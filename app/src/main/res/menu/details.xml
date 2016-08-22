@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/nav_to_station"
+        android:orderInCategory="100"
+        android:title="@string/nav_to_station"
+        android:icon="@drawable/ic_directions_white_36dp"
+        app:itemIconTint="@color/colorActions"
+        app:itemTextColor="@color/colorActions"
+        app:showAsAction="ifRoom" />
+    <!-- menu group -->
+    <group android:id="@+id/group_depencies">
+    <item
+        android:id="@+id/send_email"
+        android:orderInCategory="300"
+        android:icon="@drawable/ic_menu_send"
+        app:itemIconTint="@color/colorActions"
+        app:itemTextColor="@color/colorActions"
+        android:title="@string/send_email"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/share_photo"
+        android:orderInCategory="400"
+        android:icon="@drawable/ic_menu_share"
+        app:itemIconTint="@color/colorActions"
+        app:itemTextColor="@color/colorActions"
+        android:title="@string/share_photo"
+        app:showAsAction="ifRoom" />
+
+    </group>
+
+</menu>

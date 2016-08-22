@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_your_data"
+            android:icon="@drawable/ic_your_data"
+            android:title="@string/menu_title_your_data" />
+        <item
+            android:id="@+id/nav_update_photos"
+            android:icon="@drawable/ic_update_photos"
+            android:title="@string/menu_title_update_photos" />
+        <item
+            android:id="@+id/nav_your_own_station_photos"
+            android:icon="@drawable/ic_stations_with_photo"
+            android:title="@string/menu_title_your_own_station_photos" />
+        <item
+            android:id="@+id/nav_stations_without_photo"
+            android:icon="@drawable/ic_stations_without_photo"
+            android:title="@string/menu_title_stations_without_photo" />
+        <item
+            android:id="@+id/nav_all_stations_without_photo"
+            android:icon="@drawable/ic_menu_mapmode"
+            android:title="@string/menu_title_all_stations_without_photo" />
+    </group>
+
+    <item android:title="@string/information">
+        <menu>
+            <item
+                android:id="@+id/nav_app_info"
+                android:icon="@drawable/ic_menu_info_details"
+                android:title="@string/menu_title_info" />
+            <!--<item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/menu_title_send" />-->
+        </menu>
+    </item>
+
+</menu>

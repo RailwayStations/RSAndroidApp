@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="maps_activity">Bahnhöfe ohne Photos</string>
+    <string name="no_location_detected">Keine Position gefunden</string>
+    <string name="latitude_label">Latitude</string>
+    <string name="bahnhofname">BahnhofName</string>
+    <string name="bahnhofnr">BahnhofNr</string>
+    <string name="longitude">Longitude</string>
+    <string name="latitude">Latitude</string>
+    <string name="latlong">Geoposition</string>
+    <string name="no_stations_loaded">Keine Bahnhöfe geladen. Bitte zuerst Photos aktualisieren klicken.</string>
+    <string name="take_photo">Photografieren</string>
+    <string name="send_email">Sende E-Mail</string>
+    <string name="share_photo">Teilen</string>
+    <string name="nav_to_station">Navigiere zum Bahnhof</string>
+    <string name="CC0">CC0 - ohne Namensnennung</string>
+    <string name="CC4">CC4.0 - mit Namensnennung</string>
+    <string name="tvLicence">Unter welcher Lizenz möchtest Du Deine Fotos einreichen?</string>
+    <string name="tvOwnPhoto">Handelt es sich bei den von Dir eingereichten Photos um Deine eigenen Photos?</string>
+    <string name="rbOwnPhotoYes">Ja</string>
+    <string name="rbOwnPhotoNo">Nein</string>
+    <string name="tvLinking">Möchtest Du in unserer Fotodatenbank verlinkt werden?</string>
+    <string name="etLinking">Bitte trage hier Deinen Account ein</string>
+    <string name="rbLinkingYes">Ja</string>
+    <string name="rbLinkingNo">Nein (wird unter Anonym gespeichert)</string>
+    <string name="rbLinkingTwitter">Twitter</string>
+    <string name="rbLinkingInstagram">Instagram</string>
+    <string name="rbLinkingSnapchat">Snapchat</string>
+    <string name="rbLinkingXing">Xing</string>
+    <string name="rbLinkingwebpage">Eigene Webseite</string>
+    <string name="etNickname">Bitte trage hier Deinen Nicknamen ein</string>
+    <string name="menu_title_your_own_station_photos">Deine eigenen Bahnhofsfotos</string>
+    <string name="rbLinkingWith">Verlinkung mit: </string>
+    <string name="ownPhoto">eigenes Photo</string>
+    <string name="bt_mydata_commit">Speichern</string>
+    <string name="bt_mydata_clear">Reset</string>
+    <string name="PREF_FILE">APP_PREF_FILE</string>
+    <string name="LICENCE">APP_PREF_LICENCE</string>
+    <string name="PHOTO_OWNER">APP_PREF_PHOTO_OWNER</string>
+    <string name="LINKING">APP_PREF_LINKING</string>
+    <string name="NICKNAME">APP_PREF_NICKNAME</string>
+    <string name="LINK_TO_PHOTOGRAPHER">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
+    <string name="preferences_saved">Deine Daten wurden gespeichert.</string>
+    <string name="preferences_cleared">Deine Daten wurden zurückgesetzt. Beim nächsten Menüaufruf kannst Du neue erfassen.</string>
+    <string name="tvOwnPhotos">Handelt es sich bei den Fotos um Deine eigenen...</string>
+    <string name="title_activity_gallery">Deine Bahnhofsfotos</string>
+    <string name="title_view_image">Einzelansicht</string>
+    <string name="activitynotfound">Du hast keine Navigations-App auf Deinem Smartphone</string>
+    <string name="maps_all_activity">Alle Bahnhöfe ohne Foto</string>
+    <string name="menu_title_stations_without_photo">In der Nähe</string>
+    <string name="menu_title_all_stations_without_photo">Alle Bahnhöfe ohne Photo</string>
+    <string name="no_file_detected">Es sind noch keine Bahnhofsfotos vorhanden</string>
+    <string name="count_of_images">Du hast %1$d Bahnhofsfoto(s) im Speicher</string>
+    <string name="search_hint">Bahnhof suchen</string>
+    <string name="app_info_title">Über die App</string>
+    <string name="string_app_info_ok">string/app_info_ok</string>
+    <string name="app_info_text">App-Entwicklung:"\n"<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>
+        "\n"in 08/2016 im Rahmen des OpenSource-Projekts <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands Bahnhöfe</a></b>.
+        "\n\n"Die Bahnhofsdaten wurden von der Deutschen Bahn im Rahmen des dortigen <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData-Projektes</a></b> zur Verfügung gestellt.
+        "\n\n"Die json-Datei, die die Photos und die Bahnhofsdaten zusammenführt, wird über die von <b><a href="https://twitter.com/storchp">Peter Storch</a></b> entwickelte Java-Applikation bereitgestellt.
+        "\n\n"Für die App werden <a href="https://design.google.com/icons/">Material-Design-Icons von Google</a> genutzt, die unter Apache License Version 2.0. zur Verfügung stehen
+        "\n\n"<b>Beteiligte</b> am "Deutschlands-Bahnhöfe"-Projekt:
+        "\n\n"<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedorn (Kartenentwicklung)</a></b>
+        "\n\n"<b>- Alexandra Schön (Design)</b>
+        "\n\n"<b>- Katrin Schönherr (php-Entwicklung)</b>
+    </string>
+    <string name="information">Informationen</string>
+    <string name="menu_title_info">Über die App</string>
+</resources>
