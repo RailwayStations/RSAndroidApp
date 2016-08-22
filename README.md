@@ -8,4 +8,6 @@ The project - website you will find on http://www.deutschlands-bahnhoefe.org and
 
 To build the App you need a Google-Maps-Api-Key. Its place is under res/google_maps_api.xml.
 
+The code is public under MIT-Licence: http://choosealicense.com/licenses/mit/
+
 
