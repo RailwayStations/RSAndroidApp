@@ -120,14 +120,14 @@
             </intent-filter>
         </activity>
         <!--debug-KEY-->
-        <!--<meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_debug_key" />-->
-
-        <!--release-KEY-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_release_key" />
+            android:value="@string/google_maps_debug_key" />
+
+        <!--release-KEY-->
+        <!--<meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_release_key" />-->
 
 
     </application>
