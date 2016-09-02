@@ -7,7 +7,7 @@ be created through the java-application from [Peter Storch](https://github.com/p
 The project - website you will find on http://www.deutschlands-bahnhoefe.org and http://www.deutschlands-bahnhoefe.de.
 
 
-To build the App you need a Google-Maps-Api-Key. Its located under `app/src/main/res/values/google_maps_api.xml`.
+To build the App you need a Google-Maps-Api-Key. Its located under `app/src/main/res/values/google_maps_api-template.xml`.
 
 
 The code is public under MIT-Licence: http://choosealicense.com/licenses/mit/
