@@ -1,16 +1,26 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion "Google Inc.:Google APIs:23"
+    buildToolsVersion project.buildToolsVersion
+
+    compileOptions {
+      // use the diamond operator and some other goodies in Android
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
     defaultConfig {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
-        minSdkVersion 18
+        minSdkVersion project.minSdkVersion
         targetSdkVersion 23
         versionCode 5
         versionName "5.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+
+        // by convention, the folder name "app" is used for the APK file name. we want bahnhofsfotos instead
+        archivesBaseName = "bahnhofsfotos"
     }
     dexOptions {
         javaMaxHeapSize "4g" //specify the heap size for the dex process
