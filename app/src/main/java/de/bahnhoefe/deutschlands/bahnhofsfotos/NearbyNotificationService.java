@@ -1,17 +1,20 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -22,6 +25,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,11 +60,45 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     private boolean started;
 
+    /**
+     * Helper class to download image in background
+     */
+    private class Connection extends AsyncTask<Void, Void, Notification> {
+        private Bahnhof nearest;
+        private double distance;
+        public Connection(Bahnhof nearest, double distance) {
+            this.nearest = nearest;
+            this.distance = distance;
+        }
+
+        @Override
+        protected Notification doInBackground(Void... voids) {
+            Notification notification = nearest.getPhotoflag() == null ?
+                    buildNotificationWithoutPhoto(nearest, distance) :
+                    buildNotificationWithPhoto(nearest, distance);
+            return notification;
+        }
+
+        @Override
+        protected void onPostExecute(Notification notification) {
+            int notificationId = 001;
+
+            // Get an instance of the NotificationManager service
+            NotificationManagerCompat notificationManager =
+                    NotificationManagerCompat.from(NearbyNotificationService.this);
+
+            // Build the notification and issues it with notification manager.
+            notificationManager.notify(notificationId, notification);
+        }
+
+    }
+
     public NearbyNotificationService() {
     }
 
     @Override
     public void onCreate() {
+        Log.i(TAG, "About to create");
         super.onCreate();
         nearStations = new ArrayList<Bahnhof>(0); // no markers until we know where we are
         started = false;
@@ -66,7 +108,12 @@ public class NearbyNotificationService extends Service implements LocationListen
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!started) {
-            startLocationUpdates();
+            Log.i(TAG, "Received start command");
+            try {
+                startLocationUpdates();
+            } catch (Throwable t) {
+                Log.wtf(TAG, "Unknown problem when trying to register for GPS updates", t);
+            }
             started = true;
             return START_STICKY;
         } else
@@ -93,9 +140,10 @@ public class NearbyNotificationService extends Service implements LocationListen
 
         try {
             bahnhofsDbAdapter.open();
-            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos.latitude, myPos.longitude);
+            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos.latitude, myPos.longitude, false);
+            nearStations.addAll(bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos.latitude, myPos.longitude, true));
         } catch (Exception e) {
-            Log.i (TAG,"Datenbank konnte nicht geöffnet werden");
+            Log.e (TAG,"Datenbank konnte nicht geöffnet werden", e);
         } finally {
             bahnhofsDbAdapter.close();;
         }
@@ -103,7 +151,12 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     @Override
     public void onDestroy() {
-        stopLocationUpdates();
+        Log.i(TAG, "Service gets destroyed");
+        try {
+            stopLocationUpdates();
+        } catch (Throwable t) {
+            Log.wtf(TAG, "Unknown problem when trying to de-register from GPS updates", t);
+        }
         started = false;
         super.onDestroy();
     }
@@ -113,6 +166,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         Log.i(TAG, "Received new location: " + location);
         myPos = new LatLng(location.getLatitude(), location.getLongitude());
 
+        Log.d(TAG, "Reading matching stations from local database");
         readStations();
 
         // check if a user notification is appropriate
@@ -122,7 +176,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
         if (LocationManager.GPS_PROVIDER.equals(s)) {
-            // todo set a notification that notifications won't work
+            Log.d(TAG, "GPS status change:" + i);
         }
     }
 
@@ -134,11 +188,13 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     @Override
     public void onProviderDisabled(String s) {
-
+        if (LocationManager.GPS_PROVIDER.equals(s)) {
+            Log.w(TAG, "GPS provider is disabled, no notifications will happen");
+        }
     }
 
     private void checkNearestStation() {
-        double minDist = MIN_NOTIFICATION_DISTANCE;
+        double minDist = 3e3;
         Bahnhof nearest = null;
         for (Bahnhof bahnhof: nearStations) {
             double dist = calcDistance (bahnhof);
@@ -147,18 +203,25 @@ public class NearbyNotificationService extends Service implements LocationListen
                 minDist = dist;
             }
         }
-        if (nearest != null)
-            notifyNearest (nearest, minDist);
+        if (nearest != null && minDist < MIN_NOTIFICATION_DISTANCE) {
+            notifyNearest(nearest, minDist);
+            Log.i(TAG, "Issued notification to user");
+        } else {
+            Log.d(TAG, "No notification - nearest station was " + minDist + " km away: " + nearest);
+        }
     }
 
     private void notifyNearest(Bahnhof nearest, double minDist) {
-        int notificationId = 001;
         // Build intent for notification content
         //Intent viewIntent = new Intent(this, ViewEventActivity.class);
         //viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
         //PendingIntent viewPendingIntent =
         //        PendingIntent.getActivity(this, 0, viewIntent, 0);
+        new Connection(nearest, minDist).execute();
+    }
 
+
+    private Notification buildNotificationWithoutPhoto(Bahnhof nearest, double minDist) {
         // Build an intent for an action to view a map
         Intent mapIntent = new Intent(Intent.ACTION_VIEW);
         Uri geoUri = Uri.parse("geo:" + nearest.getLat() + "," + nearest.getLon());
@@ -201,7 +264,89 @@ public class NearbyNotificationService extends Service implements LocationListen
                         .setHintHideIcon(true)
                         .setBackground(bitmap);
 
-         NotificationCompat.Builder notificationBuilder =
+        NotificationCompat.Builder notificationBuilder =
+               new NotificationCompat.Builder(this)
+                       .setSmallIcon(R.drawable.ic_logotrain)
+                       .setContentTitle("Bahnhof in der Nähe")
+                       .setContentText(shortText)
+                       .setContentIntent(detailPendingIntent)
+                       .addAction(R.drawable.ic_directions_white_24dp,
+                               "Karte", mapPendingIntent)
+                       .addAction(R.drawable.ic_photo_camera_white_48px, "Foto", fotoPendingIntent)
+                       .extend(wearableExtender)
+                       .setStyle(bigStyle)
+                       .setVibrate(new long[]{300, 100, 300, 100, 300})
+                       .setColor(0x0000ffff)
+                       .setPriority(NotificationCompat.PRIORITY_HIGH);
+        return notificationBuilder.build();
+    }
+
+
+    private Notification buildNotificationWithPhoto(Bahnhof nearest, double minDist) {
+        // Build an intent for an action to view a map
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+        Uri geoUri = Uri.parse("geo:" + nearest.getLat() + "," + nearest.getLon());
+        mapIntent.setData(geoUri);
+        PendingIntent mapPendingIntent =
+                PendingIntent.getActivity(this, 0, mapIntent, 0);
+
+        // Build an intent for an action to see station details
+        Intent detailIntent = new Intent(this, DetailsActivity.class);
+        detailIntent.putExtra("bahnhofName",nearest.getTitle());
+        detailIntent.putExtra("bahnhofNr", String.valueOf(nearest.getId()));
+        detailIntent.putExtra("position", new LatLng(nearest.getLat(), nearest.getLon()));
+        PendingIntent detailPendingIntent =
+                PendingIntent.getActivity(this, 0, detailIntent, 0);
+
+        DecimalFormat format = new DecimalFormat ("#0.00");
+        String shortText = "Bahnhof " + nearest.getTitle() + " in " + format.format(minDist) + " km";
+        String longText = "Bahnhof: " + nearest.getTitle() +
+                "\nEntfernung: " + format.format(minDist) +
+                " km\nKoordinaten: " + format.format(nearest.getLat()) + "; " + format.format(nearest.getLon()) +
+                "\nLetzte Änderung: " + SimpleDateFormat.getDateInstance().format(new Date(nearest.getDatum())) +
+                (nearest.getPhotoflag() != null ? "\nPhoto: ja" : "");
+
+        NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
+        bigStyle.bigText(longText);
+
+        // Create a WearableExtender to add functionality for wearables
+        // Fetch the station photo
+        Bitmap bitmap = null;
+        String template = "http://www.deutschlands-bahnhoefe.de/images/%s.jpg";
+        InputStream is = null;
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.outWidth = 640;
+            URL url = new URL(String.format(template, nearest.getId()));
+            HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+            is = httpConnection.getInputStream();
+            if (httpConnection.getResponseCode() == 200) {
+                bitmap = BitmapFactory.decodeStream(is, null, options);
+            } else {
+                Log.e(TAG, "Error downloading photo: "+ httpConnection.getHeaderField("Status"));
+            }
+        } catch (MalformedURLException e) {
+            Log.wtf(TAG, "URL not well formed", e);
+            bitmap = null;
+        } catch (IOException e) {
+            Log.e(TAG, "Could not download photo");
+            bitmap = null;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    Log.w(TAG, "Could not close channel to photo download");
+                }
+            }
+        }
+
+        NotificationCompat.WearableExtender wearableExtender =
+                new NotificationCompat.WearableExtender()
+                        .setHintHideIcon(true)
+                        .setBackground(bitmap);
+
+        NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_logotrain)
                         .setContentTitle("Bahnhof in der Nähe")
@@ -209,19 +354,12 @@ public class NearbyNotificationService extends Service implements LocationListen
                         .setContentIntent(detailPendingIntent)
                         .addAction(R.drawable.ic_directions_white_24dp,
                                 "Karte", mapPendingIntent)
-                        .addAction(R.drawable.ic_photo_camera_white_48px, "Foto", fotoPendingIntent)
                         .extend(wearableExtender)
                         .setStyle(bigStyle)
-                        .setVibrate(new long[]{300, 100, 300, 100, 300})
-                        .setColor(0x0000ffff)
+                        .setVibrate(new long[]{300})
+                        .setColor(0x00ff0000)
                         .setPriority(NotificationCompat.PRIORITY_HIGH);
-
-        // Get an instance of the NotificationManager service
-        NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(this);
-
-        // Build the notification and issues it with notification manager.
-        notificationManager.notify(notificationId, notificationBuilder.build());
+        return notificationBuilder.build();
     }
 
     private Bitmap getBitmap(int id) {

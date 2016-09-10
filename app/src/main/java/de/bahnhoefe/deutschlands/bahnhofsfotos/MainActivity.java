@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_CODE = 200;
     private NavigationView navigationView;
     File file;
-    private int count=0;
 
     CustomAdapter customAdapter;
     ListView listView;
@@ -123,7 +122,7 @@ public class MainActivity extends AppCompatActivity
         try {
             lastUpdateDate = loadUpdateDateFromFile("updatedate.txt");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Cannot load last update", e);
         }
         if (!lastUpdateDate.equals("")) {
             tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
@@ -132,7 +131,7 @@ public class MainActivity extends AppCompatActivity
             tvUpdate.setText(R.string.no_stations_in_database);
         }
 
-        cursor = dbAdapter.getStationsList();
+        cursor = dbAdapter.getStationsList(false);
         customAdapter = new CustomAdapter(this, cursor,0);
         listView = (ListView) findViewById(R.id.lstStations);
         listView.setAdapter(customAdapter);
@@ -280,7 +279,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
-            new JSONTask().execute(Constants.BAHNHOEFE_OHNE_PHOTO_URL);
+            new JSONTask().execute();
             enableNavItem();
         } else if (id == R.id.nav_your_own_station_photos) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
@@ -321,23 +320,32 @@ public class MainActivity extends AppCompatActivity
         nav_item2.setEnabled(false);
     }
 
-    public class JSONTask extends AsyncTask<String, String, List<Bahnhof>>{
+    public class JSONTask extends AsyncTask<Void, String, List<Bahnhof>>{
 
         private ProgressDialog progressDialog;
 
-
         @Override
-        protected List<Bahnhof> doInBackground(String... params) {
+        protected List<Bahnhof> doInBackground(Void ...params) {
+            dbAdapter.deleteBahnhoefe();
+            List<Bahnhof> ohne = loadBatch(true);
+            List<Bahnhof> mit = loadBatch(false);
+            ohne.addAll(mit);
+            return ohne;
+        }
+
+        protected List<Bahnhof> loadBatch(boolean withPhotos) {
             HttpURLConnection connection = null;
             BufferedReader reader = null;
             Date date = new Date();
             long aktuellesDatum = date.getTime();
-            List<Bahnhof> bahnhoefe = new ArrayList<Bahnhof>();
+            int count = 0;
 
+            publishProgress("Verbinde...");
             try {
-                URL url = new URL(params[0]);
+                URL url = new URL(withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL);
                 connection = (HttpURLConnection)url.openConnection();
                 connection.connect();
+                publishProgress("Lese...");
                 InputStream stream = connection.getInputStream();
                 reader = new BufferedReader(new InputStreamReader(stream));
                 StringBuffer buffer = new StringBuffer();
@@ -347,13 +355,17 @@ public class MainActivity extends AppCompatActivity
                 }
                 String finalJson =  buffer.toString();
 
+                publishProgress("Verarbeite...");
                 try {
                     JSONArray bahnhofList = new JSONArray(finalJson);
                     count = bahnhofList.length();
+                    Log.i(TAG, "Parsed " + count + " stations with" + (withPhotos ? "" : "out") + " a photo");
+                    List<Bahnhof> bahnhoefe = new ArrayList<Bahnhof>(count);
 
                     for (int i = 0; i < bahnhofList.length(); i++){
+                        publishProgress("Verarbeite " + i + "/" + count);
                         JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
-                        publishProgress(((i+1) + " von " + bahnhofList.length()));
+                        //publishProgress(((i+1) + " von " + bahnhofList.length()));
 
                         String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
                         String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
@@ -366,26 +378,26 @@ public class MainActivity extends AppCompatActivity
                         bahnhof.setLat(Float.parseFloat(lat));
                         bahnhof.setLon(Float.parseFloat(lon));
                         bahnhof.setDatum(aktuellesDatum);
-
+                        bahnhof.setPhotoflag(withPhotos ? "x" : null);
 
                         bahnhoefe.add(bahnhof);
-                        //Log.d("DatenbankInsertOk ...", bahnhof.toString());
+                        Log.d("DatenbankInsertOk ...", bahnhof.toString());
                     }
-
+                    publishProgress("Schreibe in Datenbank");
                     dbAdapter.insertBahnhoefe(bahnhoefe);
-                    publishProgress("Datenbank aktualisiert");
+                    publishProgress("Datenbank " + (withPhotos ? "mit" : "ohne") + " Photos aktualisiert");
                     return bahnhoefe;
 
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Mal formatted Json", e);
                 }
 
 
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Malformed URL", e);
             } catch (IOException e) {
-                e.printStackTrace();
-            }finally{
+                Log.e(TAG, "Could not read json files", e);
+            } finally {
                 if(connection != null){
                     connection.disconnect();
                 }
@@ -394,7 +406,7 @@ public class MainActivity extends AppCompatActivity
                         reader.close();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Cannot close reader", e);
                 }
             }
             return null;
@@ -411,9 +423,9 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
             if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.GINGERBREAD){
-                customAdapter.swapCursor(dbAdapter.getStationsList());
+                customAdapter.swapCursor(dbAdapter.getStationsList(false));
             } else {
-                customAdapter.changeCursor(dbAdapter.getStationsList());
+                customAdapter.changeCursor(dbAdapter.getStationsList(false));
             }
 
             unlockScreenOrientation();
@@ -426,17 +438,15 @@ public class MainActivity extends AppCompatActivity
             progressDialog = new ProgressDialog(MainActivity.this);
             progressDialog.setIndeterminate(false);
 
+            // show it
+            progressDialog.show();
         }
 
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            //progressDialog.setMessage("Lade Daten ... " + values[0] + count);
-            progressDialog.setMessage("Lade Daten von " + count + " Bahnhöfen. \nDas dauert ein bisschen");
-
-            // show it
-            progressDialog.show();
-
+            progressDialog.setMessage("Lade Daten ... " + values[0]);
+            //progressDialog.setMessage("Lade Daten von " + count + " Bahnhöfen. \nDas dauert ein bisschen");
         }
 
         private void lockScreenOrientation() {

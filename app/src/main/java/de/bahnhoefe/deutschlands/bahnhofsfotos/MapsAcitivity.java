@@ -100,7 +100,7 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
 
         try{
             bahnhofsDbAdapter.open();
-            bahnhofMarker = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myLatitude, myLongitude);
+            bahnhofMarker = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myLatitude, myLongitude, false);
 
         }catch(Exception e){
             Log.i(TAG,"Datenbank konnte nicht geöffnet werden");
