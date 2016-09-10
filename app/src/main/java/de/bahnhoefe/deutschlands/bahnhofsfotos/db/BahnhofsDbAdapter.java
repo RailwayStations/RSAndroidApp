@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -15,8 +14,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.JSONTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
-import static com.google.android.gms.analytics.internal.zzy.l;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.id.search;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.DB_JSON_CONSTANTS.KEY_ID;
 
 /**
@@ -238,19 +235,19 @@ public class BahnhofsDbAdapter {
     public List<Bahnhof> getBahnhoefeByLatLngRectangle(double lat, double lng) {
         List<Bahnhof> bahnhofList = new ArrayList<Bahnhof>();
         // Select All Query with rectangle - might be later change with it
-        /*String selectQuery = "SELECT " + KEY_ID + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_TITLE + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_LAT + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_LON +
-                " FROM " + DATABASE_TABLE + " where "+ Constants.DB_JSON_CONSTANTS.KEY_LAT +" < "+ (lat +0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT +" > "+ (lat -0.5)
-                + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON +" < "+ (lng +0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON +" > "+ (lng -   0.5) ;*/
-
         String selectQuery = "SELECT " + KEY_ID + ", " +
                 Constants.DB_JSON_CONSTANTS.KEY_TITLE + ", " +
                 Constants.DB_JSON_CONSTANTS.KEY_LAT + ", " +
                 Constants.DB_JSON_CONSTANTS.KEY_LON +
+                " FROM " + DATABASE_TABLE + " where "+ Constants.DB_JSON_CONSTANTS.KEY_LAT +" < "+ (lat +0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT +" > "+ (lat -0.5)
+                + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON +" < "+ (lng +0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON +" > "+ (lng -   0.5) ;
+
+        /*String selectQuery = "SELECT " + KEY_ID + ", " +
+                Constants.DB_JSON_CONSTANTS.KEY_TITLE + ", " +
+                Constants.DB_JSON_CONSTANTS.KEY_LAT + ", " +
+                Constants.DB_JSON_CONSTANTS.KEY_LON +
                 " FROM " + DATABASE_TABLE + " where "+ Constants.DB_JSON_CONSTANTS.KEY_LAT + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT +
-                 " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON;
+                 " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON;*/
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         // looping through all rows and adding to list

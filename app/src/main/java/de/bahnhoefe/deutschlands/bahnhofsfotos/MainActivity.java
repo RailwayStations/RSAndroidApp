@@ -1,53 +1,35 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.SearchView;
-import android.text.SpannableString;
-import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -78,10 +60,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
-import static com.google.android.gms.analytics.internal.zzy.d;
-import static java.lang.Integer.getInteger;
 import static java.lang.Integer.parseInt;
-import static java.lang.Integer.valueOf;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -277,6 +256,13 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.notify) {
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
+            startService(intent);
+        } else if (id == R.id.stop_notify) {
+            // todo besser wäre wohl ein einzelner Knopf, der Notifications an- und ausschaltet.
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
+            stopService(intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -302,14 +288,12 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_stations_without_photo) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAcitivity.class);
             startActivity(intent);
-        }else if (id == R.id.nav_all_stations_without_photo) {
+        } else if (id == R.id.nav_all_stations_without_photo) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAllAcitivity.class);
             startActivity(intent);
-
-        }else if (id == R.id.nav_app_info) {
+        } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(),DIALOG_TAG);
-
         } /*else if (id == R.id.nav_send) {
 
         }*/

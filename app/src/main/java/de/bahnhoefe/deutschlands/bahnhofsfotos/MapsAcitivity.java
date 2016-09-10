@@ -1,18 +1,21 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 
-import android.*;
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -35,6 +38,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
@@ -42,6 +47,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 
 public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener , LocationListener {
 
+    private static final double MIN_NOTIFICATION_DISTANCE = 30.0d; // km
+    private static final double EARTH_CIRCUMFERENCE = 40075.017d; // km at equator
     private GoogleMap mMap;
     private Double myLatitude=50d;
     private Double myLongitude=8d;
@@ -68,7 +75,6 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
     private long UPDATE_INTERVAL_IN_MILLISECONDS= 300000;
     private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS=300000;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -81,16 +87,15 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
+        //readBahnhoefe(); <-- gehört m.E. nicht hier her, sondern zum ersten Location-Update
+        bahnhofMarker = new ArrayList<Bahnhof>(0); // no markers until we know where we are
 
-        if(bundle!=null)
-        {
-         //   myLatitude =(Double) bundle.get("latitude");
-          //  myLongitude =(Double) bundle.get("longitude");
-        }
+        myPos = new LatLng(myLatitude,myLongitude);
 
+        buildGoogleApiClient();
+    }
 
+    private void readBahnhoefe() {
         BahnhofsDbAdapter bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
 
         try{
@@ -102,12 +107,8 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
         } finally {
             bahnhofsDbAdapter.close();;
         }
-        Toast.makeText(this, bahnhofMarker.size() +" Bahnhöfe geladen", Toast.LENGTH_SHORT).show();
 
-
-        myPos = new LatLng(myLatitude,myLongitude);
-
-        buildGoogleApiClient();
+        Toast.makeText(this, bahnhofMarker.size() + " Bahnhöfe geladen", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -195,12 +196,13 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
      * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
      */
     protected synchronized void buildGoogleApiClient() {
+        createLocationRequest();
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-        createLocationRequest();
     }
 
     @Override
@@ -257,21 +259,77 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
         mMap.clear();
         myPos= new LatLng(myLatitude, myLongitude);
 
-        BahnhofsDbAdapter bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
+        readBahnhoefe();
 
-        try{
-            bahnhofsDbAdapter.open();
-            bahnhofMarker = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myLatitude, myLongitude);
-        }catch(Exception e){
-            Log.i(TAG,"Datenbank konnte nicht geöffnet werden");
-        } finally {
-            bahnhofsDbAdapter.close();;
-        }
+        // check if a user notification is appropriate
+        checkNearestStation ();
 
         addMarkers(bahnhofMarker,myPos);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
         //Toast.makeText(this, myPos.latitude+"", Toast.LENGTH_SHORT).show();
     }
+
+    private void checkNearestStation() {
+        double minDist = MIN_NOTIFICATION_DISTANCE;
+        Bahnhof nearest = null;
+        for (Bahnhof bahnhof: bahnhofMarker) {
+            double dist = calcDistance (bahnhof);
+            if (dist < minDist) {
+                nearest = bahnhof;
+                minDist = dist;
+            }
+        }
+        if (nearest != null)
+            notifyNearest (nearest, minDist);
+    }
+
+    private void notifyNearest(Bahnhof nearest, double minDist) {
+        int notificationId = 001;
+        // Build intent for notification content
+        //Intent viewIntent = new Intent(this, ViewEventActivity.class);
+        //viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
+        //PendingIntent viewPendingIntent =
+        //        PendingIntent.getActivity(this, 0, viewIntent, 0);
+
+        // Build an intent for an action to view a map
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+        Uri geoUri = Uri.parse("geo:" + nearest.getLat() + "," + nearest.getLon());
+        mapIntent.setData(geoUri);
+        PendingIntent mapPendingIntent =
+                PendingIntent.getActivity(this, 0, mapIntent, 0);
+
+        DecimalFormat format = new DecimalFormat ("#0.00");
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_logotrain)
+                        .setContentTitle("Station near you")
+                        .setContentText("Bahnhof " + nearest.getTitle() + " in " + format.format(minDist) + " km")
+                        .setContentIntent(mapPendingIntent);
+
+        // Get an instance of the NotificationManager service
+        NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(this);
+
+        // Build the notification and issues it with notification manager.
+        notificationManager.notify(notificationId, notificationBuilder.build());
+    }
+
+    /**
+     * Calculate the distance between the given station and our current position (myLatitude, myLongitude)
+     * @param bahnhof the station to calculate the distance to
+     * @return the distance
+     */
+    private double calcDistance(Bahnhof bahnhof) {
+        // Wir nähern für glatte Oberflächen, denn wir sind an Abständen kleiner 1km interessiert
+        double lateralDiff = myLatitude - bahnhof.getLat();
+        double longDiff = (Math.abs(myLatitude) < 89.99d) ?
+                (myLongitude - bahnhof.getLon()) / Math.cos(myLatitude) :
+                0.0d; // at the poles, longitude doesn't matter
+        // simple Pythagoras now.
+        double distance = Math.sqrt(Math.pow(lateralDiff, 2.0d) + Math.pow(longDiff, 2.0d)) * EARTH_CIRCUMFERENCE / 360.0d;
+        return distance;
+    }
+
     protected void startLocationUpdates() {
         // The final argument to {@code requestLocationUpdates()} is a LocationListener
         // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).

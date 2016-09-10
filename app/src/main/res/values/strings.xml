@@ -95,4 +95,8 @@
     </string>
     <string name="information">Informationen</string>
     <string name="menu_title_info">Über die App</string>
+    <string name="benachrichtigen">Benachrichtigen</string>
+    <string name="nahe_gelegenen_bahnhof_melden">Nahe gelegenen Bahnhof melden</string>
+    <string name="keine_bahnh_fe_melden">Keine Bahnhöfe melden</string>
+    <string name="beenden">beenden</string>
 </resources>
