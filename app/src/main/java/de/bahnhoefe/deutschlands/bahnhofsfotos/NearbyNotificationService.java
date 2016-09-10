@@ -6,7 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,7 +20,6 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DecimalFormat;
@@ -36,20 +36,16 @@ import static android.location.LocationManager.GPS_PROVIDER;
 public class NearbyNotificationService extends Service implements LocationListener {
 
     // some useful constants
-    private static final double MIN_NOTIFICATION_DISTANCE = 30.0d; // km
+    private static final double MIN_NOTIFICATION_DISTANCE = 1.0d; // km
     private static final double EARTH_CIRCUMFERENCE = 40075.017d; // km at equator
     private final String TAG = NearbyNotificationService.class.getSimpleName();
     private List<Bahnhof> nearStations;
     private LatLng myPos = new LatLng(50d, 8d);
-    private static final int PERMISSION_REQUEST_CODE = 200;
 
 
     /**
      * Stores parameters for requests to the FusedLocationProviderApi.
      */
-    protected LocationRequest mLocationRequest;
-    private boolean mRequestingLocationUpdates = true;
-    private long UPDATE_INTERVAL_IN_MILLISECONDS= 60000;
     private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS=30000;
 
     private SharedPreferences sharedPreferences;
@@ -173,7 +169,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         // Build an intent for an action to see station details
         Intent detailIntent = new Intent(this, DetailsActivity.class);
         detailIntent.putExtra("bahnhofName",nearest.getTitle());
-        detailIntent.putExtra("bahnhofNr", nearest.getId());
+        detailIntent.putExtra("bahnhofNr", String.valueOf(nearest.getId()));
         detailIntent.putExtra("position", new LatLng(nearest.getLat(), nearest.getLon()));
         PendingIntent detailPendingIntent =
                 PendingIntent.getActivity(this, 0, detailIntent, 0);
@@ -191,22 +187,21 @@ public class NearbyNotificationService extends Service implements LocationListen
         String shortText = "Bahnhof " + nearest.getTitle() + " in " + format.format(minDist) + " km";
         String longText = "Bahnhof: " + nearest.getTitle() +
                 "\nEntfernung: " + format.format(minDist) +
-                "\nKoordinaten: " + format.format(nearest.getLat()) + "; " + format.format(nearest.getLon()) +
+                " km\nKoordinaten: " + format.format(nearest.getLat()) + "; " + format.format(nearest.getLon()) +
                 "\nLetzte Änderung: " + SimpleDateFormat.getDateInstance().format(new Date(nearest.getDatum())) +
-                nearest.getPhotoflag() != null ? "\nPhoto: " + nearest.getPhotoflag() : "";
+                (nearest.getPhotoflag() != null ? "\nPhoto: " + nearest.getPhotoflag() : "");
 
         NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
         bigStyle.bigText(longText);
 
         // Create a WearableExtender to add functionality for wearables
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_logotrain);
-        bitmap.setDensity(400);
+        Bitmap bitmap = getBitmap(R.drawable.ic_logotrain);
         NotificationCompat.WearableExtender wearableExtender =
                 new NotificationCompat.WearableExtender()
                         .setHintHideIcon(true)
                         .setBackground(bitmap);
 
-        NotificationCompat.Builder notificationBuilder =
+         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_logotrain)
                         .setContentTitle("Bahnhof in der Nähe")
@@ -227,6 +222,20 @@ public class NearbyNotificationService extends Service implements LocationListen
 
         // Build the notification and issues it with notification manager.
         notificationManager.notify(notificationId, notificationBuilder.build());
+    }
+
+    private Bitmap getBitmap(int id) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Drawable vectorDrawable = getApplicationContext().getDrawable(id);
+            int h = 640;
+            int w = 400;
+            vectorDrawable.setBounds(0, 0, w, h);
+            Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bm);
+            vectorDrawable.draw(canvas);
+            return bm;
+        } else
+            return null;
     }
 
     /**
