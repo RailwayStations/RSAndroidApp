@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -51,46 +52,89 @@ public class NearbyNotificationService extends Service implements LocationListen
     private LatLng myPos = new LatLng(50d, 8d);
 
 
-    /**
-     * Stores parameters for requests to the FusedLocationProviderApi.
-     */
-    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS=30000;
+    // Parameters for requests to the Location Api.
+    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS=60000; // ms
+
+    private long SHORTEST_UPDATE_DISTANCE = 500; // m
 
     private SharedPreferences sharedPreferences;
 
-    private boolean started;
+    private boolean started;// we have only one notification
+    public static final int NOTIFICATION_ID = 1;
+
+    /**
+     * The Bahnhof about which a notification is being built.
+     * @todo move to BahnhofNotification class
+     */
+    private Bahnhof notificationStation;
+
+    /**
+     * The distance of the Bahnhof about which a notification is being built.
+     * @todo move to BahnhofNotification class
+     */
+    private double notificationDistance;
 
     /**
      * Helper class to download image in background
+     * @todo move into BitmapCache
      */
-    private class Connection extends AsyncTask<Void, Void, Notification> {
-        private Bahnhof nearest;
-        private double distance;
-        public Connection(Bahnhof nearest, double distance) {
-            this.nearest = nearest;
-            this.distance = distance;
+    private class Downloader extends AsyncTask<Void, Void, Bitmap> {
+        private URL url;
+        private BitmapFactory.Options options;
+
+        /**
+         * Construct a bitmap Downloader for the given URL
+         * @param url the URL to fetch the Bitmap from
+         */
+        public Downloader(URL url, BitmapFactory.Options options) {
+            this.url = url;
+            this.options = options;
         }
 
+        /**
+         * Asynchronous fetching from a URL and construction of an image from the resource.
+         * @return the constructed Bitmap or null if downloading or construction failed
+         */
         @Override
-        protected Notification doInBackground(Void... voids) {
-            Notification notification = nearest.getPhotoflag() == null ?
-                    buildNotificationWithoutPhoto(nearest, distance) :
-                    buildNotificationWithPhoto(nearest, distance);
-            return notification;
+        protected Bitmap doInBackground(Void... voids) {
+            // Fetch the station photo
+            Bitmap bitmap = null;
+            InputStream is = null;
+            try {
+                Log.i(TAG, "Feting Bitmap from URL: " + url);
+                HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+                is = httpConnection.getInputStream();
+                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    String contentType = httpConnection.getContentType();
+                    if (contentType != null && !contentType.startsWith("image"))
+                        Log.w(TAG, "Supplied URL does not appear to be an image resource (type=" + contentType+ ")");
+                    bitmap = BitmapFactory.decodeStream(is, null, options);
+                } else {
+                    Log.e(TAG, "Error downloading photo: "+ httpConnection.getResponseCode());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Could not download photo");
+                bitmap = null;
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        Log.w(TAG, "Could not close channel to photo download");
+                    }
+                }
+            }
+            return bitmap;
         }
 
+        /**
+         * Run the callback function when Bitmap creation is finished
+         * @param bitmap the downloaded Bitmap, may be null.
+         */
         @Override
-        protected void onPostExecute(Notification notification) {
-            int notificationId = 001;
-
-            // Get an instance of the NotificationManager service
-            NotificationManagerCompat notificationManager =
-                    NotificationManagerCompat.from(NearbyNotificationService.this);
-
-            // Build the notification and issues it with notification manager.
-            notificationManager.notify(notificationId, notification);
+        protected void onPostExecute(Bitmap bitmap) {
+            onBitmapAvailable(bitmap);
         }
-
     }
 
     public NearbyNotificationService() {
@@ -211,17 +255,45 @@ public class NearbyNotificationService extends Service implements LocationListen
         }
     }
 
-    private void notifyNearest(Bahnhof nearest, double minDist) {
-        // Build intent for notification content
-        //Intent viewIntent = new Intent(this, ViewEventActivity.class);
-        //viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
-        //PendingIntent viewPendingIntent =
-        //        PendingIntent.getActivity(this, 0, viewIntent, 0);
-        new Connection(nearest, minDist).execute();
+
+    /**
+     * Start notification build process. This might run asynchronous in case that required
+     * photos need to be fetched fist. If the notification is built up, #onNotificationReady(Notification)
+     * will be called.
+     *
+     * @param nearest the station nearest to the current position
+     * @param distance the distance of the station to the current position
+     */
+    private void notifyNearest(Bahnhof nearest, double distance) {
+        if (nearest.getPhotoflag() == null) {
+            buildNotificationWithoutPhoto(nearest, distance);
+        } else {
+            buildNotificationWithPhoto(nearest, distance);
+        }
     }
 
+    /**
+     * Called back once the notification was built up ready.
+     * @Todo move to Notification class
+     * @param notification
+     */
+    private void onNotificationReady (Notification notification) {
+        // Get an instance of the NotificationManager service
+        NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(NearbyNotificationService.this);
 
-    private Notification buildNotificationWithoutPhoto(Bahnhof nearest, double minDist) {
+        // Build the notification and issues it with notification manager.
+        notificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+    /**
+     * Build a notification for a station without photo. Call onNotificationReady if done.
+     * @todo move to notification class
+     * @todo factor out common operations with buildNotificationWithPhoto
+     * @param nearest
+     * @param minDist
+     */
+    private void buildNotificationWithoutPhoto(Bahnhof nearest, double minDist) {
         // Build an intent for an action to view a map
         Intent mapIntent = new Intent(Intent.ACTION_VIEW);
         Uri geoUri = Uri.parse("geo:" + nearest.getLat() + "," + nearest.getLon());
@@ -258,7 +330,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         bigStyle.bigText(longText);
 
         // Create a WearableExtender to add functionality for wearables
-        Bitmap bitmap = getBitmap(R.drawable.ic_logotrain);
+        Bitmap bitmap = getBitmapFromResource(R.drawable.ic_logotrain);
         NotificationCompat.WearableExtender wearableExtender =
                 new NotificationCompat.WearableExtender()
                         .setHintHideIcon(true)
@@ -278,11 +350,37 @@ public class NearbyNotificationService extends Service implements LocationListen
                        .setVibrate(new long[]{300, 100, 300, 100, 300})
                        .setColor(0x0000ffff)
                        .setPriority(NotificationCompat.PRIORITY_HIGH);
-        return notificationBuilder.build();
+        onNotificationReady(notificationBuilder.build());
     }
 
 
-    private Notification buildNotificationWithPhoto(Bahnhof nearest, double minDist) {
+    /**
+     * Build a notification for a station with Photo
+     * @todo move to BahnhofNotification class
+     * @param nearest
+     * @param minDist
+     */
+    private void buildNotificationWithPhoto(Bahnhof nearest, double minDist) {
+        String template = "http://www.deutschlands-bahnhoefe.de/images/%s.jpg";
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        notificationStation = nearest;
+        notificationDistance = minDist;
+        options.outWidth = 640;
+        try {
+            URL url = new URL(String.format(template, nearest.getId()));
+            // fetch bitmap asynchronously, call onBitmapAvailable if ready
+            new Downloader(url, options).execute();
+        } catch (MalformedURLException e) {
+            Log.wtf(TAG, "URL not well formed", e);
+        }
+    }
+
+    /**
+     * This gets called if the requested bitmap is available. Finish and issue the notification.
+     * @param bitmap the fetched Bitmap for the notification. May be null
+     */
+    private void onBitmapAvailable(@Nullable Bitmap bitmap) {
+        Bahnhof nearest = null; // fixme
         // Build an intent for an action to view a map
         Intent mapIntent = new Intent(Intent.ACTION_VIEW);
         Uri geoUri = Uri.parse("geo:" + nearest.getLat() + "," + nearest.getLon());
@@ -299,9 +397,9 @@ public class NearbyNotificationService extends Service implements LocationListen
                 PendingIntent.getActivity(this, 0, detailIntent, 0);
 
         DecimalFormat format = new DecimalFormat ("#0.00");
-        String shortText = "Bahnhof " + nearest.getTitle() + " in " + format.format(minDist) + " km";
+        String shortText = "Bahnhof " + nearest.getTitle() + " in " + format.format(notificationDistance) + " km";
         String longText = "Bahnhof: " + nearest.getTitle() +
-                "\nEntfernung: " + format.format(minDist) +
+                "\nEntfernung: " + format.format(notificationDistance) +
                 " km\nKoordinaten: " + format.format(nearest.getLat()) + "; " + format.format(nearest.getLon()) +
                 "\nLetzte Änderung: " + SimpleDateFormat.getDateInstance().format(new Date(nearest.getDatum())) +
                 (nearest.getPhotoflag() != null ? "\nPhoto: ja" : "");
@@ -309,37 +407,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
         bigStyle.bigText(longText);
 
-        // Create a WearableExtender to add functionality for wearables
-        // Fetch the station photo
-        Bitmap bitmap = null;
-        String template = "http://www.deutschlands-bahnhoefe.de/images/%s.jpg";
-        InputStream is = null;
-        try {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.outWidth = 640;
-            URL url = new URL(String.format(template, nearest.getId()));
-            HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
-            is = httpConnection.getInputStream();
-            if (httpConnection.getResponseCode() == 200) {
-                bitmap = BitmapFactory.decodeStream(is, null, options);
-            } else {
-                Log.e(TAG, "Error downloading photo: "+ httpConnection.getHeaderField("Status"));
-            }
-        } catch (MalformedURLException e) {
-            Log.wtf(TAG, "URL not well formed", e);
-            bitmap = null;
-        } catch (IOException e) {
-            Log.e(TAG, "Could not download photo");
-            bitmap = null;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    Log.w(TAG, "Could not close channel to photo download");
-                }
-            }
-        }
+
 
         NotificationCompat.WearableExtender wearableExtender =
                 new NotificationCompat.WearableExtender()
@@ -359,10 +427,16 @@ public class NearbyNotificationService extends Service implements LocationListen
                         .setVibrate(new long[]{300})
                         .setColor(0x00ff0000)
                         .setPriority(NotificationCompat.PRIORITY_HIGH);
-        return notificationBuilder.build();
+        onNotificationReady(notificationBuilder.build());
     }
 
-    private Bitmap getBitmap(int id) {
+    /**
+     * Construct a Bitmap object from a given drawable resource ID.
+     * @Todo move to notification class
+     * @param id the resource ID denoting a drawable resource
+     * @return the Bitmap. May be null.
+     */
+    private @Nullable Bitmap getBitmapFromResource(int id) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             Drawable vectorDrawable = getApplicationContext().getDrawable(id);
             int h = 640;
