@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -48,6 +49,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -129,6 +131,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
+            new JSONTask(lastUpdateDate).execute();
         }
 
         cursor = dbAdapter.getStationsList(false);
@@ -278,8 +281,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
-            new JSONTask().execute();
-            enableNavItem();
+            new JSONTask(lastUpdateDate).execute();
         } else if (id == R.id.nav_your_own_station_photos) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
             startActivity(intent);
@@ -322,6 +324,32 @@ public class MainActivity extends AppCompatActivity
     public class JSONTask extends AsyncTask<Void, String, List<Bahnhof>>{
 
         private ProgressDialog progressDialog;
+        private Date lastUpdateDate;
+
+        // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
+        private void enableHttpResponseCache() {
+            try {
+                long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+                File httpCacheDir = new File(getCacheDir(), "http");
+                Class.forName("android.net.http.HttpResponseCache")
+                        .getMethod("install", File.class, long.class)
+                        .invoke(null, httpCacheDir, httpCacheSize);
+            } catch (Exception httpResponseCacheNotAvailable) {
+                Log.i(TAG, "HTTP response cache is unavailable.");
+            }
+        }
+
+        protected JSONTask(@Nullable final String lastUpdateDate) {
+            enableHttpResponseCache();
+            this.lastUpdateDate = null;
+            if (lastUpdateDate != null) {
+                try {
+                    new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(lastUpdateDate);
+                } catch (ParseException e) {
+                    Log.e(TAG, "Unparsable update date: " + lastUpdateDate);
+                }
+            }
+        }
 
         @Override
         protected List<Bahnhof> doInBackground(Void ...params) {
@@ -344,54 +372,55 @@ public class MainActivity extends AppCompatActivity
                 URL url = new URL(withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL);
                 connection = (HttpURLConnection)url.openConnection();
                 connection.connect();
-                publishProgress("Lese...");
-                InputStream stream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(stream));
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-                while((line = reader.readLine()) != null){
-                    buffer.append(line);
-                }
-                String finalJson =  buffer.toString();
-
-                publishProgress("Verarbeite...");
-                try {
-                    JSONArray bahnhofList = new JSONArray(finalJson);
-                    count = bahnhofList.length();
-                    Log.i(TAG, "Parsed " + count + " stations with" + (withPhotos ? "" : "out") + " a photo");
-                    List<Bahnhof> bahnhoefe = new ArrayList<Bahnhof>(count);
-
-                    for (int i = 0; i < bahnhofList.length(); i++){
-                        publishProgress("Verarbeite " + i + "/" + count);
-                        JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
-                        //publishProgress(((i+1) + " von " + bahnhofList.length()));
-
-                        String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
-                        String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
-                        String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
-                        String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
-
-                        Bahnhof bahnhof = new Bahnhof();
-                        bahnhof.setTitle(title);
-                        bahnhof.setId(parseInt(id));
-                        bahnhof.setLat(Float.parseFloat(lat));
-                        bahnhof.setLon(Float.parseFloat(lon));
-                        bahnhof.setDatum(aktuellesDatum);
-                        bahnhof.setPhotoflag(withPhotos ? "x" : null);
-
-                        bahnhoefe.add(bahnhof);
-                        Log.d("DatenbankInsertOk ...", bahnhof.toString());
+                long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);
+                if (lastUpdateDate == null || resourceDate > lastUpdateDate.getTime()) {
+                    publishProgress("Lese...");
+                    InputStream stream = connection.getInputStream();
+                    reader = new BufferedReader(new InputStreamReader(stream));
+                    StringBuffer buffer = new StringBuffer();
+                    String line = "";
+                    while ((line = reader.readLine()) != null) {
+                        buffer.append(line);
                     }
-                    publishProgress("Schreibe in Datenbank");
-                    dbAdapter.insertBahnhoefe(bahnhoefe);
-                    publishProgress("Datenbank " + (withPhotos ? "mit" : "ohne") + " Photos aktualisiert");
-                    return bahnhoefe;
+                    String finalJson = buffer.toString();
 
-                } catch (JSONException e) {
-                    Log.e(TAG, "Mal formatted Json", e);
-                }
+                    publishProgress("Verarbeite...");
+                    try {
+                        JSONArray bahnhofList = new JSONArray(finalJson);
+                        count = bahnhofList.length();
+                        Log.i(TAG, "Parsed " + count + " stations with" + (withPhotos ? "" : "out") + " a photo");
+                        List<Bahnhof> bahnhoefe = new ArrayList<Bahnhof>(count);
 
+                        for (int i = 0; i < bahnhofList.length(); i++) {
+                            publishProgress("Verarbeite " + i + "/" + count);
+                            JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
+                            //publishProgress(((i+1) + " von " + bahnhofList.length()));
 
+                            String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
+                            String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
+                            String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
+                            String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
+
+                            Bahnhof bahnhof = new Bahnhof();
+                            bahnhof.setTitle(title);
+                            bahnhof.setId(parseInt(id));
+                            bahnhof.setLat(Float.parseFloat(lat));
+                            bahnhof.setLon(Float.parseFloat(lon));
+                            bahnhof.setDatum(aktuellesDatum);
+                            bahnhof.setPhotoflag(withPhotos ? "x" : null);
+
+                            bahnhoefe.add(bahnhof);
+                            Log.d("DatenbankInsertOk ...", bahnhof.toString());
+                        }
+                        publishProgress("Schreibe in Datenbank");
+                        dbAdapter.insertBahnhoefe(bahnhoefe);
+                        publishProgress("Datenbank " + (withPhotos ? "mit" : "ohne") + " Photos aktualisiert");
+                        return bahnhoefe;
+
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Mal formatted Json", e);
+                    }
+                } // Online-Resource ist  neuer als unsere Daten
             } catch (MalformedURLException e) {
                 Log.e(TAG, "Malformed URL", e);
             } catch (IOException e) {
@@ -415,6 +444,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(List<Bahnhof> result) {
             progressDialog.dismiss();
             writeUpdateDateInFile();
+            enableNavItem();
             tvUpdate = (TextView) findViewById(R.id.tvUpdate);
             try {
                 tvUpdate.setText("Letzte Aktualisierung am: " + loadUpdateDateFromFile("updatedate.txt") );
@@ -489,7 +519,9 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         handleGalleryNavItem();
     }
-    private void writeUpdateDateInFile() {
+
+    @Nullable
+    private String writeUpdateDateInFile() {
 
         try {
             Calendar c = Calendar.getInstance();
@@ -502,13 +534,14 @@ public class MainActivity extends AppCompatActivity
                 osw.flush();
                 osw.close();
                 Toast.makeText(getBaseContext(),"Aktualisierungsdatum gespeichert", Toast.LENGTH_LONG).show();
+                return lastUpdateDate;
             } catch (IOException ioe) {
                 Log.e(TAG, ioe.toString());
             }
         } catch (FileNotFoundException fnfe) {
             Log.e(TAG,fnfe.toString());
         }
-
+        return null;
     }
 
     public String loadUpdateDateFromFile(String filename) throws Exception{
