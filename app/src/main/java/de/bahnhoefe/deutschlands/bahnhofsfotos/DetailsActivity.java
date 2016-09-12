@@ -98,14 +98,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
 
         Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
         boolean directPicture = false;
 
-        if(bundle!=null) {
-            bahnhofName =(String) bundle.get(EXTRA_BAHNHOF_NAME);
-            bahnhofNr = bundle.getInt(EXTRA_BAHNHOF_NUMBER);
-            position = (LatLng) bundle.get(EXTRA_POSITION);
-            directPicture = bundle.getBoolean(EXTRA_TAKE_FOTO, false);
+        if(intent!=null) {
+            bahnhofName = intent.getStringExtra(EXTRA_BAHNHOF_NAME);
+            bahnhofNr = intent.getIntExtra(EXTRA_BAHNHOF_NUMBER, 0);
+            position = intent.getParcelableExtra(EXTRA_POSITION);
+            directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
 
             tvBahnhofName.setText(bahnhofName + " (" + bahnhofNr + ")");
 
@@ -122,7 +121,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
         
         // Load sharedPreferences for filling the E-Mail and variables for Filename to send
-        SharedPreferences sharedPreferences = DetailsActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
 
         licence = sharedPreferences.getString(getString(R.string.LICENCE),DEFAULT);
         photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER),DEFAULT);
@@ -131,7 +130,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         nickname = sharedPreferences.getString(getString(R.string.NICKNAME),DEFAULT);
 
         if (directPicture) {
-            takePicture();
+            checkCameraPermission();
         }
     }
 

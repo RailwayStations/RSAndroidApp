@@ -80,7 +80,7 @@ public abstract class NearbyBahnhofNotificationManager {
         // Build an intent for an action to see station details
         Intent detailIntent = getDetailIntent();
         PendingIntent detailPendingIntent =
-                PendingIntent.getActivity(context, 0, detailIntent, 0);
+                PendingIntent.getActivity(context, 0, detailIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         PendingIntent mapPendingIntent = getMapPendingIntent();
 
@@ -97,7 +97,8 @@ public abstract class NearbyBahnhofNotificationManager {
                 .addAction(R.drawable.ic_directions_white_24dp,
                         "Karte", mapPendingIntent)
                 .setStyle(bigStyle)
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setOnlyAlertOnce(true);
     }
 
 
@@ -152,6 +153,4 @@ public abstract class NearbyBahnhofNotificationManager {
             return this;
         }
     }
-
-
 }
