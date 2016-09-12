@@ -180,9 +180,9 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
         if(marker.getSnippet() != null){
             Class cls = DetailsActivity.class;
             Intent intent = new Intent(MapsAcitivity.this, cls);
-            intent.putExtra("bahnhofName",marker.getTitle());
-            intent.putExtra("bahnhofNr",marker.getSnippet());
-            intent.putExtra("position",marker.getPosition());
+            intent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NAME, marker.getTitle());
+            intent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NUMBER, Integer.valueOf(marker.getSnippet()));
+            intent.putExtra(DetailsActivity.EXTRA_POSITION, marker.getPosition());
             startActivity(intent);
         }else{
             marker.hideInfoWindow();

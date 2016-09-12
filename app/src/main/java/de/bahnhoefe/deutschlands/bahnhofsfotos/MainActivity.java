@@ -142,12 +142,11 @@ public class MainActivity extends AppCompatActivity
 
                 Bahnhof bahnhof = dbAdapter.fetchBahnhof(id);
                 LatLng bhfposition = new LatLng(bahnhof.getLat(),bahnhof.getLon());
-                String bahnhofNr = String.valueOf(bahnhof.getId());
                 Class cls = DetailsActivity.class;
                 Intent intentDetails = new Intent(MainActivity.this, cls);
-                intentDetails.putExtra("bahnhofName",bahnhof.getTitle());
-                intentDetails.putExtra("bahnhofNr",bahnhofNr);
-                intentDetails.putExtra("position",bhfposition);
+                intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF_NAME,bahnhof.getTitle());
+                intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF_NUMBER,bahnhof.getId());
+                intentDetails.putExtra(DetailsActivity.EXTRA_POSITION,bhfposition);
                 startActivity(intentDetails);
 
             }

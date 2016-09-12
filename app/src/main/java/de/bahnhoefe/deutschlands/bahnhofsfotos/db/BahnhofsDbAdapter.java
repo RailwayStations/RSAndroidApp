@@ -165,7 +165,7 @@ public class BahnhofsDbAdapter {
 
 
 
-        }
+    }
 
     public Bahnhof fetchBahnhof(long id){
         Cursor cursor = db.query(DATABASE_TABLE, null, Constants.DB_JSON_CONSTANTS.KEY_ROWID + "=?", new String[] {
