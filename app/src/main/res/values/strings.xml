@@ -68,7 +68,7 @@
         <item>per Auto</item>
         <item>per Fahrrad</item>
         <item>zu Fuß</item>
-        <item>andere</item>
+        <item>nur anzeigen</item>
     </string-array>
     <string name="navMethod">Bitte wähle&#8230;</string>
 

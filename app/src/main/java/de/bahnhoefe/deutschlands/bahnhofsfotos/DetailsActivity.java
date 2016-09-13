@@ -46,8 +46,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import static android.R.attr.alpha;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.latitude;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.longitude;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
@@ -375,7 +373,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     protected void startNavigation(final Context context) {
-        // todo ich mag Google-Navigation überhaupt nicht. Wir könnten stattdessen eine geo:-URL als Intent feuern, dann gehen auch andere Navis
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.drawable.ic_launcher);
         builder.setTitle(R.string.navMethod).setItems(R.array.pick_navmethod, new DialogInterface.OnClickListener() {
@@ -406,7 +403,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 4:
-                        dlocation = "geo:" + latitude + "," + longitude + "?q=" + bahnhofName ;
+                        dlocation = "geo:" + position.latitude + "," + position.longitude + "?q=" + bahnhofName ;
                         Log.d("findnavigation case 4", dlocation);
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
