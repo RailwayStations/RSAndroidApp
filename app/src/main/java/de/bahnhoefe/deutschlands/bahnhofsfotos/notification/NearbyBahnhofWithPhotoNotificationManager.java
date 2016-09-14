@@ -53,6 +53,8 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      */
     @Override
     public void onBitmapAvailable(@Nullable Bitmap bitmap) {
+        if (context == null)
+            return; // we're already destroyed
         if (bitmap == null)
             bitmap = getBitmapFromResource(R.drawable.ic_broken_image);
 

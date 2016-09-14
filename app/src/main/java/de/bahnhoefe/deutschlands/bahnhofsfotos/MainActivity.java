@@ -259,11 +259,15 @@ public class MainActivity extends AppCompatActivity
             return true;
         } else if (id == R.id.notify) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
-            startService(intent);
-        } else if (id == R.id.stop_notify) {
-            // todo besser wäre wohl ein einzelner Knopf, der Notifications an- und ausschaltet.
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
-            stopService(intent);
+            if (!item.isChecked()) {
+                startService(intent);
+                item.setChecked(true);
+                item.setIcon(R.drawable.ic_media_route_off_mono_dark);
+            } else {
+                stopService(intent);
+                item.setChecked(false);
+                item.setIcon(R.drawable.ic_media_route_on_mono_dark);
+            }
         }
 
         return super.onOptionsItemSelected(item);

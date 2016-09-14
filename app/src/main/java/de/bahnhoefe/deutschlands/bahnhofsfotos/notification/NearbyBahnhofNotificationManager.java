@@ -45,7 +45,7 @@ public abstract class NearbyBahnhofNotificationManager {
      * @param bahnhof the station to issue a notification for.
      * @param distance a double giving the distance from current location to bahnhof (in km)
      */
-    public NearbyBahnhofNotificationManager(Context context, Bahnhof bahnhof, double distance) {
+    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance) {
         this.context = context;
         notificationDistance = distance;
         this.notificationStation = bahnhof;
@@ -62,6 +62,9 @@ public abstract class NearbyBahnhofNotificationManager {
      * @param notification
      */
     protected void onNotificationReady(Notification notification) {
+        if (context == null)
+            return; // we're already destroyed
+
         // Get an instance of the NotificationManager service
         NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(context);
@@ -118,6 +121,18 @@ public abstract class NearbyBahnhofNotificationManager {
         Uri geoUri = Uri.parse("geo:" + notificationStation.getLat() + "," + notificationStation.getLon());
         mapIntent.setData(geoUri);
         return PendingIntent.getActivity(context, 0, mapIntent, 0);
+    }
+
+    public void destroy() {
+        NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(context);
+        notificationManager.cancel(NOTIFICATION_ID);
+        notificationStation = null;
+        context = null;
+    }
+
+    public Bahnhof getStation() {
+        return notificationStation;
     }
 
     protected class TextCreator {

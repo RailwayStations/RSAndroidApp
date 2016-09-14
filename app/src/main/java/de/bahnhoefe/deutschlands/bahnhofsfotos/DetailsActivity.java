@@ -57,7 +57,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
     private ImageButton takePictureButton;
-    Uri file;
+    private Uri file;
     private ImageView imageView;
     private String bahnhofName;
     private int bahnhofNr;

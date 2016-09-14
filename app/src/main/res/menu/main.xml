@@ -12,14 +12,10 @@
         android:id="@+id/notify"
         android:title="@string/benachrichtigen"
         android:hint="@string/nahe_gelegenen_bahnhof_melden"
-        android:icon="@drawable/ic_media_route_on_mono_dark"
-        app:showAsAction="collapseActionView|ifRoom" />
-    <item
-        android:id="@+id/stop_notify"
-        android:title="@string/beenden"
-        android:hint="@string/keine_bahnh_fe_melden"
         android:icon="@drawable/ic_media_route_off_mono_dark"
-        app:showAsAction="collapseActionView|ifRoom" />
+        app:showAsAction="collapseActionView|ifRoom"
+        android:checkable="true"
+        android:checked="false"/>
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

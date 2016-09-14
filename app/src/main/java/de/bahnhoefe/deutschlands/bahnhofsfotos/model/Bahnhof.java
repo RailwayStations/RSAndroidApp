@@ -54,6 +54,28 @@ public class Bahnhof implements Serializable{
         this.datum = datum;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Bahnhof)) return false;
+
+        Bahnhof bahnhof = (Bahnhof) o;
+
+        if (id != bahnhof.id) return false;
+        if (Float.compare(bahnhof.lat, lat) != 0) return false;
+        if (Float.compare(bahnhof.lon, lon) != 0) return false;
+        if (datum != bahnhof.datum) return false;
+        if (!title.equals(bahnhof.title)) return false;
+        return photoflag != null ? photoflag.equals(bahnhof.photoflag) : bahnhof.photoflag == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
     public String getPhotoflag() {
         return photoflag;
     }
