@@ -10,13 +10,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 
 public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNotificationManager implements BitmapAvailableHandler {
 
@@ -33,16 +30,9 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      */
     @Override
     public void notifyUser() {
-        String template = "http://www.deutschlands-bahnhoefe.de/images/%s.jpg";
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.outWidth = 640;
-        try {
-            URL url = new URL(String.format(template, notificationStation.getId()));
-            // fetch bitmap asynchronously, call onBitmapAvailable if ready
-            BitmapCache.getInstance().getFoto(this, url, options);
-        } catch (MalformedURLException e) {
-            Log.wtf(TAG, "URL not well formed", e);
-        }
+        new BahnhofsFotoFetchTask(this, options).execute(notificationStation.getId());
     }
 
 
@@ -87,7 +77,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
             Drawable vectorDrawable = context.getDrawable(id);
             int h = 640;
             int w = 400;
-            vectorDrawable.setBounds(0, 0, w, h);
+            vectorDrawable.setBounds(0, 0, w/2, h/2);
             Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bm);
             vectorDrawable.draw(canvas);

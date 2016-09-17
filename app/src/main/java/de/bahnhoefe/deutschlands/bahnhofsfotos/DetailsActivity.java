@@ -37,11 +37,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 
 import static android.R.attr.alpha;
 import static android.content.Intent.createChooser;
@@ -106,16 +104,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             tvBahnhofName.setText(bahnhofName + " (" + bahnhofNr + ")");
 
-            String template = "http://www.deutschlands-bahnhoefe.de/images/%d.jpg";
-            BitmapFactory.Options options = createBitmapOptionsForScreen();
-
-            try {
-                URL url = new URL(String.format(template, bahnhofNr));
-                // fetch bitmap asynchronously, call onBitmapAvailable if ready
-                BitmapCache.getInstance().getFoto(this, url, options);
-            } catch (MalformedURLException e) {
-                Log.wtf(TAG, "URL not well formed", e);
-            }
+            new BahnhofsFotoFetchTask(this, createBitmapOptionsForScreen()).execute(bahnhofNr);
         }
         
         // Load sharedPreferences for filling the E-Mail and variables for Filename to send
