@@ -3,5 +3,5 @@
 *.iml
 build/
 local.properties
-app/res/values/google_maps_api.xml
+app/src/main/res/values/google_maps_api.xml
 
