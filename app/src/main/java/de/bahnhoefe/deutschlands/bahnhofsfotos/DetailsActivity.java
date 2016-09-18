@@ -1,11 +1,9 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,60 +18,47 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.vision.text.Text;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 
 import static android.R.attr.alpha;
-import static android.R.attr.data;
-import static android.R.style.ThemeOverlay;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
-import static com.google.android.gms.analytics.internal.zzy.f;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.id.group_depencies;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.id.imageView;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.id.tvbahnhofname;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.latitude;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.longitude;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.style.AppTheme;
 
-public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
-    private final String TAG = getClass().getSimpleName();
+public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
+    // Names of Extras that this class reacts to
+    public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
+    public static final String EXTRA_BAHNHOF_NAME = "bahnhofName";
+    public static final String EXTRA_BAHNHOF_NUMBER = "bahnhofNr";
+    public static final String EXTRA_POSITION = "position";
+    public static final int PICTURE_SIZE_LIMIT = 300000;
+    private static final String TAG = DetailsActivity.class.getSimpleName();
 
     private ImageButton takePictureButton;
-    private ImageView imageView;
     private Uri file;
+    private ImageView imageView;
     private String bahnhofName;
-    private String bahnhofNr;
+    private int bahnhofNr;
     private TextView tvBahnhofName;
     private Boolean mICameraSelected =false;
     private static final String DEFAULT = "default";
@@ -109,28 +94,31 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
 
         Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
+        boolean directPicture = false;
 
-        if(bundle!=null)
-        {
-            bahnhofName =(String) bundle.get("bahnhofName");
-            bahnhofNr = (String) bundle.get("bahnhofNr");
-            position = (LatLng) bundle.get("position");
+        if(intent!=null) {
+            bahnhofName = intent.getStringExtra(EXTRA_BAHNHOF_NAME);
+            bahnhofNr = intent.getIntExtra(EXTRA_BAHNHOF_NUMBER, 0);
+            position = intent.getParcelableExtra(EXTRA_POSITION);
+            directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
 
             tvBahnhofName.setText(bahnhofName + " (" + bahnhofNr + ")");
 
+            new BahnhofsFotoFetchTask(this, createBitmapOptionsForScreen()).execute(bahnhofNr);
         }
         
         // Load sharedPreferences for filling the E-Mail and variables for Filename to send
-        SharedPreferences sharedPreferences = DetailsActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
 
         licence = sharedPreferences.getString(getString(R.string.LICENCE),DEFAULT);
         photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER),DEFAULT);
         linking = sharedPreferences.getString(getString(R.string.LINKING),DEFAULT);
         link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER),DEFAULT);
         nickname = sharedPreferences.getString(getString(R.string.NICKNAME),DEFAULT);
-        
-        
+
+        if (directPicture) {
+            checkCameraPermission();
+        }
     }
 
     /**
@@ -146,9 +134,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     public void takePicture(){
         Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        file = Uri.fromFile(getOutputMediaFile(bahnhofNr,nickname));
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, file);
-        startActivityForResult(intent,REQUEST_IMAGE_CAPTURE);
+        try {
+            file = Uri.fromFile(getOutputMediaFile(bahnhofNr,nickname));
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, file);
+            intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
+            intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhofName);
+            startActivityForResult(intent,REQUEST_IMAGE_CAPTURE);
+        } catch (IOException e) {
+            Log.e(TAG, "Could not create output directory", e);
+            Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG);
+        }
     }
 
 
@@ -203,62 +198,55 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            // show the image
+            BitmapFactory.Options options = createBitmapOptionsForScreen();
+            Bitmap scaledScreen = null;
+            if (file != null) {
+                Log.d(TAG, "File: "+file);
+                Log.d(TAG, "FileGetPath: "+file.getPath().toString());
 
-
-
-            /**********NEW***********************/
-            Bitmap myBitmap = BitmapFactory.decodeFile(file.getPath());
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int width = size.x;
-            int height = size.y;
-            Log.e("Screen width ", " "+width);
-            Log.e("Screen height ", " "+height);
-            Log.e("img width ", " "+myBitmap.getWidth());
-            Log.e("img height ", " "+myBitmap.getHeight());
-            float scaleHt =(float) width/myBitmap.getWidth();
-            Log.e("Scaled percent ", " "+scaleHt);
-            Bitmap scaled = Bitmap.createScaledBitmap(myBitmap,     width, (int) (myBitmap.getHeight()*scaleHt), true);
-            imageView.setImageBitmap(scaled);
-            /*********END NEW********************/
-               //imageView.setImageURI(file);
-               // imageView.invalidate();
-                Log.d("FilePathImage",file.toString());
-                Log.d("FileGetPath",file.getPath().toString());
-
-
-                if(file.getPath() == null){
-                    mICameraSelected = false;
-                }else{
-                    mICameraSelected = true;
-                }
+                scaledScreen = BitmapFactory.decodeFile(
+                        file.getPath(),
+                        options);
+                Log.d(TAG, "img width "+scaledScreen.getWidth());
+                Log.d(TAG, "img height "+scaledScreen.getHeight());
+                imageView.setImageBitmap(scaledScreen);
 
                 invalidateOptionsMenu();
-
+            } else {
+                Log.wtf(TAG, "Media file not available");
+            }
         }
     }
 
-    @Nullable
-    private static File getOutputMediaFile(String bahnhofNr,String nickname){
+    @NonNull
+    private BitmapFactory.Options createBitmapOptionsForScreen() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        Log.d(TAG, "Screen width "+width);
+        Log.d(TAG, "Screen height "+height);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.outWidth = width;
+        return options;
+    }
 
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory()
-                + File.separator + "Bahnhofsfotos");
-        /*File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "Bahnhofsfotos");*/
+    @Nullable
+    static public File getOutputMediaFile(int bahnhofNr, String nickname) throws IOException {
+
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
 
         if (!mediaStorageDir.exists()){
             if (!mediaStorageDir.mkdirs()){
-                return null;
+                throw new IOException("Cannot create directory structure "+mediaStorageDir.getAbsolutePath());
             }
         }
 
-        Log.d("BahnhofNrAbfrage",bahnhofNr);
-        File file = new File(mediaStorageDir.getPath() + File.separator +
-                nickname + "-"  + bahnhofNr + ".jpg");
-        /*return new File(mediaStorageDir.getPath() + File.separator +
-                nickname + "_"  + bahnhofNr + ".jpg");*/
+        Log.d(TAG, "BahnhofNrAbfrage: " + bahnhofNr);
+        File file = new File(mediaStorageDir.getPath(), String.format("%s-%d.jpg", nickname, bahnhofNr));
         Log.d("FilePfad",file.toString());
 
 
@@ -332,7 +320,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // action with ID action_settings was selected
             case R.id.send_email:
                 Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                emailIntent.putExtra(Intent.EXTRA_STREAM, getShareUri());
+                emailIntent.putExtra(Intent.EXTRA_STREAM, file);
                 emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhofName);
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + licence
@@ -341,7 +329,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         + "\n Verlinken bitte mit: " + linking
                         + "\n Link zum Account: " + link);
                 emailIntent.setType("multipart/byteranges");
-                emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(Intent.createChooser(emailIntent,"Mail versenden"));
 
                 break;
@@ -349,10 +336,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Intent shareIntent = new Intent();
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhofName + " @android_oma @khgdrn");
-                shareIntent.putExtra(Intent.EXTRA_STREAM, getShareUri());
+                shareIntent.putExtra(Intent.EXTRA_STREAM, file);
                 shareIntent.setType("image/jpeg");
-                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                 startActivity(createChooser(shareIntent, "send"));
                 break;
            /* case R.id.nav_to_station:
@@ -363,13 +348,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         return true;
-    }
-
-    private Uri getShareUri() {
-        return FileProvider.getUriForFile(
-                            DetailsActivity.this,
-                            "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider",
-                            getOutputMediaFile(bahnhofNr,nickname));
     }
 
     private boolean hasImage(@NonNull ImageView view) {
@@ -414,7 +392,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 4:
-                        dlocation = "geo:" + latitude + "," + longitude + "?q=" + bahnhofName ;
+                        dlocation = "geo:" + position.latitude + "," + position.longitude + "?q=" + bahnhofName ;
                         Log.d("findnavigation case 4", dlocation);
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
@@ -433,4 +411,28 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
 
+    /**
+     * This gets called if the requested bitmap is available. Finish and issue the notification.
+     *
+     * @param bitmap the fetched Bitmap for the notification. May be null
+     */
+    @Override
+    public void onBitmapAvailable(@Nullable Bitmap bitmap) {
+        if (bitmap == null)
+            return;
+        int targetWidth = createBitmapOptionsForScreen().outWidth;
+        if (bitmap.getWidth() != targetWidth) {
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap,
+                    targetWidth,
+                    (int) (((long) bitmap.getHeight() * (long) targetWidth) / bitmap.getWidth()),
+                    true);
+            imageView.setImageBitmap(scaledBitmap);
+        } else {
+            imageView.setImageBitmap(bitmap);
+        }
+
+        takePictureButton.setVisibility(View.INVISIBLE);
+        invalidateOptionsMenu();
+
+    }
 }

@@ -1,53 +1,36 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.SearchView;
-import android.text.SpannableString;
-import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -66,6 +49,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,10 +62,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
-import static com.google.android.gms.analytics.internal.zzy.d;
-import static java.lang.Integer.getInteger;
 import static java.lang.Integer.parseInt;
-import static java.lang.Integer.valueOf;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -96,7 +77,6 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_CODE = 200;
     private NavigationView navigationView;
     File file;
-    private int count=0;
 
     CustomAdapter customAdapter;
     ListView listView;
@@ -144,16 +124,17 @@ public class MainActivity extends AppCompatActivity
         try {
             lastUpdateDate = loadUpdateDateFromFile("updatedate.txt");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Cannot load last update", e);
         }
         if (!lastUpdateDate.equals("")) {
             tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
+            new JSONTask(lastUpdateDate).execute();
         }
 
-        cursor = dbAdapter.getStationsList();
+        cursor = dbAdapter.getStationsList(false);
         customAdapter = new CustomAdapter(this, cursor,0);
         listView = (ListView) findViewById(R.id.lstStations);
         listView.setAdapter(customAdapter);
@@ -164,12 +145,11 @@ public class MainActivity extends AppCompatActivity
 
                 Bahnhof bahnhof = dbAdapter.fetchBahnhof(id);
                 LatLng bhfposition = new LatLng(bahnhof.getLat(),bahnhof.getLon());
-                String bahnhofNr = String.valueOf(bahnhof.getId());
                 Class cls = DetailsActivity.class;
                 Intent intentDetails = new Intent(MainActivity.this, cls);
-                intentDetails.putExtra("bahnhofName",bahnhof.getTitle());
-                intentDetails.putExtra("bahnhofNr",bahnhofNr);
-                intentDetails.putExtra("position",bhfposition);
+                intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF_NAME,bahnhof.getTitle());
+                intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF_NUMBER,bahnhof.getId());
+                intentDetails.putExtra(DetailsActivity.EXTRA_POSITION,bhfposition);
                 startActivity(intentDetails);
 
             }
@@ -277,6 +257,17 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.notify) {
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
+            if (!item.isChecked()) {
+                startService(intent);
+                item.setChecked(true);
+                item.setIcon(R.drawable.ic_media_route_off_mono_dark);
+            } else {
+                stopService(intent);
+                item.setChecked(false);
+                item.setIcon(R.drawable.ic_media_route_on_mono_dark);
+            }
         }
 
         return super.onOptionsItemSelected(item);
@@ -294,22 +285,19 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
-            new JSONTask().execute(Constants.BAHNHOEFE_OHNE_PHOTO_URL);
-            enableNavItem();
+            new JSONTask(lastUpdateDate).execute();
         } else if (id == R.id.nav_your_own_station_photos) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_stations_without_photo) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAcitivity.class);
             startActivity(intent);
-        }else if (id == R.id.nav_all_stations_without_photo) {
+        } else if (id == R.id.nav_all_stations_without_photo) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAllAcitivity.class);
             startActivity(intent);
-
-        }else if (id == R.id.nav_app_info) {
+        } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(),DIALOG_TAG);
-
         } /*else if (id == R.id.nav_send) {
 
         }*/
@@ -337,71 +325,111 @@ public class MainActivity extends AppCompatActivity
         nav_item2.setEnabled(false);
     }
 
-    public class JSONTask extends AsyncTask<String, String, List<Bahnhof>>{
+    public class JSONTask extends AsyncTask<Void, String, List<Bahnhof>>{
 
         private ProgressDialog progressDialog;
+        private Date lastUpdateDate;
 
+        // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
+        private void enableHttpResponseCache() {
+            try {
+                long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+                File httpCacheDir = new File(getCacheDir(), "http");
+                Class.forName("android.net.http.HttpResponseCache")
+                        .getMethod("install", File.class, long.class)
+                        .invoke(null, httpCacheDir, httpCacheSize);
+            } catch (Exception httpResponseCacheNotAvailable) {
+                Log.i(TAG, "HTTP response cache is unavailable.");
+            }
+        }
+
+        protected JSONTask(@Nullable final String lastUpdateDate) {
+            enableHttpResponseCache();
+            this.lastUpdateDate = null;
+            if (lastUpdateDate != null) {
+                try {
+                    new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(lastUpdateDate);
+                } catch (ParseException e) {
+                    Log.e(TAG, "Unparsable update date: " + lastUpdateDate);
+                }
+            }
+        }
 
         @Override
-        protected List<Bahnhof> doInBackground(String... params) {
+        protected List<Bahnhof> doInBackground(Void ...params) {
+            dbAdapter.deleteBahnhoefe();
+            List<Bahnhof> ohne = loadBatch(true);
+            List<Bahnhof> mit = loadBatch(false);
+            ohne.addAll(mit);
+            return ohne;
+        }
+
+        protected List<Bahnhof> loadBatch(boolean withPhotos) {
             HttpURLConnection connection = null;
             BufferedReader reader = null;
             Date date = new Date();
             long aktuellesDatum = date.getTime();
-            List<Bahnhof> bahnhoefe = new ArrayList<Bahnhof>();
+            int count = 0;
 
+            publishProgress("Verbinde...");
             try {
-                URL url = new URL(params[0]);
+                URL url = new URL(withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL);
                 connection = (HttpURLConnection)url.openConnection();
                 connection.connect();
-                InputStream stream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(stream));
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-                while((line = reader.readLine()) != null){
-                    buffer.append(line);
-                }
-                String finalJson =  buffer.toString();
-
-                try {
-                    JSONArray bahnhofList = new JSONArray(finalJson);
-                    count = bahnhofList.length();
-
-                    for (int i = 0; i < bahnhofList.length(); i++){
-                        JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
-                        publishProgress(((i+1) + " von " + bahnhofList.length()));
-
-                        String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
-                        String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
-                        String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
-                        String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
-
-                        Bahnhof bahnhof = new Bahnhof();
-                        bahnhof.setTitle(title);
-                        bahnhof.setId(parseInt(id));
-                        bahnhof.setLat(Float.parseFloat(lat));
-                        bahnhof.setLon(Float.parseFloat(lon));
-                        bahnhof.setDatum(aktuellesDatum);
-
-
-                        bahnhoefe.add(bahnhof);
-                        //Log.d("DatenbankInsertOk ...", bahnhof.toString());
+                long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);
+                if (lastUpdateDate == null || resourceDate > lastUpdateDate.getTime()) {
+                    publishProgress("Lese...");
+                    InputStream stream = connection.getInputStream();
+                    reader = new BufferedReader(new InputStreamReader(stream));
+                    StringBuffer buffer = new StringBuffer();
+                    String line = "";
+                    while ((line = reader.readLine()) != null) {
+                        buffer.append(line);
                     }
+                    String finalJson = buffer.toString();
 
-                    dbAdapter.insertBahnhoefe(bahnhoefe);
-                    publishProgress("Datenbank aktualisiert");
-                    return bahnhoefe;
+                    publishProgress("Verarbeite...");
+                    try {
+                        JSONArray bahnhofList = new JSONArray(finalJson);
+                        count = bahnhofList.length();
+                        Log.i(TAG, "Parsed " + count + " stations with" + (withPhotos ? "" : "out") + " a photo");
+                        List<Bahnhof> bahnhoefe = new ArrayList<Bahnhof>(count);
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                        for (int i = 0; i < bahnhofList.length(); i++) {
+                            publishProgress("Verarbeite " + i + "/" + count);
+                            JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
+                            //publishProgress(((i+1) + " von " + bahnhofList.length()));
 
+                            String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
+                            String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
+                            String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
+                            String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
 
+                            Bahnhof bahnhof = new Bahnhof();
+                            bahnhof.setTitle(title);
+                            bahnhof.setId(parseInt(id));
+                            bahnhof.setLat(Float.parseFloat(lat));
+                            bahnhof.setLon(Float.parseFloat(lon));
+                            bahnhof.setDatum(aktuellesDatum);
+                            bahnhof.setPhotoflag(withPhotos ? "x" : null);
+
+                            bahnhoefe.add(bahnhof);
+                            Log.d("DatenbankInsertOk ...", bahnhof.toString());
+                        }
+                        publishProgress("Schreibe in Datenbank");
+                        dbAdapter.insertBahnhoefe(bahnhoefe);
+                        publishProgress("Datenbank " + (withPhotos ? "mit" : "ohne") + " Photos aktualisiert");
+                        return bahnhoefe;
+
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Mal formatted Json", e);
+                    }
+                } // Online-Resource ist  neuer als unsere Daten
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Malformed URL", e);
             } catch (IOException e) {
-                e.printStackTrace();
-            }finally{
+                Log.e(TAG, "Could not read json files", e);
+            } finally {
                 if(connection != null){
                     connection.disconnect();
                 }
@@ -410,7 +438,7 @@ public class MainActivity extends AppCompatActivity
                         reader.close();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Cannot close reader", e);
                 }
             }
             return null;
@@ -420,6 +448,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(List<Bahnhof> result) {
             progressDialog.dismiss();
             writeUpdateDateInFile();
+            enableNavItem();
             tvUpdate = (TextView) findViewById(R.id.tvUpdate);
             try {
                 tvUpdate.setText("Letzte Aktualisierung am: " + loadUpdateDateFromFile("updatedate.txt") );
@@ -427,9 +456,9 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
             if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.GINGERBREAD){
-                customAdapter.swapCursor(dbAdapter.getStationsList());
+                customAdapter.swapCursor(dbAdapter.getStationsList(false));
             } else {
-                customAdapter.changeCursor(dbAdapter.getStationsList());
+                customAdapter.changeCursor(dbAdapter.getStationsList(false));
             }
 
             unlockScreenOrientation();
@@ -442,17 +471,15 @@ public class MainActivity extends AppCompatActivity
             progressDialog = new ProgressDialog(MainActivity.this);
             progressDialog.setIndeterminate(false);
 
+            // show it
+            progressDialog.show();
         }
 
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            //progressDialog.setMessage("Lade Daten ... " + values[0] + count);
-            progressDialog.setMessage("Lade Daten von " + count + " Bahnhöfen. \nDas dauert ein bisschen");
-
-            // show it
-            progressDialog.show();
-
+            progressDialog.setMessage("Lade Daten ... " + values[0]);
+            //progressDialog.setMessage("Lade Daten von " + count + " Bahnhöfen. \nDas dauert ein bisschen");
         }
 
         private void lockScreenOrientation() {
@@ -496,7 +523,9 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         handleGalleryNavItem();
     }
-    private void writeUpdateDateInFile() {
+
+    @Nullable
+    private String writeUpdateDateInFile() {
 
         try {
             Calendar c = Calendar.getInstance();
@@ -509,13 +538,14 @@ public class MainActivity extends AppCompatActivity
                 osw.flush();
                 osw.close();
                 Toast.makeText(getBaseContext(),"Aktualisierungsdatum gespeichert", Toast.LENGTH_LONG).show();
+                return lastUpdateDate;
             } catch (IOException ioe) {
                 Log.e(TAG, ioe.toString());
             }
         } catch (FileNotFoundException fnfe) {
             Log.e(TAG,fnfe.toString());
         }
-
+        return null;
     }
 
     public String loadUpdateDateFromFile(String filename) throws Exception{

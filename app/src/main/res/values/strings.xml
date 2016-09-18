@@ -68,7 +68,7 @@
         <item>per Auto</item>
         <item>per Fahrrad</item>
         <item>zu Fuß</item>
-        <item>andere</item>
+        <item>nur anzeigen</item>
     </string-array>
     <string name="navMethod">Bitte wähle&#8230;</string>
 
@@ -95,4 +95,12 @@
     </string>
     <string name="information">Informationen</string>
     <string name="menu_title_info">Über die App</string>
+    <string name="benachrichtigen">Benachrichtigen</string>
+    <string name="nahe_gelegenen_bahnhof_melden">Nahe gelegenen Bahnhof melden</string>
+    <string name="keine_bahnh_fe_melden">Keine Bahnhöfe melden</string>
+    <string name="beenden">beenden</string>
+    <string name="station_is_near">Bahnhof in der Nähe</string>
+    <string name="template_short_text" formatted="false">Bahnhof %s in %.2f km</string>
+    <string name="template_long_text" formatted="false">Bahnhof: %s\nEntfernung: %.2f km\nKoordinaten: %.2f; %.2f\nLetzte Änderung: %tF\n%s</string>
+    <string name="photo_exists">Photo: ja</string>
 </resources>

@@ -1,30 +1,15 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 
-import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -85,7 +70,7 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
 
         try{
             bahnhofsDbAdapter.open();
-            bahnhofMarker = bahnhofsDbAdapter.getAllBahnhoefe();
+            bahnhofMarker = bahnhofsDbAdapter.getAllBahnhoefe(false);
                    // .getBahnhoefeByLatLngRectangle(myLatitude, myLongitude);
         }catch(Exception e){
             Log.i(TAG,"Datenbank konnte nicht geöffnet werden");
@@ -165,12 +150,11 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-
         Class cls = DetailsActivity.class;
         Intent intent = new Intent(MapsAllAcitivity.this, cls);
-        intent.putExtra("bahnhofName",marker.getTitle());
-        intent.putExtra("bahnhofNr",marker.getSnippet());
-        intent.putExtra("position",marker.getPosition());
+        intent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NAME, marker.getTitle());
+        intent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NUMBER, Integer.valueOf(marker.getSnippet()));
+        intent.putExtra(DetailsActivity.EXTRA_POSITION, marker.getPosition());
         startActivity(intent);
     }
 
