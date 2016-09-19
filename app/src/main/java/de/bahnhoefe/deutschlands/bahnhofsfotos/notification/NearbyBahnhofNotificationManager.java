@@ -93,7 +93,7 @@ public abstract class NearbyBahnhofNotificationManager {
         NotificationCompat.BigTextStyle bigStyle = textCreator.getBigStyle();
 
         return new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_logotrain)
+                .setSmallIcon(R.drawable.ic_logotrain_found)
                 .setContentTitle(context.getString(R.string.station_is_near))
                 .setContentText(shortText)
                 .setContentIntent(detailPendingIntent)
@@ -101,7 +101,8 @@ public abstract class NearbyBahnhofNotificationManager {
                         "Karte", mapPendingIntent)
                 .setStyle(bigStyle)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true);
+                .setOnlyAlertOnce(true)
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
     }
 
 

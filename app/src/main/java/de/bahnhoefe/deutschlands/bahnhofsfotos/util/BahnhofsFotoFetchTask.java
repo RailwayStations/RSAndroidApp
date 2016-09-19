@@ -1,6 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -23,6 +24,8 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private final BitmapAvailableHandler handler;
     private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos-cc0/%d/bahnhofsnr.json";
     BitmapFactory.Options options;
+    private String license;
+    private Uri author;
 
     public BahnhofsFotoFetchTask(BitmapAvailableHandler handler, BitmapFactory.Options bitmapOptionsForScreen) {
         this.handler = handler;
@@ -71,6 +74,8 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
                     } while (nextLine != null);
                     JSONObject object = new JSONArray(jsonString).getJSONObject(0);
                     URL photoURL = new URL (object.getString("bahnhofsfoto"));
+                    setAuthor(Uri.parse(object.getString("fotograf")));
+                    setLicense(object.getString("lizenz"));
                     return photoURL;
                 }
             } else {
@@ -90,5 +95,21 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
             }
         }
         return null;
+    }
+
+    public String getLicense() {
+        return license;
+    }
+
+    public void setLicense(String license) {
+        this.license = license;
+    }
+
+    public Uri getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Uri author) {
+        this.author = author;
     }
 }
