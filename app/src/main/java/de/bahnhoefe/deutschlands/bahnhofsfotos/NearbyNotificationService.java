@@ -111,8 +111,6 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     @Override
     public IBinder onBind(Intent intent) {
-        // todo should we use a bound interface for stopping the action or a broadcast?
-        // todo MapsActivity could perhaps bind to this service and we can remove the tracking aspect from there
         return null;
     }
 
