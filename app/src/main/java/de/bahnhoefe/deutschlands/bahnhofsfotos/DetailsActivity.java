@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -52,7 +53,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
     private ImageButton takePictureButton;
-    private Uri file;
+    private File file;
     private ImageView imageView;
     private String bahnhofName;
     private int bahnhofNr;
@@ -143,11 +144,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     }
 
-    public void takePicture(){
+    public void takePicture() {
         Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        file = Uri.fromFile(getOutputMediaFile(bahnhofNr,nickname));
+        file = getOutputMediaFile(bahnhofNr, nickname);
         if (file != null) {
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, file);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
             intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
             intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhofName);
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
@@ -316,8 +317,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 break;
             // action with ID action_settings was selected
             case R.id.send_email:
-                Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                emailIntent.putExtra(Intent.EXTRA_STREAM, file);
+                Intent emailIntent = createFotoSendIntent();
                 emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhofName);
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + licence
@@ -327,13 +327,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         + "\n Link zum Account: " + link);
                 emailIntent.setType("multipart/byteranges");
                 startActivity(Intent.createChooser(emailIntent,"Mail versenden"));
-
                 break;
             case R.id.share_photo:
-                Intent shareIntent = new Intent();
-                shareIntent.setAction(Intent.ACTION_SEND);
+                Intent shareIntent = createFotoSendIntent();
                 shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhofName + " @android_oma @khgdrn");
-                shareIntent.putExtra(Intent.EXTRA_STREAM, file);
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
@@ -345,6 +342,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         return true;
+    }
+
+    private Intent createFotoSendIntent() {
+        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
+            "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
+        return sendIntent;
     }
 
     protected void startNavigation(final Context context) {
