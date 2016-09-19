@@ -143,6 +143,10 @@
                 android:resource="@xml/filepaths" />
         </provider>
 
+        <service
+            android:name=".NearbyNotificationService"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>

@@ -1,9 +1,13 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -19,6 +23,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
 
     private static final long[] VIBRATION_PATTERN = new long[]{300};
     private static final int LED_COLOR = 0x00ff0000;
+    private BahnhofsFotoFetchTask fetchTask;
 
     public NearbyBahnhofWithPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance) {
         super(context, bahnhof, distance);
@@ -32,7 +37,8 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     public void notifyUser() {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.outWidth = 640;
-        new BahnhofsFotoFetchTask(this, options).execute(notificationStation.getId());
+        fetchTask = new BahnhofsFotoFetchTask(this, options);
+        fetchTask.execute(notificationStation.getId());
     }
 
 
@@ -46,12 +52,24 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
         if (context == null)
             return; // we're already destroyed
         if (bitmap == null)
-            bitmap = getBitmapFromResource(R.drawable.ic_broken_image);
+            bitmap = getBitmapFromResource(R.drawable.ic_stations_with_photo);
+
+        NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
+        bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(fetchTask.getLicense());
+        Intent authorInfo = new Intent(Intent.ACTION_VIEW);
+        authorInfo.setData(fetchTask.getAuthor());
+
+        Notification fullImagePage = new NotificationCompat.Builder (context)
+                .setStyle(bigPictureStyle)
+                .setContentIntent(PendingIntent.getActivity(context, 0, authorInfo, 0))
+                .extend(new NotificationCompat.WearableExtender().setHintShowBackgroundOnly(true))
+                .build();
 
         NotificationCompat.WearableExtender wearableExtender =
                 new NotificationCompat.WearableExtender()
                         .setHintHideIcon(true)
-                        .setBackground(bitmap);
+                        .setBackground(bitmap)
+                        .addPage(fullImagePage);
 
         NotificationCompat.Builder notificationBuilder = getBasicNotificationBuilder();
 
@@ -75,11 +93,12 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     private Bitmap getBitmapFromResource(int id) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Drawable vectorDrawable = context.getDrawable(id);
-            int h = 640;
+            int h = 400;
             int w = 400;
-            vectorDrawable.setBounds(0, 0, w/2, h/2);
+            vectorDrawable.setBounds(0, 0, w, h);
             Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bm);
+            canvas.drawColor(Color.WHITE);
             vectorDrawable.draw(canvas);
             return bm;
         } else
