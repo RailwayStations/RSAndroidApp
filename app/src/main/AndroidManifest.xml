@@ -128,6 +128,10 @@
         <!--<meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_release_key" />-->
+        <service
+                   android:name=".NearbyNotificationService"
+                   android:enabled="true"
+                   android:exported="false"></service>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
