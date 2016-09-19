@@ -11,8 +11,6 @@ import android.support.v4.app.NotificationManagerCompat;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.Date;
-
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -22,6 +20,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
  */
 public abstract class NearbyBahnhofNotificationManager {
     private static final int NOTIFICATION_ID = 1;
+    private static final int REQUEST_MAP = 0x10;
+    private static final int REQUEST_DETAIL = 0x20;
     protected final String TAG = NearbyBahnhofNotificationManager.class.getSimpleName();
 
     /**
@@ -79,11 +79,8 @@ public abstract class NearbyBahnhofNotificationManager {
      * @return
      */
     protected NotificationCompat.Builder getBasicNotificationBuilder() {
-        // mapIntent is common to both variants
         // Build an intent for an action to see station details
-        Intent detailIntent = getDetailIntent();
-        PendingIntent detailPendingIntent =
-                PendingIntent.getActivity(context, 0, detailIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent detailPendingIntent = getDetailPendingIntent();
 
         PendingIntent mapPendingIntent = getMapPendingIntent();
 
@@ -105,6 +102,9 @@ public abstract class NearbyBahnhofNotificationManager {
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
     }
 
+    protected PendingIntent pendifyMe(Intent intent, int requestCode) {
+        return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+    }
 
     @NonNull
     protected Intent getDetailIntent() {
@@ -116,12 +116,17 @@ public abstract class NearbyBahnhofNotificationManager {
         return detailIntent;
     }
 
+    @NonNull
+    protected PendingIntent getDetailPendingIntent() {
+        return pendifyMe(getDetailIntent(), REQUEST_DETAIL);
+    }
+
     protected PendingIntent getMapPendingIntent() {
         // Build an intent for an action to view a map
         Intent mapIntent = new Intent(Intent.ACTION_VIEW);
         Uri geoUri = Uri.parse("geo:" + notificationStation.getLat() + "," + notificationStation.getLon());
         mapIntent.setData(geoUri);
-        return PendingIntent.getActivity(context, 0, mapIntent, 0);
+        return pendifyMe(mapIntent, REQUEST_MAP);
     }
 
     public void destroy() {
@@ -157,9 +162,6 @@ public abstract class NearbyBahnhofNotificationManager {
             longText = String.format(longTextTemplate,
                     notificationStation.getTitle(),
                     notificationDistance,
-                    notificationStation.getLat(),
-                    notificationStation.getLon(),
-                    new Date(notificationStation.getDatum()),
                     (notificationStation.getPhotoflag() != null ?
                             context.getString(R.string.photo_exists) :
                             ""));

@@ -101,7 +101,7 @@
     <string name="beenden">beenden</string>
     <string name="station_is_near">Bahnhof in der Nähe</string>
     <string name="template_short_text" formatted="false">Bahnhof %s in %.2f km</string>
-    <string name="template_long_text" formatted="false">Bahnhof: %s\nEntfernung: %.2f km\nKoordinaten: %.2f; %.2f\nLetzte Änderung: %tF\n%s</string>
+    <string name="template_long_text" formatted="false">Bahnhof: %s\nEntfernung: %.2f km\n%s</string>
     <string name="photo_exists">Photo: für Lizenzinfos Detailansicht öffnen</string>
     <string name="nearby_notification_active">Bahnhofsortung aktiv</string>
     <string name="license_tag" formatted="false">Lizenz: %s\nUrheber: %s</string>
