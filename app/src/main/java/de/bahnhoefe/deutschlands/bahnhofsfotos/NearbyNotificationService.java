@@ -1,5 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,6 +11,8 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,6 +40,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     // some useful constants
     private static final double MIN_NOTIFICATION_DISTANCE = 1.0d; // km
     private static final double EARTH_CIRCUMFERENCE = 40075.017d; // km at equator
+    private static final int ONGOING_NOTIFICATION_ID = 0xdeadbeef;
 
     private final String TAG = NearbyNotificationService.class.getSimpleName();
     private List<Bahnhof> nearStations;
@@ -80,7 +84,18 @@ public class NearbyNotificationService extends Service implements LocationListen
             Log.i(TAG, "Received start command");
             // connect google services
             googleApiClient.connect();
+            // show a permanent notification to indicate that position detection is running
+            Notification ongoingNotification = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.ic_logotrain)
+                    .setContentTitle(getString(R.string.nearby_notification_active))
+                    .setOngoing(true)
+                    .setLocalOnly(true)
+                    .build();
+            NotificationManagerCompat notificationManager =
+                    NotificationManagerCompat.from(this);
+            notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
 
+            // set internal flag to avoid multi-starting
             started = true;
             return START_STICKY;
         } else
@@ -106,8 +121,8 @@ public class NearbyNotificationService extends Service implements LocationListen
 
         try {
             bahnhofsDbAdapter.open();
-            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos.latitude, myPos.longitude, false);
-            nearStations.addAll(bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos.latitude, myPos.longitude, true));
+            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
+            nearStations.addAll(bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, true));
         } catch (Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         } finally {
@@ -127,6 +142,12 @@ public class NearbyNotificationService extends Service implements LocationListen
         }
 
         googleApiClient.disconnect();
+
+        // Cancel the ongoing notification
+        NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(this);
+        notificationManager.cancel(ONGOING_NOTIFICATION_ID);
+
 
         started = false;
         super.onDestroy();

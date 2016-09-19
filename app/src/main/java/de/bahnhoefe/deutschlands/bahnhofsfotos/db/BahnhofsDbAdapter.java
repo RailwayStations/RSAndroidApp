@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -227,7 +229,9 @@ public class BahnhofsDbAdapter {
     }
 
     // Getting All Bahnhoefe
-    public List<Bahnhof> getBahnhoefeByLatLngRectangle(double lat, double lng, boolean withPhoto) {
+    public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, boolean withPhoto) {
+        double lat = position.latitude;
+        double lng = position.longitude;
         List<Bahnhof> bahnhofList = new ArrayList<Bahnhof>();
         // Select All Query with rectangle - might be later change with it
         String selectQuery = "SELECT " + KEY_ID + ", " +

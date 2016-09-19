@@ -12,7 +12,7 @@
         android:id="@+id/notify"
         android:title="@string/benachrichtigen"
         android:hint="@string/nahe_gelegenen_bahnhof_melden"
-        android:icon="@drawable/ic_media_route_off_mono_dark"
+        android:icon="@drawable/ic_media_route_on_mono_dark"
         app:showAsAction="collapseActionView|ifRoom"
         android:checkable="true"
         android:checked="false"/>
