@@ -404,18 +404,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     /**
      * This gets called if the requested bitmap is available. Finish and issue the notification.
      *
-     * @param bitmap the fetched Bitmap for the notification. May be null
+     * @param publicBitmap the fetched Bitmap for the notification. May be null
      */
     @Override
-    public void onBitmapAvailable(@Nullable Bitmap bitmap) {
-        if (bitmap == null) {
-            // keine öffentliche Bitmap, wir versuchen's lokal
-            bitmap = readLocalBitmap();
-            fetchTask.setLicense(licence);
-            fetchTask.setAuthor(null);
-            localFotoUsed = true;
-        }
-        if (bitmap == null) {
+    public void onBitmapAvailable(final @Nullable Bitmap publicBitmap) {
+        Bitmap showBitmap = (publicBitmap != null) ? publicBitmap : checkForLocalPhoto();
+        if (showBitmap == null) {
             // auch lokal keine Bitmap
             localFotoUsed = false;
             // switch off image and license view until we actually have a foto
@@ -425,14 +419,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             return;
         }
         int targetWidth = createBitmapOptionsForScreen().outWidth;
-        if (bitmap.getWidth() != targetWidth) {
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap,
+        if (showBitmap.getWidth() != targetWidth) {
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
                     targetWidth,
-                    (int) (((long) bitmap.getHeight() * (long) targetWidth) / bitmap.getWidth()),
+                    (int) (((long) showBitmap.getHeight() * (long) targetWidth) / showBitmap.getWidth()),
                     true);
             imageView.setImageBitmap(scaledBitmap);
         } else {
-            imageView.setImageBitmap(bitmap);
+            imageView.setImageBitmap(showBitmap);
         }
         imageView.setVisibility(View.VISIBLE);
         if (fetchTask.getLicense() != null) {
@@ -450,26 +444,36 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         invalidateOptionsMenu();
     }
 
-    private Bitmap readLocalBitmap() {
+    /**
+     * Check if there's a local photo file for this station.
+     * @return the Bitmap of the photo, or null if none exists.
+     */
+    @Nullable private Bitmap checkForLocalPhoto() {
         // show the image
         BitmapFactory.Options options = createBitmapOptionsForScreen();
         Bitmap scaledScreen = null;
-        File file = getOutputMediaFile(bahnhofNr,nickname);
+        File localFile = getOutputMediaFile(bahnhofNr,nickname);
 
-        if (file != null && file.canRead()) {
-            Log.d(TAG, "File: "+file);
-            Log.d(TAG, "FileGetPath: "+file.getPath().toString());
+        if (localFile != null && localFile.canRead()) {
+            Log.d(TAG, "File: "+ localFile);
+            Log.d(TAG, "FileGetPath: "+ localFile.getPath().toString());
 
             scaledScreen = BitmapFactory.decodeFile(
-                    file.getPath(),
+                    localFile.getPath(),
                     options);
             Log.d(TAG, "img width "+scaledScreen.getWidth());
             Log.d(TAG, "img height "+scaledScreen.getHeight());
+            // set license and author information
+            fetchTask.setLicense(licence);
+            fetchTask.setAuthor(null);
+            localFotoUsed = true;
             return scaledScreen;
         } else {
-            Log.e(TAG, "Media file not available: " + file.getAbsolutePath());
+            localFotoUsed = false;
+            Log.e(TAG, "Media file not available: " + localFile.getAbsolutePath());
             return null;
         }
 
     }
+
 }
