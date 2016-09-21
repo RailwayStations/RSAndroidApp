@@ -49,7 +49,8 @@
         <activity
             android:name=".DetailsActivity"
             android:label="@string/title_activity_details"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="landscape">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
@@ -121,7 +122,7 @@
         <!--debug-KEY-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_debug_key" />
+            android:value="@string/google_maps_deb_key" />
 
         <!--release-KEY-->
         <!--<meta-data
@@ -142,7 +143,7 @@
                 android:resource="@xml/filepaths" />
         </provider>
 
-        
+
     </application>
 
 </manifest>
