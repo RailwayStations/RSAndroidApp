@@ -21,6 +21,15 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         >
 
+        <ImageView
+            android:id="@+id/imageview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_stations_with_photo"
+            android:scaleType="fitCenter"
+            />
+
         <TextView
             android:text="TextView"
             android:id="@+id/tvbahnhofname"
@@ -28,29 +37,33 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
+            android:layout_alignTop="@id/tvbahnhofname"
             android:textSize="25sp"
             android:textStyle="bold"
             android:layout_marginBottom="20sp"/>
 
-        <ImageView
-            android:id="@+id/imageview"
+        <TextView
+            android:id="@+id/license_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/tvbahnhofname"
-            android:scaleType="fitCenter"
-            />
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:autoLink="web"
+            android:linksClickable="true"
+            android:clickable="true"
+            android:text="@string/license_tag"
+            android:textAlignment="textEnd" />
 
 
         <ImageButton
-             android:id="@+id/button_image"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignParentBottom="true"
-             android:layout_centerHorizontal="true"
-             android:src="@drawable/ic_photo_camera_white_48px"
+            android:id="@+id/button_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/license_tag"
+            android:src="@drawable/ic_photo_camera_white_48px"
             android:backgroundTint="@android:color/transparent" />
-
+        <!--  -->
 
     </RelativeLayout>
 

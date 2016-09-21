@@ -5,12 +5,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,7 +36,6 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
-import java.io.IOException;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
@@ -52,7 +50,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public static final String EXTRA_BAHNHOF_NAME = "bahnhofName";
     public static final String EXTRA_BAHNHOF_NUMBER = "bahnhofNr";
     public static final String EXTRA_POSITION = "position";
-    public static final int PICTURE_SIZE_LIMIT = 300000;
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
     private ImageButton takePictureButton;
@@ -61,7 +58,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String bahnhofName;
     private int bahnhofNr;
     private TextView tvBahnhofName;
-    private Boolean mICameraSelected =false;
+    private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
     private String licence,photoOwner,linking,link,nickname;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -71,8 +68,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * Id to identify a camera permission request.
      */
     private static final int REQUEST_CAMERA = 0;
+    private TextView licenseTagView;
 
-
+    private BahnhofsFotoFetchTask fetchTask;
 
 
     @Override
@@ -85,13 +83,20 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         tvBahnhofName = (TextView)findViewById(R.id.tvbahnhofname);
         imageView = (ImageView) findViewById(R.id.imageview);
         takePictureButton = (ImageButton)findViewById(R.id.button_image);
-
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkCameraPermission();
             }
         });
+        enablePictureButton(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+
+        licenseTagView = (TextView)findViewById(R.id.license_tag);
+
+        // switch off image and license view until we actually have a foto
+        imageView.setVisibility(View.INVISIBLE);
+        licenseTagView.setVisibility(View.INVISIBLE);
+        takePictureButton.setVisibility(View.INVISIBLE);
 
 
         Intent intent = getIntent();
@@ -105,7 +110,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             tvBahnhofName.setText(bahnhofName + " (" + bahnhofNr + ")");
 
-            new BahnhofsFotoFetchTask(this, createBitmapOptionsForScreen()).execute(bahnhofNr);
+            fetchTask = new BahnhofsFotoFetchTask(this, createBitmapOptionsForScreen());
+            fetchTask.execute(bahnhofNr);
         }
         
         // Load sharedPreferences for filling the E-Mail and variables for Filename to send
@@ -122,6 +128,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
+    private void enablePictureButton(boolean enabled) {
+        takePictureButton.setEnabled (enabled);
+        takePictureButton.setImageAlpha(enabled ? 255 : 100);
+    }
+
     /**
      * Method to request permission for camera
      */
@@ -133,16 +144,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     }
 
-    public void takePicture(){
+    public void takePicture() {
         Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        try {
-            file = getOutputMediaFile(bahnhofNr,nickname);
+        file = getOutputMediaFile(bahnhofNr, nickname);
+        if (file != null) {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
             intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
             intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhofName);
-            startActivityForResult(intent,REQUEST_IMAGE_CAPTURE);
-        } catch (IOException e) {
-            Log.e(TAG, "Could not create output directory", e);
+            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+        }
+        else {
             Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG);
         }
     }
@@ -160,7 +171,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
 
                 // Camera and Write permission has been granted, preview can be displayed
-                takePictureButton.setEnabled(true);
+                enablePictureButton(true);
                 takePicture();
 
             } else {
@@ -200,24 +211,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // show the image
-            BitmapFactory.Options options = createBitmapOptionsForScreen();
-            Bitmap scaledScreen = null;
-            if (file != null) {
-                Log.d(TAG, "File: "+file);
-                Log.d(TAG, "FileGetPath: "+file.getPath().toString());
-
-                scaledScreen = BitmapFactory.decodeFile(
-                        file.getPath(),
-                        options);
-                Log.d(TAG, "img width "+scaledScreen.getWidth());
-                Log.d(TAG, "img height "+scaledScreen.getHeight());
-                imageView.setImageBitmap(scaledScreen);
-
-                invalidateOptionsMenu();
-            } else {
-                Log.wtf(TAG, "Media file not available");
-            }
+            // die Kamera-App sollte auf unseren internen Storage schreiben, also provozieren wir das
+            // Laden des Bildes von dort
+            onBitmapAvailable(null);
         }
     }
 
@@ -236,13 +232,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     @Nullable
-    static public File getOutputMediaFile(int bahnhofNr, String nickname) throws IOException {
+    static public File getOutputMediaFile(int bahnhofNr, String nickname) {
 
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
 
         if (!mediaStorageDir.exists()){
             if (!mediaStorageDir.mkdirs()){
-                throw new IOException("Cannot create directory structure "+mediaStorageDir.getAbsolutePath());
+                Log.e(TAG, "Cannot create directory structure "+mediaStorageDir.getAbsolutePath());
+                return null;
             }
         }
 
@@ -268,7 +265,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         takePhoto.getIcon().setColorFilter(WHITE,PorterDuff.Mode.SRC_ATOP);*/
         
 
-        if(mICameraSelected){
+        if(localFotoUsed){
 
             MenuItem sendEmail = menu.findItem(R.id.send_email).setEnabled(true);
             MenuItem sharePhoto = menu.findItem(R.id.share_photo).setEnabled(true);
@@ -354,17 +351,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return sendIntent;
     }
 
-    private boolean hasImage(@NonNull ImageView view) {
-        Drawable drawable = view.getDrawable();
-        boolean hasImage = (drawable != null);
-
-        if (hasImage && (drawable instanceof BitmapDrawable)) {
-            hasImage = ((BitmapDrawable)drawable).getBitmap() != null;
-        }
-
-        return hasImage;
-    }
-
     protected void startNavigation(final Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.drawable.ic_launcher);
@@ -418,25 +404,76 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     /**
      * This gets called if the requested bitmap is available. Finish and issue the notification.
      *
-     * @param bitmap the fetched Bitmap for the notification. May be null
+     * @param publicBitmap the fetched Bitmap for the notification. May be null
      */
     @Override
-    public void onBitmapAvailable(@Nullable Bitmap bitmap) {
-        if (bitmap == null)
+    public void onBitmapAvailable(final @Nullable Bitmap publicBitmap) {
+        Bitmap showBitmap = (publicBitmap != null) ? publicBitmap : checkForLocalPhoto();
+        if (showBitmap == null) {
+            // auch lokal keine Bitmap
+            localFotoUsed = false;
+            // switch off image and license view until we actually have a foto
+            imageView.setVisibility(View.INVISIBLE);
+            licenseTagView.setVisibility(View.INVISIBLE);
+            takePictureButton.setVisibility(View.VISIBLE);
             return;
+        }
         int targetWidth = createBitmapOptionsForScreen().outWidth;
-        if (bitmap.getWidth() != targetWidth) {
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap,
+        if (showBitmap.getWidth() != targetWidth) {
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
                     targetWidth,
-                    (int) (((long) bitmap.getHeight() * (long) targetWidth) / bitmap.getWidth()),
+                    (int) (((long) showBitmap.getHeight() * (long) targetWidth) / showBitmap.getWidth()),
                     true);
             imageView.setImageBitmap(scaledBitmap);
         } else {
-            imageView.setImageBitmap(bitmap);
+            imageView.setImageBitmap(showBitmap);
+        }
+        imageView.setVisibility(View.VISIBLE);
+        if (fetchTask.getLicense() != null) {
+            licenseTagView.setText(
+                    String.format(
+                            getText(R.string.license_tag).toString(),
+                            fetchTask.getLicense(),
+                            fetchTask.getAuthor())
+            );
+            licenseTagView.setVisibility(View.VISIBLE);
+        } else {
+            licenseTagView.setVisibility(View.INVISIBLE);
+        }
+        takePictureButton.setVisibility(localFotoUsed ? View.VISIBLE : View.INVISIBLE);
+        invalidateOptionsMenu();
+    }
+
+    /**
+     * Check if there's a local photo file for this station.
+     * @return the Bitmap of the photo, or null if none exists.
+     */
+    @Nullable private Bitmap checkForLocalPhoto() {
+        // show the image
+        BitmapFactory.Options options = createBitmapOptionsForScreen();
+        Bitmap scaledScreen = null;
+        File localFile = getOutputMediaFile(bahnhofNr,nickname);
+
+        if (localFile != null && localFile.canRead()) {
+            Log.d(TAG, "File: "+ localFile);
+            Log.d(TAG, "FileGetPath: "+ localFile.getPath().toString());
+
+            scaledScreen = BitmapFactory.decodeFile(
+                    localFile.getPath(),
+                    options);
+            Log.d(TAG, "img width "+scaledScreen.getWidth());
+            Log.d(TAG, "img height "+scaledScreen.getHeight());
+            // set license and author information
+            fetchTask.setLicense(licence);
+            fetchTask.setAuthor(null);
+            localFotoUsed = true;
+            return scaledScreen;
+        } else {
+            localFotoUsed = false;
+            Log.e(TAG, "Media file not available: " + localFile.getAbsolutePath());
+            return null;
         }
 
-        takePictureButton.setVisibility(View.INVISIBLE);
-        invalidateOptionsMenu();
-
     }
+
 }

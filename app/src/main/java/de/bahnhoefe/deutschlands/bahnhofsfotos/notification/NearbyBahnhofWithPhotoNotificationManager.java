@@ -1,9 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
 
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -56,13 +54,12 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
 
         NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
         bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(fetchTask.getLicense());
-        Intent authorInfo = new Intent(Intent.ACTION_VIEW);
-        authorInfo.setData(fetchTask.getAuthor());
 
         Notification fullImagePage = new NotificationCompat.Builder (context)
                 .setStyle(bigPictureStyle)
-                .setContentIntent(PendingIntent.getActivity(context, 0, authorInfo, 0))
-                .extend(new NotificationCompat.WearableExtender().setHintShowBackgroundOnly(true))
+                .extend(new NotificationCompat.WearableExtender()
+                        .setHintShowBackgroundOnly(true)
+                        .setHintScreenTimeout(NotificationCompat.WearableExtender.SCREEN_TIMEOUT_LONG))
                 .build();
 
         NotificationCompat.WearableExtender wearableExtender =

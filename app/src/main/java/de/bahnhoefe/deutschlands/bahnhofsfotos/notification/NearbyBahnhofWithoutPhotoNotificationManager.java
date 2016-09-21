@@ -14,6 +14,7 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
 
     private static final long[] VIBRATION_PATTERN = new long[]{300, 100, 300, 100, 300};
     public static final int LED_COLOR = 0x0000ffff;
+    private static final int REQUEST_FOTO = 0x100;
 
     public NearbyBahnhofWithoutPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance) {
         super(context, bahnhof, distance);
@@ -27,7 +28,7 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
         // Photo immediately.
         Intent detailFotoIntent = getDetailIntent();
         detailFotoIntent.putExtra(DetailsActivity.EXTRA_TAKE_FOTO, true);
-        return PendingIntent.getActivity(context, 0, detailFotoIntent, 0);
+        return pendifyMe(detailFotoIntent, REQUEST_FOTO);
     }
 
 
