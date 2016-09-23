@@ -23,7 +23,7 @@ import java.net.URL;
 public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private final static String TAG = BahnhofsFotoFetchTask.class.getSimpleName();
     private final BitmapAvailableHandler handler;
-    private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos.json";
+    private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos/%d/bahnhofsnr.json";
     private BitmapFactory.Options options;
     private String license;
     private Uri authorReference;

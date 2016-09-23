@@ -169,10 +169,14 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
             Class cls = DetailsActivity.class;
             Intent intent = new Intent(MapsAcitivity.this, cls);
             long id = Long.valueOf(marker.getSnippet());
-            Bahnhof bahnhof = dbAdapter.fetchBahnhof(id);
-            intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
-            startActivity(intent);
-        }else{
+            try {
+                Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
+                intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+                startActivity(intent);
+            } catch (RuntimeException e) {
+                Log.wtf(TAG, String.format("Could not fetch station id %d that we put onto the map", id), e);
+            }
+        } else {
             marker.hideInfoWindow();
         }
 

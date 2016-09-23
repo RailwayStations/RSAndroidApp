@@ -140,7 +140,7 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
         Class cls = DetailsActivity.class;
         Intent intent = new Intent(MapsAllAcitivity.this, cls);
         long id = Long.valueOf(marker.getSnippet());
-        Bahnhof bahnhof = bahnhofsDbAdapter.fetchBahnhof(id);
+        Bahnhof bahnhof = bahnhofsDbAdapter.fetchBahnhofByBahnhofId(id);
         intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
         startActivity(intent);
     }

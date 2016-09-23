@@ -98,6 +98,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         Intent intent = getIntent();
         boolean directPicture = false;
 
+        // Load sharedPreferences for filling the E-Mail and variables for Filename to send
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+
+        licence = sharedPreferences.getString(getString(R.string.LICENCE),DEFAULT);
+        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER),DEFAULT);
+        linking = sharedPreferences.getString(getString(R.string.LINKING),DEFAULT);
+        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER),DEFAULT);
+        nickname = sharedPreferences.getString(getString(R.string.NICKNAME),DEFAULT);
+
         if (intent!=null) {
             bahnhof = (Bahnhof)intent.getSerializableExtra(EXTRA_BAHNHOF);
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
@@ -111,15 +120,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 setLocalBitmap();
             }
         }
-        
-        // Load sharedPreferences for filling the E-Mail and variables for Filename to send
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-
-        licence = sharedPreferences.getString(getString(R.string.LICENCE),DEFAULT);
-        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER),DEFAULT);
-        linking = sharedPreferences.getString(getString(R.string.LINKING),DEFAULT);
-        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER),DEFAULT);
-        nickname = sharedPreferences.getString(getString(R.string.NICKNAME),DEFAULT);
 
         if (directPicture) {
             checkCameraPermission();
@@ -146,7 +146,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (bahnhof.getPhotoflag() != null)
             return;
         Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        file = getOutputMediaFile(bahnhof.getId(), nickname);
+        file = getOutputMediaFile();
         if (file != null) {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
             intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
@@ -232,7 +232,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     @Nullable
-    static public File getOutputMediaFile(int bahnhofNr, String nickname) {
+    public File getOutputMediaFile() {
 
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
 
@@ -243,8 +243,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         }
 
-        Log.d(TAG, "BahnhofNrAbfrage: " + bahnhofNr);
-        File file = new File(mediaStorageDir.getPath(), String.format("%s-%d.jpg", nickname, bahnhofNr));
+        Log.d(TAG, "BahnhofNrAbfrage: " + bahnhof.getId());
+        File file = new File(mediaStorageDir.getPath(), String.format("%s-%d.jpg", nickname, bahnhof.getId()));
         Log.d("FilePfad",file.toString());
 
 
@@ -493,7 +493,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // show the image
         BitmapFactory.Options options = createBitmapOptionsForScreen();
         Bitmap scaledScreen = null;
-        File localFile = getOutputMediaFile(bahnhof.getId(),nickname);
+        File localFile = getOutputMediaFile();
 
         if (localFile != null && localFile.canRead()) {
             Log.d(TAG, "File: "+ localFile);
@@ -504,14 +504,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     options);
             Log.d(TAG, "img width "+scaledScreen.getWidth());
             Log.d(TAG, "img height "+scaledScreen.getHeight());
-            // set license and author information
-            fetchTask.setLicense(licence);
-            fetchTask.setAuthorReference(null);
             localFotoUsed = true;
             return scaledScreen;
         } else {
             localFotoUsed = false;
-            Log.e(TAG, "Media file not available: " + localFile.getAbsolutePath());
+            Log.e(TAG,
+                    String.format("Media file not available for station %d and nickname %s ",
+                            bahnhof.getId(),
+                            nickname
+                    )
+            );
             return null;
         }
 
