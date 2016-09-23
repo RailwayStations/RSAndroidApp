@@ -104,5 +104,5 @@
     <string name="template_long_text" formatted="false">Bahnhof: %s\nEntfernung: %.2f km\n%s</string>
     <string name="photo_exists">Photo: für Lizenzinfos Detailansicht öffnen</string>
     <string name="nearby_notification_active">Bahnhofsortung aktiv</string>
-    <string name="license_tag" formatted="false">Lizenz: %s\nUrheber: %s</string>
+    <string name="license_tag" formatted="false">Urheber: %s</string>
 </resources>

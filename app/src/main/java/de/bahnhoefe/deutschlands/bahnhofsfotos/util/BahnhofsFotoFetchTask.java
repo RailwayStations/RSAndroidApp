@@ -18,11 +18,12 @@ import java.net.URL;
 
 /**
  * Created by pelzi on 17.09.16.
+ * // todo Cache einbauen
  */
 public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private final static String TAG = BahnhofsFotoFetchTask.class.getSimpleName();
     private final BitmapAvailableHandler handler;
-    private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos-cc0/%d/bahnhofsnr.json";
+    private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos.json";
     private BitmapFactory.Options options;
     private String license;
     private Uri authorReference;

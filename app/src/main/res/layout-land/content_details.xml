@@ -27,7 +27,8 @@
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_stations_with_photo"
-            android:scaleType="fitCenter" />
+            android:scaleType="centerCrop"
+            tools:scaleType="centerCrop" />
 
         <TextView
             android:text="TextView"

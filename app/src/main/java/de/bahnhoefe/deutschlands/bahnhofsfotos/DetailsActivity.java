@@ -23,6 +23,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -39,7 +40,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 
-import static android.R.attr.alpha;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
 
@@ -57,7 +57,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
     private String licence,photoOwner,linking,link,nickname;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static int alpha = 128;
 
     /**
      * Id to identify a camera permission request.
@@ -87,6 +88,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         enablePictureButton(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 
         licenseTagView = (TextView)findViewById(R.id.license_tag);
+        licenseTagView.setMovementMethod(LinkMovementMethod.getInstance());
 
         // switch off image and license view until we actually have a foto
         imageView.setVisibility(View.INVISIBLE);
@@ -420,18 +422,27 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         // Lizenzinfo aufbauen und einblenden
-        // todo Umstellen auf Nickname, Link nicht anzeigen sondern drauflegen
+        licenseTagView.setVisibility(View.VISIBLE);
         if (fetchTask.getLicense() != null) {
             licenseTagView.setText(
                     String.format(
                             getText(R.string.license_tag).toString(),
-                            fetchTask.getLicense(),
-                            fetchTask.getAuthorReference())
+                            fetchTask.getAuthor())
             );
-            licenseTagView.setVisibility(View.VISIBLE);
+            licenseTagView.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Build an intent for an action to view the author
+                            Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+                            Uri authorUri = fetchTask.getAuthorReference();
+                            mapIntent.setData(authorUri);
+                            startActivity(mapIntent);
+                        }
+                    }
+            );
         } else {
-            // todo nicht ausblenden, sondern als "nicht verfügbar" o.ä. anzeigen
-            licenseTagView.setVisibility(View.INVISIBLE);
+            licenseTagView.setText("Lizenzinfo aktuell nicht lesbar");
         }
 
         setBitmap(publicBitmap);
