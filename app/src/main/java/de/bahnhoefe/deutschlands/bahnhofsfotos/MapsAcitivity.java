@@ -60,6 +60,7 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
     private boolean mRequestingLocationUpdates = true;
     private long UPDATE_INTERVAL_IN_MILLISECONDS= 300000;
     private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS=300000;
+    private BahnhofsDbAdapter dbAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +68,9 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_acitivty);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        dbAdapter = new BahnhofsDbAdapter(this);
+        dbAdapter.open();
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -81,17 +85,17 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
         buildGoogleApiClient();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbAdapter.close();
+    }
+
     private void readBahnhoefe() {
-        BahnhofsDbAdapter bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
-
         try{
-            bahnhofsDbAdapter.open();
-            bahnhofMarker = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
-
+            bahnhofMarker = dbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
         }catch(Exception e){
             Log.i(TAG,"Datenbank konnte nicht geöffnet werden");
-        } finally {
-            bahnhofsDbAdapter.close();;
         }
 
         Toast.makeText(this, bahnhofMarker.size() + " Bahnhöfe geladen", Toast.LENGTH_SHORT).show();
@@ -118,16 +122,13 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
     private void addMarkers(List<Bahnhof> bahnhofMarker,LatLng myPos )
     {
 
-        for(int i=0; i< bahnhofMarker.size();i++){
-            LatLng bahnhofPos = new LatLng(Double.valueOf(bahnhofMarker.get(i).getLat()),Double.valueOf(bahnhofMarker.get(i).getLon()));
+        for(Bahnhof bahnhof: bahnhofMarker){
+            LatLng bahnhofPos = bahnhof.getPosition();
             mMap.addMarker(new MarkerOptions()
-                    .title(bahnhofMarker.get(i).getTitle())
+                    .title(bahnhof.getTitle())
                     .position(bahnhofPos)
-                    .snippet(String.valueOf(bahnhofMarker.get(i).getId()))
+                    .snippet(String.valueOf(bahnhof.getId()))
                     .icon(BitmapDescriptorFactory.defaultMarker(343)));
-            mMap.setInfoWindowAdapter(this);
-            mMap.setOnInfoWindowClickListener(this);
-
         }
 
         // Add a marker and moves the camera
@@ -164,11 +165,12 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
     public void onInfoWindowClick(Marker marker) {
 
         if(marker.getSnippet() != null){
+
             Class cls = DetailsActivity.class;
             Intent intent = new Intent(MapsAcitivity.this, cls);
-            intent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NAME, marker.getTitle());
-            intent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NUMBER, Integer.valueOf(marker.getSnippet()));
-            intent.putExtra(DetailsActivity.EXTRA_POSITION, marker.getPosition());
+            long id = Long.valueOf(marker.getSnippet());
+            Bahnhof bahnhof = dbAdapter.fetchBahnhof(id);
+            intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
             startActivity(intent);
         }else{
             marker.hideInfoWindow();

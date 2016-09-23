@@ -33,24 +33,13 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
 
     private List<Bahnhof> bahnhofMarker;
     private LatLng myPos;
-    /**
-     * Provides the entry point to Google Play services.
-     */
-    //protected GoogleApiClient mGoogleApiClient;
+    BahnhofsDbAdapter bahnhofsDbAdapter;
 
-    /**
-     * Represents a geographical location.
-     */
-    //protected Location mLastLocation;
-
-    /**
-     * Stores parameters for requests to the FusedLocationProviderApi.
-     */
-    /*protected LocationRequest mLocationRequest;
-    private boolean mRequestingLocationUpdates = true;
-    private long UPDATE_INTERVAL_IN_MILLISECONDS= 300000;
-    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS=300000;*/
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bahnhofsDbAdapter.close();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +55,7 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
 
 
 
-        BahnhofsDbAdapter bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
+        bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
 
         try{
             bahnhofsDbAdapter.open();
@@ -74,8 +63,6 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
                    // .getBahnhoefeByLatLngRectangle(myLatitude, myLongitude);
         }catch(Exception e){
             Log.i(TAG,"Datenbank konnte nicht geöffnet werden");
-        } finally {
-            bahnhofsDbAdapter.close();;
         }
         myPos = new LatLng(myLatitude,myLongitude);
 //        Toast.makeText(this, bahnhofMarker.size() +" Bahnhöfe geladen", Toast.LENGTH_LONG).show();
@@ -152,9 +139,9 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
     public void onInfoWindowClick(Marker marker) {
         Class cls = DetailsActivity.class;
         Intent intent = new Intent(MapsAllAcitivity.this, cls);
-        intent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NAME, marker.getTitle());
-        intent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NUMBER, Integer.valueOf(marker.getSnippet()));
-        intent.putExtra(DetailsActivity.EXTRA_POSITION, marker.getPosition());
+        long id = Long.valueOf(marker.getSnippet());
+        Bahnhof bahnhof = bahnhofsDbAdapter.fetchBahnhof(id);
+        intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
         startActivity(intent);
     }
 

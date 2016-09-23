@@ -9,8 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -110,9 +108,7 @@ public abstract class NearbyBahnhofNotificationManager {
     protected Intent getDetailIntent() {
         // Build an intent for an action to see station details
         Intent detailIntent = new Intent(context, DetailsActivity.class);
-        detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NAME, notificationStation.getTitle());
-        detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF_NUMBER, notificationStation.getId());
-        detailIntent.putExtra(DetailsActivity.EXTRA_POSITION, new LatLng(notificationStation.getLat(), notificationStation.getLon()));
+        detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, notificationStation);
         return detailIntent;
     }
 

@@ -33,10 +33,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.File;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 
@@ -47,22 +46,18 @@ import static android.graphics.Color.WHITE;
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
-    public static final String EXTRA_BAHNHOF_NAME = "bahnhofName";
-    public static final String EXTRA_BAHNHOF_NUMBER = "bahnhofNr";
-    public static final String EXTRA_POSITION = "position";
+    public static final String EXTRA_BAHNHOF = "bahnhof";
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
     private ImageButton takePictureButton;
     private File file;
     private ImageView imageView;
-    private String bahnhofName;
-    private int bahnhofNr;
+    private Bahnhof bahnhof;
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
     private String licence,photoOwner,linking,link,nickname;
     static final int REQUEST_IMAGE_CAPTURE = 1;
-    private LatLng position;
 
     /**
      * Id to identify a camera permission request.
@@ -98,20 +93,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         licenseTagView.setVisibility(View.INVISIBLE);
         takePictureButton.setVisibility(View.INVISIBLE);
 
-
         Intent intent = getIntent();
         boolean directPicture = false;
 
-        if(intent!=null) {
-            bahnhofName = intent.getStringExtra(EXTRA_BAHNHOF_NAME);
-            bahnhofNr = intent.getIntExtra(EXTRA_BAHNHOF_NUMBER, 0);
-            position = intent.getParcelableExtra(EXTRA_POSITION);
+        if (intent!=null) {
+            bahnhof = (Bahnhof)intent.getSerializableExtra(EXTRA_BAHNHOF);
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
+            tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 
-            tvBahnhofName.setText(bahnhofName + " (" + bahnhofNr + ")");
-
-            fetchTask = new BahnhofsFotoFetchTask(this, createBitmapOptionsForScreen());
-            fetchTask.execute(bahnhofNr);
+            if (bahnhof.getPhotoflag() != null) {
+                fetchTask = new BahnhofsFotoFetchTask(this, createBitmapOptionsForScreen());
+                fetchTask.execute(bahnhof.getId());
+            } else {
+                takePictureButton.setVisibility(View.VISIBLE);
+                setLocalBitmap();
+            }
         }
         
         // Load sharedPreferences for filling the E-Mail and variables for Filename to send
@@ -145,12 +141,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void takePicture() {
+        if (bahnhof.getPhotoflag() != null)
+            return;
         Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        file = getOutputMediaFile(bahnhofNr, nickname);
+        file = getOutputMediaFile(bahnhof.getId(), nickname);
         if (file != null) {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
             intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
-            intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhofName);
+            intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
         }
         else {
@@ -213,7 +211,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             // die Kamera-App sollte auf unseren internen Storage schreiben, also provozieren wir das
             // Laden des Bildes von dort
-            onBitmapAvailable(null);
+            setLocalBitmap();
         }
     }
 
@@ -319,7 +317,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             case R.id.send_email:
                 Intent emailIntent = createFotoSendIntent();
                 emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhofName);
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + licence
                         + "\n selbst fotografiert: " + photoOwner
                         + "\n Nickname: " + nickname
@@ -330,7 +328,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 break;
             case R.id.share_photo:
                 Intent shareIntent = createFotoSendIntent();
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhofName + " @android_oma @khgdrn");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhof.getTitle() + " @android_oma @khgdrn");
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
@@ -361,28 +359,30 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Intent intent = null;
                 switch (which) {
                     case 0:
-                        dlocation = "google.navigation:ll=" + position.latitude + "," + position.longitude + "&mode=Transit";
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
                         Log.d("findnavigation case 0", dlocation);
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 1:
-                        dlocation = "google.navigation:ll=" + position.latitude + "," + position.longitude + "&mode=d";
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=d", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
                         Log.d("findnavigation case 1", dlocation);
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
 
                     case 2:
-                        dlocation = "google.navigation:ll=" + position.latitude + "," + position.longitude + "&mode=b";
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
+                                bahnhof.getPosition().latitude,
+                                bahnhof.getPosition().longitude);
                         Log.d("findnavigation case 2", dlocation);
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 3:
-                        dlocation = "google.navigation:ll=" + position.latitude + "," + position.longitude + "&mode=w";
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=w", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
                         Log.d("findnavigation case 3", dlocation);
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 4:
-                        dlocation = "geo:" + position.latitude + "," + position.longitude + "?q=" + bahnhofName ;
+                        dlocation = String.format("geo:%s,%s?q=%s", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude, bahnhof.getTitle());
                         Log.d("findnavigation case 4", dlocation);
                         intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
@@ -408,16 +408,58 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      */
     @Override
     public void onBitmapAvailable(final @Nullable Bitmap publicBitmap) {
-        Bitmap showBitmap = (publicBitmap != null) ? publicBitmap : checkForLocalPhoto();
+        localFotoUsed = false;
+        takePictureButton.setVisibility(View.INVISIBLE);
+        if (publicBitmap == null) {
+            // keine Bitmap ausgelesen
+            // switch off image and license view until we actually have a foto
+            // @todo broken image anzeigen
+            imageView.setVisibility(View.INVISIBLE);
+            licenseTagView.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        // Lizenzinfo aufbauen und einblenden
+        // todo Umstellen auf Nickname, Link nicht anzeigen sondern drauflegen
+        if (fetchTask.getLicense() != null) {
+            licenseTagView.setText(
+                    String.format(
+                            getText(R.string.license_tag).toString(),
+                            fetchTask.getLicense(),
+                            fetchTask.getAuthorReference())
+            );
+            licenseTagView.setVisibility(View.VISIBLE);
+        } else {
+            // todo nicht ausblenden, sondern als "nicht verfügbar" o.ä. anzeigen
+            licenseTagView.setVisibility(View.INVISIBLE);
+        }
+
+        setBitmap(publicBitmap);
+    }
+
+    /**
+     * Fetch bitmap from device local location, if  it exists, and set the foto view.
+     *
+     */
+    private void setLocalBitmap() {
+        takePictureButton.setVisibility(View.VISIBLE);
+
+        Bitmap showBitmap = checkForLocalPhoto();
         if (showBitmap == null) {
-            // auch lokal keine Bitmap
+            // lokal keine Bitmap
             localFotoUsed = false;
             // switch off image and license view until we actually have a foto
             imageView.setVisibility(View.INVISIBLE);
             licenseTagView.setVisibility(View.INVISIBLE);
             takePictureButton.setVisibility(View.VISIBLE);
             return;
+        } else {
+            setBitmap(showBitmap);
         }
+    }
+
+
+    private void setBitmap(final Bitmap showBitmap) {
         int targetWidth = createBitmapOptionsForScreen().outWidth;
         if (showBitmap.getWidth() != targetWidth) {
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
@@ -429,18 +471,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             imageView.setImageBitmap(showBitmap);
         }
         imageView.setVisibility(View.VISIBLE);
-        if (fetchTask.getLicense() != null) {
-            licenseTagView.setText(
-                    String.format(
-                            getText(R.string.license_tag).toString(),
-                            fetchTask.getLicense(),
-                            fetchTask.getAuthor())
-            );
-            licenseTagView.setVisibility(View.VISIBLE);
-        } else {
-            licenseTagView.setVisibility(View.INVISIBLE);
-        }
-        takePictureButton.setVisibility(localFotoUsed ? View.VISIBLE : View.INVISIBLE);
         invalidateOptionsMenu();
     }
 
@@ -452,7 +482,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // show the image
         BitmapFactory.Options options = createBitmapOptionsForScreen();
         Bitmap scaledScreen = null;
-        File localFile = getOutputMediaFile(bahnhofNr,nickname);
+        File localFile = getOutputMediaFile(bahnhof.getId(),nickname);
 
         if (localFile != null && localFile.canRead()) {
             Log.d(TAG, "File: "+ localFile);
@@ -465,7 +495,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             Log.d(TAG, "img height "+scaledScreen.getHeight());
             // set license and author information
             fetchTask.setLicense(licence);
-            fetchTask.setAuthor(null);
+            fetchTask.setAuthorReference(null);
             localFotoUsed = true;
             return scaledScreen;
         } else {

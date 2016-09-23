@@ -1,16 +1,18 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
 
 /**
  * Created by android_oma on 29.05.16.
  */
 
-public class Bahnhof implements Serializable{
+public class Bahnhof implements Serializable {
     private int id;  //Bahnhofsnummer
     private String title; //Bahnhofsname
-    private float lat;
-    private float lon;
+    private double lat;
+    private double lon;
     private long datum; // not used in the database
     private String photoflag; // not used in the database
 
@@ -30,20 +32,24 @@ public class Bahnhof implements Serializable{
         this.title = title;
     }
 
-    public float getLat() {
+    public double getLat() {
         return lat;
     }
 
-    public void setLat(float lat) {
+    public void setLat(double lat) {
         this.lat = lat;
     }
 
-    public float getLon() {
+    public double getLon() {
         return lon;
     }
 
-    public void setLon(float lon) {
+    public void setLon(double lon) {
         this.lon = lon;
+    }
+
+    public LatLng getPosition () {
+        return new LatLng(lat, lon);
     }
 
     public long getDatum() {
@@ -63,8 +69,8 @@ public class Bahnhof implements Serializable{
         Bahnhof bahnhof = (Bahnhof) o;
 
         if (id != bahnhof.id) return false;
-        if (Float.compare(bahnhof.lat, lat) != 0) return false;
-        if (Float.compare(bahnhof.lon, lon) != 0) return false;
+        if (Double.compare(bahnhof.lat, lat) != 0) return false;
+        if (Double.compare(bahnhof.lon, lon) != 0) return false;
         if (datum != bahnhof.datum) return false;
         if (!title.equals(bahnhof.title)) return false;
         return photoflag != null ? photoflag.equals(bahnhof.photoflag) : bahnhof.photoflag == null;
