@@ -20,7 +20,7 @@
     <string name="rbOwnPhotoYes">Ja</string>
     <string name="rbOwnPhotoNo">Nein</string>
     <string name="tvLinking">Möchtest Du in unserer Fotodatenbank verlinkt werden?</string>
-    <string name="etLinking">Bitte trage hier Deinen Account ein</string>
+    <string name="etLinking">Bitte trage hier die URL zu Deinem Account ein</string>
     <string name="rbLinkingYes">Ja</string>
     <string name="rbLinkingNo">Nein (wird unter Anonym gespeichert)</string>
     <string name="rbLinkingTwitter">Twitter</string>
@@ -66,4 +66,6 @@
     </string>
     <string name="information">Informationen</string>
     <string name="menu_title_info">Über die App</string>
+    <string name="chatActivity">Chat</string>
+    <string name="LogInActivity">Login</string>
 </resources>

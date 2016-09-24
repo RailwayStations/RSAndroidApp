@@ -31,6 +31,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +63,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.layout.item;
 import static java.lang.Integer.parseInt;
 
 public class MainActivity extends AppCompatActivity
@@ -80,6 +84,7 @@ public class MainActivity extends AppCompatActivity
     ListView listView;
     Cursor cursor;
 
+    private FirebaseAuth mFirebaseAuth;
 
 
     @Override
@@ -149,6 +154,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // Initialize FirebaseAuth
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
 
         Intent searchIntent = getIntent();
@@ -156,7 +163,6 @@ public class MainActivity extends AppCompatActivity
             String query = searchIntent.getStringExtra(SearchManager.QUERY);
             Toast.makeText(MainActivity.this,query,Toast.LENGTH_SHORT).show();
         }
-
 
     }
 
@@ -299,6 +305,15 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(),DIALOG_TAG);
+        }else if (id == R.id.nav_user_register) {
+            if(mFirebaseAuth.getCurrentUser() == null){
+                Intent intentSignIn = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, SignInActivity.class);
+                startActivity(intentSignIn);
+            }else {
+                Intent intentAuth = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, AuthActivity.class);
+                startActivity(intentAuth);
+            }
+
         } /*else if (id == R.id.nav_send) {
 
         }*/
@@ -480,7 +495,7 @@ public class MainActivity extends AppCompatActivity
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             progressDialog.setMessage("Lade Daten ... " + values[0]);
-            //progressDialog.setMessage("Lade Daten von " + count + " Bahnhöfen. \nDas dauert ein bisschen");
+
         }
 
         private void lockScreenOrientation() {

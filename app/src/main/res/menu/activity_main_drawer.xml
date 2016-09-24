@@ -30,6 +30,10 @@
                 android:id="@+id/nav_app_info"
                 android:icon="@drawable/ic_menu_info_details"
                 android:title="@string/menu_title_info" />
+            <item
+                android:id="@+id/nav_user_register"
+                android:icon = "@drawable/ic_menu_login"
+                android:title="Zum Chat" />
             <!--<item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
