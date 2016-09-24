@@ -212,23 +212,30 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onQueryTextSubmit(String s) {
                     Log.d(TAG, "onQueryTextSubmit ");
-                    cursor = dbAdapter.getBahnhofsListByKeyword(s);
-                    if (cursor == null){
-                        Toast.makeText(MainActivity.this,"No records found!",Toast.LENGTH_LONG).show();
-                    }else{
-                        Toast.makeText(MainActivity.this, cursor.getCount() + " records found!",Toast.LENGTH_LONG).show();
+                    try {
+                        cursor = dbAdapter.getBahnhofsListByKeyword(s, false);
+                        if (cursor == null) {
+                            Toast.makeText(MainActivity.this, "No records found!", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, cursor.getCount() + " records found!", Toast.LENGTH_LONG).show();
+                        }
+                        customAdapter.swapCursor(cursor);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
                     }
-                    customAdapter.swapCursor(cursor);
-
                     return false;
                 }
 
                 @Override
                 public boolean onQueryTextChange(String s) {
                     Log.d(TAG, "onQueryTextChange ");
-                    cursor = dbAdapter.getBahnhofsListByKeyword(s);
-                    if (cursor!=null){
-                        customAdapter.swapCursor(cursor);
+                    try {
+                        cursor = dbAdapter.getBahnhofsListByKeyword(s, false);
+                        if (cursor != null) {
+                            customAdapter.swapCursor(cursor);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
                     }
                     return false;
                 }
