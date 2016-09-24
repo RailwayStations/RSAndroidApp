@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -169,22 +170,38 @@ public class BahnhofsDbAdapter {
 
     }
 
-    public Bahnhof fetchBahnhof(long id){
+    @NonNull
+    private Bahnhof createBahnhofFromCursor(@NonNull Cursor cursor) {
+        String title = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TITLE));
+        int bahnhofsnr = cursor.getInt(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ID));
+        Double lon = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LON));
+        Double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LAT));
+        String photoflag = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG));
+        Bahnhof bahnhof = new Bahnhof();
+        bahnhof.setTitle(title);
+        bahnhof.setId(bahnhofsnr);
+        bahnhof.setLat(lat);
+        bahnhof.setLon(lon);
+        bahnhof.setPhotoflag(photoflag);
+        return bahnhof;
+    }
+
+    public Bahnhof fetchBahnhofByRowId(long id){
         Cursor cursor = db.query(DATABASE_TABLE, null, Constants.DB_JSON_CONSTANTS.KEY_ROWID + "=?", new String[] {
                 id + ""},null,null,null);
-        if(cursor != null){
-            cursor.moveToFirst();
-            String title = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TITLE));
-            int bahnhofsnr = cursor.getInt(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ID));
-            Float lon = cursor.getFloat(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LON));
-            Float lat = cursor.getFloat(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LAT));
-            String photoflag = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG));
-            Bahnhof bahnhof = new Bahnhof();
-            bahnhof.setTitle(title);
-            bahnhof.setId(bahnhofsnr);
-            bahnhof.setLat(lat);
-            bahnhof.setLon(lon);
-            bahnhof.setPhotoflag(photoflag);
+        if (cursor != null && cursor.moveToFirst()) {
+            Bahnhof bahnhof = createBahnhofFromCursor(cursor);
+            cursor.close();
+            return bahnhof;
+        } else
+            return null;
+    }
+
+    public Bahnhof fetchBahnhofByBahnhofId(long id){
+        Cursor cursor = db.query(DATABASE_TABLE, null, Constants.DB_JSON_CONSTANTS.KEY_ID + "=?", new String[] {
+                id + ""},null,null,null);
+        if (cursor != null && cursor.moveToFirst()) {
+            Bahnhof bahnhof = createBahnhofFromCursor(cursor);
             cursor.close();
             return bahnhof;
         } else
@@ -209,12 +226,7 @@ public class BahnhofsDbAdapter {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Bahnhof bahnhof = new Bahnhof();
-                bahnhof.setId(Integer.parseInt(cursor.getString(0)));
-                bahnhof.setTitle(cursor.getString(1));
-                bahnhof.setLat(Float.parseFloat(cursor.getString(2)));
-                bahnhof.setLon(Float.parseFloat(cursor.getString(3)));
-                bahnhof.setPhotoflag(cursor.getString(4));
+                Bahnhof bahnhof = createBahnhofFromCursor(cursor);
                 // Adding bahnhof to list
                 bahnhofList.add(bahnhof);
                 if (Log.isLoggable(TAG, Log.DEBUG))
@@ -248,12 +260,7 @@ public class BahnhofsDbAdapter {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Bahnhof bahnhof = new Bahnhof();
-                bahnhof.setId(Integer.parseInt(cursor.getString(0)));
-                bahnhof.setTitle(cursor.getString(1));
-                bahnhof.setLat(Float.parseFloat(cursor.getString(2)));
-                bahnhof.setLon(Float.parseFloat(cursor.getString(3)));
-                bahnhof.setPhotoflag(cursor.getString(4));
+                Bahnhof bahnhof = createBahnhofFromCursor(cursor);
                 // Adding bahnhof to list
                 bahnhofList.add(bahnhof);
 

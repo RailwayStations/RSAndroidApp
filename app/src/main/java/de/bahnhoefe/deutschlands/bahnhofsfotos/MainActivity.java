@@ -31,8 +31,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -142,14 +140,10 @@ public class MainActivity extends AppCompatActivity
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
-
-                Bahnhof bahnhof = dbAdapter.fetchBahnhof(id);
-                LatLng bhfposition = new LatLng(bahnhof.getLat(),bahnhof.getLon());
+                Bahnhof bahnhof = dbAdapter.fetchBahnhofByRowId(id);
                 Class cls = DetailsActivity.class;
                 Intent intentDetails = new Intent(MainActivity.this, cls);
-                intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF_NAME,bahnhof.getTitle());
-                intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF_NUMBER,bahnhof.getId());
-                intentDetails.putExtra(DetailsActivity.EXTRA_POSITION,bhfposition);
+                intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
                 startActivity(intentDetails);
 
             }

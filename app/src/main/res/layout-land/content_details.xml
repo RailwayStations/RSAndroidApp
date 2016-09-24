@@ -27,7 +27,8 @@
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_stations_with_photo"
-            android:scaleType="fitCenter" />
+            android:scaleType="centerCrop"
+            tools:scaleType="centerCrop" />
 
         <TextView
             android:text="TextView"
@@ -40,7 +41,7 @@
             android:textSize="25sp"
             android:textStyle="bold"
             android:layout_marginBottom="20sp"
-            android:background="#50ffffff"
+            android:background="#80ffffff"
             android:padding="8dp" />
 
         <TextView
@@ -53,7 +54,7 @@
             android:linksClickable="true"
             android:clickable="true"
             android:text="@string/license_tag"
-            android:background="#50ffffff"
+            android:background="#80ffffff"
             android:padding="8dp" />
 
 

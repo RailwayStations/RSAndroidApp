@@ -18,14 +18,16 @@ import java.net.URL;
 
 /**
  * Created by pelzi on 17.09.16.
+ * // todo Cache einbauen
  */
 public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private final static String TAG = BahnhofsFotoFetchTask.class.getSimpleName();
     private final BitmapAvailableHandler handler;
-    private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos-cc0/%d/bahnhofsnr.json";
-    BitmapFactory.Options options;
+    private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos/%d/bahnhofsnr.json";
+    private BitmapFactory.Options options;
     private String license;
-    private Uri author;
+    private Uri authorReference;
+    private String author;
 
     public BahnhofsFotoFetchTask(BitmapAvailableHandler handler, BitmapFactory.Options bitmapOptionsForScreen) {
         this.handler = handler;
@@ -73,13 +75,14 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
                             jsonString += "\n" + nextLine;
                     } while (nextLine != null);
                     JSONObject object = new JSONArray(jsonString).getJSONObject(0);
-                    URL photoURL = new URL (object.getString("bahnhofsfoto"));
-                    setAuthor(Uri.parse(object.getString("fotograf")));
+                    URL photoURL = new URL(object.getString("bahnhofsfoto"));
+                    setAuthorReference(Uri.parse(object.getString("fotograf")));
+                    setAuthor(object.getString("fotograf-title"));
                     setLicense(object.getString("lizenz"));
                     return photoURL;
                 }
             } else {
-                Log.e(TAG, "Error downloading descriptor: "+ httpConnection.getResponseCode());
+                Log.e(TAG, "Error downloading descriptor: " + httpConnection.getResponseCode());
             }
         } catch (IOException e) {
             Log.e(TAG, "Could not download descriptor");
@@ -105,11 +108,19 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
         this.license = license;
     }
 
-    public Uri getAuthor() {
-        return author;
+    public Uri getAuthorReference() {
+        return authorReference;
     }
 
-    public void setAuthor(Uri author) {
+    public void setAuthorReference(Uri author) {
+        this.authorReference = author;
+    }
+
+    public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 }
