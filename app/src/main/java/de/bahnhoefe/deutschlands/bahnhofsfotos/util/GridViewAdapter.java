@@ -21,7 +21,7 @@ import android.widget.Toast;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.GalleryActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
-import static com.google.android.gms.analytics.internal.zzy.G;
+//import static com.google.android.gms.analytics.internal.zzy.G;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.GalleryActivity.getScreenWidth;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.id.imageView;
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.bahnhoefe.deutschlands.bahnhofsfotos" >
+    package="de.bahnhoefe.deutschlands.bahnhofsfotos">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -8,7 +8,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-feature android:name="android.hardware.camera"
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
 
     <application
@@ -20,11 +22,13 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
+
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
 
@@ -74,7 +78,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".GalleryActivity"
             android:label="@string/title_activity_gallery"
@@ -89,7 +92,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ViewImageActivity"
             android:label="@string/title_view_image"
@@ -118,19 +120,47 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <!--debug-KEY-->
+        <activity android:name=".AuthActivity"
+            android:label="@string/chatActivity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
+            <intent-filter>
+                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.AuthActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".SignInActivity"
+            android:label="@string/LogInActivity"
+            android:parentActivityName=".MainActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
+            <intent-filter>
+                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.SignInActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- debug-KEY -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_deb_key" />
 
-        <!--release-KEY-->
-        <!--<meta-data
+        <!-- release-KEY -->
+        <!--
+            <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_release_key" />-->
+            android:value="@string/google_maps_release_key" />
+        -->
         <service
-                   android:name=".NearbyNotificationService"
-                   android:enabled="true"
-                   android:exported="false"></service>
+            android:name=".NearbyNotificationService"
+            android:enabled="true"
+            android:exported="false" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
