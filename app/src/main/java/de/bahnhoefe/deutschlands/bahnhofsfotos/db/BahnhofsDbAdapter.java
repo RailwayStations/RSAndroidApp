@@ -118,24 +118,31 @@ public class BahnhofsDbAdapter {
     /**
      * Return a cursor on station ids where the station's title matches the given string
      * @param search
-     * @return
+     * @param withPhoto true if stations with photo are to be queried, false if stations w/o photo
+     * @return a Cursor representing the matching results
      */
-    public Cursor getBahnhofsListByKeyword(String search) {
+    public Cursor getBahnhofsListByKeyword(String search, boolean withPhoto) {
         //Open connection to read only
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String selectQuery = Constants.DB_JSON_CONSTANTS.KEY_TITLE + "  LIKE  '%?%' ";
+        String selectQuery = String.format (
+                "%s  LIKE ? AND %s IS %s NULL",
+                Constants.DB_JSON_CONSTANTS.KEY_TITLE,
+                Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG,
+                (withPhoto ? "NOT" : "")
+        );
 
         Cursor cursor = db.query(DATABASE_TABLE,
                 new String[] {
                         "rowid _id", Constants.DB_JSON_CONSTANTS.KEY_ID,  Constants.DB_JSON_CONSTANTS.KEY_TITLE
                 },
                 selectQuery,
-                new String[]{search}, null, null, Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc");
+                new String[]{"%" + search + "%"}, null, null, Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc");
         // looping through all rows and adding to list
 
         if (cursor == null) {
             return null;
         } else if (!cursor.moveToFirst()) {
+            Log.w(TAG, String.format("Query '%s' returned no result", search));
             cursor.close();
             return null;
         }
