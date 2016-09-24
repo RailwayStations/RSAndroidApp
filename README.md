@@ -9,5 +9,7 @@ The project - website you will find on http://www.deutschlands-bahnhoefe.org and
 
 To build the App you need a Google-Maps-Api-Key. Its located under `app/src/main/res/values/google_maps_api-template.xml`.
 
+Another file has to be added: google-services.json. Please follow the tutorial on https://firebase.google.com/docs/android/setup.
+
 
 The code is public under MIT-Licence: http://choosealicense.com/licenses/mit/
