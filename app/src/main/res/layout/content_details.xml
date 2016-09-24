@@ -19,7 +19,7 @@
         android:paddingLeft="0dp"
         android:paddingRight="0dp"
         android:paddingTop="0dp"
-        >
+        android:animateLayoutChanges="true">
 
         <ImageView
             android:id="@+id/imageview"
