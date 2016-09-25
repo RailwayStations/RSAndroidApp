@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.animation.ValueAnimator;
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,6 +31,7 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -67,6 +70,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private TextView licenseTagView;
 
     private BahnhofsFotoFetchTask fetchTask;
+    private ViewGroup detailsLayout;
+    private boolean fullscreen;
 
 
     @Override
@@ -76,8 +81,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        detailsLayout = (ViewGroup)findViewById(R.id.content_details);
         tvBahnhofName = (TextView)findViewById(R.id.tvbahnhofname);
         imageView = (ImageView) findViewById(R.id.imageview);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPictureClicked();
+            }
+        });
         takePictureButton = (ImageButton)findViewById(R.id.button_image);
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,6 +106,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         imageView.setVisibility(View.INVISIBLE);
         licenseTagView.setVisibility(View.INVISIBLE);
         takePictureButton.setVisibility(View.INVISIBLE);
+
+        fullscreen = false;
 
         Intent intent = getIntent();
         boolean directPicture = false;
@@ -519,4 +533,67 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     }
 
+
+    private class AnimationUpdateListener implements ValueAnimator.AnimatorUpdateListener {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            float alpha = (float) animation.getAnimatedValue();
+            tvBahnhofName.setAlpha(alpha);
+            licenseTagView.setAlpha(alpha);
+        }
+    }
+
+    public void onPictureClicked() {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
+                !fullscreen) {
+            ValueAnimator animation = ValueAnimator.ofFloat(tvBahnhofName.getAlpha(), 0f);
+            animation.setDuration(500);
+            animation.addUpdateListener(new AnimationUpdateListener());
+            animation.start();
+            detailsLayout.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE);
+            ActionBar bar = getActionBar();
+            if (bar != null)
+              bar.hide();
+            android.support.v7.app.ActionBar sbar = getSupportActionBar();
+            if (sbar != null)
+                sbar.hide();
+            fullscreen = true;
+        } else {
+            ValueAnimator animation = ValueAnimator.ofFloat(tvBahnhofName.getAlpha(), 1.0f);
+            animation.setDuration(500);
+            animation.addUpdateListener(new AnimationUpdateListener());
+            animation.start();
+            detailsLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            ActionBar bar = getActionBar();
+            if (bar != null)
+                bar.show();
+            android.support.v7.app.ActionBar sbar = getSupportActionBar();
+            if (sbar != null)
+                sbar.show();
+            fullscreen = false;
+        }
+        /*
+        LayoutTransition transition = new LayoutTransition();
+
+        transition.removeChild(detailsLayout, licenseTagView);
+        // Duration selected in SeekBar
+        long duration = mDurationSeekbar.getProgress();
+        // Animation path is based on whether animating in or out
+        Path path = mIsOut ? mPathIn : mPathOut;
+
+        // Log animation details
+        Log.i(TAG, String.format("Starting animation: [%d ms, %s, %s]",
+                duration, (String) mInterpolatorSpinner.getSelectedItem(),
+                ((mIsOut) ? "Out (growing)" : "In (shrinking)")));
+
+        // Start the animation with the selected options
+        startAnimation(interpolator, duration, path);
+
+        // Toggle direction of animation (path)
+        mIsOut = !mIsOut;
+        */
+    }
 }
