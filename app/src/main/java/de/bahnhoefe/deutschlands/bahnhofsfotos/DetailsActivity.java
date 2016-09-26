@@ -53,7 +53,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
     private ImageButton takePictureButton;
-    private File file;
     private ImageView imageView;
     private Bahnhof bahnhof;
     private TextView tvBahnhofName;
@@ -152,7 +151,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(v.getContext(), "Bitte auf Querformat drehen", Toast.LENGTH_LONG);
+                            Toast.makeText(v.getContext(), R.string.picture_landscape_only, Toast.LENGTH_LONG)
+                                   .show();
                         }
                     }
             );
@@ -175,7 +175,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (bahnhof.getPhotoflag() != null)
             return;
         Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        file = getOutputMediaFile();
+        File file = getOutputMediaFile();
         if (file != null) {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
             intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
@@ -375,8 +375,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private Intent createFotoSendIntent() {
         Intent sendIntent = new Intent(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
-            "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
+        File file = getOutputMediaFile();
+        if (file != null) {
+            sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
+                    "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
+        }
         return sendIntent;
     }
 

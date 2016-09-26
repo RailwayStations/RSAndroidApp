@@ -120,4 +120,6 @@
     <string name="cause_crash">Cause Crash</string>
     <string name="chatActivity">Chat</string>
     <string name="LogInActivity">Login</string>
+    <string name="picture_landscape_only">Bitte auf Querformat drehen</string>
+    <string name="no_location_enabled">Einstellungen erlauben keine Ortung</string>
 </resources>
