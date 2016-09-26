@@ -250,12 +250,17 @@ public class NearbyNotificationService extends Service implements LocationListen
             @Override
             protected Boolean doInBackground(PendingResult<LocationSettingsResult>... pendingResults) {
                 com.google.android.gms.common.api.Status status = pendingResults[0].await().getStatus();
-                if (status.getStatusCode() != LocationSettingsStatusCodes.SUCCESS) {
+                return status.getStatusCode() == LocationSettingsStatusCodes.SUCCESS;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                super.onPostExecute(success);
+                if (!success) {
                     Log.e(TAG, "Device settings unsuitable for location");
-                    Toast.makeText(NearbyNotificationService.this, "Einstellungen erlauben keine Ortung", Toast.LENGTH_LONG).show();
+                    Toast.makeText(NearbyNotificationService.this, R.string.no_location_enabled, Toast.LENGTH_LONG).show();
                     stopSelf();
                 }
-                return status.getStatusCode() != LocationSettingsStatusCodes.RESOLUTION_REQUIRED;
             }
         }.execute(result);
 
