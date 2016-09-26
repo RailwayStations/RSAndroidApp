@@ -48,9 +48,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
 
     // Parameters for requests to the Location Api.
-    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 60000; // ms
-
-    private float SHORTEST_UPDATE_DISTANCE = 500; // m
+    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000; // ms
 
     private boolean started;// we have only one notification
     private NearbyBahnhofNotificationManager notifiedStationManager;
@@ -239,7 +237,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     private void startLocationUpdates() {
         LocationRequest locationRequest = new LocationRequest()
-                .setInterval (180000)
+                .setInterval (2*FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .setFastestInterval (FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -252,12 +250,17 @@ public class NearbyNotificationService extends Service implements LocationListen
             @Override
             protected Boolean doInBackground(PendingResult<LocationSettingsResult>... pendingResults) {
                 com.google.android.gms.common.api.Status status = pendingResults[0].await().getStatus();
-                if (status.getStatusCode() != LocationSettingsStatusCodes.SUCCESS) {
+                return status.getStatusCode() == LocationSettingsStatusCodes.SUCCESS;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                super.onPostExecute(success);
+                if (!success) {
                     Log.e(TAG, "Device settings unsuitable for location");
-                    Toast.makeText(NearbyNotificationService.this, "Einstellungen erlauben keine Ortung", Toast.LENGTH_LONG).show();
+                    Toast.makeText(NearbyNotificationService.this, R.string.no_location_enabled, Toast.LENGTH_LONG).show();
                     stopSelf();
                 }
-                return status.getStatusCode() != LocationSettingsStatusCodes.RESOLUTION_REQUIRED;
             }
         }.execute(result);
 

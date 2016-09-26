@@ -53,13 +53,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
     private ImageButton takePictureButton;
-    private File file;
     private ImageView imageView;
     private Bahnhof bahnhof;
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
-    private String licence,photoOwner,linking,link,nickname;
+    private String licence, photoOwner, linking, link, nickname;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static int alpha = 128;
 
@@ -81,8 +80,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        detailsLayout = (ViewGroup)findViewById(R.id.content_details);
-        tvBahnhofName = (TextView)findViewById(R.id.tvbahnhofname);
+        detailsLayout = (ViewGroup) findViewById(R.id.content_details);
+        tvBahnhofName = (TextView) findViewById(R.id.tvbahnhofname);
         imageView = (ImageView) findViewById(R.id.imageview);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,16 +89,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 onPictureClicked();
             }
         });
-        takePictureButton = (ImageButton)findViewById(R.id.button_image);
-        takePictureButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkCameraPermission();
-            }
-        });
+        takePictureButton = (ImageButton) findViewById(R.id.button_image);
         enablePictureButton(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 
-        licenseTagView = (TextView)findViewById(R.id.license_tag);
+        licenseTagView = (TextView) findViewById(R.id.license_tag);
         licenseTagView.setMovementMethod(LinkMovementMethod.getInstance());
 
         // switch off image and license view until we actually have a foto
@@ -115,14 +108,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // Load sharedPreferences for filling the E-Mail and variables for Filename to send
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
 
-        licence = sharedPreferences.getString(getString(R.string.LICENCE),DEFAULT);
-        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER),DEFAULT);
-        linking = sharedPreferences.getString(getString(R.string.LINKING),DEFAULT);
-        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER),DEFAULT);
-        nickname = sharedPreferences.getString(getString(R.string.NICKNAME),DEFAULT);
+        licence = sharedPreferences.getString(getString(R.string.LICENCE), DEFAULT);
+        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER), DEFAULT);
+        linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
+        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
+        nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
 
-        if (intent!=null) {
-            bahnhof = (Bahnhof)intent.getSerializableExtra(EXTRA_BAHNHOF);
+        if (intent != null) {
+            bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 
@@ -141,8 +134,30 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void enablePictureButton(boolean enabled) {
-        takePictureButton.setEnabled (enabled);
+        // first, the button should look enabled or disabled
         takePictureButton.setImageAlpha(enabled ? 255 : 100);
+        // then we associate clickListener which either does work or displays a helpful message
+        if (enabled) {
+            takePictureButton.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            checkCameraPermission();
+                        }
+                    }
+            );
+        } else {
+            takePictureButton.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(v.getContext(), R.string.picture_landscape_only, Toast.LENGTH_LONG)
+                                   .show();
+                        }
+                    }
+            );
+
+        }
     }
 
     /**
@@ -160,7 +175,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (bahnhof.getPhotoflag() != null)
             return;
         Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        file = getOutputMediaFile();
+        File file = getOutputMediaFile();
         if (file != null) {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
             intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
@@ -360,8 +375,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private Intent createFotoSendIntent() {
         Intent sendIntent = new Intent(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
-            "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
+        File file = getOutputMediaFile();
+        if (file != null) {
+            sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
+                    "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
+        }
         return sendIntent;
     }
 
@@ -476,7 +494,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // switch off image and license view until we actually have a foto
             imageView.setVisibility(View.INVISIBLE);
             licenseTagView.setVisibility(View.INVISIBLE);
-            takePictureButton.setVisibility(View.VISIBLE);
             return;
         } else {
             setBitmap(showBitmap);
