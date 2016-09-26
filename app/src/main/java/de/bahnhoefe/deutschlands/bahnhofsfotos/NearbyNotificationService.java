@@ -48,9 +48,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
 
     // Parameters for requests to the Location Api.
-    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 60000; // ms
-
-    private float SHORTEST_UPDATE_DISTANCE = 500; // m
+    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000; // ms
 
     private boolean started;// we have only one notification
     private NearbyBahnhofNotificationManager notifiedStationManager;
@@ -239,7 +237,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     private void startLocationUpdates() {
         LocationRequest locationRequest = new LocationRequest()
-                .setInterval (180000)
+                .setInterval (2*FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .setFastestInterval (FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
