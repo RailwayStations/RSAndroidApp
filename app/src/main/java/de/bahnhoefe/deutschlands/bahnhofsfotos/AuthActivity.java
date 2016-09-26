@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChatMessage;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FirebaseConstants;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.MyFirebaseMessagingService;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import com.bumptech.glide.Glide;
@@ -50,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
+import static com.google.android.gms.analytics.internal.zzy.m;
 
 public class AuthActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
@@ -215,6 +217,7 @@ public class AuthActivity extends AppCompatActivity implements
                         mPhotoUrl);
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(chatMessage);
                 mMessageEditText.setText("");
+
             }
         });
     }
