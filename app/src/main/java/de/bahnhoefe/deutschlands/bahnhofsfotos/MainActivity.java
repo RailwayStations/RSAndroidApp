@@ -3,8 +3,10 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -12,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -32,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,7 +65,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.layout.item;
 import static java.lang.Integer.parseInt;
 
 public class MainActivity extends AppCompatActivity
@@ -85,6 +86,8 @@ public class MainActivity extends AppCompatActivity
     Cursor cursor;
 
     private FirebaseAuth mFirebaseAuth;
+
+    private NearbyNotificationService.StatusBinder statusBinder;
 
 
     @Override
@@ -163,6 +166,8 @@ public class MainActivity extends AppCompatActivity
             String query = searchIntent.getStringExtra(SearchManager.QUERY);
             Toast.makeText(MainActivity.this,query,Toast.LENGTH_SHORT).show();
         }
+
+        bindToStatus();
 
     }
 
@@ -254,6 +259,34 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    /**
+     * Prepare the Screen's standard options menu to be displayed.  This is
+     * called right before the menu is shown, every time it is shown.  You can
+     * use this method to efficiently enable/disable items or otherwise
+     * dynamically modify the contents.
+     * <p>
+     * <p>The default implementation updates the system menu items based on the
+     * activity's state.  Deriving classes should always call through to the
+     * base class implementation.
+     *
+     * @param menu The options menu as last shown or first initialized by
+     *             onCreateOptionsMenu().
+     * @return You must return true for the menu to be displayed;
+     * if you return false it will not be shown.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (statusBinder != null) {
+            MenuItem item = menu.findItem(R.id.notify);
+            boolean active = statusBinder.isNotificationTrackingActive();
+            item.setChecked(active);
+            item.setIcon(active ? R.drawable.ic_media_route_off_mono_dark : R.drawable.ic_media_route_on_mono_dark);
+
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -266,7 +299,8 @@ public class MainActivity extends AppCompatActivity
             return true;
         } else if (id == R.id.notify) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
-            if (!item.isChecked()) {
+            boolean active = statusBinder != null ? statusBinder.isNotificationTrackingActive() : false;
+            if (!active) {
                 startService(intent);
                 item.setChecked(true);
                 item.setIcon(R.drawable.ic_media_route_off_mono_dark);
@@ -579,11 +613,28 @@ public class MainActivity extends AppCompatActivity
         }catch (FileNotFoundException fnfe){
             Log.e(TAG,fnfe.toString());
         }
-
-
         return retString;
     }
 
+    private void bindToStatus() {
+        Intent intent = new Intent(this, NearbyNotificationService.class);
+        intent.setAction(NearbyNotificationService.STATUS_INTERFACE);
+        if (!this.getApplicationContext().bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d(TAG, "Bound to status service of NearbyNotificationService");
+                statusBinder = (NearbyNotificationService.StatusBinder)service;
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.d(TAG, "Unbound from status service of NearbyNotificationService");
+                statusBinder = null;
+            }
+        }, 0))
+            Log.e(TAG, "Bind request to statistics interface failed");
+    }
 
 
 }
