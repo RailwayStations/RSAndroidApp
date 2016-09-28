@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -53,6 +54,10 @@ public class NearbyNotificationService extends Service implements LocationListen
     private boolean started;// we have only one notification
     private NearbyBahnhofNotificationManager notifiedStationManager;
     private GoogleApiClient googleApiClient = null;
+    /**
+     * The intent action to use to bind to this service's status interface.
+     */
+    public static String STATUS_INTERFACE = NearbyNotificationService.class.getPackage().getName() + ".Status";
 
     public NearbyNotificationService() {
     }
@@ -105,26 +110,6 @@ public class NearbyNotificationService extends Service implements LocationListen
         // stop tracking
         super.onLowMemory();
         stopSelf();
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    private void readStations() {
-        BahnhofsDbAdapter bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
-
-        try {
-            bahnhofsDbAdapter.open();
-            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
-            nearStations.addAll(bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, true));
-        } catch (Exception e) {
-            Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
-        } finally {
-            bahnhofsDbAdapter.close();
-            ;
-        }
     }
 
     @Override
@@ -313,4 +298,49 @@ public class NearbyNotificationService extends Service implements LocationListen
         Log.e(TAG, "Google Play Service connection failed: " + connectionResult.getErrorMessage());
         stopSelf();
     }
+
+    /**
+     * Class returned when an activity binds to this service.
+     * Currently, can only be used to query the service state, i.e. if the location tracking
+     * is switched on or off.
+     */
+    public class StatusBinder extends Binder {
+        public boolean isNotificationTrackingActive() {
+            return NearbyNotificationService.this.started;
+        }
+    }
+
+    /**
+     * Bind to interfaces provided by this service. Currently implemented:
+     * <ul>
+     *     <li>STATUS_INTERFACE: Returns a StatusBinder that can be used to query the tracking status</li>
+     * </ul>
+     * @param intent an Intent giving the intended action
+     * @return a Binder instance suitable for the intent supplied, or null if none matches.
+     */
+    @Override
+    public IBinder onBind(Intent intent) {
+        if (STATUS_INTERFACE.equals(intent.getAction())) {
+            return new StatusBinder();
+        } else {
+            return null;
+        }
+    }
+
+    private void readStations() {
+        BahnhofsDbAdapter bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
+
+        try {
+            bahnhofsDbAdapter.open();
+            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
+            nearStations.addAll(bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, true));
+        } catch (Exception e) {
+            Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
+        } finally {
+            bahnhofsDbAdapter.close();
+            ;
+        }
+    }
+
+
 }
