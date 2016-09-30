@@ -408,15 +408,13 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected List<Bahnhof> doInBackground(Void ...params) {
             dbAdapter.deleteBahnhoefe();
-            List<Bahnhof> ohne = loadBatch(true, false);
-            List<Bahnhof> mit = loadBatch(false, false);
+            List<Bahnhof> ohne = loadBatch(true);
+            List<Bahnhof> mit = loadBatch(false);
             ohne.addAll(mit);
-            List<Bahnhof> special = loadBatch(false, true);
-            ohne.addAll(special);
             return ohne;
         }
 
-        protected List<Bahnhof> loadBatch(boolean withPhotos, boolean easterEgg) {
+        protected List<Bahnhof> loadBatch(boolean withPhotos) {
             HttpURLConnection connection = null;
             BufferedReader reader = null;
             Date date = new Date();
@@ -425,7 +423,7 @@ public class MainActivity extends AppCompatActivity
 
             publishProgress("Verbinde...");
             try {
-                URL url = new URL(easterEgg ? Constants.INTERNATIONALE_BAHNHOEFE_OHNE_PHOTO_URL : (withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL));
+                URL url = new URL(withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL);
                 connection = (HttpURLConnection)url.openConnection();
                 connection.connect();
                 long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);
