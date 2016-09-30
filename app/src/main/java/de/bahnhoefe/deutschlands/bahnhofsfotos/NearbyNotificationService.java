@@ -235,7 +235,9 @@ public class NearbyNotificationService extends Service implements LocationListen
             @Override
             protected Boolean doInBackground(PendingResult<LocationSettingsResult>... pendingResults) {
                 com.google.android.gms.common.api.Status status = pendingResults[0].await().getStatus();
-                return status.getStatusCode() == LocationSettingsStatusCodes.SUCCESS;
+                int statusCode = status.getStatusCode();
+                return statusCode == LocationSettingsStatusCodes.SUCCESS
+                        || statusCode == LocationSettingsStatusCodes.SUCCESS_CACHE;
             }
 
             @Override

@@ -38,6 +38,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
@@ -51,6 +53,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
     public static final String EXTRA_BAHNHOF = "bahnhof";
     private static final String TAG = DetailsActivity.class.getSimpleName();
+    public static final int STORED_FOTO_WIDTH = 1920;
+    public static final int STORED_FOTO_QUALITY = 95;
 
     private ImageButton takePictureButton;
     private ImageView imageView;
@@ -175,14 +179,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (bahnhof.getPhotoflag() != null)
             return;
         Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        File file = getOutputMediaFile();
+        File file = getCameraMediaFile();
         if (file != null) {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
             intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
             intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-        }
-        else {
+        } else {
             Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG);
         }
     }
@@ -240,7 +243,34 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // die Kamera-App sollte auf unseren internen Storage schreiben, also provozieren wir das
+            // die Kamera-App sollte auf temporären Cache-Speicher schreiben, wir laden das Bild von
+            // dort und schreiben es in Standard-Größe in den permanenten Speicher
+            File cameraRawPictureFile = getCameraMediaFile();
+            File storagePictureFile = getStoredMediaFile();
+            if (cameraRawPictureFile == null ||storagePictureFile == null) {
+                Log.wtf(TAG, "Camera made a foto, but we're unable to reproduce where it should have gone");
+                return;
+            }
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.outWidth = STORED_FOTO_WIDTH;
+
+            Bitmap scaledScreen = BitmapFactory.decodeFile(
+                    cameraRawPictureFile.getPath(),
+                    options);
+            Log.d(TAG, "img width "+scaledScreen.getWidth());
+            Log.d(TAG, "img height "+scaledScreen.getHeight());
+
+            try {
+                scaledScreen.compress(Bitmap.CompressFormat.JPEG, STORED_FOTO_QUALITY, new FileOutputStream(storagePictureFile));
+                // temp file begone!
+                cameraRawPictureFile.delete();
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Could not write picture to destination file", e);
+                Toast.makeText(getApplicationContext(), "Konnte das skalierte Bild nicht schreiben", Toast.LENGTH_LONG).show();
+            }
+
+            // , also provozieren wir das
             // Laden des Bildes von dort
             setLocalBitmap();
         }
@@ -260,9 +290,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return options;
     }
 
-    @Nullable
-    public File getOutputMediaFile() {
 
+    /**
+     * Get the base directory for storing fotos
+     * @return the File denoting the base directory.
+     */
+    @Nullable
+    private File getMediaStorageDir() {
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
 
         if (!mediaStorageDir.exists()){
@@ -271,15 +305,50 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 return null;
             }
         }
+        return mediaStorageDir;
+    }
+
+    /**
+     * Get the file path for storing this station's foto
+     * @return the File
+     */
+    @Nullable
+    public File getStoredMediaFile() {
+
+        File mediaStorageDir = getMediaStorageDir();
+        if (mediaStorageDir == null)
+            return null;
 
         Log.d(TAG, "BahnhofNrAbfrage: " + bahnhof.getId());
-        File file = new File(mediaStorageDir.getPath(), String.format("%s-%d.jpg", nickname, bahnhof.getId()));
+        File file = new File(mediaStorageDir, String.format("%s-%d.jpg", nickname, bahnhof.getId()));
         Log.d("FilePfad",file.toString());
 
 
         return file;
 
     }
+
+    /**
+     * Get the file path for the Camera app to store the unprocessed foto to.
+     * @return the File
+     */
+    private File getCameraMediaFile() {
+        File temporaryStorageDir = new File(getMediaStorageDir(), ".temp");
+        if (!temporaryStorageDir.exists()){
+            if (!temporaryStorageDir.mkdirs()){
+                Log.e(TAG, "Cannot create directory structure "+temporaryStorageDir.getAbsolutePath());
+                return null;
+            }
+        }
+
+        Log.d(TAG, "Temporary BahnhofNrAbfrage: " + bahnhof.getId());
+        File file = new File(temporaryStorageDir, String.format("%s-%d.jpg", nickname, bahnhof.getId()));
+        Log.d("FilePfad",file.toString());
+
+        return file;
+    }
+
+
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -375,7 +444,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private Intent createFotoSendIntent() {
         Intent sendIntent = new Intent(Intent.ACTION_SEND);
-        File file = getOutputMediaFile();
+        File file = getStoredMediaFile();
         if (file != null) {
             sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                     "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
@@ -524,7 +593,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // show the image
         BitmapFactory.Options options = createBitmapOptionsForScreen();
         Bitmap scaledScreen = null;
-        File localFile = getOutputMediaFile();
+        File localFile = getStoredMediaFile();
 
         if (localFile != null && localFile.canRead()) {
             Log.d(TAG, "File: "+ localFile);
