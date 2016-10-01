@@ -2,9 +2,9 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FilenameFilter;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.GridViewAdapter;
 
@@ -38,15 +39,19 @@ public class GalleryActivity extends AppCompatActivity {
                     .show();
         } else {
             // Locate the image folder in the SD Card
-            file = new File(Environment.getExternalStorageDirectory()
-                    + File.separator + "Bahnhofsfotos");
+            file = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
             // Creates a new folder if no folder with name Bahnhofsfotos exist
             file.mkdirs();
         }
 
 
         if (file.isDirectory()) {
-            listFile = file.listFiles();
+            listFile = file.listFiles(new FilenameFilter(){
+                @Override
+                public boolean accept (File dir, String name) {
+                    return !name.startsWith(".");
+                }
+            });
             // Creates a String array for FilePathStrings
             FilePathStrings = new String[listFile.length];
 

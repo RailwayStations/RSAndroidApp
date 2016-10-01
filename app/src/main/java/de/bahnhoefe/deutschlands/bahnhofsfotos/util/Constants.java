@@ -16,5 +16,6 @@ public class Constants {
     }
 
     public static final String BAHNHOEFE_OHNE_PHOTO_URL = "http://fotouebersicht.xn--deutschlands-bahnhfe-lbc.de/bahnhoefe-withoutPhoto.json";
+    public static final String INTERNATIONALE_BAHNHOEFE_OHNE_PHOTO_URL = "http://www.flying-snail.de/transit-train_station.json";
     public static final String BAHNHOEFE_MIT_PHOTO_URL =  "http://fotouebersicht.xn--deutschlands-bahnhfe-lbc.de/bahnhoefe-withPhoto.json";
 }

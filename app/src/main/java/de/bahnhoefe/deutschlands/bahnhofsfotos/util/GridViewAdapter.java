@@ -4,32 +4,25 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.GalleryActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 //import static com.google.android.gms.analytics.internal.zzy.G;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.GalleryActivity.getScreenWidth;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.id.imageView;
 
 /**
  * Created by android_oma on 24.07.16.
  */
 
 public class GridViewAdapter extends BaseAdapter {
+
+    private final static String TAG = GridViewAdapter.class.getSimpleName();
 
     // Declare variables
     private Activity activity;
@@ -44,7 +37,7 @@ public class GridViewAdapter extends BaseAdapter {
         filename = fname;
         inflater = (LayoutInflater) activity
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
+        Log.d(TAG, "Constructed GridViewAdapter");
     }
 
     public int getCount() {
@@ -62,32 +55,28 @@ public class GridViewAdapter extends BaseAdapter {
 
     public View getView(int position, View convertView, ViewGroup parent) {
 
-            View vi = convertView;
-            if (convertView == null)
-                vi = inflater.inflate(R.layout.gridview_item, null);
-            // Locate the TextView in gridview_item.xml
-            TextView text = (TextView) vi.findViewById(R.id.text);
-            // Locate the ImageView in gridview_item.xml
-            ImageView image = (ImageView) vi.findViewById(R.id.imageViewItem);
+        View vi = convertView;
+        if (convertView == null)
+            vi = inflater.inflate(R.layout.gridview_item, null);
+        // Locate the TextView in gridview_item.xml
+        TextView text = (TextView) vi.findViewById(R.id.text);
+        // Locate the ImageView in gridview_item.xml
+        ImageView image = (ImageView) vi.findViewById(R.id.imageViewItem);
 
-            // Set file name to the TextView followed by the position
-            text.setText(filename[position]);
+        // Set file name to the TextView followed by the position
+        text.setText(filename[position]);
 
-            Bitmap myBitmap = BitmapFactory.decodeFile(filepath[position]);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.outWidth = 100;
+        Bitmap scaled = BitmapFactory.decodeFile(filepath[position], options);
 
-            int width = 100;
-            int height = 100;
-            Log.e("Screen width ", " " + width);
-            Log.e("Screen height ", " " + height);
-            Log.e("img width ", " " + myBitmap.getWidth());
-            Log.e("img height ", " " + myBitmap.getHeight());
-
-            float scaleHt = (float) width / myBitmap.getWidth();
-            Log.e("Scaled percent ", " " + scaleHt);
-            Bitmap scaled = Bitmap.createScaledBitmap(myBitmap, width, (int) (myBitmap.getHeight() * scaleHt), true);
-
+        if (scaled != null) {
+            Log.d(TAG, "Decoded " + filepath[position]);
             image.setImageBitmap(scaled);
-            return vi;
+        } else {
+            Log.e (TAG, "Cannot decode " + filepath[position]);
+        }
+        return vi;
 
     }
 }
