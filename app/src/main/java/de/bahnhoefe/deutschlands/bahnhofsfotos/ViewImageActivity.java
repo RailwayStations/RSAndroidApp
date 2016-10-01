@@ -3,12 +3,10 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
-import android.support.annotation.Nullable;
+import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -17,6 +15,7 @@ import android.widget.TextView;
 public class ViewImageActivity extends AppCompatActivity {
 
 
+    private static final String TAG = ViewImageActivity.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,28 +43,19 @@ public class ViewImageActivity extends AppCompatActivity {
         // Locate the TextView in view_image.xml
         text = (TextView) findViewById(R.id.imagetext);
 
+        // Locate the ImageView in view_image.xml
+        imageview = (ImageView) findViewById(R.id.full_image_view);
+        if (imageview == null)
+            throw new IllegalStateException("Could not find full_image_view");
+
         // Load the text into the TextView followed by the position
         text.setText(filename[position]);
 
-        Bitmap myBitmap = BitmapFactory.decodeFile(filepath[position]);
+        Bitmap scaled = BitmapFactory.decodeFile(filepath[position]);
 
-        int width = 300;
-        int height = 300;
-        Log.e("Screen width ", " " + width);
-        Log.e("Screen height ", " " + height);
-        Log.e("img width ", " " + myBitmap.getWidth());
-        Log.e("img height ", " " + myBitmap.getHeight());
+        Log.e(TAG, "img width " + scaled.getWidth());
 
-        float scaleHt = (float) width / myBitmap.getWidth();
-        Log.e("Scaled percent ", " " + scaleHt);
-        Bitmap scaled = Bitmap.createScaledBitmap(myBitmap, width, (int) (myBitmap.getHeight() * scaleHt), true);
-
-
-
-        // Locate the ImageView in view_image.xml
-        imageview = (ImageView) findViewById(R.id.full_image_view);
         imageview.setImageBitmap(scaled);
-
     }
 
     @Override

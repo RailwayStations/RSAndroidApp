@@ -12,6 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 //import static com.google.android.gms.analytics.internal.zzy.G;
@@ -67,7 +68,7 @@ public class GridViewAdapter extends BaseAdapter {
         text.setText(filename[position]);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.outWidth = 100;
+        options.inSampleSize = DetailsActivity.STORED_FOTO_WIDTH / 100;
         Bitmap scaled = BitmapFactory.decodeFile(filepath[position], options);
 
         if (scaled != null) {
