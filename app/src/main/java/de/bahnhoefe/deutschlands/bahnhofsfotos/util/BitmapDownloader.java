@@ -3,7 +3,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.IOException;
@@ -26,9 +25,8 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
      * Construct a bitmap Downloader for the given URL
      * @param handler the BitmapAvailableHandler instance that is called on completion
      * @param url the URL to fetch the Bitmap from
-     * @param options the Options to pass to BitmapFactory. May be null.
      */
-    public BitmapDownloader(BitmapAvailableHandler handler, URL url, @Nullable BitmapFactory.Options options) {
+    public BitmapDownloader(BitmapAvailableHandler handler, URL url) {
         this.bitmapAvailableHandler = handler;
         this.url = url;
         this.options = options;

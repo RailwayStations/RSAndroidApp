@@ -17,7 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
@@ -124,7 +123,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 
             if (bahnhof.getPhotoflag() != null) {
-                fetchTask = new BahnhofsFotoFetchTask(this, createBitmapOptionsForScreen());
+                fetchTask = new BahnhofsFotoFetchTask(this);
                 fetchTask.execute(bahnhof.getId());
             } else {
                 takePictureButton.setVisibility(View.VISIBLE);
@@ -253,7 +252,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
 
             BitmapFactory.Options options = new BitmapFactory.Options();
-            options.outWidth = STORED_FOTO_WIDTH;
+            options.inJustDecodeBounds = true; // just query the image size in the first step
+            BitmapFactory.decodeFile(
+                    cameraRawPictureFile.getPath(),
+                    options);
+
+            int sampling = options.outWidth / STORED_FOTO_WIDTH;
+            if (sampling > 1) {
+                options.inSampleSize = sampling;
+            }
+            options.inJustDecodeBounds = false;
 
             Bitmap scaledScreen = BitmapFactory.decodeFile(
                     cameraRawPictureFile.getPath(),
@@ -274,20 +282,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // Laden des Bildes von dort
             setLocalBitmap();
         }
-    }
-
-    @NonNull
-    private BitmapFactory.Options createBitmapOptionsForScreen() {
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
-        int height = size.y;
-        Log.d(TAG, "Screen width "+width);
-        Log.d(TAG, "Screen height "+height);
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.outWidth = width;
-        return options;
     }
 
 
@@ -571,7 +565,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
 
     private void setBitmap(final Bitmap showBitmap) {
-        int targetWidth = createBitmapOptionsForScreen().outWidth;
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int targetWidth = size.x;
+
         if (showBitmap.getWidth() != targetWidth) {
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
                     targetWidth,
@@ -591,7 +589,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      */
     @Nullable private Bitmap checkForLocalPhoto() {
         // show the image
-        BitmapFactory.Options options = createBitmapOptionsForScreen();
         Bitmap scaledScreen = null;
         File localFile = getStoredMediaFile();
 
@@ -600,8 +597,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             Log.d(TAG, "FileGetPath: "+ localFile.getPath().toString());
 
             scaledScreen = BitmapFactory.decodeFile(
-                    localFile.getPath(),
-                    options);
+                    localFile.getPath());
             Log.d(TAG, "img width "+scaledScreen.getWidth());
             Log.d(TAG, "img height "+scaledScreen.getHeight());
             localFotoUsed = true;

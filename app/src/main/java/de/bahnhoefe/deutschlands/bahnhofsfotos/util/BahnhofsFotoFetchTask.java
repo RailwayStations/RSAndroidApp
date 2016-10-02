@@ -1,6 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -24,14 +23,12 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private final static String TAG = BahnhofsFotoFetchTask.class.getSimpleName();
     private final BitmapAvailableHandler handler;
     private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos/%d/bahnhofsnr.json";
-    private BitmapFactory.Options options;
     private String license;
     private Uri authorReference;
     private String author;
 
-    public BahnhofsFotoFetchTask(BitmapAvailableHandler handler, BitmapFactory.Options bitmapOptionsForScreen) {
+    public BahnhofsFotoFetchTask(BitmapAvailableHandler handler) {
         this.handler = handler;
-        this.options = bitmapOptionsForScreen;
     }
 
     @Override
@@ -46,7 +43,7 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
         if (url != null) {
             Log.i(TAG, "Fetching photo from " + url);
             // fetch bitmap asynchronously, call onBitmapAvailable if ready
-            BitmapCache.getInstance().getFoto(handler, url, options);
+            BitmapCache.getInstance().getFoto(handler, url);
         } else {
             handler.onBitmapAvailable(null);
         }

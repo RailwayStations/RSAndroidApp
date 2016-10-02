@@ -5,7 +5,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
  */
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -83,20 +82,17 @@ public class BitmapCache  {
 
 
     /**
-     * Get a picture for the given URL, either from cache or by downloading. Apply the given options.
+     * Get a picture for the given URL, either from cache or by downloading.
      * The fetching happens asynchronously. When finished, the provided callback interface is called.
-     * @todo the implementation silently assumes that any URL will always be requested with the same options...
      * @param callback the BitmapAvailableHandler to call on completion.
      * @param resourceUrl the URL to fetch
-     * @param options the Options to apply
      */
-    public void getFoto (BitmapAvailableHandler callback, @NonNull URL resourceUrl, @Nullable BitmapFactory.Options options) {
+    public void getFoto(BitmapAvailableHandler callback, @NonNull URL resourceUrl) {
         Bitmap bitmap = cache.get (resourceUrl);
         if (bitmap == null) {
             BitmapDownloader downloader = new BitmapDownloader(
                     new Request(resourceUrl, callback),
-                    resourceUrl,
-                    options);
+                    resourceUrl);
             synchronized (requests) {
                 Collection<BitmapAvailableHandler> handlers = requests.get (resourceUrl);
                 if (handlers == null) {
