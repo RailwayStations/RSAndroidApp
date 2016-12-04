@@ -147,16 +147,16 @@
         </activity>
 
         <!-- debug-KEY -->
-        <meta-data
+        <!--<meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_deb_key" />-->
+
+        <!-- release-KEY -->
+
+            <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_deb_key" />
 
-        <!-- release-KEY -->
-        <!--
-            <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_release_key" />
-        -->
         <service
             android:name=".NearbyNotificationService"
             android:enabled="true"

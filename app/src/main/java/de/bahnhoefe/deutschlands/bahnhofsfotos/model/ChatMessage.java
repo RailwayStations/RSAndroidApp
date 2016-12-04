@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -19,6 +21,7 @@ public class ChatMessage {
         this.text = text;
         this.name = name;
         this.photoUrl = photoUrl;
+
     }
 
     public String getId() {

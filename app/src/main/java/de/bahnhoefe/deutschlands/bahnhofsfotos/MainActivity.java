@@ -59,12 +59,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
+import static android.R.attr.country;
 import static java.lang.Integer.parseInt;
 
 public class MainActivity extends AppCompatActivity
@@ -137,7 +141,11 @@ public class MainActivity extends AppCompatActivity
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
-            new JSONTask(lastUpdateDate).execute();
+            //new JSONTask(lastUpdateDate).execute();
+            //new JSONLaenderTask().execute();
+            //runMultipleAsyncTask();
+            new JSONTask(lastUpdateDate).executeOnExecutor(JSONTask.THREAD_POOL_EXECUTOR);
+            new JSONLaenderTask().executeOnExecutor(JSONLaenderTask.THREAD_POOL_EXECUTOR);
         }
 
         cursor = dbAdapter.getStationsList(false);
@@ -326,7 +334,9 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
-            new JSONTask(lastUpdateDate).execute();
+            new JSONTask(lastUpdateDate).executeOnExecutor(JSONTask.THREAD_POOL_EXECUTOR);
+            new JSONLaenderTask().executeOnExecutor(JSONLaenderTask.THREAD_POOL_EXECUTOR);
+            //runMultipleAsyncTask();
         } else if (id == R.id.nav_your_own_station_photos) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
             startActivity(intent);
@@ -380,6 +390,7 @@ public class MainActivity extends AppCompatActivity
         private ProgressDialog progressDialog;
         private Date lastUpdateDate;
 
+
         // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
         private void enableHttpResponseCache() {
             try {
@@ -408,6 +419,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected List<Bahnhof> doInBackground(Void ...params) {
             dbAdapter.deleteBahnhoefe();
+            dbAdapter.deleteCountries();
             List<Bahnhof> ohne = loadBatch(true);
             List<Bahnhof> mit = loadBatch(false);
             ohne.addAll(mit);
@@ -545,6 +557,101 @@ public class MainActivity extends AppCompatActivity
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         }
     }
+
+    public class JSONLaenderTask extends AsyncTask<Void, String, List<Country>> {
+
+        private ProgressDialog progressDialog;
+
+        protected List<Country> doInBackground(Void... params) {
+            URL url = null;
+            HttpURLConnection laenderConnection = null;
+            BufferedReader reader = null;
+            int count = 0;
+
+            try {
+                url = new URL(Constants.LAENDERDATEN_URL);
+                laenderConnection = (HttpURLConnection) url.openConnection();
+                laenderConnection.connect();
+                InputStream stream = laenderConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(stream));
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+                String finalJson = buffer.toString();
+
+                publishProgress("Verarbeite Länder...");
+                try {
+                    JSONArray countryList = new JSONArray(finalJson);
+                    count = countryList.length();
+                    Log.i(TAG, "Parsed " + count + " countries");
+                    List<Country> countries = new ArrayList<Country>(count);
+
+                    for (int i = 0; i < countryList.length(); i++) {
+                        publishProgress("Verarbeite " + i + "/" + count);
+                        JSONObject jsonObj = (JSONObject) countryList.get(i);
+
+                        String countryShortCode = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE);
+                        String countryName = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME);
+                        String email = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_EMAIL);
+                        String twitterTags = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS);
+
+                        Country country = new Country();
+                        country.setCountryShortCode(countryShortCode);
+                        country.setCountryName(countryName);
+                        country.setEmail(email);
+                        country.setTwitterTags(twitterTags);
+
+                        countries.add(country);
+                        Log.d("DatenbankInsertLdOk ...", country.toString());
+                    }
+                    publishProgress("Schreibe in Datenbank");
+                    dbAdapter.insertCountries(countries);
+                    publishProgress("Datenbank " + countries + " Ländern aktualisiert");
+                    return countries;
+
+                } catch (JSONException e) {
+                    Log.e(TAG, "Mal formatted Json", e);
+                }
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
+
+    // from http://blogs.innovationm.com/multiple-asynctask-in-android/
+    private void runMultipleAsyncTask() // Run Multiple Async Task
+    {
+        JSONTask asyncTaskBahnhoefe = new JSONTask(lastUpdateDate); // First
+
+        if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) // Above Api Level 13
+        {
+            asyncTaskBahnhoefe.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        else // Below Api Level 13
+        {
+            asyncTaskBahnhoefe.execute();
+        }
+        JSONLaenderTask asyncTaskCountries = new JSONLaenderTask(); // Second
+        if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)// Above Api Level 13
+        {
+            asyncTaskCountries.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        else // Below Api Level 13
+        {
+            asyncTaskCountries.execute();
+        }
+    }
+
+
+
+
 
     public BahnhofsDbAdapter getDbHelper(){
         return dbAdapter;

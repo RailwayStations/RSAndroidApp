@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
+import static android.R.attr.country;
 import static java.lang.Integer.parseInt;
 
 /**
@@ -42,6 +44,31 @@ public class BahnhofsJSONParser {
         }
 
         return bahnhoefe;
+    }
+
+    public static List<Country> parseLaender(String jsonLaender) throws JSONException {
+
+        List<Country> countries = new ArrayList<Country>();
+        JSONArray countryList = new JSONArray((countries));
+
+        for (int i = 0; i < countryList.length(); i++){
+            JSONObject jsonObj = (JSONObject) countryList.get(i);
+            String countryShortCode = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE);
+            String countryName = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME);
+            String email = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_EMAIL);
+            String twitterTags = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS);
+
+            Country country = new Country();
+            country.setCountryShortCode(countryShortCode);
+            country.setCountryName(countryName);
+            country.setEmail(email);
+            country.setTwitterTags(twitterTags);
+
+            Log.d("DatenbankLdInsertOk", country.toString());
+            countries.add(country);
+        }
+
+        return countries;
     }
 
 
