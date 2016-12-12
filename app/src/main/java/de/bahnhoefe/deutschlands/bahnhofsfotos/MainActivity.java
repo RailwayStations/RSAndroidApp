@@ -7,8 +7,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -69,6 +71,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 import static android.R.attr.country;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.BAHNHOEFE_MIT_PHOTO_URL;
 import static java.lang.Integer.parseInt;
 
 public class MainActivity extends AppCompatActivity
@@ -84,10 +87,12 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_CODE = 200;
     private NavigationView navigationView;
     File file;
+    private static final String DEFAULT = "";
 
     CustomAdapter customAdapter;
     ListView listView;
     Cursor cursor;
+
 
     private FirebaseAuth mFirebaseAuth;
 
@@ -141,6 +146,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
+            setCountrySelectionToDe();
             runMultipleAsyncTask();
 
         }
@@ -174,6 +180,13 @@ public class MainActivity extends AppCompatActivity
 
         bindToStatus();
 
+    }
+
+    private void setCountrySelectionToDe() {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(getString(R.string.COUNTRY),"DE");
+        editor.apply();
     }
 
 
@@ -300,7 +313,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if(id==R.id.countrySelection){
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, CountryActivity.class);
             startActivity(intent);
         } else if (id == R.id.notify) {
@@ -385,7 +398,11 @@ public class MainActivity extends AppCompatActivity
 
         private ProgressDialog progressDialog;
         private Date lastUpdateDate;
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
+        String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
 
+        String urlWithPhoto = Constants.BAHNHOEFE_START_URL + "/" + countryShortChode.toLowerCase() + "/" + Constants.BAHNHOEFE_END_URL + "true";
+        String urlWithoutPhoto = Constants.BAHNHOEFE_START_URL + "/" + countryShortChode.toLowerCase() + "/" + Constants.BAHNHOEFE_END_URL + "false";
 
         // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
         private void enableHttpResponseCache() {
@@ -431,7 +448,8 @@ public class MainActivity extends AppCompatActivity
 
             publishProgress("Verbinde...");
             try {
-                URL url = new URL(withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL);
+                //URL url = new URL(withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL);
+                URL url = new URL(withPhotos ? urlWithPhoto : urlWithoutPhoto);
                 connection = (HttpURLConnection)url.openConnection();
                 connection.connect();
                 long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);

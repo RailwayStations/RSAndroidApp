@@ -125,5 +125,7 @@
     <string name="no_location_enabled">Einstellungen erlauben keine Ortung</string>
     <string name="country_activity">Länderauswahl</string>
     <string name="selectCountry">auswählen</string>
+    <string name="countrySelection">Länderauswahl</string>
+    <string name="locationUpdates">Standort-Aktualisierung</string>
 
 </resources>

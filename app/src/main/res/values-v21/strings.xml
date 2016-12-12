@@ -71,4 +71,6 @@
     <string name="country_activity">Länderauswahl</string>
     <string name="selectCountry">auswählen</string>
     <string name="COUNTRY">APP_PREF_COUNTRY</string>
+    <string name="countrySelection">Länderauswahl</string>
+    <string name="locationUpdates">Standort-Aktualisierung</string>
 </resources>
