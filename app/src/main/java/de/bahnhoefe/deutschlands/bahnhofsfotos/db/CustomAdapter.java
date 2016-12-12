@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
@@ -14,6 +15,9 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 /**
  * Created by android_oma on 06.08.16.
+ *
+ * Adapter for ListView of stations, which don't have a photo
+ *
  */
 
 public class CustomAdapter extends CursorAdapter {

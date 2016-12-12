@@ -19,6 +19,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 import static android.R.attr.country;
 import static android.R.attr.id;
+import static com.google.android.gms.analytics.internal.zzy.p;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.DB_JSON_CONSTANTS.KEY_ID;
 
 /**
@@ -30,7 +31,7 @@ public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
             + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
@@ -42,6 +43,7 @@ public class BahnhofsDbAdapter {
     private static final String CREATE_STATEMENT_2 = "CREATE INDEX " + DATABASE_TABLE + "_IDX "
             + "ON " + DATABASE_TABLE + "(" + Constants.DB_JSON_CONSTANTS.KEY_ID + ")";
     private static final String CREATE_STATEMENT_COUNTRIES = "CREATE TABLE " + DATABASE_TABLE_LAENDER + " ("
+            + Constants.DB_JSON_CONSTANTS.KEY_ROWID_COUNTRIES + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
             + Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_EMAIL + " TEXT, "
@@ -141,8 +143,30 @@ public class BahnhofsDbAdapter {
             return null;
         }
         return cursor;
+    }
+
+    public Cursor getCountryList() {
+        //Open connection to read only
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String selectQueryCountries =  "SELECT rowidcountries _id, " +
+                Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + ", " +
+                Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME +
+                " FROM " + DATABASE_TABLE_LAENDER
+                + " ORDER BY " +
+                Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME + " asc";
+        Log.d(TAG, selectQueryCountries.toString());
 
 
+        Cursor cursor = db.rawQuery(selectQueryCountries, null);
+        // looping through all rows and adding to list
+
+        if (cursor == null) {
+            return null;
+        } else if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+        return cursor;
     }
 
 
@@ -272,6 +296,29 @@ public class BahnhofsDbAdapter {
             return country;
         } else
             return null;
+    }
+
+    public Country fetchCountriesByRowId(long id){
+        Cursor cursor = db.query(DATABASE_TABLE_LAENDER, null, Constants.DB_JSON_CONSTANTS.KEY_ROWID_COUNTRIES + "=?", new String[] {
+                id + ""},null,null,null);
+        if (cursor != null && cursor.moveToFirst()) {
+            Country country = createCountryFromCursor(cursor);
+            cursor.close();
+            return country;
+        } else
+            return null;
+    }
+
+    public Integer fetchCountryShortCodeById(String countryShortCode){
+        Cursor cursor = db.query(DATABASE_TABLE_LAENDER, new String[] {Constants.DB_JSON_CONSTANTS.KEY_ROWID_COUNTRIES}, Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + "=?", new String[] {
+                id + ""},null,null,null);
+        if (cursor != null && cursor.moveToFirst()) {
+            Integer position = cursor.getInt(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ROWID_COUNTRIES));
+            cursor.close();
+            return position;
+        } else
+            return null;
+
     }
 
     // Getting All Bahnhoefe

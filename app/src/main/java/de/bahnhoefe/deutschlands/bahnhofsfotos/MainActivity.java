@@ -141,11 +141,8 @@ public class MainActivity extends AppCompatActivity
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
-            //new JSONTask(lastUpdateDate).execute();
-            //new JSONLaenderTask().execute();
-            //runMultipleAsyncTask();
-            new JSONTask(lastUpdateDate).executeOnExecutor(JSONTask.THREAD_POOL_EXECUTOR);
-            new JSONLaenderTask().executeOnExecutor(JSONLaenderTask.THREAD_POOL_EXECUTOR);
+            runMultipleAsyncTask();
+
         }
 
         cursor = dbAdapter.getStationsList(false);
@@ -304,7 +301,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, CountryActivity.class);
+            startActivity(intent);
         } else if (id == R.id.notify) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
             boolean active = statusBinder != null ? statusBinder.isNotificationTrackingActive() : false;
@@ -334,9 +332,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
-            new JSONTask(lastUpdateDate).executeOnExecutor(JSONTask.THREAD_POOL_EXECUTOR);
-            new JSONLaenderTask().executeOnExecutor(JSONLaenderTask.THREAD_POOL_EXECUTOR);
-            //runMultipleAsyncTask();
+            runMultipleAsyncTask();
         } else if (id == R.id.nav_your_own_station_photos) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
             startActivity(intent);
@@ -632,7 +628,7 @@ public class MainActivity extends AppCompatActivity
 
         if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) // Above Api Level 13
         {
-            asyncTaskBahnhoefe.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            asyncTaskBahnhoefe.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
         else // Below Api Level 13
         {
@@ -641,7 +637,7 @@ public class MainActivity extends AppCompatActivity
         JSONLaenderTask asyncTaskCountries = new JSONLaenderTask(); // Second
         if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)// Above Api Level 13
         {
-            asyncTaskCountries.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            asyncTaskCountries.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
         else // Below Api Level 13
         {

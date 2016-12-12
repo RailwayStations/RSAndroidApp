@@ -68,4 +68,7 @@
     <string name="menu_title_info">Über die App</string>
     <string name="chatActivity">Chat</string>
     <string name="LogInActivity">Login</string>
+    <string name="country_activity">Länderauswahl</string>
+    <string name="selectCountry">auswählen</string>
+    <string name="COUNTRY">APP_PREF_COUNTRY</string>
 </resources>

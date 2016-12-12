@@ -120,25 +120,41 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".AuthActivity"
+        <activity android:name=".CountryActivity"
+            android:label="@string/country_activity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
+            <intent-filter>
+                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+        </activity>
+        <activity
+            android:name=".AuthActivity"
             android:label="@string/chatActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
+
             <intent-filter>
                 <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.AuthActivity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignInActivity"
+        <activity
+            android:name=".SignInActivity"
             android:label="@string/LogInActivity"
             android:parentActivityName=".MainActivity">
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
+
             <intent-filter>
                 <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.SignInActivity" />
 
@@ -147,13 +163,16 @@
         </activity>
 
         <!-- debug-KEY -->
-        <!--<meta-data
+        <!--
+            <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_deb_key" />-->
+            android:value="@string/google_maps_deb_key" />
+        -->
+
 
         <!-- release-KEY -->
 
-            <meta-data
+        <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_deb_key" />
 
@@ -175,7 +194,6 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-
 
         <provider
             android:name="android.support.v4.content.FileProvider"

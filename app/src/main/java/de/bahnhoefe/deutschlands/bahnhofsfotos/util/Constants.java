@@ -20,6 +20,7 @@ public class Constants {
         public static final String KEY_COUNTRYSHORTCODE = "countryflag";
         public static final String KEY_EMAIL = "mail";
         public static final String KEY_TWITTERTAGS = "twitter_tags";
+        public static final String KEY_ROWID_COUNTRIES = "rowidcountries";
     }
 
     public static final String BAHNHOEFE_OHNE_PHOTO_URL = "http://fotouebersicht.xn--deutschlands-bahnhfe-lbc.de/bahnhoefe-withoutPhoto.json";

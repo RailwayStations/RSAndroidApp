@@ -60,6 +60,7 @@
     <string name="LINKING">APP_PREF_LINKING</string>
     <string name="NICKNAME">APP_PREF_NICKNAME</string>
     <string name="LINK_TO_PHOTOGRAPHER">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
+    <string name="COUNTRY">APP_PREF_COUNTRY</string>
     <string name="preferences_saved">Deine Daten wurden gespeichert. </string>
     <string name="preferences_cleared">Deine Daten wurden zurückgesetzt. Beim nächsten Menüaufruf kannst Du neue erfassen.</string>
     <string name="tvOwnPhotos">Handelt es sich bei den Fotos um Deine eigenen ...</string>
@@ -122,4 +123,7 @@
     <string name="LogInActivity">Login</string>
     <string name="picture_landscape_only">Bitte auf Querformat drehen</string>
     <string name="no_location_enabled">Einstellungen erlauben keine Ortung</string>
+    <string name="country_activity">Länderauswahl</string>
+    <string name="selectCountry">auswählen</string>
+
 </resources>
