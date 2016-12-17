@@ -289,7 +289,7 @@ public class BahnhofsDbAdapter {
 
     public Country fetchCountryByCountryShortCode(String countryShortCode){
         Cursor cursor = db.query(DATABASE_TABLE_LAENDER, null, Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + "=?", new String[] {
-                id + ""},null,null,null);
+                countryShortCode + ""},null,null,null);
         if (cursor != null && cursor.moveToFirst()) {
             Country country = createCountryFromCursor(cursor);
             cursor.close();

@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
     File file;
     private static final String DEFAULT = "";
+    private String countryShortCode;
 
     CustomAdapter customAdapter;
     ListView listView;
@@ -155,14 +156,20 @@ public class MainActivity extends AppCompatActivity
         customAdapter = new CustomAdapter(this, cursor,0);
         listView = (ListView) findViewById(R.id.lstStations);
         listView.setAdapter(customAdapter);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
+        System.out.println(countryShortCode);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByRowId(id);
+                Country country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
+                Log.d(TAG,country.getEmail());
                 Class cls = DetailsActivity.class;
                 Intent intentDetails = new Intent(MainActivity.this, cls);
                 intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+                intentDetails.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
                 startActivity(intentDetails);
 
             }

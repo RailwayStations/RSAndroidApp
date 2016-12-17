@@ -41,16 +41,20 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 
+import static android.R.attr.country;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
+import static com.google.android.gms.analytics.internal.zzy.k;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
     public static final String EXTRA_BAHNHOF = "bahnhof";
+    public static final String EXTRA_COUNTRY = "country";
     private static final String TAG = DetailsActivity.class.getSimpleName();
     public static final int STORED_FOTO_WIDTH = 1920;
     public static final int STORED_FOTO_QUALITY = 95;
@@ -58,10 +62,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private ImageButton takePictureButton;
     private ImageView imageView;
     private Bahnhof bahnhof;
+    private Country country;
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
-    private String licence, photoOwner, linking, link, nickname;
+    private String licence, photoOwner, linking, link, nickname,countryShortCode;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static int alpha = 128;
 
@@ -116,8 +121,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
         link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
         nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
+        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
 
         if (intent != null) {
+            country = (Country) intent.getSerializableExtra(EXTRA_COUNTRY);
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
@@ -410,7 +417,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // action with ID action_settings was selected
             case R.id.send_email:
                 Intent emailIntent = createFotoSendIntent();
-                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
+                //emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {country.getEmail()});
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + licence
                         + "\n selbst fotografiert: " + photoOwner
@@ -422,7 +430,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 break;
             case R.id.share_photo:
                 Intent shareIntent = createFotoSendIntent();
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhof.getTitle() + " @android_oma @khgdrn");
+                //shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhof.getTitle() + " @android_oma @khgdrn");
+                shareIntent.putExtra(Intent.EXTRA_TEXT,country.getTwitterTags() + " " + bahnhof.getTitle());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
