@@ -1,5 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -34,15 +35,16 @@ public class CountryActivity extends AppCompatActivity {
     ListView listView;
     Cursor cursor;
     private String TAG = getClass().getSimpleName();
+
+
     private static final String DEFAULT = "DE";
+    //private String countryShortCode;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_country);
-
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
 
         dbAdapter = new BahnhofsDbAdapter(this);
         dbAdapter.open();
@@ -60,21 +62,41 @@ public class CountryActivity extends AppCompatActivity {
                 countryAdapter.setSelectedIndex(position);
                 countryAdapter.notifyDataSetChanged();
                 countryAdapter.bindView(listview,CountryActivity.this,cursor);
-
-               /* SharedPreferences sharedPreferences = CountryActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(getString(R.string.COUNTRY),cursor.getString(1));
-                editor.commit();
-                sharedPreferences = PreferenceManager.getDefaultSharedPreferences(CountryActivity.this);
-                String countrypref = sharedPreferences.getString("countryflag","");
-                Log.d(TAG,countrypref);*/
-
             }
 
 
         });
 
 
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+       /* SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);*/
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+    @Override
+    protected void onRestart() {
+        super.onRestart();
     }
 }

@@ -1,5 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -91,7 +92,7 @@ public class CountryAdapter extends CursorAdapter{
         } else if(selectedPosition == cursor.getPosition()){
             holder.checkCountry.setChecked(true);
             editor.putString(res.getString(R.string.COUNTRY),cursor.getString(1));
-            editor.apply();
+            editor.commit();
         }else{
             holder.checkCountry.setChecked(false);
         }

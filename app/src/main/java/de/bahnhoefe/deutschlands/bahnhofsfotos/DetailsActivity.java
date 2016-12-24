@@ -123,9 +123,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
         countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
 
+
         if (intent != null) {
-            country = (Country) intent.getSerializableExtra(EXTRA_COUNTRY);
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
+            country = (Country) intent.getSerializableExtra(EXTRA_COUNTRY);
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 

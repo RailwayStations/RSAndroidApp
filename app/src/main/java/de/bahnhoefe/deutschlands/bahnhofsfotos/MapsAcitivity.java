@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -39,6 +40,9 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+
+import static android.R.attr.country;
 
 public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener , LocationListener {
 
@@ -48,6 +52,8 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
 
     private List<Bahnhof> bahnhofMarker;
     private LatLng myPos;
+    private String countryShortCode;
+    private static final String DEFAULT = "";
     /**
      * Provides the entry point to Google Play services.
      */
@@ -164,6 +170,9 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onInfoWindowClick(Marker marker) {
 
+        //SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+        //countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
+
         if(marker.getSnippet() != null){
 
             Class cls = DetailsActivity.class;
@@ -171,7 +180,9 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
             long id = Long.valueOf(marker.getSnippet());
             try {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
+                Country country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
                 intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+                intent.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
                 startActivity(intent);
             } catch (RuntimeException e) {
                 Log.wtf(TAG, String.format("Could not fetch station id %d that we put onto the map", id), e);

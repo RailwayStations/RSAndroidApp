@@ -144,20 +144,19 @@ public class MainActivity extends AppCompatActivity
         }
         if (!lastUpdateDate.equals("")) {
             tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
+            SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+            countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
             setCountrySelectionToDe();
             runMultipleAsyncTask();
-
         }
 
         cursor = dbAdapter.getStationsList(false);
         customAdapter = new CustomAdapter(this, cursor,0);
         listView = (ListView) findViewById(R.id.lstStations);
         listView.setAdapter(customAdapter);
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
         System.out.println(countryShortCode);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -670,8 +669,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-
+    private String loadCountryShortCode(){
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
+        String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
+        return countryShortChode;
+    }
 
 
     public BahnhofsDbAdapter getDbHelper(){
@@ -700,6 +702,7 @@ public class MainActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
         handleGalleryNavItem();
+
     }
 
     @Nullable

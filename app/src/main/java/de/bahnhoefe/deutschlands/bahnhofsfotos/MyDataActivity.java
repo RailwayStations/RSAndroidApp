@@ -174,5 +174,4 @@ public class MyDataActivity extends AppCompatActivity {
         Toast.makeText(this,R.string.preferences_cleared,Toast.LENGTH_LONG).show();
     }
 
-
 }

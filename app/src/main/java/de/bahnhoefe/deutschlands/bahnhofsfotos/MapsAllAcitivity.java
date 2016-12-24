@@ -23,6 +23,7 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 
 public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener {
 
@@ -34,6 +35,8 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
     private List<Bahnhof> bahnhofMarker;
     private LatLng myPos;
     BahnhofsDbAdapter bahnhofsDbAdapter;
+    private String countryShortCode;
+    private static final String DEFAULT = "";
 
     @Override
     protected void onDestroy() {
@@ -141,7 +144,9 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
         Intent intent = new Intent(MapsAllAcitivity.this, cls);
         long id = Long.valueOf(marker.getSnippet());
         Bahnhof bahnhof = bahnhofsDbAdapter.fetchBahnhofByBahnhofId(id);
+        Country country = bahnhofsDbAdapter.fetchCountryByCountryShortCode(countryShortCode);
         intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+        intent.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
         startActivity(intent);
     }
 
