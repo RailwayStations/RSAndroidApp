@@ -10,7 +10,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -36,12 +35,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,30 +54,26 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
-
+import com.google.firebase.auth.FirebaseAuth;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-
-import static android.R.attr.country;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.BAHNHOEFE_MIT_PHOTO_URL;
 import static java.lang.Integer.parseInt;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DIALOG_TAG = "App Info Dialog";
     public final String TAG = "Bahnhoefe";
-    private TextView tvDownload;
     private BahnhofsDbAdapter dbAdapter;
-    private Context context;
     private TextView tvUpdate;
     private String lastUpdateDate;
-    private static final int PERMISSION_REQUEST_CODE = 200;
     private NavigationView navigationView;
     File file;
     private static final String DEFAULT = "";
@@ -407,9 +396,6 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
         String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
 
-        String urlWithPhoto = Constants.BAHNHOEFE_START_URL + "/" + countryShortChode.toLowerCase() + "/" + Constants.BAHNHOEFE_END_URL + "true";
-        String urlWithoutPhoto = Constants.BAHNHOEFE_START_URL + "/" + countryShortChode.toLowerCase() + "/" + Constants.BAHNHOEFE_END_URL + "false";
-
         // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
         private void enableHttpResponseCache() {
             try {
@@ -454,8 +440,7 @@ public class MainActivity extends AppCompatActivity
 
             publishProgress("Verbinde...");
             try {
-                //URL url = new URL(withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL);
-                URL url = new URL(withPhotos ? urlWithPhoto : urlWithoutPhoto);
+                URL url = new URL(String.format("%s/%s/%s%s", Constants.BAHNHOEFE_START_URL, countryShortChode.toLowerCase(), Constants.BAHNHOEFE_END_URL, withPhotos));
                 connection = (HttpURLConnection)url.openConnection();
                 connection.connect();
                 long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);
@@ -480,7 +465,6 @@ public class MainActivity extends AppCompatActivity
                         for (int i = 0; i < bahnhofList.length(); i++) {
                             publishProgress("Verarbeite " + i + "/" + count);
                             JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
-                            //publishProgress(((i+1) + " von " + bahnhofList.length()));
 
                             String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
                             String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
