@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -140,6 +141,9 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
+
         Class cls = DetailsActivity.class;
         Intent intent = new Intent(MapsAllAcitivity.this, cls);
         long id = Long.valueOf(marker.getSnippet());

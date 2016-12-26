@@ -170,8 +170,8 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onInfoWindowClick(Marker marker) {
 
-        //SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-        //countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
 
         if(marker.getSnippet() != null){
 
