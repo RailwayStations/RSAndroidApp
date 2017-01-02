@@ -34,7 +34,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     @Override
     public void notifyUser() {
         BitmapFactory.Options options = new BitmapFactory.Options();
-        fetchTask = new BahnhofsFotoFetchTask(this);
+        fetchTask = new BahnhofsFotoFetchTask(this,context);
         fetchTask.execute(notificationStation.getId());
     }
 

@@ -5,7 +5,10 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.facebook.FacebookSdk;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +25,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.os.Build.VERSION_CODES.M;
+import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.facebook.FacebookSdk.getApplicationId;
 import static com.google.android.gms.analytics.internal.zzy.c;
+import static com.google.android.gms.analytics.internal.zzy.d;
 
 /**
  * Created by pelzi on 17.09.16.
@@ -31,17 +38,31 @@ import static com.google.android.gms.analytics.internal.zzy.c;
 public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private final static String TAG = BahnhofsFotoFetchTask.class.getSimpleName();
     private final BitmapAvailableHandler handler;
-    private String descriptorUrlPattern = "https://railway-stations.org/bahnhoefe/de/bhfnr/%d/bahnhofsfotos.json";
+    //private String descriptorUrlPattern = "https://railway-stations.org/bahnhoefe/de/bhfnr/%d/bahnhofsfotos.json";
+    private String descriptorUrlPattern = "";
     private String license;
     private Uri authorReference;
     private String author;
     private static final String DEFAULT_COUNTRY = "DE";
+    //private Context context;
+    private String countryShortCode;
     private Context context;
+    SharedPreferences sharedPreferences;
 
 
-    public BahnhofsFotoFetchTask(BitmapAvailableHandler handler) {
+
+    public BahnhofsFotoFetchTask(BitmapAvailableHandler handler, Context context) {
         this.handler = handler;
+        sharedPreferences = context.getSharedPreferences("APP_PREF_FILE",Context.MODE_PRIVATE);
     }
+
+    private String buildDescriptorUrlPattern() {
+        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY",DEFAULT_COUNTRY);
+        descriptorUrlPattern = "https://railway-stations.org/bahnhoefe/" + countryShortCode.toLowerCase() + "/bhfnr/%d/bahnhofsfotos.json";
+        Log.d(TAG, "descriptorUrlPattern: " + descriptorUrlPattern);
+        return descriptorUrlPattern;
+    }
+
 
     @Override
     protected void onCancelled() {
@@ -61,7 +82,10 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
         }
     }
 
-
+    @Override
+    protected void onPreExecute() {
+        buildDescriptorUrlPattern();
+    }
 
     @Override
     protected URL doInBackground(Integer... integers) {
@@ -110,6 +134,14 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
         }
         return null;
     }
+
+   /* private String buildDescriptorUrlPattern(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Resources.getSystem().getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
+        countryShortCode = sharedPreferences.getString(Resources.getSystem().getString(R.string.COUNTRY),DEFAULT_COUNTRY);
+        descriptorUrlPattern = "https://railway-stations.org/bahnhoefe/" + countryShortCode.toLowerCase() + "/bhfnr/%d/bahnhofsfotos.json";
+        Log.d(TAG,"descriptorUrlPatternNew = " + descriptorUrlPattern);
+        return descriptorUrlPattern;
+    }*/
 
 
     public String getLicense() {

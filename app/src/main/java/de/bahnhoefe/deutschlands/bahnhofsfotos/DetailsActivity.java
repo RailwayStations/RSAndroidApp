@@ -131,7 +131,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 
             if (bahnhof.getPhotoflag() != null) {
-                fetchTask = new BahnhofsFotoFetchTask(this);
+                fetchTask = new BahnhofsFotoFetchTask(this,getApplicationContext());
                 fetchTask.execute(bahnhof.getId());
             } else {
                 takePictureButton.setVisibility(View.VISIBLE);
