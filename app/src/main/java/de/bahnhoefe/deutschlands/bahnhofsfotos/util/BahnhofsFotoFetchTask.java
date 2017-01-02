@@ -1,5 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -15,6 +18,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+
+import static android.content.Context.MODE_PRIVATE;
+import static com.google.android.gms.analytics.internal.zzy.c;
+
 /**
  * Created by pelzi on 17.09.16.
  * // todo Cache einbauen
@@ -22,10 +31,13 @@ import java.net.URL;
 public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private final static String TAG = BahnhofsFotoFetchTask.class.getSimpleName();
     private final BitmapAvailableHandler handler;
-    private final static String descriptorUrlPattern = "http://www.deutschlands-bahnhoefe.org/bahnhofsfotos/%d/bahnhofsnr.json";
+    private String descriptorUrlPattern = "https://railway-stations.org/bahnhoefe/de/bhfnr/%d/bahnhofsfotos.json";
     private String license;
     private Uri authorReference;
     private String author;
+    private static final String DEFAULT_COUNTRY = "DE";
+    private Context context;
+
 
     public BahnhofsFotoFetchTask(BitmapAvailableHandler handler) {
         this.handler = handler;
@@ -48,6 +60,8 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
             handler.onBitmapAvailable(null);
         }
     }
+
+
 
     @Override
     protected URL doInBackground(Integer... integers) {
@@ -96,6 +110,7 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
         }
         return null;
     }
+
 
     public String getLicense() {
         return license;

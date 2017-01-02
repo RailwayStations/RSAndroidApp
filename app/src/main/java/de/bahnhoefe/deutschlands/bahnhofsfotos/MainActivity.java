@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
     File file;
     private static final String DEFAULT = "";
+    private static final String DEFAULT_COUNTRY = "DE";
     private String countryShortCode;
 
     CustomAdapter customAdapter;
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity
         if (!lastUpdateDate.equals("")) {
             tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
             SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-            countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
+            countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT_COUNTRY);
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByRowId(id);
                 Country country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
-                Log.d(TAG,country.getEmail());
+                //Log.d(TAG,country.getEmail());
                 Class cls = DetailsActivity.class;
                 Intent intentDetails = new Intent(MainActivity.this, cls);
                 intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
@@ -626,6 +627,17 @@ public class MainActivity extends AppCompatActivity
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(List<Country> countries) {
+            //super.onPostExecute(countries);
+            recreate();
         }
     }
 

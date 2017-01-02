@@ -25,6 +25,6 @@ public class Constants {
     // Links zusammenschrauben
     public static final String BAHNHOEFE_START_URL = "https://api.railway-stations.org";
     public static final String BAHNHOEFE_END_URL = "stations?hasPhoto=";
-    public static final String LAENDERDATEN_URL = "http://www.deutschlands-bahnhoefe.org/laenderdaten.json";
+    public static final String LAENDERDATEN_URL = "https://railway-stations.org/laenderdaten.json";
 
 }
