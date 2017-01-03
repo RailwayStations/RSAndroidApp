@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity
         customAdapter = new CustomAdapter(this, cursor,0);
         listView = (ListView) findViewById(R.id.lstStations);
         listView.setAdapter(customAdapter);
-        System.out.println(countryShortCode);
+        Log.i(TAG, "Country: " + countryShortCode);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
