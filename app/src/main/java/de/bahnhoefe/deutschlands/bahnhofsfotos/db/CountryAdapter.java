@@ -86,7 +86,7 @@ public class CountryAdapter extends CursorAdapter{
         holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
         holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
 
-        System.out.println(cursor.getString(1) + " " + prefCountry);
+        Log.i(TAG, cursor.getString(1) + " " + prefCountry);
         if(cursor.getString(1).equals(prefCountry)){
             holder.checkCountry.setChecked(true);
         } else if(selectedPosition == cursor.getPosition()){
