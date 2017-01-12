@@ -61,6 +61,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+
+import static com.google.android.gms.analytics.internal.zzy.b;
 import static java.lang.Integer.parseInt;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,17 +74,14 @@ public class MainActivity extends AppCompatActivity
     private static final String DIALOG_TAG = "App Info Dialog";
     public final String TAG = "Bahnhoefe";
     private BahnhofsDbAdapter dbAdapter;
-    private TextView tvUpdate;
     private String lastUpdateDate;
     private NavigationView navigationView;
-    File file;
     private static final String DEFAULT = "";
     private static final String DEFAULT_COUNTRY = "DE";
     private String countryShortCode;
 
-    CustomAdapter customAdapter;
-    ListView listView;
-    Cursor cursor;
+    private CustomAdapter customAdapter;
+    private Cursor cursor;
 
 
     private FirebaseAuth mFirebaseAuth;
@@ -100,6 +99,7 @@ public class MainActivity extends AppCompatActivity
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
+        countryShortCode = baseApplication.getCountryShortCode();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -134,19 +134,16 @@ public class MainActivity extends AppCompatActivity
         }
         if (!lastUpdateDate.equals("")) {
             tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
-
-            SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-            countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT_COUNTRY);
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
-            setCountrySelectionToDe();
             runMultipleAsyncTask();
         }
 
         cursor = dbAdapter.getStationsList(false);
         customAdapter = new CustomAdapter(this, cursor,0);
-        listView = (ListView) findViewById(R.id.lstStations);
+        ListView listView = (ListView) findViewById(R.id.lstStations);
+        assert listView != null;
         listView.setAdapter(customAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -178,17 +175,10 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void setCountrySelectionToDe() {
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(getString(R.string.COUNTRY),"DE");
-        editor.apply();
-    }
-
 
     private void handleGalleryNavItem() {
 
-        file = new File(Environment.getExternalStorageDirectory()
+        File file = new File(Environment.getExternalStorageDirectory()
                 + File.separator + "Bahnhofsfotos");
         Log.d(TAG, file.toString());
 
@@ -368,6 +358,7 @@ public class MainActivity extends AppCompatActivity
         }*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -394,6 +385,7 @@ public class MainActivity extends AppCompatActivity
 
         private ProgressDialog progressDialog;
         private Date lastUpdateDate;
+
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
         String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
 
@@ -516,7 +508,7 @@ public class MainActivity extends AppCompatActivity
             progressDialog.dismiss();
             writeUpdateDateInFile();
             enableNavItem();
-            tvUpdate = (TextView) findViewById(R.id.tvUpdate);
+            TextView tvUpdate = (TextView) findViewById(R.id.tvUpdate);
             try {
                 tvUpdate.setText("Letzte Aktualisierung am: " + loadUpdateDateFromFile("updatedate.txt") );
             } catch (Exception e) {
@@ -636,7 +628,6 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(List<Country> countries) {
-            //super.onPostExecute(countries);
             recreate();
         }
     }

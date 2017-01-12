@@ -83,6 +83,7 @@ public class BaseApplication extends Application  {
         editor.apply();
     }
 
+
     public String getCountryShortCode() {
 
         return getPreferences().getString(getString(R.string.COUNTRY),DEFAULT_COUNTRY);

@@ -13,14 +13,18 @@ public class ChatMessage {
     private String text;
     private String name;
     private String photoUrl;
+    private String chatTimeStamp;
+
+
 
     public ChatMessage() {
     }
 
-    public ChatMessage(String text, String name, String photoUrl) {
+    public ChatMessage(String text, String name, String photoUrl,String chatTimeStamp) {
         this.text = text;
         this.name = name;
         this.photoUrl = photoUrl;
+        this.chatTimeStamp = chatTimeStamp;
 
     }
 
@@ -54,5 +58,15 @@ public class ChatMessage {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public String getChatTimeStamp() {
+        return chatTimeStamp;
+    }
+
+    public String setChatTimeStamp() {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy @ HH:mm");
+        return df.format(c.getTime());
     }
 }
