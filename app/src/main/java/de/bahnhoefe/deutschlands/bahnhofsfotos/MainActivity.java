@@ -98,8 +98,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        dbAdapter = new BahnhofsDbAdapter(this);
-        dbAdapter.open();
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        dbAdapter = baseApplication.getDbAdapter();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -148,7 +148,6 @@ public class MainActivity extends AppCompatActivity
         customAdapter = new CustomAdapter(this, cursor,0);
         listView = (ListView) findViewById(R.id.lstStations);
         listView.setAdapter(customAdapter);
-        //Log.i(TAG, "Country: " + countryShortCode);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -666,35 +665,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private String loadCountryShortCode(){
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
-        String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT_COUNTRY);
-        return countryShortChode;
-    }
 
-
-    public BahnhofsDbAdapter getDbHelper(){
-        return dbAdapter;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (dbAdapter !=null){
-            dbAdapter.close();
-        }
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
     @Override
     public void onResume() {
         super.onResume();

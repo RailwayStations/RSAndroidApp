@@ -27,18 +27,12 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import static android.R.attr.country;
 import static android.R.attr.defaultValue;
 import static android.R.attr.id;
+import static com.google.android.gms.analytics.internal.zzy.i;
 import static com.google.android.gms.analytics.internal.zzy.l;
 
 public class CountryActivity extends AppCompatActivity {
-    private BahnhofsDbAdapter dbAdapter;
-    CountryAdapter countryAdapter;
-    ListView listView;
-    Cursor cursor;
+    private CountryAdapter countryAdapter;
     private String TAG = getClass().getSimpleName();
-
-
-    private static final String DEFAULT = "DE";
-    //private String countryShortCode;
 
 
     @Override
@@ -46,19 +40,18 @@ public class CountryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_country);
 
-        dbAdapter = new BahnhofsDbAdapter(this);
-        dbAdapter.open();
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
 
-        cursor = dbAdapter.getCountryList();
+        final Cursor cursor = dbAdapter.getCountryList();
         countryAdapter = new CountryAdapter(this, cursor,0);
-        listView = (ListView) findViewById(R.id.lstCountries);
+        ListView listView = (ListView) findViewById(R.id.lstCountries);
         listView.setAdapter(countryAdapter);
 
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
-                Country country = dbAdapter.fetchCountriesByRowId(id);
                 countryAdapter.setSelectedIndex(position);
                 countryAdapter.notifyDataSetChanged();
                 countryAdapter.bindView(listview,CountryActivity.this,cursor);
@@ -69,35 +62,5 @@ public class CountryActivity extends AppCompatActivity {
 
 
     }
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (dbAdapter !=null){
-            dbAdapter.close();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-    }
 }

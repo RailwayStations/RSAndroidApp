@@ -40,14 +40,11 @@ import static java.security.AccessController.getContext;
  */
 
 public class CountryAdapter extends CursorAdapter{
-    TextView txtCountryShortCode,txtCountryName;
-    RadioButton rdCountry;
-    CheckBox checkCountry;
     private static final String DEFAULT_COUNTRY = "DE";
     private int selectedPosition = -1;
     private LayoutInflater mInflater;
     private String TAG = getClass().getSimpleName();
-    private int sharedPrefPosition;
+
 
 
 
@@ -72,13 +69,9 @@ public class CountryAdapter extends CursorAdapter{
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
 
-        Resources res = context.getResources();
+        BaseApplication baseApplication = BaseApplication.getInstance();
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(res.getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
-        String prefCountry = sharedPreferences.getString(res.getString(R.string.COUNTRY),DEFAULT_COUNTRY);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
+        String prefCountry = baseApplication.getCountryShortCode();
 
         //If you want to have zebra lines color effect uncomment below code
         if(cursor.getPosition()%2==1) {
@@ -96,8 +89,7 @@ public class CountryAdapter extends CursorAdapter{
             holder.checkCountry.setChecked(true);
         } else if(selectedPosition == cursor.getPosition()){
             holder.checkCountry.setChecked(true);
-            editor.putString(res.getString(R.string.COUNTRY),cursor.getString(1));
-            editor.commit();
+            baseApplication.setCountryShortCode(cursor.getString(1));
         }else{
             holder.checkCountry.setChecked(false);
         }
