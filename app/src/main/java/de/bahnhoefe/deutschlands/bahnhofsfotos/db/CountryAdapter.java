@@ -59,9 +59,9 @@ public class CountryAdapter extends CursorAdapter{
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View   view    =    mInflater.inflate(R.layout.item_country, parent, false);
         CountryAdapter.ViewHolder holder  =   new CountryAdapter.ViewHolder();
+        holder.checkCountry = (CheckBox)view.findViewById(R.id.checkCountry);
         holder.txtCountryShortCode   =   (TextView)  view.findViewById(R.id.txtCountryShortCode);
         holder.txtCountryName    =   (TextView)  view.findViewById(R.id.txtCountryName);
-        holder.checkCountry = (CheckBox)view.findViewById(R.id.checkCountry);
         view.setTag(holder);
         return view;
     }
@@ -122,10 +122,10 @@ public class CountryAdapter extends CursorAdapter{
     }
 
 
-    static class ViewHolder {
+    private static class ViewHolder {
+        CheckBox checkCountry;
         TextView txtCountryShortCode;
         TextView txtCountryName;
-        CheckBox checkCountry;
     }
 }
 
