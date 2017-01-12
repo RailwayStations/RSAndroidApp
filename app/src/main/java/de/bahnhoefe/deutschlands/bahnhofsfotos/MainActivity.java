@@ -505,7 +505,12 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(List<Bahnhof> result) {
-            progressDialog.dismiss();
+            if (MainActivity.this.isDestroyed()) {
+                return;
+            }
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
             writeUpdateDateInFile();
             enableNavItem();
             TextView tvUpdate = (TextView) findViewById(R.id.tvUpdate);
