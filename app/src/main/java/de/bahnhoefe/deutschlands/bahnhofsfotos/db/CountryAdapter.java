@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.MyDataActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
@@ -25,6 +26,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import static android.R.attr.country;
 import static android.content.Context.MODE_PRIVATE;
 import static android.media.CamcorderProfile.get;
+import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.google.android.gms.analytics.internal.zzy.B;
 import static com.google.android.gms.analytics.internal.zzy.c;
 import static com.google.android.gms.analytics.internal.zzy.h;
 import static com.google.android.gms.analytics.internal.zzy.i;
@@ -40,7 +43,7 @@ public class CountryAdapter extends CursorAdapter{
     TextView txtCountryShortCode,txtCountryName;
     RadioButton rdCountry;
     CheckBox checkCountry;
-    private static final String DEFAULT = "";
+    private static final String DEFAULT_COUNTRY = "DE";
     private int selectedPosition = -1;
     private LayoutInflater mInflater;
     private String TAG = getClass().getSimpleName();
@@ -68,10 +71,12 @@ public class CountryAdapter extends CursorAdapter{
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+
         Resources res = context.getResources();
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(res.getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
-        String prefCountry = sharedPreferences.getString(res.getString(R.string.COUNTRY),DEFAULT);
+        String prefCountry = sharedPreferences.getString(res.getString(R.string.COUNTRY),DEFAULT_COUNTRY);
+
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
 

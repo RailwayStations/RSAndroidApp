@@ -19,7 +19,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name="android.support.multidex.MultiDexApplication">
+        android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication"
+        >
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

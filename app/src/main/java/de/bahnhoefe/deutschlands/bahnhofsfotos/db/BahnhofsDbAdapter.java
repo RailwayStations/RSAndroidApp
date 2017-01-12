@@ -114,10 +114,12 @@ public class BahnhofsDbAdapter {
 
     public void deleteBahnhoefe(){
         db.delete(DATABASE_TABLE,null,null);
+
     }
 
     public void deleteCountries(){
         db.delete(DATABASE_TABLE_LAENDER,null,null);
+
     }
 
     public Cursor getStationsList(boolean withPhoto) {

@@ -135,14 +135,6 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
         return null;
     }
 
-   /* private String buildDescriptorUrlPattern(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Resources.getSystem().getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
-        countryShortCode = sharedPreferences.getString(Resources.getSystem().getString(R.string.COUNTRY),DEFAULT_COUNTRY);
-        descriptorUrlPattern = "https://railway-stations.org/bahnhoefe/" + countryShortCode.toLowerCase() + "/bhfnr/%d/bahnhofsfotos.json";
-        Log.d(TAG,"descriptorUrlPatternNew = " + descriptorUrlPattern);
-        return descriptorUrlPattern;
-    }*/
-
 
     public String getLicense() {
         return license;

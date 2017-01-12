@@ -72,13 +72,14 @@ public class CountryActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-       /* SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);*/
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (dbAdapter !=null){
+            dbAdapter.close();
+        }
     }
 
     @Override
