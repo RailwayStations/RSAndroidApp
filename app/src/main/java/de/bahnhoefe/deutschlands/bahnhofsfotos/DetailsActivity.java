@@ -126,6 +126,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         if (intent != null) {
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
+            if (bahnhof == null) {
+                Log.w(TAG, "EXTRA_BAHNHOF in intent data missing");
+                Toast.makeText(this, "Bahnhof nicht gefunden", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+
             country = (Country) intent.getSerializableExtra(EXTRA_COUNTRY);
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
@@ -193,7 +200,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
         } else {
-            Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG);
+            Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
         }
     }
 
