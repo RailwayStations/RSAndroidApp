@@ -2,6 +2,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,9 +50,9 @@ public class CustomAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        ViewHolder holder  =   (ViewHolder)    view.getTag();
-        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_ID)));
-        holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_TITLE)));
+            ViewHolder holder = (ViewHolder) view.getTag();
+            holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_ID)));
+            holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_TITLE)));
 
     }
 

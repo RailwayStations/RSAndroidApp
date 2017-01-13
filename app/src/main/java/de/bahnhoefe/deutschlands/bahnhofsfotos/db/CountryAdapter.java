@@ -46,13 +46,52 @@ public class CountryAdapter extends CursorAdapter{
     private String TAG = getClass().getSimpleName();
 
 
-
-
-
     public CountryAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
+
+    // new refactored after https://www.youtube.com/watch?v=wDBM6wVEO70&feature=youtu.be&t=7m
+    public View getView(int selectedPosition,View convertView, ViewGroup parent, Cursor cursor){
+        ViewHolder holder;
+        BaseApplication baseApplication = BaseApplication.getInstance();
+
+        String prefCountry = baseApplication.getCountryShortCode();
+
+        //If you want to have zebra lines color effect uncomment below code
+        if(selectedPosition%2==1) {
+            convertView.setBackgroundResource(R.drawable.item_list_backgroundcolor);
+        } else {
+            convertView.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
+        }
+
+        if(convertView == null){
+            convertView = mInflater.inflate(R.layout.item_country, parent, false);
+            holder = new ViewHolder();
+            holder.checkCountry = (CheckBox)convertView.findViewById(R.id.checkCountry);
+            holder.txtCountryShortCode   =   (TextView)  convertView.findViewById(R.id.txtCountryShortCode);
+            holder.txtCountryName    =   (TextView)  convertView.findViewById(R.id.txtCountryName);
+            convertView.setTag(holder);
+        }else{
+            holder = (ViewHolder) convertView.getTag();
+        }
+
+        holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
+        holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
+
+        Log.i(TAG, cursor.getString(1) + " " + prefCountry);
+        if (cursor.getString(1).equals(prefCountry)) {
+            holder.checkCountry.setChecked(true);
+        } else if (selectedPosition == cursor.getPosition()) {
+            holder.checkCountry.setChecked(true);
+            baseApplication.setCountryShortCode(cursor.getString(1));
+        } else {
+            holder.checkCountry.setChecked(false);
+        }
+
+        return convertView;
+    }
+
 
 
     @Override
@@ -66,6 +105,7 @@ public class CountryAdapter extends CursorAdapter{
         return view;
     }
 
+    // wird nicht benutzt, ersetzt durch getView()
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
 
@@ -80,19 +120,21 @@ public class CountryAdapter extends CursorAdapter{
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        CountryAdapter.ViewHolder holder  =   (CountryAdapter.ViewHolder) view.getTag();
-        holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
-        holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
 
-        Log.i(TAG, cursor.getString(1) + " " + prefCountry);
-        if(cursor.getString(1).equals(prefCountry)){
-            holder.checkCountry.setChecked(true);
-        } else if(selectedPosition == cursor.getPosition()){
-            holder.checkCountry.setChecked(true);
-            baseApplication.setCountryShortCode(cursor.getString(1));
-        }else{
-            holder.checkCountry.setChecked(false);
-        }
+            CountryAdapter.ViewHolder holder = (CountryAdapter.ViewHolder) view.getTag();
+            holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
+            holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
+
+            Log.i(TAG, cursor.getString(1) + " " + prefCountry);
+            if (cursor.getString(1).equals(prefCountry)) {
+                holder.checkCountry.setChecked(true);
+            } else if (selectedPosition == cursor.getPosition()) {
+                holder.checkCountry.setChecked(true);
+                baseApplication.setCountryShortCode(cursor.getString(1));
+            } else {
+                holder.checkCountry.setChecked(false);
+            }
+
 
         holder.checkCountry.setOnClickListener(onStateChangedListener(holder.checkCountry, cursor.getPosition()));
 

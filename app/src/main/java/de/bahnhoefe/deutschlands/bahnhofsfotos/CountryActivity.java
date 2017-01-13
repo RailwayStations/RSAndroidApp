@@ -46,7 +46,7 @@ public class CountryActivity extends AppCompatActivity {
 
         final Cursor cursor = dbAdapter.getCountryList();
         countryAdapter = new CountryAdapter(this, cursor,0);
-        ListView listView = (ListView) findViewById(R.id.lstCountries);
+        final ListView listView = (ListView) findViewById(R.id.lstCountries);
 
         assert listView != null;
         listView.setAdapter(countryAdapter);
@@ -57,7 +57,8 @@ public class CountryActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
                 countryAdapter.setSelectedIndex(position);
                 countryAdapter.notifyDataSetChanged();
-                countryAdapter.bindView(listview,CountryActivity.this,cursor);
+                //countryAdapter.bindView(listview,CountryActivity.this,cursor);
+                countryAdapter.getView(position,view,listView,cursor);
             }
 
 
