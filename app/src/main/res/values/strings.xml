@@ -128,5 +128,8 @@
     <string name="selectCountry">auswählen</string>
     <string name="countrySelection">Länderauswahl</string>
     <string name="locationUpdates">Standort-Aktualisierung</string>
+    <string name="dialog_message">Du hast unter \'Meine Daten\' noch nichts eingetragen. Bitte hole das nach!</string>
+    <string name="dialog_title">In Meine Daten fehlt noch was</string>
+    <string name="zu_meine_daten">Öffne Meine Daten</string>
 
 </resources>

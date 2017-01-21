@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
@@ -49,6 +50,8 @@ import static android.R.attr.country;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
 import static com.google.android.gms.analytics.internal.zzy.k;
+import static com.google.android.gms.analytics.internal.zzy.m;
+import static com.google.android.gms.analytics.internal.zzy.v;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
@@ -178,6 +181,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
+    private void checkMyData() {
+        MyDataDialogFragment myDataDialog = new MyDataDialogFragment();
+        myDataDialog.show(getFragmentManager(),"mydata_dialog");
+    }
+
     /**
      * Method to request permission for camera
      */
@@ -190,18 +198,24 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void takePicture() {
-        if (bahnhof.getPhotoflag() != null)
-            return;
-        Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        File file = getCameraMediaFile();
-        if (file != null) {
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-            intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
-            intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
-            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-        } else {
-            Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
-        }
+
+            if (bahnhof.getPhotoflag() != null)
+                return;
+        if(nickname.equals("default")){
+            checkMyData();
+        }else {
+
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            File file = getCameraMediaFile();
+            if (file != null) {
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
+                intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
+                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+            } else {
+                Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
+            }
+       }
     }
 
 
@@ -243,11 +257,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
 
             } else {
+                if(nickname.equals("default")){
+                    checkMyData();
+                }
 
                 takePicture();
 
             }
         }else{
+            if(nickname.equals("default")){
+                checkMyData();
+            }
             takePicture();
         }
     }
@@ -674,25 +694,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 sbar.show();
             fullscreen = false;
         }
-        /*
-        LayoutTransition transition = new LayoutTransition();
 
-        transition.removeChild(detailsLayout, licenseTagView);
-        // Duration selected in SeekBar
-        long duration = mDurationSeekbar.getProgress();
-        // Animation path is based on whether animating in or out
-        Path path = mIsOut ? mPathIn : mPathOut;
-
-        // Log animation details
-        Log.i(TAG, String.format("Starting animation: [%d ms, %s, %s]",
-                duration, (String) mInterpolatorSpinner.getSelectedItem(),
-                ((mIsOut) ? "Out (growing)" : "In (shrinking)")));
-
-        // Start the animation with the selected options
-        startAnimation(interpolator, duration, path);
-
-        // Toggle direction of animation (path)
-        mIsOut = !mIsOut;
-        */
     }
 }

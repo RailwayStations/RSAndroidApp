@@ -1,6 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -160,7 +161,7 @@ public class MyDataActivity extends AppCompatActivity {
         editor.putString(getString(R.string.LINKING),linking);
         editor.putString(getString(R.string.LINK_TO_PHOTOGRAPHER),etLink.getText().toString());
         editor.putString(getString(R.string.NICKNAME),etNickname.getText().toString());
-        editor.commit();
+        editor.apply();
         Toast.makeText(this,R.string.preferences_saved,Toast.LENGTH_LONG).show();
 
     }
@@ -170,8 +171,13 @@ public class MyDataActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
         Toast.makeText(this,R.string.preferences_cleared,Toast.LENGTH_LONG).show();
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(MyDataActivity.this,MainActivity.class);
+        startActivity(intent);
+    }
 }
