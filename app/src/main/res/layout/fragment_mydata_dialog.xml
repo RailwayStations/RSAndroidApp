@@ -20,7 +20,7 @@
             android:layout_width="337dp"
             android:layout_height="wrap_content"
             android:text="@string/dialog_title"
-            android:textSize="25sp"
+            android:textSize="22sp"
             android:textAlignment="center"
             android:textColor="#ffffffff"
             android:id="@+id/tvdialog_mydata_title"
@@ -32,11 +32,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/dialog_message"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:layout_marginTop="16dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
+        android:padding="10dp"
          />
 
 </LinearLayout>
