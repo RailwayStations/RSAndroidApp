@@ -353,9 +353,10 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intentAuth);
             }
 
-        } /*else if (id == R.id.nav_send) {
-
-        }*/
+        } else if (id == R.id.nav_send) {
+            Intent sliderIntent = new Intent(MainActivity.this,IntroSliderActivity.class);
+            startActivity(sliderIntent);
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         assert drawer != null;

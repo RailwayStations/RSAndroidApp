@@ -7,4 +7,55 @@
     <color name="listItem1">#ffffff</color>
     <color name="listItem2">#F5F5F5</color>
     <color name="listItemSelected">#c71c4d</color>
+    <!-- Introslider-Colors -->
+    <color name="introSlider1">#F06292</color>
+    <color name="introSlider2">#BA68C8</color>
+    <color name="introSlider3">#9575CD</color>
+    <color name="introSlider4">#7986CB</color>
+    <color name="introSlider5">#64B5F6</color>
+    <color name="introSlider6">#4DD0E1</color>
+    <color name="introSlider7">#4DB6AC</color>
+    <color name="introSlider8">#DCE775</color>
+
+    <color name="dotDarkSlider1">#C2185B</color>
+    <color name="dotDarkSlider2">#7B1FA2</color>
+    <color name="dotDarkSlider3">#512DA8</color>
+    <color name="dotDarkSlider4">#303F9F</color>
+    <color name="dotDarkSlider5">#1976D2</color>
+    <color name="dotDarkSlider6">#0288D1</color>
+    <color name="dotDarkSlider7">#0097A7</color>
+    <color name="dotDarkSlider8">#AFB42B</color>
+
+    <color name="dotLightSlider1">#F8BBD0</color>
+    <color name="dotLightSlider2">#E1BEE7</color>
+    <color name="dotLightSlider3">#D1C4E9</color>
+    <color name="dotLightSlider4">#C5CAE9</color>
+    <color name="dotLightSlider5">#BBDEFB</color>
+    <color name="dotLightSlider6">#B3E5FC</color>
+    <color name="dotLightSlider7">#B2EBF2</color>
+    <color name="dotLightSlider8">#F0F4C3</color>
+
+    <array name="dot_active">
+        <item>@color/dotLightSlider1</item>
+        <item>@color/dotLightSlider2</item>
+        <item>@color/dotLightSlider3</item>
+        <item>@color/dotLightSlider4</item>
+        <item>@color/dotLightSlider5</item>
+        <item>@color/dotLightSlider6</item>
+        <item>@color/dotLightSlider7</item>
+        <item>@color/dotLightSlider8</item>
+    </array>
+
+    <array name="dot_inactive">
+        <item>@color/dotDarkSlider1</item>
+        <item>@color/dotDarkSlider2</item>
+        <item>@color/dotDarkSlider3</item>
+        <item>@color/dotDarkSlider4</item>
+        <item>@color/dotDarkSlider5</item>
+        <item>@color/dotDarkSlider6</item>
+        <item>@color/dotDarkSlider7</item>
+        <item>@color/dotDarkSlider8</item>
+    </array>
+
+
 </resources>
