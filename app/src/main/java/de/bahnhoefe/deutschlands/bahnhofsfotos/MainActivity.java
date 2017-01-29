@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,6 +63,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
+import static android.R.attr.country;
 import static com.google.android.gms.analytics.internal.zzy.b;
 import static java.lang.Integer.parseInt;
 import org.json.JSONArray;
@@ -106,8 +108,18 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Will be implemented later.", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                String email = "bahnhofsfotos@deutschlands-bahnhoefe.de";
+                String subject = "Nachricht zur Bahnhofsfoto-App";
+                String chooserTitle = "Mail versenden";
+
+                Uri uri = Uri.parse("mailto:" + email)
+                        .buildUpon()
+                        .appendQueryParameter("subject", subject)
+                        .build();
+
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + email));
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                startActivity(Intent.createChooser(emailIntent, chooserTitle));
             }
         });
 
