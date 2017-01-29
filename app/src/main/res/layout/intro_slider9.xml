@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="@color/introSlider6">
+    android:background="@color/introSlider9">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -12,12 +12,12 @@
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/ic_share_white_48dp"/>
+            android:src="@drawable/ic_language_white_48dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Foto teilen"
             android:layout_marginTop="10dp"
+            android:text="Länderauswahl"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="25sp"
@@ -28,7 +28,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
-            android:text="Im gleichen Bildschirm findest Du oben das Symbol zum Teilen des Fotos. Wenn Du z.B. die Twitter-App verwendest, werden gleich alle Hashtags mit übernommen."
+            android:text="Beim Start der App werden die Bahnhofsdaten von Deutschland geladen. Wenn Du das Land von DE nach CH wechseln möchtest, kannst Du das im Startbildschirm oben rechts. Bitte vergiß nicht, danach Bahnhofsdaten zu aktualisieren."
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="18sp"

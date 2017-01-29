@@ -27,10 +27,10 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
-            android:text="Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung "
+            android:text="Damit die Benutzer sich untereinander abstimmen können, welche Bahnhöfe sie gerade ansteuern, haben wir hier einen Chat eingebaut. Es gibt noch keine Push Notifications, wenn neue Nachrichten gesendet werden. Du mußt also aktiv reinschauen."
             android:textAlignment="center"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
+            android:textSize="18sp"
             />
 
     </LinearLayout>

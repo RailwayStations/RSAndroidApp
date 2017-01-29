@@ -16,7 +16,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="In der Nähe und auf der Suche"
+            android:text="Bahnhöfe 'In der Nähe'"
+            android:layout_marginTop="10dp"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="25sp"
@@ -27,10 +28,10 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
-            android:text="Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung Erklärung "
+            android:text="Im Menü unter 'In der Nähe' findest Du alle Bahnhöfe in Deiner Nähe, die noch kein Foto haben."
             android:textAlignment="center"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
+            android:textSize="18sp"
             />
 
     </LinearLayout>

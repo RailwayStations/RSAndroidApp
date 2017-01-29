@@ -8,32 +8,35 @@
     <color name="listItem2">#F5F5F5</color>
     <color name="listItemSelected">#c71c4d</color>
     <!-- Introslider-Colors -->
-    <color name="introSlider1">#F06292</color>
-    <color name="introSlider2">#BA68C8</color>
-    <color name="introSlider3">#9575CD</color>
-    <color name="introSlider4">#7986CB</color>
-    <color name="introSlider5">#64B5F6</color>
-    <color name="introSlider6">#4DD0E1</color>
-    <color name="introSlider7">#4DB6AC</color>
-    <color name="introSlider8">#DCE775</color>
+    <color name="introSlider1">#c2185b</color>
+    <color name="introSlider2">#9c27b0</color>
+    <color name="introSlider3">#673ab7</color>
+    <color name="introSlider4">#3f51b5</color>
+    <color name="introSlider5">#1e88e5</color>
+    <color name="introSlider6">#651fff</color>
+    <color name="introSlider7">#3d5afe</color>
+    <color name="introSlider8">#039be5</color>
+    <color name="introSlider9">#0097a7</color>
 
-    <color name="dotDarkSlider1">#C2185B</color>
-    <color name="dotDarkSlider2">#7B1FA2</color>
-    <color name="dotDarkSlider3">#512DA8</color>
-    <color name="dotDarkSlider4">#303F9F</color>
-    <color name="dotDarkSlider5">#1976D2</color>
-    <color name="dotDarkSlider6">#0288D1</color>
-    <color name="dotDarkSlider7">#0097A7</color>
-    <color name="dotDarkSlider8">#AFB42B</color>
+    <color name="dotDarkSlider1">#ad1457</color>
+    <color name="dotDarkSlider2">#6a1b9a</color>
+    <color name="dotDarkSlider3">#4527a0</color>
+    <color name="dotDarkSlider4">#283593</color>
+    <color name="dotDarkSlider5">#0d47a1</color>
+    <color name="dotDarkSlider6">#6200ea</color>
+    <color name="dotDarkSlider7">#304ffe</color>
+    <color name="dotDarkSlider8">#0277bd</color>
+    <color name="dotDarkSlider9">#006064</color>
 
-    <color name="dotLightSlider1">#F8BBD0</color>
-    <color name="dotLightSlider2">#E1BEE7</color>
-    <color name="dotLightSlider3">#D1C4E9</color>
-    <color name="dotLightSlider4">#C5CAE9</color>
-    <color name="dotLightSlider5">#BBDEFB</color>
-    <color name="dotLightSlider6">#B3E5FC</color>
-    <color name="dotLightSlider7">#B2EBF2</color>
-    <color name="dotLightSlider8">#F0F4C3</color>
+    <color name="dotLightSlider1">#f06292</color>
+    <color name="dotLightSlider2">#ce93d8</color>
+    <color name="dotLightSlider3">#b39ddb</color>
+    <color name="dotLightSlider4">#9fa8da</color>
+    <color name="dotLightSlider5">#90caf9</color>
+    <color name="dotLightSlider6">#b388ff</color>
+    <color name="dotLightSlider7">#8c9eff</color>
+    <color name="dotLightSlider8">#81d4fa</color>
+    <color name="dotLightSlider9">#b2ebf2</color>
 
     <array name="dot_active">
         <item>@color/dotLightSlider1</item>
@@ -44,6 +47,7 @@
         <item>@color/dotLightSlider6</item>
         <item>@color/dotLightSlider7</item>
         <item>@color/dotLightSlider8</item>
+        <item>@color/dotLightSlider9</item>
     </array>
 
     <array name="dot_inactive">
@@ -55,6 +59,7 @@
         <item>@color/dotDarkSlider6</item>
         <item>@color/dotDarkSlider7</item>
         <item>@color/dotDarkSlider8</item>
+        <item>@color/dotDarkSlider9</item>
     </array>
 
 
