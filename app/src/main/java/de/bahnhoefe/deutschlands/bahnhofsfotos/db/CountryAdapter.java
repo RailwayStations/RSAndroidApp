@@ -58,15 +58,14 @@ public class CountryAdapter extends CursorAdapter{
 
         String prefCountry = baseApplication.getCountryShortCode();
 
-        //If you want to have zebra lines color effect uncomment below code
-        if(selectedPosition%2==1) {
-            convertView.setBackgroundResource(R.drawable.item_list_backgroundcolor);
-        } else {
-            convertView.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
-        }
-
         if(convertView == null){
             convertView = mInflater.inflate(R.layout.item_country, parent, false);
+            //If you want to have zebra lines color effect uncomment below code
+            if(selectedPosition%2==1) {
+                convertView.setBackgroundResource(R.drawable.item_list_backgroundcolor);
+            } else {
+                convertView.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
+            }
             holder = new ViewHolder();
             holder.checkCountry = (CheckBox)convertView.findViewById(R.id.checkCountry);
             holder.txtCountryShortCode   =   (TextView)  convertView.findViewById(R.id.txtCountryShortCode);

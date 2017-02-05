@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
@@ -20,7 +21,10 @@ public abstract class NearbyBahnhofNotificationManager {
     private static final int NOTIFICATION_ID = 1;
     private static final int REQUEST_MAP = 0x10;
     private static final int REQUEST_DETAIL = 0x20;
+    private static final int REQUEST_TIMETABLE = 0x30;
     protected final String TAG = NearbyBahnhofNotificationManager.class.getSimpleName();
+    private final String TIMETABLE_LINK_TEMPLATE = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?lrt=1&input=%s&boardType=dep&start=yes&";
+    private final String countryShortCode;
 
     /**
      * The Bahnhof about which a notification is being built.
@@ -47,6 +51,11 @@ public abstract class NearbyBahnhofNotificationManager {
         this.context = context;
         notificationDistance = distance;
         this.notificationStation = bahnhof;
+        // Read the configured country code
+        // @todo remove once an international solution is found for timetabling
+        SharedPreferences sharedPreferences = context.getSharedPreferences("APP_PREF_FILE",Context.MODE_PRIVATE);
+        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY","DE");
+
     }
 
     /**
@@ -79,13 +88,33 @@ public abstract class NearbyBahnhofNotificationManager {
     protected NotificationCompat.Builder getBasicNotificationBuilder() {
         // Build an intent for an action to see station details
         PendingIntent detailPendingIntent = getDetailPendingIntent();
-
+        // Build an intent to see the station on a map
         PendingIntent mapPendingIntent = getMapPendingIntent();
+        // Build an intent to view the station's timetable
+        PendingIntent timetablePendingIntent = getTimetablePendingIntent();
 
         // Texts and bigStyle
         TextCreator textCreator = new TextCreator().invoke();
         String shortText = textCreator.getShortText();
         NotificationCompat.BigTextStyle bigStyle = textCreator.getBigStyle();
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.ic_logotrain_found)
+                .setContentTitle(context.getString(R.string.station_is_near))
+                .setContentText(shortText)
+                .setContentIntent(detailPendingIntent)
+                .addAction(R.drawable.ic_directions_white_24dp,
+                        context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
+                .setStyle(bigStyle)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setOnlyAlertOnce(true)
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
+        // @todo find an international solution to display the timetable. I suggest to read country configuration if URL template from the server.
+        if ("DE".equals(countryShortCode)) {
+            builder.addAction(R.drawable.ic_timetable,
+                    context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_timetable),
+                    timetablePendingIntent);
+        }
 
         return new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_logotrain_found)
@@ -93,7 +122,8 @@ public abstract class NearbyBahnhofNotificationManager {
                 .setContentText(shortText)
                 .setContentIntent(detailPendingIntent)
                 .addAction(R.drawable.ic_directions_white_24dp,
-                        "Karte", mapPendingIntent)
+                        context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
+                .addAction(R.drawable.ic_timetable, context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_timetable), timetablePendingIntent)
                 .setStyle(bigStyle)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setOnlyAlertOnce(true)
@@ -117,13 +147,32 @@ public abstract class NearbyBahnhofNotificationManager {
         return pendifyMe(getDetailIntent(), REQUEST_DETAIL);
     }
 
+    /**
+     * Build an intent for an action to view a map.
+     * @return the PendingIntent built.
+     */
     protected PendingIntent getMapPendingIntent() {
-        // Build an intent for an action to view a map
+        //
         Intent mapIntent = new Intent(Intent.ACTION_VIEW);
         Uri geoUri = Uri.parse("geo:" + notificationStation.getLat() + "," + notificationStation.getLon());
         mapIntent.setData(geoUri);
         return pendifyMe(mapIntent, REQUEST_MAP);
     }
+
+    /**
+     * Build an intent for an action to view a map.
+     * @return the PendingIntent built.
+     */
+    protected PendingIntent getTimetablePendingIntent() {
+        //
+        Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
+        Uri timeTableUri = Uri.parse(
+                String.format(TIMETABLE_LINK_TEMPLATE, Uri.encode(notificationStation.getTitle()))
+        );
+        timetableIntent.setData(timeTableUri);
+        return pendifyMe(timetableIntent, REQUEST_TIMETABLE);
+    }
+
 
     public void destroy() {
         NotificationManagerCompat notificationManager =

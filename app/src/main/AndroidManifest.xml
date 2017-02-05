@@ -14,13 +14,22 @@
         android:required="true" />
 
     <application
+        android:name=".BaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication"
-        >
+        android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_launcher" />
+        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message. See README(https://goo.gl/6BKBk7) for more. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimary" />
+        <!-- [END fcm_default_icon] -->
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -122,18 +131,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".CountryActivity"
+        <activity
+            android:name=".CountryActivity"
             android:label="@string/country_activity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
+
             <intent-filter>
                 <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".AuthActivity"
@@ -163,6 +173,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".IntroSliderActivity"
+                  android:label="IntroSlider"
+                  android:theme="@style/AppTheme.NoActionBar"
+                  >
+        </activity>
 
         <!-- debug-KEY -->
         <!--
@@ -176,7 +191,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_rel_key" />
+            android:value="@string/google_maps_deb_key" />
 
         <service
             android:name=".NearbyNotificationService"
