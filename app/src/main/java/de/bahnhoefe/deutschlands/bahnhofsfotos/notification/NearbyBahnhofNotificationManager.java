@@ -7,8 +7,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
@@ -22,9 +26,19 @@ public abstract class NearbyBahnhofNotificationManager {
     private static final int REQUEST_MAP = 0x10;
     private static final int REQUEST_DETAIL = 0x20;
     private static final int REQUEST_TIMETABLE = 0x30;
+    private static final int REQUEST_STATION = 0x40;
     protected final String TAG = NearbyBahnhofNotificationManager.class.getSimpleName();
-    private final String TIMETABLE_LINK_TEMPLATE = "http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?lrt=1&input=%s&boardType=dep&start=yes&";
+    // @todo Diese Map aus den zentralen Stammdaten unter https://railway-stations.org/laenderdaten.json laden, sobald die URL-Templates dort drin sind
+    private static Map<String, String> TIMETABLE_LINK_TEMPLATES;
+    {
+        TIMETABLE_LINK_TEMPLATES = new HashMap<String, String>(2);
+        TIMETABLE_LINK_TEMPLATES.put("DE", "https://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?bt=dep&max=10&rt=1&use_realtime_filter=1&start=yes&input=%s");
+        TIMETABLE_LINK_TEMPLATES.put("CH", "http://fahrplan.sbb.ch/bin/stboard.exe/dn?input=%s&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes");
+    }
+
     private final String countryShortCode;
+    private final String DB_BAHNHOF_LIVE_PKG = "de.deutschebahn.bahnhoflive";
+    private final String DB_BAHNHOF_LIVE_CLASS = "de.deutschebahn.bahnhoflive.MeinBahnhofActivity";
 
     /**
      * The Bahnhof about which a notification is being built.
@@ -92,6 +106,8 @@ public abstract class NearbyBahnhofNotificationManager {
         PendingIntent mapPendingIntent = getMapPendingIntent();
         // Build an intent to view the station's timetable
         PendingIntent timetablePendingIntent = getTimetablePendingIntent();
+        // Build an intent to launch the DB Bahnhöfe Live app
+        PendingIntent stationPendingIntent = getStationPendingIntent();
 
         // Texts and bigStyle
         TextCreator textCreator = new TextCreator().invoke();
@@ -109,12 +125,16 @@ public abstract class NearbyBahnhofNotificationManager {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setOnlyAlertOnce(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
-        // @todo find an international solution to display the timetable. I suggest to read country configuration if URL template from the server.
-        if ("DE".equals(countryShortCode)) {
+
+        if (timetablePendingIntent != null) {
             builder.addAction(R.drawable.ic_timetable,
                     context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_timetable),
                     timetablePendingIntent);
         }
+        // @todo aktivieren, sobald ein wirklich funktionierende Intent gefunden ist
+            /*builder.addAction(R.drawable.ic_timetable,
+                    "Bahnhofsinfos",
+                    stationPendingIntent);*/
 
         return new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_logotrain_found)
@@ -163,15 +183,32 @@ public abstract class NearbyBahnhofNotificationManager {
      * Build an intent for an action to view a map.
      * @return the PendingIntent built.
      */
-    protected PendingIntent getTimetablePendingIntent() {
+    protected @Nullable PendingIntent getTimetablePendingIntent() {
         //
-        Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
+        final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
+        final String timeTableTemplate = TIMETABLE_LINK_TEMPLATES.get(countryShortCode);
+        if (timeTableTemplate == null)
+            return null;
         Uri timeTableUri = Uri.parse(
-                String.format(TIMETABLE_LINK_TEMPLATE, Uri.encode(notificationStation.getTitle()))
+                String.format(timeTableTemplate, Uri.encode(notificationStation.getTitle()))
         );
         timetableIntent.setData(timeTableUri);
         return pendifyMe(timetableIntent, REQUEST_TIMETABLE);
     }
+
+    /**
+     * Build an intent for an action to view a map.
+     * @return the PendingIntent built.
+     */
+
+    @NonNull
+    protected PendingIntent getStationPendingIntent() {
+        // Build an intent for an action to see station details
+        Intent stationIntent = new Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS);
+        stationIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, notificationStation);
+        return pendifyMe(stationIntent, REQUEST_STATION);
+    }
+
 
 
     public void destroy() {
