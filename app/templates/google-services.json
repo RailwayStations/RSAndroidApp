@@ -1,0 +1,58 @@
+{
+  "project_info": {
+    "project_number": "440656211497",
+    "firebase_url": "https://gabysfirebase.firebaseio.com",
+    "project_id": "gabysfirebase",
+    "storage_bucket": "gabysfirebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440656211497:android:e75ef8d77ec227d6",
+        "android_client_info": {
+          "package_name": "de.bahnhoefe.deutschlands.bahnhofsfotos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "440656211497-kihnaitclaljh9pjp6kng96499fuoa47.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.bahnhoefe.deutschlands.bahnhofsfotos",
+            "certificate_hash": "9DC76CDA5D2EEFC91902AC990851CA5308D8561B"
+          }
+        },
+        {
+          "client_id": "440656211497-sn90vq6cklv316o6gb0hd2vl6dn97q3s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.bahnhoefe.deutschlands.bahnhofsfotos",
+            "certificate_hash": "0FCE225858B03E02E7D2F87B0C210EA7FF8B03AF"
+          }
+        },
+        {
+          "client_id": "440656211497-u25co12p2pu70vg0vc030g78djhrittb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
