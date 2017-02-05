@@ -11,11 +11,9 @@
 -->
 
     <!--debug-KEY-->
-    <!--
-    <string name="google_maps_debug_key" templateMergeStrategy="preserve" translatable="false">
+    <string name="google_maps_deb_key" templateMergeStrategy="preserve" translatable="false">
         [your debug-Key goes here]
     </string>
-    -->
 
     <!--release-KEY-->
     <!--
