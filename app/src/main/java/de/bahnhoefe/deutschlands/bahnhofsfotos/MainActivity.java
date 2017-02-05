@@ -7,9 +7,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,12 +36,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,31 +55,36 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.google.firebase.auth.FirebaseAuth;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
+import static android.R.attr.country;
+import static com.google.android.gms.analytics.internal.zzy.b;
 import static java.lang.Integer.parseInt;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DIALOG_TAG = "App Info Dialog";
     public final String TAG = "Bahnhoefe";
-    private TextView tvDownload;
     private BahnhofsDbAdapter dbAdapter;
-    private Context context;
-    private TextView tvUpdate;
     private String lastUpdateDate;
-    private static final int PERMISSION_REQUEST_CODE = 200;
     private NavigationView navigationView;
-    File file;
+    private static final String DEFAULT = "";
+    private static final String DEFAULT_COUNTRY = "DE";
+    private String countryShortCode;
 
-    CustomAdapter customAdapter;
-    ListView listView;
-    Cursor cursor;
+    private CustomAdapter customAdapter;
+    private Cursor cursor;
+
 
     private FirebaseAuth mFirebaseAuth;
 
@@ -98,16 +99,27 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        dbAdapter = new BahnhofsDbAdapter(this);
-        dbAdapter.open();
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        dbAdapter = baseApplication.getDbAdapter();
+        countryShortCode = baseApplication.getCountryShortCode();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Will be implemented later.", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                String email = "bahnhofsfotos@deutschlands-bahnhoefe.de";
+                String subject = "Nachricht zur Bahnhofsfoto-App";
+                String chooserTitle = "Mail versenden";
+
+                Uri uri = Uri.parse("mailto:" + email)
+                        .buildUpon()
+                        .appendQueryParameter("subject", subject)
+                        .build();
+
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + email));
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                startActivity(Intent.createChooser(emailIntent, chooserTitle));
             }
         });
 
@@ -137,21 +149,25 @@ public class MainActivity extends AppCompatActivity
         } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
-            new JSONTask(lastUpdateDate).execute();
+            runMultipleAsyncTask();
         }
 
         cursor = dbAdapter.getStationsList(false);
         customAdapter = new CustomAdapter(this, cursor,0);
-        listView = (ListView) findViewById(R.id.lstStations);
+        ListView listView = (ListView) findViewById(R.id.lstStations);
+        assert listView != null;
         listView.setAdapter(customAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByRowId(id);
+                Country country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
+                Log.i(TAG, "Country: " + countryShortCode);
                 Class cls = DetailsActivity.class;
                 Intent intentDetails = new Intent(MainActivity.this, cls);
                 intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+                intentDetails.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
                 startActivity(intentDetails);
 
             }
@@ -174,7 +190,7 @@ public class MainActivity extends AppCompatActivity
 
     private void handleGalleryNavItem() {
 
-        file = new File(Environment.getExternalStorageDirectory()
+        File file = new File(Environment.getExternalStorageDirectory()
                 + File.separator + "Bahnhofsfotos");
         Log.d(TAG, file.toString());
 
@@ -295,8 +311,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if(id==R.id.countrySelection){
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, CountryActivity.class);
+            startActivity(intent);
         } else if (id == R.id.notify) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
             boolean active = statusBinder != null ? statusBinder.isNotificationTrackingActive() : false;
@@ -326,7 +343,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
-            new JSONTask(lastUpdateDate).execute();
+            runMultipleAsyncTask();
         } else if (id == R.id.nav_your_own_station_photos) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
             startActivity(intent);
@@ -348,11 +365,13 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intentAuth);
             }
 
-        } /*else if (id == R.id.nav_send) {
-
-        }*/
+        } else if (id == R.id.nav_send) {
+            Intent sliderIntent = new Intent(MainActivity.this,IntroSliderActivity.class);
+            startActivity(sliderIntent);
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -379,6 +398,9 @@ public class MainActivity extends AppCompatActivity
 
         private ProgressDialog progressDialog;
         private Date lastUpdateDate;
+
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
+        String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
 
         // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
         private void enableHttpResponseCache() {
@@ -408,6 +430,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected List<Bahnhof> doInBackground(Void ...params) {
             dbAdapter.deleteBahnhoefe();
+            dbAdapter.deleteCountries();
             List<Bahnhof> ohne = loadBatch(true);
             List<Bahnhof> mit = loadBatch(false);
             ohne.addAll(mit);
@@ -423,7 +446,7 @@ public class MainActivity extends AppCompatActivity
 
             publishProgress("Verbinde...");
             try {
-                URL url = new URL(withPhotos ? Constants.BAHNHOEFE_MIT_PHOTO_URL : Constants.BAHNHOEFE_OHNE_PHOTO_URL);
+                URL url = new URL(String.format("%s/%s/%s%s", Constants.BAHNHOEFE_START_URL, countryShortChode.toLowerCase(), Constants.BAHNHOEFE_END_URL, withPhotos));
                 connection = (HttpURLConnection)url.openConnection();
                 connection.connect();
                 long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);
@@ -448,7 +471,6 @@ public class MainActivity extends AppCompatActivity
                         for (int i = 0; i < bahnhofList.length(); i++) {
                             publishProgress("Verarbeite " + i + "/" + count);
                             JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
-                            //publishProgress(((i+1) + " von " + bahnhofList.length()));
 
                             String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
                             String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
@@ -496,10 +518,15 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(List<Bahnhof> result) {
-            progressDialog.dismiss();
+            if (MainActivity.this.isDestroyed()) {
+                return;
+            }
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
             writeUpdateDateInFile();
             enableNavItem();
-            tvUpdate = (TextView) findViewById(R.id.tvUpdate);
+            TextView tvUpdate = (TextView) findViewById(R.id.tvUpdate);
             try {
                 tvUpdate.setText("Letzte Aktualisierung am: " + loadUpdateDateFromFile("updatedate.txt") );
             } catch (Exception e) {
@@ -546,32 +573,113 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public BahnhofsDbAdapter getDbHelper(){
-        return dbAdapter;
-    }
+    public class JSONLaenderTask extends AsyncTask<Void, String, List<Country>> {
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (dbAdapter !=null){
-            dbAdapter.close();
+        private ProgressDialog progressDialog;
+
+        protected List<Country> doInBackground(Void... params) {
+            URL url = null;
+            HttpURLConnection laenderConnection = null;
+            BufferedReader reader = null;
+            int count = 0;
+
+            try {
+                url = new URL(Constants.LAENDERDATEN_URL);
+                laenderConnection = (HttpURLConnection) url.openConnection();
+                laenderConnection.connect();
+                InputStream stream = laenderConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(stream));
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+                String finalJson = buffer.toString();
+
+                publishProgress("Verarbeite Länder...");
+                try {
+                    JSONArray countryList = new JSONArray(finalJson);
+                    count = countryList.length();
+                    Log.i(TAG, "Parsed " + count + " countries");
+                    List<Country> countries = new ArrayList<Country>(count);
+
+                    for (int i = 0; i < countryList.length(); i++) {
+                        publishProgress("Verarbeite " + i + "/" + count);
+                        JSONObject jsonObj = (JSONObject) countryList.get(i);
+
+                        String countryShortCode = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE);
+                        String countryName = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME);
+                        String email = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_EMAIL);
+                        String twitterTags = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS);
+
+                        Country country = new Country();
+                        country.setCountryShortCode(countryShortCode);
+                        country.setCountryName(countryName);
+                        country.setEmail(email);
+                        country.setTwitterTags(twitterTags);
+
+                        countries.add(country);
+                        Log.d("DatenbankInsertLdOk ...", country.toString());
+                    }
+                    publishProgress("Schreibe in Datenbank");
+                    dbAdapter.insertCountries(countries);
+                    publishProgress("Datenbank " + countries + " Ländern aktualisiert");
+                    return countries;
+
+                } catch (JSONException e) {
+                    Log.e(TAG, "Mal formatted Json", e);
+                }
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
         }
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(List<Country> countries) {
+            recreate();
+        }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    // from http://blogs.innovationm.com/multiple-asynctask-in-android/
+    private void runMultipleAsyncTask() // Run Multiple Async Task
+    {
+        JSONTask asyncTaskBahnhoefe = new JSONTask(lastUpdateDate); // First
+
+        if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) // Above Api Level 13
+        {
+            asyncTaskBahnhoefe.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        }
+        else // Below Api Level 13
+        {
+            asyncTaskBahnhoefe.execute();
+        }
+        JSONLaenderTask asyncTaskCountries = new JSONLaenderTask(); // Second
+        if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)// Above Api Level 13
+        {
+            asyncTaskCountries.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        }
+        else // Below Api Level 13
+        {
+            asyncTaskCountries.execute();
+        }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
+
     @Override
     public void onResume() {
         super.onResume();
         handleGalleryNavItem();
+
     }
 
     @Nullable

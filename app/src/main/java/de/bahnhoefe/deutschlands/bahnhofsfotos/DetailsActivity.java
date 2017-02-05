@@ -40,17 +40,24 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 
+import static android.R.attr.country;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
+import static com.google.android.gms.analytics.internal.zzy.k;
+import static com.google.android.gms.analytics.internal.zzy.m;
+import static com.google.android.gms.analytics.internal.zzy.v;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
     public static final String EXTRA_BAHNHOF = "bahnhof";
+    public static final String EXTRA_COUNTRY = "country";
     private static final String TAG = DetailsActivity.class.getSimpleName();
     public static final int STORED_FOTO_WIDTH = 1920;
     public static final int STORED_FOTO_QUALITY = 95;
@@ -58,10 +65,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private ImageButton takePictureButton;
     private ImageView imageView;
     private Bahnhof bahnhof;
+    private Country country;
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
-    private String licence, photoOwner, linking, link, nickname;
+    private String licence, photoOwner, linking, link, nickname,countryShortCode;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static int alpha = 128;
 
@@ -116,14 +124,24 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
         link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
         nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
+        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
+
 
         if (intent != null) {
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
+            if (bahnhof == null) {
+                Log.w(TAG, "EXTRA_BAHNHOF in intent data missing");
+                Toast.makeText(this, "Bahnhof nicht gefunden", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+
+            country = (Country) intent.getSerializableExtra(EXTRA_COUNTRY);
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 
             if (bahnhof.getPhotoflag() != null) {
-                fetchTask = new BahnhofsFotoFetchTask(this);
+                fetchTask = new BahnhofsFotoFetchTask(this,getApplicationContext());
                 fetchTask.execute(bahnhof.getId());
             } else {
                 takePictureButton.setVisibility(View.VISIBLE);
@@ -163,6 +181,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
+    private void checkMyData() {
+        MyDataDialogFragment myDataDialog = new MyDataDialogFragment();
+        myDataDialog.show(getFragmentManager(),"mydata_dialog");
+    }
+
     /**
      * Method to request permission for camera
      */
@@ -175,18 +198,24 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void takePicture() {
-        if (bahnhof.getPhotoflag() != null)
-            return;
-        Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-        File file = getCameraMediaFile();
-        if (file != null) {
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-            intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
-            intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
-            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-        } else {
-            Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG);
-        }
+
+            if (bahnhof.getPhotoflag() != null)
+                return;
+        if(nickname.equals("default")){
+            checkMyData();
+        }else {
+
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            File file = getCameraMediaFile();
+            if (file != null) {
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
+                intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
+                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+            } else {
+                Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
+            }
+       }
     }
 
 
@@ -228,11 +257,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
 
             } else {
+                if(nickname.equals("default")){
+                    checkMyData();
+                }
 
                 takePicture();
 
             }
         }else{
+            if(nickname.equals("default")){
+                checkMyData();
+            }
             takePicture();
         }
     }
@@ -410,7 +445,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // action with ID action_settings was selected
             case R.id.send_email:
                 Intent emailIntent = createFotoSendIntent();
-                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
+                //emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {country.getEmail()});
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + licence
                         + "\n selbst fotografiert: " + photoOwner
@@ -422,7 +458,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 break;
             case R.id.share_photo:
                 Intent shareIntent = createFotoSendIntent();
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhof.getTitle() + " @android_oma @khgdrn");
+                //shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhof.getTitle() + " @android_oma @khgdrn");
+                shareIntent.putExtra(Intent.EXTRA_TEXT,country.getTwitterTags() + " " + bahnhof.getTitle());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
@@ -657,25 +694,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 sbar.show();
             fullscreen = false;
         }
-        /*
-        LayoutTransition transition = new LayoutTransition();
 
-        transition.removeChild(detailsLayout, licenseTagView);
-        // Duration selected in SeekBar
-        long duration = mDurationSeekbar.getProgress();
-        // Animation path is based on whether animating in or out
-        Path path = mIsOut ? mPathIn : mPathOut;
-
-        // Log animation details
-        Log.i(TAG, String.format("Starting animation: [%d ms, %s, %s]",
-                duration, (String) mInterpolatorSpinner.getSelectedItem(),
-                ((mIsOut) ? "Out (growing)" : "In (shrinking)")));
-
-        // Start the animation with the selected options
-        startAnimation(interpolator, duration, path);
-
-        // Toggle direction of animation (path)
-        mIsOut = !mIsOut;
-        */
     }
 }

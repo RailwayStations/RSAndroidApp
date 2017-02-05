@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -39,6 +40,9 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+
+import static android.R.attr.country;
 
 public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener , LocationListener {
 
@@ -48,15 +52,16 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
 
     private List<Bahnhof> bahnhofMarker;
     private LatLng myPos;
+    private static final String DEFAULT = "";
     /**
      * Provides the entry point to Google Play services.
      */
-    protected GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient mGoogleApiClient;
 
     /**
      * Stores parameters for requests to the FusedLocationProviderApi.
      */
-    protected LocationRequest mLocationRequest;
+    private LocationRequest mLocationRequest;
     private boolean mRequestingLocationUpdates = true;
     private long UPDATE_INTERVAL_IN_MILLISECONDS= 300000;
     private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS=300000;
@@ -68,8 +73,8 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_acitivty);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        dbAdapter = new BahnhofsDbAdapter(this);
-        dbAdapter.open();
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        dbAdapter = baseApplication.getDbAdapter();
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -85,11 +90,6 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
         buildGoogleApiClient();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        dbAdapter.close();
-    }
 
     private void readBahnhoefe() {
         try{
@@ -164,6 +164,9 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onInfoWindowClick(Marker marker) {
 
+        BaseApplication baseApplication = (BaseApplication)getApplication();
+        String countryShortCode = baseApplication.getCountryShortCode();
+
         if(marker.getSnippet() != null){
 
             Class cls = DetailsActivity.class;
@@ -171,10 +174,12 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
             long id = Long.valueOf(marker.getSnippet());
             try {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
+                Country country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
                 intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+                intent.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
                 startActivity(intent);
             } catch (RuntimeException e) {
-                Log.wtf(TAG, String.format("Could not fetch station id %d that we put onto the map", id), e);
+                Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);
             }
         } else {
             marker.hideInfoWindow();

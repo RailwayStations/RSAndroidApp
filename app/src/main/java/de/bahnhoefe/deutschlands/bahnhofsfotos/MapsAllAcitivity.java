@@ -3,9 +3,9 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -23,23 +23,18 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 
 public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
-    private Double myLatitude=51d;
-    private Double myLongitude=10d;
     private static final String TAG = MapsAllAcitivity.class.getSimpleName();
 
     private List<Bahnhof> bahnhofMarker;
     private LatLng myPos;
-    BahnhofsDbAdapter bahnhofsDbAdapter;
+    private BahnhofsDbAdapter dbAdapter;
+    private static final String DEFAULT = "";
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        bahnhofsDbAdapter.close();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,19 +49,11 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
         mapFragment.getMapAsync(this);
 
 
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        dbAdapter = baseApplication.getDbAdapter();
 
-        bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
-
-        try{
-            bahnhofsDbAdapter.open();
-            bahnhofMarker = bahnhofsDbAdapter.getAllBahnhoefe(false);
-                   // .getBahnhoefeByLatLngRectangle(myLatitude, myLongitude);
-        }catch(Exception e){
-            Log.i(TAG,"Datenbank konnte nicht geöffnet werden");
-        }
-        myPos = new LatLng(myLatitude,myLongitude);
-//        Toast.makeText(this, bahnhofMarker.size() +" Bahnhöfe geladen", Toast.LENGTH_LONG).show();
-
+        bahnhofMarker = dbAdapter.getAllBahnhoefe(false);
+        myPos = new LatLng(51d, 10d);
 
     }
 
@@ -92,7 +79,7 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
     {
 
         for(int i=0; i< bahnhofMarker.size();i++){
-            LatLng bahnhofPos = new LatLng(Double.valueOf(bahnhofMarker.get(i).getLat()),Double.valueOf(bahnhofMarker.get(i).getLon()));
+            LatLng bahnhofPos = new LatLng(bahnhofMarker.get(i).getLat(), bahnhofMarker.get(i).getLon());
             mMap.addMarker(new MarkerOptions()
                     .title(bahnhofMarker.get(i).getTitle())
                     .position(bahnhofPos)
@@ -104,12 +91,6 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 7));
-
-        // Add a marker and moves the camera to your own position. If you want to do anything with it, use the bottom code
-       /* mMap.addMarker(new MarkerOptions().position(myPos).title("Meine aktuelle Position: ").icon(BitmapDescriptorFactory.defaultMarker(55)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
-        mMap.setInfoWindowAdapter(this);
-        mMap.setOnInfoWindowClickListener(this);*/
 
     }
 
@@ -137,29 +118,19 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+        BaseApplication baseApplication = (BaseApplication)getApplication();
+        String countryShortCode = baseApplication.getCountryShortCode();
+
         Class cls = DetailsActivity.class;
         Intent intent = new Intent(MapsAllAcitivity.this, cls);
         long id = Long.valueOf(marker.getSnippet());
-        Bahnhof bahnhof = bahnhofsDbAdapter.fetchBahnhofByBahnhofId(id);
+        Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
+        Country country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
         intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+        intent.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
         startActivity(intent);
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
 
 
 }

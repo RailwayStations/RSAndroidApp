@@ -2,18 +2,25 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 /**
  * Created by android_oma on 06.08.16.
+ *
+ * Adapter for ListView of stations, which don't have a photo
+ *
  */
 
 public class CustomAdapter extends CursorAdapter {
@@ -45,9 +52,9 @@ public class CustomAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        ViewHolder holder  =   (ViewHolder)    view.getTag();
-        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_ID)));
-        holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_TITLE)));
+            ViewHolder holder = (ViewHolder) view.getTag();
+            holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_ID)));
+            holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_TITLE)));
 
     }
 

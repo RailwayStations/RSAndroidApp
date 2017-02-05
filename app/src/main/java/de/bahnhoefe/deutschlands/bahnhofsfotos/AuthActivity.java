@@ -47,6 +47,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,15 +57,18 @@ import static com.google.android.gms.analytics.internal.zzy.m;
 public class AuthActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
+
     public static class MessageViewHolder extends RecyclerView.ViewHolder {
         public TextView messageTextView;
         public TextView messengerTextView;
+        public TextView messengerTimeStamp;
         public CircleImageView messengerImageView;
 
         public MessageViewHolder(View v) {
             super(v);
             messageTextView = (TextView) itemView.findViewById(R.id.messageTextView);
             messengerTextView = (TextView) itemView.findViewById(R.id.messengerTextView);
+            messengerTimeStamp = (TextView) itemView.findViewById(R.id.messengerTimeStamp);
             messengerImageView = (CircleImageView) itemView.findViewById(R.id.messengerImageView);
         }
     }
@@ -77,6 +81,7 @@ public class AuthActivity extends AppCompatActivity implements
     private static final String MESSAGE_SENT_EVENT = "message_sent";
     private String mUsername;
     private String mPhotoUrl;
+    private String mTimeStamp;
     private SharedPreferences mSharedPreferences;
 
     private Button mSendButton;
@@ -104,6 +109,10 @@ public class AuthActivity extends AppCompatActivity implements
         // Initialize Firebase Auth
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+        ChatMessage friendly_chat = new ChatMessage();
+        mTimeStamp = friendly_chat.setChatTimeStamp();
+
 
         if (mFirebaseUser == null) {
             // Not signed in, launch the Sign In activity
@@ -137,6 +146,7 @@ public class AuthActivity extends AppCompatActivity implements
                 mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 viewHolder.messageTextView.setText(friendlyMessage.getText());
                 viewHolder.messengerTextView.setText(friendlyMessage.getName());
+                viewHolder.messengerTimeStamp.setText(friendlyMessage.getChatTimeStamp());
                 if (friendlyMessage.getPhotoUrl() == null) {
                     viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(AuthActivity.this,
                             R.drawable.ic_account_circle_black_36dp));
@@ -214,7 +224,7 @@ public class AuthActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 ChatMessage chatMessage = new ChatMessage(mMessageEditText.getText().toString(), mUsername,
-                        mPhotoUrl);
+                        mPhotoUrl,mTimeStamp);
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(chatMessage);
                 mMessageEditText.setText("");
 
@@ -266,7 +276,6 @@ public class AuthActivity extends AppCompatActivity implements
                 mUsername = ANONYMOUS;
                 mPhotoUrl = null;
                 startActivity(new Intent(this,MainActivity.class));
-                //startActivity(new Intent(this,SignInActivity.class));
                 return true;
             /*case R.id.fresh_config_menu:
                 fetchConfig();

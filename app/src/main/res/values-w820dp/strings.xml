@@ -35,6 +35,7 @@
     <string name="bt_mydata_commit">Speichern</string>
     <string name="bt_mydata_clear">Reset</string>
     <string name="PREF_FILE">APP_PREF_FILE</string>
+    <string name="PREF_COUNTRY_FILE">APP_PREF_FILE</string>
     <string name="LICENCE">APP_PREF_LICENCE</string>
     <string name="PHOTO_OWNER">APP_PREF_PHOTO_OWNER</string>
     <string name="LINKING">APP_PREF_LINKING</string>
@@ -68,4 +69,12 @@
     <string name="menu_title_info">Über die App</string>
     <string name="chatActivity">Chat</string>
     <string name="LogInActivity">Login</string>
+    <string name="country_activity">Länderauswahl</string>
+    <string name="selectCountry">auswählen</string>
+    <string name="COUNTRY">APP_PREF_COUNTRY</string>
+    <string name="countrySelection">Länderauswahl</string>
+    <string name="locationUpdates">Standort-Aktualisierung</string>
+    <string name="dialog_message">Du hast unter “Meine Daten” dein Profil noch nicht ausgefüllt. Du kannst erst ein Foto speichern, wenn du dies erledigt hast.</string>
+    <string name="dialog_title">Ergänze Deine Daten</string>
+    <string name="zu_meine_daten">Öffne Meine Daten</string>
 </resources>

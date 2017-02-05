@@ -17,8 +17,11 @@
         android:checkable="true"
         android:checked="false"/>
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:id="@+id/countrySelection"
+        android:title="@string/countrySelection"
         app:showAsAction="never" />
+    <!--<item
+        android:id="@+id/locationUpates"
+        android:title="@string/locationUpdates"
+        app:showAsAction="never" />-->
 </menu>
