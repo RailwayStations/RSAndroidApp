@@ -2,11 +2,11 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -22,15 +22,12 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChatMessage;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FirebaseConstants;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.MyFirebaseMessagingService;
-import de.hdodenhof.circleimageview.CircleImageView;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.ui.email.SignInActivity;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
@@ -38,21 +35,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import static android.app.Activity.RESULT_OK;
-import static com.google.android.gms.analytics.internal.zzy.m;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChatMessage;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AuthActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
@@ -74,11 +64,11 @@ public class AuthActivity extends AppCompatActivity implements
     }
 
     private static final String TAG = "AuthActivity";
-    public static final String MESSAGES_CHILD = "messages";
+    private static final String MESSAGES_CHILD = "messages";
     private static final int REQUEST_INVITE = 1;
-    public static final int DEFAULT_MSG_LENGTH_LIMIT = 10;
-    public static final String ANONYMOUS = "anonymous";
-    private static final String MESSAGE_SENT_EVENT = "message_sent";
+    private static final int DEFAULT_MSG_LENGTH_LIMIT = 10;
+    private static final String FRIENDLY_MSG_LENGTH = "friendly_msg_length";
+    private static final String ANONYMOUS = "anonymous";
     private String mUsername;
     private String mPhotoUrl;
     private String mTimeStamp;
@@ -199,7 +189,7 @@ public class AuthActivity extends AppCompatActivity implements
 
         mMessageEditText = (EditText) findViewById(R.id.messageEditText);
         mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mSharedPreferences
-                .getInt(FirebaseConstants.FRIENDLY_MSG_LENGTH, DEFAULT_MSG_LENGTH_LIMIT))});
+                .getInt(FRIENDLY_MSG_LENGTH, DEFAULT_MSG_LENGTH_LIMIT))});
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {

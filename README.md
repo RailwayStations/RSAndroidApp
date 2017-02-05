@@ -9,7 +9,7 @@ be created through the java-application from [Peter Storch](https://github.com/p
 The project - website you will find on https://railway-stations.org and http://www.deutschlands-bahnhoefe.de.
 
 
-To build the App you need a Google-Maps-Api-Key. Its located under `app/src/main/res/values/google_maps_api-template.xml`.
+To build the App you need a Google-Maps-Api-Key. Insert the key(s) in `app/templates/google_maps_api.xml` and copy the file into `app/src/main/res/values/`.
 
 The google-services.json has to be exchanged with your firebase-created file. Please follow the tutorial on https://firebase.google.com/docs/android/setup.
 Rename the FireBaseConstantsTemplate to FireBaseConstants and fill in your own data. 
