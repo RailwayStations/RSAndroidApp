@@ -11,7 +11,7 @@ The project - website you will find on https://railway-stations.org and http://w
 
 To build the App you need a Google-Maps-Api-Key. Its located under `app/src/main/res/values/google_maps_api-template.xml`.
 
-Another file has to be added: google-services.json. Please follow the tutorial on https://firebase.google.com/docs/android/setup.
+The google-services.json has to be exchanged with your firebase-created file. Please follow the tutorial on https://firebase.google.com/docs/android/setup.
 Rename the FireBaseConstantsTemplate to FireBaseConstants and fill in your own data. 
 
 
