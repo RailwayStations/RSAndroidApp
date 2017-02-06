@@ -1,5 +1,13 @@
 language: android
 jdk: oraclejdk8
+sudo: false
+cache:
+  directories:
+    - $HOME/.gradle/caches/2.14.1
+    - $HOME/.gradle/caches/jars-1
+    - $HOME/.gradle/daemon
+    - $HOME/.gradle/native
+    - $HOME/.gradle/wrapper
 
 env:
   global:
@@ -49,5 +57,5 @@ before_script:
 
 script:
   # TODO: build with emulator
-  #- ./gradlew build connectedCheck
-  - ./gradlew build
+  #- ./gradlew build connectedCheck -PdisablePreDex
+  - ./gradlew build -PdisablePreDex
