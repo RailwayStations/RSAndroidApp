@@ -77,4 +77,5 @@
     <string name="dialog_message">Du hast unter “Meine Daten” dein Profil noch nicht ausgefüllt. Du kannst erst ein Foto speichern, wenn du dies erledigt hast.</string>
     <string name="dialog_title">Ergänze Deine Daten</string>
     <string name="zu_meine_daten">Öffne Meine Daten</string>
+    <string name="FIRSTAPPSTART">FirstAppStart</string>
 </resources>

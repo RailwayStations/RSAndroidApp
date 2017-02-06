@@ -133,5 +133,6 @@
     <string name="zu_meine_daten">Öffne Meine Daten</string>
     <string name="label_map">Karte</string>
     <string name="label_timetable">Abfahrten</string>
+    <string name="FIRSTAPPSTART">FirstAppStart</string>
 
 </resources>

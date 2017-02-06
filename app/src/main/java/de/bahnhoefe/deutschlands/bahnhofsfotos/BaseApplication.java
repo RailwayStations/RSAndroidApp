@@ -17,6 +17,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 public class BaseApplication extends Application  {
 
 
+    private static final String DEFAULT_FIRSTAPPSTART = "0";
     private static BaseApplication instance;
     public static final String DEFAULT_COUNTRY = "DE";
 
@@ -54,6 +55,7 @@ public class BaseApplication extends Application  {
         dbAdapter = new BahnhofsDbAdapter(this);
         dbAdapter.open();
         getCountryShortCode();
+        getFirstAppStart();
 
     }
 
@@ -87,5 +89,16 @@ public class BaseApplication extends Application  {
     public String getCountryShortCode() {
 
         return getPreferences().getString(getString(R.string.COUNTRY),DEFAULT_COUNTRY);
+    }
+
+    public void setFirstAppStart(String firstAppStart){
+        SharedPreferences.Editor editor = getPreferences().edit();
+        editor.putString(getString(R.string.FIRSTAPPSTART),firstAppStart);
+        editor.apply();
+    }
+
+    public String getFirstAppStart() {
+
+        return getPreferences().getString(getString(R.string.FIRSTAPPSTART),DEFAULT_FIRSTAPPSTART);
     }
 }

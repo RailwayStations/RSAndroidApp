@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import static com.google.android.gms.analytics.internal.zzy.B;
 import static com.google.android.gms.analytics.internal.zzy.i;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_share_white_48dp;
 
 public class IntroSliderActivity extends AppCompatActivity {
 
@@ -37,6 +38,7 @@ public class IntroSliderActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        final BaseApplication baseApplication = (BaseApplication) getApplication();
 
         if(Build.VERSION.SDK_INT>=21){
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -65,6 +67,7 @@ public class IntroSliderActivity extends AppCompatActivity {
         skip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                baseApplication.setFirstAppStart("1");
                 Intent intent = new Intent(IntroSliderActivity.this,MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -118,15 +121,20 @@ public class IntroSliderActivity extends AppCompatActivity {
 
         @Override
         public void onPageSelected(int position) {
+            BaseApplication baseApplication = (BaseApplication) getApplication();
             addBottomDots(position);
 
             if(position==layouts.length-1){
                 next.setText("PROCEED");
                 skip.setVisibility(View.GONE);
+                baseApplication.setFirstAppStart("1");
+                Intent sliderIntent = new Intent(IntroSliderActivity.this,MainActivity.class);
+                startActivity(sliderIntent);
             }else
             {
                 next.setText("NEXT");
                 skip.setVisibility(View.VISIBLE);
+
             }
         }
 
