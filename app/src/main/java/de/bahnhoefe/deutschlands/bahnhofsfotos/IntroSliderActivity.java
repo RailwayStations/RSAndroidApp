@@ -67,7 +67,7 @@ public class IntroSliderActivity extends AppCompatActivity {
         skip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                baseApplication.setFirstAppStart("1");
+                baseApplication.setFirstAppStart(true);
                 Intent intent = new Intent(IntroSliderActivity.this,MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -127,14 +127,11 @@ public class IntroSliderActivity extends AppCompatActivity {
             if(position==layouts.length-1){
                 next.setText("PROCEED");
                 skip.setVisibility(View.GONE);
-                baseApplication.setFirstAppStart("1");
-                Intent sliderIntent = new Intent(IntroSliderActivity.this,MainActivity.class);
-                startActivity(sliderIntent);
+                baseApplication.setFirstAppStart(true);
             }else
             {
                 next.setText("NEXT");
                 skip.setVisibility(View.VISIBLE);
-
             }
         }
 
