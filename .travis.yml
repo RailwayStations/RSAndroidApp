@@ -58,4 +58,4 @@ before_script:
 script:
   # TODO: build with emulator
   #- ./gradlew build connectedCheck -PdisablePreDex
-  - ./gradlew build -PdisablePreDex
+  - ./gradlew testDebugUnitTest -PdisablePreDex
