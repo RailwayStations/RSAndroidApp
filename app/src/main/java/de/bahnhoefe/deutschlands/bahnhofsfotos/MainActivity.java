@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity
     private static final String DEFAULT = "";
     private static final String DEFAULT_COUNTRY = "DE";
     private String countryShortCode;
+    private String firstAppStart;
 
     private CustomAdapter customAdapter;
     private Cursor cursor;
@@ -102,26 +103,27 @@ public class MainActivity extends AppCompatActivity
         BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
         countryShortCode = baseApplication.getCountryShortCode();
+        firstAppStart = baseApplication.getFirstAppStart();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String email = "bahnhofsfotos@deutschlands-bahnhoefe.de";
-                String subject = "Nachricht zur Bahnhofsfoto-App";
-                String chooserTitle = "Mail versenden";
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String email = "bahnhofsfotos@deutschlands-bahnhoefe.de";
+                    String subject = "Nachricht zur Bahnhofsfoto-App";
+                    String chooserTitle = "Mail versenden";
 
-                Uri uri = Uri.parse("mailto:" + email)
-                        .buildUpon()
-                        .appendQueryParameter("subject", subject)
-                        .build();
+                    Uri uri = Uri.parse("mailto:" + email)
+                            .buildUpon()
+                            .appendQueryParameter("subject", subject)
+                            .build();
 
-                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + email));
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-                startActivity(Intent.createChooser(emailIntent, chooserTitle));
-            }
-        });
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + email));
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                    startActivity(Intent.createChooser(emailIntent, chooserTitle));
+                }
+            });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -138,6 +140,11 @@ public class MainActivity extends AppCompatActivity
         View header = navigationView.getHeaderView(0);
         TextView tvUpdate = (TextView) header.findViewById(R.id.tvUpdate);
 
+        if(firstAppStart.equals("0")){
+            Intent introSliderIntent = new Intent(MainActivity.this,IntroSliderActivity.class);
+            startActivity(introSliderIntent);
+        }
+
 
         try {
             lastUpdateDate = loadUpdateDateFromFile("updatedate.txt");
@@ -146,7 +153,7 @@ public class MainActivity extends AppCompatActivity
         }
         if (!lastUpdateDate.equals("")) {
             tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
-        } else {
+        }else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
             runMultipleAsyncTask();
