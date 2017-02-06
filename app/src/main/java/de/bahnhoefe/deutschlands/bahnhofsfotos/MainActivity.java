@@ -65,6 +65,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 import static android.R.attr.country;
 import static com.google.android.gms.analytics.internal.zzy.b;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.id.tvUpdate;
 import static java.lang.Integer.parseInt;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity
     private static final String DEFAULT = "";
     private static final String DEFAULT_COUNTRY = "DE";
     private String countryShortCode;
-    private String firstAppStart;
+    private Boolean firstAppStart;
 
     private CustomAdapter customAdapter;
     private Cursor cursor;
@@ -119,9 +120,11 @@ public class MainActivity extends AppCompatActivity
                             .appendQueryParameter("subject", subject)
                             .build();
 
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + email));
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, uri);
                     startActivity(Intent.createChooser(emailIntent, chooserTitle));
+                /*Snackbar.make(view, "Will be implemented later.", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
+                    finish();
                 }
             });
 
@@ -140,11 +143,11 @@ public class MainActivity extends AppCompatActivity
         View header = navigationView.getHeaderView(0);
         TextView tvUpdate = (TextView) header.findViewById(R.id.tvUpdate);
 
-        if(firstAppStart.equals("0")){
+        if(firstAppStart==false){
             Intent introSliderIntent = new Intent(MainActivity.this,IntroSliderActivity.class);
             startActivity(introSliderIntent);
+            finish();
         }
-
 
         try {
             lastUpdateDate = loadUpdateDateFromFile("updatedate.txt");
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity
         }else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
-            runMultipleAsyncTask();
+            //runMultipleAsyncTask();
         }
 
         cursor = dbAdapter.getStationsList(false);
@@ -176,7 +179,7 @@ public class MainActivity extends AppCompatActivity
                 intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
                 intentDetails.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
                 startActivity(intentDetails);
-
+                finish();
             }
         });
 
@@ -679,6 +682,7 @@ public class MainActivity extends AppCompatActivity
         {
             asyncTaskCountries.execute();
         }
+
     }
 
 
@@ -686,6 +690,11 @@ public class MainActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
         handleGalleryNavItem();
+        if (lastUpdateDate.equals("")) {
+            disableNavItem();
+            //tvUpdate.setText(R.string.no_stations_in_database);
+            runMultipleAsyncTask();
+        }
 
     }
 
