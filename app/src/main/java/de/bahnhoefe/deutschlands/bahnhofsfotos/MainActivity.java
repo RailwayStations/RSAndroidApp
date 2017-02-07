@@ -111,20 +111,13 @@ public class MainActivity extends AppCompatActivity
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String email = "bahnhofsfotos@deutschlands-bahnhoefe.de";
-                    String subject = "Nachricht zur Bahnhofsfoto-App";
-                    String chooserTitle = "Mail versenden";
 
-                    Uri uri = Uri.parse("mailto:" + email)
-                            .buildUpon()
-                            .appendQueryParameter("subject", subject)
-                            .build();
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
+                    startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
 
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, uri);
-                    startActivity(Intent.createChooser(emailIntent, chooserTitle));
                 /*Snackbar.make(view, "Will be implemented later.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();*/
-                    finish();
                 }
             });
 
@@ -307,7 +300,7 @@ public class MainActivity extends AppCompatActivity
             MenuItem item = menu.findItem(R.id.notify);
             boolean active = statusBinder.isNotificationTrackingActive();
             item.setChecked(active);
-            item.setIcon(active ? R.drawable.ic_media_route_off_mono_dark : R.drawable.ic_media_route_on_mono_dark);
+            item.setIcon(active ? R.drawable.ic_gps_fixed_white_48dp : R.drawable.ic_location_disabled_white_48dp);
 
         }
         return super.onPrepareOptionsMenu(menu);
@@ -324,17 +317,18 @@ public class MainActivity extends AppCompatActivity
         if(id==R.id.countrySelection){
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, CountryActivity.class);
             startActivity(intent);
+            item.setIcon(R.drawable.ic_language_white_48dp);
         } else if (id == R.id.notify) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
             boolean active = statusBinder != null ? statusBinder.isNotificationTrackingActive() : false;
             if (!active) {
                 startService(intent);
                 item.setChecked(true);
-                item.setIcon(R.drawable.ic_media_route_off_mono_dark);
+                item.setIcon(R.drawable.ic_location_disabled_white_48dp);
             } else {
                 stopService(intent);
                 item.setChecked(false);
-                item.setIcon(R.drawable.ic_media_route_on_mono_dark);
+                item.setIcon(R.drawable.ic_gps_fixed_white_48dp);
             }
         }
 
