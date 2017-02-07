@@ -78,4 +78,7 @@
     <string name="dialog_title">Ergänze Deine Daten</string>
     <string name="zu_meine_daten">Öffne Meine Daten</string>
     <string name="FIRSTAPPSTART">FirstAppStart</string>
+    <string name="fab_email">bahnhofsfotos@deutschlands-bahnhoefe.de</string>
+    <string name="fab_subject">Nachricht zur Bahnhofsfoto-App</string>
+    <string name="fab_chooser_title">Mail versenden</string>
 </resources>

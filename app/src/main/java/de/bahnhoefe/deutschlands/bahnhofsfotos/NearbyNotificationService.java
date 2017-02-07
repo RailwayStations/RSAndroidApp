@@ -89,7 +89,7 @@ public class NearbyNotificationService extends Service implements LocationListen
             googleApiClient.connect();
             // show a permanent notification to indicate that position detection is running
             Notification ongoingNotification = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.ic_logotrain)
+                    .setSmallIcon(R.drawable.ic_launcher)
                     .setContentTitle(getString(R.string.nearby_notification_active))
                     .setOngoing(true)
                     .setLocalOnly(true)
