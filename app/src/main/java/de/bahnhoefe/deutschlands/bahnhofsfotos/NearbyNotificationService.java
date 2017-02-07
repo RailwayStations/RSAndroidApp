@@ -49,7 +49,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
 
     // Parameters for requests to the Location Api.
-    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000; // ms
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000; // ms
 
     private boolean started;// we have only one notification
     private NearbyBahnhofNotificationManager notifiedStationManager;
@@ -57,7 +57,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     /**
      * The intent action to use to bind to this service's status interface.
      */
-    public static String STATUS_INTERFACE = NearbyNotificationService.class.getPackage().getName() + ".Status";
+    public static final String STATUS_INTERFACE = NearbyNotificationService.class.getPackage().getName() + ".Status";
 
     public NearbyNotificationService() {
     }
@@ -66,7 +66,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     public void onCreate() {
         Log.i(TAG, "About to create");
         super.onCreate();
-        nearStations = new ArrayList<Bahnhof>(0); // no markers until we know where we are
+        nearStations = new ArrayList<>(0); // no markers until we know where we are
         notifiedStationManager = null;
         started = false;
 
@@ -216,8 +216,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                 (myPos.longitude - bahnhof.getLon()) * Math.cos(myPos.latitude / 180 * Math.PI) :
                 0.0d; // at the poles, longitude doesn't matter
         // simple Pythagoras now.
-        double distance = Math.sqrt(Math.pow(lateralDiff, 2.0d) + Math.pow(longDiff, 2.0d)) * EARTH_CIRCUMFERENCE / 360.0d;
-        return distance;
+        return Math.sqrt(Math.pow(lateralDiff, 2.0d) + Math.pow(longDiff, 2.0d)) * EARTH_CIRCUMFERENCE / 360.0d;
     }
 
     private void startLocationUpdates() {
@@ -231,9 +230,11 @@ public class NearbyNotificationService extends Service implements LocationListen
                 LocationServices.SettingsApi.checkLocationSettings(googleApiClient,
                         builder.build());
 
+        AsyncTask<PendingResult<LocationSettingsResult>, Void, Boolean> task =
         new AsyncTask<PendingResult<LocationSettingsResult>, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(PendingResult<LocationSettingsResult>... pendingResults) {
+
+            @Override @SafeVarargs
+            final protected Boolean doInBackground(PendingResult<LocationSettingsResult>... pendingResults) {
                 com.google.android.gms.common.api.Status status = pendingResults[0].await().getStatus();
                 int statusCode = status.getStatusCode();
                 return statusCode == LocationSettingsStatusCodes.SUCCESS
@@ -241,7 +242,7 @@ public class NearbyNotificationService extends Service implements LocationListen
             }
 
             @Override
-            protected void onPostExecute(Boolean success) {
+            final protected void onPostExecute(Boolean success) {
                 super.onPostExecute(success);
                 if (!success) {
                     Log.e(TAG, "Device settings unsuitable for location");
@@ -249,7 +250,9 @@ public class NearbyNotificationService extends Service implements LocationListen
                     stopSelf();
                 }
             }
-        }.execute(result);
+        };
+        //noinspection unchecked
+        task.execute(result);
 
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(
@@ -268,7 +271,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     /**
      * Called by Google Play when the client has connected.
-     * @param bundle
+     * @param bundle the Bundle corresponding to the event
      */
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -307,7 +310,7 @@ public class NearbyNotificationService extends Service implements LocationListen
      * is switched on or off.
      */
     public class StatusBinder extends Binder {
-        public boolean isNotificationTrackingActive() {
+        boolean isNotificationTrackingActive() {
             return NearbyNotificationService.this.started;
         }
     }
@@ -340,7 +343,6 @@ public class NearbyNotificationService extends Service implements LocationListen
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         } finally {
             bahnhofsDbAdapter.close();
-            ;
         }
     }
 
