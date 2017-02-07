@@ -20,13 +20,13 @@ import static android.R.attr.id;
 public class MyDataActivity extends AppCompatActivity {
     private static final String DEFAULT = "N/A";
     private final String TAG = getClass().getSimpleName();
-    EditText etNickname,etLink;
-    RadioGroup rgLicence, rgPhotoOwner, rgLinking;
-    RadioButton rbLinkingXing, rbLinkingTwitter, rbLinkingSnapchat, rbLinkingInstagram, rbLinkingWebpage, rbLinkingNo;
-    RadioButton rbLicenceCC0, rbLicenceCC4;
-    RadioButton rbPhotoOwnerYes, rbPhotoOwnerNo;
-    String licence, photoOwner, nickname, link, linking;
-    Button btCommit, btClear;
+    private EditText etNickname,etLink;
+    private RadioGroup rgLicence, rgPhotoOwner, rgLinking;
+    private RadioButton rbLinkingXing, rbLinkingTwitter, rbLinkingSnapchat, rbLinkingInstagram, rbLinkingWebpage, rbLinkingNo;
+    private RadioButton rbLicenceCC0, rbLicenceCC4;
+    private RadioButton rbPhotoOwnerYes, rbPhotoOwnerNo;
+    private String licence, photoOwner, nickname, link, linking;
+    private Button btCommit, btClear;
 
 
 
@@ -177,9 +177,8 @@ public class MyDataActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent i = getBaseContext().getPackageManager()
-                .getLaunchIntentForPackage( getBaseContext().getPackageName() );
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
+        Intent intent = new Intent(MyDataActivity.this,MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

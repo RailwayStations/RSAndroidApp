@@ -342,8 +342,10 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_your_data) {
+        if(id==R.id.nav_slideshow){
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, IntroSliderActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_your_data) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
@@ -360,7 +362,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(),DIALOG_TAG);
-        }else if (id == R.id.nav_user_register) {
+        } else if (id == R.id.nav_user_register) {
             if(mFirebaseAuth.getCurrentUser() == null){
                 Intent intentSignIn = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, SignInActivity.class);
                 startActivity(intentSignIn);
@@ -369,9 +371,6 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intentAuth);
             }
 
-        } else if (id == R.id.nav_send) {
-            Intent sliderIntent = new Intent(MainActivity.this,IntroSliderActivity.class);
-            startActivity(sliderIntent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

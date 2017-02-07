@@ -696,4 +696,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(DetailsActivity.this,MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }
