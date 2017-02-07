@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -42,8 +43,9 @@ public class AppInfoFragment extends DialogFragment {
         textView.setPadding(50, 50, 50, 50);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
         textView.setText(R.string.app_info_text);
+        textView.setLinkTextColor(Color.parseColor("#c71c4d"));
 
-        builder.setIcon(R.drawable.ic_launcher)
+        builder.setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.app_info_title)
                 //.setMessage(R.string.app_info_text)
                 .setPositiveButton(R.string.app_info_ok, new DialogInterface.OnClickListener() {

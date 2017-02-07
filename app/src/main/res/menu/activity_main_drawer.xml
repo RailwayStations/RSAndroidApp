@@ -3,6 +3,10 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_slideshow"
+            android:icon="@drawable/ic_slideshow_white_24px"
+            android:title="@string/menu_title_introslider" />
+        <item
             android:id="@+id/nav_your_data"
             android:icon="@drawable/ic_your_data"
             android:title="@string/menu_title_your_data" />
@@ -32,12 +36,8 @@
                 android:title="@string/menu_title_info" />
             <item
                 android:id="@+id/nav_user_register"
-                android:icon = "@drawable/ic_menu_login"
+                android:icon = "@drawable/ic_chat_white_24px"
                 android:title="Zum Chat" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="@string/menu_title_send" />
         </menu>
     </item>
 
