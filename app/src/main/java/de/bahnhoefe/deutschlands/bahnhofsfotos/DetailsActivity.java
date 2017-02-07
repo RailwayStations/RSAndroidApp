@@ -41,23 +41,19 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 
-import static android.R.attr.country;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
-import static com.google.android.gms.analytics.internal.zzy.k;
-import static com.google.android.gms.analytics.internal.zzy.m;
-import static com.google.android.gms.analytics.internal.zzy.v;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
     public static final String EXTRA_BAHNHOF = "bahnhof";
-    public static final String EXTRA_COUNTRY = "country";
     private static final String TAG = DetailsActivity.class.getSimpleName();
     private static final String TAG2 = "BackButtonTest";
     public static final int STORED_FOTO_WIDTH = 1920;
@@ -89,6 +85,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
+        countryShortCode = baseApplication.getCountryShortCode();
+        country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -125,8 +126,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
         link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
         nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
-        countryShortCode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
-
 
         if (intent != null) {
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
@@ -137,7 +136,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 return;
             }
 
-            country = (Country) intent.getSerializableExtra(EXTRA_COUNTRY);
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 

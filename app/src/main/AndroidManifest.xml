@@ -104,20 +104,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ViewImageActivity"
-            android:label="@string/title_view_image"
-            android:parentActivityName=".GalleryActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.GalleryActivity" />
-
-            <intent-filter>
-                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.ViewImageActivity" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".MapsAllAcitivity"
             android:label="@string/maps_all_activity"
             android:parentActivityName=".MainActivity">
