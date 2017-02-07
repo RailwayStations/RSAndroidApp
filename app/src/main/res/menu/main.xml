@@ -12,14 +12,15 @@
         android:id="@+id/notify"
         android:title="@string/benachrichtigen"
         android:hint="@string/nahe_gelegenen_bahnhof_melden"
-        android:icon="@drawable/ic_gps_fixed_white_48dp"
+        android:icon="@drawable/ic_gps_not_fixed_white_24px"
         app:showAsAction="collapseActionView|ifRoom"
         android:checkable="true"
         android:checked="false"/>
     <item
         android:id="@+id/countrySelection"
         android:title="@string/countrySelection"
-        app:showAsAction="never" />
+        android:icon="@drawable/ic_language_white_24px"
+        app:showAsAction="collapseActionView|ifRoom" />
     <!--<item
         android:id="@+id/locationUpates"
         android:title="@string/locationUpdates"
