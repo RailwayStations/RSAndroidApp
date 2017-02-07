@@ -46,7 +46,7 @@ public class MyDataDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 Intent myDataIntent = new Intent(getActivity(),MyDataActivity.class);
                 startActivity(myDataIntent);
-                getActivity().finish();
+                dismiss();
             }
         })
         .setNegativeButton("ABBRECHEN", new OnClickListener() {
@@ -54,7 +54,7 @@ public class MyDataDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 Intent mainIntent = new Intent(getActivity(), MainActivity.class);
                 startActivity(mainIntent);
-                getActivity().finish();
+                dismiss();
             }
         });
         return builder.create();

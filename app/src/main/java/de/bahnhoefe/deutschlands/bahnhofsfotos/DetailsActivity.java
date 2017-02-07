@@ -59,6 +59,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public static final String EXTRA_BAHNHOF = "bahnhof";
     public static final String EXTRA_COUNTRY = "country";
     private static final String TAG = DetailsActivity.class.getSimpleName();
+    private static final String TAG2 = "BackButtonTest";
     public static final int STORED_FOTO_WIDTH = 1920;
     public static final int STORED_FOTO_QUALITY = 95;
 
@@ -433,11 +434,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                             .addNextIntentWithParentStack(upIntent)
                             // Navigate up to the closest parent
                             .startActivities();
+
                 } else {
                     // This activity is part of this app's task, so simply
                     // navigate up to the logical parent activity.
                     NavUtils.navigateUpTo(this, upIntent);
                 }
+
+                onBackPressed();
                 break;
             case R.id.nav_to_station:
                 startNavigation(DetailsActivity.this);
