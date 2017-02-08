@@ -180,7 +180,7 @@ public abstract class NearbyBahnhofNotificationManager {
     }
 
     /**
-     * Build an intent for an action to view a map.
+     * Build an intent for an action to view a timetable for the station.
      * @return the PendingIntent built.
      */
     protected @Nullable PendingIntent getTimetablePendingIntent() {

@@ -5,7 +5,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -40,9 +39,6 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-
-import static android.R.attr.country;
 
 public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener , LocationListener {
 
@@ -174,9 +170,7 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
             long id = Long.valueOf(marker.getSnippet());
             try {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
-                Country country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
                 intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
-                intent.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
                 startActivity(intent);
             } catch (RuntimeException e) {
                 Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);

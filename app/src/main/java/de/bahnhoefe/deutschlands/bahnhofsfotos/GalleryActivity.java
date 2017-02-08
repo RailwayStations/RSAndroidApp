@@ -16,20 +16,29 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FilenameFilter;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.GridViewAdapter;
 
 public class GalleryActivity extends AppCompatActivity {
     // Declare variables
-    private String[] FilePathStrings;
-    private String[] FileNameStrings;
+    private String[] filePathStrings;
+    private String[] fileNameStrings;
     private File[] listFile;
-    GridView grid;
-    GridViewAdapter adapter;
-    File file;
+    private GridView grid;
+    private GridViewAdapter adapter;
+    private File file;
+    private BahnhofsDbAdapter dbAdapter;
+    private String countryShortCode;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        dbAdapter = baseApplication.getDbAdapter();
+        countryShortCode = baseApplication.getCountryShortCode();
+
         setContentView(R.layout.activity_gallery);
 
         // Check for SD Card
@@ -53,18 +62,18 @@ public class GalleryActivity extends AppCompatActivity {
                 }
             });
             // Creates a String array for FilePathStrings
-            FilePathStrings = new String[listFile.length];
+            filePathStrings = new String[listFile.length];
 
 
 
             // Creates a String array for FileNameStrings
-            FileNameStrings = new String[listFile.length];
+            fileNameStrings = new String[listFile.length];
 
             for (int i = 0; i < listFile.length; i++) {
                 // Get the path of the image file
-                FilePathStrings[i] = listFile[i].getAbsolutePath();
+                filePathStrings[i] = listFile[i].getAbsolutePath();
                 // Get the name image file
-                FileNameStrings[i] = listFile[i].getName();
+                fileNameStrings[i] = listFile[i].getName();
                 //Toast.makeText(this, FileNameStrings[i], Toast.LENGTH_LONG).show();
             }
         }
@@ -79,7 +88,7 @@ public class GalleryActivity extends AppCompatActivity {
         // Locate the GridView in gridview_main.xml
         grid = (GridView) findViewById(R.id.gridview);
         // Pass String arrays to LazyAdapter Class
-        adapter = new GridViewAdapter(this, FilePathStrings, FileNameStrings);
+        adapter = new GridViewAdapter(this, filePathStrings, fileNameStrings);
         // connect LazyAdapter to the GridView
         grid.setAdapter(adapter);
 
@@ -87,16 +96,24 @@ public class GalleryActivity extends AppCompatActivity {
         grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                Intent i = new Intent(GalleryActivity.this, ViewImageActivity.class);
-                // Pass String arrays FilePathStrings
-                i.putExtra("filepath", FilePathStrings);
-                // Pass String arrays FileNameStrings
-                i.putExtra("filename", FileNameStrings);
-                // Pass click position
-                i.putExtra("position", position);
-                startActivity(i);
-
+                String fileName = fileNameStrings[position];
+                String[] nameParts = fileName.split("[-.]");
+                boolean shown = false;
+                if (nameParts.length == 3) {
+                    long stationId = Long.valueOf(nameParts[1]);
+                    Bahnhof station = dbAdapter.fetchBahnhofByBahnhofId(stationId);
+                    if (station != null) {
+                        Intent detailIntent = new Intent(GalleryActivity.this, DetailsActivity.class);
+                        detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, station);
+                        startActivity(detailIntent);
+                        shown = true;
+                    }
+                }
+                if (!shown) {
+                    Toast.makeText(GalleryActivity.this,
+                            "Kann dieses Foto keinem Bahnhof mehr zuordnen",
+                            Toast.LENGTH_LONG).show();
+                }
             }
 
         });

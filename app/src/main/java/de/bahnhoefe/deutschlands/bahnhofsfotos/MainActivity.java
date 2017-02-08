@@ -20,7 +20,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -35,6 +34,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,7 +60,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.google.firebase.auth.FirebaseAuth;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
@@ -63,13 +67,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
-import static android.R.attr.country;
-import static com.google.android.gms.analytics.internal.zzy.b;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.id.tvUpdate;
 import static java.lang.Integer.parseInt;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -165,12 +163,9 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByRowId(id);
-                Country country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
-                Log.i(TAG, "Country: " + countryShortCode);
                 Class cls = DetailsActivity.class;
                 Intent intentDetails = new Intent(MainActivity.this, cls);
                 intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
-                intentDetails.putExtra(DetailsActivity.EXTRA_COUNTRY, country);
                 startActivity(intentDetails);
                 finish();
             }
