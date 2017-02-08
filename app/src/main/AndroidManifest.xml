@@ -48,7 +48,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".MapsAcitivity"
+            android:name=".MapsActivity"
             android:label="@string/maps_activity"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -104,7 +104,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MapsAllAcitivity"
+            android:name=".MapsAllActivity"
             android:label="@string/maps_all_activity"
             android:parentActivityName=".MainActivity">
             <meta-data

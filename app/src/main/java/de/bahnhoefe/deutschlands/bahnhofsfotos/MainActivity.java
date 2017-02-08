@@ -349,10 +349,10 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_stations_without_photo) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAcitivity.class);
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_all_stations_without_photo) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAllAcitivity.class);
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAllActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
