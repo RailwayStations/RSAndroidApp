@@ -139,5 +139,6 @@
     <string name="fab_subject">Nachricht zur Bahnhofsfoto-App</string>
     <string name="fab_chooser_title">Mail versenden</string>
     <string name="menu_title_introslider">Introslider</string>
+    <string name="menu_follow_my_location">Folge meiner Position</string>
 
 </resources>
