@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.List;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -17,28 +19,24 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.List;
-
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 
-public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener {
+public class MapsAllActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
-    private static final String TAG = MapsAllAcitivity.class.getSimpleName();
+    private static final String TAG = MapsAllActivity.class.getSimpleName();
 
     private List<Bahnhof> bahnhofMarker;
     private LatLng myPos;
     private BahnhofsDbAdapter dbAdapter;
-    private static final String DEFAULT = "";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_all_maps_acitivty);
+        setContentView(R.layout.activity_all_maps_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -120,7 +118,7 @@ public class MapsAllAcitivity extends AppCompatActivity implements OnMapReadyCal
         String countryShortCode = baseApplication.getCountryShortCode();
 
         Class cls = DetailsActivity.class;
-        Intent intent = new Intent(MapsAllAcitivity.this, cls);
+        Intent intent = new Intent(MapsAllActivity.this, cls);
         long id = Long.valueOf(marker.getSnippet());
         Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
         intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);

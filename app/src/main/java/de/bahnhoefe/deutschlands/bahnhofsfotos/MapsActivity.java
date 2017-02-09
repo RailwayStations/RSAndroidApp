@@ -43,19 +43,20 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 
-public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    public static final int MIN_METER_DISTANCE_BEFORE_RELOAD = 1000;
+    public static final int LOCATION_REQUEST_INTERVAL_MILLIS = 500;
     private GoogleMap mMap;
-    private static final String TAG = MapsAcitivity.class.getSimpleName();
+    private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int PERMISSION_REQUEST_CODE = 200;
 
     private List<Bahnhof> bahnhofMarker;
     private LatLng myPos;
+    private LatLng lastLoadPos;
 
     // views
     private CheckBox myLocSwitch = null;
-    // map status data
-    private static boolean followMyLocation = true;
 
     /**
      * Provides the entry point to Google Play services.
@@ -67,28 +68,21 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
      */
     private LocationRequest mLocationRequest;
     private boolean mRequestingLocationUpdates = true;
-    private long UPDATE_INTERVAL_IN_MILLISECONDS = 300000;
-    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 300000;
-    private long UPDATE_INTERVAL_IN_MILLISECONDS_FOLLOW = 1000;
-    private long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS_FOLLOW = 1000;
     private BahnhofsDbAdapter dbAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps_acitivty);
+        setContentView(R.layout.activity_maps_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
-
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //readBahnhoefe(); <-- gehört m.E. nicht hier her, sondern zum ersten Location-Update
         bahnhofMarker = new ArrayList<Bahnhof>(0); // no markers until we know where we are
 
         myPos = new LatLng(50d, 8d);
@@ -117,24 +111,28 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
 
     private void switchMyLocationButton() {
         if (myLocSwitch != null) {
-            myLocSwitch.setChecked(followMyLocation);
-            updateLocationRequestIntervals();
+            myLocSwitch.setChecked(mRequestingLocationUpdates);
+            if (mRequestingLocationUpdates) {
+                startLocationUpdates();
+            } else {
+                stopLocationUpdates();
+            }
         }
     }
 
-    private static class MyLocationListener implements View.OnClickListener {
+    private class MyLocationListener implements View.OnClickListener {
 
-        private final WeakReference<MapsAcitivity> mapRef;
+        private final WeakReference<MapsActivity> mapRef;
 
-        MyLocationListener(@NonNull final MapsAcitivity map) {
+        MyLocationListener(@NonNull final MapsActivity map) {
             mapRef = new WeakReference<>(map);
         }
 
         @Override
         public void onClick(final View view) {
-            final MapsAcitivity map = mapRef.get();
+            final MapsActivity map = mapRef.get();
             if (map != null) {
-                followMyLocation = !followMyLocation;
+                mRequestingLocationUpdates = !mRequestingLocationUpdates;
                 map.switchMyLocationButton();
             }
         }
@@ -164,13 +162,11 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.clear();
-        addMarkers(bahnhofMarker,myPos);
-
+        addMarkers(bahnhofMarker, myPos);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
     }
 
-    private void addMarkers(List<Bahnhof> bahnhofMarker,LatLng myPos )
-    {
-
+    private void addMarkers(List<Bahnhof> bahnhofMarker,LatLng myPos) {
         for(Bahnhof bahnhof: bahnhofMarker){
             LatLng bahnhofPos = bahnhof.getPosition();
             mMap.addMarker(new MarkerOptions()
@@ -182,10 +178,8 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
 
         // Add a marker and moves the camera
         mMap.addMarker(new MarkerOptions().position(myPos).title("Meine aktuelle Position: ").icon(BitmapDescriptorFactory.defaultMarker(55)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
         mMap.setInfoWindowAdapter(this);
         mMap.setOnInfoWindowClickListener(this);
-
     }
 
     @Override
@@ -219,7 +213,7 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
         if(marker.getSnippet() != null){
 
             Class cls = DetailsActivity.class;
-            Intent intent = new Intent(MapsAcitivity.this, cls);
+            Intent intent = new Intent(MapsActivity.this, cls);
             long id = Long.valueOf(marker.getSnippet());
             try {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
@@ -278,8 +272,6 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
-
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
@@ -298,18 +290,32 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
 
     @Override
     public void onLocationChanged(Location location) {
+        if (!mRequestingLocationUpdates) {
+            return;
+        }
         mMap.clear();
         myPos= new LatLng(location.getLatitude(), location.getLongitude());
 
-        readBahnhoefe();
+        if (lastLoadPos == null || distanceInMeter(lastLoadPos, myPos) > MIN_METER_DISTANCE_BEFORE_RELOAD) {
+            readBahnhoefe();
+            lastLoadPos = myPos;
+        }
 
         addMarkers(bahnhofMarker,myPos);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
-        //Toast.makeText(this, myPos.latitude+"", Toast.LENGTH_SHORT).show();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, mMap.getCameraPosition().zoom));
+    }
+
+    private float distanceInMeter(LatLng oldPos, LatLng myPos) {
+        float[] result = new float[1];
+        Location.distanceBetween(oldPos.latitude, oldPos.longitude, myPos.latitude, myPos.longitude, result);
+        return result[0];
     }
 
 
     protected void startLocationUpdates() {
+        if (!mGoogleApiClient.isConnected()) {
+            return;
+        }
         // The final argument to {@code requestLocationUpdates()} is a LocationListener
         // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -325,7 +331,7 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    ActivityCompat.requestPermissions(MapsAcitivity.this,
+                                    ActivityCompat.requestPermissions(MapsActivity.this,
                                             new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION},
                                             PERMISSION_REQUEST_CODE);
                                 }
@@ -349,6 +355,11 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
 
         }
     }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+
     /**
      * Sets up the location request. Android has two location request settings:
      * {@code ACCESS_COARSE_LOCATION} and {@code ACCESS_FINE_LOCATION}. These settings control
@@ -364,24 +375,20 @@ public class MapsAcitivity extends AppCompatActivity implements OnMapReadyCallba
      */
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        updateLocationRequestIntervals();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
-
-    private void updateLocationRequestIntervals() {
         // Sets the desired interval for active location updates. This interval is
         // inexact. You may not receive updates at all if no location sources are available, or
         // you may receive them slower than requested. You may also receive updates faster than
         // requested if other applications are requesting location at a faster interval.
-        mLocationRequest.setInterval(followMyLocation ? UPDATE_INTERVAL_IN_MILLISECONDS_FOLLOW : UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setInterval(LOCATION_REQUEST_INTERVAL_MILLIS);
 
         // Sets the fastest rate for active location updates. This interval is exact, and your
         // application will never receive updates faster than this value.
-        mLocationRequest.setFastestInterval(followMyLocation ? FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS_FOLLOW : FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setFastestInterval(LOCATION_REQUEST_INTERVAL_MILLIS);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(MapsAcitivity.this)
+        new AlertDialog.Builder(MapsActivity.this)
                 .setMessage(message)
                 .setPositiveButton("OK", okListener)
                 .setNegativeButton("Cancel", null)
