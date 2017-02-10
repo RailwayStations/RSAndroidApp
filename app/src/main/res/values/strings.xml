@@ -15,7 +15,7 @@
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_maps_acitivty">MapsAcitivty</string>
-    <string name="maps_activity">Bahnhöfe ohne Photos</string>
+    <string name="maps_activity">Bahnhöfe ohne Fotos</string>
     <string name="no_location_detected">Keine Position gefunden</string>
     <string name="map">Karte aufrufen</string>
     <string name="latitude_label">Latitude</string>

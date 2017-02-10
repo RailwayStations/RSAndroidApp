@@ -50,6 +50,7 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/maps_activity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

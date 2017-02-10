@@ -12,8 +12,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -75,6 +78,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_activity);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.maps_toolbar);
+        setSupportActionBar(myToolbar);
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
@@ -146,7 +153,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.i(TAG,"Datenbank konnte nicht geöffnet werden");
         }
 
-        Toast.makeText(this, bahnhofMarker.size() + " Bahnhöfe geladen", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, bahnhofMarker.size() + " Bahnhöfe geladen", Toast.LENGTH_LONG).show();
     }
 
 
