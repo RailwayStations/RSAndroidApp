@@ -125,12 +125,12 @@ public class IntroSliderActivity extends AppCompatActivity {
             addBottomDots(position);
 
             if(position==layouts.length-1){
-                next.setText("PROCEED");
+                next.setText(R.string.proceed);
                 skip.setVisibility(View.GONE);
                 baseApplication.setFirstAppStart(true);
             }else
             {
-                next.setText("NEXT");
+                next.setText(R.string.next);
                 skip.setVisibility(View.VISIBLE);
             }
         }

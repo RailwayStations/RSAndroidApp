@@ -112,7 +112,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         final MenuItem item = menu.findItem(R.id.menu_toggle_mypos);
         myLocSwitch = new CheckBox(this);
-        myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector);
+        myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fixed_white_24px);
         item.setActionView(myLocSwitch);
         initMyLocationSwitchButton(myLocSwitch);
         return true;

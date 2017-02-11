@@ -12,7 +12,7 @@
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/ic_share_white_48dp"/>
+            android:src="@drawable/ic_share_white_24px"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
-            android:text="Im gleichen Bildschirm findest Du oben das Symbol zum Teilen des Fotos. Wenn Du z.B. die Twitter-App verwendest, werden gleich alle Hashtags mit übernommen."
+            android:text="@string/text_intro_slider6"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="18sp"

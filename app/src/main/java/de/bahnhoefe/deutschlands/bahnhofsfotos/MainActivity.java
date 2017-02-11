@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity
             MenuItem item = menu.findItem(R.id.notify);
             boolean active = statusBinder.isNotificationTrackingActive();
             item.setChecked(active);
-            item.setIcon(active ? R.drawable.ic_gps_fixed_white_24px : R.drawable.ic_gps_not_fixed_white_24px);
+            item.setIcon(active ? R.drawable.ic_notifications_active_white_24px : R.drawable.ic_notifications_off_white_24px);
 
         }
         return super.onPrepareOptionsMenu(menu);
@@ -319,11 +319,11 @@ public class MainActivity extends AppCompatActivity
             if (!active) {
                 startService(intent);
                 item.setChecked(true);
-                item.setIcon(R.drawable.ic_gps_fixed_white_24px);
+                item.setIcon(R.drawable.ic_notifications_active_white_24px);
             } else {
                 stopService(intent);
                 item.setChecked(false);
-                item.setIcon(R.drawable.ic_gps_not_fixed_white_24px);
+                item.setIcon(R.drawable.ic_notifications_off_white_24px);
             }
         }
 

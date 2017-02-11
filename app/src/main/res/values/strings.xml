@@ -138,7 +138,19 @@
     <string name="fab_email">bahnhofsfotos@deutschlands-bahnhoefe.de</string>
     <string name="fab_subject">Nachricht zur Bahnhofsfoto-App</string>
     <string name="fab_chooser_title">Mail versenden</string>
-    <string name="menu_title_introslider">Introslider</string>
+    <string name="menu_title_introslider">Anleitung</string>
     <string name="menu_follow_my_location">Folge meiner Position</string>
+    <string name="text_intro_slider1">Wir sammeln Bahnhofsfotos von Benutzern, die wir unter freier Lizenz anderen Entwicklern zur Verfügung stellen können. Unsere Lieblings-Lizenz ist CC0.</string>
+    <string name="text_intro_slider2">Bitte trage im Menüpunkt \'Meine Daten\' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne den Eintrag des Nicknamens kannst Du aus der App heraus nicht fotografieren.</string>
+    <string name="text_intro_slider3">Im Menü unter \'In der Nähe\' findest Du alle Bahnhöfe in Deiner Nähe, die noch kein Foto haben.</string>
+    <string name="text_intro_slider4">Du kommst über 2 Wege zum Fotografieren eines Bahnhofs: über die Suche auf dem Startbildschirm oder über einen der Karten-Menüpunkte \'In der Nähe\' oder \'Alle Bahnhöfe ohne Foto\'. Das FotoIcon wird nur anklickbar, wenn Du Dein Smartphone quer hältst.</string>
+    <string name="text_intro_slider5">Sobald Du einen Bahnhof fotografiert hast, wird das Foto angezeigt und Du kannst das Foto und Deine Daten oben über das E-Mail-Icon an Deine E-Mail-App weiterleiten. Das Hochladen von Fotos auf den Server ist derzeit noch nicht möglich.</string>
+    <string name="text_intro_slider6">Im gleichen Bildschirm findest Du oben das Symbol zum Teilen des Fotos. Wenn Du z.B. die Twitter-App verwendest, werden gleich alle Hashtags mit übernommen.</string>
+    <string name="text_intro_slider7">Wenn Du unterwegs bist und Du möchtest informiert werden, wenn ein Bahnhof in der Nähe ist, der noch kein Foto hat, kannst Du die Bahnhofsortung einschalten.</string>
+    <string name="text_intro_slider8">Damit die Benutzer sich untereinander abstimmen können, welche Bahnhöfe sie gerade ansteuern, haben wir hier einen Chat eingebaut. Es gibt noch keine Push Notifications, wenn neue Nachrichten gesendet werden. Du mußt also aktiv reinschauen.</string>
+    <string name="text_intro_slider9">Beim Start der App werden die Bahnhofsdaten von Deutschland geladen. Wenn Du das Land von DE nach CH wechseln möchtest, kannst Du das im Startbildschirm oben rechts. Bitte vergiß nicht, danach Bahnhofsdaten zu aktualisieren.</string>
+    <string name="next">WEITER</string>
+    <string name="skip">ABBRECHEN</string>
+    <string name="proceed">STARTEN</string>
 
 </resources>
