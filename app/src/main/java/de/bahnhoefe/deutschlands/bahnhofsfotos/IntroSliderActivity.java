@@ -19,7 +19,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import static com.google.android.gms.analytics.internal.zzy.B;
 import static com.google.android.gms.analytics.internal.zzy.i;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_share_white_48dp;

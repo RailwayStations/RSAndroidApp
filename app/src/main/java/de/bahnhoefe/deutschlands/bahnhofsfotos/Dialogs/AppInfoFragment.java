@@ -28,7 +28,6 @@ import static com.google.android.gms.analytics.internal.zzy.d;
 import static com.google.android.gms.analytics.internal.zzy.i;
 import static com.google.android.gms.analytics.internal.zzy.s;
 
-
 public class AppInfoFragment extends DialogFragment {
 
 

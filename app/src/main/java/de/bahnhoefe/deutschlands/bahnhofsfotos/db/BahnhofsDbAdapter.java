@@ -19,7 +19,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 import static android.R.attr.country;
 import static android.R.attr.id;
-import static com.google.android.gms.analytics.internal.zzy.p;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.DB_JSON_CONSTANTS.KEY_ID;
 
 /**

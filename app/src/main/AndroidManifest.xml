@@ -20,12 +20,13 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_launcher" />
-        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
-             notification message. See README(https://goo.gl/6BKBk7) for more. -->
+        <!--
+             Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message. See README(https://goo.gl/6BKBk7) for more.
+        -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorPrimary" />
@@ -50,8 +51,8 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/maps_activity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
@@ -119,6 +120,20 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".RailwayStationsActivity"
+            android:label="@string/railway_stations_activity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity" />
+
+            <intent-filter>
+                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.RailwayStationsActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".CountryActivity"
             android:label="@string/country_activity"
             android:parentActivityName=".MainActivity">
@@ -160,11 +175,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".IntroSliderActivity"
-                  android:label="IntroSlider"
-                  android:theme="@style/AppTheme.NoActionBar"
-                  >
-        </activity>
+        <activity
+            android:name=".IntroSliderActivity"
+            android:label="IntroSlider"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <!-- debug-KEY -->
         <!--
@@ -178,7 +192,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_rel_key" />
+            android:value="@string/google_maps_deb_key" />
 
         <service
             android:name=".NearbyNotificationService"

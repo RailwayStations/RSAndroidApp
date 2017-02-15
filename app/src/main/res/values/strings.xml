@@ -152,5 +152,8 @@
     <string name="next">WEITER</string>
     <string name="skip">ABBRECHEN</string>
     <string name="proceed">STARTEN</string>
+    <string name="menu_title_website">railway-stations.org</string>
+    <string name="menu_title_zum_chat">Zum Chat</string>
+    <string name="railway_stations_activity">https://railway-stations.org</string>
 
 </resources>

@@ -31,13 +31,17 @@
     <item android:title="@string/information">
         <menu>
             <item
+                android:id="@+id/nav_web_site"
+                android:icon="@drawable/ic_public_gray_24px"
+                android:title="@string/menu_title_website" />
+            <item
                 android:id="@+id/nav_app_info"
                 android:icon="@drawable/ic_info_gray_24px"
                 android:title="@string/menu_title_info" />
             <item
                 android:id="@+id/nav_user_register"
                 android:icon = "@drawable/ic_chat_white_24px"
-                android:title="Zum Chat" />
+                android:title="@string/menu_title_zum_chat" />
         </menu>
     </item>
 

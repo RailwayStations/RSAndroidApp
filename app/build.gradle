@@ -16,10 +16,11 @@ android {
 
     defaultConfig {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
+        //minSdkVersion 19
         minSdkVersion project.minSdkVersion
         targetSdkVersion 23
-        versionCode 17
-        versionName "8.0.0"
+        versionCode 18
+        versionName "8.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -50,6 +51,8 @@ dependencies {
 
 
     compile 'com.android.support:support-v4:23.4.0'
+
+
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'

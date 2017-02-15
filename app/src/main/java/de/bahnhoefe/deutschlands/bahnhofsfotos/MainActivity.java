@@ -354,6 +354,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_all_stations_without_photo) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAllActivity.class);
             startActivity(intent);
+        } else if (id == R.id.nav_web_site) {
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, RailwayStationsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(),DIALOG_TAG);
