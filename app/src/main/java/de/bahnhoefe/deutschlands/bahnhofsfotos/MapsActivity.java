@@ -378,8 +378,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        if(mGoogleApiClient.isConnected()){
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        }
+
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
     }
 
     /**
