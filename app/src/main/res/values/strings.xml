@@ -65,13 +65,20 @@
     <string name="preferences_saved">Deine Daten wurden gespeichert. </string>
     <string name="preferences_cleared">Deine Daten wurden zurückgesetzt. Beim nächsten Menüaufruf kannst Du neue erfassen.</string>
     <string name="tvOwnPhotos">Handelt es sich bei den Fotos um Deine eigenen ...</string>
+    <string name="nav_oepnv">   mit ÖPNV</string>
+    <string name="nav_car">   per Auto</string>
+    <string name="nav_bike">   per Fahrrad</string>
+    <string name="nav_walk">   zu Fuß</string>
+    <string name="nav_show">   nur anzeigen</string>
+
     <string-array name="pick_navmethod">
-        <item>mit öffentlichen Verkehrsmitteln</item>
-        <item>per Auto</item>
-        <item>per Fahrrad</item>
-        <item>zu Fuß</item>
-        <item>nur anzeigen</item>
+        <item>   mit ÖPNV</item>
+        <item>   per Auto</item>
+        <item>   per Fahrrad</item>
+        <item>   zu Fuß</item>
+        <item>   nur anzeigen</item>
     </string-array>
+
     <string name="navMethod">Bitte wähle&#8230;</string>
 
     <!-- TODO: Remove or change this placeholder text -->

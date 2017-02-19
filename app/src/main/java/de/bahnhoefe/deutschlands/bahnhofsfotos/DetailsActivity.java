@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,8 +32,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,9 +50,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_info_gray_24px;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
@@ -70,6 +76,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static int alpha = 128;
 
+   /* final NavItem[] items = {
+            new NavItem("   mit ÖPNV", R.drawable.ic_directions_bus_gray_24px),
+            new NavItem("   per Auto", R.drawable.ic_directions_car_gray_24px),
+            new NavItem("   per Fahrrad", R.drawable.ic_directions_bike_gray_24px),
+            new NavItem("   zu Fuß",R.drawable.ic_directions_walk_gray_24px),
+            new NavItem("   nur anzeigen",R.drawable.ic_info_gray_24px)
+    };*/
+
+
     /**
      * Id to identify a camera permission request.
      */
@@ -90,6 +105,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
         countryShortCode = baseApplication.getCountryShortCode();
         country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
+
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -443,6 +459,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 break;
             case R.id.nav_to_station:
                 startNavigation(DetailsActivity.this);
+                //startNavigation(DetailsActivity.this);
                 break;
             // action with ID action_settings was selected
             case R.id.send_email:
@@ -475,6 +492,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return true;
     }
 
+
+
     private Intent createFotoSendIntent() {
         Intent sendIntent = new Intent(Intent.ACTION_SEND);
         File file = getStoredMediaFile();
@@ -485,7 +504,87 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return sendIntent;
     }
 
-    protected void startNavigation(final Context context) {
+    private void startNavigation(final Context context) {
+        final NavItem[] items = {
+                new NavItem("   " + getString(R.string.nav_oepnv), R.drawable.ic_directions_bus_gray_24px),
+                new NavItem("   " + getString(R.string.nav_car), R.drawable.ic_directions_car_gray_24px),
+                new NavItem("   " + getString(R.string.nav_bike), R.drawable.ic_directions_bike_gray_24px),
+                new NavItem("   " + getString(R.string.nav_walk),R.drawable.ic_directions_walk_gray_24px),
+                new NavItem("   " + getString(R.string.nav_show),R.drawable.ic_info_gray_24px)
+        };
+
+
+        ListAdapter adapter = new ArrayAdapter<NavItem>(
+                this,
+                android.R.layout.select_dialog_item,
+                android.R.id.text1,
+                items){
+            public View getView(int position, View convertView, ViewGroup parent) {
+                //Use super class to create the View
+                View v = super.getView(position, convertView, parent);
+                TextView tv = (TextView)v.findViewById(android.R.id.text1);
+
+                //Put the image on the TextView
+                tv.setCompoundDrawablesWithIntrinsicBounds(items[position].icon, 0, 0, 0);
+
+                //Add margin between image and text (support various screen densities)
+                int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
+                tv.setCompoundDrawablePadding(dp5);
+
+                return v;
+            }
+        };
+
+        AlertDialog.Builder navBuilder = new AlertDialog.Builder(this);
+                navBuilder.setIcon(R.mipmap.ic_launcher);
+                navBuilder.setTitle(R.string.navMethod);
+                navBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int navItem) {
+                        String dlocation = "";
+                        Intent intent = null;
+                        switch (navItem) {
+                            case 0:
+                                dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
+                                Log.d("findnavigation case 0", dlocation);
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                                break;
+                            case 1:
+                                dlocation = String.format("google.navigation:ll=%s,%s&mode=d", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
+                                Log.d("findnavigation case 1", dlocation);
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                                break;
+
+                            case 2:
+                                dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
+                                        bahnhof.getPosition().latitude,
+                                        bahnhof.getPosition().longitude);
+                                Log.d("findnavigation case 2", dlocation);
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                                break;
+                            case 3:
+                                dlocation = String.format("google.navigation:ll=%s,%s&mode=w", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
+                                Log.d("findnavigation case 3", dlocation);
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                                break;
+                            case 4:
+                                dlocation = String.format("geo:%s,%s?q=%s", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude, bahnhof.getTitle());
+                                Log.d("findnavigation case 4", dlocation);
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                                break;
+
+                        }
+                        try {
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            Toast toast = Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG);
+                            toast.show();
+                        }
+                    }
+                }).show();
+
+    }
+
+    /*protected void startNavigation(final Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.mipmap.ic_launcher);
         builder.setTitle(R.string.navMethod).setItems(R.array.pick_navmethod, new DialogInterface.OnClickListener() {
@@ -534,7 +633,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         });
         builder.show();
 
-    }
+    }*/
 
 
     /**
