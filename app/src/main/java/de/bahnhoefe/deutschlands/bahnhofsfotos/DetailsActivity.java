@@ -54,6 +54,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
+import static com.google.android.gms.analytics.internal.zzy.p;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_info_gray_24px;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
@@ -529,7 +530,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
                 //Add margin between image and text (support various screen densities)
                 int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
+                int dp7 = (int) (22 * getResources().getDisplayMetrics().density);
                 tv.setCompoundDrawablePadding(dp5);
+                tv.setPadding(dp7,0,0,0);
 
                 return v;
             }
