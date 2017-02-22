@@ -431,7 +431,8 @@ public class MainActivity extends AppCompatActivity
             dbAdapter.deleteCountries();
             List<Bahnhof> ohne = loadBatch(true);
             List<Bahnhof> mit = loadBatch(false);
-            ohne.addAll(mit);
+            if (ohne != null && mit != null)
+                ohne.addAll(mit);
             return ohne;
         }
 

@@ -1,0 +1,12 @@
+--- app/src/main/java/de/bahnhoefe/deutschlands/bahnhofsfotos/MainActivity.java	2017-02-22 20:59:57.000000000 +0100
++++ /Users/pelzi/AndroidStudioProjects/Bahnhofsfotos/app/src/main/java/de/bahnhoefe/deutschlands/bahnhofsfotos/MainActivity.java	2017-02-20 23:57:17.000000000 +0100
+@@ -431,7 +434,8 @@
+             dbAdapter.deleteCountries();
+             List<Bahnhof> ohne = loadBatch(true);
+             List<Bahnhof> mit = loadBatch(false);
+-            ohne.addAll(mit);
++            if (ohne != null && mit != null)
++                ohne.addAll(mit);
+             return ohne;
+         }
+ 
