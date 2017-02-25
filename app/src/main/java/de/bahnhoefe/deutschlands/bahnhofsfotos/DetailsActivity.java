@@ -530,7 +530,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
                 //Add margin between image and text (support various screen densities)
                 int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
-                int dp7 = (int) (22 * getResources().getDisplayMetrics().density);
+                int dp7 = (int) (20 * getResources().getDisplayMetrics().density);
                 tv.setCompoundDrawablePadding(dp5);
                 tv.setPadding(dp7,0,0,0);
 

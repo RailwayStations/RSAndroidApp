@@ -435,7 +435,9 @@ public class MainActivity extends AppCompatActivity
             List<Bahnhof> ohne = loadBatch(true);
             List<Bahnhof> mit = loadBatch(false);
             if (ohne != null && mit != null)
+            {
                 ohne.addAll(mit);
+            }
             return ohne;
         }
 
