@@ -17,6 +17,7 @@ public class ChatMessage {
 
 
 
+
     public ChatMessage() {
     }
 
@@ -27,6 +28,7 @@ public class ChatMessage {
         this.chatTimeStamp = chatTimeStamp;
 
     }
+
 
     public String getId() {
         return id;

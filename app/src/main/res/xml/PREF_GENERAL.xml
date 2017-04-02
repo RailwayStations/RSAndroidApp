@@ -1,0 +1,7 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="notifications_new_message"
+        android:summary="@string/pref_title_new_message_notifications"
+        android:title="@string/pref_header_notifications" />
+</PreferenceScreen>

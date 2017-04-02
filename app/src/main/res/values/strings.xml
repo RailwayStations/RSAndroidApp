@@ -162,5 +162,10 @@
     <string name="menu_title_website">railway-stations.org</string>
     <string name="menu_title_zum_chat">Zum Chat</string>
     <string name="railway_stations_activity">https://railway-stations.org</string>
+    <string name="pref_title_new_message_notifications">Register or unregister for Push Notification</string>
+    <string name="pref_header_notifications">Tab Menu Website</string>
+    <string name="push_notifications_menu_label">Benachrichtigungen ausschalten</string>
+    <string name="push_notifications_menu_active">Benachrichtigungen aktivieren</string>
+    <string name="FRIENDLY_ENGAGE_TOPIC">friendly_engage</string>
 
 </resources>

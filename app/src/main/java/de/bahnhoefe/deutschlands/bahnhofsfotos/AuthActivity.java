@@ -1,10 +1,13 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,11 +21,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.bumptech.glide.Glide;
@@ -39,10 +49,25 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChatMessage;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.MyFirebaseInstanceIdService;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.google.android.gms.analytics.internal.zzy.p;
+import static com.google.android.gms.common.api.Status.su;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_notifications_active_white_24px;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_notifications_off_white_24px;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.layout.item;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.menu.chat_menu;
 
 public class AuthActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
@@ -86,6 +111,9 @@ public class AuthActivity extends AppCompatActivity implements
     private AdView mAdView;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private GoogleApiClient mGoogleApiClient;
+    private Boolean friendlyEngageTopic;
+
+    private CheckBox myNotifySwitch = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +122,7 @@ public class AuthActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         mUsername = ANONYMOUS;
 
         // Initialize Firebase Auth
@@ -218,8 +247,11 @@ public class AuthActivity extends AppCompatActivity implements
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(chatMessage);
                 mMessageEditText.setText("");
 
+
             }
         });
+
+
     }
 
     @Override
@@ -240,7 +272,7 @@ public class AuthActivity extends AppCompatActivity implements
 
     @Override
     public void onDestroy() {
-       if (mAdView != null) {
+        if (mAdView != null) {
             mAdView.destroy();
         }
         super.onDestroy();
@@ -248,9 +280,51 @@ public class AuthActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.chat_menu, menu);
+        inflater.inflate(chat_menu, menu);
+        final MenuItem item = menu.findItem(R.id.toggle_notifications_menu);
+        myNotifySwitch = new CheckBox(this);
+        myNotifySwitch.setButtonDrawable(R.drawable.ic_chat_notifications_selector);
+        item.setActionView(myNotifySwitch);
+        initMyNotifySwitchButton(myNotifySwitch);
         return true;
+    }
+
+    private void initMyNotifySwitchButton(final CheckBox notifySwitch) {
+        myNotifySwitch = notifySwitch;
+        myNotifySwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchMyNotificationButton();
+            }
+        });
+
+    }
+
+    private void switchMyNotificationButton() {
+        subscribtionStatus();
+        if (myNotifySwitch != null) {
+            myNotifySwitch.setChecked(friendlyEngageTopic);
+            Log.d(TAG,"Der Button ist: " + friendlyEngageTopic);
+            if (friendlyEngageTopic==true) {
+                FirebaseMessaging.getInstance().subscribeToTopic("friendly_engage");
+                saveNewTopicStatusToFalse();
+                Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet", Toast.LENGTH_LONG).show();
+            } else {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic("friendly_engage");
+                saveNewTopicStatusToTrue();
+                Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        switchMyNotificationButton();
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -267,12 +341,35 @@ public class AuthActivity extends AppCompatActivity implements
                 mPhotoUrl = null;
                 startActivity(new Intent(this,MainActivity.class));
                 return true;
+            case R.id.toggle_notifications_menu:
+
+                //return true;
             /*case R.id.fresh_config_menu:
                 fetchConfig();
                 return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private Boolean subscribtionStatus() {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),MODE_PRIVATE);
+        friendlyEngageTopic = sharedPreferences.getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC),false);
+        return friendlyEngageTopic;
+    }
+
+    private void saveNewTopicStatusToTrue() {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC),true);
+        editor.apply();
+    }
+
+    private void saveNewTopicStatusToFalse() {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC),false);
+        editor.apply();
     }
 
     private void causeCrash() {
@@ -329,6 +426,8 @@ public class AuthActivity extends AppCompatActivity implements
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
+
+
 
 }
 
