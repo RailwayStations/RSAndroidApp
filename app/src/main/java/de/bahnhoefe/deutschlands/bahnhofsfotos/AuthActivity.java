@@ -1,13 +1,10 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,12 +24,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.bumptech.glide.Glide;
@@ -49,25 +41,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChatMessage;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.MyFirebaseInstanceIdService;
-import de.hdodenhof.circleimageview.CircleImageView;
-
-import static com.google.android.gms.analytics.internal.zzy.p;
-import static com.google.android.gms.common.api.Status.su;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_notifications_active_white_24px;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_notifications_off_white_24px;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.layout.item;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.menu.chat_menu;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChatMessage;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AuthActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
@@ -122,6 +101,7 @@ public class AuthActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        subscribtionStatus();
 
         mUsername = ANONYMOUS;
 
@@ -307,13 +287,13 @@ public class AuthActivity extends AppCompatActivity implements
         if (myNotifySwitch != null) {
             myNotifySwitch.setChecked(friendlyEngageTopic);
             Log.d(TAG,"Der Button ist: " + friendlyEngageTopic);
-            if (friendlyEngageTopic==true) {
+            if (friendlyEngageTopic) {
                 FirebaseMessaging.getInstance().subscribeToTopic("friendly_engage");
-                saveNewTopicStatusToFalse();
+                saveNewTopicStatusTo(false);
                 Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet", Toast.LENGTH_LONG).show();
             } else {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic("friendly_engage");
-                saveNewTopicStatusToTrue();
+                saveNewTopicStatusTo(true);
                 Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet", Toast.LENGTH_LONG).show();
             }
         }
@@ -341,39 +321,20 @@ public class AuthActivity extends AppCompatActivity implements
                 mPhotoUrl = null;
                 startActivity(new Intent(this,MainActivity.class));
                 return true;
-            case R.id.toggle_notifications_menu:
-
-                //return true;
-            /*case R.id.fresh_config_menu:
-                fetchConfig();
-                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     private Boolean subscribtionStatus() {
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),MODE_PRIVATE);
-        friendlyEngageTopic = sharedPreferences.getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC),false);
+        friendlyEngageTopic = mSharedPreferences.getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), false);
         return friendlyEngageTopic;
     }
 
-    private void saveNewTopicStatusToTrue() {
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC),true);
+    private void saveNewTopicStatusTo(boolean status) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), status);
         editor.apply();
-    }
-
-    private void saveNewTopicStatusToFalse() {
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC),false);
-        editor.apply();
-    }
-
-    private void causeCrash() {
-        throw new NullPointerException("Fake null pointer exception");
     }
 
     private void sendInvitation() {
