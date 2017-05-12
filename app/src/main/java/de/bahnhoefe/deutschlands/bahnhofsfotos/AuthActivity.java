@@ -251,6 +251,14 @@ public class AuthActivity extends AppCompatActivity implements
         myNotifySwitch.setChecked(subscribtionStatus());
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        boolean success = requestCode == RESULT_OK;
+        myNotifySwitch.setChecked(success);
+        saveNewTopicStatusTo(success);
+    }
+
     private void switchMyNotificationButton() {
         boolean subscribtionStatus = subscribtionStatus();
         if (myNotifySwitch != null) {
