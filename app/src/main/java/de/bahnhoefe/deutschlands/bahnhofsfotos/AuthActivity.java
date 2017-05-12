@@ -30,7 +30,6 @@ import java.util.Map;
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.ui.email.SignInActivity;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
@@ -87,10 +86,8 @@ public class AuthActivity extends AppCompatActivity implements
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private EditText mMessageEditText;
-    private AdView mAdView;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private GoogleApiClient mGoogleApiClient;
-    private Boolean friendlyEngageTopic;
 
     private CheckBox myNotifySwitch = null;
 
@@ -235,30 +232,6 @@ public class AuthActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onPause() {
-        if (mAdView != null) {
-            mAdView.pause();
-        }
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
-        super.onDestroy();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
@@ -283,17 +256,17 @@ public class AuthActivity extends AppCompatActivity implements
     }
 
     private void switchMyNotificationButton() {
-        subscribtionStatus();
+        boolean subscribtionStatus = subscribtionStatus();
         if (myNotifySwitch != null) {
-            myNotifySwitch.setChecked(friendlyEngageTopic);
-            Log.d(TAG,"Der Button ist: " + friendlyEngageTopic);
-            if (friendlyEngageTopic) {
+            subscribtionStatus = !subscribtionStatus;
+            saveNewTopicStatusTo(subscribtionStatus);
+            myNotifySwitch.setChecked(subscribtionStatus);
+            Log.d(TAG,"Der Button ist: " + subscribtionStatus);
+            if (subscribtionStatus) {
                 FirebaseMessaging.getInstance().subscribeToTopic("friendly_engage");
-                saveNewTopicStatusTo(false);
                 Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet", Toast.LENGTH_LONG).show();
             } else {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic("friendly_engage");
-                saveNewTopicStatusTo(true);
                 Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet", Toast.LENGTH_LONG).show();
             }
         }
@@ -326,9 +299,8 @@ public class AuthActivity extends AppCompatActivity implements
         }
     }
 
-    private Boolean subscribtionStatus() {
-        friendlyEngageTopic = mSharedPreferences.getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), false);
-        return friendlyEngageTopic;
+    private boolean subscribtionStatus() {
+        return mSharedPreferences.getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), false);
     }
 
     private void saveNewTopicStatusTo(boolean status) {
