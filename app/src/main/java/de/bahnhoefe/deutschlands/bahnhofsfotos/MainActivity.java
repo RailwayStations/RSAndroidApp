@@ -35,12 +35,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,14 +54,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.google.firebase.auth.FirebaseAuth;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-
 import static java.lang.Integer.parseInt;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -77,8 +74,6 @@ public class MainActivity extends AppCompatActivity
     private BahnhofsDbAdapter dbAdapter;
     private String lastUpdateDate;
     private NavigationView navigationView;
-    private static final String DEFAULT = "";
-    private static final String DEFAULT_COUNTRY = "DE";
     private String countryShortCode;
     private Boolean firstAppStart;
 
@@ -400,8 +395,8 @@ public class MainActivity extends AppCompatActivity
         private ProgressDialog progressDialog;
         private Date lastUpdateDate;
 
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
-        String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY),DEFAULT);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+        String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY), BaseApplication.DEFAULT_COUNTRY);
 
         // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
         private void enableHttpResponseCache() {

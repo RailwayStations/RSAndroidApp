@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -68,7 +69,7 @@ public abstract class NearbyBahnhofNotificationManager {
         // Read the configured country code
         // @todo remove once an international solution is found for timetabling
         SharedPreferences sharedPreferences = context.getSharedPreferences("APP_PREF_FILE",Context.MODE_PRIVATE);
-        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY","DE");
+        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY", BaseApplication.DEFAULT_COUNTRY);
 
     }
 
