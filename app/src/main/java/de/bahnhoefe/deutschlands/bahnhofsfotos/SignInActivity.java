@@ -121,7 +121,8 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                             Toast.makeText(SignInActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            startActivityForResult(new Intent(SignInActivity.this, AuthActivity.class), RESULT_OK);
+                            ((BaseApplication)getApplication()).saveSubscribtionStatus(true);
+                            startActivity(new Intent(SignInActivity.this, AuthActivity.class));
                             finish();
                         }
                     }

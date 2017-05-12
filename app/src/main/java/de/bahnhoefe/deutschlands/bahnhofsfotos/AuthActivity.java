@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.bumptech.glide.Glide;
-import com.firebase.ui.auth.ui.email.SignInActivity;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
@@ -251,19 +250,11 @@ public class AuthActivity extends AppCompatActivity implements
         myNotifySwitch.setChecked(subscribtionStatus());
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        boolean success = requestCode == RESULT_OK;
-        myNotifySwitch.setChecked(success);
-        saveNewTopicStatusTo(success);
-    }
-
     private void switchMyNotificationButton() {
         boolean subscribtionStatus = subscribtionStatus();
         if (myNotifySwitch != null) {
             subscribtionStatus = !subscribtionStatus;
-            saveNewTopicStatusTo(subscribtionStatus);
+            saveSubscribtionStatus(subscribtionStatus);
             myNotifySwitch.setChecked(subscribtionStatus);
             Log.d(TAG,"Der Button ist: " + subscribtionStatus);
             if (subscribtionStatus) {
@@ -274,14 +265,6 @@ public class AuthActivity extends AppCompatActivity implements
                 Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet", Toast.LENGTH_LONG).show();
             }
         }
-    }
-
-
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        switchMyNotificationButton();
-        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -296,6 +279,8 @@ public class AuthActivity extends AppCompatActivity implements
                 mFirebaseUser = null;
                 mUsername = ANONYMOUS;
                 mPhotoUrl = null;
+                saveSubscribtionStatus(false);
+                myNotifySwitch.setChecked(false);
                 startActivity(new Intent(this,MainActivity.class));
                 return true;
             default:
@@ -304,13 +289,11 @@ public class AuthActivity extends AppCompatActivity implements
     }
 
     private boolean subscribtionStatus() {
-        return mSharedPreferences.getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), false);
+        return ((BaseApplication)getApplication()).subscribtionStatus();
     }
 
-    private void saveNewTopicStatusTo(boolean status) {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), status);
-        editor.apply();
+    private void saveSubscribtionStatus(boolean status) {
+        ((BaseApplication)getApplication()).saveSubscribtionStatus(status);
     }
 
     private void sendInvitation() {

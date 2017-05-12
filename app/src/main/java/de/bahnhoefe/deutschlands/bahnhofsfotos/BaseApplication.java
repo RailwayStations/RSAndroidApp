@@ -101,4 +101,15 @@ public class BaseApplication extends Application  {
 
         return getPreferences().getBoolean(getString(R.string.FIRSTAPPSTART),DEFAULT_FIRSTAPPSTART);
     }
+
+    public boolean subscribtionStatus() {
+        return getPreferences().getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), false);
+    }
+
+    public void saveSubscribtionStatus(boolean status) {
+        SharedPreferences.Editor editor = getPreferences().edit();
+        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), status);
+        editor.apply();
+    }
+
 }
