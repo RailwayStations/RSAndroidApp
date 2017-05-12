@@ -1,46 +1,24 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.MyDataActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-
-import static android.R.attr.country;
-import static android.content.Context.MODE_PRIVATE;
-import static android.media.CamcorderProfile.get;
-import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.google.android.gms.analytics.internal.zzy.B;
-import static com.google.android.gms.analytics.internal.zzy.c;
-import static com.google.android.gms.analytics.internal.zzy.h;
-import static com.google.android.gms.analytics.internal.zzy.i;
-import static com.google.android.gms.analytics.internal.zzy.r;
-import static java.lang.String.valueOf;
-import static java.security.AccessController.getContext;
 
 /**
  * Created by android_oma on 08.12.16.
  */
 
 public class CountryAdapter extends CursorAdapter{
-    private static final String DEFAULT_COUNTRY = "DE";
     private int selectedPosition = -1;
     private LayoutInflater mInflater;
     private String TAG = getClass().getSimpleName();
