@@ -223,17 +223,13 @@ public class AuthActivity extends AppCompatActivity implements
                         mPhotoUrl,mTimeStamp);
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(chatMessage);
                 mMessageEditText.setText("");
-
-
             }
         });
-
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(chat_menu, menu);
         final MenuItem item = menu.findItem(R.id.toggle_notifications_menu);
@@ -252,7 +248,7 @@ public class AuthActivity extends AppCompatActivity implements
                 switchMyNotificationButton();
             }
         });
-
+        myNotifySwitch.setChecked(subscribtionStatus());
     }
 
     private void switchMyNotificationButton() {
