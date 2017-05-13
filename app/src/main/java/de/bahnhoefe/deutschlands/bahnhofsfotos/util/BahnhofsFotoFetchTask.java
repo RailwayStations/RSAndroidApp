@@ -29,9 +29,8 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private String license;
     private Uri authorReference;
     private String author;
-    private String countryShortCode;
+    private final String countryShortCode;
     SharedPreferences sharedPreferences;
-
 
 
     public BahnhofsFotoFetchTask(BitmapAvailableHandler handler, Context context) {

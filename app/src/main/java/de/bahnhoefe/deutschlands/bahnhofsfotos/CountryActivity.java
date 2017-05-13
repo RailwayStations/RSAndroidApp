@@ -11,8 +11,9 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CountryAdapter;
 
 public class CountryActivity extends AppCompatActivity {
+
     private CountryAdapter countryAdapter;
-    private String TAG = getClass().getSimpleName();
+    private final String TAG = getClass().getSimpleName();
 
 
     @Override
@@ -24,20 +25,18 @@ public class CountryActivity extends AppCompatActivity {
         BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
 
         final Cursor cursor = dbAdapter.getCountryList();
-        countryAdapter = new CountryAdapter(this, cursor,0);
+        countryAdapter = new CountryAdapter(this, cursor, 0);
         final ListView listView = (ListView) findViewById(R.id.lstCountries);
 
         assert listView != null;
         listView.setAdapter(countryAdapter);
-
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
                 countryAdapter.setSelectedIndex(position);
                 countryAdapter.notifyDataSetChanged();
-                //countryAdapter.bindView(listview,CountryActivity.this,cursor);
-                countryAdapter.getView(position,view,listView,cursor);
+                countryAdapter.getView(position, view, listView, cursor);
             }
 
 

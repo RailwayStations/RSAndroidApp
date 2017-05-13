@@ -47,7 +47,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     public static final int MIN_METER_DISTANCE_BEFORE_RELOAD = 1000;
     public static final int LOCATION_REQUEST_INTERVAL_MILLIS = 500;
@@ -152,10 +152,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void readBahnhoefe() {
-        try{
+        try {
             bahnhofMarker = dbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
-        }catch(Exception e){
-            Log.i(TAG,"Datenbank konnte nicht geöffnet werden");
+        } catch (Exception e) {
+            Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
 
         Toast.makeText(this, bahnhofMarker.size() + " Bahnhöfe geladen", Toast.LENGTH_LONG).show();
@@ -179,8 +179,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
     }
 
-    private void addMarkers(List<Bahnhof> bahnhofMarker,LatLng myPos) {
-        for(Bahnhof bahnhof: bahnhofMarker){
+    private void addMarkers(List<Bahnhof> bahnhofMarker, LatLng myPos) {
+        for (Bahnhof bahnhof : bahnhofMarker) {
             LatLng bahnhofPos = bahnhof.getPosition();
             mMap.addMarker(new MarkerOptions()
                     .title(bahnhof.getTitle())
@@ -204,26 +204,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public View getInfoContents(Marker marker) {
 
-        LayoutInflater layoutInflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = layoutInflater.inflate(R.layout.info_window,null,false);
-        ((TextView)view.findViewById(R.id.tvbahnhofname)).setText(marker.getTitle());
-        if(marker.getSnippet() != null){
-            ((TextView)view.findViewById(R.id.tvbahnhofnr)).setText("BahnhofNr: " + marker.getSnippet());
-        }else{
-            ((TextView)view.findViewById(R.id.tvbahnhofnr)).setText(" ");
+        LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = layoutInflater.inflate(R.layout.info_window, null, false);
+        ((TextView) view.findViewById(R.id.tvbahnhofname)).setText(marker.getTitle());
+        if (marker.getSnippet() != null) {
+            ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText("BahnhofNr: " + marker.getSnippet());
+        } else {
+            ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText(" ");
         }
 
-        ((TextView)view.findViewById(R.id.tvlatlon)).setText(marker.getPosition().toString());
+        ((TextView) view.findViewById(R.id.tvlatlon)).setText(marker.getPosition().toString());
         return view;
     }
 
     @Override
     public void onInfoWindowClick(Marker marker) {
 
-        BaseApplication baseApplication = (BaseApplication)getApplication();
+        BaseApplication baseApplication = (BaseApplication) getApplication();
         String countryShortCode = baseApplication.getCountryShortCode();
 
-        if(marker.getSnippet() != null){
+        if (marker.getSnippet() != null) {
 
             Class cls = DetailsActivity.class;
             Intent intent = new Intent(MapsActivity.this, cls);
@@ -268,9 +268,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
-
-
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -313,14 +312,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         mMap.clear();
-        myPos= new LatLng(location.getLatitude(), location.getLongitude());
+        myPos = new LatLng(location.getLatitude(), location.getLongitude());
 
         if (lastLoadPos == null || distanceInMeter(lastLoadPos, myPos) > MIN_METER_DISTANCE_BEFORE_RELOAD) {
             readBahnhoefe();
             lastLoadPos = myPos;
         }
 
-        addMarkers(bahnhofMarker,myPos);
+        addMarkers(bahnhofMarker, myPos);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, mMap.getCameraPosition().zoom));
     }
 
@@ -343,7 +342,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     != PackageManager.PERMISSION_GRANTED) {
                 // Check Permissions Now
 
-
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         android.Manifest.permission.ACCESS_FINE_LOCATION)) {
                     showMessageOKCancel("You need to allow access to Locations",
@@ -351,7 +349,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     ActivityCompat.requestPermissions(MapsActivity.this,
-                                            new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION},
+                                            new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                                             PERMISSION_REQUEST_CODE);
                                 }
                             });
@@ -368,7 +366,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 LocationServices.FusedLocationApi.requestLocationUpdates(
                         mGoogleApiClient, mLocationRequest, this);
             }
-        }else{
+        } else {
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, mLocationRequest, this);
         }
@@ -376,12 +374,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     protected void stopLocationUpdates() {
-        if(mGoogleApiClient.isConnected()){
+        if (mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
 
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
     }
 
     /**

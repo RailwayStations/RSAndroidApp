@@ -2,23 +2,11 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 /**
@@ -45,13 +33,13 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
         // Once a token is generated, we subscribe to topic.
         FirebaseMessaging.getInstance().subscribeToTopic(FRIENDLY_ENGAGE_TOPIC);
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE),MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC),true);
+        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), true);
         editor.apply();
 
-       // sendTheRegisteredTokenToWebServer(token);
-        }
+        // sendTheRegisteredTokenToWebServer(token);
+    }
 
   /*  private void sendTheRegisteredTokenToWebServer(final String token){
         queue = Volley.newRequestQueue(getApplicationContext());
@@ -87,5 +75,5 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         };
         queue.add(stringPostRequest);
     }*/
-    }
+}
 

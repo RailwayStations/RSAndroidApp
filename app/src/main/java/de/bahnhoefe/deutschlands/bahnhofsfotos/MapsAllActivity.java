@@ -68,13 +68,10 @@ public class MapsAllActivity extends AppCompatActivity implements OnMapReadyCall
         mMap = googleMap;
         mMap.clear();
         addAllMarkers(bahnhofMarker);
-
     }
 
-    private void addAllMarkers(List<Bahnhof> bahnhofMarker )
-    {
-
-        for(int i=0; i< bahnhofMarker.size();i++){
+    private void addAllMarkers(List<Bahnhof> bahnhofMarker) {
+        for (int i = 0; i < bahnhofMarker.size(); i++) {
             LatLng bahnhofPos = new LatLng(bahnhofMarker.get(i).getLat(), bahnhofMarker.get(i).getLon());
             mMap.addMarker(new MarkerOptions()
                     .title(bahnhofMarker.get(i).getTitle())
@@ -87,7 +84,6 @@ public class MapsAllActivity extends AppCompatActivity implements OnMapReadyCall
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 7));
-
     }
 
     @Override
@@ -98,23 +94,22 @@ public class MapsAllActivity extends AppCompatActivity implements OnMapReadyCall
 
     @Override
     public View getInfoContents(Marker marker) {
-
-        LayoutInflater layoutInflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = layoutInflater.inflate(R.layout.info_window,null,false);
-        ((TextView)view.findViewById(R.id.tvbahnhofname)).setText(marker.getTitle());
-        if(marker.getSnippet() != null){
-            ((TextView)view.findViewById(R.id.tvbahnhofnr)).setText("BahnhofNr: " + marker.getSnippet());
-        }else{
-            ((TextView)view.findViewById(R.id.tvbahnhofnr)).setText(" ");
+        LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = layoutInflater.inflate(R.layout.info_window, null, false);
+        ((TextView) view.findViewById(R.id.tvbahnhofname)).setText(marker.getTitle());
+        if (marker.getSnippet() != null) {
+            ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText("BahnhofNr: " + marker.getSnippet());
+        } else {
+            ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText(" ");
         }
 
-        ((TextView)view.findViewById(R.id.tvlatlon)).setText(marker.getPosition().toString());
+        ((TextView) view.findViewById(R.id.tvlatlon)).setText(marker.getPosition().toString());
         return view;
     }
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        BaseApplication baseApplication = (BaseApplication)getApplication();
+        BaseApplication baseApplication = (BaseApplication) getApplication();
         String countryShortCode = baseApplication.getCountryShortCode();
 
         Class cls = DetailsActivity.class;
@@ -125,7 +120,4 @@ public class MapsAllActivity extends AppCompatActivity implements OnMapReadyCall
         startActivity(intent);
     }
 
-
-
 }
-

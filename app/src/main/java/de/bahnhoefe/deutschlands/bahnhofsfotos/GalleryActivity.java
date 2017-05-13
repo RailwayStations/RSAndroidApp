@@ -1,12 +1,9 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -29,7 +26,6 @@ public class GalleryActivity extends AppCompatActivity {
     private GridViewAdapter adapter;
     private File file;
     private BahnhofsDbAdapter dbAdapter;
-    private String countryShortCode;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,15 +33,13 @@ public class GalleryActivity extends AppCompatActivity {
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
-        countryShortCode = baseApplication.getCountryShortCode();
 
         setContentView(R.layout.activity_gallery);
 
         // Check for SD Card
         if (!Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {
-            Toast.makeText(this, "Error! No SDCARD Found!", Toast.LENGTH_LONG)
-                    .show();
+            Toast.makeText(this, "Error! No SDCARD Found!", Toast.LENGTH_LONG).show();
         } else {
             // Locate the image folder in the SD Card
             file = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
@@ -53,18 +47,15 @@ public class GalleryActivity extends AppCompatActivity {
             file.mkdirs();
         }
 
-
         if (file.isDirectory()) {
-            listFile = file.listFiles(new FilenameFilter(){
+            listFile = file.listFiles(new FilenameFilter() {
                 @Override
-                public boolean accept (File dir, String name) {
+                public boolean accept(File dir, String name) {
                     return !name.startsWith(".");
                 }
             });
             // Creates a String array for FilePathStrings
             filePathStrings = new String[listFile.length];
-
-
 
             // Creates a String array for FileNameStrings
             fileNameStrings = new String[listFile.length];
@@ -82,7 +73,7 @@ public class GalleryActivity extends AppCompatActivity {
         String strCountOfImagesFormat = getResources().getString(R.string.count_of_images);
         String strCountOfImagesMsg = String.format(strCountOfImagesFormat, countOfImages);
 
-        TextView tvCountOfImages = (TextView)findViewById(R.id.tvImageCount);
+        TextView tvCountOfImages = (TextView) findViewById(R.id.tvImageCount);
         tvCountOfImages.setText(strCountOfImagesMsg);
 
         // Locate the GridView in gridview_main.xml
@@ -119,11 +110,5 @@ public class GalleryActivity extends AppCompatActivity {
         });
 
     }
-    public static float getScreenWidth(Activity activity) {
-        Display display = activity.getWindowManager().getDefaultDisplay();
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        display.getMetrics(outMetrics);
-        float pxWidth = outMetrics.widthPixels;
-        return pxWidth;
-    }
+
 }

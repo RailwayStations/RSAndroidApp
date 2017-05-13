@@ -17,6 +17,9 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -27,10 +30,6 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.model.LatLng;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager;
@@ -129,7 +128,6 @@ public class NearbyNotificationService extends Service implements LocationListen
                 NotificationManagerCompat.from(this);
         notificationManager.cancel(ONGOING_NOTIFICATION_ID);
 
-
         started = false;
         super.onDestroy();
     }
@@ -181,13 +179,12 @@ public class NearbyNotificationService extends Service implements LocationListen
         }
     }
 
-
     /**
      * Start notification build process. This might run asynchronous in case that required
      * photos need to be fetched fist. If the notification is built up, #onNotificationReady(Notification)
      * will be called.
      *
-     * @param nearest the station nearest to the current position
+     * @param nearest  the station nearest to the current position
      * @param distance the distance of the station to the current position
      */
     private void notifyNearest(Bahnhof nearest, double distance) {
@@ -203,9 +200,9 @@ public class NearbyNotificationService extends Service implements LocationListen
         notifiedStationManager.notifyUser();
     }
 
-
     /**
      * Calculate the distance between the given station and our current position (myLatitude, myLongitude)
+     *
      * @param bahnhof the station to calculate the distance to
      * @return the distance
      */
@@ -221,8 +218,8 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     private void startLocationUpdates() {
         LocationRequest locationRequest = new LocationRequest()
-                .setInterval (2*FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
-                .setFastestInterval (FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+                .setInterval(2 * FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+                .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
@@ -231,26 +228,27 @@ public class NearbyNotificationService extends Service implements LocationListen
                         builder.build());
 
         AsyncTask<PendingResult<LocationSettingsResult>, Void, Boolean> task =
-        new AsyncTask<PendingResult<LocationSettingsResult>, Void, Boolean>() {
+                new AsyncTask<PendingResult<LocationSettingsResult>, Void, Boolean>() {
 
-            @Override @SafeVarargs
-            final protected Boolean doInBackground(PendingResult<LocationSettingsResult>... pendingResults) {
-                com.google.android.gms.common.api.Status status = pendingResults[0].await().getStatus();
-                int statusCode = status.getStatusCode();
-                return statusCode == LocationSettingsStatusCodes.SUCCESS
-                        || statusCode == LocationSettingsStatusCodes.SUCCESS_CACHE;
-            }
+                    @Override
+                    @SafeVarargs
+                    final protected Boolean doInBackground(PendingResult<LocationSettingsResult>... pendingResults) {
+                        com.google.android.gms.common.api.Status status = pendingResults[0].await().getStatus();
+                        int statusCode = status.getStatusCode();
+                        return statusCode == LocationSettingsStatusCodes.SUCCESS
+                                || statusCode == LocationSettingsStatusCodes.SUCCESS_CACHE;
+                    }
 
-            @Override
-            final protected void onPostExecute(Boolean success) {
-                super.onPostExecute(success);
-                if (!success) {
-                    Log.e(TAG, "Device settings unsuitable for location");
-                    Toast.makeText(NearbyNotificationService.this, R.string.no_location_enabled, Toast.LENGTH_LONG).show();
-                    stopSelf();
-                }
-            }
-        };
+                    @Override
+                    final protected void onPostExecute(Boolean success) {
+                        super.onPostExecute(success);
+                        if (!success) {
+                            Log.e(TAG, "Device settings unsuitable for location");
+                            Toast.makeText(NearbyNotificationService.this, R.string.no_location_enabled, Toast.LENGTH_LONG).show();
+                            stopSelf();
+                        }
+                    }
+                };
         //noinspection unchecked
         task.execute(result);
 
@@ -271,6 +269,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     /**
      * Called by Google Play when the client has connected.
+     *
      * @param bundle the Bundle corresponding to the event
      */
     @Override
@@ -318,8 +317,9 @@ public class NearbyNotificationService extends Service implements LocationListen
     /**
      * Bind to interfaces provided by this service. Currently implemented:
      * <ul>
-     *     <li>STATUS_INTERFACE: Returns a StatusBinder that can be used to query the tracking status</li>
+     * <li>STATUS_INTERFACE: Returns a StatusBinder that can be used to query the tracking status</li>
      * </ul>
+     *
      * @param intent an Intent giving the intended action
      * @return a Binder instance suitable for the intent supplied, or null if none matches.
      */
@@ -345,6 +345,5 @@ public class NearbyNotificationService extends Service implements LocationListen
             bahnhofsDbAdapter.close();
         }
     }
-
 
 }

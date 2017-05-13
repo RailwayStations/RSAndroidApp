@@ -29,7 +29,7 @@ public class HighScoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_high_score);
 
-        new JSONHighscoreTask(((BaseApplication)getApplication()).getCountryShortCode()).execute();
+        new JSONHighscoreTask(((BaseApplication) getApplication()).getCountryShortCode()).execute();
     }
 
 

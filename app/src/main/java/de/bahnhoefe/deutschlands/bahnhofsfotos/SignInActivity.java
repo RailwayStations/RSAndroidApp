@@ -1,4 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -121,7 +122,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                             Toast.makeText(SignInActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            ((BaseApplication)getApplication()).saveSubscribtionStatus(true);
+                            ((BaseApplication) getApplication()).saveSubscribtionStatus(true);
                             startActivity(new Intent(SignInActivity.this, AuthActivity.class));
                             finish();
                         }
@@ -138,4 +139,3 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     }
 
 }
-

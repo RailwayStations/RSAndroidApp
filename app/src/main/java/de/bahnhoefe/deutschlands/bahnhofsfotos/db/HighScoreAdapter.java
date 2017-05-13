@@ -61,7 +61,7 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
                 break;
         }
 
-        if(position % 2 == 1) {
+        if (position % 2 == 1) {
             rowView.setBackgroundResource(R.drawable.item_list_backgroundcolor);
         } else {
             rowView.setBackgroundResource(R.drawable.item_list_backgroundcolor2);

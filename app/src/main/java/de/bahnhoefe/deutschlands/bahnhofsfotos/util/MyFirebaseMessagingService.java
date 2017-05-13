@@ -1,22 +1,14 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.AuthActivity;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 /**
@@ -42,7 +34,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String click_action = remoteMessage.getNotification().getClickAction();
         Intent intent = new Intent(click_action);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(message);
@@ -52,7 +44,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         notificationBuilder.setGroupSummary(true);
         notificationBuilder.setContentIntent(pendingIntent);
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0,notificationBuilder.build());
+        notificationManager.notify(0, notificationBuilder.build());
     }
 
 }

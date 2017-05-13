@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -36,7 +35,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +42,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+import static android.content.Intent.createChooser;
+import static android.graphics.Color.WHITE;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -52,17 +52,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 
-import static android.content.Intent.createChooser;
-import static android.graphics.Color.WHITE;
-import static com.google.android.gms.analytics.internal.zzy.p;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.drawable.ic_info_gray_24px;
-
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
     public static final String EXTRA_BAHNHOF = "bahnhof";
     private static final String TAG = DetailsActivity.class.getSimpleName();
-    private static final String TAG2 = "BackButtonTest";
     public static final int STORED_FOTO_WIDTH = 1920;
     public static final int STORED_FOTO_QUALITY = 95;
 
@@ -73,18 +67,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
-    private String licence, photoOwner, linking, link, nickname,countryShortCode;
+    private String licence, photoOwner, linking, link, nickname, countryShortCode;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static int alpha = 128;
-
-   /* final NavItem[] items = {
-            new NavItem("   mit ÖPNV", R.drawable.ic_directions_bus_gray_24px),
-            new NavItem("   per Auto", R.drawable.ic_directions_car_gray_24px),
-            new NavItem("   per Fahrrad", R.drawable.ic_directions_bike_gray_24px),
-            new NavItem("   zu Fuß",R.drawable.ic_directions_walk_gray_24px),
-            new NavItem("   nur anzeigen",R.drawable.ic_info_gray_24px)
-    };*/
-
+    private static final int alpha = 128;
 
     /**
      * Id to identify a camera permission request.
@@ -157,7 +142,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 
             if (bahnhof.getPhotoflag() != null) {
-                fetchTask = new BahnhofsFotoFetchTask(this,getApplicationContext());
+                fetchTask = new BahnhofsFotoFetchTask(this, getApplicationContext());
                 fetchTask.execute(bahnhof.getId());
             } else {
                 takePictureButton.setVisibility(View.VISIBLE);
@@ -189,7 +174,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         @Override
                         public void onClick(View v) {
                             Toast.makeText(v.getContext(), R.string.picture_landscape_only, Toast.LENGTH_LONG)
-                                   .show();
+                                    .show();
                         }
                     }
             );
@@ -199,28 +184,23 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private void checkMyData() {
         MyDataDialogFragment myDataDialog = new MyDataDialogFragment();
-        myDataDialog.show(getFragmentManager(),"mydata_dialog");
+        myDataDialog.show(getFragmentManager(), "mydata_dialog");
     }
 
     /**
      * Method to request permission for camera
      */
     private void requestCameraPermission() {
-
-
         // Camera and Write permission has not been granted yet. Request it directly.
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CAMERA);
-
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA);
     }
 
     public void takePicture() {
-
-            if (bahnhof.getPhotoflag() != null)
-                return;
-        if(nickname.equals("default")){
+        if (bahnhof.getPhotoflag() != null)
+            return;
+        if (nickname.equals("default")) {
             checkMyData();
-        }else {
-
+        } else {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             File file = getCameraMediaFile();
             if (file != null) {
@@ -231,9 +211,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             } else {
                 Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
             }
-       }
+        }
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -245,14 +224,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // Check if the only required permission has been granted
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-
                 // Camera and Write permission has been granted, preview can be displayed
                 enablePictureButton(true);
                 takePicture();
-
             } else {
                 //Permission not granted
-                Toast.makeText(DetailsActivity.this,"You need to grant camera permission to use camera",Toast.LENGTH_LONG).show();
+                Toast.makeText(DetailsActivity.this, "You need to grant camera permission to use camera", Toast.LENGTH_LONG).show();
             }
 
         }
@@ -266,28 +243,22 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
-
                 // Camera permission has not been granted.
-
                 requestCameraPermission();
-
-
             } else {
-                if(nickname.equals("default")){
+                if (nickname.equals("default")) {
                     checkMyData();
                 }
 
                 takePicture();
-
             }
-        }else{
-            if(nickname.equals("default")){
+        } else {
+            if (nickname.equals("default")) {
                 checkMyData();
             }
             takePicture();
         }
     }
-
 
 
     @Override
@@ -297,7 +268,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // dort und schreiben es in Standard-Größe in den permanenten Speicher
             File cameraRawPictureFile = getCameraMediaFile();
             File storagePictureFile = getStoredMediaFile();
-            if (cameraRawPictureFile == null ||storagePictureFile == null) {
+            if (cameraRawPictureFile == null || storagePictureFile == null) {
                 Log.wtf(TAG, "Camera made a foto, but we're unable to reproduce where it should have gone");
                 return;
             }
@@ -317,8 +288,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             Bitmap scaledScreen = BitmapFactory.decodeFile(
                     cameraRawPictureFile.getPath(),
                     options);
-            Log.d(TAG, "img width "+scaledScreen.getWidth());
-            Log.d(TAG, "img height "+scaledScreen.getHeight());
+            Log.d(TAG, "img width " + scaledScreen.getWidth());
+            Log.d(TAG, "img height " + scaledScreen.getHeight());
 
             try {
                 scaledScreen.compress(Bitmap.CompressFormat.JPEG, STORED_FOTO_QUALITY, new FileOutputStream(storagePictureFile));
@@ -338,15 +309,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     /**
      * Get the base directory for storing fotos
+     *
      * @return the File denoting the base directory.
      */
     @Nullable
     private File getMediaStorageDir() {
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
 
-        if (!mediaStorageDir.exists()){
-            if (!mediaStorageDir.mkdirs()){
-                Log.e(TAG, "Cannot create directory structure "+mediaStorageDir.getAbsolutePath());
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.e(TAG, "Cannot create directory structure " + mediaStorageDir.getAbsolutePath());
                 return null;
             }
         }
@@ -355,19 +327,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     /**
      * Get the file path for storing this station's foto
+     *
      * @return the File
      */
     @Nullable
     public File getStoredMediaFile() {
-
         File mediaStorageDir = getMediaStorageDir();
-        if (mediaStorageDir == null)
+        if (mediaStorageDir == null) {
             return null;
+        }
 
         Log.d(TAG, "BahnhofNrAbfrage: " + bahnhof.getId());
         File file = new File(mediaStorageDir, String.format("%s-%d.jpg", nickname, bahnhof.getId()));
-        Log.d("FilePfad",file.toString());
-
+        Log.d("FilePfad", file.toString());
 
         return file;
 
@@ -375,24 +347,24 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     /**
      * Get the file path for the Camera app to store the unprocessed foto to.
+     *
      * @return the File
      */
     private File getCameraMediaFile() {
         File temporaryStorageDir = new File(getMediaStorageDir(), ".temp");
-        if (!temporaryStorageDir.exists()){
-            if (!temporaryStorageDir.mkdirs()){
-                Log.e(TAG, "Cannot create directory structure "+temporaryStorageDir.getAbsolutePath());
+        if (!temporaryStorageDir.exists()) {
+            if (!temporaryStorageDir.mkdirs()) {
+                Log.e(TAG, "Cannot create directory structure " + temporaryStorageDir.getAbsolutePath());
                 return null;
             }
         }
 
         Log.d(TAG, "Temporary BahnhofNrAbfrage: " + bahnhof.getId());
         File file = new File(temporaryStorageDir, String.format("%s-%d.jpg", nickname, bahnhof.getId()));
-        Log.d("FilePfad",file.toString());
+        Log.d("FilePfad", file.toString());
 
         return file;
     }
-
 
 
     @Override
@@ -401,37 +373,28 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         getMenuInflater().inflate(R.menu.details, menu);
         MenuItem navToStation = menu.findItem(R.id.nav_to_station);
         navToStation.getIcon().mutate();
-        navToStation.getIcon().setColorFilter(WHITE,PorterDuff.Mode.SRC_ATOP);
-        /*MenuItem takePhoto = menu.findItem(R.id.take_photo);
+        navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
-        takePhoto.getIcon().mutate();
-        takePhoto.getIcon().setColorFilter(WHITE,PorterDuff.Mode.SRC_ATOP);*/
-        
-
-        if(localFotoUsed){
-
+        if (localFotoUsed) {
             MenuItem sendEmail = menu.findItem(R.id.send_email).setEnabled(true);
             MenuItem sharePhoto = menu.findItem(R.id.share_photo).setEnabled(true);
             sendEmail.getIcon().mutate();
-            sendEmail.getIcon().setColorFilter(WHITE,PorterDuff.Mode.SRC_ATOP);
+            sendEmail.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
             sharePhoto.getIcon().mutate();
-            sharePhoto.getIcon().setColorFilter(WHITE,PorterDuff.Mode.SRC_ATOP);
-
-        }else{
+            sharePhoto.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
+        } else {
             MenuItem sendEmail = menu.findItem(R.id.send_email).setEnabled(false);
             MenuItem sharePhoto = menu.findItem(R.id.share_photo).setEnabled(false);
             sendEmail.getIcon().mutate();
-            sendEmail.getIcon().setColorFilter(WHITE,PorterDuff.Mode.SRC_ATOP);
+            sendEmail.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
             sendEmail.getIcon().setAlpha(alpha);
             sharePhoto.getIcon().mutate();
-            sharePhoto.getIcon().setColorFilter(WHITE,PorterDuff.Mode.SRC_ATOP);
+            sharePhoto.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
             sharePhoto.getIcon().setAlpha(alpha);
         }
 
-
         return super.onPrepareOptionsMenu(menu);
     }
-
 
 
     @Override
@@ -449,7 +412,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                             .addNextIntentWithParentStack(upIntent)
                             // Navigate up to the closest parent
                             .startActivities();
-
                 } else {
                     // This activity is part of this app's task, so simply
                     // navigate up to the logical parent activity.
@@ -466,7 +428,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             case R.id.send_email:
                 Intent emailIntent = createFotoSendIntent();
                 //emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
-                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {country.getEmail()});
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{country.getEmail()});
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + licence
                         + "\n selbst fotografiert: " + photoOwner
@@ -474,25 +436,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         + "\n Verlinken bitte mit: " + linking
                         + "\n Link zum Account: " + link);
                 emailIntent.setType("multipart/byteranges");
-                startActivity(Intent.createChooser(emailIntent,"Mail versenden"));
+                startActivity(Intent.createChooser(emailIntent, "Mail versenden"));
                 break;
             case R.id.share_photo:
                 Intent shareIntent = createFotoSendIntent();
                 //shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhof.getTitle() + " @android_oma @khgdrn");
-                shareIntent.putExtra(Intent.EXTRA_TEXT,country.getTwitterTags() + " " + bahnhof.getTitle());
+                shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + bahnhof.getTitle());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
-           /* case R.id.nav_to_station:
-
-                break;*/
             default:
                 break;
         }
 
         return true;
     }
-
 
 
     private Intent createFotoSendIntent() {
@@ -510,8 +468,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 new NavItem("   " + getString(R.string.nav_oepnv), R.drawable.ic_directions_bus_gray_24px),
                 new NavItem("   " + getString(R.string.nav_car), R.drawable.ic_directions_car_gray_24px),
                 new NavItem("   " + getString(R.string.nav_bike), R.drawable.ic_directions_bike_gray_24px),
-                new NavItem("   " + getString(R.string.nav_walk),R.drawable.ic_directions_walk_gray_24px),
-                new NavItem("   " + getString(R.string.nav_show),R.drawable.ic_info_gray_24px)
+                new NavItem("   " + getString(R.string.nav_walk), R.drawable.ic_directions_walk_gray_24px),
+                new NavItem("   " + getString(R.string.nav_show), R.drawable.ic_info_gray_24px)
         };
 
 
@@ -519,11 +477,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 this,
                 android.R.layout.select_dialog_item,
                 android.R.id.text1,
-                items){
+                items) {
             public View getView(int position, View convertView, ViewGroup parent) {
                 //Use super class to create the View
                 View v = super.getView(position, convertView, parent);
-                TextView tv = (TextView)v.findViewById(android.R.id.text1);
+                TextView tv = (TextView) v.findViewById(android.R.id.text1);
 
                 //Put the image on the TextView
                 tv.setCompoundDrawablesWithIntrinsicBounds(items[position].icon, 0, 0, 0);
@@ -532,79 +490,29 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
                 int dp7 = (int) (20 * getResources().getDisplayMetrics().density);
                 tv.setCompoundDrawablePadding(dp5);
-                tv.setPadding(dp7,0,0,0);
+                tv.setPadding(dp7, 0, 0, 0);
 
                 return v;
             }
         };
 
         AlertDialog.Builder navBuilder = new AlertDialog.Builder(this);
-                navBuilder.setIcon(R.mipmap.ic_launcher);
-                navBuilder.setTitle(R.string.navMethod);
-                navBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int navItem) {
-                        String dlocation = "";
-                        Intent intent = null;
-                        switch (navItem) {
-                            case 0:
-                                dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
-                                Log.d("findnavigation case 0", dlocation);
-                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                                break;
-                            case 1:
-                                dlocation = String.format("google.navigation:ll=%s,%s&mode=d", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
-                                Log.d("findnavigation case 1", dlocation);
-                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                                break;
-
-                            case 2:
-                                dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
-                                        bahnhof.getPosition().latitude,
-                                        bahnhof.getPosition().longitude);
-                                Log.d("findnavigation case 2", dlocation);
-                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                                break;
-                            case 3:
-                                dlocation = String.format("google.navigation:ll=%s,%s&mode=w", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
-                                Log.d("findnavigation case 3", dlocation);
-                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                                break;
-                            case 4:
-                                dlocation = String.format("geo:%s,%s?q=%s", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude, bahnhof.getTitle());
-                                Log.d("findnavigation case 4", dlocation);
-                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                                break;
-
-                        }
-                        try {
-                            startActivity(intent);
-                        } catch (Exception e) {
-                            Toast toast = Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG);
-                            toast.show();
-                        }
-                    }
-                }).show();
-
-    }
-
-    /*protected void startNavigation(final Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.mipmap.ic_launcher);
-        builder.setTitle(R.string.navMethod).setItems(R.array.pick_navmethod, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        navBuilder.setIcon(R.mipmap.ic_launcher);
+        navBuilder.setTitle(R.string.navMethod);
+        navBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int navItem) {
                 String dlocation = "";
                 Intent intent = null;
-                switch (which) {
+                switch (navItem) {
                     case 0:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
                         Log.d("findnavigation case 0", dlocation);
-                        intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 1:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=d", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
                         Log.d("findnavigation case 1", dlocation);
-                        intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
 
                     case 2:
@@ -612,17 +520,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                                 bahnhof.getPosition().latitude,
                                 bahnhof.getPosition().longitude);
                         Log.d("findnavigation case 2", dlocation);
-                        intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 3:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=w", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
                         Log.d("findnavigation case 3", dlocation);
-                        intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 4:
                         dlocation = String.format("geo:%s,%s?q=%s", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude, bahnhof.getTitle());
                         Log.d("findnavigation case 4", dlocation);
-                        intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(dlocation));
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
 
                 }
@@ -633,11 +541,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     toast.show();
                 }
             }
-        });
-        builder.show();
+        }).show();
 
-    }*/
-
+    }
 
     /**
      * This gets called if the requested bitmap is available. Finish and issue the notification.
@@ -686,7 +592,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     /**
      * Fetch bitmap from device local location, if  it exists, and set the foto view.
-     *
      */
     private void setLocalBitmap() {
         takePictureButton.setVisibility(View.VISIBLE);
@@ -703,7 +608,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             setBitmap(showBitmap);
         }
     }
-
 
     private void setBitmap(final Bitmap showBitmap) {
         Display display = getWindowManager().getDefaultDisplay();
@@ -724,23 +628,34 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         invalidateOptionsMenu();
     }
 
+    private class AnimationUpdateListener implements ValueAnimator.AnimatorUpdateListener {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            float alpha = (float) animation.getAnimatedValue();
+            tvBahnhofName.setAlpha(alpha);
+            licenseTagView.setAlpha(alpha);
+        }
+    }
+
     /**
      * Check if there's a local photo file for this station.
+     *
      * @return the Bitmap of the photo, or null if none exists.
      */
-    @Nullable private Bitmap checkForLocalPhoto() {
+    @Nullable
+    private Bitmap checkForLocalPhoto() {
         // show the image
         Bitmap scaledScreen = null;
         File localFile = getStoredMediaFile();
 
         if (localFile != null && localFile.canRead()) {
-            Log.d(TAG, "File: "+ localFile);
-            Log.d(TAG, "FileGetPath: "+ localFile.getPath().toString());
+            Log.d(TAG, "File: " + localFile);
+            Log.d(TAG, "FileGetPath: " + localFile.getPath().toString());
 
             scaledScreen = BitmapFactory.decodeFile(
                     localFile.getPath());
-            Log.d(TAG, "img width "+scaledScreen.getWidth());
-            Log.d(TAG, "img height "+scaledScreen.getHeight());
+            Log.d(TAG, "img width " + scaledScreen.getWidth());
+            Log.d(TAG, "img height " + scaledScreen.getHeight());
             localFotoUsed = true;
             return scaledScreen;
         } else {
@@ -756,16 +671,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     }
 
-
-    private class AnimationUpdateListener implements ValueAnimator.AnimatorUpdateListener {
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            float alpha = (float) animation.getAnimatedValue();
-            tvBahnhofName.setAlpha(alpha);
-            licenseTagView.setAlpha(alpha);
-        }
-    }
-
     public void onPictureClicked() {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
                 !fullscreen) {
@@ -779,7 +684,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                             | View.SYSTEM_UI_FLAG_IMMERSIVE);
             ActionBar bar = getActionBar();
             if (bar != null)
-              bar.hide();
+                bar.hide();
             android.support.v7.app.ActionBar sbar = getSupportActionBar();
             if (sbar != null)
                 sbar.hide();
@@ -803,7 +708,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(DetailsActivity.this,MainActivity.class);
+        Intent intent = new Intent(DetailsActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }

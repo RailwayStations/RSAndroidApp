@@ -64,8 +64,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DIALOG_TAG = "App Info Dialog";
     public final String TAG = "Bahnhoefe";
@@ -77,7 +76,6 @@ public class MainActivity extends AppCompatActivity
     private CustomAdapter customAdapter;
     private Cursor cursor;
 
-
     private FirebaseAuth mFirebaseAuth;
 
     private NearbyNotificationService.StatusBinder statusBinder;
@@ -85,7 +83,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -95,23 +92,21 @@ public class MainActivity extends AppCompatActivity
         dbAdapter = baseApplication.getDbAdapter();
         firstAppStart = baseApplication.getFirstAppStart();
 
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
-                    startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
-                }
-            });
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
+                startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
+            }
+        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -121,8 +116,8 @@ public class MainActivity extends AppCompatActivity
         View header = navigationView.getHeaderView(0);
         TextView tvUpdate = (TextView) header.findViewById(R.id.tvUpdate);
 
-        if(firstAppStart==false){
-            Intent introSliderIntent = new Intent(MainActivity.this,IntroSliderActivity.class);
+        if (firstAppStart == false) {
+            Intent introSliderIntent = new Intent(MainActivity.this, IntroSliderActivity.class);
             startActivity(introSliderIntent);
             finish();
         }
@@ -134,14 +129,13 @@ public class MainActivity extends AppCompatActivity
         }
         if (!lastUpdateDate.equals("")) {
             tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
-        }else {
+        } else {
             disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
-            //runMultipleAsyncTask();
         }
 
         cursor = dbAdapter.getStationsList(false);
-        customAdapter = new CustomAdapter(this, cursor,0);
+        customAdapter = new CustomAdapter(this, cursor, 0);
         ListView listView = (ListView) findViewById(R.id.lstStations);
         assert listView != null;
         listView.setAdapter(customAdapter);
@@ -163,9 +157,9 @@ public class MainActivity extends AppCompatActivity
 
 
         Intent searchIntent = getIntent();
-        if(Intent.ACTION_SEARCH.equals(searchIntent.getAction())){
+        if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
             String query = searchIntent.getStringExtra(SearchManager.QUERY);
-            Toast.makeText(MainActivity.this,query,Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, query, Toast.LENGTH_SHORT).show();
         }
 
         bindToStatus();
@@ -179,7 +173,7 @@ public class MainActivity extends AppCompatActivity
                 + File.separator + "Bahnhofsfotos");
         Log.d(TAG, file.toString());
 
-        Menu menuNav=navigationView.getMenu();
+        Menu menuNav = navigationView.getMenu();
         MenuItem nav_itemGallery = menuNav.findItem(R.id.nav_your_own_station_photos);
 
         if (file.isDirectory()) {
@@ -187,10 +181,10 @@ public class MainActivity extends AppCompatActivity
             if (files == null) {
                 //directory is empty
                 nav_itemGallery.setEnabled(false);
-            }else{
+            } else {
                 nav_itemGallery.setEnabled(true);
             }
-        }else{
+        } else {
             nav_itemGallery.setEnabled(false);
         }
 
@@ -209,55 +203,48 @@ public class MainActivity extends AppCompatActivity
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public boolean onCreateOptionsMenu(Menu menu) {
-
         getMenuInflater().inflate(R.menu.main, menu);
-        MenuItem item = menu.findItem(R.id.search);
 
+        SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView search = (SearchView) menu.findItem(R.id.search).getActionView();
+        search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            SearchView search = (SearchView) menu.findItem(R.id.search).getActionView();
-            search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
-            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                Log.d(TAG, "onQueryTextSubmit ");
+                try {
+                    cursor = dbAdapter.getBahnhofsListByKeyword(s, false);
+                    if (cursor == null) {
+                        Toast.makeText(MainActivity.this, "No records found!", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, cursor.getCount() + " records found!", Toast.LENGTH_LONG).show();
+                    }
+                    customAdapter.swapCursor(cursor);
+                } catch (Exception e) {
+                    Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
+                }
+                return false;
+            }
 
-                @Override
-                public boolean onQueryTextSubmit(String s) {
-                    Log.d(TAG, "onQueryTextSubmit ");
-                    try {
-                        cursor = dbAdapter.getBahnhofsListByKeyword(s, false);
-                        if (cursor == null) {
-                            Toast.makeText(MainActivity.this, "No records found!", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(MainActivity.this, cursor.getCount() + " records found!", Toast.LENGTH_LONG).show();
-                        }
+            @Override
+            public boolean onQueryTextChange(String s) {
+                Log.d(TAG, "onQueryTextChange ");
+                try {
+                    cursor = dbAdapter.getBahnhofsListByKeyword(s, false);
+                    if (cursor != null) {
                         customAdapter.swapCursor(cursor);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
                     }
-                    return false;
+                } catch (Exception e) {
+                    Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
                 }
+                return false;
+            }
 
-                @Override
-                public boolean onQueryTextChange(String s) {
-                    Log.d(TAG, "onQueryTextChange ");
-                    try {
-                        cursor = dbAdapter.getBahnhofsListByKeyword(s, false);
-                        if (cursor != null) {
-                            customAdapter.swapCursor(cursor);
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
-                    }
-                    return false;
-                }
-
-            });
-
-        }
+        });
 
         return true;
-
     }
 
     /**
@@ -296,13 +283,13 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if(id==R.id.countrySelection){
+        if (id == R.id.countrySelection) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, CountryActivity.class);
             startActivity(intent);
             item.setIcon(R.drawable.ic_language_white_24px);
         } else if (id == R.id.notify) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
-            boolean active = statusBinder != null ? statusBinder.isNotificationTrackingActive() : false;
+            boolean active = statusBinder != null && statusBinder.isNotificationTrackingActive();
             if (!active) {
                 startService(intent);
                 item.setChecked(true);
@@ -317,14 +304,12 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        if(id==R.id.nav_slideshow){
+        if (id == R.id.nav_slideshow) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, IntroSliderActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_data) {
@@ -349,12 +334,12 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
-            appInfoFragment.show(getSupportFragmentManager(),DIALOG_TAG);
+            appInfoFragment.show(getSupportFragmentManager(), DIALOG_TAG);
         } else if (id == R.id.nav_user_register) {
-            if(mFirebaseAuth.getCurrentUser() == null){
+            if (mFirebaseAuth.getCurrentUser() == null) {
                 Intent intentSignIn = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, SignInActivity.class);
                 startActivity(intentSignIn);
-            }else {
+            } else {
                 Intent intentAuth = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, AuthActivity.class);
                 startActivity(intentAuth);
             }
@@ -369,14 +354,14 @@ public class MainActivity extends AppCompatActivity
 
     private void enableNavItem() {
         // after loading stations enable menu to start MapsActivity
-        Menu menuNav=navigationView.getMenu();
+        Menu menuNav = navigationView.getMenu();
         MenuItem nav_item2 = menuNav.findItem(R.id.nav_stations_without_photo);
         MenuItem nav_item3 = menuNav.findItem(R.id.nav_all_stations_without_photo);
         nav_item3.setEnabled(true);
         nav_item2.setEnabled(true);
     }
 
-    private void disableNavItem(){
+    private void disableNavItem() {
         // if there are no stations available, disable the menu to start MapsActivity
         Menu menuNav = navigationView.getMenu();
         MenuItem nav_item2 = menuNav.findItem(R.id.nav_stations_without_photo);
@@ -385,11 +370,11 @@ public class MainActivity extends AppCompatActivity
         nav_item2.setEnabled(false);
     }
 
-    public class JSONTask extends AsyncTask<Void, String, List<Bahnhof>>{
+    public class JSONTask extends AsyncTask<Void, String, List<Bahnhof>> {
 
         private final String countryCode;
         private ProgressDialog progressDialog;
-        private Date lastUpdateDate;
+        private final Date lastUpdateDate;
 
         // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
         private void enableHttpResponseCache() {
@@ -418,13 +403,12 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected List<Bahnhof> doInBackground(Void ...params) {
+        protected List<Bahnhof> doInBackground(Void... params) {
             dbAdapter.deleteBahnhoefe();
             dbAdapter.deleteCountries();
             List<Bahnhof> ohne = loadBatch(true);
             List<Bahnhof> mit = loadBatch(false);
-            if (ohne != null && mit != null)
-            {
+            if (ohne != null && mit != null) {
                 ohne.addAll(mit);
             }
             return ohne;
@@ -440,7 +424,7 @@ public class MainActivity extends AppCompatActivity
             publishProgress("Verbinde...");
             try {
                 URL url = new URL(String.format("%s/%s/%s%s", Constants.API_START_URL, countryCode.toLowerCase(), Constants.BAHNHOEFE_END_URL, withPhotos));
-                connection = (HttpURLConnection)url.openConnection();
+                connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
                 long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);
                 if (lastUpdateDate == null || resourceDate > lastUpdateDate.getTime()) {
@@ -493,11 +477,11 @@ public class MainActivity extends AppCompatActivity
             } catch (IOException e) {
                 Log.e(TAG, "Could not read json files", e);
             } finally {
-                if(connection != null){
+                if (connection != null) {
                     connection.disconnect();
                 }
                 try {
-                    if(reader != null){
+                    if (reader != null) {
                         reader.close();
                     }
                 } catch (IOException e) {
@@ -519,18 +503,13 @@ public class MainActivity extends AppCompatActivity
             enableNavItem();
             TextView tvUpdate = (TextView) findViewById(R.id.tvUpdate);
             try {
-                tvUpdate.setText("Letzte Aktualisierung am: " + loadUpdateDateFromFile("updatedate.txt") );
+                tvUpdate.setText("Letzte Aktualisierung am: " + loadUpdateDateFromFile("updatedate.txt"));
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error writing updatedate.txt", e);
             }
-            if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.GINGERBREAD){
-                customAdapter.swapCursor(dbAdapter.getStationsList(false));
-            } else {
-                customAdapter.changeCursor(dbAdapter.getStationsList(false));
-            }
+            customAdapter.swapCursor(dbAdapter.getStationsList(false));
 
             unlockScreenOrientation();
-
         }
 
         @Override
@@ -635,16 +614,15 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Run Multiple Async Tasks
-     *
+     * <p>
      * from http://blogs.innovationm.com/multiple-asynctask-in-android/
      */
     private void runMultipleAsyncTask() {
         // First Task
-        new JSONTask(lastUpdateDate, ((BaseApplication)getApplication()).getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        new JSONTask(lastUpdateDate, ((BaseApplication) getApplication()).getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 
         // Second Task
         new JSONLaenderTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
-
     }
 
 
@@ -654,7 +632,6 @@ public class MainActivity extends AppCompatActivity
         handleGalleryNavItem();
         if (lastUpdateDate.equals("")) {
             disableNavItem();
-            //tvUpdate.setText(R.string.no_stations_in_database);
             runMultipleAsyncTask();
         }
 
@@ -662,42 +639,41 @@ public class MainActivity extends AppCompatActivity
 
     @Nullable
     private String writeUpdateDateInFile() {
-
         try {
             Calendar c = Calendar.getInstance();
             SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
             final String lastUpdateDate = df.format(c.getTime());
-            FileOutputStream updateDate = openFileOutput("updatedate.txt",MODE_PRIVATE);
+            FileOutputStream updateDate = openFileOutput("updatedate.txt", MODE_PRIVATE);
             OutputStreamWriter osw = new OutputStreamWriter(updateDate);
             try {
                 osw.write(lastUpdateDate);
                 osw.flush();
                 osw.close();
-                Toast.makeText(getBaseContext(),"Aktualisierungsdatum gespeichert", Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), "Aktualisierungsdatum gespeichert", Toast.LENGTH_LONG).show();
                 return lastUpdateDate;
             } catch (IOException ioe) {
                 Log.e(TAG, ioe.toString());
             }
         } catch (FileNotFoundException fnfe) {
-            Log.e(TAG,fnfe.toString());
+            Log.e(TAG, fnfe.toString());
         }
         return null;
     }
 
-    public String loadUpdateDateFromFile(String filename) throws Exception{
+    public String loadUpdateDateFromFile(String filename) throws Exception {
         String retString = "";
         BufferedReader reader = null;
-        try{
+        try {
             FileInputStream in = this.openFileInput(filename);
             reader = new BufferedReader(new InputStreamReader(in));
             String zeile;
-            while ((zeile = reader.readLine()) != null){
+            while ((zeile = reader.readLine()) != null) {
                 retString += zeile;
             }
             reader.close();
 
-        }catch (FileNotFoundException fnfe){
-            Log.e(TAG,fnfe.toString());
+        } catch (FileNotFoundException fnfe) {
+            Log.e(TAG, fnfe.toString());
         }
         return retString;
     }
@@ -709,7 +685,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.d(TAG, "Bound to status service of NearbyNotificationService");
-                statusBinder = (NearbyNotificationService.StatusBinder)service;
+                statusBinder = (NearbyNotificationService.StatusBinder) service;
                 invalidateOptionsMenu();
             }
 
@@ -719,7 +695,8 @@ public class MainActivity extends AppCompatActivity
                 statusBinder = null;
             }
         }, 0))
-            Log.e(TAG, "Bind request to statistics interface failed");
+
+        Log.e(TAG, "Bind request to statistics interface failed");
     }
 
 

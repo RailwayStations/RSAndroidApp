@@ -219,7 +219,7 @@ public class AuthActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 ChatMessage chatMessage = new ChatMessage(mMessageEditText.getText().toString(), mUsername,
-                        mPhotoUrl,mTimeStamp);
+                        mPhotoUrl, mTimeStamp);
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(chatMessage);
                 mMessageEditText.setText("");
             }
@@ -256,7 +256,7 @@ public class AuthActivity extends AppCompatActivity implements
             subscribtionStatus = !subscribtionStatus;
             saveSubscribtionStatus(subscribtionStatus);
             myNotifySwitch.setChecked(subscribtionStatus);
-            Log.d(TAG,"Der Button ist: " + subscribtionStatus);
+            Log.d(TAG, "Der Button ist: " + subscribtionStatus);
             if (subscribtionStatus) {
                 FirebaseMessaging.getInstance().subscribeToTopic("friendly_engage");
                 Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet", Toast.LENGTH_LONG).show();
@@ -281,7 +281,7 @@ public class AuthActivity extends AppCompatActivity implements
                 mPhotoUrl = null;
                 saveSubscribtionStatus(false);
                 myNotifySwitch.setChecked(false);
-                startActivity(new Intent(this,MainActivity.class));
+                startActivity(new Intent(this, MainActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -289,11 +289,11 @@ public class AuthActivity extends AppCompatActivity implements
     }
 
     private boolean subscribtionStatus() {
-        return ((BaseApplication)getApplication()).subscribtionStatus();
+        return ((BaseApplication) getApplication()).subscribtionStatus();
     }
 
     private void saveSubscribtionStatus(boolean status) {
-        ((BaseApplication)getApplication()).saveSubscribtionStatus(status);
+        ((BaseApplication) getApplication()).saveSubscribtionStatus(status);
     }
 
     private void sendInvitation() {
@@ -346,7 +346,6 @@ public class AuthActivity extends AppCompatActivity implements
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
-
 
 
 }
