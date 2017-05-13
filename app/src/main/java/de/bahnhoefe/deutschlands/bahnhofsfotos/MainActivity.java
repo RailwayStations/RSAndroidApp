@@ -7,7 +7,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -45,7 +44,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -74,7 +72,6 @@ public class MainActivity extends AppCompatActivity
     private BahnhofsDbAdapter dbAdapter;
     private String lastUpdateDate;
     private NavigationView navigationView;
-    private String countryShortCode;
     private Boolean firstAppStart;
 
     private CustomAdapter customAdapter;
@@ -96,7 +93,6 @@ public class MainActivity extends AppCompatActivity
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
-        countryShortCode = baseApplication.getCountryShortCode();
         firstAppStart = baseApplication.getFirstAppStart();
 
 
@@ -104,13 +100,9 @@ public class MainActivity extends AppCompatActivity
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
                     Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
                     emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
                     startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
-
-                /*Snackbar.make(view, "Will be implemented later.", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
                 }
             });
 
@@ -340,6 +332,9 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
             runMultipleAsyncTask();
+        } else if (id == R.id.nav_highscore) {
+            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, HighScoreActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_your_own_station_photos) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
             startActivity(intent);
@@ -392,11 +387,9 @@ public class MainActivity extends AppCompatActivity
 
     public class JSONTask extends AsyncTask<Void, String, List<Bahnhof>>{
 
+        private final String countryCode;
         private ProgressDialog progressDialog;
         private Date lastUpdateDate;
-
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-        String countryShortChode = sharedPreferences.getString(getString(R.string.COUNTRY), BaseApplication.DEFAULT_COUNTRY);
 
         // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
         private void enableHttpResponseCache() {
@@ -411,9 +404,10 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        protected JSONTask(@Nullable final String lastUpdateDate) {
+        protected JSONTask(@Nullable final String lastUpdateDate, final String countryCode) {
             enableHttpResponseCache();
             this.lastUpdateDate = null;
+            this.countryCode = countryCode;
             if (lastUpdateDate != null) {
                 try {
                     new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(lastUpdateDate);
@@ -445,7 +439,7 @@ public class MainActivity extends AppCompatActivity
 
             publishProgress("Verbinde...");
             try {
-                URL url = new URL(String.format("%s/%s/%s%s", Constants.BAHNHOEFE_START_URL, countryShortChode.toLowerCase(), Constants.BAHNHOEFE_END_URL, withPhotos));
+                URL url = new URL(String.format("%s/%s/%s%s", Constants.API_START_URL, countryCode.toLowerCase(), Constants.BAHNHOEFE_END_URL, withPhotos));
                 connection = (HttpURLConnection)url.openConnection();
                 connection.connect();
                 long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);
@@ -496,8 +490,6 @@ public class MainActivity extends AppCompatActivity
                         Log.e(TAG, "Mal formatted Json", e);
                     }
                 } // Online-Resource ist  neuer als unsere Daten
-            } catch (MalformedURLException e) {
-                Log.e(TAG, "Malformed URL", e);
             } catch (IOException e) {
                 Log.e(TAG, "Could not read json files", e);
             } finally {
@@ -596,43 +588,35 @@ public class MainActivity extends AppCompatActivity
                 String finalJson = buffer.toString();
 
                 publishProgress("Verarbeite Länder...");
-                try {
-                    JSONArray countryList = new JSONArray(finalJson);
-                    count = countryList.length();
-                    Log.i(TAG, "Parsed " + count + " countries");
-                    List<Country> countries = new ArrayList<Country>(count);
+                JSONArray countryList = new JSONArray(finalJson);
+                count = countryList.length();
+                Log.i(TAG, "Parsed " + count + " countries");
+                List<Country> countries = new ArrayList<Country>(count);
 
-                    for (int i = 0; i < countryList.length(); i++) {
-                        publishProgress("Verarbeite " + i + "/" + count);
-                        JSONObject jsonObj = (JSONObject) countryList.get(i);
+                for (int i = 0; i < countryList.length(); i++) {
+                    publishProgress("Verarbeite " + i + "/" + count);
+                    JSONObject jsonObj = (JSONObject) countryList.get(i);
 
-                        String countryShortCode = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE);
-                        String countryName = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME);
-                        String email = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_EMAIL);
-                        String twitterTags = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS);
+                    String countryShortCode = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE);
+                    String countryName = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME);
+                    String email = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_EMAIL);
+                    String twitterTags = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS);
 
-                        Country country = new Country();
-                        country.setCountryShortCode(countryShortCode);
-                        country.setCountryName(countryName);
-                        country.setEmail(email);
-                        country.setTwitterTags(twitterTags);
+                    Country country = new Country();
+                    country.setCountryShortCode(countryShortCode);
+                    country.setCountryName(countryName);
+                    country.setEmail(email);
+                    country.setTwitterTags(twitterTags);
 
-                        countries.add(country);
-                        Log.d("DatenbankInsertLdOk ...", country.toString());
-                    }
-                    publishProgress("Schreibe in Datenbank");
-                    dbAdapter.insertCountries(countries);
-                    publishProgress("Datenbank " + countries + " Ländern aktualisiert");
-                    return countries;
-
-                } catch (JSONException e) {
-                    Log.e(TAG, "Mal formatted Json", e);
+                    countries.add(country);
+                    Log.d("DatenbankInsertLdOk ...", country.toString());
                 }
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                publishProgress("Schreibe in Datenbank");
+                dbAdapter.insertCountries(countries);
+                publishProgress("Datenbank " + countries + " Ländern aktualisiert");
+                return countries;
+            } catch (final Exception e) {
+                Log.e(TAG, "Error loading countries", e);
             }
 
             return null;
@@ -649,28 +633,17 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // from http://blogs.innovationm.com/multiple-asynctask-in-android/
-    private void runMultipleAsyncTask() // Run Multiple Async Task
-    {
-        JSONTask asyncTaskBahnhoefe = new JSONTask(lastUpdateDate); // First
+    /**
+     * Run Multiple Async Tasks
+     *
+     * from http://blogs.innovationm.com/multiple-asynctask-in-android/
+     */
+    private void runMultipleAsyncTask() {
+        // First Task
+        new JSONTask(lastUpdateDate, ((BaseApplication)getApplication()).getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 
-        if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) // Above Api Level 13
-        {
-            asyncTaskBahnhoefe.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
-        }
-        else // Below Api Level 13
-        {
-            asyncTaskBahnhoefe.execute();
-        }
-        JSONLaenderTask asyncTaskCountries = new JSONLaenderTask(); // Second
-        if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)// Above Api Level 13
-        {
-            asyncTaskCountries.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
-        }
-        else // Below Api Level 13
-        {
-            asyncTaskCountries.execute();
-        }
+        // Second Task
+        new JSONLaenderTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 
     }
 

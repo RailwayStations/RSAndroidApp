@@ -167,5 +167,7 @@
     <string name="push_notifications_menu_label">Benachrichtigungen ausschalten</string>
     <string name="push_notifications_menu_active">Benachrichtigungen aktivieren</string>
     <string name="FRIENDLY_ENGAGE_TOPIC">friendly_engage</string>
+    <string name="title_activity_high_score">Rangliste</string>
+    <string name="menu_title_highscore">Rangliste</string>
 
 </resources>
