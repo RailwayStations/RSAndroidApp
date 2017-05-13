@@ -71,7 +71,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Stores parameters for requests to the FusedLocationProviderApi.
      */
     private LocationRequest mLocationRequest;
-    private boolean mRequestingLocationUpdates = false;
+    private boolean mRequestingLocationUpdates = true;
+    private boolean nextCameraChangeIsManual = true;
     private BahnhofsDbAdapter dbAdapter;
 
     @Override
@@ -172,11 +173,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
         mMap.clear();
         addMarkers(bahnhofMarker, myPos);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
+        nextCameraChangeIsManual = false;
+        mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
+            @Override
+            public void onCameraMoveStarted(int i) {
+                if (nextCameraChangeIsManual) {
+                    stopLocationUpdates();
+                    myLocSwitch.setChecked(false);
+                }
+            }
+        });
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                nextCameraChangeIsManual = true;
+            }
+        });
     }
 
     private void addMarkers(List<Bahnhof> bahnhofMarker, LatLng myPos) {
@@ -320,6 +337,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         addMarkers(bahnhofMarker, myPos);
+        nextCameraChangeIsManual = false;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, mMap.getCameraPosition().zoom));
     }
 
