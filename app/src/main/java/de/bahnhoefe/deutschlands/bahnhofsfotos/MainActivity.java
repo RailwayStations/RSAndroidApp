@@ -267,9 +267,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (statusBinder != null) {
             MenuItem item = menu.findItem(R.id.notify);
-            boolean active = statusBinder.isNotificationTrackingActive();
-            item.setChecked(active);
-            item.setIcon(active ? R.drawable.ic_notifications_active_white_24px : R.drawable.ic_notifications_off_white_24px);
+            NotificationState state = statusBinder.getNotifictaionState();
+            item.setChecked(state.isActive());
+            item.setIcon(state.getIconResourceId());
 
         }
         return super.onPrepareOptionsMenu(menu);
@@ -284,21 +284,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.countrySelection) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, CountryActivity.class);
+            final Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, CountryActivity.class);
             startActivity(intent);
             item.setIcon(R.drawable.ic_language_white_24px);
         } else if (id == R.id.notify) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
-            boolean active = statusBinder != null && statusBinder.isNotificationTrackingActive();
-            if (!active) {
+            final Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
+            NotificationState state = statusBinder != null ? statusBinder.getNotifictaionState() : NotificationState.OFF;
+            switch (state) {
+                case ALL:
+                    state = NotificationState.ONLY_WITHOUT_PHOTO;
+                    break;
+                case ONLY_WITHOUT_PHOTO:
+                    state = NotificationState.OFF;
+                    break;
+                case OFF:
+                    state = NotificationState.ALL;
+                    break;
+            }
+            if (state.isActive()) {
+                intent.putExtra(NearbyNotificationService.ONLY_WITHOUT_PHOTO, state.onlyWithoutPhoto());
                 startService(intent);
-                item.setChecked(true);
-                item.setIcon(R.drawable.ic_notifications_active_white_24px);
+                bindToStatus();
             } else {
                 stopService(intent);
-                item.setChecked(false);
-                item.setIcon(R.drawable.ic_notifications_off_white_24px);
             }
+            item.setChecked(state.isActive());
+            item.setIcon(state.getIconResourceId());
         }
 
         return super.onOptionsItemSelected(item);

@@ -41,6 +41,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     private static final double MIN_NOTIFICATION_DISTANCE = 1.0d; // km
     private static final double EARTH_CIRCUMFERENCE = 40075.017d; // km at equator
     private static final int ONGOING_NOTIFICATION_ID = 0xdeadbeef;
+    public static final String ONLY_WITHOUT_PHOTO = "onlyWithoutPhoto";
 
     private final String TAG = NearbyNotificationService.class.getSimpleName();
     private List<Bahnhof> nearStations;
@@ -50,9 +51,10 @@ public class NearbyNotificationService extends Service implements LocationListen
     // Parameters for requests to the Location Api.
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000; // ms
 
-    private boolean started;// we have only one notification
+    private NotificationState notificationState = NotificationState.OFF;// we have only one notification
     private NearbyBahnhofNotificationManager notifiedStationManager;
     private GoogleApiClient googleApiClient = null;
+
     /**
      * The intent action to use to bind to this service's status interface.
      */
@@ -67,7 +69,6 @@ public class NearbyNotificationService extends Service implements LocationListen
         super.onCreate();
         nearStations = new ArrayList<>(0); // no markers until we know where we are
         notifiedStationManager = null;
-        started = false;
 
         // Create an instance of GoogleAPIClient.
         if (googleApiClient == null) {
@@ -82,26 +83,32 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (!started) {
-            Log.i(TAG, "Received start command");
-            // connect google services
-            googleApiClient.connect();
-            // show a permanent notification to indicate that position detection is running
-            Notification ongoingNotification = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.ic_launcher)
-                    .setContentTitle(getString(R.string.nearby_notification_active))
-                    .setOngoing(true)
-                    .setLocalOnly(true)
-                    .build();
-            NotificationManagerCompat notificationManager =
-                    NotificationManagerCompat.from(this);
-            notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
+        // set internal flag to avoid multi-starting
+        if (intent.getBooleanExtra(ONLY_WITHOUT_PHOTO, true)) {
+            notificationState = NotificationState.ONLY_WITHOUT_PHOTO;
+        } else {
+            notificationState = NotificationState.ALL;
+        }
 
-            // set internal flag to avoid multi-starting
-            started = true;
-            return START_STICKY;
-        } else
-            return super.onStartCommand(intent, flags, startId);
+        cancelNotification();;
+
+        Log.i(TAG, "Received start command");
+        // connect google services
+        if (!googleApiClient.isConnected()) {
+            googleApiClient.connect();
+        }
+        final int messageId = notificationState.onlyWithoutPhoto() ? R.string.nearby_notification_active_only_without_photo : R.string.nearby_notification_active;
+        // show a permanent notification to indicate that position detection is running
+        final Notification ongoingNotification = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(getString(messageId))
+                .setOngoing(true)
+                .setLocalOnly(true)
+                .build();
+        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
+
+        return START_STICKY;
     }
 
     @Override
@@ -115,6 +122,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     public void onDestroy() {
         Log.i(TAG, "Service gets destroyed");
         try {
+            notificationState = NotificationState.OFF;
             cancelNotification();
             stopLocationUpdates();
         } catch (Throwable t) {
@@ -128,7 +136,6 @@ public class NearbyNotificationService extends Service implements LocationListen
                 NotificationManagerCompat.from(this);
         notificationManager.cancel(ONGOING_NOTIFICATION_ID);
 
-        started = false;
         super.onDestroy();
     }
 
@@ -306,11 +313,11 @@ public class NearbyNotificationService extends Service implements LocationListen
     /**
      * Class returned when an activity binds to this service.
      * Currently, can only be used to query the service state, i.e. if the location tracking
-     * is switched on or off.
+     * is switched off or on with photo or on without photo.
      */
     public class StatusBinder extends Binder {
-        boolean isNotificationTrackingActive() {
-            return NearbyNotificationService.this.started;
+        NotificationState getNotifictaionState() {
+            return NearbyNotificationService.this.notificationState;
         }
     }
 
@@ -337,8 +344,11 @@ public class NearbyNotificationService extends Service implements LocationListen
 
         try {
             bahnhofsDbAdapter.open();
+            Log.i(TAG, "Lese Bahnhoefe onlyWithoutPhoto=" + notificationState.onlyWithoutPhoto());
             nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
-            nearStations.addAll(bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, true));
+            if (!notificationState.onlyWithoutPhoto()) {
+                nearStations.addAll(bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, true));
+            }
         } catch (Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         } finally {
