@@ -11,7 +11,9 @@
     tools:showIn="@layout/activity_mydata">
     <ScrollView
         android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+        android:layout_height="495dp"
+        tools:layout_editor_absoluteY="8dp"
+        tools:layout_editor_absoluteX="0dp">
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -145,13 +147,36 @@
             android:hint="@string/etNickname"
             android:layout_below="@+id/etLinking"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvPhotoUpload"
+            android:layout_below="@+id/etNickname"
+            android:text="@string/tvPhotoUpload"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/etEmail"
+            android:hint="@string/etEmail"
+            android:layout_below="@+id/tvPhotoUpload"
+            android:inputType="textEmailAddress"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/etUploadToken"
+            android:hint="@string/etUploadToken"
+            android:layout_below="@+id/etEmail"/>
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bt_mydata_commit"
             android:layout_marginTop="10dp"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/etNickname"
+            android:layout_below="@+id/etUploadToken"
             android:text="@string/bt_mydata_commit"
             android:onClick="saveSettings"
             />
@@ -161,10 +186,21 @@
             android:id="@+id/bt_mydata_clear"
             android:layout_marginTop="10dp"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/etNickname"
-            android:layout_toRightOf="@+id/bt_mydata_commit"
+            android:layout_below="@+id/etUploadToken"
+            android:layout_toEndOf="@+id/bt_mydata_commit"
             android:text="@string/bt_mydata_clear"
             android:onClick="clearSettings"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_get_token"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/etUploadToken"
+            android:layout_toEndOf="@+id/bt_mydata_clear"
+            android:text="@string/bt_mydata_get_token"
+            android:onClick="register"
             />
 
 

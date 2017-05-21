@@ -2,6 +2,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.animation.ValueAnimator;
 import android.app.ActionBar;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -39,9 +41,15 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
@@ -51,6 +59,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
@@ -68,7 +77,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
-    private String licence, photoOwner, linking, link, nickname, countryShortCode;
+    private String licence, photoOwner, linking, link, nickname, email, token, countryShortCode;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int alpha = 128;
 
@@ -81,7 +90,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private BahnhofsFotoFetchTask fetchTask;
     private ViewGroup detailsLayout;
     private boolean fullscreen;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +170,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
         link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
         nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
+        email = sharedPreferences.getString(getString(R.string.EMAIL), DEFAULT);
+        token = sharedPreferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
     }
 
     private void enablePictureButton(boolean enabled) {
@@ -384,26 +394,30 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
         if (localFotoUsed) {
-            MenuItem sendEmail = menu.findItem(R.id.send_email).setEnabled(true);
-            MenuItem sharePhoto = menu.findItem(R.id.share_photo).setEnabled(true);
-            sendEmail.getIcon().mutate();
-            sendEmail.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-            sharePhoto.getIcon().mutate();
-            sharePhoto.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
+            enableMenuItem(menu, R.id.send_email);
+            enableMenuItem(menu, R.id.share_photo);
+            enableMenuItem(menu, R.id.photo_upload);
         } else {
-            MenuItem sendEmail = menu.findItem(R.id.send_email).setEnabled(false);
-            MenuItem sharePhoto = menu.findItem(R.id.share_photo).setEnabled(false);
-            sendEmail.getIcon().mutate();
-            sendEmail.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-            sendEmail.getIcon().setAlpha(alpha);
-            sharePhoto.getIcon().mutate();
-            sharePhoto.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-            sharePhoto.getIcon().setAlpha(alpha);
+            disableMenuItem(menu, R.id.send_email);
+            disableMenuItem(menu, R.id.share_photo);
+            disableMenuItem(menu, R.id.photo_upload);
         }
 
         return super.onPrepareOptionsMenu(menu);
     }
 
+    private void enableMenuItem(Menu menu, int id) {
+        MenuItem menuItem = menu.findItem(id).setEnabled(true);
+        menuItem.getIcon().mutate();
+        menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
+    }
+
+    private void disableMenuItem(Menu menu, int id) {
+        MenuItem menuItem = menu.findItem(id).setEnabled(false);
+        menuItem.getIcon().mutate();
+        menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
+        menuItem.getIcon().setAlpha(alpha);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -446,9 +460,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 emailIntent.setType("multipart/byteranges");
                 startActivity(Intent.createChooser(emailIntent, "Mail versenden"));
                 break;
+            case R.id.photo_upload:
+                if (DEFAULT.equals(email) || DEFAULT.equals(token)) {
+                    Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
+                } else {
+                    new PhotoUploadTask(countryShortCode.toLowerCase(), nickname, email, bahnhof.getId(), getStoredMediaFile(), getString(R.string.rs_api_key), token).execute();
+                }
+                break;
             case R.id.share_photo:
                 Intent shareIntent = createFotoSendIntent();
-                //shareIntent.putExtra(Intent.EXTRA_TEXT, "#Bahnhofsfoto #dbOpendata #dbHackathon " + bahnhof.getTitle() + " @android_oma @khgdrn");
                 shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + bahnhof.getTitle());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
@@ -720,4 +740,118 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         startActivity(intent);
         finish();
     }
+
+    public class PhotoUploadTask extends AsyncTask<Void, String, Integer> {
+
+        private final String countryCode;
+        private final String nickname;
+        private final int stationId;
+        private final File file;
+        private final String apiKey;
+        private final String token;
+        private final String email;
+        private ProgressDialog progressDialog;
+
+        public PhotoUploadTask(String countryCode, String nickname, String email, int stationId, File file, String apiKey, String token) {
+            this.countryCode = countryCode;
+            this.nickname = nickname;
+            this.email = email;
+            this.stationId = stationId;
+            this.file = file;
+            this.apiKey = apiKey;
+            this.token = token;
+        }
+
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            HttpURLConnection conn = null;
+            DataOutputStream wr = null;
+            FileInputStream is = null;
+            int status = -1;
+
+            publishProgress("Verbinde...");
+            try {
+                URL url = new URL(String.format("%s/photoUpload", Constants.API_START_URL));
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput( true );
+                conn.setInstanceFollowRedirects( false );
+                conn.setRequestMethod( "POST" );
+                conn.setRequestProperty( "Content-Type", URLConnection.guessContentTypeFromName(file.getName()));
+                conn.setRequestProperty( "Content-Length", String.valueOf(file.length()));
+                conn.setRequestProperty( "API-Key", apiKey);
+                conn.setRequestProperty( "Nickname", nickname);
+                conn.setRequestProperty( "Email", email);
+                conn.setRequestProperty( "Upload-Token", token);
+                conn.setRequestProperty( "Station-Id", String.valueOf(stationId));
+                conn.setRequestProperty( "Country", countryCode);
+                conn.setUseCaches( false );
+
+                wr = new DataOutputStream( conn.getOutputStream());
+                is = new FileInputStream(file);
+                byte[] buffer = new byte[8196];
+                int bytesRead = 0;
+                while ((bytesRead = is.read(buffer)) > 0) {
+                    publishProgress("Sende...");
+                    wr.write( buffer, 0, bytesRead );
+                }
+                wr.flush();
+
+                status = conn.getResponseCode();
+                Log.i(TAG, "Upload photo response: " + status);
+            } catch ( Exception e) {
+                status = -2;
+                Log.e(TAG, "Could upload photo", e);
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+                try {
+                    if (wr != null) {
+                        wr.close();
+                    }
+                    if (is != null) {
+                        is.close();
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Cannot close stream", e);
+                }
+            }
+
+            return status;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (DetailsActivity.this.isDestroyed()) {
+                return;
+            }
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+            if (result == 202) {
+                Toast.makeText(DetailsActivity.this, R.string.upload_completed, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(DetailsActivity.this, getString(R.string.upload_failed, result), Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(DetailsActivity.this);
+            progressDialog.setIndeterminate(false);
+
+            // show it
+            progressDialog.show();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            progressDialog.setMessage("Sende Daten ... " + values[0]);
+
+        }
+
+    }
+
 }

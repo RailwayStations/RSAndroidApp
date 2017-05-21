@@ -60,6 +60,8 @@
     <string name="PHOTO_OWNER">APP_PREF_PHOTO_OWNER</string>
     <string name="LINKING">APP_PREF_LINKING</string>
     <string name="NICKNAME">APP_PREF_NICKNAME</string>
+    <string name="EMAIL">APP_PREF_EMAIL</string>
+    <string name="UPLOAD_TOKEN">APP_PREF_UPLOAD_TOKEN</string>
     <string name="LINK_TO_PHOTOGRAPHER">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
     <string name="COUNTRY">APP_PREF_COUNTRY</string>
     <string name="preferences_saved">Deine Daten wurden gespeichert. </string>
@@ -170,5 +172,16 @@
     <string name="FRIENDLY_ENGAGE_TOPIC">friendly_engage</string>
     <string name="title_activity_high_score">Rangliste</string>
     <string name="menu_title_highscore">Rangliste</string>
+    <string name="photo_upload">Foto hochladen</string>
+    <string name="upload_completed">Foto erfolgreich hochgeladen</string>
+    <string name="upload_failed">Foto konnte nicht hochgeladen werden %1d</string>
+    <string name="etEmail">Bitte trage hier Deine Email-Adresse ein</string>
+    <string name="etUploadToken">Bitte trage hier den Upload-Token ein</string>
+    <string name="tvPhotoUpload">Möchtest Du den Photo-Upload aus der App nutzen?</string>
+    <string name="bt_mydata_get_token">Token anfordern</string>
+    <string name="registration_completed">Upload Token angefordert, bitte schaue in Deine Email.</string>
+    <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1d</string>
+    <string name="registration_needed">Um die Upload-Funktion zu nutzen, musst Du unter \"Meine Daten\" ein Upload-Token anfordern.</string>
+    <string name="registration_data_incomplete">Daten für die Registrierung sind unvollständig</string>
 
 </resources>
