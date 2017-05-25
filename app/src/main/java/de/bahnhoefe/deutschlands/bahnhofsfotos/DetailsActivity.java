@@ -24,6 +24,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Display;
@@ -117,18 +118,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         fullscreen = false;
 
+        readPreferences();
         Intent intent = getIntent();
         boolean directPicture = false;
-
-        // Load sharedPreferences for filling the E-Mail and variables for Filename to send
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-
-        licence = sharedPreferences.getString(getString(R.string.LICENCE), DEFAULT);
-        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER), DEFAULT);
-        linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
-        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
-        nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
-
         if (intent != null) {
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
             if (bahnhof == null) {
@@ -153,6 +145,23 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (directPicture) {
             checkCameraPermission();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        readPreferences();
+    }
+
+    private void readPreferences() {
+        // Load sharedPreferences for filling the E-Mail and variables for Filename to send
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
+
+        licence = sharedPreferences.getString(getString(R.string.LICENCE), DEFAULT);
+        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER), DEFAULT);
+        linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
+        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
+        nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
     }
 
     private void enablePictureButton(boolean enabled) {
@@ -196,9 +205,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void takePicture() {
-        if (bahnhof.getPhotoflag() != null)
+        if (bahnhof.getPhotoflag() != null) {
             return;
-        if (nickname.equals("default")) {
+        }
+
+        if (isMyDataIncomplete()) {
             checkMyData();
         } else {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -212,6 +223,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    private boolean isMyDataIncomplete() {
+        return DEFAULT.equals(nickname) || TextUtils.isEmpty(nickname);
     }
 
     @Override
@@ -246,16 +261,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 // Camera permission has not been granted.
                 requestCameraPermission();
             } else {
-                if (nickname.equals("default")) {
-                    checkMyData();
-                }
-
                 takePicture();
             }
         } else {
-            if (nickname.equals("default")) {
-                checkMyData();
-            }
             takePicture();
         }
     }
