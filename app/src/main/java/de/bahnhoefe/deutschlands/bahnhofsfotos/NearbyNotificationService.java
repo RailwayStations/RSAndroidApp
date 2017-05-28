@@ -84,13 +84,13 @@ public class NearbyNotificationService extends Service implements LocationListen
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // set internal flag to avoid multi-starting
-        if (intent.getBooleanExtra(ONLY_WITHOUT_PHOTO, true)) {
+        if (intent == null || intent.getBooleanExtra(ONLY_WITHOUT_PHOTO, true)) {
             notificationState = NotificationState.ONLY_WITHOUT_PHOTO;
         } else {
             notificationState = NotificationState.ALL;
         }
 
-        cancelNotification();;
+        cancelNotification();
 
         Log.i(TAG, "Received start command");
         // connect google services
