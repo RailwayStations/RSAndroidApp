@@ -80,15 +80,21 @@
         <activity
             android:name=".MyDataActivity"
             android:label="@string/title_activity_my_data"
+            android:exported="true"
+            android:launchMode="singleInstance"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity"/>
 
             <intent-filter>
-                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.MyDataActivity"/>
-
+                <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:host="railway-stations.org"
+                    android:pathPrefix="/uploadToken"
+                    android:scheme="http"/>
             </intent-filter>
         </activity>
         <activity

@@ -1,10 +1,14 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,15 +16,24 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MyDataActivity extends AppCompatActivity {
     private static final String DEFAULT = "N/A";
     private final String TAG = getClass().getSimpleName();
-    private EditText etNickname, etLink;
+    private EditText etNickname, etLink, etEmail, etUploadToken;
     private RadioGroup rgLicence, rgPhotoOwner, rgLinking;
     private RadioButton rbLinkingXing, rbLinkingTwitter, rbLinkingSnapchat, rbLinkingInstagram, rbLinkingWebpage, rbLinkingNo;
     private RadioButton rbLicenceCC0, rbLicenceCC4;
     private RadioButton rbPhotoOwnerYes, rbPhotoOwnerNo;
-    private String licence, photoOwner, nickname, link, linking;
+    private String licence, photoOwner, nickname, email, link, linking, uploadToken;
     private Button btCommit, btClear;
 
     @Override
@@ -30,6 +43,8 @@ public class MyDataActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         etNickname = (EditText) findViewById(R.id.etNickname);
+        etUploadToken = (EditText) findViewById(R.id.etUploadToken);
+        etEmail = (EditText) findViewById(R.id.etEmail);
         etLink = (EditText) findViewById(R.id.etLinking);
         btCommit = (Button) findViewById(R.id.bt_mydata_commit);
         btClear = (Button) findViewById(R.id.bt_mydata_clear);
@@ -83,12 +98,33 @@ public class MyDataActivity extends AppCompatActivity {
         link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
         nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
 
-
         if (link.equals(DEFAULT) || nickname.equals(DEFAULT)) {
             Toast.makeText(this, "Keine Daten vorhanden", Toast.LENGTH_LONG).show();
         } else {
             etNickname.setText(nickname);
             etLink.setText(link);
+        }
+
+        email = sharedPreferences.getString(getString(R.string.EMAIL), DEFAULT);
+        if (!DEFAULT.equals(email)) {
+            etEmail.setText(email);
+        }
+
+        uploadToken = sharedPreferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
+        if (!DEFAULT.equals(uploadToken)) {
+            etUploadToken.setText(uploadToken);
+        }
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+                Uri data = intent.getData();
+                if (data != null) {
+                    uploadToken = data.getLastPathSegment();
+                    etUploadToken.setText(uploadToken);
+                    saveSettings(null);
+                }
+            }
         }
     }
 
@@ -141,6 +177,11 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
+    public void register(View view) {
+        saveSettings(view);
+        new RegisterTask(getString(R.string.rs_api_key)).execute();
+    }
+
     public void saveSettings(View view) {
         SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -149,6 +190,8 @@ public class MyDataActivity extends AppCompatActivity {
         editor.putString(getString(R.string.LINKING), linking);
         editor.putString(getString(R.string.LINK_TO_PHOTOGRAPHER), etLink.getText().toString());
         editor.putString(getString(R.string.NICKNAME), etNickname.getText().toString());
+        editor.putString(getString(R.string.EMAIL), etEmail.getText().toString());
+        editor.putString(getString(R.string.UPLOAD_TOKEN), etUploadToken.getText().toString());
         editor.apply();
         Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
     }
@@ -167,4 +210,104 @@ public class MyDataActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+    public class RegisterTask extends AsyncTask<Void, String, Integer> {
+
+        private final String apiKey;
+        private final JSONObject registrationData;
+        private ProgressDialog progressDialog;
+
+        public RegisterTask(String apiKey) {
+            this.apiKey = apiKey;
+            registrationData = new JSONObject();
+            try {
+                registrationData.put("nickname", etNickname.getText().toString());
+                registrationData.put("email", etEmail.getText().toString());
+                registrationData.put("license", licence);
+                registrationData.put("photoOwner", "YES".equals(photoOwner));
+                registrationData.put("linking", linking);
+                registrationData.put("link", etLink.getText().toString());
+            } catch (JSONException e) {
+                throw new RuntimeException("Error creating RegistrationData", e);
+            }
+        }
+
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            HttpURLConnection conn = null;
+            DataOutputStream wr = null;
+            int status = -1;
+
+            publishProgress("Verbinde...");
+            try {
+                URL url = new URL(String.format("%s/registration", Constants.API_START_URL));
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput( true );
+                conn.setInstanceFollowRedirects( false );
+                conn.setRequestMethod( "POST" );
+                conn.setRequestProperty( "Content-Type", "application/json");
+                conn.setRequestProperty( "API-Key", apiKey);
+                conn.setUseCaches( false );
+
+                wr = new DataOutputStream( conn.getOutputStream());
+                wr.writeChars( registrationData.toString() );
+                wr.flush();
+
+                status = conn.getResponseCode();
+                Log.i(TAG, "Registration response: " + status);
+            } catch ( Exception e) {
+                Log.e(TAG, "Could not register", e);
+                throw new RuntimeException("Error sending registration", e);
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+                try {
+                    if (wr != null) {
+                        wr.close();
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Cannot close stream", e);
+                }
+            }
+
+            return status;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (MyDataActivity.this.isDestroyed()) {
+                return;
+            }
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+            if (result == 202) {
+                Toast.makeText(MyDataActivity.this, R.string.registration_completed, Toast.LENGTH_LONG).show();
+            } else if (result == 422) {
+                    Toast.makeText(MyDataActivity.this, R.string.registration_data_incomplete, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(MyDataActivity.this, getString(R.string.registration_failed, result), Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(MyDataActivity.this);
+            progressDialog.setIndeterminate(false);
+
+            // show it
+            progressDialog.show();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            progressDialog.setMessage("Sende Daten ... " + values[0]);
+
+        }
+
+    }
+
 }

@@ -48,6 +48,7 @@ before_script:
   - echo 8933bad161af4178b1185d1a37fbf41ea5269c55 > $ANDROID_HOME/licenses/android-sdk-license
   - echo 84831b9409646a918e30573bab4c9c91346d8abd > $ANDROID_HOME/licenses/android-sdk-preview-license
   # Copy templates
+  - cp app/templates/rs_api.xml app/src/main/res/values/rs_api.xml
   - cp app/templates/google_maps_api.xml app/src/main/res/values/google_maps_api.xml
   - cp app/templates/google-services.json app/google-services.json
   # Create and start emulator, TODO: emulator doesn't work at the moment

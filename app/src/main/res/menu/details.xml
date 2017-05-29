@@ -12,6 +12,14 @@
     <!-- menu group -->
     <group android:id="@+id/group_depencies">
     <item
+        android:id="@+id/photo_upload"
+        android:orderInCategory="300"
+        android:icon="@drawable/ic_file_upload_white_24dp"
+        app:itemIconTint="@color/colorActions"
+        app:itemTextColor="@color/colorActions"
+        android:title="@string/photo_upload"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/send_email"
         android:orderInCategory="300"
         android:icon="@drawable/ic_mail_white_24px"
