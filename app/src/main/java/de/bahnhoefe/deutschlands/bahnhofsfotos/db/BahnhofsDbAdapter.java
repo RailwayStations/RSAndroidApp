@@ -64,8 +64,14 @@ public class BahnhofsDbAdapter {
     }
 
     public void insertBahnhoefe(List<Bahnhof> bahnhoefe) {
+        if (bahnhoefe.isEmpty()) {
+            return; // nothing todo
+        }
+
         db.beginTransaction(); // soll die Performance verbessern, heißt's.
         try {
+            deleteBahnhoefe();
+
             for (Bahnhof bahnhof : bahnhoefe) {
                 ContentValues values = new ContentValues();
                 values.put(KEY_ID, bahnhof.getId());
@@ -75,7 +81,6 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG, bahnhof.getPhotoflag());
 
                 db.insert(DATABASE_TABLE, null, values);
-
             }
             db.setTransactionSuccessful();
         } finally {
@@ -84,8 +89,13 @@ public class BahnhofsDbAdapter {
     }
 
     public void insertCountries(List<Country> countries) {
+        if (countries.isEmpty()) {
+            return; // nothing todo
+        }
         db.beginTransaction(); // soll die Performance verbessern, heißt's.
         try {
+            deleteCountries();
+
             for (Country country : countries) {
                 ContentValues values = new ContentValues();
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE, country.getCountryShortCode());
@@ -104,12 +114,10 @@ public class BahnhofsDbAdapter {
 
     public void deleteBahnhoefe() {
         db.delete(DATABASE_TABLE, null, null);
-
     }
 
     public void deleteCountries() {
         db.delete(DATABASE_TABLE_LAENDER, null, null);
-
     }
 
     public Cursor getStationsList(boolean withPhoto) {
