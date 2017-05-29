@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -112,6 +113,18 @@ public class MyDataActivity extends AppCompatActivity {
         uploadToken = sharedPreferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
         if (!DEFAULT.equals(uploadToken)) {
             etUploadToken.setText(uploadToken);
+        }
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+                Uri data = intent.getData();
+                if (data != null) {
+                    uploadToken = data.getLastPathSegment();
+                    etUploadToken.setText(uploadToken);
+                    saveSettings(null);
+                }
+            }
         }
     }
 
