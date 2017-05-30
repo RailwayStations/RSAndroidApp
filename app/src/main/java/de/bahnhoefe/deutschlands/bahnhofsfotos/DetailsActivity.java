@@ -831,6 +831,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
             if (result == 202) {
                 Toast.makeText(DetailsActivity.this, R.string.upload_completed, Toast.LENGTH_LONG).show();
+            } else if (result == 401) {
+                Toast.makeText(DetailsActivity.this, R.string.upload_token_invalid, Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(DetailsActivity.this, getString(R.string.upload_failed, result), Toast.LENGTH_LONG).show();
             }
