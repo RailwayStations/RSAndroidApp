@@ -115,7 +115,10 @@ public class MyDataActivity extends AppCompatActivity {
             etUploadToken.setText(uploadToken);
         }
 
-        Intent intent = getIntent();
+        receiveUploadToken(getIntent());
+    }
+
+    private void receiveUploadToken(Intent intent) {
         if (intent != null) {
             if (Intent.ACTION_VIEW.equals(intent.getAction())) {
                 Uri data = intent.getData();
@@ -126,6 +129,12 @@ public class MyDataActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        receiveUploadToken(intent);
     }
 
     public void selectLicence(View view) {
