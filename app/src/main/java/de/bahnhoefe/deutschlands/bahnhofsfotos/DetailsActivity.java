@@ -59,6 +59,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 
@@ -142,8 +143,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 
             if (bahnhof.getPhotoflag() != null) {
-                fetchTask = new BahnhofsFotoFetchTask(this, getApplicationContext());
-                fetchTask.execute(bahnhof.getId());
+                if (ConnectionUtil.checkInternetConnection(this)) {
+                    fetchTask = new BahnhofsFotoFetchTask(this, getApplicationContext());
+                    fetchTask.execute(bahnhof.getId());
+                }
             } else {
                 takePictureButton.setVisibility(View.VISIBLE);
                 setLocalBitmap();
@@ -464,7 +467,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (DEFAULT.equals(email) || DEFAULT.equals(token)) {
                     Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
                 } else {
-                    new PhotoUploadTask(countryShortCode.toLowerCase(), nickname, email, bahnhof.getId(), getStoredMediaFile(), getString(R.string.rs_api_key), token).execute();
+                    if (ConnectionUtil.checkInternetConnection(this)) {
+                        new PhotoUploadTask(countryShortCode.toLowerCase(), nickname, email, bahnhof.getId(), getStoredMediaFile(), getString(R.string.rs_api_key), token).execute();
+                    }
                 }
                 break;
             case R.id.share_photo:
@@ -593,7 +598,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         // Lizenzinfo aufbauen und einblenden
         licenseTagView.setVisibility(View.VISIBLE);
-        if (fetchTask.getLicense() != null) {
+        if (fetchTask != null && fetchTask.getLicense() != null) {
             licenseTagView.setText(
                     String.format(
                             getText(R.string.license_tag).toString(),

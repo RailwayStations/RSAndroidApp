@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -188,7 +189,9 @@ public class MyDataActivity extends AppCompatActivity {
 
     public void register(View view) {
         saveSettings(view);
-        new RegisterTask(getString(R.string.rs_api_key)).execute();
+        if (ConnectionUtil.checkInternetConnection(this)) {
+            new RegisterTask(getString(R.string.rs_api_key)).execute();
+        }
     }
 
     public void saveSettings(View view) {

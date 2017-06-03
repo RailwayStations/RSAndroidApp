@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
@@ -23,7 +22,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -31,10 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,10 +58,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
-
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.layout.item;
 import static java.lang.Integer.parseInt;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -632,11 +625,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * from http://blogs.innovationm.com/multiple-asynctask-in-android/
      */
     private void runMultipleAsyncTask() {
-        // First Task
-        new JSONTask(lastUpdateDate, ((BaseApplication) getApplication()).getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        if (ConnectionUtil.checkInternetConnection(this)) {
+            // First Task
+            new JSONTask(lastUpdateDate, ((BaseApplication) getApplication()).getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 
-        // Second Task
-        new JSONLaenderTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+            // Second Task
+            new JSONLaenderTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        }
     }
 
 

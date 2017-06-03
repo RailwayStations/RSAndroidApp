@@ -17,6 +17,7 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import org.json.JSONObject;
 
@@ -29,7 +30,9 @@ public class HighScoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_high_score);
 
-        new JSONHighscoreTask(((BaseApplication) getApplication()).getCountryShortCode()).execute();
+        if (ConnectionUtil.checkInternetConnection(this)) {
+            new JSONHighscoreTask(((BaseApplication) getApplication()).getCountryShortCode()).execute();
+        }
     }
 
 

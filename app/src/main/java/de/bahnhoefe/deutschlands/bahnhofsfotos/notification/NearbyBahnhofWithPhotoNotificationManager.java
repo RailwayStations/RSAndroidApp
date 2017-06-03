@@ -3,7 +3,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -16,6 +15,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 
 public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNotificationManager implements BitmapAvailableHandler {
 
@@ -33,9 +33,10 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      */
     @Override
     public void notifyUser() {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        fetchTask = new BahnhofsFotoFetchTask(this, context);
-        fetchTask.execute(notificationStation.getId());
+        if (ConnectionUtil.checkInternetConnection(context)) {
+            fetchTask = new BahnhofsFotoFetchTask(this, context);
+            fetchTask.execute(notificationStation.getId());
+        }
     }
 
 
@@ -46,13 +47,17 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      */
     @Override
     public void onBitmapAvailable(@Nullable Bitmap bitmap) {
-        if (context == null)
+        if (context == null) {
             return; // we're already destroyed
-        if (bitmap == null)
+        }
+        if (bitmap == null) {
             bitmap = getBitmapFromResource(R.drawable.ic_stations_with_photo);
+        }
 
         NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
-        bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(fetchTask.getLicense());
+        if (fetchTask != null) {
+            bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(fetchTask.getLicense());
+        }
 
         Notification fullImagePage = new NotificationCompat.Builder(context)
                 .setStyle(bigPictureStyle)
