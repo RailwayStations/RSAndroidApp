@@ -48,7 +48,9 @@
     <string name="rbLinkingSnapchat">Snapchat</string>
     <string name="rbLinkingXing">Xing</string>
     <string name="rbLinkingwebpage">Eigene Webseite</string>
-    <string name="etNickname">Bitte trage hier Deinen Nicknamen ein</string>
+    <string name="etNickname">Bitte trage hier Deinen Nicknamen ein
+        "\n"bei Twitter bitte ohne das @
+    </string>
     <string name="menu_title_your_own_station_photos">Deine eigenen Bahnhofsfotos</string>
     <string name="rbLinkingWith">Verlinkung mit: </string>
     <string name="ownPhoto">eigenes Photo</string>
@@ -151,13 +153,13 @@
     <string name="menu_title_introslider">Anleitung</string>
     <string name="menu_follow_my_location">Folge meiner Position</string>
     <string name="text_intro_slider1">Wir sammeln Bahnhofsfotos von Benutzern, die wir unter freier Lizenz anderen Entwicklern zur Verfügung stellen können. Unsere Lieblings-Lizenz ist CC0.</string>
-    <string name="text_intro_slider2">Bitte trage im Menüpunkt \'Meine Daten\' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne den Eintrag des Nicknamens kannst Du aus der App heraus nicht fotografieren.</string>
+    <string name="text_intro_slider2">Bitte trage im Menüpunkt \'Meine Daten\' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne den Eintrag des Nicknamens kannst Du aus der App heraus nicht fotografieren. Den Twitter-Nick bitte ohne das @ eintragen.</string>
     <string name="text_intro_slider3">Im Menü unter \'In der Nähe\' findest Du alle Bahnhöfe in Deiner Nähe, die noch kein Foto haben.</string>
     <string name="text_intro_slider4">Du kommst über 2 Wege zum Fotografieren eines Bahnhofs: über die Suche auf dem Startbildschirm oder über einen der Karten-Menüpunkte \'In der Nähe\' oder \'Alle Bahnhöfe ohne Foto\'. Das FotoIcon wird nur anklickbar, wenn Du Dein Smartphone quer hältst.</string>
-    <string name="text_intro_slider5">Sobald Du einen Bahnhof fotografiert hast, wird das Foto angezeigt und Du kannst das Foto und Deine Daten oben über das E-Mail-Icon an Deine E-Mail-App weiterleiten. Das Hochladen von Fotos auf den Server ist derzeit noch nicht möglich.</string>
+    <string name="text_intro_slider5">Sobald Du einen Bahnhof fotografiert hast, wird das Foto angezeigt und Du kannst es hochladen.</string>
     <string name="text_intro_slider6">Im gleichen Bildschirm findest Du oben das Symbol zum Teilen des Fotos. Wenn Du z.B. die Twitter-App verwendest, werden gleich alle Hashtags mit übernommen.</string>
-    <string name="text_intro_slider7">Wenn Du unterwegs bist und Du möchtest informiert werden, wenn ein Bahnhof in der Nähe ist, der noch kein Foto hat, kannst Du die Bahnhofsortung einschalten.</string>
-    <string name="text_intro_slider8">Damit die Benutzer sich untereinander abstimmen können, welche Bahnhöfe sie gerade ansteuern, haben wir hier einen Chat eingebaut. Es gibt noch keine Push Notifications, wenn neue Nachrichten gesendet werden. Du mußt also aktiv reinschauen.</string>
+    <string name="text_intro_slider7">Wenn Du unterwegs bist und Du möchtest informiert werden, wenn ein Bahnhof in der Nähe ist, kannst Du die Bahnhofsortung einschalten. Es gibt 3 Zustände: 1. Klick - Notifications für alle Bahnhöfe, 2. Klick - Notifications für die Bahnhöfe ohne Foto (mit Kamerasymbol), 3. Klick Notifications ausschalten.</string>
+    <string name="text_intro_slider8">Damit die Benutzer sich untereinander abstimmen können, welche Bahnhöfe sie gerade ansteuern, haben wir hier einen Chat eingebaut. Sobald es einen neuen Beitrag im Chat gibt, wirst Du per Push Notification benachrichtigt. Du kannst die Push Notifications aber auch ausschalten.</string>
     <string name="text_intro_slider9">Beim Start der App werden die Bahnhofsdaten von Deutschland geladen. Wenn Du das Land von DE nach CH wechseln möchtest, kannst Du das im Startbildschirm oben rechts. Bitte vergiß nicht, danach Bahnhofsdaten zu aktualisieren.</string>
     <string name="next">WEITER</string>
     <string name="skip">ABBRECHEN</string>
@@ -176,13 +178,24 @@
     <string name="upload_completed">Foto erfolgreich hochgeladen</string>
     <string name="upload_token_invalid">Dein Upload-Token ist ungültig. Bitte fordere ein Neues an.</string>
     <string name="upload_failed">Foto konnte nicht hochgeladen werden %1d</string>
-    <string name="etEmail">Bitte trage hier Deine Email-Adresse ein</string>
-    <string name="etUploadToken">Bitte trage hier den Upload-Token ein</string>
+    <string name="etEmail">Bitte trage hier Deine Email-Adresse
+        "\n"ein und klicke \'Token anfordern\'</string>
+    <string name="etUploadToken">Bitte trage hier nach Erhalt der E-Mail
+        "\n"den Upload-Token ein</string>
     <string name="tvPhotoUpload">Möchtest Du den Photo-Upload aus der App nutzen?</string>
     <string name="bt_mydata_get_token">Token anfordern</string>
     <string name="registration_completed">Upload Token angefordert, bitte schaue in Deine Email.</string>
     <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1d</string>
     <string name="registration_needed">Um die Upload-Funktion zu nutzen, musst Du unter \"Meine Daten\" ein Upload-Token anfordern.</string>
     <string name="registration_data_incomplete">Daten für die Registrierung sind unvollständig</string>
+    <string name="title_slider5">Foto hochladen</string>
+    <string name="title_slider1">Bahnhofsfotos</string>
+    <string name="title_slider2">Meine Daten</string>
+    <string name="title_slider3">Bahnhöfe \'In der Nähe\'</string>
+    <string name="title_slider4">Fotografieren</string>
+    <string name="title_slider6">Foto teilen</string>
+    <string name="title_slider7">Bahnhofsortung</string>
+    <string name="title_slider8">Der Chat</string>
+    <string name="title_slider9">Länderauswahl</string>
 
 </resources>

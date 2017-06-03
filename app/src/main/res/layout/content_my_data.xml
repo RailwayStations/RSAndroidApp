@@ -42,7 +42,9 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/rbCC0"
                 android:text="@string/CC0"
-                android:onClick="selectLicence"/>
+                android:onClick="selectLicence"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
             <RadioButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -145,14 +147,24 @@
             android:hint="@string/etNickname"
             android:layout_below="@+id/etLinking"/>
 
+        <View
+            android:id="@+id/vDivider"
+            android:layout_width="fill_parent"
+            android:layout_height="15dip"
+            android:background="#3EB90E"
+            android:layout_below="@+id/etNickname"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvPhotoUpload"
-            android:layout_below="@+id/etNickname"
+            android:layout_below="@+id/vDivider"
             android:text="@string/tvPhotoUpload"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
             />
         <EditText
             android:layout_width="match_parent"
@@ -160,13 +172,25 @@
             android:id="@+id/etEmail"
             android:hint="@string/etEmail"
             android:layout_below="@+id/tvPhotoUpload"
-            android:inputType="textEmailAddress"/>
+            android:inputType="textEmailAddress"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/etUploadToken"
             android:hint="@string/etUploadToken"
-            android:layout_below="@+id/etEmail"/>
+            android:layout_below="@+id/etEmail"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
+        <View
+            android:id="@+id/vSecondDivider"
+            android:layout_width="fill_parent"
+            android:layout_height="15dip"
+            android:background="#3EB90E"
+            android:layout_below="@+id/etUploadToken"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"/>
 
         <Button
             android:layout_width="wrap_content"
@@ -174,20 +198,9 @@
             android:id="@+id/bt_mydata_commit"
             android:layout_marginTop="10dp"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/etUploadToken"
+            android:layout_below="@+id/vSecondDivider"
             android:text="@string/bt_mydata_commit"
             android:onClick="saveSettings"
-            />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_mydata_clear"
-            android:layout_marginTop="10dp"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/etUploadToken"
-            android:layout_toEndOf="@+id/bt_mydata_commit"
-            android:text="@string/bt_mydata_clear"
-            android:onClick="clearSettings"
             />
         <Button
             android:layout_width="wrap_content"
@@ -195,10 +208,21 @@
             android:id="@+id/bt_get_token"
             android:layout_marginTop="10dp"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/etUploadToken"
-            android:layout_toEndOf="@+id/bt_mydata_clear"
+            android:layout_below="@+id/vSecondDivider"
+            android:layout_toEndOf="@+id/bt_mydata_commit"
             android:text="@string/bt_mydata_get_token"
             android:onClick="register"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_mydata_clear"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/vSecondDivider"
+            android:layout_toEndOf="@+id/bt_get_token"
+            android:text="@string/bt_mydata_clear"
+            android:onClick="clearSettings"
             />
 
 

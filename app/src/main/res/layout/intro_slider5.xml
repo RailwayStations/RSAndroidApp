@@ -12,11 +12,11 @@
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/ic_mail_white_24px"/>
+            android:src="@drawable/ic_file_upload_white_24dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Foto per Mail versenden"
+            android:text="@string/title_slider5"
             android:layout_marginTop="10dp"
             android:textAlignment="center"
             android:textColor="@android:color/white"

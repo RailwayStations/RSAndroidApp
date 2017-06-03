@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Bahnhofsfotos"
+            android:text="@string/title_slider1"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="25sp"
