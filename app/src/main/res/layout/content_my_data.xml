@@ -150,8 +150,8 @@
         <View
             android:id="@+id/vDivider"
             android:layout_width="fill_parent"
-            android:layout_height="15dip"
-            android:background="#3EB90E"
+            android:layout_height="3dip"
+            android:background="@color/uploadTokenDivider"
             android:layout_below="@+id/etNickname"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"/>
@@ -183,12 +183,22 @@
             android:layout_below="@+id/etEmail"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_get_token"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_below="@+id/etUploadToken"
+            android:text="@string/bt_mydata_get_token"
+            android:onClick="register"
+            />
         <View
             android:id="@+id/vSecondDivider"
             android:layout_width="fill_parent"
-            android:layout_height="15dip"
-            android:background="#3EB90E"
-            android:layout_below="@+id/etUploadToken"
+            android:layout_height="3dip"
+            android:background="@color/uploadTokenDivider"
+            android:layout_below="@+id/bt_get_token"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"/>
 
@@ -202,17 +212,7 @@
             android:text="@string/bt_mydata_commit"
             android:onClick="saveSettings"
             />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_get_token"
-            android:layout_marginTop="10dp"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/vSecondDivider"
-            android:layout_toEndOf="@+id/bt_mydata_commit"
-            android:text="@string/bt_mydata_get_token"
-            android:onClick="register"
-            />
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -220,7 +220,7 @@
             android:layout_marginTop="10dp"
             android:layout_alignParentBottom="true"
             android:layout_below="@+id/vSecondDivider"
-            android:layout_toEndOf="@+id/bt_get_token"
+            android:layout_toEndOf="@+id/bt_mydata_commit"
             android:text="@string/bt_mydata_clear"
             android:onClick="clearSettings"
             />
