@@ -54,6 +54,7 @@ import java.net.URLConnection;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
@@ -835,11 +836,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 progressDialog.dismiss();
             }
             if (result == 202) {
-                Toast.makeText(DetailsActivity.this, R.string.upload_completed, Toast.LENGTH_LONG).show();
+                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_completed);
             } else if (result == 401) {
-                Toast.makeText(DetailsActivity.this, R.string.upload_token_invalid, Toast.LENGTH_LONG).show();
+                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_token_invalid);
             } else {
-                Toast.makeText(DetailsActivity.this, getString(R.string.upload_failed, result), Toast.LENGTH_LONG).show();
+                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_failed);
             }
         }
 

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import org.json.JSONException;
@@ -296,11 +297,11 @@ public class MyDataActivity extends AppCompatActivity {
                 progressDialog.dismiss();
             }
             if (result == 202) {
-                Toast.makeText(MyDataActivity.this, R.string.registration_completed, Toast.LENGTH_LONG).show();
+                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_completed);
             } else if (result == 422) {
-                    Toast.makeText(MyDataActivity.this, R.string.registration_data_incomplete, Toast.LENGTH_LONG).show();
+                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
             } else {
-                Toast.makeText(MyDataActivity.this, getString(R.string.registration_failed, result), Toast.LENGTH_LONG).show();
+                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_failed);
             }
         }
 
