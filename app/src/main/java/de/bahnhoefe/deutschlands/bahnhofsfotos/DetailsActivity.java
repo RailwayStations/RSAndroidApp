@@ -44,7 +44,6 @@ import android.widget.Toast;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -286,44 +285,45 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // die Kamera-App sollte auf temporären Cache-Speicher schreiben, wir laden das Bild von
-            // dort und schreiben es in Standard-Größe in den permanenten Speicher
-            File cameraRawPictureFile = getCameraMediaFile();
-            File storagePictureFile = getStoredMediaFile();
-            if (cameraRawPictureFile == null || storagePictureFile == null) {
-                Log.wtf(TAG, "Camera made a foto, but we're unable to reproduce where it should have gone");
-                return;
-            }
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true; // just query the image size in the first step
-            BitmapFactory.decodeFile(
-                    cameraRawPictureFile.getPath(),
-                    options);
-
-            int sampling = options.outWidth / STORED_FOTO_WIDTH;
-            if (sampling > 1) {
-                options.inSampleSize = sampling;
-            }
-            options.inJustDecodeBounds = false;
-
-            Bitmap scaledScreen = BitmapFactory.decodeFile(
-                    cameraRawPictureFile.getPath(),
-                    options);
-            Log.d(TAG, "img width " + scaledScreen.getWidth());
-            Log.d(TAG, "img height " + scaledScreen.getHeight());
-
             try {
+                // die Kamera-App sollte auf temporären Cache-Speicher schreiben, wir laden das Bild von
+                // dort und schreiben es in Standard-Größe in den permanenten Speicher
+                File cameraRawPictureFile = getCameraMediaFile();
+                File storagePictureFile = getStoredMediaFile();
+                if (cameraRawPictureFile == null || storagePictureFile == null) {
+                    throw new RuntimeException("Fotodatei nicht vorhanden");
+                }
+
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true; // just query the image size in the first step
+                BitmapFactory.decodeFile(
+                        cameraRawPictureFile.getPath(),
+                        options);
+
+                int sampling = options.outWidth / STORED_FOTO_WIDTH;
+                if (sampling > 1) {
+                    options.inSampleSize = sampling;
+                }
+                options.inJustDecodeBounds = false;
+
+                Bitmap scaledScreen = BitmapFactory.decodeFile(
+                        cameraRawPictureFile.getPath(),
+                        options);
+                if (scaledScreen == null) {
+                    throw new RuntimeException("Skalieren des Fotos fehlgeschlagen");
+                }
+                Log.d(TAG, "img width " + scaledScreen.getWidth());
+                Log.d(TAG, "img height " + scaledScreen.getHeight());
+
                 scaledScreen.compress(Bitmap.CompressFormat.JPEG, STORED_FOTO_QUALITY, new FileOutputStream(storagePictureFile));
                 // temp file begone!
                 cameraRawPictureFile.delete();
-            } catch (FileNotFoundException e) {
-                Log.e(TAG, "Could not write picture to destination file", e);
-                Toast.makeText(getApplicationContext(), "Konnte das skalierte Bild nicht schreiben", Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Log.e(TAG, "Error processing photo", e);
+                Toast.makeText(getApplicationContext(), "Fehler beim Verarbeiten des Fotos: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
 
-            // , also provozieren wir das
-            // Laden des Bildes von dort
+            // also provozieren wir das Laden des Bildes von dort
             setLocalBitmap();
         }
     }
