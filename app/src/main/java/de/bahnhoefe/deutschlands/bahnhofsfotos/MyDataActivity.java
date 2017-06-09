@@ -201,10 +201,10 @@ public class MyDataActivity extends AppCompatActivity {
         editor.putString(getString(R.string.LICENCE), licence);
         editor.putString(getString(R.string.PHOTO_OWNER), photoOwner);
         editor.putString(getString(R.string.LINKING), linking);
-        editor.putString(getString(R.string.LINK_TO_PHOTOGRAPHER), etLink.getText().toString());
-        editor.putString(getString(R.string.NICKNAME), etNickname.getText().toString());
-        editor.putString(getString(R.string.EMAIL), etEmail.getText().toString());
-        editor.putString(getString(R.string.UPLOAD_TOKEN), etUploadToken.getText().toString());
+        editor.putString(getString(R.string.LINK_TO_PHOTOGRAPHER), etLink.getText().toString().trim());
+        editor.putString(getString(R.string.NICKNAME), etNickname.getText().toString().trim());
+        editor.putString(getString(R.string.EMAIL), etEmail.getText().toString().trim());
+        editor.putString(getString(R.string.UPLOAD_TOKEN), etUploadToken.getText().toString().trim());
         editor.apply();
         Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
     }
@@ -234,12 +234,12 @@ public class MyDataActivity extends AppCompatActivity {
             this.apiKey = apiKey;
             registrationData = new JSONObject();
             try {
-                registrationData.put("nickname", etNickname.getText().toString());
-                registrationData.put("email", etEmail.getText().toString());
+                registrationData.put("nickname", etNickname.getText().toString().trim());
+                registrationData.put("email", etEmail.getText().toString().trim());
                 registrationData.put("license", licence);
                 registrationData.put("photoOwner", "YES".equals(photoOwner));
                 registrationData.put("linking", linking);
-                registrationData.put("link", etLink.getText().toString());
+                registrationData.put("link", etLink.getText().toString().trim());
             } catch (JSONException e) {
                 throw new RuntimeException("Error creating RegistrationData", e);
             }
