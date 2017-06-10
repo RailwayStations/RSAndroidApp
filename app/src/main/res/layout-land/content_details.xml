@@ -66,7 +66,6 @@
             android:layout_above="@id/license_tag"
             android:src="@drawable/ic_photo_camera_white_48px"
             android:backgroundTint="@android:color/transparent" />
-        <!--  -->
 
     </RelativeLayout>
 
