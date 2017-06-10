@@ -44,6 +44,7 @@ public class MyDataActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydata);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.title_activity_my_data);
 
         etNickname = (EditText) findViewById(R.id.etNickname);
         etUploadToken = (EditText) findViewById(R.id.etUploadToken);
