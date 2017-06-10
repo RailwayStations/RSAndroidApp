@@ -19,6 +19,7 @@ import android.widget.Toast;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
@@ -189,6 +190,9 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void register(View view) {
+        if (!isValid()) {
+            return;
+        }
         saveSettings(view);
         if (ConnectionUtil.checkInternetConnection(this)) {
             new RegisterTask(getString(R.string.rs_api_key)).execute();
@@ -222,6 +226,53 @@ public class MyDataActivity extends AppCompatActivity {
         Intent intent = new Intent(MyDataActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    public boolean isValid() {
+        if (DEFAULT.equals(licence)) {
+            new SimpleDialogs().confirm(this, R.string.missing_licence);
+            return false;
+        }
+        if (DEFAULT.equals(photoOwner)) {
+            new SimpleDialogs().confirm(this, R.string.missing_photoOwner);
+            return false;
+        }
+        if (etNickname.getText().toString().isEmpty()) {
+            new SimpleDialogs().confirm(this, R.string.missing_nickname);
+            return false;
+        }
+        if (!isValidEmail(etEmail.getText())) {
+            new SimpleDialogs().confirm(this, R.string.missing_email_address);
+            return false;
+        }
+        if (DEFAULT.equals(linking)) {
+            new SimpleDialogs().confirm(this, R.string.missing_linking);
+            return false;
+        }
+        String url = etLink.getText().toString();
+        if (!"NO".equals(link) && !isValidHTTPURL(url)) {
+            new SimpleDialogs().confirm(this, R.string.missing_link);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isValidHTTPURL(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
+                return false;
+            }
+        } catch (MalformedURLException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isValidEmail(CharSequence target) {
+        return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+
     }
 
     public class RegisterTask extends AsyncTask<Void, String, Integer> {

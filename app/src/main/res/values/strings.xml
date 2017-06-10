@@ -197,5 +197,11 @@
     <string name="title_slider7">Bahnhofsortung</string>
     <string name="title_slider8">Der Chat</string>
     <string name="title_slider9">Länderauswahl</string>
+    <string name="missing_licence">Bitte gib an, unter welcher Lizenz Du Deine Fotos einreichen möchtest</string>
+    <string name="missing_photoOwner">Bitte gib an, ob es sich um Deine eigenen Fotos handelt</string>
+    <string name="missing_nickname">Bitte gib Deinen Nickname an</string>
+    <string name="missing_email_address">Bitte gib einge gültige E-Mail-Adresse an</string>
+    <string name="missing_linking">Bitte gib an, ob Du verlinkt werden möchtest</string>
+    <string name="missing_link">Gib bitte einen gültigen Link an, wenn Du verlinkt werden möchtest</string>
 
 </resources>
