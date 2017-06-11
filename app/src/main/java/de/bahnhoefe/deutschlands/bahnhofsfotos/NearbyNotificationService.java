@@ -1,6 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -98,12 +99,23 @@ public class NearbyNotificationService extends Service implements LocationListen
             googleApiClient.connect();
         }
         final int messageId = notificationState.onlyWithoutPhoto() ? R.string.nearby_notification_active_only_without_photo : R.string.nearby_notification_active;
+
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
         // show a permanent notification to indicate that position detection is running
         final Notification ongoingNotification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(getString(messageId))
                 .setOngoing(true)
                 .setLocalOnly(true)
+                .setContentIntent(resultPendingIntent)
                 .build();
         final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
