@@ -251,7 +251,7 @@ public class MyDataActivity extends AppCompatActivity {
             return false;
         }
         String url = etLink.getText().toString();
-        if (!"NO".equals(link) && !isValidHTTPURL(url)) {
+        if (!"NO".equals(linking) && !isValidHTTPURL(url)) {
             new SimpleDialogs().confirm(this, R.string.missing_link);
             return false;
         }
