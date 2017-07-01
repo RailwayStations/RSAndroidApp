@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.animation.ValueAnimator;
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -458,6 +460,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + bahnhof.getTitle());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
+                break;
+            case android.R.id.home:
+                Intent upIntent = NavUtils.getParentActivityIntent(this);
+                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+                    // This activity is NOT part of this app's task, so create a new task
+                    // when navigating up, with a synthesized back stack.
+                    TaskStackBuilder.create(this)
+                            // Add all of this activity's parents to the back stack
+                            .addNextIntentWithParentStack(upIntent)
+                            // Navigate up to the closest parent
+                            .startActivities();
+                } else {
+                    onBackPressed();
+                }
+
                 break;
             default:
                 return super.onOptionsItemSelected(item);
