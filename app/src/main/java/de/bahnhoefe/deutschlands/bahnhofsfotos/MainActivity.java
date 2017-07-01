@@ -34,6 +34,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,7 +57,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.google.firebase.auth.FirebaseAuth;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
@@ -60,9 +64,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+
 import static java.lang.Integer.parseInt;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -148,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intentDetails = new Intent(MainActivity.this, cls);
                 intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
                 startActivity(intentDetails);
-                finish();
             }
         });
 
