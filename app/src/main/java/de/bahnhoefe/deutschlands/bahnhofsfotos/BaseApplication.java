@@ -6,15 +6,10 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
-import android.support.multidex.MultiDexApplication;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 
-/**
- * Created by android_oma on 08.01.17.
- */
-
-public class BaseApplication extends Application  {
+public class BaseApplication extends Application {
 
 
     private static final Boolean DEFAULT_FIRSTAPPSTART = false;
@@ -29,8 +24,6 @@ public class BaseApplication extends Application  {
 
     public BaseApplication() {
         setInstance(this);
-
-
     }
 
     @Override
@@ -75,30 +68,41 @@ public class BaseApplication extends Application  {
     }
 
     public SharedPreferences getPreferences() {
-        return getSharedPreferences(getString(R.string.PREF_FILE),MODE_PRIVATE);
+        return getSharedPreferences(getString(R.string.PREF_FILE), MODE_PRIVATE);
     }
 
 
     public void setCountryShortCode(String countryShortCode) {
         SharedPreferences.Editor editor = getPreferences().edit();
-        editor.putString(getString(R.string.COUNTRY),countryShortCode);
+        editor.putString(getString(R.string.COUNTRY), countryShortCode);
         editor.apply();
     }
 
 
     public String getCountryShortCode() {
 
-        return getPreferences().getString(getString(R.string.COUNTRY),DEFAULT_COUNTRY);
+        return getPreferences().getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
     }
 
-    public void setFirstAppStart(Boolean firstAppStart){
+    public void setFirstAppStart(Boolean firstAppStart) {
         SharedPreferences.Editor editor = getPreferences().edit();
-        editor.putBoolean(getString(R.string.FIRSTAPPSTART),firstAppStart);
+        editor.putBoolean(getString(R.string.FIRSTAPPSTART), firstAppStart);
         editor.apply();
     }
 
     public boolean getFirstAppStart() {
 
-        return getPreferences().getBoolean(getString(R.string.FIRSTAPPSTART),DEFAULT_FIRSTAPPSTART);
+        return getPreferences().getBoolean(getString(R.string.FIRSTAPPSTART), DEFAULT_FIRSTAPPSTART);
     }
+
+    public boolean subscribtionStatus() {
+        return getPreferences().getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), false);
+    }
+
+    public void saveSubscribtionStatus(boolean status) {
+        SharedPreferences.Editor editor = getPreferences().edit();
+        editor.putBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), status);
+        editor.apply();
+    }
+
 }

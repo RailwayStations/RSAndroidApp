@@ -34,7 +34,6 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
 
     /**
      * Build a notification for a station without photo. Call onNotificationReady if done.
-     *
      */
     @Override
     public void notifyUser() {

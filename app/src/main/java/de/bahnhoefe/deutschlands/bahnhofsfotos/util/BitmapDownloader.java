@@ -12,19 +12,21 @@ import java.net.URL;
 
 /**
  * Helper class to download image in background
+ *
  * @Author pelzvieh
  */
 public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
     private final String TAG = BitmapDownloader.class.getSimpleName();
     private final BitmapAvailableHandler bitmapAvailableHandler;
 
-    private URL url;
+    private final URL url;
     private BitmapFactory.Options options;
 
     /**
      * Construct a bitmap Downloader for the given URL
+     *
      * @param handler the BitmapAvailableHandler instance that is called on completion
-     * @param url the URL to fetch the Bitmap from
+     * @param url     the URL to fetch the Bitmap from
      */
     public BitmapDownloader(BitmapAvailableHandler handler, URL url) {
         this.bitmapAvailableHandler = handler;
@@ -34,6 +36,7 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
 
     /**
      * Asynchronous fetching from a URL and construction of an image from the resource.
+     *
      * @return the constructed Bitmap or null if downloading or construction failed
      */
     @Override
@@ -48,10 +51,10 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
             if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 String contentType = httpConnection.getContentType();
                 if (contentType != null && !contentType.startsWith("image"))
-                    Log.w(TAG, "Supplied URL does not appear to be an image resource (type=" + contentType+ ")");
+                    Log.w(TAG, "Supplied URL does not appear to be an image resource (type=" + contentType + ")");
                 bitmap = BitmapFactory.decodeStream(is, null, options);
             } else {
-                Log.e(TAG, "Error downloading photo: "+ httpConnection.getResponseCode());
+                Log.e(TAG, "Error downloading photo: " + httpConnection.getResponseCode());
             }
         } catch (IOException e) {
             Log.e(TAG, "Could not download photo");
@@ -70,6 +73,7 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
 
     /**
      * Run the callback function when Bitmap creation is finished
+     *
      * @param bitmap the downloaded Bitmap, may be null.
      */
     @Override

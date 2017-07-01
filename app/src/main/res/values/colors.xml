@@ -7,6 +7,8 @@
     <color name="listItem1">#ffffff</color>
     <color name="listItem2">#F5F5F5</color>
     <color name="listItemSelected">#c71c4d</color>
+    <color name="uploadTokenDivider">#3EB90E</color>
+
     <!-- Introslider-Colors -->
     <color name="introSlider1">#c2185b</color>
     <color name="introSlider2">#9c27b0</color>

@@ -6,16 +6,17 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by pelzi on 17.09.16.
@@ -28,16 +29,14 @@ public class BahnhofsFotoFetchTask extends AsyncTask<Integer, Void, URL> {
     private String license;
     private Uri authorReference;
     private String author;
-    private static final String DEFAULT_COUNTRY = "DE";
-    private String countryShortCode;
+    private final String countryShortCode;
     SharedPreferences sharedPreferences;
-
 
 
     public BahnhofsFotoFetchTask(BitmapAvailableHandler handler, Context context) {
         this.handler = handler;
-        sharedPreferences = context.getSharedPreferences("APP_PREF_FILE",Context.MODE_PRIVATE);
-        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY",DEFAULT_COUNTRY);
+        sharedPreferences = context.getSharedPreferences("APP_PREF_FILE", Context.MODE_PRIVATE);
+        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY", BaseApplication.DEFAULT_COUNTRY);
     }
 
     private void initConfigurationParameters() {

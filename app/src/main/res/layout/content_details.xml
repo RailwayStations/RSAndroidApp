@@ -65,7 +65,17 @@
             android:layout_above="@id/license_tag"
             android:src="@drawable/ic_photo_camera_white_48px"
             android:backgroundTint="@android:color/transparent" />
-        <!--  -->
+
+        <TextView
+            android:id="@+id/rotate_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/button_image"
+            android:text="@string/picture_landscape_only"
+            android:textStyle="bold"
+            android:background="#80ffffff"
+            android:padding="8dp" />
 
     </RelativeLayout>
 

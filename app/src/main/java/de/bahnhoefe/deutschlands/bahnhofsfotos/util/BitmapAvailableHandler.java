@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 public interface BitmapAvailableHandler {
     /**
      * This gets called if the requested bitmap is available. Finish and issue the notification.
+     *
      * @param bitmap the fetched Bitmap for the notification. May be null
      */
     void onBitmapAvailable(@Nullable Bitmap bitmap);

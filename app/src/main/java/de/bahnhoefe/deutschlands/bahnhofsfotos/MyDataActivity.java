@@ -1,13 +1,14 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,28 +16,39 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import static android.R.attr.id;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MyDataActivity extends AppCompatActivity {
     private static final String DEFAULT = "N/A";
     private final String TAG = getClass().getSimpleName();
-    private EditText etNickname,etLink;
+    private EditText etNickname, etLink, etEmail, etUploadToken;
     private RadioGroup rgLicence, rgPhotoOwner, rgLinking;
     private RadioButton rbLinkingXing, rbLinkingTwitter, rbLinkingSnapchat, rbLinkingInstagram, rbLinkingWebpage, rbLinkingNo;
     private RadioButton rbLicenceCC0, rbLicenceCC4;
     private RadioButton rbPhotoOwnerYes, rbPhotoOwnerNo;
-    private String licence, photoOwner, nickname, link, linking;
+    private String licence, photoOwner, nickname, email, link, linking, uploadToken;
     private Button btCommit, btClear;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydata);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.title_activity_my_data);
 
         etNickname = (EditText) findViewById(R.id.etNickname);
+        etUploadToken = (EditText) findViewById(R.id.etUploadToken);
+        etEmail = (EditText) findViewById(R.id.etEmail);
         etLink = (EditText) findViewById(R.id.etLinking);
         btCommit = (Button) findViewById(R.id.bt_mydata_commit);
         btClear = (Button) findViewById(R.id.bt_mydata_clear);
@@ -45,65 +57,92 @@ public class MyDataActivity extends AppCompatActivity {
         rgPhotoOwner = (RadioGroup) findViewById(R.id.rgOwnPhoto);
         rgLinking = (RadioGroup) findViewById(R.id.rgLinking);
 
-        rbLinkingXing = (RadioButton)findViewById(R.id.rbLinkingXing);
-        rbLinkingTwitter = (RadioButton)findViewById(R.id.rbLinkingTwitter);
-        rbLinkingSnapchat = (RadioButton)findViewById(R.id.rbLinkingSnapchat);
-        rbLinkingInstagram = (RadioButton)findViewById(R.id.rbLinkingInstagram);
-        rbLinkingWebpage = (RadioButton)findViewById(R.id.rbLinkingWebpage);
-        rbLinkingNo = (RadioButton)findViewById(R.id.rbLinkingNo);
+        rbLinkingXing = (RadioButton) findViewById(R.id.rbLinkingXing);
+        rbLinkingTwitter = (RadioButton) findViewById(R.id.rbLinkingTwitter);
+        rbLinkingSnapchat = (RadioButton) findViewById(R.id.rbLinkingSnapchat);
+        rbLinkingInstagram = (RadioButton) findViewById(R.id.rbLinkingInstagram);
+        rbLinkingWebpage = (RadioButton) findViewById(R.id.rbLinkingWebpage);
+        rbLinkingNo = (RadioButton) findViewById(R.id.rbLinkingNo);
 
-        rbLicenceCC0 = (RadioButton)findViewById(R.id.rbCC0);
-        rbLicenceCC4 = (RadioButton)findViewById(R.id.rbCC40);
+        rbLicenceCC0 = (RadioButton) findViewById(R.id.rbCC0);
+        rbLicenceCC4 = (RadioButton) findViewById(R.id.rbCC40);
 
-        rbPhotoOwnerNo = (RadioButton)findViewById(R.id.rbOwnPhotoNo);
-        rbPhotoOwnerYes = (RadioButton)findViewById(R.id.rbOwnPhotoYes);
+        rbPhotoOwnerNo = (RadioButton) findViewById(R.id.rbOwnPhotoNo);
+        rbPhotoOwnerYes = (RadioButton) findViewById(R.id.rbOwnPhotoYes);
 
+        SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
 
-
-        SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
-
-        licence = sharedPreferences.getString(getString(R.string.LICENCE),DEFAULT);
-        if(licence.equals("CC0")){
+        licence = sharedPreferences.getString(getString(R.string.LICENCE), DEFAULT);
+        if (licence.equals("CC0")) {
             rgLicence.check(R.id.rbCC0);
-        }else if(licence.equals("CC4")){
+        } else if (licence.equals("CC4")) {
             rgLicence.check(R.id.rbCC40);
         }
-        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER),DEFAULT);
-        if(photoOwner.equals("YES")){
+        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER), DEFAULT);
+        if (photoOwner.equals("YES")) {
             rgPhotoOwner.check(R.id.rbOwnPhotoYes);
-        }else if(photoOwner.equals("NO")){
+        } else if (photoOwner.equals("NO")) {
             rgPhotoOwner.check(R.id.rbOwnPhotoNo);
         }
-        linking = sharedPreferences.getString(getString(R.string.LINKING),DEFAULT);
-        if(linking.equals("XING")){
+        linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
+        if (linking.equals("XING")) {
             rgLinking.check(R.id.rbLinkingXing);
-        }else if(linking.equals("SNAPCHAT")){
+        } else if (linking.equals("SNAPCHAT")) {
             rgLinking.check(R.id.rbLinkingSnapchat);
-        }else if(linking.equals("TWITTER")){
+        } else if (linking.equals("TWITTER")) {
             rgLinking.check(R.id.rbLinkingTwitter);
-        }else if(linking.equals("WEBPAGE")){
+        } else if (linking.equals("WEBPAGE")) {
             rgLinking.check(R.id.rbLinkingWebpage);
-        }else if(linking.equals("INSTAGRAM")){
+        } else if (linking.equals("INSTAGRAM")) {
             rgLinking.check(R.id.rbLinkingInstagram);
-        }else if(linking.equals("NO")){
+        } else if (linking.equals("NO")) {
             rgLinking.check(R.id.rbLinkingNo);
         }
 
-        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER),DEFAULT);
-        nickname = sharedPreferences.getString(getString(R.string.NICKNAME),DEFAULT);
+        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
+        nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
 
-
-
-        if(link.equals(DEFAULT) || nickname.equals(DEFAULT)){
-            Toast.makeText(this,"Keine Daten vorhanden",Toast.LENGTH_LONG).show();
-        }else{
+        if (link.equals(DEFAULT) || nickname.equals(DEFAULT)) {
+            Toast.makeText(this, "Keine Daten vorhanden", Toast.LENGTH_LONG).show();
+        } else {
             etNickname.setText(nickname);
             etLink.setText(link);
         }
+
+        email = sharedPreferences.getString(getString(R.string.EMAIL), DEFAULT);
+        if (!DEFAULT.equals(email)) {
+            etEmail.setText(email);
+        }
+
+        uploadToken = sharedPreferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
+        if (!DEFAULT.equals(uploadToken)) {
+            etUploadToken.setText(uploadToken);
+        }
+
+        receiveUploadToken(getIntent());
     }
 
-    public void selectLicence(View view){
-        switch (view.getId()){
+    private void receiveUploadToken(Intent intent) {
+        if (intent != null) {
+            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+                Uri data = intent.getData();
+                if (data != null) {
+                    uploadToken = data.getLastPathSegment();
+                    etUploadToken.setText(uploadToken);
+                    saveSettings(null);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        receiveUploadToken(intent);
+    }
+
+    public void selectLicence(View view) {
+        switch (view.getId()) {
             case R.id.rbCC0:
                 licence = "CC0";
                 break;
@@ -114,9 +153,9 @@ public class MyDataActivity extends AppCompatActivity {
 
     }
 
-    public void selectPhotoOwner(View view){
+    public void selectPhotoOwner(View view) {
 
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.rbOwnPhotoYes:
                 photoOwner = "YES";
                 break;
@@ -127,9 +166,9 @@ public class MyDataActivity extends AppCompatActivity {
 
     }
 
-    public void linkToPhotographer(View view){
+    public void linkToPhotographer(View view) {
 
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.rbLinkingInstagram:
                 linking = "INSTAGRAM";
                 break;
@@ -149,36 +188,191 @@ public class MyDataActivity extends AppCompatActivity {
                 linking = "WEBPAGE";
                 break;
         }
-
-
     }
 
-    public void saveSettings(View view){
-        SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE),Context.MODE_PRIVATE);
+    public void register(View view) {
+        if (!isValid()) {
+            return;
+        }
+        saveSettings(view);
+        if (ConnectionUtil.checkInternetConnection(this)) {
+            new RegisterTask(getString(R.string.rs_api_key)).execute();
+        }
+    }
+
+    public void saveSettings(View view) {
+        SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(getString(R.string.LICENCE),licence);
-        editor.putString(getString(R.string.PHOTO_OWNER),photoOwner);
-        editor.putString(getString(R.string.LINKING),linking);
-        editor.putString(getString(R.string.LINK_TO_PHOTOGRAPHER),etLink.getText().toString());
-        editor.putString(getString(R.string.NICKNAME),etNickname.getText().toString());
+        editor.putString(getString(R.string.LICENCE), licence);
+        editor.putString(getString(R.string.PHOTO_OWNER), photoOwner);
+        editor.putString(getString(R.string.LINKING), linking);
+        editor.putString(getString(R.string.LINK_TO_PHOTOGRAPHER), etLink.getText().toString().trim());
+        editor.putString(getString(R.string.NICKNAME), etNickname.getText().toString().trim());
+        editor.putString(getString(R.string.EMAIL), etEmail.getText().toString().trim());
+        editor.putString(getString(R.string.UPLOAD_TOKEN), etUploadToken.getText().toString().trim());
         editor.apply();
-        Toast.makeText(this,R.string.preferences_saved,Toast.LENGTH_LONG).show();
-
+        Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
     }
 
-    public void clearSettings(View viewButtonClear){
-
+    public void clearSettings(View viewButtonClear) {
         SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
-        Toast.makeText(this,R.string.preferences_cleared,Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.preferences_cleared, Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(MyDataActivity.this,MainActivity.class);
+        Intent intent = new Intent(MyDataActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }
+
+    public boolean isValid() {
+        if (DEFAULT.equals(licence)) {
+            new SimpleDialogs().confirm(this, R.string.missing_licence);
+            return false;
+        }
+        if (DEFAULT.equals(photoOwner)) {
+            new SimpleDialogs().confirm(this, R.string.missing_photoOwner);
+            return false;
+        }
+        if (etNickname.getText().toString().isEmpty()) {
+            new SimpleDialogs().confirm(this, R.string.missing_nickname);
+            return false;
+        }
+        if (!isValidEmail(etEmail.getText())) {
+            new SimpleDialogs().confirm(this, R.string.missing_email_address);
+            return false;
+        }
+        if (DEFAULT.equals(linking)) {
+            new SimpleDialogs().confirm(this, R.string.missing_linking);
+            return false;
+        }
+        String url = etLink.getText().toString();
+        if (!"NO".equals(linking) && !isValidHTTPURL(url)) {
+            new SimpleDialogs().confirm(this, R.string.missing_link);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isValidHTTPURL(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
+                return false;
+            }
+        } catch (MalformedURLException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isValidEmail(CharSequence target) {
+        return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+
+    }
+
+    public class RegisterTask extends AsyncTask<Void, String, Integer> {
+
+        private final String apiKey;
+        private final JSONObject registrationData;
+        private ProgressDialog progressDialog;
+
+        public RegisterTask(String apiKey) {
+            this.apiKey = apiKey;
+            registrationData = new JSONObject();
+            try {
+                registrationData.put("nickname", etNickname.getText().toString().trim());
+                registrationData.put("email", etEmail.getText().toString().trim());
+                registrationData.put("license", licence);
+                registrationData.put("photoOwner", "YES".equals(photoOwner));
+                registrationData.put("linking", linking);
+                registrationData.put("link", etLink.getText().toString().trim());
+            } catch (JSONException e) {
+                throw new RuntimeException("Error creating RegistrationData", e);
+            }
+        }
+
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            HttpURLConnection conn = null;
+            DataOutputStream wr = null;
+            int status = -1;
+
+            publishProgress("Verbinde...");
+            try {
+                URL url = new URL(String.format("%s/registration", Constants.API_START_URL));
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput( true );
+                conn.setInstanceFollowRedirects( false );
+                conn.setRequestMethod( "POST" );
+                conn.setRequestProperty( "Content-Type", "application/json");
+                conn.setRequestProperty( "API-Key", apiKey);
+                conn.setUseCaches( false );
+
+                wr = new DataOutputStream( conn.getOutputStream());
+                wr.writeChars( registrationData.toString() );
+                wr.flush();
+
+                status = conn.getResponseCode();
+                Log.i(TAG, "Registration response: " + status);
+            } catch ( Exception e) {
+                Log.e(TAG, "Could not register", e);
+                throw new RuntimeException("Error sending registration", e);
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+                try {
+                    if (wr != null) {
+                        wr.close();
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Cannot close stream", e);
+                }
+            }
+
+            return status;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (MyDataActivity.this.isDestroyed()) {
+                return;
+            }
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+            if (result == 202) {
+                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_completed);
+            } else if (result == 422) {
+                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
+            } else {
+                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_failed);
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(MyDataActivity.this);
+            progressDialog.setIndeterminate(false);
+
+            // show it
+            progressDialog.show();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            progressDialog.setMessage("Sende Daten ... " + values[0]);
+
+        }
+
+    }
+
 }

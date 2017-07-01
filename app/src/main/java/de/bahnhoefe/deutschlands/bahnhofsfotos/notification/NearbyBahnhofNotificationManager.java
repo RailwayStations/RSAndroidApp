@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -30,6 +31,7 @@ public abstract class NearbyBahnhofNotificationManager {
     protected final String TAG = NearbyBahnhofNotificationManager.class.getSimpleName();
     // @todo Diese Map aus den zentralen Stammdaten unter https://railway-stations.org/laenderdaten.json laden, sobald die URL-Templates dort drin sind
     private static Map<String, String> TIMETABLE_LINK_TEMPLATES;
+
     {
         TIMETABLE_LINK_TEMPLATES = new HashMap<String, String>(2);
         TIMETABLE_LINK_TEMPLATES.put("DE", "https://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?bt=dep&max=10&rt=1&use_realtime_filter=1&start=yes&input=%s");
@@ -57,8 +59,9 @@ public abstract class NearbyBahnhofNotificationManager {
 
     /**
      * Constructor. After construction, you need to call notifyUser for action to happen.
-     * @param context the Android Context from which this object ist created.
-     * @param bahnhof the station to issue a notification for.
+     *
+     * @param context  the Android Context from which this object ist created.
+     * @param bahnhof  the station to issue a notification for.
      * @param distance a double giving the distance from current location to bahnhof (in km)
      */
     public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance) {
@@ -67,8 +70,8 @@ public abstract class NearbyBahnhofNotificationManager {
         this.notificationStation = bahnhof;
         // Read the configured country code
         // @todo remove once an international solution is found for timetabling
-        SharedPreferences sharedPreferences = context.getSharedPreferences("APP_PREF_FILE",Context.MODE_PRIVATE);
-        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY","DE");
+        SharedPreferences sharedPreferences = context.getSharedPreferences("APP_PREF_FILE", Context.MODE_PRIVATE);
+        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY", BaseApplication.DEFAULT_COUNTRY);
 
     }
 
@@ -97,6 +100,7 @@ public abstract class NearbyBahnhofNotificationManager {
     /**
      * Helper method that configures a NotificationBuilder wtih the elements common to both
      * notification types.
+     *
      * @return
      */
     protected NotificationCompat.Builder getBasicNotificationBuilder() {
@@ -169,6 +173,7 @@ public abstract class NearbyBahnhofNotificationManager {
 
     /**
      * Build an intent for an action to view a map.
+     *
      * @return the PendingIntent built.
      */
     protected PendingIntent getMapPendingIntent() {
@@ -181,9 +186,12 @@ public abstract class NearbyBahnhofNotificationManager {
 
     /**
      * Build an intent for an action to view a timetable for the station.
+     *
      * @return the PendingIntent built.
      */
-    protected @Nullable PendingIntent getTimetablePendingIntent() {
+    protected
+    @Nullable
+    PendingIntent getTimetablePendingIntent() {
         //
         final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
         final String timeTableTemplate = TIMETABLE_LINK_TEMPLATES.get(countryShortCode);
@@ -198,6 +206,7 @@ public abstract class NearbyBahnhofNotificationManager {
 
     /**
      * Build an intent for an action to view a map.
+     *
      * @return the PendingIntent built.
      */
 
@@ -208,7 +217,6 @@ public abstract class NearbyBahnhofNotificationManager {
         stationIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, notificationStation);
         return pendifyMe(stationIntent, REQUEST_STATION);
     }
-
 
 
     public void destroy() {

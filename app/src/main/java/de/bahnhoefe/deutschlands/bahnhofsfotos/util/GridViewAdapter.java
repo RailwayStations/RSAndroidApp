@@ -26,9 +26,9 @@ public class GridViewAdapter extends BaseAdapter {
     private final static String TAG = GridViewAdapter.class.getSimpleName();
 
     // Declare variables
-    private Activity activity;
-    private String[] filepath;
-    private String[] filename;
+    private final Activity activity;
+    private final String[] filepath;
+    private final String[] filename;
 
     private static LayoutInflater inflater = null;
 
@@ -75,7 +75,7 @@ public class GridViewAdapter extends BaseAdapter {
             Log.d(TAG, "Decoded " + filepath[position]);
             image.setImageBitmap(scaled);
         } else {
-            Log.e (TAG, "Cannot decode " + filepath[position]);
+            Log.e(TAG, "Cannot decode " + filepath[position]);
         }
         return vi;
 

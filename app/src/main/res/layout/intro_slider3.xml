@@ -12,11 +12,11 @@
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/ic_location_on_white_48dp" />
+            android:src="@drawable/ic_near_me_white_24px" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bahnhöfe 'In der Nähe'"
+            android:text="@string/title_slider3"
             android:layout_marginTop="10dp"
             android:textAlignment="center"
             android:textColor="@android:color/white"
@@ -28,7 +28,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
-            android:text="Im Menü unter 'In der Nähe' findest Du alle Bahnhöfe in Deiner Nähe, die noch kein Foto haben."
+            android:text="@string/text_intro_slider3"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="18sp"

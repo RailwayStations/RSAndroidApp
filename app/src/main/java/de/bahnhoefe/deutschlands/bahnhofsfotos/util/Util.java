@@ -5,9 +5,9 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
  */
 
 public class Util {
-    public static boolean isNumeric(String str){
-        for(char c : str.toCharArray()){
-            if(!Character.isDigit(c))
+    public static boolean isNumeric(String str) {
+        for (char c : str.toCharArray()) {
+            if (!Character.isDigit(c))
                 return false;
         }
         return true;

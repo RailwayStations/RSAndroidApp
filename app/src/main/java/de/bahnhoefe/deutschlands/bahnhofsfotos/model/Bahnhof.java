@@ -1,12 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.Serializable;
 
-/**
- * Created by android_oma on 29.05.16.
- */
+import com.google.android.gms.maps.model.LatLng;
 
 public class Bahnhof implements Serializable {
     private int id;  //Bahnhofsnummer
@@ -48,7 +44,7 @@ public class Bahnhof implements Serializable {
         this.lon = lon;
     }
 
-    public LatLng getPosition () {
+    public LatLng getPosition() {
         return new LatLng(lat, lon);
     }
 
@@ -91,7 +87,8 @@ public class Bahnhof implements Serializable {
     }
 
     @Override
-    public String toString(){
-        return "Bahnhof [id=" + id + ", title=" + title + ", lat=" + lat + ", lon=" + lon  + "]";
+    public String toString() {
+        return "Bahnhof [id=" + id + ", title=" + title + ", lat=" + lat + ", lon=" + lon + "]";
     }
+
 }

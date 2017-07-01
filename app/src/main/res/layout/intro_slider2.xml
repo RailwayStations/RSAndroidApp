@@ -8,15 +8,14 @@
         android:layout_centerInParent="true"
         android:gravity="center_horizontal"
         android:orientation="vertical">
-        
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/ic_settings_white_48dp"/>
+            android:src="@drawable/ic_account_box_white_24px"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Meine Daten"
+            android:text="@string/title_slider2"
             android:layout_marginTop="10dp"
             android:textAlignment="center"
             android:textColor="@android:color/white"
@@ -28,7 +27,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
-            android:text="Bitte trage im Menüpunkt 'Meine Daten' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne den Eintrag des Nicknamens kannst Du aus der App heraus nicht fotografieren."
+            android:text="@string/text_intro_slider2"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="18sp"

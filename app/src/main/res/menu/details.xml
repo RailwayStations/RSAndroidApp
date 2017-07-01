@@ -5,16 +5,24 @@
         android:id="@+id/nav_to_station"
         android:orderInCategory="100"
         android:title="@string/nav_to_station"
-        android:icon="@drawable/ic_directions_white_36dp"
+        android:icon="@drawable/ic_directions_white_24px"
         app:itemIconTint="@color/colorActions"
         app:itemTextColor="@color/colorActions"
         app:showAsAction="ifRoom" />
     <!-- menu group -->
     <group android:id="@+id/group_depencies">
     <item
+        android:id="@+id/photo_upload"
+        android:orderInCategory="300"
+        android:icon="@drawable/ic_file_upload_white_24dp"
+        app:itemIconTint="@color/colorActions"
+        app:itemTextColor="@color/colorActions"
+        android:title="@string/photo_upload"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/send_email"
         android:orderInCategory="300"
-        android:icon="@drawable/ic_menu_send"
+        android:icon="@drawable/ic_mail_white_24px"
         app:itemIconTint="@color/colorActions"
         app:itemTextColor="@color/colorActions"
         android:title="@string/send_email"
@@ -22,7 +30,7 @@
     <item
         android:id="@+id/share_photo"
         android:orderInCategory="400"
-        android:icon="@drawable/ic_menu_share"
+        android:icon="@drawable/ic_share_white_24px"
         app:itemIconTint="@color/colorActions"
         app:itemTextColor="@color/colorActions"
         android:title="@string/share_photo"

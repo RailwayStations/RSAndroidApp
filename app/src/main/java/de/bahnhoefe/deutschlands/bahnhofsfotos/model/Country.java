@@ -2,19 +2,13 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 import java.io.Serializable;
 
-import static android.R.attr.id;
-
-/**
- * Created by android_oma on 04.12.16.
- */
-
 public class Country implements Serializable {
     private String countryName;
     private String countryShortCode;
     private String email;
     private String twitterTags;
 
-    public Country(){
+    public Country() {
 
     }
 
@@ -23,7 +17,6 @@ public class Country implements Serializable {
         this.countryShortCode = countryShortCode;
         this.email = email;
         this.twitterTags = twitterTags;
-
     }
 
     public String getCountryName() {
@@ -59,7 +52,7 @@ public class Country implements Serializable {
     }
 
     @Override
-    public String toString(){
-        return "Land [Laendername=" + countryName + ", Laenderkuerzel=" + countryShortCode + ", E-Mail=" + email + ", TwitterTags=" + twitterTags  + "]";
+    public String toString() {
+        return "Land [Laendername=" + countryName + ", Laenderkuerzel=" + countryShortCode + ", E-Mail=" + email + ", TwitterTags=" + twitterTags + "]";
     }
 }

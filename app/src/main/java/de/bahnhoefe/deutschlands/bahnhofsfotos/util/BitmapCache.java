@@ -17,7 +17,7 @@ import java.util.HashMap;
 /**
  * A cache for station fotos.
  */
-public class BitmapCache  {
+public class BitmapCache {
     private final String TAG = BitmapCache.class.getSimpleName();
 
     /**
@@ -27,6 +27,7 @@ public class BitmapCache  {
 
     /**
      * Get the BitmapCache instance.
+     *
      * @return the single instance of BitmapCache.
      */
     public static BitmapCache getInstance() {
@@ -42,15 +43,15 @@ public class BitmapCache  {
         requests = new HashMap<>(3);
     }
 
-    private HashMap<URL, Collection<BitmapAvailableHandler>> requests;
+    private final HashMap<URL, Collection<BitmapAvailableHandler>> requests;
 
-    private HashMap<URL, Bitmap> cache;
+    private final HashMap<URL, Bitmap> cache;
 
     private class Request implements BitmapAvailableHandler {
-        private URL url;
-        private BitmapAvailableHandler requestor;
+        private final URL url;
+        private final BitmapAvailableHandler requestor;
 
-        public Request (URL url, BitmapAvailableHandler requestor) {
+        public Request(URL url, BitmapAvailableHandler requestor) {
             this.url = url;
             this.requestor = requestor;
         }
@@ -68,11 +69,11 @@ public class BitmapCache  {
 
             // inform all requestors about the available image
             synchronized (requests) {
-                Collection<BitmapAvailableHandler> handlers = requests.remove (url);
+                Collection<BitmapAvailableHandler> handlers = requests.remove(url);
                 if (handlers == null) {
                     Log.wtf(TAG, "Request result without a saved requestor. This should never happen.");
                 } else {
-                    for (BitmapAvailableHandler handler: handlers) {
+                    for (BitmapAvailableHandler handler : handlers) {
                         handler.onBitmapAvailable(bitmap);
                     }
                 }
@@ -84,17 +85,18 @@ public class BitmapCache  {
     /**
      * Get a picture for the given URL, either from cache or by downloading.
      * The fetching happens asynchronously. When finished, the provided callback interface is called.
-     * @param callback the BitmapAvailableHandler to call on completion.
+     *
+     * @param callback    the BitmapAvailableHandler to call on completion.
      * @param resourceUrl the URL to fetch
      */
     public void getFoto(BitmapAvailableHandler callback, @NonNull URL resourceUrl) {
-        Bitmap bitmap = cache.get (resourceUrl);
+        Bitmap bitmap = cache.get(resourceUrl);
         if (bitmap == null) {
             BitmapDownloader downloader = new BitmapDownloader(
                     new Request(resourceUrl, callback),
                     resourceUrl);
             synchronized (requests) {
-                Collection<BitmapAvailableHandler> handlers = requests.get (resourceUrl);
+                Collection<BitmapAvailableHandler> handlers = requests.get(resourceUrl);
                 if (handlers == null) {
                     handlers = new ArrayList<>();
                     handlers.add(callback);

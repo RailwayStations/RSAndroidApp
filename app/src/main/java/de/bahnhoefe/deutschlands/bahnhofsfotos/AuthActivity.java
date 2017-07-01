@@ -18,17 +18,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.bumptech.glide.Glide;
-import com.firebase.ui.auth.ui.email.SignInActivity;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
@@ -39,8 +39,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.R.menu.chat_menu;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChatMessage;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -83,9 +85,10 @@ public class AuthActivity extends AppCompatActivity implements
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private EditText mMessageEditText;
-    private AdView mAdView;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private GoogleApiClient mGoogleApiClient;
+
+    private CheckBox myNotifySwitch = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +97,8 @@ public class AuthActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        subscribtionStatus();
+
         mUsername = ANONYMOUS;
 
         // Initialize Firebase Auth
@@ -214,43 +219,52 @@ public class AuthActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 ChatMessage chatMessage = new ChatMessage(mMessageEditText.getText().toString(), mUsername,
-                        mPhotoUrl,mTimeStamp);
+                        mPhotoUrl, mTimeStamp);
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(chatMessage);
                 mMessageEditText.setText("");
-
             }
         });
-    }
 
-    @Override
-    public void onPause() {
-        if (mAdView != null) {
-            mAdView.pause();
-        }
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-       if (mAdView != null) {
-            mAdView.destroy();
-        }
-        super.onDestroy();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.chat_menu, menu);
+        inflater.inflate(chat_menu, menu);
+        final MenuItem item = menu.findItem(R.id.toggle_notifications_menu);
+        myNotifySwitch = new CheckBox(this);
+        myNotifySwitch.setButtonDrawable(R.drawable.ic_chat_notifications_selector);
+        item.setActionView(myNotifySwitch);
+        initMyNotifySwitchButton(myNotifySwitch);
         return true;
+    }
+
+    private void initMyNotifySwitchButton(final CheckBox notifySwitch) {
+        myNotifySwitch = notifySwitch;
+        myNotifySwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchMyNotificationButton();
+            }
+        });
+        myNotifySwitch.setChecked(subscribtionStatus());
+    }
+
+    private void switchMyNotificationButton() {
+        boolean subscribtionStatus = subscribtionStatus();
+        if (myNotifySwitch != null) {
+            subscribtionStatus = !subscribtionStatus;
+            saveSubscribtionStatus(subscribtionStatus);
+            myNotifySwitch.setChecked(subscribtionStatus);
+            Log.d(TAG, "Der Button ist: " + subscribtionStatus);
+            if (subscribtionStatus) {
+                FirebaseMessaging.getInstance().subscribeToTopic("friendly_engage");
+                Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet", Toast.LENGTH_LONG).show();
+            } else {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic("friendly_engage");
+                Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -265,18 +279,21 @@ public class AuthActivity extends AppCompatActivity implements
                 mFirebaseUser = null;
                 mUsername = ANONYMOUS;
                 mPhotoUrl = null;
-                startActivity(new Intent(this,MainActivity.class));
+                saveSubscribtionStatus(false);
+                myNotifySwitch.setChecked(false);
+                startActivity(new Intent(this, MainActivity.class));
                 return true;
-            /*case R.id.fresh_config_menu:
-                fetchConfig();
-                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void causeCrash() {
-        throw new NullPointerException("Fake null pointer exception");
+    private boolean subscribtionStatus() {
+        return ((BaseApplication) getApplication()).subscribtionStatus();
+    }
+
+    private void saveSubscribtionStatus(boolean status) {
+        ((BaseApplication) getApplication()).saveSubscribtionStatus(status);
     }
 
     private void sendInvitation() {
@@ -329,6 +346,7 @@ public class AuthActivity extends AppCompatActivity implements
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
+
 
 }
 

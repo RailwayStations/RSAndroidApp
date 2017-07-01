@@ -12,11 +12,11 @@
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/ic_gps_fixed_white_48dp"/>
+            android:src="@drawable/ic_notifications_active_white_24px"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bahnhofsortung"
+            android:text="@string/title_slider7"
             android:layout_marginTop="10dp"
             android:textAlignment="center"
             android:textColor="@android:color/white"
@@ -28,7 +28,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
-            android:text="Wenn Du unterwegs bist und Du möchtest informiert werden, wenn ein Bahnhof in der Nähe ist, der noch kein Foto hat, kannst Du die Bahnhofsortung einschalten."
+            android:text="@string/text_intro_slider7"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="18sp"

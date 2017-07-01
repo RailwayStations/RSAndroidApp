@@ -15,4 +15,6 @@ The google-services.json has to be exchanged with your firebase-created file. Pl
 Rename the FireBaseConstantsTemplate to FireBaseConstants and fill in your own data.
 A template for the `google-services.json` can be found in `app/templates`. Copy it to `app` and set the correct api key.
 
+API-Key: copy `app/templates/rs_api.xml` to `app/src/main/res/values/` and enter the API for the Backend Service.
+
 The code is public under MIT-Licence: http://choosealicense.com/licenses/mit/

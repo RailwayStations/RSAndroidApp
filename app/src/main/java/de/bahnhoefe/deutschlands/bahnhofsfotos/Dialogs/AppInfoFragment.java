@@ -1,33 +1,16 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-
-import static com.google.android.gms.analytics.internal.zzy.a;
-import static com.google.android.gms.analytics.internal.zzy.d;
-import static com.google.android.gms.analytics.internal.zzy.i;
-import static com.google.android.gms.analytics.internal.zzy.s;
-
 
 public class AppInfoFragment extends DialogFragment {
 
