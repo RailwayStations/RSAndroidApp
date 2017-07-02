@@ -2,6 +2,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
@@ -9,6 +10,7 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 /**
@@ -34,7 +36,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String click_action = remoteMessage.getNotification().getClickAction();
         Intent intent = new Intent(click_action);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(intent);
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(message);

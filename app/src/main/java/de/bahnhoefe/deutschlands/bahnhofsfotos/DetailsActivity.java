@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.animation.ValueAnimator;
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,7 +23,6 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -50,8 +50,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
-import static android.content.Intent.createChooser;
-import static android.graphics.Color.WHITE;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
@@ -62,6 +60,9 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
+
+import static android.content.Intent.createChooser;
+import static android.graphics.Color.WHITE;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
     // Names of Extras that this class reacts to
@@ -427,25 +428,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public boolean onOptionsItemSelected(MenuItem item) {
         String navLocation = "";
         switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                Intent upIntent = NavUtils.getParentActivityIntent(this);
-                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
-                    // This activity is NOT part of this app's task, so create a new task
-                    // when navigating up, with a synthesized back stack.
-                    TaskStackBuilder.create(this)
-                            // Add all of this activity's parents to the back stack
-                            .addNextIntentWithParentStack(upIntent)
-                            // Navigate up to the closest parent
-                            .startActivities();
-                } else {
-                    // This activity is part of this app's task, so simply
-                    // navigate up to the logical parent activity.
-                    NavUtils.navigateUpTo(this, upIntent);
-                }
-
-                onBackPressed();
-                break;
             case R.id.nav_to_station:
                 startNavigation(DetailsActivity.this);
                 //startNavigation(DetailsActivity.this);
@@ -479,8 +461,23 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
-            default:
+            case android.R.id.home:
+                Intent upIntent = NavUtils.getParentActivityIntent(this);
+                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+                    // This activity is NOT part of this app's task, so create a new task
+                    // when navigating up, with a synthesized back stack.
+                    TaskStackBuilder.create(this)
+                            // Add all of this activity's parents to the back stack
+                            .addNextIntentWithParentStack(upIntent)
+                            // Navigate up to the closest parent
+                            .startActivities();
+                } else {
+                    onBackPressed();
+                }
+
                 break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
         return true;
@@ -738,13 +735,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             fullscreen = false;
         }
 
-    }
-
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(DetailsActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     public class PhotoUploadTask extends AsyncTask<Void, String, Integer> {
