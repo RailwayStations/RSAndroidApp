@@ -73,7 +73,6 @@ public class AuthActivity extends AppCompatActivity implements
     private static final String ANONYMOUS = "anonymous";
     private String mUsername;
     private String mPhotoUrl;
-    private String mTimeStamp;
     private SharedPreferences mSharedPreferences;
 
     private Button mSendButton;
@@ -104,10 +103,6 @@ public class AuthActivity extends AppCompatActivity implements
         // Initialize Firebase Auth
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
-
-        ChatMessage friendly_chat = new ChatMessage();
-        mTimeStamp = friendly_chat.setChatTimeStamp();
-
 
         if (mFirebaseUser == null) {
             // Not signed in, launch the Sign In activity
@@ -218,8 +213,7 @@ public class AuthActivity extends AppCompatActivity implements
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ChatMessage chatMessage = new ChatMessage(mMessageEditText.getText().toString(), mUsername,
-                        mPhotoUrl, mTimeStamp);
+                ChatMessage chatMessage = new ChatMessage(mMessageEditText.getText().toString(), mUsername, mPhotoUrl);
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(chatMessage);
                 mMessageEditText.setText("");
             }

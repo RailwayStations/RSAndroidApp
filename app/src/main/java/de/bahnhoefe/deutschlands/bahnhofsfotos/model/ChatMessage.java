@@ -1,9 +1,12 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 
 public class ChatMessage {
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy @ HH:mm");
+
     private String id;
     private String text;
     private String name;
@@ -18,6 +21,10 @@ public class ChatMessage {
         this.name = name;
         this.photoUrl = photoUrl;
         this.chatTimeStamp = chatTimeStamp;
+    }
+
+    public ChatMessage(String text, String name, String photoUrl) {
+        this(text, name, photoUrl, createChatTimeStamp());
     }
 
     public String getId() {
@@ -56,10 +63,8 @@ public class ChatMessage {
         return chatTimeStamp;
     }
 
-    public String setChatTimeStamp() {
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy @ HH:mm");
-        return df.format(c.getTime());
+    private static String createChatTimeStamp() {
+        return DATE_FORMAT.format(new Date());
     }
 
 }
