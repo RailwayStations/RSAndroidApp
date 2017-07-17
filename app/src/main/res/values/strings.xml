@@ -203,5 +203,6 @@
     <string name="missing_email_address">Bitte gib einge gültige E-Mail-Adresse an</string>
     <string name="missing_linking">Bitte gib an, ob Du verlinkt werden möchtest</string>
     <string name="missing_link">Gib bitte einen gültigen Link an, wenn Du verlinkt werden möchtest</string>
+    <string name="upload_conflict">Dein Foto wurde hochgeladen, es liegt aber möglicherweise ein Konflikt vor.</string>
 
 </resources>
