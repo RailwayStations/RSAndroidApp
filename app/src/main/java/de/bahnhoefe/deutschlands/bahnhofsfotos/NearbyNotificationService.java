@@ -55,6 +55,9 @@ public class NearbyNotificationService extends Service implements LocationListen
     private NotificationState notificationState = NotificationState.OFF;// we have only one notification
     private NearbyBahnhofNotificationManager notifiedStationManager;
     private GoogleApiClient googleApiClient = null;
+    private BahnhofsDbAdapter bahnhofsDbAdapter = null;
+
+
 
     /**
      * The intent action to use to bind to this service's status interface.
@@ -70,6 +73,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         super.onCreate();
         nearStations = new ArrayList<>(0); // no markers until we know where we are
         notifiedStationManager = null;
+        bahnhofsDbAdapter = ((BaseApplication)getApplication()).getDbAdapter();
 
         // Create an instance of GoogleAPIClient.
         if (googleApiClient == null) {
@@ -215,7 +219,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                 notifiedStationManager = null;
             }
         }
-        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance);
+        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance, bahnhofsDbAdapter);
         notifiedStationManager.notifyUser();
     }
 
@@ -352,10 +356,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     }
 
     private void readStations() {
-        BahnhofsDbAdapter bahnhofsDbAdapter = new BahnhofsDbAdapter(this);
-
         try {
-            bahnhofsDbAdapter.open();
             Log.i(TAG, "Lese Bahnhoefe onlyWithoutPhoto=" + notificationState.onlyWithoutPhoto());
             nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
             if (!notificationState.onlyWithoutPhoto()) {
@@ -363,8 +364,6 @@ public class NearbyNotificationService extends Service implements LocationListen
             }
         } catch (Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
-        } finally {
-            bahnhofsDbAdapter.close();
         }
     }
 

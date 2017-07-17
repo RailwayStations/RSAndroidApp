@@ -34,11 +34,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,6 +52,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.google.firebase.auth.FirebaseAuth;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
@@ -64,8 +60,9 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-
 import static java.lang.Integer.parseInt;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -456,6 +453,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
                         String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
                         boolean noPhoto = jsonObj.isNull(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER);
+                        String ds100 = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_DS100);
 
                         Bahnhof bahnhof = new Bahnhof();
                         bahnhof.setTitle(title);
@@ -464,6 +462,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         bahnhof.setLon(Float.parseFloat(lon));
                         bahnhof.setDatum(aktuellesDatum);
                         bahnhof.setPhotoflag(noPhoto ? null : "x");
+                        bahnhof.setDS100(ds100);
 
                         bahnhoefe.add(bahnhof);
                         Log.d("DatenbankInsertOk ...", bahnhof.toString());
@@ -554,18 +553,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private Exception exception;
 
         protected List<Country> doInBackground(Void... params) {
-            URL url = null;
-            HttpURLConnection laenderConnection = null;
-            BufferedReader reader = null;
             int count = 0;
 
-            List<Country> countries = new ArrayList<Country>(count);
+            List<Country> countries = new ArrayList<>(count);
             try {
-                url = new URL(Constants.LAENDERDATEN_URL);
-                laenderConnection = (HttpURLConnection) url.openConnection();
+                URL url = new URL(Constants.API_START_URL + "/countries");
+                HttpURLConnection laenderConnection = (HttpURLConnection) url.openConnection();
                 laenderConnection.connect();
                 InputStream stream = laenderConnection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(stream));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
                 StringBuffer buffer = new StringBuffer();
                 String line = "";
                 while ((line = reader.readLine()) != null) {
@@ -582,16 +578,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     publishProgress("Verarbeite " + i + "/" + count);
                     JSONObject jsonObj = (JSONObject) countryList.get(i);
 
-                    String countryShortCode = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE);
-                    String countryName = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME);
-                    String email = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_EMAIL);
-                    String twitterTags = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS);
+                    String countryShortCode = jsonObj.getString("code").toUpperCase();
+                    String countryName = jsonObj.getString("name");
+                    String email = jsonObj.getString("email");
+                    String twitterTags = jsonObj.getString("twitterTags");
+                    String timetableUrlTemplate = jsonObj.getString("timetableUrlTemplate");
 
                     Country country = new Country();
                     country.setCountryShortCode(countryShortCode);
                     country.setCountryName(countryName);
                     country.setEmail(email);
                     country.setTwitterTags(twitterTags);
+                    country.setTimetableUrlTemplate(timetableUrlTemplate);
 
                     countries.add(country);
                     Log.d("DatenbankInsertLdOk ...", country.toString());

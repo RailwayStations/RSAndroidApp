@@ -11,6 +11,7 @@ public class Bahnhof implements Serializable {
     private double lon;
     private long datum; // not used in the database
     private String photoflag; // not used in the database
+    private String ds100;
 
     public int getId() {
         return id;
@@ -91,4 +92,11 @@ public class Bahnhof implements Serializable {
         return "Bahnhof [id=" + id + ", title=" + title + ", lat=" + lat + ", lon=" + lon + "]";
     }
 
+    public String getDS100() {
+        return ds100;
+    }
+
+    public void setDS100(String ds100) {
+        this.ds100 = ds100;
+    }
 }

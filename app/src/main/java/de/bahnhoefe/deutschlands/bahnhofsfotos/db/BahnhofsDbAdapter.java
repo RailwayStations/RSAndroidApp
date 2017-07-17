@@ -21,7 +21,7 @@ public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
             + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
@@ -29,7 +29,8 @@ public class BahnhofsDbAdapter {
             + Constants.DB_JSON_CONSTANTS.KEY_TITLE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_LAT + " REAL, "
             + Constants.DB_JSON_CONSTANTS.KEY_LON + " REAL, "
-            + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " TEXT)";
+            + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_DS100 + " TEXT)";
     private static final String CREATE_STATEMENT_2 = "CREATE INDEX " + DATABASE_TABLE + "_IDX "
             + "ON " + DATABASE_TABLE + "(" + Constants.DB_JSON_CONSTANTS.KEY_ID + ")";
     private static final String CREATE_STATEMENT_COUNTRIES = "CREATE TABLE " + DATABASE_TABLE_LAENDER + " ("
@@ -37,7 +38,8 @@ public class BahnhofsDbAdapter {
             + Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_EMAIL + " TEXT, "
-            + Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS + " TEXT)";
+            + Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE + " TEXT)";
 
     private static final String DROP_STATEMENT_1 = "DROP INDEX IF EXISTS " + DATABASE_TABLE + "_IDX";
     private static final String DROP_STATEMENT_2 = "DROP TABLE IF EXISTS " + DATABASE_TABLE;
@@ -79,6 +81,7 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LAT, bahnhof.getLat());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LON, bahnhof.getLon());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG, bahnhof.getPhotoflag());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_DS100, bahnhof.getDS100());
 
                 db.insert(DATABASE_TABLE, null, values);
             }
@@ -102,6 +105,7 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME, country.getCountryName());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_EMAIL, country.getEmail());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS, country.getTwitterTags());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE, country.getTimetableUrlTemplate());
 
                 db.insert(DATABASE_TABLE_LAENDER, null, values);
 
@@ -205,7 +209,6 @@ public class BahnhofsDbAdapter {
         return cursor;
     }
 
-
     class BahnhoefeDbOpenHelper extends SQLiteOpenHelper {
 
         public BahnhoefeDbOpenHelper(Context context) {
@@ -240,12 +243,14 @@ public class BahnhofsDbAdapter {
         Double lon = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LON));
         Double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LAT));
         String photoflag = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG));
+        String ds100 = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_DS100));
         Bahnhof bahnhof = new Bahnhof();
         bahnhof.setTitle(title);
         bahnhof.setId(bahnhofsnr);
         bahnhof.setLat(lat);
         bahnhof.setLon(lon);
         bahnhof.setPhotoflag(photoflag);
+        bahnhof.setDS100(ds100);
         return bahnhof;
     }
 
@@ -255,11 +260,13 @@ public class BahnhofsDbAdapter {
         String countryName = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME));
         String email = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_EMAIL));
         String twitterTags = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS));
+        String timetableUrlTemplate = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE));
         Country country = new Country();
         country.setCountryShortCode(countryShortCode);
         country.setCountryName(countryName);
         country.setEmail(email);
         country.setTwitterTags(twitterTags);
+        country.setTimetableUrlTemplate(timetableUrlTemplate);
         return country;
     }
 
@@ -296,17 +303,9 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    // Getting All Bahnhoefe
     public List<Bahnhof> getAllBahnhoefe(boolean withPhoto) {
         List<Bahnhof> bahnhofList = new ArrayList<Bahnhof>();
-        // Select All Query without any baseLocationValues (myCurrentLocation)
-        String selectQuery = "SELECT " +
-                KEY_ID + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_TITLE + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_LAT + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_LON + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG +
-                " FROM " + DATABASE_TABLE
+        String selectQuery = "SELECT * FROM " + DATABASE_TABLE
                 + " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " IS " + (withPhoto ? "NOT" : "") + " NULL";
         Log.d(TAG, selectQuery.toString());
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -324,22 +323,15 @@ public class BahnhofsDbAdapter {
         }
         cursor.close();
 
-        // return bahnhof list
         return bahnhofList;
     }
 
-    // Getting All Bahnhoefe
     public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, boolean withPhoto) {
         double lat = position.latitude;
         double lng = position.longitude;
         List<Bahnhof> bahnhofList = new ArrayList<Bahnhof>();
         // Select All Query with rectangle - might be later change with it
-        String selectQuery = "SELECT " + KEY_ID + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_TITLE + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_LAT + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_LON + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG +
-                " FROM " + DATABASE_TABLE + " where " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " < " + (lat + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " > " + (lat - 0.5)
+        String selectQuery = "SELECT * FROM " + DATABASE_TABLE + " where " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " < " + (lat + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " > " + (lat - 0.5)
                 + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " < " + (lng + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " > " + (lng - 0.5)
                 + " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " IS " + (withPhoto ? "NOT" : "") + " NULL";
 
@@ -364,12 +356,7 @@ public class BahnhofsDbAdapter {
     public List<Country> getAllCountries() {
         List<Country> countryList = new ArrayList<Country>();
         // Select All Query without any baseLocationValues (myCurrentLocation)
-        String selectQueryCountries = "SELECT " +
-                Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_EMAIL + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS +
-                " FROM " + DATABASE_TABLE_LAENDER;
+        String selectQueryCountries = "SELECT * FROM " + DATABASE_TABLE_LAENDER;
 
         Log.d(TAG, selectQueryCountries.toString());
         Cursor cursor = db.rawQuery(selectQueryCountries, null);

@@ -8,6 +8,7 @@ import android.util.Log;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 
 public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofNotificationManager {
@@ -16,8 +17,8 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
     public static final int LED_COLOR = 0x0000ffff;
     private static final int REQUEST_FOTO = 0x100;
 
-    public NearbyBahnhofWithoutPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance) {
-        super(context, bahnhof, distance);
+    public NearbyBahnhofWithoutPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance, BahnhofsDbAdapter dbAdapter) {
+        super(context, bahnhof, distance, dbAdapter);
         Log.d(TAG, "Creating " + getClass().getSimpleName());
     }
 
