@@ -829,6 +829,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_completed);
             } else if (result == 401) {
                 new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_token_invalid);
+            } else if (result == 409) {
+                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
             } else {
                 new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_failed);
             }
