@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
@@ -23,8 +24,8 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     private static final int LED_COLOR = 0x00ff0000;
     private BahnhofsFotoFetchTask fetchTask;
 
-    public NearbyBahnhofWithPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance) {
-        super(context, bahnhof, distance);
+    public NearbyBahnhofWithPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance, BahnhofsDbAdapter dbAdapter) {
+        super(context, bahnhof, distance, dbAdapter);
         Log.d(TAG, "Creating " + getClass().getSimpleName());
     }
 

@@ -12,17 +12,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 
-/**
- * Created by pelzi on 11.09.16.
- */
 public abstract class NearbyBahnhofNotificationManager {
     private static final int NOTIFICATION_ID = 1;
     private static final int REQUEST_MAP = 0x10;
@@ -30,18 +26,11 @@ public abstract class NearbyBahnhofNotificationManager {
     private static final int REQUEST_TIMETABLE = 0x30;
     private static final int REQUEST_STATION = 0x40;
     protected final String TAG = NearbyBahnhofNotificationManager.class.getSimpleName();
-    // @todo Diese Map aus den zentralen Stammdaten unter https://railway-stations.org/laenderdaten.json laden, sobald die URL-Templates dort drin sind
-    private static Map<String, String> TIMETABLE_LINK_TEMPLATES;
-
-    {
-        TIMETABLE_LINK_TEMPLATES = new HashMap<String, String>(2);
-        TIMETABLE_LINK_TEMPLATES.put("DE", "https://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?bt=dep&max=10&rt=1&use_realtime_filter=1&start=yes&input=%s");
-        TIMETABLE_LINK_TEMPLATES.put("CH", "http://fahrplan.sbb.ch/bin/stboard.exe/dn?input=%s&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes");
-    }
 
     private final String countryShortCode;
     private final String DB_BAHNHOF_LIVE_PKG = "de.deutschebahn.bahnhoflive";
     private final String DB_BAHNHOF_LIVE_CLASS = "de.deutschebahn.bahnhoflive.MeinBahnhofActivity";
+    private final Country country;
 
     /**
      * The Bahnhof about which a notification is being built.
@@ -65,7 +54,7 @@ public abstract class NearbyBahnhofNotificationManager {
      * @param bahnhof  the station to issue a notification for.
      * @param distance a double giving the distance from current location to bahnhof (in km)
      */
-    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance) {
+    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance, BahnhofsDbAdapter dbAdapter) {
         this.context = context;
         notificationDistance = distance;
         this.notificationStation = bahnhof;
@@ -73,7 +62,7 @@ public abstract class NearbyBahnhofNotificationManager {
         // @todo remove once an international solution is found for timetabling
         SharedPreferences sharedPreferences = context.getSharedPreferences("APP_PREF_FILE", Context.MODE_PRIVATE);
         countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY", BaseApplication.DEFAULT_COUNTRY);
-
+        country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
     }
 
     /**
@@ -202,11 +191,17 @@ public abstract class NearbyBahnhofNotificationManager {
     protected
     @Nullable
     PendingIntent getTimetablePendingIntent() {
-        //
         final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
-        final String timeTableTemplate = TIMETABLE_LINK_TEMPLATES.get(countryShortCode);
-        if (timeTableTemplate == null)
+
+        String timeTableTemplate = country.getTimetableUrlTemplate();
+        if (timeTableTemplate == null) {
             return null;
+        }
+
+        timeTableTemplate = timeTableTemplate.replace("{id}", String.valueOf(notificationStation.getId()));
+        timeTableTemplate = timeTableTemplate.replace("{title}", notificationStation.getTitle());
+        timeTableTemplate = timeTableTemplate.replace("{DS100}", notificationStation.getDS100());
+
         Uri timeTableUri = Uri.parse(
                 String.format(timeTableTemplate, Uri.encode(notificationStation.getTitle()))
         );

@@ -7,16 +7,18 @@ public class Country implements Serializable {
     private String countryShortCode;
     private String email;
     private String twitterTags;
+    private String timetableUrlTemplate;
 
     public Country() {
 
     }
 
-    public Country(String countryName, String countryShortCode, String email, String twitterTags) {
+    public Country(String countryName, String countryShortCode, String email, String twitterTags, String timetableUrlTemplate) {
         this.countryName = countryName;
         this.countryShortCode = countryShortCode;
         this.email = email;
         this.twitterTags = twitterTags;
+        this.timetableUrlTemplate = timetableUrlTemplate;
     }
 
     public String getCountryName() {
@@ -51,8 +53,17 @@ public class Country implements Serializable {
         this.twitterTags = twitterTags;
     }
 
+    public String getTimetableUrlTemplate() {
+        return timetableUrlTemplate;
+    }
+
+    public void setTimetableUrlTemplate(String timetableUrlTemplate) {
+        this.timetableUrlTemplate = timetableUrlTemplate;
+    }
+
     @Override
     public String toString() {
-        return "Land [Laendername=" + countryName + ", Laenderkuerzel=" + countryShortCode + ", E-Mail=" + email + ", TwitterTags=" + twitterTags + "]";
+        return "Land [Laendername=" + countryName + ", Laenderkuerzel=" + countryShortCode + ", E-Mail=" + email + ", TwitterTags=" + twitterTags + ", TimetableUrlTemplate=" + timetableUrlTemplate + "]";
     }
+
 }
