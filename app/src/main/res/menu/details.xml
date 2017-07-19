@@ -9,6 +9,14 @@
         app:itemIconTint="@color/colorActions"
         app:itemTextColor="@color/colorActions"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/timetable"
+        android:orderInCategory="100"
+        android:title="@string/label_timetable"
+        android:icon="@drawable/ic_timetable"
+        app:itemIconTint="@color/colorActions"
+        app:itemTextColor="@color/colorActions"
+        app:showAsAction="ifRoom" />
     <!-- menu group -->
     <group android:id="@+id/group_depencies">
     <item

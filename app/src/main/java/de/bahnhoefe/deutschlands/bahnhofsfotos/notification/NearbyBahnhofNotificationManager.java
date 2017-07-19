@@ -18,6 +18,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
 
 public abstract class NearbyBahnhofNotificationManager {
     private static final int NOTIFICATION_ID = 1;
@@ -99,7 +100,7 @@ public abstract class NearbyBahnhofNotificationManager {
         // Build an intent to see the station on a map
         PendingIntent mapPendingIntent = getMapPendingIntent();
         // Build an intent to view the station's timetable
-        PendingIntent timetablePendingIntent = getTimetablePendingIntent();
+        PendingIntent timetablePendingIntent = getTimetablePendingIntent(country, notificationStation);
         // Build an intent to launch the DB Bahnhöfe Live app
         PendingIntent stationPendingIntent = getStationPendingIntent();
 
@@ -190,23 +191,8 @@ public abstract class NearbyBahnhofNotificationManager {
      */
     protected
     @Nullable
-    PendingIntent getTimetablePendingIntent() {
-        final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
-
-        String timeTableTemplate = country.getTimetableUrlTemplate();
-        if (timeTableTemplate == null) {
-            return null;
-        }
-
-        timeTableTemplate = timeTableTemplate.replace("{id}", String.valueOf(notificationStation.getId()));
-        timeTableTemplate = timeTableTemplate.replace("{title}", notificationStation.getTitle());
-        timeTableTemplate = timeTableTemplate.replace("{DS100}", notificationStation.getDS100());
-
-        Uri timeTableUri = Uri.parse(
-                String.format(timeTableTemplate, Uri.encode(notificationStation.getTitle()))
-        );
-        timetableIntent.setData(timeTableUri);
-        return pendifyMe(timetableIntent, REQUEST_TIMETABLE);
+    PendingIntent getTimetablePendingIntent(Country country, Bahnhof station) {
+        return pendifyMe(new Timetable().createTimetableIntent(country, station), NearbyBahnhofNotificationManager.REQUEST_TIMETABLE);
     }
 
     /**
@@ -214,7 +200,6 @@ public abstract class NearbyBahnhofNotificationManager {
      *
      * @return the PendingIntent built.
      */
-
     @NonNull
     protected PendingIntent getStationPendingIntent() {
         // Build an intent for an action to see station details
