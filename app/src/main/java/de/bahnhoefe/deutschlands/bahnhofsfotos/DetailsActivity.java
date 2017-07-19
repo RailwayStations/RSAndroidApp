@@ -75,8 +75,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public static final int STORED_FOTO_QUALITY = 95;
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int SELECT_PICTURE = 2;
+    private static final int REQUEST_TAKE_PICTURE_PERMISSION = 0;
+    private static final int REQUEST_SELECT_PICTURE_PERMISSION = 1;
+    private static final int REQUEST_TAKE_PICTURE = 2;
+    private static final int REQUEST_SELECT_PICTURE = 3;
     private static final int alpha = 128;
 
     private ImageButton takePictureButton;
@@ -90,10 +92,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String licence, photoOwner, linking, link, nickname, email, token, countryShortCode;
 
 
-    /**
-     * Id to identify a camera permission request.
-     */
-    private static final int REQUEST_CAMERA = 0;
     private TextView licenseTagView;
 
     private BahnhofsFotoFetchTask fetchTask;
@@ -127,7 +125,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        checkCameraPermission();
+                        takePictureWithPermissionCheck();
                     }
                 }
         );
@@ -136,7 +134,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        selectPicture();
+                        selectPictureWithPermissionCheck();
                     }
                 }
         );
@@ -180,7 +178,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         if (directPicture) {
-            checkCameraPermission();
+            takePictureWithPermissionCheck();
         }
     }
 
@@ -209,11 +207,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     /**
-     * Method to request permission for camera
+     * Method to request permission for taking picture
      */
-    private void requestCameraPermission() {
+    private void requestPermissionAndTakePicture() {
         // Camera and Write permission has not been granted yet. Request it directly.
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA);
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_TAKE_PICTURE_PERMISSION);
+    }
+
+    /**
+     * Method to request permission for selecting picture
+     */
+    private void requestPermissionAndSelectPicture() {
+        // Write permission has not been granted yet. Request it directly.
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_SELECT_PICTURE_PERMISSION);
     }
 
     public void selectPicture() {
@@ -229,7 +235,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_SELECT_PICTURE);
             } else {
                 Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
             }
@@ -250,7 +256,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
                 intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
                 intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
-                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+                startActivityForResult(intent, REQUEST_TAKE_PICTURE);
             } else {
                 Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
             }
@@ -263,9 +269,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_CAMERA) {
-            // BEGIN_INCLUDE(permission_result)
-            // Received permission result for camera permission.
+        if (requestCode == REQUEST_TAKE_PICTURE_PERMISSION) {
             Log.i(TAG, "Received response for Camera permission request.");
 
             // Check if the only required permission has been granted
@@ -277,20 +281,30 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 //Permission not granted
                 Toast.makeText(DetailsActivity.this, "You need to grant camera permission to use camera", Toast.LENGTH_LONG).show();
             }
+        } else if (requestCode == REQUEST_SELECT_PICTURE_PERMISSION) {
+            Log.i(TAG, "Received response for select image permission request.");
+
+            // Check if the only required permission has been granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Write permission has been granted, preview can be displayed
+                selectPicture();
+            } else {
+                //Permission not granted
+                Toast.makeText(DetailsActivity.this, "You need to grant write external storage permission", Toast.LENGTH_LONG).show();
+            }
 
         }
     }
 
     /**
-     * Method to check permission
+     * Method to check permission before taking a picture
      */
-    void checkCameraPermission() {
-        boolean isGranted;
+    void takePictureWithPermissionCheck() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
                 // Camera permission has not been granted.
-                requestCameraPermission();
+                requestPermissionAndTakePicture();
             } else {
                 takePicture();
             }
@@ -299,6 +313,22 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
+    /**
+     * Method to check permission before selecting a picture
+     */
+    void selectPictureWithPermissionCheck() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Write permission has not been granted.
+                requestPermissionAndSelectPicture();
+            } else {
+                selectPicture();
+            }
+        } else {
+            selectPicture();
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -308,7 +338,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         try {
             File storagePictureFile = getStoredMediaFile();
-            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (requestCode == REQUEST_TAKE_PICTURE) {
                 // die Kamera-App sollte auf temporären Cache-Speicher schreiben, wir laden das Bild von
                 // dort und schreiben es in Standard-Größe in den permanenten Speicher
                 File cameraRawPictureFile = getCameraMediaFile();
@@ -335,7 +365,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 saveScaledBitmap(storagePictureFile, scaledScreen);
                 // temp file begone!
                 cameraRawPictureFile.delete();
-            } else if (requestCode == SELECT_PICTURE) {
+            } else if (requestCode == REQUEST_SELECT_PICTURE) {
                 Uri selectedImageUri = data.getData();
                 Bitmap bitmap = getBitmapFromUri(selectedImageUri);
 
