@@ -9,9 +9,6 @@
         app:itemIconTint="@color/colorActions"
         app:itemTextColor="@color/colorActions"
         app:showAsAction="ifRoom" />
-
-    <!-- menu group -->
-    <group android:id="@+id/group_depencies">
     <item
         android:id="@+id/timetable"
         android:orderInCategory="100"
@@ -20,6 +17,10 @@
         app:itemIconTint="@color/colorActions"
         app:itemTextColor="@color/colorActions"
         app:showAsAction="ifRoom" />
+
+    <!-- menu group -->
+    <group android:id="@+id/group_depencies">
+
     <item
         android:id="@+id/photo_upload"
         android:orderInCategory="300"
