@@ -21,7 +21,7 @@ public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
             + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
@@ -29,7 +29,10 @@ public class BahnhofsDbAdapter {
             + Constants.DB_JSON_CONSTANTS.KEY_TITLE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_LAT + " REAL, "
             + Constants.DB_JSON_CONSTANTS.KEY_LON + " REAL, "
-            + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_LICENSE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_DS100 + " TEXT)";
     private static final String CREATE_STATEMENT_2 = "CREATE INDEX " + DATABASE_TABLE + "_IDX "
             + "ON " + DATABASE_TABLE + "(" + Constants.DB_JSON_CONSTANTS.KEY_ID + ")";
@@ -80,7 +83,10 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_TITLE, bahnhof.getTitle());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LAT, bahnhof.getLat());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LON, bahnhof.getLon());
-                values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG, bahnhof.getPhotoflag());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL, bahnhof.getPhotoUrl());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER, bahnhof.getPhotographer());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL, bahnhof.getPhotographerUrl());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_LICENSE, bahnhof.getLicense());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_DS100, bahnhof.getDS100());
 
                 db.insert(DATABASE_TABLE, null, values);
@@ -125,13 +131,11 @@ public class BahnhofsDbAdapter {
     }
 
     public Cursor getStationsList(boolean withPhoto) {
-        //Open connection to read only
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
         String selectQuery = "SELECT rowid _id, " +
                 KEY_ID + ", " +
                 Constants.DB_JSON_CONSTANTS.KEY_TITLE +
                 " FROM " + DATABASE_TABLE
-                + " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " IS " + (withPhoto ? "NOT" : "") + " NULL"
+                + " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (withPhoto ? "NOT" : "") + " NULL"
                 + " ORDER BY " +
                 Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc";
         Log.d(TAG, selectQuery.toString());
@@ -187,7 +191,7 @@ public class BahnhofsDbAdapter {
         String selectQuery = String.format(
                 "%s  LIKE ? AND %s IS %s NULL",
                 Constants.DB_JSON_CONSTANTS.KEY_TITLE,
-                Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG,
+                Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL,
                 (withPhoto ? "NOT" : "")
         );
 
@@ -242,14 +246,20 @@ public class BahnhofsDbAdapter {
         int bahnhofsnr = cursor.getInt(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ID));
         Double lon = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LON));
         Double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LAT));
-        String photoflag = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG));
+        String photoUrl = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL));
+        String photographer = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER));
+        String photographerUrl = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL));
+        String license = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LICENSE));
         String ds100 = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_DS100));
         Bahnhof bahnhof = new Bahnhof();
         bahnhof.setTitle(title);
         bahnhof.setId(bahnhofsnr);
         bahnhof.setLat(lat);
         bahnhof.setLon(lon);
-        bahnhof.setPhotoflag(photoflag);
+        bahnhof.setPhotoUrl(photoUrl);
+        bahnhof.setPhotographer(photographer);
+        bahnhof.setPhotographerUrl(photographerUrl);
+        bahnhof.setLicense(license);
         bahnhof.setDS100(ds100);
         return bahnhof;
     }
@@ -303,10 +313,12 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    public List<Bahnhof> getAllBahnhoefe(boolean withPhoto) {
-        List<Bahnhof> bahnhofList = new ArrayList<Bahnhof>();
-        String selectQuery = "SELECT * FROM " + DATABASE_TABLE
-                + " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " IS " + (withPhoto ? "NOT" : "") + " NULL";
+    public List<Bahnhof> getAllBahnhoefe(Boolean withPhoto) {
+        List<Bahnhof> bahnhofList = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + DATABASE_TABLE;
+        if (withPhoto != null) {
+            selectQuery += " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (withPhoto ? "NOT" : "") + " NULL";
+        }
         Log.d(TAG, selectQuery.toString());
         Cursor cursor = db.rawQuery(selectQuery, null);
 
@@ -326,33 +338,31 @@ public class BahnhofsDbAdapter {
         return bahnhofList;
     }
 
-    public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, boolean withPhoto) {
+    public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, Boolean withPhoto) {
         double lat = position.latitude;
         double lng = position.longitude;
-        List<Bahnhof> bahnhofList = new ArrayList<Bahnhof>();
+        List<Bahnhof> bahnhofList = new ArrayList<>();
         // Select All Query with rectangle - might be later change with it
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE + " where " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " < " + (lat + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " > " + (lat - 0.5)
-                + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " < " + (lng + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " > " + (lng - 0.5)
-                + " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " IS " + (withPhoto ? "NOT" : "") + " NULL";
+                + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " < " + (lng + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " > " + (lng - 0.5);
+        if (withPhoto != null) {
+            selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (withPhoto ? "NOT" : "") + " NULL";
+        }
 
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
                 Bahnhof bahnhof = createBahnhofFromCursor(cursor);
-                // Adding bahnhof to list
                 bahnhofList.add(bahnhof);
 
             } while (cursor.moveToNext());
         }
         cursor.close();
 
-        // returns bahnhof list
         return bahnhofList;
     }
 
-    // Getting All Countries
     public List<Country> getAllCountries() {
         List<Country> countryList = new ArrayList<Country>();
         // Select All Query without any baseLocationValues (myCurrentLocation)
@@ -374,7 +384,6 @@ public class BahnhofsDbAdapter {
         }
         cursor.close();
 
-        // return country list
         return countryList;
     }
 

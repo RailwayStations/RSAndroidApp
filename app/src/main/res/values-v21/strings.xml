@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="maps_activity">Bahnhöfe ohne Photos</string>
+    <string name="maps_activity">Bahnhofskarte</string>
     <string name="no_location_detected">Keine Position gefunden</string>
     <string name="latitude_label">Latitude</string>
     <string name="bahnhofname">BahnhofName</string>

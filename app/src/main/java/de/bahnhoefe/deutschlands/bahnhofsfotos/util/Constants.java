@@ -9,8 +9,10 @@ public class Constants {
         public static final String KEY_TITLE = "title";
         public static final String KEY_LAT = "lat";
         public static final String KEY_LON = "lon";
-        public static final String KEY_PHOTOFLAG = "photoflag";
+        public static final String KEY_PHOTO_URL = "photoUrl";
         public static final String KEY_PHOTOGRAPHER = "photographer";
+        public static final String KEY_PHOTOGRAPHER_URL = "photographerUrl";
+        public static final String KEY_LICENSE = "license";
         public static final String KEY_DS100 = "DS100";
 
         //Länderkonstanten

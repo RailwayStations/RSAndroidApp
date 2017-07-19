@@ -36,7 +36,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     public void notifyUser() {
         if (ConnectionUtil.checkInternetConnection(context)) {
             fetchTask = new BahnhofsFotoFetchTask(this, context);
-            fetchTask.execute(notificationStation.getId());
+            fetchTask.execute(notificationStation);
         }
     }
 
@@ -57,7 +57,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
 
         NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
         if (fetchTask != null) {
-            bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(fetchTask.getLicense());
+            bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(notificationStation.getLicense());
         }
 
         Notification fullImagePage = new NotificationCompat.Builder(context)

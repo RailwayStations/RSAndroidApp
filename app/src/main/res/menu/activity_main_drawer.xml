@@ -23,13 +23,9 @@
             android:icon="@drawable/ic_photo_gray_24px"
             android:title="@string/menu_title_your_own_station_photos" />
         <item
-            android:id="@+id/nav_stations_without_photo"
-            android:icon="@drawable/ic_near_me_gray_24px"
-            android:title="@string/menu_title_stations_without_photo" />
-        <item
-            android:id="@+id/nav_all_stations_without_photo"
+            android:id="@+id/nav_stations_map"
             android:icon="@drawable/ic_map_gray_24px"
-            android:title="@string/menu_title_all_stations_without_photo" />
+            android:title="@string/menu_title_stations_map" />
     </group>
 
     <item android:title="@string/information">

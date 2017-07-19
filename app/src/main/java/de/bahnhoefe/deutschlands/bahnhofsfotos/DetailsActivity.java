@@ -166,10 +166,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
 
-            if (bahnhof.getPhotoflag() != null) {
+            if (bahnhof.hasPhoto()) {
                 if (ConnectionUtil.checkInternetConnection(this)) {
                     fetchTask = new BahnhofsFotoFetchTask(this, getApplicationContext());
-                    fetchTask.execute(bahnhof.getId());
+                    fetchTask.execute(bahnhof);
                 }
             } else {
                 takePictureButton.setVisibility(View.VISIBLE);
@@ -224,7 +224,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void selectPicture() {
-        if (bahnhof.getPhotoflag() != null) {
+        if (bahnhof.hasPhoto()) {
             return;
         }
 
@@ -244,7 +244,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void takePicture() {
-        if (bahnhof.getPhotoflag() != null) {
+        if (bahnhof.hasPhoto()) {
             return;
         }
 
@@ -504,18 +504,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        String navLocation = "";
         switch (item.getItemId()) {
             case R.id.nav_to_station:
                 startNavigation(DetailsActivity.this);
-                //startNavigation(DetailsActivity.this);
                 break;
             case R.id.timetable:
                 startActivity(new Timetable().createTimetableIntent(country, bahnhof));
                 break;
             case R.id.send_email:
                 Intent emailIntent = createFotoSendIntent();
-                //emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
                 emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{country.getEmail()});
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + licence
@@ -676,11 +673,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         // Lizenzinfo aufbauen und einblenden
         licenseTagView.setVisibility(View.VISIBLE);
-        if (fetchTask != null && fetchTask.getLicense() != null) {
+        if (bahnhof.getLicense() != null) {
             licenseTagView.setText(
                     String.format(
                             getText(R.string.license_tag).toString(),
-                            fetchTask.getAuthor())
+                            bahnhof.getPhotographer())
             );
             licenseTagView.setOnClickListener(
                     new View.OnClickListener() {
@@ -688,7 +685,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         public void onClick(View v) {
                             // Build an intent for an action to view the author
                             Intent mapIntent = new Intent(Intent.ACTION_VIEW);
-                            Uri authorUri = fetchTask.getAuthorReference();
+                            Uri authorUri = Uri.parse(bahnhof.getPhotographerUrl());
                             mapIntent.setData(authorUri);
                             startActivity(mapIntent);
                         }

@@ -21,8 +21,4 @@
         android:title="@string/countrySelection"
         android:icon="@drawable/ic_language_white_24px"
         app:showAsAction="collapseActionView|ifRoom" />
-    <!--<item
-        android:id="@+id/locationUpates"
-        android:title="@string/locationUpdates"
-        app:showAsAction="never" />-->
 </menu>

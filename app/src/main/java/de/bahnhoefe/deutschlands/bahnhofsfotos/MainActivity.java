@@ -130,7 +130,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!lastUpdateDate.equals("")) {
             tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
         } else {
-            disableNavItem();
             tvUpdate.setText(R.string.no_stations_in_database);
         }
 
@@ -333,11 +332,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_your_own_station_photos) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_stations_without_photo) {
+        } else if (id == R.id.nav_stations_map) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_all_stations_without_photo) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsAllActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_web_site) {
             Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, RailwayStationsActivity.class);
@@ -360,24 +356,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private void enableNavItem() {
-        // after loading stations enable menu to start MapsActivity
-        Menu menuNav = navigationView.getMenu();
-        MenuItem nav_item2 = menuNav.findItem(R.id.nav_stations_without_photo);
-        MenuItem nav_item3 = menuNav.findItem(R.id.nav_all_stations_without_photo);
-        nav_item3.setEnabled(true);
-        nav_item2.setEnabled(true);
-    }
-
-    private void disableNavItem() {
-        // if there are no stations available, disable the menu to start MapsActivity
-        Menu menuNav = navigationView.getMenu();
-        MenuItem nav_item2 = menuNav.findItem(R.id.nav_stations_without_photo);
-        MenuItem nav_item3 = menuNav.findItem(R.id.nav_all_stations_without_photo);
-        nav_item3.setEnabled(false);
-        nav_item2.setEnabled(false);
     }
 
     public class JSONTask extends AsyncTask<Void, String, List<Bahnhof>> {
@@ -452,8 +430,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
                         String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
                         String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
-                        boolean noPhoto = jsonObj.isNull(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER);
-                        String ds100 = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_DS100);
+                        String photoUrl = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL);
+                        String photographer = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER);
+                        String photographerUrl = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL);
+                        String license = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_LICENSE);
+                        String ds100 = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_DS100);
 
                         Bahnhof bahnhof = new Bahnhof();
                         bahnhof.setTitle(title);
@@ -461,7 +442,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         bahnhof.setLat(Float.parseFloat(lat));
                         bahnhof.setLon(Float.parseFloat(lon));
                         bahnhof.setDatum(aktuellesDatum);
-                        bahnhof.setPhotoflag(noPhoto ? null : "x");
+                        bahnhof.setPhotoUrl(photoUrl);
+                        bahnhof.setPhotographer(photographer);
+                        bahnhof.setPhotographerUrl(photographerUrl);
+                        bahnhof.setLicense(license);
                         bahnhof.setDS100(ds100);
 
                         bahnhoefe.add(bahnhof);
@@ -490,6 +474,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return bahnhoefe;
         }
 
+        private String getNullableString(JSONObject jsonObj, String name) {
+            if (jsonObj.isNull(name)) {
+                return null;
+            }
+            return jsonObj.optString(name, null);
+        }
+
         @Override
         protected void onPostExecute(List<Bahnhof> result) {
             if (MainActivity.this.isDestroyed()) {
@@ -512,7 +503,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 customAdapter.swapCursor(dbAdapter.getStationsList(false));
             }
 
-            enableNavItem();
             unlockScreenOrientation();
         }
 
@@ -640,7 +630,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         handleGalleryNavItem();
         if (lastUpdateDate.equals("")) {
-            disableNavItem();
             runMultipleAsyncTask();
         }
 

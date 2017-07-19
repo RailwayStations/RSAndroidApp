@@ -242,7 +242,7 @@ public abstract class NearbyBahnhofNotificationManager {
             longText = String.format(longTextTemplate,
                     notificationStation.getTitle(),
                     notificationDistance,
-                    (notificationStation.getPhotoflag() != null ?
+                    (notificationStation.hasPhoto() ?
                             context.getString(R.string.photo_exists) :
                             ""));
 
