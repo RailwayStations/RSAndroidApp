@@ -65,6 +65,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
 
@@ -509,7 +510,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 startNavigation(DetailsActivity.this);
                 //startNavigation(DetailsActivity.this);
                 break;
-            // action with ID action_settings was selected
+            case R.id.timetable:
+                startActivity(new Timetable().createTimetableIntent(country, bahnhof));
+                break;
             case R.id.send_email:
                 Intent emailIntent = createFotoSendIntent();
                 //emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "bahnhofsfotos@deutschlands-bahnhoefe.de" });
