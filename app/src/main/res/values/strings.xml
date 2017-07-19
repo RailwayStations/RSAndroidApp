@@ -204,5 +204,7 @@
     <string name="missing_linking">Bitte gib an, ob Du verlinkt werden möchtest</string>
     <string name="missing_link">Gib bitte einen gültigen Link an, wenn Du verlinkt werden möchtest</string>
     <string name="upload_conflict">Dein Foto wurde hochgeladen, es liegt aber möglicherweise ein Konflikt vor.</string>
+    <string name="select_photo">Foto auswählen</string>
+    <string name="station_photo">Bahnhofsfoto</string>
 
 </resources>

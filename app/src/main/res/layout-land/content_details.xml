@@ -28,10 +28,10 @@
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_stations_with_photo"
             android:scaleType="centerCrop"
-            tools:scaleType="centerCrop" />
+            tools:scaleType="centerCrop"
+            android:contentDescription="@string/station_photo"/>
 
         <TextView
-            android:text="TextView"
             android:id="@+id/tvbahnhofname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_alignRight="@id/imageview"
+            android:layout_alignEnd="@id/imageview"
             android:autoLink="web"
             android:linksClickable="true"
             android:clickable="true"
@@ -58,14 +58,29 @@
             android:padding="8dp" />
 
 
-        <ImageButton
-            android:id="@+id/button_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+        <LinearLayout
             android:layout_above="@id/license_tag"
-            android:src="@drawable/ic_photo_camera_white_48px"
-            android:backgroundTint="@android:color/transparent" />
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/button_take_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_photo_camera_red_48px"
+                android:background="@null"
+                android:contentDescription="@string/take_photo"/>
+
+            <ImageButton
+                android:id="@+id/button_select_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_photo_red_48px"
+                android:background="@null"
+                android:contentDescription="@string/select_photo"/>
+        </LinearLayout>
 
     </RelativeLayout>
 

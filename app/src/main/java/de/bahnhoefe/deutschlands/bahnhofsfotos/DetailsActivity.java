@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -43,13 +44,17 @@ import android.widget.Toast;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
+import static android.content.Intent.createChooser;
+import static android.graphics.Color.WHITE;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
@@ -61,18 +66,21 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 
-import static android.content.Intent.createChooser;
-import static android.graphics.Color.WHITE;
-
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
+
     // Names of Extras that this class reacts to
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
     public static final String EXTRA_BAHNHOF = "bahnhof";
-    private static final String TAG = DetailsActivity.class.getSimpleName();
     public static final int STORED_FOTO_WIDTH = 1920;
     public static final int STORED_FOTO_QUALITY = 95;
 
+    private static final String TAG = DetailsActivity.class.getSimpleName();
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int SELECT_PICTURE = 2;
+    private static final int alpha = 128;
+
     private ImageButton takePictureButton;
+    private ImageButton selectPictureButton;
     private ImageView imageView;
     private Bahnhof bahnhof;
     private Country country;
@@ -80,8 +88,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private boolean localFotoUsed = false;
     private static final String DEFAULT = "default";
     private String licence, photoOwner, linking, link, nickname, email, token, countryShortCode;
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int alpha = 128;
+
 
     /**
      * Id to identify a camera permission request.
@@ -115,8 +122,24 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 onPictureClicked();
             }
         });
-        takePictureButton = (ImageButton) findViewById(R.id.button_image);
-        enablePictureButton(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+        takePictureButton = (ImageButton) findViewById(R.id.button_take_picture);
+        takePictureButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        checkCameraPermission();
+                    }
+                }
+        );
+        selectPictureButton = (ImageButton) findViewById(R.id.button_select_picture);
+        selectPictureButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        selectPicture();
+                    }
+                }
+        );
 
         licenseTagView = (TextView) findViewById(R.id.license_tag);
         licenseTagView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -125,6 +148,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         imageView.setVisibility(View.INVISIBLE);
         licenseTagView.setVisibility(View.INVISIBLE);
         takePictureButton.setVisibility(View.INVISIBLE);
+        selectPictureButton.setVisibility(View.INVISIBLE);
 
         fullscreen = false;
 
@@ -150,6 +174,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
             } else {
                 takePictureButton.setVisibility(View.VISIBLE);
+                selectPictureButton.setVisibility(View.VISIBLE);
                 setLocalBitmap();
             }
         }
@@ -178,33 +203,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         token = sharedPreferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
     }
 
-    private void enablePictureButton(boolean enabled) {
-        // first, the button should look enabled or disabled
-        takePictureButton.setImageAlpha(enabled ? 255 : 100);
-        // then we associate clickListener which either does work or displays a helpful message
-        if (enabled) {
-            takePictureButton.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            checkCameraPermission();
-                        }
-                    }
-            );
-        } else {
-            takePictureButton.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Toast.makeText(v.getContext(), R.string.picture_landscape_only, Toast.LENGTH_LONG)
-                                    .show();
-                        }
-                    }
-            );
-
-        }
-    }
-
     private void checkMyData() {
         MyDataDialogFragment myDataDialog = new MyDataDialogFragment();
         myDataDialog.show(getFragmentManager(), "mydata_dialog");
@@ -216,6 +214,26 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private void requestCameraPermission() {
         // Camera and Write permission has not been granted yet. Request it directly.
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA);
+    }
+
+    public void selectPicture() {
+        if (bahnhof.getPhotoflag() != null) {
+            return;
+        }
+
+        if (isMyDataIncomplete()) {
+            checkMyData();
+        } else {
+            File file = getCameraMediaFile();
+            if (file != null) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
+            } else {
+                Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     public void takePicture() {
@@ -254,7 +272,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 // Camera and Write permission has been granted, preview can be displayed
-                enablePictureButton(true);
                 takePicture();
             } else {
                 //Permission not granted
@@ -285,12 +302,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            try {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        try {
+            File storagePictureFile = getStoredMediaFile();
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 // die Kamera-App sollte auf temporären Cache-Speicher schreiben, wir laden das Bild von
                 // dort und schreiben es in Standard-Größe in den permanenten Speicher
                 File cameraRawPictureFile = getCameraMediaFile();
-                File storagePictureFile = getStoredMediaFile();
                 if (cameraRawPictureFile == null || storagePictureFile == null) {
                     throw new RuntimeException("Fotodatei nicht vorhanden");
                 }
@@ -310,25 +331,51 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Bitmap scaledScreen = BitmapFactory.decodeFile(
                         cameraRawPictureFile.getPath(),
                         options);
-                if (scaledScreen == null) {
-                    throw new RuntimeException("Skalieren des Fotos fehlgeschlagen");
-                }
-                Log.d(TAG, "img width " + scaledScreen.getWidth());
-                Log.d(TAG, "img height " + scaledScreen.getHeight());
 
-                scaledScreen.compress(Bitmap.CompressFormat.JPEG, STORED_FOTO_QUALITY, new FileOutputStream(storagePictureFile));
+                saveScaledBitmap(storagePictureFile, scaledScreen);
                 // temp file begone!
                 cameraRawPictureFile.delete();
-            } catch (Exception e) {
-                Log.e(TAG, "Error processing photo", e);
-                Toast.makeText(getApplicationContext(), "Fehler beim Verarbeiten des Fotos: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
+            } else if (requestCode == SELECT_PICTURE) {
+                Uri selectedImageUri = data.getData();
+                Bitmap bitmap = getBitmapFromUri(selectedImageUri);
 
-            // also provozieren wir das Laden des Bildes von dort
-            setLocalBitmap();
+                int sampling = bitmap.getWidth() / STORED_FOTO_WIDTH;
+                Bitmap scaledScreen = bitmap;
+                if (sampling > 1) {
+                    scaledScreen = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / sampling, bitmap.getHeight() / sampling, false);
+                }
+
+                saveScaledBitmap(storagePictureFile, scaledScreen);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error processing photo", e);
+            Toast.makeText(getApplicationContext(), "Fehler beim Verarbeiten des Fotos: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
+    private void saveScaledBitmap(File storagePictureFile, Bitmap scaledScreen) throws FileNotFoundException {
+        if (scaledScreen == null) {
+            throw new RuntimeException("Skalieren des Fotos fehlgeschlagen");
+        }
+        Log.d(TAG, "img width " + scaledScreen.getWidth());
+        Log.d(TAG, "img height " + scaledScreen.getHeight());
+        if (scaledScreen.getWidth() < scaledScreen.getHeight()) {
+            Toast.makeText(getApplicationContext(), "Foto muss im Querformat sein!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        scaledScreen.compress(Bitmap.CompressFormat.JPEG, STORED_FOTO_QUALITY, new FileOutputStream(storagePictureFile));
+        setLocalBitmap();
+    }
+
+    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+        ParcelFileDescriptor parcelFileDescriptor =
+                getContentResolver().openFileDescriptor(uri, "r");
+        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+        Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+        parcelFileDescriptor.close();
+        return image;
+    }
 
     /**
      * Get the base directory for storing fotos
@@ -626,6 +673,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      */
     private void setLocalBitmap() {
         takePictureButton.setVisibility(View.VISIBLE);
+        selectPictureButton.setVisibility(View.VISIBLE);
 
         Bitmap showBitmap = checkForLocalPhoto();
         if (showBitmap == null) {
@@ -634,7 +682,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // switch off image and license view until we actually have a foto
             imageView.setVisibility(View.INVISIBLE);
             licenseTagView.setVisibility(View.INVISIBLE);
-            return;
         } else {
             setBitmap(showBitmap);
         }
