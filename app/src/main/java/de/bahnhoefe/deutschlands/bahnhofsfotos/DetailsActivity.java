@@ -7,7 +7,6 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -89,8 +88,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Country country;
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
-    private static final String DEFAULT = "default";
-    private String licence, photoOwner, linking, link, nickname, email, token, countryShortCode;
+    private String license, photoOwner, linking, link, nickname, email, token, countryShortCode;
 
 
     private TextView licenseTagView;
@@ -98,13 +96,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private BahnhofsFotoFetchTask fetchTask;
     private ViewGroup detailsLayout;
     private boolean fullscreen;
+    private BaseApplication baseApplication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-        BaseApplication baseApplication = (BaseApplication) getApplication();
+        baseApplication = (BaseApplication) getApplication();
         BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
         countryShortCode = baseApplication.getCountryShortCode();
         country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
@@ -190,16 +189,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void readPreferences() {
-        // Load sharedPreferences for filling the E-Mail and variables for Filename to send
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-
-        licence = sharedPreferences.getString(getString(R.string.LICENCE), DEFAULT);
-        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER), DEFAULT);
-        linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
-        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
-        nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
-        email = sharedPreferences.getString(getString(R.string.EMAIL), DEFAULT);
-        token = sharedPreferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
+        license = baseApplication.getLicense();
+        photoOwner = baseApplication.getPhotoOwner();
+        linking = baseApplication.getLinking();
+        link = baseApplication.getPhotographerLink();
+        nickname = baseApplication.getNickname();
+        email = baseApplication.getEmail();
+        token = baseApplication.getUploadToken();
     }
 
     private void checkMyData() {
@@ -265,7 +261,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private boolean isMyDataIncomplete() {
-        return DEFAULT.equals(nickname) || TextUtils.isEmpty(nickname);
+        return TextUtils.isEmpty(nickname);
     }
 
     @Override
@@ -515,7 +511,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Intent emailIntent = createFotoSendIntent();
                 emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{country.getEmail()});
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
-                emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + licence
+                emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + license
                         + "\n selbst fotografiert: " + photoOwner
                         + "\n Nickname: " + nickname
                         + "\n Verlinken bitte mit: " + linking
@@ -524,7 +520,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 startActivity(Intent.createChooser(emailIntent, "Mail versenden"));
                 break;
             case R.id.photo_upload:
-                if (DEFAULT.equals(email) || DEFAULT.equals(token)) {
+                if (TextUtils.isEmpty(email) || TextUtils.isEmpty(token)) {
                     Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
                 } else {
                     if (ConnectionUtil.checkInternetConnection(this)) {

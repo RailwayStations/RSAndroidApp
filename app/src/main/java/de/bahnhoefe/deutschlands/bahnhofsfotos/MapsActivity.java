@@ -92,7 +92,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
-        nickname = baseApplication.getPreferences().getString(getString(R.string.NICKNAME), null);
+        nickname = baseApplication.getNickname();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()

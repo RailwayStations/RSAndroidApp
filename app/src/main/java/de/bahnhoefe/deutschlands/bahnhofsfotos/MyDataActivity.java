@@ -1,18 +1,15 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -29,15 +26,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MyDataActivity extends AppCompatActivity {
-    private static final String DEFAULT = "N/A";
     private final String TAG = getClass().getSimpleName();
     private EditText etNickname, etLink, etEmail, etUploadToken;
     private RadioGroup rgLicence, rgPhotoOwner, rgLinking;
-    private RadioButton rbLinkingXing, rbLinkingTwitter, rbLinkingSnapchat, rbLinkingInstagram, rbLinkingWebpage, rbLinkingNo;
-    private RadioButton rbLicenceCC0, rbLicenceCC4;
-    private RadioButton rbPhotoOwnerYes, rbPhotoOwnerNo;
     private String licence, photoOwner, nickname, email, link, linking, uploadToken;
-    private Button btCommit, btClear;
+    private BaseApplication baseApplication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,79 +38,62 @@ public class MyDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_mydata);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.title_activity_my_data);
+        baseApplication = (BaseApplication) getApplication();
 
         etNickname = (EditText) findViewById(R.id.etNickname);
         etUploadToken = (EditText) findViewById(R.id.etUploadToken);
         etEmail = (EditText) findViewById(R.id.etEmail);
         etLink = (EditText) findViewById(R.id.etLinking);
-        btCommit = (Button) findViewById(R.id.bt_mydata_commit);
-        btClear = (Button) findViewById(R.id.bt_mydata_clear);
 
         rgLicence = (RadioGroup) findViewById(R.id.rgLicence);
         rgPhotoOwner = (RadioGroup) findViewById(R.id.rgOwnPhoto);
         rgLinking = (RadioGroup) findViewById(R.id.rgLinking);
 
-        rbLinkingXing = (RadioButton) findViewById(R.id.rbLinkingXing);
-        rbLinkingTwitter = (RadioButton) findViewById(R.id.rbLinkingTwitter);
-        rbLinkingSnapchat = (RadioButton) findViewById(R.id.rbLinkingSnapchat);
-        rbLinkingInstagram = (RadioButton) findViewById(R.id.rbLinkingInstagram);
-        rbLinkingWebpage = (RadioButton) findViewById(R.id.rbLinkingWebpage);
-        rbLinkingNo = (RadioButton) findViewById(R.id.rbLinkingNo);
-
-        rbLicenceCC0 = (RadioButton) findViewById(R.id.rbCC0);
-        rbLicenceCC4 = (RadioButton) findViewById(R.id.rbCC40);
-
-        rbPhotoOwnerNo = (RadioButton) findViewById(R.id.rbOwnPhotoNo);
-        rbPhotoOwnerYes = (RadioButton) findViewById(R.id.rbOwnPhotoYes);
-
-        SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-
-        licence = sharedPreferences.getString(getString(R.string.LICENCE), DEFAULT);
+        licence = baseApplication.getLicense();
         if (licence.equals("CC0")) {
             rgLicence.check(R.id.rbCC0);
         } else if (licence.equals("CC4")) {
             rgLicence.check(R.id.rbCC40);
         }
-        photoOwner = sharedPreferences.getString(getString(R.string.PHOTO_OWNER), DEFAULT);
+        photoOwner = baseApplication.getPhotoOwner();
         if (photoOwner.equals("YES")) {
             rgPhotoOwner.check(R.id.rbOwnPhotoYes);
         } else if (photoOwner.equals("NO")) {
             rgPhotoOwner.check(R.id.rbOwnPhotoNo);
         }
-        linking = sharedPreferences.getString(getString(R.string.LINKING), DEFAULT);
-        if (linking.equals("XING")) {
-            rgLinking.check(R.id.rbLinkingXing);
-        } else if (linking.equals("SNAPCHAT")) {
-            rgLinking.check(R.id.rbLinkingSnapchat);
-        } else if (linking.equals("TWITTER")) {
-            rgLinking.check(R.id.rbLinkingTwitter);
-        } else if (linking.equals("WEBPAGE")) {
-            rgLinking.check(R.id.rbLinkingWebpage);
-        } else if (linking.equals("INSTAGRAM")) {
-            rgLinking.check(R.id.rbLinkingInstagram);
-        } else if (linking.equals("NO")) {
-            rgLinking.check(R.id.rbLinkingNo);
+        linking = baseApplication.getLinking();
+        switch (linking) {
+            case "XING":
+                rgLinking.check(R.id.rbLinkingXing);
+                break;
+            case "SNAPCHAT":
+                rgLinking.check(R.id.rbLinkingSnapchat);
+                break;
+            case "TWITTER":
+                rgLinking.check(R.id.rbLinkingTwitter);
+                break;
+            case "WEBPAGE":
+                rgLinking.check(R.id.rbLinkingWebpage);
+                break;
+            case "INSTAGRAM":
+                rgLinking.check(R.id.rbLinkingInstagram);
+                break;
+            case "NO":
+                rgLinking.check(R.id.rbLinkingNo);
+                break;
         }
 
-        link = sharedPreferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
-        nickname = sharedPreferences.getString(getString(R.string.NICKNAME), DEFAULT);
+        link = baseApplication.getPhotographerLink();
+        etLink.setText(link);
 
-        if (link.equals(DEFAULT) || nickname.equals(DEFAULT)) {
-            Toast.makeText(this, "Keine Daten vorhanden", Toast.LENGTH_LONG).show();
-        } else {
-            etNickname.setText(nickname);
-            etLink.setText(link);
-        }
+        nickname = baseApplication.getNickname();
+        etNickname.setText(nickname);
 
-        email = sharedPreferences.getString(getString(R.string.EMAIL), DEFAULT);
-        if (!DEFAULT.equals(email)) {
-            etEmail.setText(email);
-        }
+        email = baseApplication.getEmail();
+        etEmail.setText(email);
 
-        uploadToken = sharedPreferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
-        if (!DEFAULT.equals(uploadToken)) {
-            etUploadToken.setText(uploadToken);
-        }
+        uploadToken = baseApplication.getUploadToken();
+        etUploadToken.setText(uploadToken);
 
         receiveUploadToken(getIntent());
     }
@@ -201,40 +177,39 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void saveSettings(View view) {
-        SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(getString(R.string.LICENCE), licence);
-        editor.putString(getString(R.string.PHOTO_OWNER), photoOwner);
-        editor.putString(getString(R.string.LINKING), linking);
-        editor.putString(getString(R.string.LINK_TO_PHOTOGRAPHER), etLink.getText().toString().trim());
-        editor.putString(getString(R.string.NICKNAME), etNickname.getText().toString().trim());
-        editor.putString(getString(R.string.EMAIL), etEmail.getText().toString().trim());
-        editor.putString(getString(R.string.UPLOAD_TOKEN), etUploadToken.getText().toString().trim());
-        editor.apply();
+        baseApplication.setLicense(licence);
+        baseApplication.setPhotoOwner(photoOwner);
+        baseApplication.setLinking(linking);
+        baseApplication.setPhotographerLink(etLink.getText().toString().trim());
+        baseApplication.setNickname(etNickname.getText().toString().trim());
+        baseApplication.setEmail(etEmail.getText().toString().trim());
+        baseApplication.setUploadToken(etUploadToken.getText().toString().trim());
         Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
     }
 
     public void clearSettings(View viewButtonClear) {
-        SharedPreferences sharedPreferences = MyDataActivity.this.getSharedPreferences(getString(R.string.PREF_FILE), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
+        baseApplication.setLicense(null);
+        baseApplication.setPhotoOwner(null);
+        baseApplication.setLinking(null);
+        baseApplication.setPhotographerLink(null);
+        baseApplication.setNickname(null);
+        baseApplication.setEmail(null);
+        baseApplication.setUploadToken(null);
         Toast.makeText(this, R.string.preferences_cleared, Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(MyDataActivity.this, MainActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
     public boolean isValid() {
-        if (DEFAULT.equals(licence)) {
+        if (TextUtils.isEmpty(licence)) {
             new SimpleDialogs().confirm(this, R.string.missing_licence);
             return false;
         }
-        if (DEFAULT.equals(photoOwner)) {
+        if (TextUtils.isEmpty(photoOwner)) {
             new SimpleDialogs().confirm(this, R.string.missing_photoOwner);
             return false;
         }
@@ -246,7 +221,7 @@ public class MyDataActivity extends AppCompatActivity {
             new SimpleDialogs().confirm(this, R.string.missing_email_address);
             return false;
         }
-        if (DEFAULT.equals(linking)) {
+        if (TextUtils.isEmpty(linking)) {
             new SimpleDialogs().confirm(this, R.string.missing_linking);
             return false;
         }
@@ -361,8 +336,6 @@ public class MyDataActivity extends AppCompatActivity {
         protected void onPreExecute() {
             progressDialog = new ProgressDialog(MyDataActivity.this);
             progressDialog.setIndeterminate(false);
-
-            // show it
             progressDialog.show();
         }
 
@@ -370,7 +343,6 @@ public class MyDataActivity extends AppCompatActivity {
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             progressDialog.setMessage("Sende Daten ... " + values[0]);
-
         }
 
     }

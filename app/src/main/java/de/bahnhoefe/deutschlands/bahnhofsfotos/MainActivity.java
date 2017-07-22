@@ -116,9 +116,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View header = navigationView.getHeaderView(0);
         TextView tvUpdate = (TextView) header.findViewById(R.id.tvUpdate);
 
-        if (firstAppStart == false) {
-            Intent introSliderIntent = new Intent(MainActivity.this, IntroSliderActivity.class);
-            startActivity(introSliderIntent);
+        if (!firstAppStart) {
+            startActivity(new Intent(this, IntroSliderActivity.class));
             finish();
         }
 

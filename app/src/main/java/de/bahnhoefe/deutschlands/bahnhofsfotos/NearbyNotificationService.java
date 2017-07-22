@@ -55,9 +55,8 @@ public class NearbyNotificationService extends Service implements LocationListen
     private NotificationState notificationState = NotificationState.OFF;// we have only one notification
     private NearbyBahnhofNotificationManager notifiedStationManager;
     private GoogleApiClient googleApiClient = null;
+    private BaseApplication baseApplication = null;
     private BahnhofsDbAdapter bahnhofsDbAdapter = null;
-
-
 
     /**
      * The intent action to use to bind to this service's status interface.
@@ -73,7 +72,8 @@ public class NearbyNotificationService extends Service implements LocationListen
         super.onCreate();
         nearStations = new ArrayList<>(0); // no markers until we know where we are
         notifiedStationManager = null;
-        bahnhofsDbAdapter = ((BaseApplication)getApplication()).getDbAdapter();
+        baseApplication = (BaseApplication)getApplication();
+        bahnhofsDbAdapter = baseApplication.getDbAdapter();
 
         // Create an instance of GoogleAPIClient.
         if (googleApiClient == null) {
@@ -219,7 +219,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                 notifiedStationManager = null;
             }
         }
-        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance, bahnhofsDbAdapter);
+        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance, bahnhofsDbAdapter.fetchCountryByCountryShortCode(baseApplication.getCountryShortCode()));
         notifiedStationManager.notifyUser();
     }
 
