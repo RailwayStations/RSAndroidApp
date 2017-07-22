@@ -38,21 +38,16 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotific
 
 public class NearbyNotificationService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    // some useful constants
     private static final double MIN_NOTIFICATION_DISTANCE = 1.0d; // km
     private static final double EARTH_CIRCUMFERENCE = 40075.017d; // km at equator
     private static final int ONGOING_NOTIFICATION_ID = 0xdeadbeef;
-    public static final String ONLY_WITHOUT_PHOTO = "onlyWithoutPhoto";
 
     private final String TAG = NearbyNotificationService.class.getSimpleName();
     private List<Bahnhof> nearStations;
     private LatLng myPos = new LatLng(50d, 8d);
 
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
 
-    // Parameters for requests to the Location Api.
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000; // ms
-
-    private NotificationState notificationState = NotificationState.OFF;// we have only one notification
     private NearbyBahnhofNotificationManager notifiedStationManager;
     private GoogleApiClient googleApiClient = null;
     private BaseApplication baseApplication = null;
@@ -88,13 +83,6 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // set internal flag to avoid multi-starting
-        if (intent == null || intent.getBooleanExtra(ONLY_WITHOUT_PHOTO, true)) {
-            notificationState = NotificationState.ONLY_WITHOUT_PHOTO;
-        } else {
-            notificationState = NotificationState.ALL;
-        }
-
         cancelNotification();
 
         Log.i(TAG, "Received start command");
@@ -102,7 +90,6 @@ public class NearbyNotificationService extends Service implements LocationListen
         if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
         }
-        final int messageId = notificationState.onlyWithoutPhoto() ? R.string.nearby_notification_active_only_without_photo : R.string.nearby_notification_active;
 
         Intent resultIntent = new Intent(this, MainActivity.class);
         PendingIntent resultPendingIntent =
@@ -116,7 +103,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         // show a permanent notification to indicate that position detection is running
         final Notification ongoingNotification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
-                .setContentTitle(getString(messageId))
+                .setContentTitle(getString(R.string.nearby_notification_active))
                 .setOngoing(true)
                 .setLocalOnly(true)
                 .setContentIntent(resultPendingIntent)
@@ -138,7 +125,6 @@ public class NearbyNotificationService extends Service implements LocationListen
     public void onDestroy() {
         Log.i(TAG, "Service gets destroyed");
         try {
-            notificationState = NotificationState.OFF;
             cancelNotification();
             stopLocationUpdates();
         } catch (Throwable t) {
@@ -332,9 +318,6 @@ public class NearbyNotificationService extends Service implements LocationListen
      * is switched off or on with photo or on without photo.
      */
     public class StatusBinder extends Binder {
-        NotificationState getNotifictaionState() {
-            return NearbyNotificationService.this.notificationState;
-        }
     }
 
     /**
@@ -357,11 +340,8 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     private void readStations() {
         try {
-            Log.i(TAG, "Lese Bahnhoefe onlyWithoutPhoto=" + notificationState.onlyWithoutPhoto());
-            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
-            if (!notificationState.onlyWithoutPhoto()) {
-                nearStations.addAll(bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, true));
-            }
+            Log.i(TAG, "Lade nahegelegene Bahnhoefe");
+            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, baseApplication.getPhotoFilter());
         } catch (Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         }

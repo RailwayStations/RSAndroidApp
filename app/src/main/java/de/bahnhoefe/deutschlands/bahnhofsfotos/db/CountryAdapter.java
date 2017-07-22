@@ -14,10 +14,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
-/**
- * Created by android_oma on 08.12.16.
- */
-
 public class CountryAdapter extends CursorAdapter {
     private int selectedPosition = -1;
     private final LayoutInflater mInflater;
@@ -69,7 +65,6 @@ public class CountryAdapter extends CursorAdapter {
         return convertView;
     }
 
-
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View view = mInflater.inflate(R.layout.item_country, parent, false);
@@ -84,9 +79,7 @@ public class CountryAdapter extends CursorAdapter {
     // wird nicht benutzt, ersetzt durch getView()
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-
         BaseApplication baseApplication = BaseApplication.getInstance();
-
         String prefCountry = baseApplication.getCountryShortCode();
 
         //If you want to have zebra lines color effect uncomment below code
@@ -95,7 +88,6 @@ public class CountryAdapter extends CursorAdapter {
         } else {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
-
 
         CountryAdapter.ViewHolder holder = (CountryAdapter.ViewHolder) view.getTag();
         holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
@@ -111,10 +103,7 @@ public class CountryAdapter extends CursorAdapter {
             holder.checkCountry.setChecked(false);
         }
 
-
         holder.checkCountry.setOnClickListener(onStateChangedListener(holder.checkCountry, cursor.getPosition()));
-
-
     }
 
     private View.OnClickListener onStateChangedListener(final CheckBox checkCountry, final int position) {
@@ -128,17 +117,13 @@ public class CountryAdapter extends CursorAdapter {
                     selectedPosition = -1;
                 }
                 notifyDataSetChanged();
-
             }
         };
-
     }
-
 
     public void setSelectedIndex(int index) {
         selectedPosition = index;
     }
-
 
     private static class ViewHolder {
         CheckBox checkCountry;

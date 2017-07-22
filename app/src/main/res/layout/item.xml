@@ -9,8 +9,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity">
 
-
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,13 +20,23 @@
 
     <TextView
         android:layout_width="318dp"
-        android:layout_height="40dp"
+        android:layout_height="24dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/txtStationName"
         android:text="ten"
         android:textStyle="bold"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/hasPhoto"
+        android:src="@drawable/ic_photo_red_48px"
+        android:visibility="invisible"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
 

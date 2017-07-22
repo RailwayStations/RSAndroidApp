@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -36,19 +35,13 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +53,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import static java.lang.Integer.parseInt;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -68,10 +62,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final String DIALOG_TAG = "App Info Dialog";
     public final String TAG = "Bahnhoefe";
+    private BaseApplication baseApplication;
     private BahnhofsDbAdapter dbAdapter;
-    private String lastUpdateDate;
     private NavigationView navigationView;
-    private Boolean firstAppStart;
+    private MenuItem photoFilterMenuItem;
 
     private CustomAdapter customAdapter;
     private Cursor cursor;
@@ -88,9 +82,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        BaseApplication baseApplication = (BaseApplication) getApplication();
+        baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
-        firstAppStart = baseApplication.getFirstAppStart();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -116,23 +109,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View header = navigationView.getHeaderView(0);
         TextView tvUpdate = (TextView) header.findViewById(R.id.tvUpdate);
 
-        if (!firstAppStart) {
+        if (!baseApplication.getFirstAppStart()) {
             startActivity(new Intent(this, IntroSliderActivity.class));
             finish();
         }
 
-        try {
-            lastUpdateDate = loadUpdateDateFromFile("updatedate.txt");
-        } catch (Exception e) {
-            Log.e(TAG, "Cannot load last update", e);
-        }
-        if (!lastUpdateDate.equals("")) {
-            tvUpdate.setText("Letzte Aktualisierung am: " + lastUpdateDate);
+        long lastUpdateDate = baseApplication.getLastUpdate();
+        if (lastUpdateDate > 0) {
+            tvUpdate.setText("Letzte Aktualisierung am: " + SimpleDateFormat.getDateTimeInstance().format(lastUpdateDate));
         } else {
             tvUpdate.setText(R.string.no_stations_in_database);
         }
 
-        cursor = dbAdapter.getStationsList(false);
+        cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter());
         customAdapter = new CustomAdapter(this, cursor, 0);
         ListView listView = (ListView) findViewById(R.id.lstStations);
         assert listView != null;
@@ -152,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize FirebaseAuth
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-
         Intent searchIntent = getIntent();
         if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
             String query = searchIntent.getStringExtra(SearchManager.QUERY);
@@ -160,12 +148,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         bindToStatus();
-
     }
 
 
     private void handleGalleryNavItem() {
-
         File file = new File(Environment.getExternalStorageDirectory()
                 + File.separator + "Bahnhofsfotos");
         Log.d(TAG, file.toString());
@@ -176,7 +162,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (file.isDirectory()) {
             String[] files = file.list();
             if (files == null) {
-                //directory is empty
                 nav_itemGallery.setEnabled(false);
             } else {
                 nav_itemGallery.setEnabled(true);
@@ -205,14 +190,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView search = (SearchView) menu.findItem(R.id.search).getActionView();
         search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
-
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             @Override
             public boolean onQueryTextSubmit(String s) {
                 Log.d(TAG, "onQueryTextSubmit ");
                 try {
-                    cursor = dbAdapter.getBahnhofsListByKeyword(s, false);
+                    cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter());
                     if (cursor == null) {
                         Toast.makeText(MainActivity.this, "No records found!", Toast.LENGTH_LONG).show();
                     } else {
@@ -229,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextChange(String s) {
                 Log.d(TAG, "onQueryTextChange ");
                 try {
-                    cursor = dbAdapter.getBahnhofsListByKeyword(s, false);
+                    cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter());
                     if (cursor != null) {
                         customAdapter.swapCursor(cursor);
                     }
@@ -240,6 +224,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
         });
+
+        photoFilterMenuItem = menu.findItem(R.id.menu_toggle_photo);
+        photoFilterMenuItem.setIcon(baseApplication.getPhotoFilter().getIcon());
+
+        initNotificationMenuItem(menu.findItem(R.id.notify), false);
 
         return true;
     }
@@ -262,13 +251,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (statusBinder != null) {
-            MenuItem item = menu.findItem(R.id.notify);
-            NotificationState state = statusBinder.getNotifictaionState();
-            item.setChecked(state.isActive());
-            item.setIcon(state.getIconResourceId());
-
-        }
+        MenuItem item = menu.findItem(R.id.notify);
+        initNotificationMenuItem(item, statusBinder != null);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -281,71 +265,66 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.countrySelection) {
-            final Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, CountryActivity.class);
+            final Intent intent = new Intent(MainActivity.this, CountryActivity.class);
             startActivity(intent);
             item.setIcon(R.drawable.ic_language_white_24px);
+        } else if (id == R.id.menu_toggle_photo) {
+            PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
+            item.setIcon(photoFilter.getIcon());
+            baseApplication.setPhotoFilter(photoFilter);
+            cursor = dbAdapter.getStationsList(photoFilter);
+            customAdapter.swapCursor(cursor);
         } else if (id == R.id.notify) {
-            final Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, NearbyNotificationService.class);
-            NotificationState state = statusBinder != null ? statusBinder.getNotifictaionState() : NotificationState.OFF;
-            switch (state) {
-                case ALL:
-                    state = NotificationState.ONLY_WITHOUT_PHOTO;
-                    break;
-                case ONLY_WITHOUT_PHOTO:
-                    state = NotificationState.OFF;
-                    break;
-                case OFF:
-                    state = NotificationState.ALL;
-                    break;
-            }
-            if (state.isActive()) {
-                intent.putExtra(NearbyNotificationService.ONLY_WITHOUT_PHOTO, state.onlyWithoutPhoto());
+            final Intent intent = new Intent(MainActivity.this, NearbyNotificationService.class);
+            if (statusBinder == null) {
                 startService(intent);
                 bindToStatus();
             } else {
                 stopService(intent);
             }
-            item.setChecked(state.isActive());
-            item.setIcon(state.getIconResourceId());
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
+    private void initNotificationMenuItem(MenuItem item, boolean active) {
+        item.setChecked(active);
+        item.setIcon(active ? R.drawable.ic_notifications_active_white_24px : R.drawable.ic_notifications_off_white_24px);
+    }
+
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.nav_slideshow) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, IntroSliderActivity.class);
+            Intent intent = new Intent(MainActivity.this, IntroSliderActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_data) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MyDataActivity.class);
+            Intent intent = new Intent(MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
             runMultipleAsyncTask();
         } else if (id == R.id.nav_highscore) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, HighScoreActivity.class);
+            Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_own_station_photos) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, GalleryActivity.class);
+            Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_stations_map) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, MapsActivity.class);
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_web_site) {
-            Intent intent = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, RailwayStationsActivity.class);
+            Intent intent = new Intent(MainActivity.this, RailwayStationsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(), DIALOG_TAG);
         } else if (id == R.id.nav_user_register) {
             if (mFirebaseAuth.getCurrentUser() == null) {
-                Intent intentSignIn = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, SignInActivity.class);
+                Intent intentSignIn = new Intent(MainActivity.this, SignInActivity.class);
                 startActivity(intentSignIn);
             } else {
-                Intent intentAuth = new Intent(de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity.this, AuthActivity.class);
+                Intent intentAuth = new Intent(MainActivity.this, AuthActivity.class);
                 startActivity(intentAuth);
             }
 
@@ -361,7 +340,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         private final String countryCode;
         private ProgressDialog progressDialog;
-        private final Date lastUpdateDate;
         private Exception exception;
 
         // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
@@ -377,17 +355,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-        protected JSONTask(@Nullable final String lastUpdateDate, final String countryCode) {
+        protected JSONTask(final String countryCode) {
             enableHttpResponseCache();
-            this.lastUpdateDate = null;
             this.countryCode = countryCode;
-            if (lastUpdateDate != null) {
-                try {
-                    new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(lastUpdateDate);
-                } catch (ParseException e) {
-                    Log.e(TAG, "Unparsable update date: " + lastUpdateDate);
-                }
-            }
         }
 
         @Override
@@ -404,57 +374,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 URL url = new URL(String.format("%s/%s/stations", Constants.API_START_URL, countryCode.toLowerCase()));
                 connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
-                long resourceDate = connection.getHeaderFieldDate("Last-Modified", aktuellesDatum);
-                if (lastUpdateDate == null || resourceDate > lastUpdateDate.getTime()) {
-                    publishProgress("Lese...");
-                    InputStream stream = connection.getInputStream();
-                    reader = new BufferedReader(new InputStreamReader(stream));
-                    StringBuffer buffer = new StringBuffer();
-                    String line = "";
-                    while ((line = reader.readLine()) != null) {
-                        buffer.append(line);
-                    }
-                    String finalJson = buffer.toString();
 
-                    publishProgress("Verarbeite...");
-                    JSONArray bahnhofList = new JSONArray(finalJson);
-                    count = bahnhofList.length();
-                    Log.i(TAG, "Parsed " + count + " stations");
+                publishProgress("Lese...");
+                InputStream stream = connection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(stream));
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+                String finalJson = buffer.toString();
 
-                    for (int i = 0; i < bahnhofList.length(); i++) {
-                        publishProgress("Verarbeite " + i + "/" + count);
-                        JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
+                publishProgress("Verarbeite...");
+                JSONArray bahnhofList = new JSONArray(finalJson);
+                count = bahnhofList.length();
+                Log.i(TAG, "Parsed " + count + " stations");
 
-                        String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
-                        String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
-                        String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
-                        String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
-                        String photoUrl = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL);
-                        String photographer = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER);
-                        String photographerUrl = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL);
-                        String license = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_LICENSE);
-                        String ds100 = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_DS100);
+                for (int i = 0; i < bahnhofList.length(); i++) {
+                    publishProgress("Verarbeite " + i + "/" + count);
+                    JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
 
-                        Bahnhof bahnhof = new Bahnhof();
-                        bahnhof.setTitle(title);
-                        bahnhof.setId(parseInt(id));
-                        bahnhof.setLat(Float.parseFloat(lat));
-                        bahnhof.setLon(Float.parseFloat(lon));
-                        bahnhof.setDatum(aktuellesDatum);
-                        bahnhof.setPhotoUrl(photoUrl);
-                        bahnhof.setPhotographer(photographer);
-                        bahnhof.setPhotographerUrl(photographerUrl);
-                        bahnhof.setLicense(license);
-                        bahnhof.setDS100(ds100);
+                    String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
+                    String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
+                    String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
+                    String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
+                    String photoUrl = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL);
+                    String photographer = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER);
+                    String photographerUrl = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL);
+                    String license = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_LICENSE);
+                    String ds100 = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_DS100);
 
-                        bahnhoefe.add(bahnhof);
-                        Log.d("DatenbankInsertOk ...", bahnhof.toString());
-                    }
-                    publishProgress("Schreibe in Datenbank");
+                    Bahnhof bahnhof = new Bahnhof();
+                    bahnhof.setTitle(title);
+                    bahnhof.setId(parseInt(id));
+                    bahnhof.setLat(Float.parseFloat(lat));
+                    bahnhof.setLon(Float.parseFloat(lon));
+                    bahnhof.setDatum(aktuellesDatum);
+                    bahnhof.setPhotoUrl(photoUrl);
+                    bahnhof.setPhotographer(photographer);
+                    bahnhof.setPhotographerUrl(photographerUrl);
+                    bahnhof.setLicense(license);
+                    bahnhof.setDS100(ds100);
 
-                    dbAdapter.insertBahnhoefe(bahnhoefe);
-                    publishProgress("Bahnhöfe Datenbank aktualisiert");
-                } // Online-Resource ist neuer als unsere Daten
+                    bahnhoefe.add(bahnhof);
+                    Log.d("DatenbankInsertOk ...", bahnhof.toString());
+                }
+                publishProgress("Schreibe in Datenbank");
+
+                dbAdapter.insertBahnhoefe(bahnhoefe);
+                publishProgress("Bahnhöfe Datenbank aktualisiert");
             } catch (Exception e) {
                 Log.e(TAG, "Error refreshing stations", e);
                 exception = e;
@@ -492,14 +460,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (exception != null) {
                 Toast.makeText(getBaseContext(), "Fehler beim Aktualisieren der Bahnhöfe: " + exception.getMessage(), Toast.LENGTH_LONG).show();
             } else {
-                writeUpdateDateInFile();
+                baseApplication.setLastUpdate(System.currentTimeMillis());
                 TextView tvUpdate = (TextView) findViewById(R.id.tvUpdate);
                 try {
-                    tvUpdate.setText("Letzte Aktualisierung am: " + loadUpdateDateFromFile("updatedate.txt"));
+                    tvUpdate.setText("Letzte Aktualisierung am: " + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
                 } catch (Exception e) {
                     Log.e(TAG, "Error writing updatedate.txt", e);
                 }
-                customAdapter.swapCursor(dbAdapter.getStationsList(false));
+                customAdapter.swapCursor(dbAdapter.getStationsList(baseApplication.getPhotoFilter()));
             }
 
             unlockScreenOrientation();
@@ -616,7 +584,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void runMultipleAsyncTask() {
         if (ConnectionUtil.checkInternetConnection(this)) {
             // First Task
-            new JSONTask(lastUpdateDate, ((BaseApplication) getApplication()).getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+            new JSONTask(baseApplication.getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 
             // Second Task
             new JSONLaenderTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
@@ -628,51 +596,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onResume() {
         super.onResume();
         handleGalleryNavItem();
-        if (lastUpdateDate.equals("")) {
+        if (baseApplication.getLastUpdate() == 0) {
             runMultipleAsyncTask();
         }
 
-    }
-
-    @Nullable
-    private String writeUpdateDateInFile() {
-        try {
-            Calendar c = Calendar.getInstance();
-            SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-            final String lastUpdateDate = df.format(c.getTime());
-            FileOutputStream updateDate = openFileOutput("updatedate.txt", MODE_PRIVATE);
-            OutputStreamWriter osw = new OutputStreamWriter(updateDate);
-            try {
-                osw.write(lastUpdateDate);
-                osw.flush();
-                osw.close();
-                Toast.makeText(getBaseContext(), "Aktualisierungsdatum gespeichert", Toast.LENGTH_LONG).show();
-                return lastUpdateDate;
-            } catch (IOException ioe) {
-                Log.e(TAG, ioe.toString());
-            }
-        } catch (FileNotFoundException fnfe) {
-            Log.e(TAG, fnfe.toString());
+        if (photoFilterMenuItem != null) {
+            photoFilterMenuItem.setIcon(baseApplication.getPhotoFilter().getIcon());
         }
-        return null;
-    }
-
-    public String loadUpdateDateFromFile(String filename) throws Exception {
-        String retString = "";
-        BufferedReader reader = null;
-        try {
-            FileInputStream in = this.openFileInput(filename);
-            reader = new BufferedReader(new InputStreamReader(in));
-            String zeile;
-            while ((zeile = reader.readLine()) != null) {
-                retString += zeile;
-            }
-            reader.close();
-
-        } catch (FileNotFoundException fnfe) {
-            Log.e(TAG, fnfe.toString());
+        if (customAdapter != null) {
+            cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter());
+            customAdapter.swapCursor(cursor);
         }
-        return retString;
     }
 
     private void bindToStatus() {
@@ -690,14 +624,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onServiceDisconnected(ComponentName name) {
                 Log.d(TAG, "Unbound from status service of NearbyNotificationService");
                 statusBinder = null;
+                invalidateOptionsMenu();
             }
         }, 0))
 
         Log.e(TAG, "Bind request to statistics interface failed");
     }
 
-
-
-    }
-
-
+}

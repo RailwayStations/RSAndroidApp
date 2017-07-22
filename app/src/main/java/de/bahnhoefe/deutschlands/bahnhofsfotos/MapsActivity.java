@@ -48,6 +48,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -72,9 +73,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationRequest mLocationRequest;
     private boolean nextCameraChangeIsManual = true;
     private BahnhofsDbAdapter dbAdapter;
-    private Boolean photoFilter = Boolean.FALSE;
     private String nickname;
     private Marker myPositionMarker;
+    private BaseApplication baseApplication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +91,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(myToolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        BaseApplication baseApplication = (BaseApplication) getApplication();
+        baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
         nickname = baseApplication.getNickname();
 
@@ -114,6 +115,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector);
         myLocSwitch.setChecked(true);
         item.setActionView(myLocSwitch);
+
+        menu.findItem(R.id.menu_toggle_photo).setIcon(baseApplication.getPhotoFilter().getIcon());
+
         return true;
     }
 
@@ -121,16 +125,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_toggle_photo:
-                if (photoFilter == null) {
-                    photoFilter = Boolean.TRUE;
-                    item.setIcon(R.drawable.ic_station_filter_with_photo_24px);
-                } else if (photoFilter == Boolean.TRUE) {
-                    photoFilter = Boolean.FALSE;
-                    item.setIcon(R.drawable.ic_station_filter_without_photo_24px);
-                } else {
-                    photoFilter = null;
-                    item.setIcon(R.drawable.ic_station_filter_all_24px);
-                }
+                PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
+                item.setIcon(photoFilter.getIcon());
+                baseApplication.setPhotoFilter(photoFilter);
                 reloadMap();
                 break;
             default:
@@ -170,7 +167,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void readBahnhoefe() {
         try {
-            bahnhofMarker = dbAdapter.getAllBahnhoefe(photoFilter);
+            bahnhofMarker = dbAdapter.getAllBahnhoefe(baseApplication.getPhotoFilter());
         } catch (Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }

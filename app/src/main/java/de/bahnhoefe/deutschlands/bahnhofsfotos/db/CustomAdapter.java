@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
@@ -29,6 +30,7 @@ public class CustomAdapter extends CursorAdapter {
         ViewHolder holder = new ViewHolder();
         holder.txtId = (TextView) view.findViewById(R.id.txtId);
         holder.txtStationName = (TextView) view.findViewById(R.id.txtStationName);
+        holder.hasPhoto = (ImageView) view.findViewById(R.id.hasPhoto);
         view.setTag(holder);
         return view;
     }
@@ -45,11 +47,12 @@ public class CustomAdapter extends CursorAdapter {
         ViewHolder holder = (ViewHolder) view.getTag();
         holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_ID)));
         holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_TITLE)));
-
+        holder.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
     }
 
     static class ViewHolder {
         TextView txtId;
         TextView txtStationName;
+        ImageView hasPhoto;
     }
 }

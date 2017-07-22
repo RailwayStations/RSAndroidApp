@@ -207,5 +207,7 @@
     <string name="menu_title_stations_map">Bahnhofskarte</string>
     <string name="menu_photo_filter">Filter mit/ohne Foto</string>
     <string name="loading_stations">Lade Bahnhöfe</string>
+    <string name="PHOTO_FILTER">APP_PREF_PHOTO_FILTER</string>
+    <string name="LAST_UPDATE">APP_PREF_LAST_UPDATE</string>
 
 </resources>

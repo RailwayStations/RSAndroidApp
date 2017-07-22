@@ -7,9 +7,11 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 public class BaseApplication extends Application {
 
+    private static final String TAG = BaseApplication.class.getSimpleName();
     private static final Boolean DEFAULT_FIRSTAPPSTART = false;
     private static final String DEFAULT = "";
     private static BaseApplication instance;
@@ -141,6 +143,28 @@ public class BaseApplication extends Application {
 
     public void setUploadToken(String uploadToken) {
         putString(R.string.UPLOAD_TOKEN, uploadToken);
+    }
+
+    public PhotoFilter getPhotoFilter() {
+        return PhotoFilter.valueOf(preferences.getString(getString(R.string.PHOTO_FILTER), PhotoFilter.STATIONS_WITHOUT_PHOTO.toString()));
+    }
+
+    public void setPhotoFilter(PhotoFilter photoFilter) {
+        putString(R.string.PHOTO_FILTER, photoFilter.toString());
+    }
+
+    public long getLastUpdate() {
+        return preferences.getLong(getString(R.string.LAST_UPDATE), 0L);
+    }
+
+    public void setLastUpdate(long lastUpdate) {
+        putLong(R.string.LAST_UPDATE, lastUpdate);
+    }
+
+    private void putLong(int key, long value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putLong(getString(key), value);
+        editor.apply();
     }
 
 }

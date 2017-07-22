@@ -59,8 +59,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BahnhofsFotoFetchTask;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
@@ -89,11 +89,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private String license, photoOwner, linking, link, nickname, email, token, countryShortCode;
-
-
     private TextView licenseTagView;
-
-    private BahnhofsFotoFetchTask fetchTask;
     private ViewGroup detailsLayout;
     private boolean fullscreen;
     private BaseApplication baseApplication;
@@ -167,8 +163,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             if (bahnhof.hasPhoto()) {
                 if (ConnectionUtil.checkInternetConnection(this)) {
-                    fetchTask = new BahnhofsFotoFetchTask(this, getApplicationContext());
-                    fetchTask.execute(bahnhof);
+                    BitmapCache.getInstance().getFoto(this, bahnhof.getPhotoUrl());
                 }
             } else {
                 takePictureButton.setVisibility(View.VISIBLE);

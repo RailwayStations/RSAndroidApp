@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,11 +50,9 @@ public class BitmapCache {
 
     private class Request implements BitmapAvailableHandler {
         private final URL url;
-        private final BitmapAvailableHandler requestor;
 
-        public Request(URL url, BitmapAvailableHandler requestor) {
+        public Request(URL url) {
             this.url = url;
-            this.requestor = requestor;
         }
 
         /**
@@ -81,6 +80,21 @@ public class BitmapCache {
         }
     }
 
+    /**
+     * Get a picture for the given URL, either from cache or by downloading.
+     * The fetching happens asynchronously. When finished, the provided callback interface is called.
+     *
+     * @param callback    the BitmapAvailableHandler to call on completion.
+     * @param resourceUrl the URL to fetch
+     */
+    public void getFoto(BitmapAvailableHandler callback, @NonNull String resourceUrl) {
+        try {
+            getFoto(callback, new URL(resourceUrl));
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "Couldn't load photo from malformed URL " + resourceUrl);
+            callback.onBitmapAvailable(null);
+        }
+    }
 
     /**
      * Get a picture for the given URL, either from cache or by downloading.
@@ -93,7 +107,7 @@ public class BitmapCache {
         Bitmap bitmap = cache.get(resourceUrl);
         if (bitmap == null) {
             BitmapDownloader downloader = new BitmapDownloader(
-                    new Request(resourceUrl, callback),
+                    new Request(resourceUrl),
                     resourceUrl);
             synchronized (requests) {
                 Collection<BitmapAvailableHandler> handlers = requests.get(resourceUrl);
