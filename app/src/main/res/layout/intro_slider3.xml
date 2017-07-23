@@ -12,7 +12,7 @@
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/ic_near_me_white_24px" />
+            android:src="@drawable/ic_station_filter_all_24px" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
