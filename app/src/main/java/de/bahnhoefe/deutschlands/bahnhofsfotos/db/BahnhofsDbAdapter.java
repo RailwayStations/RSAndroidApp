@@ -16,12 +16,13 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.DB_JSON_CONSTANTS.KEY_ID;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
             + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
@@ -29,7 +30,10 @@ public class BahnhofsDbAdapter {
             + Constants.DB_JSON_CONSTANTS.KEY_TITLE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_LAT + " REAL, "
             + Constants.DB_JSON_CONSTANTS.KEY_LON + " REAL, "
-            + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_LICENSE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_DS100 + " TEXT)";
     private static final String CREATE_STATEMENT_2 = "CREATE INDEX " + DATABASE_TABLE + "_IDX "
             + "ON " + DATABASE_TABLE + "(" + Constants.DB_JSON_CONSTANTS.KEY_ID + ")";
@@ -80,7 +84,10 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_TITLE, bahnhof.getTitle());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LAT, bahnhof.getLat());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LON, bahnhof.getLon());
-                values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG, bahnhof.getPhotoflag());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL, bahnhof.getPhotoUrl());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER, bahnhof.getPhotographer());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL, bahnhof.getPhotographerUrl());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_LICENSE, bahnhof.getLicense());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_DS100, bahnhof.getDS100());
 
                 db.insert(DATABASE_TABLE, null, values);
@@ -124,16 +131,18 @@ public class BahnhofsDbAdapter {
         db.delete(DATABASE_TABLE_LAENDER, null, null);
     }
 
-    public Cursor getStationsList(boolean withPhoto) {
-        //Open connection to read only
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+    public Cursor getStationsList(PhotoFilter photoFilter) {
         String selectQuery = "SELECT rowid _id, " +
                 KEY_ID + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_TITLE +
-                " FROM " + DATABASE_TABLE
-                + " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " IS " + (withPhoto ? "NOT" : "") + " NULL"
-                + " ORDER BY " +
-                Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc";
+                Constants.DB_JSON_CONSTANTS.KEY_TITLE + ", " +
+                Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL +
+                " FROM " + DATABASE_TABLE;
+
+        if (photoFilter != PhotoFilter.ALL_STATIONS) {
+            selectQuery += " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+        }
+
+        selectQuery += " ORDER BY " + Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc";
         Log.d(TAG, selectQuery.toString());
 
 
@@ -178,22 +187,20 @@ public class BahnhofsDbAdapter {
      * Return a cursor on station ids where the station's title matches the given string
      *
      * @param search
-     * @param withPhoto true if stations with photo are to be queried, false if stations w/o photo
+     * @param photoFilter if stations need to be filtered by photo available or not
      * @return a Cursor representing the matching results
      */
-    public Cursor getBahnhofsListByKeyword(String search, boolean withPhoto) {
+    public Cursor getBahnhofsListByKeyword(String search, PhotoFilter photoFilter) {
         //Open connection to read only
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String selectQuery = String.format(
-                "%s  LIKE ? AND %s IS %s NULL",
-                Constants.DB_JSON_CONSTANTS.KEY_TITLE,
-                Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG,
-                (withPhoto ? "NOT" : "")
-        );
+        String selectQuery = String.format("%s LIKE ?", Constants.DB_JSON_CONSTANTS.KEY_TITLE);
+        if (photoFilter != PhotoFilter.ALL_STATIONS) {
+            selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+        }
 
         Cursor cursor = db.query(DATABASE_TABLE,
                 new String[]{
-                        "rowid _id", Constants.DB_JSON_CONSTANTS.KEY_ID, Constants.DB_JSON_CONSTANTS.KEY_TITLE
+                        "rowid _id", Constants.DB_JSON_CONSTANTS.KEY_ID, Constants.DB_JSON_CONSTANTS.KEY_TITLE, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL
                 },
                 selectQuery,
                 new String[]{"%" + search + "%"}, null, null, Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc");
@@ -211,7 +218,7 @@ public class BahnhofsDbAdapter {
 
     class BahnhoefeDbOpenHelper extends SQLiteOpenHelper {
 
-        public BahnhoefeDbOpenHelper(Context context) {
+        BahnhoefeDbOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
@@ -242,14 +249,20 @@ public class BahnhofsDbAdapter {
         int bahnhofsnr = cursor.getInt(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ID));
         Double lon = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LON));
         Double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LAT));
-        String photoflag = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG));
+        String photoUrl = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL));
+        String photographer = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER));
+        String photographerUrl = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL));
+        String license = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LICENSE));
         String ds100 = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_DS100));
         Bahnhof bahnhof = new Bahnhof();
         bahnhof.setTitle(title);
         bahnhof.setId(bahnhofsnr);
         bahnhof.setLat(lat);
         bahnhof.setLon(lon);
-        bahnhof.setPhotoflag(photoflag);
+        bahnhof.setPhotoUrl(photoUrl);
+        bahnhof.setPhotographer(photographer);
+        bahnhof.setPhotographerUrl(photographerUrl);
+        bahnhof.setLicense(license);
         bahnhof.setDS100(ds100);
         return bahnhof;
     }
@@ -303,10 +316,12 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    public List<Bahnhof> getAllBahnhoefe(boolean withPhoto) {
-        List<Bahnhof> bahnhofList = new ArrayList<Bahnhof>();
-        String selectQuery = "SELECT * FROM " + DATABASE_TABLE
-                + " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " IS " + (withPhoto ? "NOT" : "") + " NULL";
+    public List<Bahnhof> getAllBahnhoefe(PhotoFilter photoFilter) {
+        List<Bahnhof> bahnhofList = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + DATABASE_TABLE;
+        if (photoFilter != PhotoFilter.ALL_STATIONS) {
+            selectQuery += " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+        }
         Log.d(TAG, selectQuery.toString());
         Cursor cursor = db.rawQuery(selectQuery, null);
 
@@ -326,33 +341,31 @@ public class BahnhofsDbAdapter {
         return bahnhofList;
     }
 
-    public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, boolean withPhoto) {
+    public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, PhotoFilter photoFilter) {
         double lat = position.latitude;
         double lng = position.longitude;
-        List<Bahnhof> bahnhofList = new ArrayList<Bahnhof>();
+        List<Bahnhof> bahnhofList = new ArrayList<>();
         // Select All Query with rectangle - might be later change with it
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE + " where " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " < " + (lat + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " > " + (lat - 0.5)
-                + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " < " + (lng + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " > " + (lng - 0.5)
-                + " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOFLAG + " IS " + (withPhoto ? "NOT" : "") + " NULL";
+                + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " < " + (lng + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " > " + (lng - 0.5);
+        if (photoFilter != PhotoFilter.ALL_STATIONS) {
+            selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+        }
 
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
                 Bahnhof bahnhof = createBahnhofFromCursor(cursor);
-                // Adding bahnhof to list
                 bahnhofList.add(bahnhof);
 
             } while (cursor.moveToNext());
         }
         cursor.close();
 
-        // returns bahnhof list
         return bahnhofList;
     }
 
-    // Getting All Countries
     public List<Country> getAllCountries() {
         List<Country> countryList = new ArrayList<Country>();
         // Select All Query without any baseLocationValues (myCurrentLocation)
@@ -374,7 +387,6 @@ public class BahnhofsDbAdapter {
         }
         cursor.close();
 
-        // return country list
         return countryList;
     }
 

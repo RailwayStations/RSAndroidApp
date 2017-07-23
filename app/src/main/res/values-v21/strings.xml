@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="maps_activity">Bahnhöfe ohne Photos</string>
+    <string name="maps_activity">Bahnhofskarte</string>
     <string name="no_location_detected">Keine Position gefunden</string>
     <string name="latitude_label">Latitude</string>
     <string name="bahnhofname">BahnhofName</string>
@@ -36,8 +36,6 @@
     <string name="ownPhoto">eigenes Photo</string>
     <string name="bt_mydata_commit">Speichern</string>
     <string name="bt_mydata_clear">Reset</string>
-    <string name="PREF_FILE">APP_PREF_FILE</string>
-    <string name="PREF_COUNTRY_FILE">APP_PREF_FILE</string>
     <string name="LICENCE">APP_PREF_LICENCE</string>
     <string name="PHOTO_OWNER">APP_PREF_PHOTO_OWNER</string>
     <string name="LINKING">APP_PREF_LINKING</string>

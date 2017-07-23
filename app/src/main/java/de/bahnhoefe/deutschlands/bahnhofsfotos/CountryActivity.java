@@ -13,15 +13,13 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CountryAdapter;
 public class CountryActivity extends AppCompatActivity {
 
     private CountryAdapter countryAdapter;
-    private final String TAG = getClass().getSimpleName();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_country);
 
-        BaseApplication baseApplication = (BaseApplication) getApplication();
+        final BaseApplication baseApplication = (BaseApplication) getApplication();
         BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
 
         final Cursor cursor = dbAdapter.getCountryList();
@@ -37,12 +35,11 @@ public class CountryActivity extends AppCompatActivity {
                 countryAdapter.setSelectedIndex(position);
                 countryAdapter.notifyDataSetChanged();
                 countryAdapter.getView(position, view, listView, cursor);
+                baseApplication.setLastUpdate(0L);
             }
 
 
         });
-
-
     }
 
 }

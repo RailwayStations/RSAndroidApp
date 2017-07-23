@@ -10,8 +10,11 @@ public class Bahnhof implements Serializable {
     private double lat;
     private double lon;
     private long datum; // not used in the database
-    private String photoflag; // not used in the database
     private String ds100;
+    private String photoUrl;
+    private String photographer;
+    private String photographerUrl;
+    private String license;
 
     public int getId() {
         return id;
@@ -65,26 +68,12 @@ public class Bahnhof implements Serializable {
 
         Bahnhof bahnhof = (Bahnhof) o;
 
-        if (id != bahnhof.id) return false;
-        if (Double.compare(bahnhof.lat, lat) != 0) return false;
-        if (Double.compare(bahnhof.lon, lon) != 0) return false;
-        if (datum != bahnhof.datum) return false;
-        if (!title.equals(bahnhof.title)) return false;
-        return photoflag != null ? photoflag.equals(bahnhof.photoflag) : bahnhof.photoflag == null;
-
+        return id == bahnhof.id;
     }
 
     @Override
     public int hashCode() {
         return super.hashCode();
-    }
-
-    public String getPhotoflag() {
-        return photoflag;
-    }
-
-    public void setPhotoflag(String photoflag) {
-        this.photoflag = photoflag;
     }
 
     @Override
@@ -99,4 +88,41 @@ public class Bahnhof implements Serializable {
     public void setDS100(String ds100) {
         this.ds100 = ds100;
     }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotographer(String photographer) {
+        this.photographer = photographer;
+    }
+
+    public String getPhotographer() {
+        return photographer;
+    }
+
+    public void setPhotographerUrl(String photographerUrl) {
+        this.photographerUrl = photographerUrl;
+    }
+
+    public String getPhotographerUrl() {
+        return photographerUrl;
+    }
+
+    public void setLicense(String license) {
+        this.license = license;
+    }
+
+    public String getLicense() {
+        return license;
+    }
+
+    public boolean hasPhoto() {
+        return photoUrl != null;
+    }
+
 }

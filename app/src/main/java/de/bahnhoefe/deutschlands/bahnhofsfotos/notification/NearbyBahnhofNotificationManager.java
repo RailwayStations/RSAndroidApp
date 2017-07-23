@@ -5,17 +5,14 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
@@ -28,7 +25,6 @@ public abstract class NearbyBahnhofNotificationManager {
     private static final int REQUEST_STATION = 0x40;
     protected final String TAG = NearbyBahnhofNotificationManager.class.getSimpleName();
 
-    private final String countryShortCode;
     private final String DB_BAHNHOF_LIVE_PKG = "de.deutschebahn.bahnhoflive";
     private final String DB_BAHNHOF_LIVE_CLASS = "de.deutschebahn.bahnhoflive.MeinBahnhofActivity";
     private final Country country;
@@ -55,15 +51,11 @@ public abstract class NearbyBahnhofNotificationManager {
      * @param bahnhof  the station to issue a notification for.
      * @param distance a double giving the distance from current location to bahnhof (in km)
      */
-    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance, BahnhofsDbAdapter dbAdapter) {
+    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance, Country country) {
         this.context = context;
         notificationDistance = distance;
         this.notificationStation = bahnhof;
-        // Read the configured country code
-        // @todo remove once an international solution is found for timetabling
-        SharedPreferences sharedPreferences = context.getSharedPreferences("APP_PREF_FILE", Context.MODE_PRIVATE);
-        countryShortCode = sharedPreferences.getString("APP_PREF_COUNTRY", BaseApplication.DEFAULT_COUNTRY);
-        country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
+        this.country = country;
     }
 
     /**
@@ -242,7 +234,7 @@ public abstract class NearbyBahnhofNotificationManager {
             longText = String.format(longTextTemplate,
                     notificationStation.getTitle(),
                     notificationDistance,
-                    (notificationStation.getPhotoflag() != null ?
+                    (notificationStation.hasPhoto() ?
                             context.getString(R.string.photo_exists) :
                             ""));
 

@@ -15,7 +15,7 @@
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_maps_acitivty">MapsAcitivty</string>
-    <string name="maps_activity">Bahnhöfe ohne Fotos</string>
+    <string name="maps_activity">Bahnhofskarte</string>
     <string name="no_location_detected">Keine Position gefunden</string>
     <string name="map">Karte aufrufen</string>
     <string name="latitude_label">Latitude</string>
@@ -56,8 +56,6 @@
     <string name="ownPhoto">eigenes Photo</string>
     <string name="bt_mydata_commit">Speichern</string>
     <string name="bt_mydata_clear">Reset</string>
-    <string name="PREF_FILE">APP_PREF_FILE</string>
-    <string name="PREF_COUNTRY_FILE">APP_PREF_FILE</string>
     <string name="LICENCE">APP_PREF_LICENCE</string>
     <string name="PHOTO_OWNER">APP_PREF_PHOTO_OWNER</string>
     <string name="LINKING">APP_PREF_LINKING</string>
@@ -206,5 +204,10 @@
     <string name="upload_conflict">Dein Foto wurde hochgeladen, es liegt aber möglicherweise ein Konflikt vor.</string>
     <string name="select_photo">Foto auswählen</string>
     <string name="station_photo">Bahnhofsfoto</string>
+    <string name="menu_title_stations_map">Bahnhofskarte</string>
+    <string name="menu_photo_filter">Filter mit/ohne Foto</string>
+    <string name="loading_stations">Lade Bahnhöfe</string>
+    <string name="PHOTO_FILTER">APP_PREF_PHOTO_FILTER</string>
+    <string name="LAST_UPDATE">APP_PREF_LAST_UPDATE</string>
 
 </resources>

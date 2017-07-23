@@ -43,13 +43,4 @@
         android:layout_toRightOf="@+id/txtCountryShortCode"
          />
 
-    <!--<RadioButton
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:id="@+id/rdCountry"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-    />-->
-
 </RelativeLayout>

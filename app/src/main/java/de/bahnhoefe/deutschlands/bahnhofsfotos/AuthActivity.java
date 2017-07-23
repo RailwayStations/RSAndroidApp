@@ -1,9 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -73,7 +71,6 @@ public class AuthActivity extends AppCompatActivity implements
     private static final String ANONYMOUS = "anonymous";
     private String mUsername;
     private String mPhotoUrl;
-    private SharedPreferences mSharedPreferences;
 
     private Button mSendButton;
     private RecyclerView mMessageRecyclerView;
@@ -95,7 +92,6 @@ public class AuthActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_auth);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         subscribtionStatus();
 
         mUsername = ANONYMOUS;
@@ -178,7 +174,7 @@ public class AuthActivity extends AppCompatActivity implements
         // Define default config values. Defaults are used when fetched config values are not
         // available. Eg: if an error occurred fetching values from the server.
         Map<String, Object> defaultConfigMap = new HashMap<>();
-        defaultConfigMap.put("friendly_msg_length", 10L);
+        defaultConfigMap.put(FRIENDLY_MSG_LENGTH, (long) DEFAULT_MSG_LENGTH_LIMIT);
 
         // Apply config settings and default values.
         mFirebaseRemoteConfig.setConfigSettings(firebaseRemoteConfigSettings);
@@ -188,8 +184,7 @@ public class AuthActivity extends AppCompatActivity implements
         fetchConfig();
 
         mMessageEditText = (EditText) findViewById(R.id.messageEditText);
-        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mSharedPreferences
-                .getInt(FRIENDLY_MSG_LENGTH, DEFAULT_MSG_LENGTH_LIMIT))});
+        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -331,7 +326,7 @@ public class AuthActivity extends AppCompatActivity implements
      * cached values.
      */
     private void applyRetrievedLengthLimit() {
-        Long friendly_msg_length = mFirebaseRemoteConfig.getLong("friendly_msg_length");
+        Long friendly_msg_length = mFirebaseRemoteConfig.getLong(FRIENDLY_MSG_LENGTH);
         mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(friendly_msg_length.intValue())});
         Log.d(TAG, "FML is: " + friendly_msg_length);
     }

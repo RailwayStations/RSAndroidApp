@@ -2,10 +2,11 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
 
 import android.content.Context;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 
 public class NearbyBahnhofNotificationManagerFactory {
+
     /**
      * Construct the appropriate subclass of NearbyBahnhofNotificationManager for the given parameters.
      *
@@ -14,10 +15,11 @@ public class NearbyBahnhofNotificationManagerFactory {
      * @param distance the distance of the station from current position of the user
      * @return an instance of NearbyBahnhofNotificationManager
      */
-    static public NearbyBahnhofNotificationManager create(Context context, Bahnhof bahnhof, double distance, BahnhofsDbAdapter dbAdapter) {
-        if (bahnhof.getPhotoflag() == null)
-            return new NearbyBahnhofWithoutPhotoNotificationManager(context, bahnhof, distance, dbAdapter);
-        else
-            return new NearbyBahnhofWithPhotoNotificationManager(context, bahnhof, distance, dbAdapter);
+    static public NearbyBahnhofNotificationManager create(Context context, Bahnhof bahnhof, double distance, Country country) {
+        if (bahnhof.hasPhoto()) {
+            return new NearbyBahnhofWithPhotoNotificationManager(context, bahnhof, distance, country);
+        } else {
+            return new NearbyBahnhofWithoutPhotoNotificationManager(context, bahnhof, distance, country);
+        }
     }
 }

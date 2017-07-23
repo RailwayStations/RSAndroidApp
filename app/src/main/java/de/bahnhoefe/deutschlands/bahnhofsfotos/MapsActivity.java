@@ -2,12 +2,14 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -27,7 +29,6 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,16 +41,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    public static final int MIN_METER_DISTANCE_BEFORE_RELOAD = 1000;
     public static final int LOCATION_REQUEST_INTERVAL_MILLIS = 500;
     private GoogleMap mMap;
     private static final String TAG = MapsActivity.class.getSimpleName();
@@ -57,9 +59,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private List<Bahnhof> bahnhofMarker;
     private LatLng myPos;
-    private LatLng lastLoadPos;
 
-    // views
     private CheckBox myLocSwitch = null;
 
     /**
@@ -71,9 +71,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Stores parameters for requests to the FusedLocationProviderApi.
      */
     private LocationRequest mLocationRequest;
-    private boolean mRequestingLocationUpdates = true;
     private boolean nextCameraChangeIsManual = true;
     private BahnhofsDbAdapter dbAdapter;
+    private String nickname;
+    private Marker myPositionMarker;
+    private BaseApplication baseApplication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,17 +91,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(myToolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        BaseApplication baseApplication = (BaseApplication) getApplication();
+        baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
+        nickname = baseApplication.getNickname();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        bahnhofMarker = new ArrayList<Bahnhof>(0); // no markers until we know where we are
-
-        myPos = new LatLng(50d, 8d);
+        bahnhofMarker = new ArrayList<>(0); // no markers until we know where we are
 
         buildGoogleApiClient();
     }
@@ -112,54 +113,64 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         final MenuItem item = menu.findItem(R.id.menu_toggle_mypos);
         myLocSwitch = new CheckBox(this);
         myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector);
+        myLocSwitch.setChecked(true);
         item.setActionView(myLocSwitch);
-        initMyLocationSwitchButton(myLocSwitch);
+
+        menu.findItem(R.id.menu_toggle_photo).setIcon(baseApplication.getPhotoFilter().getIcon());
+
         return true;
     }
 
-    private void initMyLocationSwitchButton(final CheckBox locSwitch) {
-        myLocSwitch = locSwitch;
-        myLocSwitch.setOnClickListener(new MyLocationListener(this));
-        switchMyLocationButton();
-    }
-
-    private void switchMyLocationButton() {
-        if (myLocSwitch != null) {
-            myLocSwitch.setChecked(mRequestingLocationUpdates);
-            if (mRequestingLocationUpdates) {
-                startLocationUpdates();
-            } else {
-                stopLocationUpdates();
-            }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_toggle_photo:
+                PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
+                item.setIcon(photoFilter.getIcon());
+                baseApplication.setPhotoFilter(photoFilter);
+                reloadMap();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+        return true;
     }
 
-    private class MyLocationListener implements View.OnClickListener {
+    private void reloadMap() {
+        new LoadMapMarkerTask().execute((Void)null);
+    }
 
-        private final WeakReference<MapsActivity> mapRef;
+    private class LoadMapMarkerTask extends AsyncTask<Void, Void, Integer> {
 
-        MyLocationListener(@NonNull final MapsActivity map) {
-            mapRef = new WeakReference<>(map);
+        final android.app.AlertDialog progress = ProgressDialog.show(MapsActivity.this, "", getResources().getString(R.string.loading_stations));
+
+        @Override
+        protected void onPreExecute() {
+            progress.show();
+            mMap.clear();
+            myPositionMarker = null;
         }
 
         @Override
-        public void onClick(final View view) {
-            final MapsActivity map = mapRef.get();
-            if (map != null) {
-                mRequestingLocationUpdates = !mRequestingLocationUpdates;
-                map.switchMyLocationButton();
-            }
+        protected Integer doInBackground(Void... params) {
+            readBahnhoefe();
+            return bahnhofMarker.size();
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            addMarkers(bahnhofMarker);
+            progress.dismiss();
+            Toast.makeText(MapsActivity.this, bahnhofMarker.size() + " Bahnhöfe geladen", Toast.LENGTH_LONG).show();
         }
     }
 
     private void readBahnhoefe() {
         try {
-            bahnhofMarker = dbAdapter.getBahnhoefeByLatLngRectangle(myPos, false);
+            bahnhofMarker = dbAdapter.getAllBahnhoefe(baseApplication.getPhotoFilter());
         } catch (Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
-
-        Toast.makeText(this, bahnhofMarker.size() + " Bahnhöfe geladen", Toast.LENGTH_LONG).show();
     }
 
 
@@ -175,15 +186,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.clear();
-        addMarkers(bahnhofMarker, myPos);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
+        reloadMap();
+        if (myPos != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
+        } else {
+            mMap.moveCamera(CameraUpdateFactory.zoomBy(11));
+        }
         nextCameraChangeIsManual = false;
         mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
             @Override
             public void onCameraMoveStarted(int i) {
                 if (nextCameraChangeIsManual) {
-                    stopLocationUpdates();
                     myLocSwitch.setChecked(false);
                 }
             }
@@ -196,20 +209,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void addMarkers(List<Bahnhof> bahnhofMarker, LatLng myPos) {
+    private void addMarkers(List<Bahnhof> bahnhofMarker) {
         for (Bahnhof bahnhof : bahnhofMarker) {
             LatLng bahnhofPos = bahnhof.getPosition();
             mMap.addMarker(new MarkerOptions()
                     .title(bahnhof.getTitle())
                     .position(bahnhofPos)
                     .snippet(String.valueOf(bahnhof.getId()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(343)));
+                    .icon(getMarkerIcon(bahnhof, nickname)));
         }
 
-        // Add a marker and moves the camera
-        mMap.addMarker(new MarkerOptions().position(myPos).title("Meine aktuelle Position: ").icon(BitmapDescriptorFactory.defaultMarker(55)));
         mMap.setInfoWindowAdapter(this);
         mMap.setOnInfoWindowClickListener(this);
+    }
+
+    private BitmapDescriptor getMarkerIcon(Bahnhof bahnhof, String nickname) {
+        if (!bahnhof.hasPhoto()) {
+            return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+        } else if (bahnhof.getPhotographer().equals(nickname)) {
+            return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
+        }
+        return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
     }
 
     @Override
@@ -220,7 +240,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public View getInfoContents(Marker marker) {
-
         LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = layoutInflater.inflate(R.layout.info_window, null, false);
         ((TextView) view.findViewById(R.id.tvbahnhofname)).setText(marker.getTitle());
@@ -236,14 +255,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-
-        BaseApplication baseApplication = (BaseApplication) getApplication();
-        String countryShortCode = baseApplication.getCountryShortCode();
-
         if (marker.getSnippet() != null) {
-
-            Class cls = DetailsActivity.class;
-            Intent intent = new Intent(MapsActivity.this, cls);
+            Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
             long id = Long.valueOf(marker.getSnippet());
             try {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
@@ -293,10 +306,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Within {@code onPause()}, we pause location updates, but leave the
         // connection to GoogleApiClient intact.  Here, we resume receiving
         // location updates if the user has requested them.
-
-        if (mRequestingLocationUpdates) {
-            startLocationUpdates();
-        }
+        startLocationUpdates();
     }
 
     @Override
@@ -307,9 +317,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if (mRequestingLocationUpdates) {
-            startLocationUpdates();
-        }
+        startLocationUpdates();
     }
 
     @Override
@@ -325,28 +333,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onLocationChanged(Location location) {
-        if (!mRequestingLocationUpdates) {
-            return;
-        }
-        mMap.clear();
         myPos = new LatLng(location.getLatitude(), location.getLongitude());
 
-        if (lastLoadPos == null || distanceInMeter(lastLoadPos, myPos) > MIN_METER_DISTANCE_BEFORE_RELOAD) {
-            readBahnhoefe();
-            lastLoadPos = myPos;
+        if (myPositionMarker == null) {
+            myPositionMarker = mMap.addMarker(new MarkerOptions().position(myPos).title("Meine aktuelle Position: ").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+        } else {
+            myPositionMarker.setPosition(myPos);
         }
 
-        addMarkers(bahnhofMarker, myPos);
         nextCameraChangeIsManual = false;
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, mMap.getCameraPosition().zoom));
+        if (myLocSwitch.isChecked()) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, mMap.getCameraPosition().zoom));
+        }
     }
-
-    private float distanceInMeter(LatLng oldPos, LatLng myPos) {
-        float[] result = new float[1];
-        Location.distanceBetween(oldPos.latitude, oldPos.longitude, myPos.latitude, myPos.longitude, result);
-        return result[0];
-    }
-
 
     protected void startLocationUpdates() {
         if (!mGoogleApiClient.isConnected()) {
