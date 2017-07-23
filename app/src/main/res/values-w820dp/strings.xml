@@ -31,7 +31,7 @@
         <string name="etNickname">Bitte trage hier Deinen Nicknamen ein
         "\n"- bei Twitter bitte ohne das @
     </string>
-    <string name="menu_title_your_own_station_photos">Deine eigenen Bahnhofsfotos</string>
+    <string name="menu_title_your_own_station_photos">Eigene Fotos</string>
     <string name="rbLinkingWith">Verlinkung mit: </string>
     <string name="ownPhoto">eigenes Foto</string>
     <string name="bt_mydata_commit">Speichern</string>
