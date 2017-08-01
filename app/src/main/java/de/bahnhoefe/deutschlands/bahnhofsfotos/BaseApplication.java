@@ -7,6 +7,9 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Linking;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 public class BaseApplication extends Application {
@@ -53,6 +56,24 @@ public class BaseApplication extends Application {
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
     }
 
+    private void putBoolean(int key, boolean value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(getString(key), value);
+        editor.apply();
+    }
+
+    private void putString(int key, String value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(getString(key), value);
+        editor.apply();
+    }
+
+    private void putLong(int key, long value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putLong(getString(key), value);
+        editor.apply();
+    }
+
     public void setCountryShortCode(String countryShortCode) {
         putString(R.string.COUNTRY, countryShortCode);
     }
@@ -77,68 +98,56 @@ public class BaseApplication extends Application {
         putBoolean(R.string.FRIENDLY_ENGAGE_TOPIC, status);
     }
 
-    private void putBoolean(int key, boolean value) {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(getString(key), value);
-        editor.apply();
+    public License getLicense() {
+        return License.byName(preferences.getString(getString(R.string.LICENCE), License.UNKNOWN.toString()));
     }
 
-    private void putString(int key, String value) {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(getString(key), value);
-        editor.apply();
+    public void setLicense(License license) {
+        putString(R.string.LICENCE, license.toString());
     }
 
-    public String getLicense() {
-        return preferences.getString(getString(R.string.LICENCE), DEFAULT);
+    public PhotoOwner getPhotoOwner() {
+        return PhotoOwner.byName(preferences.getString(getString(R.string.PHOTO_OWNER), PhotoOwner.UNKNOWN.toString()));
     }
 
-    public String getPhotoOwner() {
-        return preferences.getString(getString(R.string.PHOTO_OWNER), DEFAULT);
+    public void setPhotoOwner(PhotoOwner photoOwner) {
+        putString(R.string.PHOTO_OWNER, photoOwner.toString());
     }
 
-    public String getLinking() {
-        return preferences.getString(getString(R.string.LINKING), DEFAULT);
+    public Linking getLinking() {
+        return Linking.byName(preferences.getString(getString(R.string.LINKING), Linking.UNKNOWN.toString()));
+    }
+
+    public void setLinking(Linking linking) {
+        putString(R.string.LINKING, linking.toString());
     }
 
     public String getPhotographerLink() {
         return preferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
     }
 
-    public String getNickname() {
-        return preferences.getString(getString(R.string.NICKNAME), DEFAULT);
-    }
-
-    public String getEmail() {
-        return preferences.getString(getString(R.string.EMAIL), DEFAULT);
-    }
-
-    public String getUploadToken() {
-        return preferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
-    }
-
-    public void setLicense(String license) {
-        putString(R.string.LICENCE, license);
-    }
-
-    public void setPhotoOwner(String photoOwner) {
-        putString(R.string.PHOTO_OWNER, photoOwner);
-    }
-
-    public void setLinking(String linking) {
-        putString(R.string.LINKING, linking);
-    }
-
     public void setPhotographerLink(String photographerLink) {
         putString(R.string.LINK_TO_PHOTOGRAPHER, photographerLink);
+    }
+
+    public String getNickname() {
+        return preferences.getString(getString(R.string.NICKNAME), DEFAULT);
     }
 
     public void setNickname(String nickname) {
         putString(R.string.NICKNAME, nickname);
     }
 
+    public String getEmail() {
+        return preferences.getString(getString(R.string.EMAIL), DEFAULT);
+    }
+
     public void setEmail(String email) {
         putString(R.string.EMAIL, email);
+    }
+
+    public String getUploadToken() {
+        return preferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
     }
 
     public void setUploadToken(String uploadToken) {
@@ -159,12 +168,6 @@ public class BaseApplication extends Application {
 
     public void setLastUpdate(long lastUpdate) {
         putLong(R.string.LAST_UPDATE, lastUpdate);
-    }
-
-    private void putLong(int key, long value) {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putLong(getString(key), value);
-        editor.apply();
     }
 
 }
