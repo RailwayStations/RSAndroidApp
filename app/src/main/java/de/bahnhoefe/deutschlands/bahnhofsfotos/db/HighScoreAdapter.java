@@ -35,6 +35,7 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
             viewHolder.photos = (TextView) rowView.findViewById(R.id.highscore_photos);
             viewHolder.name = (TextView) rowView.findViewById(R.id.highscore_name);
             viewHolder.award = (ImageView) rowView.findViewById(R.id.highscore_award);
+            viewHolder.position = (TextView) rowView.findViewById(R.id.highscore_position);
             rowView.setTag(viewHolder);
         }
 
@@ -43,21 +44,27 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
         final HighScoreItem item = highScore[position];
         holder.name.setText(item.getName());
         holder.photos.setText(String.valueOf(item.getPhotos()));
+        holder.position.setText(String.valueOf(item.getPosition()) + ".");
+
         switch (position) {
             case 0:
                 holder.award.setImageResource(R.drawable.ic_crown_gold);
                 holder.award.setVisibility(View.VISIBLE);
+                holder.position.setVisibility(View.INVISIBLE);
                 break;
             case 1:
                 holder.award.setImageResource(R.drawable.ic_crown_silver);
                 holder.award.setVisibility(View.VISIBLE);
+                holder.position.setVisibility(View.INVISIBLE);
                 break;
             case 2:
                 holder.award.setImageResource(R.drawable.ic_crown_bronze);
                 holder.award.setVisibility(View.VISIBLE);
+                holder.position.setVisibility(View.INVISIBLE);
                 break;
             default:
                 holder.award.setVisibility(View.INVISIBLE);
+                holder.position.setVisibility(View.VISIBLE);
                 break;
         }
 
@@ -74,6 +81,7 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
         public TextView name;
         public TextView photos;
         public ImageView award;
+        public TextView position;
     }
 
 }

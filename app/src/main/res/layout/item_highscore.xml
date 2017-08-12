@@ -21,27 +21,40 @@
     </ImageView>
 
     <TextView
-        android:id="@+id/highscore_photos"
-        android:layout_width="80dp"
+        android:id="@+id/highscore_position"
+        android:layout_width="70dp"
         android:layout_height="50dp"
         android:gravity="center_vertical"
-        android:paddingStart="30dp"
+        android:textStyle="bold"
+        android:paddingStart="20dp"
+        android:layout_alignParentTop="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="177"/>
+
+
+    <TextView
+        android:id="@+id/highscore_photos"
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
         android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_toEndOf="@+id/highscore_award"
-        android:text="1"/>
-
+        android:layout_toEndOf="@+id/highscore_position"
+        android:text="188"/>
     <TextView
         android:id="@+id/highscore_name"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:gravity="center_vertical"
-        android:paddingStart="30dp"
+        android:paddingStart="10dp"
         android:text="ten"
         android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/highscore_photos"/>
+
+
 
 </RelativeLayout>
 

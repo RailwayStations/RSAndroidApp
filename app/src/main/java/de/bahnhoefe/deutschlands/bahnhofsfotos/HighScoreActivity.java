@@ -1,10 +1,17 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.app.SearchManager;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -21,6 +28,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import org.json.JSONObject;
 
+import static com.google.android.gms.analytics.internal.zzy.l;
+
 public class HighScoreActivity extends AppCompatActivity {
 
     private static final String TAG = "HighScoreActivity";
@@ -33,6 +42,7 @@ public class HighScoreActivity extends AppCompatActivity {
         if (ConnectionUtil.checkInternetConnection(this)) {
             new JSONHighscoreTask(((BaseApplication) getApplication()).getCountryShortCode()).execute();
         }
+
     }
 
 
@@ -60,6 +70,7 @@ public class HighScoreActivity extends AppCompatActivity {
                     buffer.append(line);
                 }
                 final String finalJson = buffer.toString();
+                int position = 0;
 
                 final JSONObject photographers = new JSONObject(finalJson);
                 Log.i(TAG, "Parsed " + photographers.length() + " photographers");
@@ -68,7 +79,8 @@ public class HighScoreActivity extends AppCompatActivity {
                 while (photographerNames.hasNext()) {
                     final String name = photographerNames.next();
                     final int photos = photographers.getInt(name);
-                    highScore.add(new HighScoreItem(name, photos));
+                    position = position + 1;
+                    highScore.add(new HighScoreItem(name, photos, position));
                 }
             } catch (final Exception e) {
                 Log.e(TAG, "Error loading HighScore", e);
@@ -89,5 +101,7 @@ public class HighScoreActivity extends AppCompatActivity {
             listView.setAdapter(new HighScoreAdapter(HighScoreActivity.this, highScore.toArray(new HighScoreItem[0])));
         }
     }
+
+
 
 }
