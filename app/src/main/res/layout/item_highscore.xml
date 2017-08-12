@@ -22,11 +22,12 @@
 
     <TextView
         android:id="@+id/highscore_position"
-        android:layout_width="70dp"
+        android:layout_width="50dp"
         android:layout_height="50dp"
         android:gravity="center_vertical"
         android:textStyle="bold"
-        android:paddingStart="20dp"
+        android:textAlignment="center"
+        android:maxLines="1"
         android:layout_alignParentTop="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="177"/>
@@ -34,11 +35,12 @@
 
     <TextView
         android:id="@+id/highscore_photos"
-        android:layout_width="70dp"
+        android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:gravity="center_vertical"
         android:paddingStart="20dp"
         android:textStyle="bold"
+        android:maxLines="1"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_toEndOf="@+id/highscore_position"
         android:text="188"/>

@@ -1,17 +1,10 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-import android.app.SearchManager;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -27,8 +20,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import org.json.JSONObject;
-
-import static com.google.android.gms.analytics.internal.zzy.l;
 
 public class HighScoreActivity extends AppCompatActivity {
 
@@ -76,10 +67,14 @@ public class HighScoreActivity extends AppCompatActivity {
                 Log.i(TAG, "Parsed " + photographers.length() + " photographers");
 
                 final Iterator<String> photographerNames = photographers.keys();
+                int lastPhotos = 0;
                 while (photographerNames.hasNext()) {
                     final String name = photographerNames.next();
                     final int photos = photographers.getInt(name);
-                    position = position + 1;
+                    if (lastPhotos == 0 || lastPhotos > photos) {
+                        position++;
+                    }
+                    lastPhotos = photos;
                     highScore.add(new HighScoreItem(name, photos, position));
                 }
             } catch (final Exception e) {
