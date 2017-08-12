@@ -34,7 +34,7 @@
     <string name="nav_to_station">Navigiere zum Bahnhof</string>
     <string name="title_activity_my_data">Deine Daten</string>
     <string name="CC0">CC0 - ohne Namensnennung</string>
-    <string name="CC4">CC4.0 mit Namensnennung</string>
+    <string name="CC4">CC4.0 mit Namensnennung (nicht mehr unterstützt)</string>
     <string name="tvLicence">Unter welcher Lizenz möchtest Du Deine Fotos einreichen?</string>
     <string name="tvOwnPhoto">Handelt es sich bei den von Dir eingereichten Photos um Deine eigenen Photos?</string>
     <string name="rbOwnPhotoYes">Ja</string>
@@ -210,5 +210,6 @@
     <string name="PHOTO_FILTER">APP_PREF_PHOTO_FILTER</string>
     <string name="LAST_UPDATE">APP_PREF_LAST_UPDATE</string>
     <string name="search_nickname_hint">Fotograf suchen</string>
+    <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können.</string>
 
 </resources>

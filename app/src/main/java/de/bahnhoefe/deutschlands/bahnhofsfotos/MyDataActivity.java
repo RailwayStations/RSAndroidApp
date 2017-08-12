@@ -102,6 +102,9 @@ public class MyDataActivity extends AppCompatActivity {
 
     public void selectLicence(View view) {
         license = License.byId(view.getId());
+        if (license == License.CC4) {
+            new SimpleDialogs().confirm(this, R.string.cc4_warning);
+        }
     }
 
     public void selectPhotoOwner(View view) {
