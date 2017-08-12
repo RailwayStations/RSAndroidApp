@@ -209,5 +209,6 @@
     <string name="loading_stations">Lade Bahnhöfe</string>
     <string name="PHOTO_FILTER">APP_PREF_PHOTO_FILTER</string>
     <string name="LAST_UPDATE">APP_PREF_LAST_UPDATE</string>
+    <string name="search_nickname_hint">Fotograf suchen</string>
 
 </resources>

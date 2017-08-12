@@ -1,10 +1,17 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.annotation.TargetApi;
+import android.app.SearchManager;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Menu;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -24,6 +31,7 @@ import org.json.JSONObject;
 public class HighScoreActivity extends AppCompatActivity {
 
     private static final String TAG = "HighScoreActivity";
+    private HighScoreAdapter adapter;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -33,7 +41,44 @@ public class HighScoreActivity extends AppCompatActivity {
         if (ConnectionUtil.checkInternetConnection(this)) {
             new JSONHighscoreTask(((BaseApplication) getApplication()).getCountryShortCode()).execute();
         }
+    }
 
+    @Override
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_high_score, menu);
+
+        SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView search = (SearchView) menu.findItem(R.id.search).getActionView();
+        search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                Log.d(TAG, "onQueryTextSubmit ");
+                if (adapter != null) {
+                    adapter.getFilter().filter(s);
+                    if (adapter.isEmpty()) {
+                        Toast.makeText(HighScoreActivity.this, "No records found!", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(HighScoreActivity.this, adapter.getCount() + " records found!", Toast.LENGTH_LONG).show();
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                Log.d(TAG, "onQueryTextChange ");
+                if (adapter != null) {
+                    adapter.getFilter().filter(s);
+                }
+                return false;
+            }
+
+        });
+
+        return true;
     }
 
 
@@ -93,10 +138,9 @@ public class HighScoreActivity extends AppCompatActivity {
         protected void onPostExecute(final List<HighScoreItem> highScore) {
             final ListView listView = (ListView) findViewById(R.id.highscore_list);
             assert listView != null;
-            listView.setAdapter(new HighScoreAdapter(HighScoreActivity.this, highScore.toArray(new HighScoreItem[0])));
+            adapter = new HighScoreAdapter(HighScoreActivity.this, highScore);
+            listView.setAdapter(adapter);
         }
     }
-
-
 
 }

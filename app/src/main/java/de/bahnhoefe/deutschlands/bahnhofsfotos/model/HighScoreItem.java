@@ -22,4 +22,10 @@ public class HighScoreItem {
     public int getPosition() {
         return position;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }
