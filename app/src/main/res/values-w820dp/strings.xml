@@ -116,5 +116,5 @@
         "\n"ein und klicke \'Token anfordern\'</string>
     <string name="etUploadToken">Bitte trage hier nach Erhalt der E-Mail
         "\n"den Upload-Token ein</string>
-    <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können. Das gilt nur für neue Fotografen.</string>
+    <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können.</string>
 </resources>

@@ -210,6 +210,6 @@
     <string name="PHOTO_FILTER">APP_PREF_PHOTO_FILTER</string>
     <string name="LAST_UPDATE">APP_PREF_LAST_UPDATE</string>
     <string name="search_nickname_hint">Fotograf suchen</string>
-    <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können. Das gilt nur für neue Fotografen.</string>
+    <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können.</string>
 
 </resources>
