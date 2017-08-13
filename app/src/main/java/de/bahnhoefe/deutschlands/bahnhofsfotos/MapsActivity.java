@@ -210,8 +210,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void addMarkers(List<Bahnhof> bahnhofMarker) {
+        double minLat = 0;
+        double maxLat = 0;
+        double minLon = 0;
+        double maxLon = 0;
         for (Bahnhof bahnhof : bahnhofMarker) {
             LatLng bahnhofPos = bahnhof.getPosition();
+            if (minLat == 0.0) {
+                minLat = bahnhofPos.latitude;
+                maxLat = bahnhofPos.latitude;
+                minLon = bahnhofPos.longitude;
+                maxLon = bahnhofPos.longitude;
+            } else {
+                minLat = Math.min(minLat, bahnhofPos.latitude);
+                maxLat = Math.max(maxLat, bahnhofPos.latitude);
+                minLon = Math.min(minLon, bahnhofPos.longitude);
+                maxLon = Math.max(maxLon, bahnhofPos.longitude);
+            }
             mMap.addMarker(new MarkerOptions()
                     .title(bahnhof.getTitle())
                     .position(bahnhofPos)
@@ -221,6 +236,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMap.setInfoWindowAdapter(this);
         mMap.setOnInfoWindowClickListener(this);
+        if (myPos == null || (myPos.latitude == 0.0 && myPos.longitude == 0.0)) {
+            myPos = new LatLng((minLat + maxLat) / 2, (minLon + maxLon) / 2);
+            updatePosition();
+        }
     }
 
     private BitmapDescriptor getMarkerIcon(Bahnhof bahnhof, String nickname) {
@@ -334,7 +353,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onLocationChanged(Location location) {
         myPos = new LatLng(location.getLatitude(), location.getLongitude());
+        updatePosition();
+    }
 
+    private void updatePosition() {
         if (myPositionMarker == null) {
             myPositionMarker = mMap.addMarker(new MarkerOptions().position(myPos).title("Meine aktuelle Position: ").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
         } else {
