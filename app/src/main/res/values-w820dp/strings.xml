@@ -28,8 +28,8 @@
     <string name="rbLinkingSnapchat">Snapchat</string>
     <string name="rbLinkingXing">Xing</string>
     <string name="rbLinkingwebpage">Eigene Webseite</string>
-        <string name="etNickname">Bitte trage hier Deinen Nicknamen ein
-        "\n"- bei Twitter bitte ohne das @
+    <string name="etNickname">Bitte trage hier Deinen Nicknamen ein.
+        "\n" Wenn Du schon Fotograf bist, bitte exakt, wie er in der Rangliste erscheint.
     </string>
     <string name="menu_title_your_own_station_photos">Eigene Fotos</string>
     <string name="rbLinkingWith">Verlinkung mit: </string>
@@ -116,4 +116,5 @@
         "\n"ein und klicke \'Token anfordern\'</string>
     <string name="etUploadToken">Bitte trage hier nach Erhalt der E-Mail
         "\n"den Upload-Token ein</string>
+    <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können. Das gilt nur für neue Fotografen.</string>
 </resources>
