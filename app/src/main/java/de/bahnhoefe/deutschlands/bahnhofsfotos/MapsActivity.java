@@ -186,6 +186,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.getUiSettings().setZoomControlsEnabled(true);
         reloadMap();
         if (myPos != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
