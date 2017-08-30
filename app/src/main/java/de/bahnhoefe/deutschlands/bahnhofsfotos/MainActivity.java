@@ -1,10 +1,12 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
@@ -25,6 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,6 +54,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
@@ -61,6 +66,7 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DIALOG_TAG = "App Info Dialog";
+    private static final long CHECK_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes
     public final String TAG = "Bahnhoefe";
     private BaseApplication baseApplication;
     private BahnhofsDbAdapter dbAdapter;
@@ -303,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
-            runMultipleAsyncTask();
+            runUpdateTasks();
         } else if (id == R.id.nav_highscore) {
             Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
             startActivity(intent);
@@ -506,7 +512,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public class JSONLaenderTask extends AsyncTask<Void, String, List<Country>> {
 
-        private ProgressDialog progressDialog;
         private Exception exception;
 
         protected List<Country> doInBackground(Void... params) {
@@ -576,12 +581,57 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    public class JSONStatisticTask extends AsyncTask<Void, String, Statistic> {
+
+        private final String countryCode;
+
+        protected JSONStatisticTask(final String countryCode) {
+            this.countryCode = countryCode;
+        }
+
+        protected Statistic doInBackground(Void... params) {
+            try {
+                URL url = new URL(Constants.API_START_URL + "/" + countryCode.toLowerCase() + "/stats");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                InputStream stream = connection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+                String finalJson = buffer.toString();
+
+                publishProgress("Verarbeite Statistik...");
+                JSONObject statsJson = new JSONObject(finalJson);
+                Statistic statistic = new Statistic(statsJson.getInt("total"),
+                                            statsJson.getInt("withPhoto"),
+                                            statsJson.getInt("withoutPhoto"),
+                                            statsJson.getInt("photographers"));
+
+                Log.i(TAG, "Stat: " + statistic);
+                return statistic;
+            } catch (final Exception e) {
+                Log.e(TAG, "Error loading countries", e);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Statistic statistic) {
+            checkForUpdates(statistic);
+        }
+
+    }
+
     /**
      * Run Multiple Async Tasks
      * <p>
      * from http://blogs.innovationm.com/multiple-asynctask-in-android/
      */
-    private void runMultipleAsyncTask() {
+    private void runUpdateTasks() {
         if (ConnectionUtil.checkInternetConnection(this)) {
             // First Task
             new JSONTask(baseApplication.getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
@@ -597,7 +647,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         handleGalleryNavItem();
         if (baseApplication.getLastUpdate() == 0) {
-            runMultipleAsyncTask();
+            runUpdateTasks();
+        } else if (System.currentTimeMillis() - baseApplication.getLastUpdate() > CHECK_UPDATE_INTERVAL) {
+            baseApplication.setLastUpdate(System.currentTimeMillis());
+            if (baseApplication.getUpdatePolicy() != UpdatePolicy.MANUAL) {
+                new JSONStatisticTask(baseApplication.getCountryShortCode()).execute();
+            }
         }
 
         if (photoFilterMenuItem != null) {
@@ -606,6 +661,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (customAdapter != null) {
             cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter());
             customAdapter.swapCursor(cursor);
+        }
+    }
+
+    private void checkForUpdates(Statistic apiStat) {
+        if (apiStat == null) {
+            return;
+        }
+
+        Statistic dbStat = dbAdapter.getStatistic();
+        Log.d(TAG, "DbStat: " + dbStat);
+        if (apiStat.getTotal() != dbStat.getTotal() || apiStat.getWithPhoto() != dbStat.getWithPhoto() || apiStat.getWithoutPhoto() != dbStat.getWithoutPhoto()) {
+            if (baseApplication.getUpdatePolicy() == UpdatePolicy.AUTOMATIC) {
+                runUpdateTasks();
+            } else {
+                new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
+                        .setIcon(R.mipmap.ic_launcher)
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.update_available)
+                        .setCancelable(true)
+                        .setPositiveButton(R.string.button_ok_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                runUpdateTasks();
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton(R.string.button_cancel_text, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .create().show();
+            }
         }
     }
 

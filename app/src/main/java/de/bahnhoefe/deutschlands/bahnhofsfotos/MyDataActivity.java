@@ -22,6 +22,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Linking;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import org.json.JSONException;
@@ -30,7 +31,7 @@ import org.json.JSONObject;
 public class MyDataActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
     private EditText etNickname, etLink, etEmail, etUploadToken;
-    private RadioGroup rgLicence, rgPhotoOwner, rgLinking;
+    private RadioGroup rgLicence, rgPhotoOwner, rgLinking, rgUpdatePolicy;
     private License license;
     private PhotoOwner photoOwner;
     private String nickname;
@@ -39,6 +40,7 @@ public class MyDataActivity extends AppCompatActivity {
     private Linking linking;
     private String uploadToken;
     private BaseApplication baseApplication;
+    private UpdatePolicy updatePolicy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,7 @@ public class MyDataActivity extends AppCompatActivity {
         rgLicence = (RadioGroup) findViewById(R.id.rgLicence);
         rgPhotoOwner = (RadioGroup) findViewById(R.id.rgOwnPhoto);
         rgLinking = (RadioGroup) findViewById(R.id.rgLinking);
+        rgUpdatePolicy = (RadioGroup) findViewById(R.id.rgUpdatePolicy);
 
         license = baseApplication.getLicense();
         rgLicence.check(license.getId());
@@ -77,6 +80,9 @@ public class MyDataActivity extends AppCompatActivity {
 
         uploadToken = baseApplication.getUploadToken();
         etUploadToken.setText(uploadToken);
+
+        updatePolicy = baseApplication.getUpdatePolicy();
+        rgUpdatePolicy.check(updatePolicy.getId());
 
         receiveUploadToken(getIntent());
     }
@@ -107,6 +113,10 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
+    public void selectUpdatePolicy(View view) {
+        updatePolicy = UpdatePolicy.byId(view.getId());
+    }
+
     public void selectPhotoOwner(View view) {
         photoOwner = PhotoOwner.byId(view.getId());
     }
@@ -133,6 +143,7 @@ public class MyDataActivity extends AppCompatActivity {
         baseApplication.setNickname(etNickname.getText().toString().trim());
         baseApplication.setEmail(etEmail.getText().toString().trim());
         baseApplication.setUploadToken(etUploadToken.getText().toString().trim());
+        baseApplication.setUpdatePolicy(updatePolicy);
         Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
     }
 
@@ -144,6 +155,7 @@ public class MyDataActivity extends AppCompatActivity {
         baseApplication.setNickname(null);
         baseApplication.setEmail(null);
         baseApplication.setUploadToken(null);
+        baseApplication.setUpdatePolicy(UpdatePolicy.NOTIFY);
         Toast.makeText(this, R.string.preferences_cleared, Toast.LENGTH_LONG).show();
     }
 

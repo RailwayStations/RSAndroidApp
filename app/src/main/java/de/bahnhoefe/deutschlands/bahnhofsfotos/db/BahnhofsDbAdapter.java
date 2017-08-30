@@ -14,6 +14,7 @@ import java.util.List;
 import com.google.android.gms.maps.model.LatLng;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.DB_JSON_CONSTANTS.KEY_ID;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
@@ -214,6 +215,16 @@ public class BahnhofsDbAdapter {
             return null;
         }
         return cursor;
+    }
+
+    public Statistic getStatistic() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT count(*), count(" + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + "), count(distinct(" + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE, null);
+        if (!cursor.moveToNext()) {
+            return null;
+        }
+        return new Statistic(cursor.getInt(0), cursor.getInt(1), cursor.getInt(0) - cursor.getInt(1), cursor.getInt(2));
     }
 
     class BahnhoefeDbOpenHelper extends SQLiteOpenHelper {

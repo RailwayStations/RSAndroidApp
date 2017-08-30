@@ -57,6 +57,7 @@
     <string name="bt_mydata_commit">Speichern</string>
     <string name="bt_mydata_clear">Reset</string>
     <string name="LICENCE">APP_PREF_LICENCE</string>
+    <string name="UPDATE_POLICY">APP_PREF_UPDATE_POLICY</string>
     <string name="PHOTO_OWNER">APP_PREF_PHOTO_OWNER</string>
     <string name="LINKING">APP_PREF_LINKING</string>
     <string name="NICKNAME">APP_PREF_NICKNAME</string>
@@ -211,5 +212,11 @@
     <string name="LAST_UPDATE">APP_PREF_LAST_UPDATE</string>
     <string name="search_nickname_hint">Fotograf suchen</string>
     <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können.</string>
+    <string name="update_available">Es sind neue Bahnhofsfotos verfügbar. Aktualisieren?</string>
+    <string name="button_cancel_text">Abbrechen</string>
+    <string name="update_manual">Manuell</string>
+    <string name="update_notify">Nachfragen</string>
+    <string name="update_automatic">Automatisch</string>
+    <string name="tvUpdatePolicy">Aktualisierung der Bahnhofsdaten</string>
 
 </resources>
