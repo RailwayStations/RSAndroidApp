@@ -10,6 +10,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Linking;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 public class BaseApplication extends Application {
@@ -104,6 +105,14 @@ public class BaseApplication extends Application {
 
     public void setLicense(License license) {
         putString(R.string.LICENCE, license.toString());
+    }
+
+    public UpdatePolicy getUpdatePolicy() {
+        return UpdatePolicy.byName(preferences.getString(getString(R.string.UPDATE_POLICY), License.UNKNOWN.toString()));
+    }
+
+    public void setUpdatePolicy(UpdatePolicy updatePolicy) {
+        putString(R.string.UPDATE_POLICY, updatePolicy.toString());
     }
 
     public PhotoOwner getPhotoOwner() {
