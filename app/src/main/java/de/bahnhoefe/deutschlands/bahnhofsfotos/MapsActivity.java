@@ -247,7 +247,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (!bahnhof.hasPhoto()) {
             return BitmapDescriptorFactory.defaultMarker(343);
         } else if (bahnhof.getPhotographer().equals(nickname)) {
-            return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
+            return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
         }
         return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
     }
