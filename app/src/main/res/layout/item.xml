@@ -33,10 +33,11 @@
         android:layout_height="24dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/hasPhoto"
-        android:src="@drawable/ic_photo_red_48px"
+        android:src="@drawable/ic_photo_gray_48px"
         android:visibility="invisible"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        />
 
 </RelativeLayout>
 
