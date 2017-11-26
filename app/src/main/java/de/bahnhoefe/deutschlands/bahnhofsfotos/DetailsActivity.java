@@ -910,7 +910,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             } else if (result == 409) {
                 new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
             } else {
-                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_failed);
+                new SimpleDialogs().confirm(DetailsActivity.this,
+                        String.format(getText(R.string.upload_failed).toString(), result));
             }
         }
 

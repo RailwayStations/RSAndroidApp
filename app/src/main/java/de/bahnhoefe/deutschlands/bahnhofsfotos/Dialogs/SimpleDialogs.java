@@ -16,4 +16,12 @@ public class SimpleDialogs {
                 .setNeutralButton(R.string.button_ok_text, null).create().show();
     }
 
+    public void confirm(Context context, CharSequence message) {
+        new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setNeutralButton(R.string.button_ok_text, null).create().show();
+    }
+
 }

@@ -289,7 +289,8 @@ public class MyDataActivity extends AppCompatActivity {
             } else if (result == 422) {
                 new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
             } else {
-                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_failed);
+                new SimpleDialogs().confirm(MyDataActivity.this,
+                        String.format(getText(R.string.registration_failed).toString(), result));
             }
         }
 
