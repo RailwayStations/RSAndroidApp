@@ -44,6 +44,7 @@ android:
     - 'android-sdk-preview-license-.+'
     - 'android-sdk-license-.+'
     - 'google-gdk-license-.+'
+    - '.+'
     
 install:
   - echo y | android update sdk -u -a -t tools
@@ -52,6 +53,8 @@ install:
   - echo y | android update sdk -u -a -t android-$ANDROID_API_LEVEL
   - echo y | android update sdk -u -a -t extra-google-m2repository
   - echo y | android update sdk -u -a -t extra-android-m2repository
+  - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.0-alpha4"
+  - echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.0-alpha4"
   
 before_script:
   # Accept licenses
