@@ -54,6 +54,7 @@ install:
   - echo y | android update sdk -u -a -t extra-google-m2repository
   - echo y | android update sdk -u -a -t extra-android-m2repository
   - echo y | android update sdk -u -a -t constraint-layout-1.0.2
+  - echo y | android update sdk -u -a -t constraint-layout-solver-1.0.2
   
 before_script:
   # Accept licenses
