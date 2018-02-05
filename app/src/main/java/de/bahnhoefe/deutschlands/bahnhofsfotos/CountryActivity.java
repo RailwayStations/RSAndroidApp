@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -35,11 +36,34 @@ public class CountryActivity extends AppCompatActivity {
                 countryAdapter.setSelectedIndex(position);
                 countryAdapter.notifyDataSetChanged();
                 countryAdapter.getView(position, view, listView, cursor);
-                baseApplication.setLastUpdate(0L);
             }
 
 
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        BaseApplication baseApplication = BaseApplication.getInstance();
+        String prefCountry = baseApplication.getCountryShortCode();
+        String selectedCountry = countryAdapter.getSelectedCountry();
+
+        if (!prefCountry.equals(selectedCountry)) {
+            baseApplication.setCountryShortCode(selectedCountry);
+            baseApplication.setLastUpdate(0L);
+        }
+        super.onBackPressed();
     }
 
 }

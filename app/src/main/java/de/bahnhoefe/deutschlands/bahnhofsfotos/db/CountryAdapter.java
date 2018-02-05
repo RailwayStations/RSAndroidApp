@@ -18,19 +18,18 @@ public class CountryAdapter extends CursorAdapter {
     private int selectedPosition = -1;
     private final LayoutInflater mInflater;
     private final String TAG = getClass().getSimpleName();
-
+    private String selectedCountry = null;
 
     public CountryAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        BaseApplication baseApplication = BaseApplication.getInstance();
+        selectedCountry = baseApplication.getCountryShortCode();
     }
 
     // new refactored after https://www.youtube.com/watch?v=wDBM6wVEO70&feature=youtu.be&t=7m
     public View getView(int selectedPosition, View convertView, ViewGroup parent, Cursor cursor) {
         ViewHolder holder;
-        BaseApplication baseApplication = BaseApplication.getInstance();
-
-        String prefCountry = baseApplication.getCountryShortCode();
 
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.item_country, parent, false);
@@ -52,12 +51,13 @@ public class CountryAdapter extends CursorAdapter {
         holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
         holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
 
-        Log.i(TAG, cursor.getString(1) + " " + prefCountry);
-        if (cursor.getString(1).equals(prefCountry)) {
+        final String newCountry = cursor.getString(1);
+        Log.i(TAG, newCountry + " " + selectedCountry);
+        if (newCountry.equals(selectedCountry)) {
             holder.checkCountry.setChecked(true);
         } else if (selectedPosition == cursor.getPosition()) {
             holder.checkCountry.setChecked(true);
-            baseApplication.setCountryShortCode(cursor.getString(1));
+            selectedCountry = newCountry;
         } else {
             holder.checkCountry.setChecked(false);
         }
@@ -79,9 +79,6 @@ public class CountryAdapter extends CursorAdapter {
     // wird nicht benutzt, ersetzt durch getView()
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        BaseApplication baseApplication = BaseApplication.getInstance();
-        String prefCountry = baseApplication.getCountryShortCode();
-
         //If you want to have zebra lines color effect uncomment below code
         if (cursor.getPosition() % 2 == 1) {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor);
@@ -93,12 +90,13 @@ public class CountryAdapter extends CursorAdapter {
         holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
         holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
 
-        Log.i(TAG, cursor.getString(1) + " " + prefCountry);
-        if (cursor.getString(1).equals(prefCountry)) {
+        final String newCountry = cursor.getString(1);
+        Log.i(TAG, newCountry + " " + selectedCountry);
+        if (newCountry.equals(selectedCountry)) {
             holder.checkCountry.setChecked(true);
         } else if (selectedPosition == cursor.getPosition()) {
             holder.checkCountry.setChecked(true);
-            baseApplication.setCountryShortCode(cursor.getString(1));
+            selectedCountry = newCountry;
         } else {
             holder.checkCountry.setChecked(false);
         }
@@ -110,19 +108,23 @@ public class CountryAdapter extends CursorAdapter {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkCountry.isChecked()) {
-                    selectedPosition = position;
+            if (checkCountry.isChecked()) {
+                selectedPosition = position;
 
-                } else {
-                    selectedPosition = -1;
-                }
-                notifyDataSetChanged();
+            } else {
+                selectedPosition = -1;
+            }
+            notifyDataSetChanged();
             }
         };
     }
 
     public void setSelectedIndex(int index) {
         selectedPosition = index;
+    }
+
+    public String getSelectedCountry() {
+        return selectedCountry;
     }
 
     private static class ViewHolder {
