@@ -255,9 +255,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             File file = getCameraMediaFile();
             if (file != null) {
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                Uri photoURI = FileProvider.getUriForFile(this, "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
                 intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
+                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 startActivityForResult(intent, REQUEST_TAKE_PICTURE);
             } else {
                 Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
