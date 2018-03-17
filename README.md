@@ -17,4 +17,6 @@ A template for the `google-services.json` can be found in `app/templates`. Copy 
 
 API-Key: copy `app/templates/rs_api.xml` to `app/src/main/res/values/` and enter the API for the Backend Service.
 
+Help to translate the project on [Crowdin](https://crowdin.com/project/rsandroidapp).
+
 The code is public under MIT-Licence: http://choosealicense.com/licenses/mit/

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#
+#
+# This script downloads all translations from crowdin,
+#
+#
+
+# see: https://crowdin.com/page/api/export
+# see: https://crowdin.com/page/api/download
+
+. "$(dirname "$0")/globals"
+
+ZIPFILE=all.zip
+
+finish () {
+    debug "cleaning up"
+    # revert everything until last commit
+    [[ -f ${ZIPFILE} ]] && _do rm "${ZIPFILE}"
+}
+
+# package the language files (allowed every 30 min)
+debug "packaging language files."
+crowdin_surf "https://api.crowdin.com/api/project/rsandroidapp/export?key=${CROWDIN_APIKEY}"
+
+# download and unpack translations
+[[ -f ${ZIPFILE} ]] && rm ${ZIPFILE}
+_do wget "https://api.crowdin.com/api/project/rsandroidapp/download/all.zip?key=${CROWDIN_APIKEY}" -O ${ZIPFILE} \
+     || die "crowdin download failed."
+_do unzip -o ${ZIPFILE} -d build/crowdin || die "unzip of ${ZIPFILE} failed."
+
+for f in build/crowdin/*/rsandroidapp/strings.xml; do
+  # fix unicode entities for ellipsis character
+  sed -i 's/&#8230;/…/g' "$f"
+
+  # move file to correct location
+  tmp=${f#*build/crowdin/}
+  code=${tmp%/rsandroidapp/*}
+  code=$(map_from_crowdin_code "$code")
+
+  cp "$f" app/src/main/res/values-"$code"/strings.xml
+done
+
+# clean up
+finish

@@ -1,0 +1,19 @@
+INSTALLATION
+
+- create a NEW local repo from the github repo on master branch
+- copy crowdin/credentials.template to crowdin/credentials
+- edit crowdin/credentials
+  -> find the API-KEY here http://crowdin.net/project/rsandroidapp/settings#project-settings-api
+- prepare crowdin:
+  - run update manually
+
+THE SCRIPTS
+
+Run all scripts from within a repo.
+
+- upload: no arguments
+  -> this will upload the base language file values/strings.xml to crowdin.
+    from master, it will upload to master and globals. other branches are not allowed.
+
+- download: no arguments
+  -> this will download the language files from crowdin.

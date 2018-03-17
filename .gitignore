@@ -6,5 +6,5 @@ local.properties
 app/src/main/res/values/google_maps_api.xml
 app/src/main/res/values/rs_api.xml
 app/google-services.json
-
+crowdin/credentials
 

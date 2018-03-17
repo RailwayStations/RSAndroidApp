@@ -1,0 +1,30 @@
+<resources>
+    <string name="LICENCE" translatable="false">APP_PREF_LICENCE</string>
+    <string name="UPDATE_POLICY" translatable="false">APP_PREF_UPDATE_POLICY</string>
+    <string name="PHOTO_OWNER" translatable="false">APP_PREF_PHOTO_OWNER</string>
+    <string name="LINKING" translatable="false">APP_PREF_LINKING</string>
+    <string name="NICKNAME" translatable="false">APP_PREF_NICKNAME</string>
+    <string name="EMAIL" translatable="false">APP_PREF_EMAIL</string>
+    <string name="UPLOAD_TOKEN" translatable="false">APP_PREF_UPLOAD_TOKEN</string>
+    <string name="LINK_TO_PHOTOGRAPHER" translatable="false">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
+    <string name="COUNTRY" translatable="false">APP_PREF_COUNTRY</string>
+
+    <string name="FIRSTAPPSTART" translatable="false">FirstAppStart</string>
+    <string name="fab_email" translatable="false">bahnhofsfotos@deutschlands-bahnhoefe.de</string>
+    <string name="menu_title_website" translatable="false">railway-stations.org</string>
+    <string name="railway_stations_activity" translatable="false">https://railway-stations.org</string>
+    <string name="FRIENDLY_ENGAGE_TOPIC" translatable="false">friendly_engage</string>
+    <string name="PHOTO_FILTER" translatable="false">APP_PREF_PHOTO_FILTER</string>
+    <string name="LAST_UPDATE" translatable="false">APP_PREF_LAST_UPDATE</string>
+
+    <string name="rbLinkingTwitter" translatable="false">Twitter</string>
+    <string name="rbLinkingInstagram" translatable="false">Instagram</string>
+    <string name="rbLinkingSnapchat" translatable="false">Snapchat</string>
+    <string name="rbLinkingXing" translatable="false">Xing</string>
+
+    <!-- placeholder -->
+    <string name="bahnhofname" translatable="false">BahnhofName</string>
+    <string name="bahnhofnr" translatable="false">BahnhofNr</string>
+    <string name="latlong" translatable="false">Geoposition</string>
+
+</resources>

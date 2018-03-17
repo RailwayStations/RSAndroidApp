@@ -3,8 +3,6 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="menu_title_first">Deutschlands</string>
-    <string name="menu_title_second">Bahnhöfe</string>
     <string name="menu_title_your_data">Meine Daten</string>
     <string name="menu_title_update_photos">Aktualisieren</string>
     <string name="menu_title_stations_with_photo">Bahnhöfe mit Photo</string>
@@ -14,17 +12,8 @@
     <string name="menu_title_send">Senden</string>
 
     <string name="action_settings">Settings</string>
-    <string name="title_activity_maps_acitivty">MapsAcitivty</string>
     <string name="maps_activity">Bahnhofskarte</string>
     <string name="no_location_detected">Keine Position gefunden</string>
-    <string name="map">Karte aufrufen</string>
-    <string name="latitude_label">Latitude</string>
-    <string name="longitude_label">Longitude</string>
-    <string name="bahnhofname">BahnhofName</string>
-    <string name="bahnhofnr">BahnhofNr</string>
-    <string name="longitude">Longitude</string>
-    <string name="latitude">Latitude</string>
-    <string name="latlong">Geoposition</string>
     <string name="title_activity_details">Bahnhofs-Details</string>
     <string name="no_stations_loaded">Keine Bahnhöfe geladen. Bitte zuerst Photos aktualisieren klicken.</string>
     <string name="no_stations_in_database">Eine Aktualisierung hat noch nicht stattgefunden</string>
@@ -43,10 +32,6 @@
     <string name="etLinking">Bitte trage hier die URL zu Deinem Account ein</string>
     <string name="rbLinkingYes">Ja</string>
     <string name="rbLinkingNo">Nein (wird unter Anonym gespeichert)</string>
-    <string name="rbLinkingTwitter">Twitter</string>
-    <string name="rbLinkingInstagram">Instagram</string>
-    <string name="rbLinkingSnapchat">Snapchat</string>
-    <string name="rbLinkingXing">Xing</string>
     <string name="rbLinkingwebpage">Eigene Webseite</string>
     <string name="etNickname">Bitte trage hier Deinen Nicknamen ein.
         "\n" Wenn Du schon Fotograf bist, bitte exakt, wie er in der Rangliste erscheint.
@@ -56,41 +41,19 @@
     <string name="ownPhoto">eigenes Photo</string>
     <string name="bt_mydata_commit">Speichern</string>
     <string name="bt_mydata_clear">Reset</string>
-    <string name="LICENCE">APP_PREF_LICENCE</string>
-    <string name="UPDATE_POLICY">APP_PREF_UPDATE_POLICY</string>
-    <string name="PHOTO_OWNER">APP_PREF_PHOTO_OWNER</string>
-    <string name="LINKING">APP_PREF_LINKING</string>
-    <string name="NICKNAME">APP_PREF_NICKNAME</string>
-    <string name="EMAIL">APP_PREF_EMAIL</string>
-    <string name="UPLOAD_TOKEN">APP_PREF_UPLOAD_TOKEN</string>
-    <string name="LINK_TO_PHOTOGRAPHER">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
-    <string name="COUNTRY">APP_PREF_COUNTRY</string>
     <string name="preferences_saved">Deine Daten wurden gespeichert. </string>
     <string name="preferences_cleared">Deine Daten wurden zurückgesetzt. Beim nächsten Menüaufruf kannst Du neue erfassen.</string>
-    <string name="tvOwnPhotos">Handelt es sich bei den Fotos um Deine eigenen ...</string>
+    <string name="tvOwnPhotos">Handelt es sich bei den Fotos um Deine eigenen …</string>
     <string name="nav_oepnv">mit Bus und Bahn</string>
     <string name="nav_car">mit dem Auto</string>
     <string name="nav_bike">mit dem Fahrrad</string>
     <string name="nav_walk">zu Fuß</string>
     <string name="nav_show">nur den Ort</string>
 
-    <string-array name="pick_navmethod">
-        <item>mit Bus und Bahn</item>
-        <item>mit dem Auto</item>
-        <item>mit dem Fahrrad</item>
-        <item>zu Fuß</item>
-        <item>nur den Ort</item>
-    </string-array>
+    <string name="navMethod">Zeige den Weg…</string>
 
-    <string name="navMethod">Zeige den Weg...</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_gallery">Deine Bahnhofsfotos</string>
-    <string name="title_view_image">Einzelansicht</string>
     <string name="activitynotfound">Du hast keine Navigations-App auf Deinem Smartphone</string>
-    <string name="maps_all_activity">Alle Bahnhöfe ohne Foto</string>
-    <string name="no_file_detected">Es sind noch keine Bahnhofsfotos vorhanden</string>
     <string name="count_of_images">Du hast %1$d Bahnhofsfoto(s) im Speicher</string>
     <string name="search_hint">Bahnhof suchen</string>
     <string name="app_info_title">Über die App</string>
@@ -109,44 +72,31 @@
     <string name="menu_title_info">Über die App</string>
     <string name="benachrichtigen">Benachrichtigen</string>
     <string name="nahe_gelegenen_bahnhof_melden">Nahe gelegenen Bahnhof melden</string>
-    <string name="keine_bahnh_fe_melden">Keine Bahnhöfe melden</string>
-    <string name="beenden">beenden</string>
     <string name="station_is_near">Bahnhof in der Nähe</string>
     <string name="template_short_text" formatted="false">Bahnhof %s in %.2f km</string>
     <string name="template_long_text" formatted="false">Bahnhof: %s\nEntfernung: %.2f km\n%s</string>
     <string name="photo_exists">Photo: für Lizenzinfos Detailansicht öffnen</string>
     <string name="nearby_notification_active">Bahnhofsortung aktiv</string>
-    <string name="nearby_notification_active_only_without_photo">Bahnhofsortung für fehlende Photos aktiv</string>
     <string name="license_tag" formatted="false">Urheber: %s</string>
 
     <!--Firebase-Chat-->
-    <string name="welcome_msg">Welcome!</string>
     <string name="sign_out">Sign Out</string>
-    <string name="contacts_permission_rationale">Access to account information is required to sign in.</string>
     <string name="invite_menu_label">Invite</string>
     <string name="invitation_message">Please join me for a friendly chat</string>
     <string name="invitation_cta">Call to action</string>
     <string name="invitation_title">Friendly Chat Invite</string>
     <string name="sign_in">Hier kannst Du Dich mit Deinem Google-Account einloggen</string>
-    <string name="sign_up">Sign Up</string>
-    <string name="fresh_config">Fresh Config</string>
-    <string name="cause_crash">Cause Crash</string>
     <string name="chatActivity">Chat</string>
     <string name="LogInActivity">Login</string>
 
     <string name="picture_landscape_only">Bitte auf Querformat drehen</string>
     <string name="no_location_enabled">Einstellungen erlauben keine Ortung</string>
     <string name="country_activity">Länderauswahl</string>
-    <string name="selectCountry">auswählen</string>
     <string name="countrySelection">Länderauswahl</string>
-    <string name="locationUpdates">Standort-Aktualisierung</string>
     <string name="dialog_message">Du hast unter “Meine Daten” dein Profil noch nicht ausgefüllt. Du kannst erst ein Foto speichern, wenn du dies erledigt hast.</string>
     <string name="dialog_title">Ergänze Deine Daten</string>
-    <string name="zu_meine_daten">Öffne Meine Daten</string>
     <string name="label_map">Karte</string>
     <string name="label_timetable">Abfahrten</string>
-    <string name="FIRSTAPPSTART">FirstAppStart</string>
-    <string name="fab_email">bahnhofsfotos@deutschlands-bahnhoefe.de</string>
     <string name="fab_subject">Nachricht zur Bahnhofsfoto-App</string>
     <string name="fab_chooser_title">Mail versenden</string>
     <string name="menu_title_introslider">Anleitung</string>
@@ -163,14 +113,10 @@
     <string name="next">WEITER</string>
     <string name="skip">ABBRECHEN</string>
     <string name="proceed">STARTEN</string>
-    <string name="menu_title_website">railway-stations.org</string>
     <string name="menu_title_zum_chat">Zum Chat</string>
-    <string name="railway_stations_activity">https://railway-stations.org</string>
     <string name="pref_title_new_message_notifications">Register or unregister for Push Notification</string>
     <string name="pref_header_notifications">Tab Menu Website</string>
     <string name="push_notifications_menu_label">Benachrichtigungen ausschalten</string>
-    <string name="push_notifications_menu_active">Benachrichtigungen aktivieren</string>
-    <string name="FRIENDLY_ENGAGE_TOPIC">friendly_engage</string>
     <string name="title_activity_high_score">Rangliste</string>
     <string name="menu_title_highscore">Rangliste</string>
     <string name="photo_upload">Foto hochladen</string>
@@ -208,8 +154,6 @@
     <string name="menu_title_stations_map">Bahnhofskarte</string>
     <string name="menu_photo_filter">Filter mit/ohne Foto</string>
     <string name="loading_stations">Lade Bahnhöfe</string>
-    <string name="PHOTO_FILTER">APP_PREF_PHOTO_FILTER</string>
-    <string name="LAST_UPDATE">APP_PREF_LAST_UPDATE</string>
     <string name="search_nickname_hint">Fotograf suchen</string>
     <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können.</string>
     <string name="update_available">Es sind neue Bahnhofsfotos verfügbar. Aktualisieren?</string>

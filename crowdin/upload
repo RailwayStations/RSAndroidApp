@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#
+#
+# This script updates
+#   main/res/values/strings.xml
+# in crowdin by uploading the files from master to crowdin.
+#
+#
+
+# see: https://crowdin.com/page/api/update-file
+
+# update_file uploads the file in parameter 1 to the crowdin file name in parameter 2
+update_file() {
+    crowdin_surf -F "files[$2]=@$1" \
+        "https://api.crowdin.com/api/project/rsandroidapp/update-file?key=${CROWDIN_APIKEY}"
+}
+
+. "$(dirname "$0")/globals"
+
+# current branch
+CURRENT_BRANCH=$(git name-rev --name-only HEAD)
+
+# check branch
+if [ "$CURRENT_BRANCH" != "master" ]; then
+    echo Only update from master branch
+    exit
+fi
+
+echo You must be on an up-to-date "$CURRENT_BRANCH" branch to execute this script.
+echo You have 5 seconds to abort with ctrl-c if this is not the case.
+sleep 5
+
+# update files
+update_file app/src/main/res/values/strings.xml rsandroidapp/strings.xml
