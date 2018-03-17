@@ -145,10 +145,10 @@
   <string name="loading_stations">Load stations</string>
   <string name="search_nickname_hint">Search photographer</string>
   <string name="cc4_warning">CC4 is only available for historical reasons. Please choose CC0, so that we can use your photos without any problems.</string>
-  <string name="update_available">Es sind neue Bahnhofsfotos verfügbar. Aktualisieren?</string>
-  <string name="button_cancel_text">Abbrechen</string>
-  <string name="update_manual">Manuell</string>
-  <string name="update_notify">Nachfragen</string>
-  <string name="update_automatic">Automatisch</string>
-  <string name="tvUpdatePolicy">Aktualisierung der Bahnhofsdaten</string>
+  <string name="update_available">New station photos are available. Update?</string>
+  <string name="button_cancel_text">Cancel</string>
+  <string name="update_manual">Manual</string>
+  <string name="update_notify">Ask</string>
+  <string name="update_automatic">Automatically</string>
+  <string name="tvUpdatePolicy">Upgrade the station data</string>
 </resources>
