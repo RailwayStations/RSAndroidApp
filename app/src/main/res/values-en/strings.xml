@@ -33,7 +33,7 @@
   <string name="rbLinkingYes">Yes</string>
   <string name="rbLinkingNo">No (will be saved as anonymous)</string>
   <string name="rbLinkingwebpage">Own Web page</string>
-  <string name="etNickname">Please enter your nickname here.         \"\n\" If you\'re already a photographer, please exactly as it appears in the rankings.
+  <string name="etNickname">Please enter your nickname here.         \n If you\'re already a photographer, please exactly as it appears in the highscore.
     </string>
   <string name="menu_title_your_own_station_photos">Your own photos</string>
   <string name="rbLinkingWith">Link with: </string>
@@ -55,10 +55,10 @@
   <string name="search_hint">Search station</string>
   <string name="app_info_title">About the app</string>
   <string name="app_info_ok">OK</string>
-  <string name="app_info_text">App development: \"\n\"<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>
-        \"\n\"in 08/2016 during the OpenSource project of <b><a href="http://www.deutschlands-bahnhoefe.org">Germany\'s railway stations</a></b>. "         "\n\n"The station data were provided by Deutsche Bahn in the context of the local <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData project</a></b>. "         "\n\n"The json file that merges the photos and the station data, is provided by the Java application developed by <b><a href="https://twitter.com/storchp">Peter Storch</a></b>. "         "" \n\n"The app uses the <a href="https://design.google.com/icons/">material-design-icons used by Google,</a> under Apache license version 2.0"\n\n"<b>Involved</b> in the "Germany\'s railway stations" project: "\n\n"<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedor n (map development)</a></b>
-        \"\n\n\"<b>- Alexandra Schön (design)</b>
-        \"\n\n\"<b>- Katrin Schönherr (php development)</b>
+  <string name="app_info_text">App development: \n<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>
+        \nin 08/2016 during the OpenSource project of <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands Bahnhöfe</a></b>.          \n\nThe station data were provided by Deutsche Bahn in the context of the local <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData project</a></b>.          \n\nThe json file that merges the photos and the station data, is provided by the Java application developed by <b><a href="https://twitter.com/storchp">Peter Storch</a></b>.           \n\nThe app uses the <a href="https://design.google.com/icons/">material-design-icons used by Google,</a> under Apache license version 2.0\n\n<b>Involved</b> in the "Deutschlands-Bahnhöfe" project: \n\n<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedor n (map development)</a></b>
+        \n\n<b>- Alexandra Schön (design)</b>
+        \n\n<b>- Katrin Schönherr (php development)</b>
     </string>
   <string name="information">Information</string>
   <string name="menu_title_info">About the app</string>
@@ -91,13 +91,13 @@
   <string name="fab_chooser_title">Send mail</string>
   <string name="menu_title_introslider">Manual</string>
   <string name="menu_follow_my_location">Follow my position</string>
-  <string name="text_intro_slider1">We collect station photos from users, which we can provide to other developers under a free license. Our favorite license is CC0. \"\n\n\"<b>With this version the country change will be easier.</b></string>
-  <string name="text_intro_slider2">Please fill in the required data under \'My data\', so that we can give your photo files a correct name. Without the nick name entry you can not shoot photos from within the app. \"\n\n\"<b>Requesting the token for the upload is quite easy and quick.</b></string>
+  <string name="text_intro_slider1">We collect station photos from users, which we can provide to other developers under a free license. Our favorite license is CC0. \n\n<b>With this version the country change will be easier.</b></string>
+  <string name="text_intro_slider2">Please fill in the required data under \'My data\', so that we can give your photo files a correct name. Without the nick name entry you can not shoot photos from within the app. \n\n<b>Requesting the token for the upload is quite easy and quick.</b></string>
   <string name="text_intro_slider3">In the menu under<b> \'Station map\' </b>and on the <b>list on the homepage</b> you can find a selection in the menu, whether you want <b>all</b> stations (longer loading time), only the stations <b>with</b> photo or just stations <b>without</b> photos to be displayed.</string>
   <string name="text_intro_slider4">There are 2 ways to take a photo of a train station: about the search on the <b>Mainpage</b> or <b>through the map menu point \'Station map\'</b>. The photo icon is only clickable if you\'re holding your Smartphone in landscape mode.</string>
   <string name="text_intro_slider5">As soon as you have taken a photo, it will be displayed and you can upload it.</string>
   <string name="text_intro_slider6">In this screen you can find the icon to share the photo. When you choose to use for example the Twitter-App, all hashtags are used automatically.</string>
-  <string name="text_intro_slider7">When you are on the go and want to be informed of nearby stations, you can switch on the location notification of stations.\"\n\n\"<b>The selection of the notified stations is dependent on the selection of the list on the mainpage - see Station selection -.</b></string>
+  <string name="text_intro_slider7">When you are on the go and want to be informed of nearby stations, you can switch on the location notification of stations.\n\n<b>The selection of the notified stations is dependent on the selection of the list on the mainpage - see Station selection -.</b></string>
   <string name="text_intro_slider8">For users to be able to coordinate, which stations they want to take, we have implemented a chat. As soon as a new message is sent you will be notified by push notification. Of course you can disable the notification if you like.</string>
   <string name="text_intro_slider9">When starting the app, the stations from Germany are loaded. If you want change the country from DE to <b>another</b> country, you can do this in the home screen top right. As soon as you press the back button, the new country will be loaded.</string>
   <string name="next">NEXT</string>
@@ -114,7 +114,7 @@
   <string name="upload_token_invalid">Your upload token is invalid. Please request a new one.</string>
   <string name="upload_failed">Photo upload failed %1d</string>
   <string name="etEmail">Please enter your email address
-\"\n\" and click on \'Request token\'</string>
+\n and click on \'Request token\'</string>
   <string name="etUploadToken">Please enter the received token here</string>
   <string name="tvPhotoUpload">Do you want to upload photos from within the app?</string>
   <string name="bt_mydata_get_token">Request token</string>
@@ -150,5 +150,5 @@
   <string name="update_manual">Manual</string>
   <string name="update_notify">Ask</string>
   <string name="update_automatic">Automatically</string>
-  <string name="tvUpdatePolicy">Upgrade the station data</string>
+  <string name="tvUpdatePolicy">Update the station data</string>
 </resources>
