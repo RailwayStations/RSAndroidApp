@@ -73,9 +73,9 @@
   <!--Firebase-Chat-->
   <string name="sign_out">Sign Out</string>
   <string name="invite_menu_label">Invite</string>
-  <string name="invitation_message">Please join me for a friendly chat</string>
-  <string name="invitation_cta">Call to action</string>
-  <string name="invitation_title">Friendly Chat Invite</string>
+  <string name="invitation_message">Please join the station photo chat</string>
+  <string name="invitation_cta">Send invitation</string>
+  <string name="invitation_title">Invitation to the station photo chat</string>
   <string name="sign_in">You can log on with your Google account</string>
   <string name="chatActivity">Chat</string>
   <string name="LogInActivity">Login</string>
@@ -151,4 +151,53 @@
   <string name="update_notify">Ask</string>
   <string name="update_automatic">Automatically</string>
   <string name="tvUpdatePolicy">Update the station data</string>
+  <string name="send">SEND</string>
+  <string name="logo_train">small locomotive logo</string>
+  <string name="license_info_not_readable">License info currently not readable</string>
+  <string name="station_not_found">Station not found</string>
+  <string name="last_update_at">Last updated on: </string>
+  <string name="station_update_failed">Failed to update the stations:</string>
+  <string name="stationId">StationNbr: </string>
+  <string name="need_to_allow_location_access">You need to grant location permission</string>
+  <string name="my_position">My current location: </string>
+  <string name="chat_notification_enabled">You have successfully activated the chat notifications</string>
+  <string name="chat_notification_disabled">You have successfully turned off the chat notifications</string>
+  <string name="unable_to_create_folder_structure">Failed to create directory structure</string>
+  <string name="select_picture">Select Photo</string>
+  <string name="grant_camera_permission">You need to grant permission to use the camera</string>
+  <string name="grant_external_storage">You need to grant permission to use the external storage</string>
+  <string name="photofile_not_existing">Photo file does not exist</string>
+  <string name="error_processing_photo">Failed to process the photos:</string>
+  <string name="error_scaling_photo">Scaling of the photo failed</string>
+  <string name="photo_need_landscape_orientation">Photo must be in landscape mode!</string>
+  <string name="connecting">Connecting…</string>
+  <string name="sending">Send…</string>
+  <string name="send_data">Send data…</string>
+  <string name="error_no_sdcard_found">No external SD card found!</string>
+  <string name="cannot_associate_photo_to_station">Cannot associate this photo to a station</string>
+  <string name="no_records_found">No records found!</string>
+  <string name="reading_data">Read data…</string>
+  <string name="processing_data">Processing…</string>
+  <string name="processing_item_of">Processing %1$d/%2$d</string>
+  <string name="writing_to_database">Writing to database</string>
+  <string name="stations_database_updated">Stations database updated</string>
+  <string name="loading_data">Loading data…</string>
+  <string name="processing_countries">Processing countries…</string>
+  <string name="countries_database_updated">Countries database updated</string>
+  <string name="error_updating_countries">Failed to update the country data:</string>
+  <string name="processing_statistics">Processing statistics…</string>
+  <string name="open_once_nearby">Please first open \'Near by\' once</string>
+  <string name="welcome">Welcome</string>
+  <string name="authentication_failed">Authentication failed.</string>
+  <string name="google_play_services_error">Error in the Google play services.</string>
+  <string name="photo">Photo</string>
+  <string name="no_internet_connection">No Internet connection!</string>
+  <plurals name="stations_loaded">
+    <item quantity="one">%d station loaded</item>
+    <item quantity="other">%d stations loaded</item>
+  </plurals>
+  <plurals name="records_found">
+    <item quantity="one">%d entry found</item>
+    <item quantity="other">%d entries found</item>
+  </plurals>
 </resources>

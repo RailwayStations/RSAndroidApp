@@ -15,6 +15,7 @@ import java.io.FilenameFilter;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.GridViewAdapter;
 
 public class GalleryActivity extends AppCompatActivity {
@@ -39,10 +40,10 @@ public class GalleryActivity extends AppCompatActivity {
         // Check for SD Card
         if (!Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {
-            Toast.makeText(this, "Error! No SDCARD Found!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.error_no_sdcard_found, Toast.LENGTH_LONG).show();
         } else {
             // Locate the image folder in the SD Card
-            file = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
+            file = new File(Environment.getExternalStorageDirectory(), Constants.PHOTO_DIRECTORY);
             // Creates a new folder if no folder with name Bahnhofsfotos exist
             file.mkdirs();
         }
@@ -102,7 +103,7 @@ public class GalleryActivity extends AppCompatActivity {
                 }
                 if (!shown) {
                     Toast.makeText(GalleryActivity.this,
-                            "Kann dieses Foto keinem Bahnhof mehr zuordnen",
+                            R.string.cannot_associate_photo_to_station,
                             Toast.LENGTH_LONG).show();
                 }
             }

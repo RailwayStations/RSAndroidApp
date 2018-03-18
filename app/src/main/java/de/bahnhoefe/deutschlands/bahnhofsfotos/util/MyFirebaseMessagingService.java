@@ -13,10 +13,6 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
-/**
- * Created by android_oma on 09.09.16.
- */
-
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     Context context;
 

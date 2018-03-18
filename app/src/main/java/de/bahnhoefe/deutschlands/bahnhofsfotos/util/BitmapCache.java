@@ -1,9 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
-/**
- * Created by pelzi on 10.09.16.
- */
-
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

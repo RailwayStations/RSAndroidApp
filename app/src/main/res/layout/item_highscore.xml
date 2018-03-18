@@ -30,7 +30,7 @@
         android:maxLines="1"
         android:layout_alignParentTop="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="177"/>
+        android:text="@string/highscorePosition"/>
 
 
     <TextView
@@ -43,14 +43,14 @@
         android:maxLines="1"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_toEndOf="@+id/highscore_position"
-        android:text="188"/>
+        android:text="@string/highscorePhotos"/>
     <TextView
         android:id="@+id/highscore_name"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:gravity="center_vertical"
         android:paddingStart="20dp"
-        android:text="ten"
+        android:text="@string/highscoreName"
         android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_alignParentTop="true"

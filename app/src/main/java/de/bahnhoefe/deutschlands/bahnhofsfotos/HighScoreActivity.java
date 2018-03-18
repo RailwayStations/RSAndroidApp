@@ -59,9 +59,9 @@ public class HighScoreActivity extends AppCompatActivity {
                 if (adapter != null) {
                     adapter.getFilter().filter(s);
                     if (adapter.isEmpty()) {
-                        Toast.makeText(HighScoreActivity.this, "No records found!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(HighScoreActivity.this, R.string.no_records_found, Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(HighScoreActivity.this, adapter.getCount() + " records found!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(HighScoreActivity.this, getResources().getQuantityString(R.plurals.records_found, adapter.getCount(), adapter.getCount()), Toast.LENGTH_LONG).show();
                     }
                 }
                 return false;

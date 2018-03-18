@@ -161,7 +161,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(Integer integer) {
             addMarkers(bahnhofMarker);
             progress.dismiss();
-            Toast.makeText(MapsActivity.this, bahnhofMarker.size() + " Bahnhöfe geladen", Toast.LENGTH_LONG).show();
+            Toast.makeText(MapsActivity.this, getResources().getQuantityString(R.plurals.stations_loaded, bahnhofMarker.size(), bahnhofMarker.size()), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -264,7 +264,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         View view = layoutInflater.inflate(R.layout.info_window, null, false);
         ((TextView) view.findViewById(R.id.tvbahnhofname)).setText(marker.getTitle());
         if (marker.getSnippet() != null) {
-            ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText("BahnhofNr: " + marker.getSnippet());
+            ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText(getString(R.string.stationId) + marker.getSnippet());
         } else {
             ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText(" ");
         }
@@ -359,7 +359,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void updatePosition() {
         if (myPositionMarker == null) {
-            myPositionMarker = mMap.addMarker(new MarkerOptions().position(myPos).title("Meine aktuelle Position: ").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+            myPositionMarker = mMap.addMarker(new MarkerOptions().position(myPos).title(getResources().getString(R.string.my_position)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
         } else {
             myPositionMarker.setPosition(myPos);
         }
@@ -384,7 +384,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    showMessageOKCancel("You need to allow access to Locations",
+                    showMessageOKCancel(getString(R.string.need_to_allow_location_access),
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -451,8 +451,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(MapsActivity.this)
                 .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(R.string.button_ok_text, okListener)
+                .setNegativeButton(R.string.button_cancel_text, null)
                 .create()
                 .show();
     }

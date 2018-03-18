@@ -15,7 +15,7 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:contentDescription="kleines LokLogo"
+        android:contentDescription="@string/logo_train"
         android:layout_width="115dp"
         android:layout_height="115dp"
         android:src="@drawable/ic_logotrain" />
@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
-        android:text="jdhaghghghghghgggjjgjgjgj"
+        android:text="@string/navHeaderUpdate"
          />
 
 

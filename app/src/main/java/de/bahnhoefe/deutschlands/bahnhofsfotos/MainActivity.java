@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         long lastUpdateDate = baseApplication.getLastUpdate();
         if (lastUpdateDate > 0) {
-            tvUpdate.setText("Letzte Aktualisierung am: " + SimpleDateFormat.getDateTimeInstance().format(lastUpdateDate));
+            tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(lastUpdateDate));
         } else {
             tvUpdate.setText(R.string.no_stations_in_database);
         }
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void handleGalleryNavItem() {
         File file = new File(Environment.getExternalStorageDirectory()
-                + File.separator + "Bahnhofsfotos");
+                + File.separator + Constants.PHOTO_DIRECTORY);
         Log.d(TAG, file.toString());
 
         Menu menuNav = navigationView.getMenu();
@@ -204,9 +204,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 try {
                     cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter());
                     if (cursor == null) {
-                        Toast.makeText(MainActivity.this, "No records found!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, R.string.no_records_found, Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(MainActivity.this, cursor.getCount() + " records found!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, getResources().getQuantityString(R.plurals.records_found, cursor.getCount(), cursor.getCount()), Toast.LENGTH_LONG).show();
                     }
                     customAdapter.swapCursor(cursor);
                 } catch (Exception e) {
@@ -374,14 +374,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             long aktuellesDatum = date.getTime();
             int count = 0;
 
-            publishProgress("Verbinde...");
+            publishProgress(getResources().getString(R.string.connecting));
             List<Bahnhof> bahnhoefe = new ArrayList<>(count);
             try {
                 URL url = new URL(String.format("%s/%s/stations", Constants.API_START_URL, countryCode.toLowerCase()));
                 connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
 
-                publishProgress("Lese...");
+                publishProgress(getString(R.string.reading_data));
                 InputStream stream = connection.getInputStream();
                 reader = new BufferedReader(new InputStreamReader(stream));
                 StringBuffer buffer = new StringBuffer();
@@ -391,13 +391,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 String finalJson = buffer.toString();
 
-                publishProgress("Verarbeite...");
+                publishProgress(getString(R.string.processing_data));
                 JSONArray bahnhofList = new JSONArray(finalJson);
                 count = bahnhofList.length();
                 Log.i(TAG, "Parsed " + count + " stations");
 
                 for (int i = 0; i < bahnhofList.length(); i++) {
-                    publishProgress("Verarbeite " + i + "/" + count);
+                    publishProgress(getResources().getString(R.string.processing_item_of,i, count));
                     JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
 
                     String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
@@ -425,10 +425,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     bahnhoefe.add(bahnhof);
                     Log.d("DatenbankInsertOk ...", bahnhof.toString());
                 }
-                publishProgress("Schreibe in Datenbank");
+                publishProgress(getString(R.string.writing_to_database));
 
                 dbAdapter.insertBahnhoefe(bahnhoefe);
-                publishProgress("Bahnhöfe Datenbank aktualisiert");
+                publishProgress(getString(R.string.stations_database_updated));
             } catch (Exception e) {
                 Log.e(TAG, "Error refreshing stations", e);
                 exception = e;
@@ -464,12 +464,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             if (exception != null) {
-                Toast.makeText(getBaseContext(), "Fehler beim Aktualisieren der Bahnhöfe: " + exception.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + exception.getMessage(), Toast.LENGTH_LONG).show();
             } else {
                 baseApplication.setLastUpdate(System.currentTimeMillis());
                 TextView tvUpdate = (TextView) findViewById(R.id.tvUpdate);
                 try {
-                    tvUpdate.setText("Letzte Aktualisierung am: " + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
+                    tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
                 } catch (Exception e) {
                     Log.e(TAG, "Error writing updatedate.txt", e);
                 }
@@ -492,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            progressDialog.setMessage("Lade Daten ... " + values[0]);
+            progressDialog.setMessage(getString(R.string.loading_data) + values[0]);
 
         }
 
@@ -531,13 +531,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 String finalJson = buffer.toString();
 
-                publishProgress("Verarbeite Länder...");
+                publishProgress(getString(R.string.processing_countries));
                 JSONArray countryList = new JSONArray(finalJson);
                 count = countryList.length();
                 Log.i(TAG, "Parsed " + count + " countries");
 
                 for (int i = 0; i < countryList.length(); i++) {
-                    publishProgress("Verarbeite " + i + "/" + count);
+                    publishProgress(getResources().getString(R.string.processing_item_of, i, count));
                     JSONObject jsonObj = (JSONObject) countryList.get(i);
 
                     String countryShortCode = jsonObj.getString("code").toUpperCase();
@@ -556,9 +556,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     countries.add(country);
                     Log.d("DatenbankInsertLdOk ...", country.toString());
                 }
-                publishProgress("Schreibe in Datenbank");
+                publishProgress(getString(R.string.writing_to_database));
                 dbAdapter.insertCountries(countries);
-                publishProgress("Datenbank " + countries + " Ländern aktualisiert");
+                publishProgress(getString(R.string.countries_database_updated));
             } catch (final Exception e) {
                 Log.e(TAG, "Error loading countries", e);
                 exception = e;
@@ -576,7 +576,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         protected void onPostExecute(List<Country> countries) {
             recreate();
             if (exception != null) {
-                Toast.makeText(getBaseContext(), "Fehler beim Aktualisieren der Länderdaten: " + exception.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), getString(R.string.error_updating_countries) + exception.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -603,7 +603,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 String finalJson = buffer.toString();
 
-                publishProgress("Verarbeite Statistik...");
+                publishProgress(getString(R.string.processing_statistics));
                 JSONObject statsJson = new JSONObject(finalJson);
                 Statistic statistic = new Statistic(statsJson.getInt("total"),
                                             statsJson.getInt("withPhoto"),

@@ -266,7 +266,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                     googleApiClient, locationRequest, this);
         } catch (SecurityException se) {
             Log.e(TAG, "Still no permission for location services");
-            Toast.makeText(this, "Bitte einmal \"in der Nähe\" aufrufen", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.open_once_nearby, Toast.LENGTH_LONG).show();
             stopSelf();
         }
     }
@@ -290,7 +290,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         }
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "No permission for location service");
-            Toast.makeText(this, "Bitte einmal \"in der Nähe\" aufrufen", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.open_once_nearby, Toast.LENGTH_LONG).show();
             return;
         }
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(

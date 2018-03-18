@@ -82,9 +82,9 @@
     <!--Firebase-Chat-->
     <string name="sign_out">Sign Out</string>
     <string name="invite_menu_label">Invite</string>
-    <string name="invitation_message">Please join me for a friendly chat</string>
-    <string name="invitation_cta">Call to action</string>
-    <string name="invitation_title">Friendly Chat Invite</string>
+    <string name="invitation_message">Bitte trete dem Bahnhofsfoto-Chat bei</string>
+    <string name="invitation_cta">Einladung senden</string>
+    <string name="invitation_title">Einladung zum Bahnhofsfoto-Chat</string>
     <string name="sign_in">Hier kannst Du Dich mit Deinem Google-Account einloggen</string>
     <string name="chatActivity">Chat</string>
     <string name="LogInActivity">Login</string>
@@ -162,5 +162,54 @@
     <string name="update_notify">Nachfragen</string>
     <string name="update_automatic">Automatisch</string>
     <string name="tvUpdatePolicy">Aktualisierung der Bahnhofsdaten</string>
+    <string name="send">SEND</string>
+    <string name="logo_train">kleines LokLogo</string>
+    <string name="license_info_not_readable">Lizenzinfo aktuell nicht lesbar</string>
+    <string name="station_not_found">Bahnhof nicht gefunden</string>
+    <string name="last_update_at">Letzte Aktualisierung am: </string>
+    <string name="station_update_failed">Fehler beim Aktualisieren der Bahnhöfe:</string>
+    <string name="stationId">BahnhofNr: </string>
+    <string name="need_to_allow_location_access">You need to allow access to Locations</string>
+    <string name="my_position">Meine aktuelle Position: </string>
+    <string name="chat_notification_enabled">Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet</string>
+    <string name="chat_notification_disabled">Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet</string>
+    <string name="unable_to_create_folder_structure">Kann keine Verzeichnisstruktur anlegen</string>
+    <string name="select_picture">Foto auswählen</string>
+    <string name="grant_camera_permission">Du musst den Zugriff auf die Kamera erlauben</string>
+    <string name="grant_external_storage">Du musst den Zugriff auf den externen Speicher erlauben</string>
+    <string name="photofile_not_existing">Fotodatei nicht vorhanden</string>
+    <string name="error_processing_photo">Fehler beim Verarbeiten des Fotos:</string>
+    <string name="error_scaling_photo">Skalieren des Fotos fehlgeschlagen</string>
+    <string name="photo_need_landscape_orientation">Foto muss im Querformat sein!</string>
+    <string name="connecting">Verbinde…</string>
+    <string name="sending">Sende…</string>
+    <string name="send_data">Sende Daten…</string>
+    <string name="error_no_sdcard_found">Keine externe SD-Karte gefunden!</string>
+    <string name="cannot_associate_photo_to_station">Kann dieses Foto keinem Bahnhof mehr zuordnen</string>
+    <string name="no_records_found">Keine Einträge gefunden!</string>
+    <string name="reading_data">Lese Daten…</string>
+    <string name="processing_data">Verarbeite…</string>
+    <string name="processing_item_of">Verarbeite %1$d/%2$d</string>
+    <string name="writing_to_database">Schreibe in Datenbank</string>
+    <string name="stations_database_updated">Bahnhöfe Datenbank aktualisiert</string>
+    <string name="loading_data">Lade Daten…</string>
+    <string name="processing_countries">Verarbeite Länder…</string>
+    <string name="countries_database_updated">Länder-Datenbank aktualisiert</string>
+    <string name="error_updating_countries">Fehler beim Aktualisieren der Länderdaten:</string>
+    <string name="processing_statistics">Verarbeite Statistik…</string>
+    <string name="open_once_nearby">Bitte einmal \"in der Nähe\" aufrufen</string>
+    <string name="welcome">Welcome</string>
+    <string name="authentication_failed">Authentifizierung fehlgeschlagen.</string>
+    <string name="google_play_services_error">Fehler in den Google Play Diensten.</string>
+    <string name="photo">Foto</string>
+    <string name="no_internet_connection">Keine Internetverbindung!</string>
+    <plurals name="stations_loaded">
+        <item quantity="one">%d Bahnhof geladen</item>
+        <item quantity="other">%d Bahnhöfe geladen</item>
+    </plurals>
+    <plurals name="records_found">
+        <item quantity="one">%d Eintrag gefunden</item>
+        <item quantity="other">%d Einträge gefunden</item>
+    </plurals>
 
 </resources>

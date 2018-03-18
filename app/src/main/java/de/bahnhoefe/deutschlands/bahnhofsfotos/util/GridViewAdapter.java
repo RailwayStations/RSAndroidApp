@@ -15,17 +15,10 @@ import android.widget.TextView;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
-//import static com.google.android.gms.analytics.internal.zzy.G;
-
-/**
- * Created by android_oma on 24.07.16.
- */
-
 public class GridViewAdapter extends BaseAdapter {
 
     private final static String TAG = GridViewAdapter.class.getSimpleName();
 
-    // Declare variables
     private final Activity activity;
     private final String[] filepath;
     private final String[] filename;

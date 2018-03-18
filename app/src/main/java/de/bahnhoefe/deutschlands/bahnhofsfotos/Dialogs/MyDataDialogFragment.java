@@ -25,7 +25,7 @@ public class MyDataDialogFragment extends DialogFragment {
                 .setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.dialog_title)
                 .setMessage(R.string.dialog_message)
-                .setPositiveButton("OK", new OnClickListener() {
+                .setPositiveButton(R.string.button_ok_text, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent myDataIntent = new Intent(getActivity(), MyDataActivity.class);
@@ -33,7 +33,7 @@ public class MyDataDialogFragment extends DialogFragment {
                         dismiss();
                     }
                 })
-                .setNegativeButton("ABBRECHEN", new OnClickListener() {
+                .setNegativeButton(R.string.button_cancel_text, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent mainIntent = new Intent(getActivity(), MainActivity.class);

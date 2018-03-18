@@ -43,7 +43,7 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
         PendingIntent fotoPendingIntent = getFotoPendingIntent();
 
         notificationBuilder
-                .addAction(R.drawable.ic_photo_camera_white_48px, "Foto", fotoPendingIntent)
+                .addAction(R.drawable.ic_photo_camera_white_48px, context.getString(R.string.photo), fotoPendingIntent)
                 .setVibrate(VIBRATION_PATTERN)
                 .setColor(LED_COLOR)
         ;

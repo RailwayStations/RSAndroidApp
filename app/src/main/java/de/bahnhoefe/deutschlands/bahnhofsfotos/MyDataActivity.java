@@ -240,7 +240,7 @@ public class MyDataActivity extends AppCompatActivity {
             DataOutputStream wr = null;
             int status = -1;
 
-            publishProgress("Verbinde...");
+            publishProgress(getString(R.string.connecting));
             try {
                 URL url = new URL(String.format("%s/registration", Constants.API_START_URL));
                 conn = (HttpURLConnection) url.openConnection();
@@ -304,7 +304,7 @@ public class MyDataActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            progressDialog.setMessage("Sende Daten ... " + values[0]);
+            progressDialog.setMessage(getString(R.string.send_data) + values[0]);
         }
 
     }

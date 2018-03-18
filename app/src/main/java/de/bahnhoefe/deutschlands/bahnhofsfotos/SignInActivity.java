@@ -62,7 +62,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         if (authResult != null) {
             // Welcome the user
             FirebaseUser user = authResult.getUser();
-            Toast.makeText(this, "Welcome " + user.getEmail(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.welcome) + user.getEmail(), Toast.LENGTH_SHORT).show();
 
             // Go back to the main activity
             startActivity(new Intent(this, AuthActivity.class));
@@ -119,7 +119,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(SignInActivity.this, "Authentication failed.",
+                            Toast.makeText(SignInActivity.this, R.string.authentication_failed,
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             ((BaseApplication) getApplication()).saveSubscribtionStatus(true);
@@ -135,7 +135,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         // An unresolvable error has occurred and Google APIs (including Sign-In) will not
         // be available.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.google_play_services_error, Toast.LENGTH_SHORT).show();
     }
 
 }

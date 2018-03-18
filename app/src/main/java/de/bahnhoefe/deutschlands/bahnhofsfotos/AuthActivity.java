@@ -247,11 +247,11 @@ public class AuthActivity extends AppCompatActivity implements
             myNotifySwitch.setChecked(subscribtionStatus);
             Log.d(TAG, "Der Button ist: " + subscribtionStatus);
             if (subscribtionStatus) {
-                FirebaseMessaging.getInstance().subscribeToTopic("friendly_engage");
-                Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet", Toast.LENGTH_LONG).show();
+                FirebaseMessaging.getInstance().subscribeToTopic(getString(R.string.FRIENDLY_ENGAGE_TOPIC));
+                Toast.makeText(AuthActivity.this, R.string.chat_notification_enabled, Toast.LENGTH_LONG).show();
             } else {
-                FirebaseMessaging.getInstance().unsubscribeFromTopic("friendly_engage");
-                Toast.makeText(AuthActivity.this, "Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet", Toast.LENGTH_LONG).show();
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(getString(R.string.FRIENDLY_ENGAGE_TOPIC));
+                Toast.makeText(AuthActivity.this, R.string.chat_notification_disabled, Toast.LENGTH_LONG).show();
             }
         }
     }

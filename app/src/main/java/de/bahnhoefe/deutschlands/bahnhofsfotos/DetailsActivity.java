@@ -163,7 +163,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
             if (bahnhof == null) {
                 Log.w(TAG, "EXTRA_BAHNHOF in intent data missing");
-                Toast.makeText(this, "Bahnhof nicht gefunden", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.station_not_found, Toast.LENGTH_LONG).show();
                 finish();
                 return;
             }
@@ -237,9 +237,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_SELECT_PICTURE);
+                startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), REQUEST_SELECT_PICTURE);
             } else {
-                Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -256,11 +256,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             File file = getCameraMediaFile();
             if (file != null) {
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-                intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "Deutschlands Bahnhöfe");
+                intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
                 intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
                 startActivityForResult(intent, REQUEST_TAKE_PICTURE);
             } else {
-                Toast.makeText(this, "Kann keine Verzeichnisstruktur anlegen", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -281,7 +281,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 takePicture();
             } else {
                 //Permission not granted
-                Toast.makeText(DetailsActivity.this, "You need to grant camera permission to use camera", Toast.LENGTH_LONG).show();
+                Toast.makeText(DetailsActivity.this, R.string.grant_camera_permission, Toast.LENGTH_LONG).show();
             }
         } else if (requestCode == REQUEST_SELECT_PICTURE_PERMISSION) {
             Log.i(TAG, "Received response for select image permission request.");
@@ -292,7 +292,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 selectPicture();
             } else {
                 //Permission not granted
-                Toast.makeText(DetailsActivity.this, "You need to grant write external storage permission", Toast.LENGTH_LONG).show();
+                Toast.makeText(DetailsActivity.this, R.string.grant_external_storage, Toast.LENGTH_LONG).show();
             }
 
         }
@@ -345,7 +345,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 // dort und schreiben es in Standard-Größe in den permanenten Speicher
                 File cameraRawPictureFile = getCameraMediaFile();
                 if (cameraRawPictureFile == null || storagePictureFile == null) {
-                    throw new RuntimeException("Fotodatei nicht vorhanden");
+                    throw new RuntimeException(getString(R.string.photofile_not_existing));
                 }
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
@@ -381,18 +381,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         } catch (Exception e) {
             Log.e(TAG, "Error processing photo", e);
-            Toast.makeText(getApplicationContext(), "Fehler beim Verarbeiten des Fotos: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     private void saveScaledBitmap(File storagePictureFile, Bitmap scaledScreen) throws FileNotFoundException {
         if (scaledScreen == null) {
-            throw new RuntimeException("Skalieren des Fotos fehlgeschlagen");
+            throw new RuntimeException(getString(R.string.error_scaling_photo));
         }
         Log.d(TAG, "img width " + scaledScreen.getWidth());
         Log.d(TAG, "img height " + scaledScreen.getHeight());
         if (scaledScreen.getWidth() < scaledScreen.getHeight()) {
-            Toast.makeText(getApplicationContext(), "Foto muss im Querformat sein!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.photo_need_landscape_orientation, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -416,7 +416,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      */
     @Nullable
     private File getMediaStorageDir() {
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Bahnhofsfotos");
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), Constants.PHOTO_DIRECTORY);
 
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
@@ -522,7 +522,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         + "\n Verlinken bitte mit: " + linking
                         + "\n Link zum Account: " + link);
                 emailIntent.setType("multipart/byteranges");
-                startActivity(Intent.createChooser(emailIntent, "Mail versenden"));
+                startActivity(Intent.createChooser(emailIntent, getResources().getString(R.string.send_email)));
                 break;
             case R.id.photo_upload:
                 if (TextUtils.isEmpty(email) || TextUtils.isEmpty(token)) {
@@ -693,7 +693,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     }
             );
         } else {
-            licenseTagView.setText("Lizenzinfo aktuell nicht lesbar");
+            licenseTagView.setText(R.string.license_info_not_readable);
         }
 
         setBitmap(publicBitmap);
@@ -844,7 +844,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             FileInputStream is = null;
             int status = -1;
 
-            publishProgress("Verbinde...");
+            publishProgress(getString(R.string.connecting));
             try {
                 URL url = new URL(String.format("%s/photoUpload", Constants.API_START_URL));
                 conn = (HttpURLConnection) url.openConnection();
@@ -866,7 +866,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 byte[] buffer = new byte[8196];
                 int bytesRead = 0;
                 while ((bytesRead = is.read(buffer)) > 0) {
-                    publishProgress("Sende...");
+                    publishProgress(getString(R.string.sending));
                     wr.write( buffer, 0, bytesRead );
                 }
                 wr.flush();
@@ -927,7 +927,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            progressDialog.setMessage("Sende Daten ... " + values[0]);
+            progressDialog.setMessage(getString(R.string.send_data) + values[0]);
 
         }
 
