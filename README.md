@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/RailwayStations/RSAndroidApp.svg?branch=master)](https://travis-ci.org/RailwayStations/RSAndroidApp)
+[![Build Status](https://travis-ci.org/RailwayStations/RSAndroidApp.svg?branch=master)](https://travis-ci.org/RailwayStations/RSAndroidApp) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/rsandroidapp/localized.svg)](https://crowdin.com/project/rsandroidapp)
 
 # Bahnhofsfotos
 Android-App for the Project "Deutschlands-Bahnhoefe"
