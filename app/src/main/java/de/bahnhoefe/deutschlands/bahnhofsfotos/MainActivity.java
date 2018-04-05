@@ -320,7 +320,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_web_site) {
-            Intent intent = new Intent(MainActivity.this, RailwayStationsActivity.class);
+            Uri mapUri = Uri.parse("https://railway-stations.org");
+            Intent intent = new Intent(Intent.ACTION_VIEW, mapUri);
             startActivity(intent);
         } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
