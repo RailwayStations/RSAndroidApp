@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 27
     buildToolsVersion project.buildToolsVersion
 
     compileOptions {
@@ -17,8 +17,7 @@ android {
     defaultConfig {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
         minSdkVersion 19
-        //minSdkVersion project.minSdkVersion
-        targetSdkVersion 23
+        targetSdkVersion 27
         versionCode 31
         versionName "10.0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -49,36 +48,36 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
-
-    compile 'com.android.support:support-v4:23.4.0'
-
-
-    compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
-    compile 'com.google.android.gms:play-services:9.4.0'
-    compile 'com.google.android.gms:play-services-maps:9.4.0'
-    compile 'com.google.android.gms:play-services-ads:9.4.0'
-    compile 'com.google.android.gms:play-services-wearable:9.4.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.github.bumptech.glide:glide:3.6.1'
-    compile 'com.google.firebase:firebase-auth:9.4.0'
-    compile 'com.google.firebase:firebase-database:9.4.0'
-    compile 'com.google.firebase:firebase-config:9.4.0'
+    compile 'com.android.support:support-v4:27.1.1'
+    compile 'com.android.support:cardview-v7:27.1.1'
+    compile 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.android.support:design:27.1.1'
+    compile 'com.android.support:customtabs:27.1.1'
+    compile 'com.google.android.gms:play-services-auth:15.0.0'
+    compile 'com.google.android.gms:play-services-location:15.0.0'
+    compile 'com.google.android.gms:play-services-maps:15.0.0'
+    compile 'com.google.android.gms:play-services-ads:15.0.0'
+    compile 'com.google.android.gms:play-services-wearable:15.0.0'
+    compile 'com.android.support.constraint:constraint-layout:1.1.0'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.google.firebase:firebase-auth:15.0.0'
+    compile 'com.google.firebase:firebase-database:15.0.0'
+    compile 'com.google.firebase:firebase-config:15.0.0'
+    compile 'com.google.firebase:firebase-invites:15.0.0'
     compile 'com.firebase:firebase-client-android:2.5.2'
-    compile 'com.google.firebase:firebase-core:9.4.0'
-    compile 'com.google.firebase:firebase-analytics:9.4.0'
-    compile 'com.google.firebase:firebase-messaging:9.4.0'
+    compile 'com.google.firebase:firebase-core:15.0.0'
+    compile 'com.google.firebase:firebase-analytics:15.0.0'
+    compile 'com.google.firebase:firebase-messaging:15.0.0'
     compile 'com.firebaseui:firebase-ui:0.4.0'
     compile 'com.mcxiaoke.volley:library:1.0.19'
-    compile 'com.google.code.gson:gson:2.6.1'
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile 'com.google.code.gson:gson:2.8.2'
+    compile 'com.android.support:multidex:1.0.3'
+    compile 'com.android.support:recyclerview-v7:27.1.1'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     testCompile 'junit:junit:4.12'
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support:support-annotations:23.4.0'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestCompile 'com.android.support.test:runner:1.0.2'
+    androidTestCompile 'com.android.support:support-annotations:27.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
