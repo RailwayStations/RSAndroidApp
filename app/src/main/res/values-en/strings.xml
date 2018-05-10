@@ -186,7 +186,7 @@
   <string name="countries_database_updated">Countries database updated</string>
   <string name="error_updating_countries">Failed to update the country data:</string>
   <string name="processing_statistics">Processing statistics…</string>
-  <string name="open_once_nearby">Please first open \'Near by\' once</string>
+  <string name="open_once_nearby">Please first open \'Station Map\' once</string>
   <string name="welcome">Welcome</string>
   <string name="authentication_failed">Authentication failed.</string>
   <string name="google_play_services_error">Error in the Google play services.</string>

@@ -197,7 +197,7 @@
     <string name="countries_database_updated">Länder-Datenbank aktualisiert</string>
     <string name="error_updating_countries">Fehler beim Aktualisieren der Länderdaten:</string>
     <string name="processing_statistics">Verarbeite Statistik…</string>
-    <string name="open_once_nearby">Bitte einmal \"in der Nähe\" aufrufen</string>
+    <string name="open_once_nearby">Bitte einmal die \"Bahnhofskarte\" aufrufen</string>
     <string name="welcome">Welcome</string>
     <string name="authentication_failed">Authentifizierung fehlgeschlagen.</string>
     <string name="google_play_services_error">Fehler in den Google Play Diensten.</string>
