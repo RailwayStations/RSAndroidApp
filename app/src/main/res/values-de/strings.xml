@@ -203,6 +203,7 @@
     <string name="google_play_services_error">Fehler in den Google Play Diensten.</string>
     <string name="photo">Foto</string>
     <string name="no_internet_connection">Keine Internetverbindung!</string>
+    <string name="timetable_missing">Abfahrtszeiten nicht verfügbar</string>
     <plurals name="stations_loaded">
         <item quantity="one">%d Bahnhof geladen</item>
         <item quantity="other">%d Bahnhöfe geladen</item>

@@ -192,6 +192,7 @@
   <string name="google_play_services_error">Error in the Google play services.</string>
   <string name="photo">Photo</string>
   <string name="no_internet_connection">No Internet connection!</string>
+  <string name="timetable_missing">Timetable not available</string>
   <plurals name="stations_loaded">
     <item quantity="one">%d station loaded</item>
     <item quantity="other">%d stations loaded</item>

@@ -512,7 +512,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 startNavigation(DetailsActivity.this);
                 break;
             case R.id.timetable:
-                startActivity(new Timetable().createTimetableIntent(country, bahnhof));
+                final Intent timetableIntent = new Timetable().createTimetableIntent(country, bahnhof);
+                if (timetableIntent != null) {
+                    startActivity(timetableIntent);
+                } else {
+                    Toast.makeText(this, R.string.timetable_missing, Toast.LENGTH_LONG).show();
+                }
                 break;
             case R.id.send_email:
                 Intent emailIntent = createFotoSendIntent();

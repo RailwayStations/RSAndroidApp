@@ -184,7 +184,11 @@ public abstract class NearbyBahnhofNotificationManager {
     protected
     @Nullable
     PendingIntent getTimetablePendingIntent(Country country, Bahnhof station) {
-        return pendifyMe(new Timetable().createTimetableIntent(country, station), NearbyBahnhofNotificationManager.REQUEST_TIMETABLE);
+        final Intent timetableIntent = new Timetable().createTimetableIntent(country, station);
+        if (timetableIntent != null) {
+            return pendifyMe(timetableIntent, NearbyBahnhofNotificationManager.REQUEST_TIMETABLE);
+        }
+        return null;
     }
 
     /**

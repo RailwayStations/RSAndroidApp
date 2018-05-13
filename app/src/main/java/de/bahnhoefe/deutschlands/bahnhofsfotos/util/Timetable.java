@@ -19,7 +19,7 @@ public class Timetable {
         final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
 
         String timeTableTemplate = country.getTimetableUrlTemplate();
-        if (timeTableTemplate == null) {
+        if (timeTableTemplate == null || timeTableTemplate.isEmpty()) {
             return null;
         }
 
