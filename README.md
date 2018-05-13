@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/RailwayStations/RSAndroidApp.svg?branch=master)](https://travis-ci.org/RailwayStations/RSAndroidApp) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/rsandroidapp/localized.svg)](https://crowdin.com/project/rsandroidapp)
+[![Build Status](https://travis-ci.org/RailwayStations/RSAndroidApp.svg?branch=master)](https://travis-ci.org/RailwayStations/RSAndroidApp) 
 
 # Bahnhofsfotos
 Android-App for the Project "Deutschlands-Bahnhoefe"
@@ -16,7 +16,5 @@ Rename the FireBaseConstantsTemplate to FireBaseConstants and fill in your own d
 A template for the `google-services.json` can be found in `app/templates`. Copy it to `app` and set the correct api key.
 
 API-Key: copy `app/templates/rs_api.xml` to `app/src/main/res/values/` and enter the API for the Backend Service.
-
-Help to translate the project on [Crowdin](https://crowdin.com/project/rsandroidapp).
 
 The code is public under MIT-Licence: http://choosealicense.com/licenses/mit/
