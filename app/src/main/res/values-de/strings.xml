@@ -1,0 +1,215 @@
+<resources>
+    <string name="app_name">Bahnhofsfotos</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="menu_title_your_data">Meine Daten</string>
+    <string name="menu_title_update_photos">Aktualisieren</string>
+    <string name="menu_title_stations_with_photo">Bahnhöfe mit Photo</string>
+    <string name="menu_title_stations_without_photo">In der Nähe</string>
+    <string name="menu_title_all_stations_without_photo">Alle Bahnhöfe ohne Photo</string>
+    <string name="menu_title_share">Teilen</string>
+    <string name="menu_title_send">Senden</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="maps_activity">Bahnhofskarte</string>
+    <string name="no_location_detected">Keine Position gefunden</string>
+    <string name="title_activity_details">Bahnhofs-Details</string>
+    <string name="no_stations_loaded">Keine Bahnhöfe geladen. Bitte zuerst Photos aktualisieren klicken.</string>
+    <string name="no_stations_in_database">Eine Aktualisierung hat noch nicht stattgefunden</string>
+    <string name="take_photo">Photografieren</string>
+    <string name="send_email">Sende E-Mail</string>
+    <string name="share_photo">Teilen</string>
+    <string name="nav_to_station">Navigiere zum Bahnhof</string>
+    <string name="title_activity_my_data">Deine Daten</string>
+    <string name="CC0">CC0 - ohne Namensnennung</string>
+    <string name="CC4">CC4.0 mit Namensnennung (nicht mehr unterstützt)</string>
+    <string name="tvLicence">Unter welcher Lizenz möchtest Du Deine Fotos einreichen?</string>
+    <string name="tvOwnPhoto">Handelt es sich bei den von Dir eingereichten Photos um Deine eigenen Photos?</string>
+    <string name="rbOwnPhotoYes">Ja</string>
+    <string name="rbOwnPhotoNo">Nein</string>
+    <string name="tvLinking">Möchtest Du in unserer Fotodatenbank verlinkt werden?</string>
+    <string name="etLinking">Bitte trage hier die URL zu Deinem Account ein</string>
+    <string name="rbLinkingYes">Ja</string>
+    <string name="rbLinkingNo">Nein (wird unter Anonym gespeichert)</string>
+    <string name="rbLinkingwebpage">Eigene Webseite</string>
+    <string name="etNickname">Bitte trage hier Deinen Nicknamen ein.
+        "\n" Wenn Du schon Fotograf bist, bitte exakt, wie er in der Rangliste erscheint.
+    </string>
+    <string name="menu_title_your_own_station_photos">Eigene Fotos</string>
+    <string name="rbLinkingWith">Verlinkung mit: </string>
+    <string name="ownPhoto">eigenes Photo</string>
+    <string name="bt_mydata_commit">Speichern</string>
+    <string name="bt_mydata_clear">Reset</string>
+    <string name="preferences_saved">Deine Daten wurden gespeichert. </string>
+    <string name="preferences_cleared">Deine Daten wurden zurückgesetzt. Beim nächsten Menüaufruf kannst Du neue erfassen.</string>
+    <string name="tvOwnPhotos">Handelt es sich bei den Fotos um Deine eigenen …</string>
+    <string name="nav_oepnv">mit Bus und Bahn</string>
+    <string name="nav_car">mit dem Auto</string>
+    <string name="nav_bike">mit dem Fahrrad</string>
+    <string name="nav_walk">zu Fuß</string>
+    <string name="nav_show">nur den Ort</string>
+
+    <string name="navMethod">Zeige den Weg…</string>
+
+    <string name="title_activity_gallery">Deine Bahnhofsfotos</string>
+    <string name="activitynotfound">Du hast keine Navigations-App auf Deinem Smartphone</string>
+    <string name="count_of_images">Du hast %1$d Bahnhofsfoto(s) im Speicher</string>
+    <string name="search_hint">Bahnhof suchen</string>
+    <string name="app_info_title">Über die App</string>
+    <string name="app_info_ok">OK</string>
+    <string name="app_info_text">App-Entwicklung:"\n"<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>
+        "\n"in 08/2016 im Rahmen des OpenSource-Projekts <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands Bahnhöfe</a></b>.
+        "\n\n"Die Bahnhofsdaten wurden von der Deutschen Bahn im Rahmen des dortigen <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData-Projektes</a></b> zur Verfügung gestellt.
+        "\n\n"Die json-Datei, die die Photos und die Bahnhofsdaten zusammenführt, wird über die von <b><a href="https://twitter.com/storchp">Peter Storch</a></b> entwickelte Java-Applikation bereitgestellt.
+        "\n\n"Für die App werden <a href="https://design.google.com/icons/">Material-Design-Icons von Google</a> genutzt, die unter Apache License Version 2.0. zur Verfügung stehen
+        "\n\n"<b>Beteiligte</b> am "Deutschlands-Bahnhöfe"-Projekt:
+        "\n\n"<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedorn (Kartenentwicklung)</a></b>
+        "\n\n"<b>- Alexandra Schön (Design)</b>
+        "\n\n"<b>- Katrin Schönherr (php-Entwicklung)</b>
+    </string>
+    <string name="information">Informationen</string>
+    <string name="menu_title_info">Über die App</string>
+    <string name="benachrichtigen">Benachrichtigen</string>
+    <string name="nahe_gelegenen_bahnhof_melden">Nahe gelegenen Bahnhof melden</string>
+    <string name="station_is_near">Bahnhof in der Nähe</string>
+    <string name="template_short_text" formatted="false">Bahnhof %s in %.2f km</string>
+    <string name="template_long_text" formatted="false">Bahnhof: %s\nEntfernung: %.2f km\n%s</string>
+    <string name="photo_exists">Photo: für Lizenzinfos Detailansicht öffnen</string>
+    <string name="nearby_notification_active">Bahnhofsortung aktiv</string>
+    <string name="license_tag" formatted="false">Urheber: %s</string>
+
+    <!--Firebase-Chat-->
+    <string name="sign_out">Sign Out</string>
+    <string name="invite_menu_label">Invite</string>
+    <string name="invitation_message">Bitte trete dem Bahnhofsfoto-Chat bei</string>
+    <string name="invitation_cta">Einladung senden</string>
+    <string name="invitation_title">Einladung zum Bahnhofsfoto-Chat</string>
+    <string name="sign_in">Hier kannst Du Dich mit Deinem Google-Account einloggen</string>
+    <string name="chatActivity">Chat</string>
+    <string name="LogInActivity">Login</string>
+
+    <string name="picture_landscape_only">Bitte auf Querformat drehen</string>
+    <string name="no_location_enabled">Einstellungen erlauben keine Ortung</string>
+    <string name="country_activity">Länderauswahl</string>
+    <string name="countrySelection">Länderauswahl</string>
+    <string name="dialog_message">Du hast unter “Meine Daten” dein Profil noch nicht ausgefüllt. Du kannst erst ein Foto speichern, wenn du dies erledigt hast.</string>
+    <string name="dialog_title">Ergänze Deine Daten</string>
+    <string name="label_map">Karte</string>
+    <string name="label_timetable">Abfahrten</string>
+    <string name="fab_subject">Nachricht zur Bahnhofsfoto-App</string>
+    <string name="fab_chooser_title">Mail versenden</string>
+    <string name="menu_title_introslider">Anleitung</string>
+    <string name="menu_follow_my_location">Folge meiner Position</string>
+    <string name="text_intro_slider1">Wir sammeln Bahnhofsfotos von Benutzern, die wir unter freier Lizenz anderen Entwicklern zur Verfügung stellen können. Unsere Lieblings-Lizenz ist CC0. "\n\n"<b>Mit dieser Version wird der Länderwechsel einfacher.</b></string>
+    <string name="text_intro_slider2">Bitte trage im Menüpunkt \'Meine Daten\' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne den Eintrag des Nicknamens kannst Du aus der App heraus nicht fotografieren. "\n\n"<b>Das Anfordern des Token für den Upload geht übrigens ganz schnell und unkompliziert.</b></string>
+    <string name="text_intro_slider3">Im Menü unter<b> \'Bahnhofskarte\' </b>und auf der <b>Startseiten-Liste</b> findest Du im Menü eine Auswahl, ob Du <b>alle</b> Bahnhöfe (längere Ladezeit), nur die <b>mit</b> Foto oder nur die <b>ohne</b> Fotos angezeigt haben möchtest.</string>
+    <string name="text_intro_slider4">Du kommst über 2 Wege zum Fotografieren eines Bahnhofs: über die Suche auf dem <b>Startbildschirm</b> oder <b>über den Karten-Menüpunkt \'Bahnhofskarte\'</b>. Das FotoIcon wird nur anklickbar, wenn Du Dein Smartphone quer hältst.</string>
+    <string name="text_intro_slider5">Sobald Du einen Bahnhof fotografiert hast, wird das Foto angezeigt und Du kannst es hochladen.</string>
+    <string name="text_intro_slider6">Im gleichen Bildschirm findest Du oben das Symbol zum Teilen des Fotos. Wenn Du z.B. die Twitter-App verwendest, werden gleich alle Hashtags mit übernommen.</string>
+    <string name="text_intro_slider7">Wenn Du unterwegs bist und Du möchtest informiert werden, wenn ein Bahnhof in der Nähe ist, kannst Du die Bahnhofsortung einschalten. "\n\n"<b>Die Auswahl der gemeldeten Bahnhöfe richtet sich nach der Einstellung der angezeigten Bahnhöfe in der Liste der Startseite - siehe Bahnhofs-Auswahl -.</b></string>
+    <string name="text_intro_slider8">Damit die Benutzer sich untereinander abstimmen können, welche Bahnhöfe sie gerade ansteuern, haben wir hier einen Chat eingebaut. Sobald es einen neuen Beitrag im Chat gibt, wirst Du per Push Notification benachrichtigt. Du kannst die Push Notifications aber auch ausschalten.</string>
+    <string name="text_intro_slider9">Beim Start der App werden die Bahnhofsdaten von Deutschland geladen. Wenn Du das Land von DE auf ein <b>anderes</b> wechseln möchtest, kannst Du das im Startbildschirm oben rechts. Sobald Du den Zurück-Button betätigst, wird das neue Land geladen.</string>
+    <string name="next">WEITER</string>
+    <string name="skip">ABBRECHEN</string>
+    <string name="proceed">STARTEN</string>
+    <string name="menu_title_zum_chat">Zum Chat</string>
+    <string name="pref_title_new_message_notifications">Register or unregister for Push Notification</string>
+    <string name="pref_header_notifications">Tab Menu Website</string>
+    <string name="push_notifications_menu_label">Benachrichtigungen ausschalten</string>
+    <string name="title_activity_high_score">Rangliste</string>
+    <string name="menu_title_highscore">Rangliste</string>
+    <string name="photo_upload">Foto hochladen</string>
+    <string name="upload_completed">Foto erfolgreich hochgeladen</string>
+    <string name="upload_token_invalid">Dein Upload-Token ist ungültig. Bitte fordere ein Neues an.</string>
+    <string name="upload_failed">Foto konnte nicht hochgeladen werden %1d</string>
+    <string name="etEmail">Bitte trage hier Deine Email-Adresse
+        "\n"ein und klicke \'Token anfordern\'</string>
+    <string name="etUploadToken">Bitte trage hier nach Erhalt der E-Mail
+        "\n"den Upload-Token ein</string>
+    <string name="tvPhotoUpload">Möchtest Du den Photo-Upload aus der App nutzen?</string>
+    <string name="bt_mydata_get_token">Token anfordern</string>
+    <string name="registration_completed">Upload Token angefordert, bitte schaue in Deine Email.</string>
+    <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1d</string>
+    <string name="registration_needed">Um die Upload-Funktion zu nutzen, musst Du unter \"Meine Daten\" ein Upload-Token anfordern.</string>
+    <string name="registration_data_incomplete">Daten für die Registrierung sind unvollständig</string>
+    <string name="title_slider5">Foto hochladen</string>
+    <string name="title_slider1">Bahnhofsfotos</string>
+    <string name="title_slider2">Meine Daten</string>
+    <string name="title_slider3">Bahnhofsauswahl</string>
+    <string name="title_slider4">Fotografieren</string>
+    <string name="title_slider6">Foto teilen</string>
+    <string name="title_slider7">Bahnhofsortung</string>
+    <string name="title_slider8">Der Chat</string>
+    <string name="title_slider9">Länderauswahl</string>
+    <string name="missing_licence">Bitte gib an, unter welcher Lizenz Du Deine Fotos einreichen möchtest</string>
+    <string name="missing_photoOwner">Bitte gib an, ob es sich um Deine eigenen Fotos handelt</string>
+    <string name="missing_nickname">Bitte gib Deinen Nickname an</string>
+    <string name="missing_email_address">Bitte gib einge gültige E-Mail-Adresse an</string>
+    <string name="missing_linking">Bitte gib an, ob Du verlinkt werden möchtest</string>
+    <string name="missing_link">Gib bitte einen gültigen Link an, wenn Du verlinkt werden möchtest</string>
+    <string name="upload_conflict">Dein Foto wurde hochgeladen, es liegt aber möglicherweise ein Konflikt vor.</string>
+    <string name="select_photo">Foto auswählen</string>
+    <string name="station_photo">Bahnhofsfoto</string>
+    <string name="menu_title_stations_map">Bahnhofskarte</string>
+    <string name="menu_photo_filter">Filter mit/ohne Foto</string>
+    <string name="loading_stations">Lade Bahnhöfe</string>
+    <string name="search_nickname_hint">Fotograf suchen</string>
+    <string name="cc4_warning">CC4 ist nur noch aus historischen Gründen vorhanden. Bitte wähle CC0, damit wir Deine Fotos ohne Probleme verwenden können.</string>
+    <string name="update_available">Es sind neue Bahnhofsfotos verfügbar. Aktualisieren?</string>
+    <string name="button_cancel_text">Abbrechen</string>
+    <string name="update_manual">Manuell</string>
+    <string name="update_notify">Nachfragen</string>
+    <string name="update_automatic">Automatisch</string>
+    <string name="tvUpdatePolicy">Aktualisierung der Bahnhofsdaten</string>
+    <string name="send">SEND</string>
+    <string name="logo_train">kleines LokLogo</string>
+    <string name="license_info_not_readable">Lizenzinfo aktuell nicht lesbar</string>
+    <string name="station_not_found">Bahnhof nicht gefunden</string>
+    <string name="last_update_at">Letzte Aktualisierung am: </string>
+    <string name="station_update_failed">Fehler beim Aktualisieren der Bahnhöfe:</string>
+    <string name="stationId">BahnhofNr: </string>
+    <string name="need_to_allow_location_access">You need to allow access to Locations</string>
+    <string name="my_position">Meine aktuelle Position: </string>
+    <string name="chat_notification_enabled">Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet</string>
+    <string name="chat_notification_disabled">Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet</string>
+    <string name="unable_to_create_folder_structure">Kann keine Verzeichnisstruktur anlegen</string>
+    <string name="select_picture">Foto auswählen</string>
+    <string name="grant_camera_permission">Du musst den Zugriff auf die Kamera erlauben</string>
+    <string name="grant_external_storage">Du musst den Zugriff auf den externen Speicher erlauben</string>
+    <string name="photofile_not_existing">Fotodatei nicht vorhanden</string>
+    <string name="error_processing_photo">Fehler beim Verarbeiten des Fotos:</string>
+    <string name="error_scaling_photo">Skalieren des Fotos fehlgeschlagen</string>
+    <string name="photo_need_landscape_orientation">Foto muss im Querformat sein!</string>
+    <string name="connecting">Verbinde…</string>
+    <string name="sending">Sende…</string>
+    <string name="send_data">Sende Daten…</string>
+    <string name="error_no_sdcard_found">Keine externe SD-Karte gefunden!</string>
+    <string name="cannot_associate_photo_to_station">Kann dieses Foto keinem Bahnhof mehr zuordnen</string>
+    <string name="no_records_found">Keine Einträge gefunden!</string>
+    <string name="reading_data">Lese Daten…</string>
+    <string name="processing_data">Verarbeite…</string>
+    <string name="processing_item_of">Verarbeite %1$d/%2$d</string>
+    <string name="writing_to_database">Schreibe in Datenbank</string>
+    <string name="stations_database_updated">Bahnhöfe Datenbank aktualisiert</string>
+    <string name="loading_data">Lade Daten…</string>
+    <string name="processing_countries">Verarbeite Länder…</string>
+    <string name="countries_database_updated">Länder-Datenbank aktualisiert</string>
+    <string name="error_updating_countries">Fehler beim Aktualisieren der Länderdaten:</string>
+    <string name="processing_statistics">Verarbeite Statistik…</string>
+    <string name="open_once_nearby">Bitte einmal die \"Bahnhofskarte\" aufrufen</string>
+    <string name="welcome">Welcome</string>
+    <string name="authentication_failed">Authentifizierung fehlgeschlagen.</string>
+    <string name="google_play_services_error">Fehler in den Google Play Diensten.</string>
+    <string name="photo">Foto</string>
+    <string name="no_internet_connection">Keine Internetverbindung!</string>
+    <plurals name="stations_loaded">
+        <item quantity="one">%d Bahnhof geladen</item>
+        <item quantity="other">%d Bahnhöfe geladen</item>
+    </plurals>
+    <plurals name="records_found">
+        <item quantity="one">%d Eintrag gefunden</item>
+        <item quantity="other">%d Einträge gefunden</item>
+    </plurals>
+
+</resources>
