@@ -691,11 +691,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            // Build an intent for an action to view the author
+                            // Build an intent for an action to view the author if URL is provided
                             Intent mapIntent = new Intent(Intent.ACTION_VIEW);
-                            Uri authorUri = Uri.parse(bahnhof.getPhotographerUrl());
-                            mapIntent.setData(authorUri);
-                            startActivity(mapIntent);
+                            String photographerUrl = bahnhof.getPhotographerUrl();
+                            if (photographerUrl != null && !photographerUrl.isEmpty()) {
+                                mapIntent.setData(Uri.parse(photographerUrl));
+                                startActivity(mapIntent);
+                            }
                         }
                     }
             );
