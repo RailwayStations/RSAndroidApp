@@ -442,7 +442,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         Log.d(TAG, "BahnhofNrAbfrage: " + bahnhof.getId());
-        File file = new File(mediaStorageDir, String.format("%s-%d.jpg", nickname, bahnhof.getId()));
+        File file = new File(mediaStorageDir, String.format("%s-%s.jpg", nickname, bahnhof.getId()));
         Log.d("FilePfad", file.toString());
 
         return file;
@@ -464,7 +464,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         Log.d(TAG, "Temporary BahnhofNrAbfrage: " + bahnhof.getId());
-        File file = new File(temporaryStorageDir, String.format("%s-%d.jpg", nickname, bahnhof.getId()));
+        File file = new File(temporaryStorageDir, String.format("%s-%s.jpg", nickname, bahnhof.getId()));
         Log.d("FilePfad", file.toString());
 
         return file;
@@ -779,7 +779,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         } else {
             localFotoUsed = false;
             Log.e(TAG,
-                    String.format("Media file not available for station %d and nickname %s ",
+                    String.format("Media file not available for station %s and nickname %s ",
                             bahnhof.getId(),
                             nickname
                     )
@@ -828,14 +828,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         private final String countryCode;
         private final String nickname;
-        private final int stationId;
+        private final String stationId;
         private final File file;
         private final String apiKey;
         private final String token;
         private final String email;
         private ProgressDialog progressDialog;
 
-        public PhotoUploadTask(String countryCode, String nickname, String email, int stationId, File file, String apiKey, String token) {
+        public PhotoUploadTask(String countryCode, String nickname, String email, String stationId, File file, String apiKey, String token) {
             this.countryCode = countryCode;
             this.nickname = nickname;
             this.email = email;
@@ -866,7 +866,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 conn.setRequestProperty( "Nickname", nickname);
                 conn.setRequestProperty( "Email", email);
                 conn.setRequestProperty( "Upload-Token", token);
-                conn.setRequestProperty( "Station-Id", String.valueOf(stationId));
+                conn.setRequestProperty( "Station-Id", stationId);
                 conn.setRequestProperty( "Country", countryCode);
                 conn.setUseCaches( false );
 

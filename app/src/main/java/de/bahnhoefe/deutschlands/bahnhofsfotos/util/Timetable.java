@@ -23,7 +23,7 @@ public class Timetable {
             return null;
         }
 
-        timeTableTemplate = timeTableTemplate.replace("{id}", String.valueOf(station.getId()));
+        timeTableTemplate = timeTableTemplate.replace("{id}", station.getId());
         timeTableTemplate = timeTableTemplate.replace("{title}", station.getTitle());
         timeTableTemplate = timeTableTemplate.replace("{DS100}", station.getDS100());
 

@@ -231,7 +231,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.addMarker(new MarkerOptions()
                     .title(bahnhof.getTitle())
                     .position(bahnhofPos)
-                    .snippet(String.valueOf(bahnhof.getId()))
+                    .snippet(bahnhof.getId())
                     .icon(getMarkerIcon(bahnhof, nickname)));
         }
 
@@ -277,7 +277,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onInfoWindowClick(Marker marker) {
         if (marker.getSnippet() != null) {
             Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
-            long id = Long.valueOf(marker.getSnippet());
+            String id = marker.getSnippet();
             try {
                 Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
                 intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);

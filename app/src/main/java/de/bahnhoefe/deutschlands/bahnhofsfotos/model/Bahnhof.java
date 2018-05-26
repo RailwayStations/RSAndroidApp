@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.google.android.gms.maps.model.LatLng;
 
 public class Bahnhof implements Serializable {
-    private int id;  //Bahnhofsnummer
+    private String id;  //Bahnhofsnummer
     private String title; //Bahnhofsname
     private double lat;
     private double lon;
@@ -16,11 +16,11 @@ public class Bahnhof implements Serializable {
     private String photographerUrl;
     private String license;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -68,7 +68,7 @@ public class Bahnhof implements Serializable {
 
         Bahnhof bahnhof = (Bahnhof) o;
 
-        return id == bahnhof.id;
+        return id.equals(bahnhof.id);
     }
 
     @Override

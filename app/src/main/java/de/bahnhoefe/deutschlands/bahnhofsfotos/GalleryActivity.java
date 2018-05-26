@@ -92,7 +92,7 @@ public class GalleryActivity extends AppCompatActivity {
                 String[] nameParts = fileName.split("[-.]");
                 boolean shown = false;
                 if (nameParts.length == 3) {
-                    long stationId = Long.valueOf(nameParts[1]);
+                    String stationId = nameParts[1];
                     Bahnhof station = dbAdapter.fetchBahnhofByBahnhofId(stationId);
                     if (station != null) {
                         Intent detailIntent = new Intent(GalleryActivity.this, DetailsActivity.class);

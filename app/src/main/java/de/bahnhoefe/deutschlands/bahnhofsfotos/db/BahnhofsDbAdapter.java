@@ -23,11 +23,11 @@ public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
             + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
-            + KEY_ID + " INTEGER, "
+            + KEY_ID + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_TITLE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_LAT + " REAL, "
             + Constants.DB_JSON_CONSTANTS.KEY_LON + " REAL, "
@@ -257,7 +257,7 @@ public class BahnhofsDbAdapter {
     @NonNull
     private Bahnhof createBahnhofFromCursor(@NonNull Cursor cursor) {
         String title = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TITLE));
-        int bahnhofsnr = cursor.getInt(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ID));
+        String bahnhofsnr = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ID));
         Double lon = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LON));
         Double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LAT));
         String photoUrl = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL));
@@ -305,7 +305,7 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    public Bahnhof fetchBahnhofByBahnhofId(long id) {
+    public Bahnhof fetchBahnhofByBahnhofId(String id) {
         Cursor cursor = db.query(DATABASE_TABLE, null, Constants.DB_JSON_CONSTANTS.KEY_ID + "=?", new String[]{
                 id + ""}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {

@@ -59,7 +59,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
-import static java.lang.Integer.parseInt;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -401,19 +400,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     publishProgress(getResources().getString(R.string.processing_item_of,i, count));
                     JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
 
-                    String title = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_TITLE);
-                    String id = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_ID);
-                    String lat = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LAT);
-                    String lon = jsonObj.getString(Constants.DB_JSON_CONSTANTS.KEY_LON);
-                    String photoUrl = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL);
-                    String photographer = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER);
-                    String photographerUrl = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL);
-                    String license = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_LICENSE);
-                    String ds100 = getNullableString(jsonObj, Constants.DB_JSON_CONSTANTS.KEY_DS100);
+                    String title = jsonObj.getString("title");
+                    String id = jsonObj.getString("idStr");
+                    String lat = jsonObj.getString("lat");
+                    String lon = jsonObj.getString("lon");
+                    String photoUrl = getNullableString(jsonObj, "photoUrl");
+                    String photographer = getNullableString(jsonObj, "photographer");
+                    String photographerUrl = getNullableString(jsonObj, "photographerUrl");
+                    String license = getNullableString(jsonObj, "license");
+                    String ds100 = getNullableString(jsonObj, "DS100");
 
                     Bahnhof bahnhof = new Bahnhof();
                     bahnhof.setTitle(title);
-                    bahnhof.setId(parseInt(id));
+                    bahnhof.setId(id);
                     bahnhof.setLat(Float.parseFloat(lat));
                     bahnhof.setLon(Float.parseFloat(lon));
                     bahnhof.setDatum(aktuellesDatum);
