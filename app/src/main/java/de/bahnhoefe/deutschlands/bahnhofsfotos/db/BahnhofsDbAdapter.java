@@ -132,23 +132,28 @@ public class BahnhofsDbAdapter {
         db.delete(DATABASE_TABLE_LAENDER, null, null);
     }
 
-    public Cursor getStationsList(PhotoFilter photoFilter) {
+    public Cursor getStationsList(PhotoFilter photoFilter, String nickname) {
         String selectQuery = "SELECT rowid _id, " +
                 KEY_ID + ", " +
                 Constants.DB_JSON_CONSTANTS.KEY_TITLE + ", " +
                 Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL +
                 " FROM " + DATABASE_TABLE;
 
-        if (photoFilter != PhotoFilter.ALL_STATIONS) {
+        if (photoFilter == PhotoFilter.NICKNAME) {
+            selectQuery += " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " = ?";
+        } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
             selectQuery += " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
         }
 
         selectQuery += " ORDER BY " + Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc";
         Log.d(TAG, selectQuery.toString());
 
-
-        Cursor cursor = db.rawQuery(selectQuery, null);
-        // looping through all rows and adding to list
+        Cursor cursor;
+        if (photoFilter == PhotoFilter.NICKNAME) {
+            cursor = db.rawQuery(selectQuery, new String[]{nickname});
+        } else {
+            cursor = db.rawQuery(selectQuery, null);
+        }
 
         if (cursor == null) {
             return null;
@@ -191,12 +196,21 @@ public class BahnhofsDbAdapter {
      * @param photoFilter if stations need to be filtered by photo available or not
      * @return a Cursor representing the matching results
      */
-    public Cursor getBahnhofsListByKeyword(String search, PhotoFilter photoFilter) {
+    public Cursor getBahnhofsListByKeyword(String search, PhotoFilter photoFilter, String nickname) {
         //Open connection to read only
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String selectQuery = String.format("%s LIKE ?", Constants.DB_JSON_CONSTANTS.KEY_TITLE);
-        if (photoFilter != PhotoFilter.ALL_STATIONS) {
+        if (photoFilter == PhotoFilter.NICKNAME) {
+            selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " = ?";
+        } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
             selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+        }
+
+        String[] queryArgs;
+        if (photoFilter == PhotoFilter.NICKNAME) {
+            queryArgs = new String[]{"%" + search + "%", nickname};
+        } else {
+            queryArgs = new String[]{"%" + search + "%"};
         }
 
         Cursor cursor = db.query(DATABASE_TABLE,
@@ -204,7 +218,7 @@ public class BahnhofsDbAdapter {
                         "rowid _id", Constants.DB_JSON_CONSTANTS.KEY_ID, Constants.DB_JSON_CONSTANTS.KEY_TITLE, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL
                 },
                 selectQuery,
-                new String[]{"%" + search + "%"}, null, null, Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc");
+                queryArgs, null, null, Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc");
         // looping through all rows and adding to list
 
         if (cursor == null) {
@@ -225,6 +239,18 @@ public class BahnhofsDbAdapter {
             return null;
         }
         return new Statistic(cursor.getInt(0), cursor.getInt(1), cursor.getInt(0) - cursor.getInt(1), cursor.getInt(2));
+    }
+
+    public String[] getPhotographerNicknames() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        List<String> photographers = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT distinct " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " FROM " + DATABASE_TABLE + " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " IS NOT NULL ORDER BY " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER, null);
+        while (cursor.moveToNext()) {
+            photographers.add(cursor.getString(0));
+        }
+        cursor.close();
+        return photographers.toArray(new String[0]);
     }
 
     class BahnhoefeDbOpenHelper extends SQLiteOpenHelper {
@@ -327,14 +353,22 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    public List<Bahnhof> getAllBahnhoefe(PhotoFilter photoFilter) {
+    public List<Bahnhof> getAllBahnhoefe(PhotoFilter photoFilter, String nickname) {
         List<Bahnhof> bahnhofList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE;
-        if (photoFilter != PhotoFilter.ALL_STATIONS) {
+        if (photoFilter == PhotoFilter.NICKNAME) {
+            selectQuery += " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " = ?";
+        } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
             selectQuery += " WHERE " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
         }
         Log.d(TAG, selectQuery.toString());
-        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        Cursor cursor;
+        if (photoFilter == PhotoFilter.NICKNAME) {
+            cursor = db.rawQuery(selectQuery, new String[]{nickname});
+        } else {
+            cursor = db.rawQuery(selectQuery, null);
+        }
 
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -352,18 +386,25 @@ public class BahnhofsDbAdapter {
         return bahnhofList;
     }
 
-    public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, PhotoFilter photoFilter) {
+    public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, PhotoFilter photoFilter, String nickname) {
         double lat = position.latitude;
         double lng = position.longitude;
         List<Bahnhof> bahnhofList = new ArrayList<>();
         // Select All Query with rectangle - might be later change with it
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE + " where " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " < " + (lat + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " > " + (lat - 0.5)
                 + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " < " + (lng + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LON + " > " + (lng - 0.5);
-        if (photoFilter != PhotoFilter.ALL_STATIONS) {
+        if (photoFilter == PhotoFilter.NICKNAME) {
+            selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " = ?";
+        } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
             selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
         }
 
-        Cursor cursor = db.rawQuery(selectQuery, null);
+        Cursor cursor;
+        if (photoFilter == PhotoFilter.NICKNAME) {
+            cursor = db.rawQuery(selectQuery, new String[]{nickname});
+        } else {
+            cursor = db.rawQuery(selectQuery, null);
+        }
 
         if (cursor.moveToFirst()) {
             do {

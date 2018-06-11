@@ -212,5 +212,8 @@
         <item quantity="one">%d Eintrag gefunden</item>
         <item quantity="other">%d Einträge gefunden</item>
     </plurals>
+    <string name="nicknameFilter">Fotografenfilter</string>
+    <string name="select_nickname">Wähle Fotograf</string>
+    <string name="no_nicknames_found">Keine Fotografen gefunden</string>
 
 </resources>

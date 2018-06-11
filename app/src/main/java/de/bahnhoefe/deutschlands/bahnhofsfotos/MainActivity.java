@@ -50,6 +50,7 @@ import java.util.List;
 
 import com.google.firebase.auth.FirebaseAuth;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -126,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvUpdate.setText(R.string.no_stations_in_database);
         }
 
-        cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter());
+        cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
         customAdapter = new CustomAdapter(this, cursor, 0);
         ListView listView = (ListView) findViewById(R.id.lstStations);
         assert listView != null;
@@ -201,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextSubmit(String s) {
                 Log.d(TAG, "onQueryTextSubmit ");
                 try {
-                    cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter());
+                    cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
                     if (cursor == null) {
                         Toast.makeText(MainActivity.this, R.string.no_records_found, Toast.LENGTH_LONG).show();
                     } else {
@@ -218,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextChange(String s) {
                 Log.d(TAG, "onQueryTextChange ");
                 try {
-                    cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter());
+                    cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
                     if (cursor != null) {
                         customAdapter.swapCursor(cursor);
                     }
@@ -262,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -277,8 +278,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
             item.setIcon(photoFilter.getIcon());
             baseApplication.setPhotoFilter(photoFilter);
-            cursor = dbAdapter.getStationsList(photoFilter);
+            cursor = dbAdapter.getStationsList(photoFilter, baseApplication.getNicknameFilter());
             customAdapter.swapCursor(cursor);
+        } else if (id == R.id.nicknameFilter) {
+            int selectedNickname = -1;
+            final String[] nicknames = dbAdapter.getPhotographerNicknames();
+            String selectedNick = baseApplication.getNicknameFilter();
+            if (nicknames.length == 0) {
+                Toast.makeText(getBaseContext(), getString(R.string.no_nicknames_found), Toast.LENGTH_LONG).show();
+                return true;
+            }
+            for (int i = 0; i < nicknames.length; i++) {
+                if (nicknames[i].equals(selectedNick)) {
+                    selectedNickname = i;
+                }
+            }
+            new SimpleDialogs().select(this, getString(R.string.select_nickname), nicknames, selectedNickname, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    dialog.dismiss();
+                    int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                    baseApplication.setNicknameFilter(nicknames[selectedPosition]);
+                    PhotoFilter photoFilter = PhotoFilter.NICKNAME;
+                    baseApplication.setPhotoFilter(photoFilter);
+                    item.setIcon(photoFilter.getIcon());
+                    cursor = dbAdapter.getStationsList(photoFilter, baseApplication.getNicknameFilter());
+                    customAdapter.swapCursor(cursor);
+                }
+            });
         } else if (id == R.id.notify) {
             final Intent intent = new Intent(MainActivity.this, NearbyNotificationService.class);
             if (statusBinder == null) {
@@ -473,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 } catch (Exception e) {
                     Log.e(TAG, "Error writing updatedate.txt", e);
                 }
-                customAdapter.swapCursor(dbAdapter.getStationsList(baseApplication.getPhotoFilter()));
+                customAdapter.swapCursor(dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter()));
             }
 
             unlockScreenOrientation();
@@ -659,7 +685,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             photoFilterMenuItem.setIcon(baseApplication.getPhotoFilter().getIcon());
         }
         if (customAdapter != null) {
-            cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter());
+            cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
             customAdapter.swapCursor(cursor);
         }
     }

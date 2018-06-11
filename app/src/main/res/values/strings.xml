@@ -83,6 +83,7 @@
   <string name="no_location_enabled">Location disabled</string>
   <string name="country_activity">Country selection</string>
   <string name="countrySelection">Country selection</string>
+  <string name="nicknameFilter">Filter by photographer</string>
   <string name="dialog_message">You have not filled out your profile under \"My data\" yet. You can only save a photo, when this is done.</string>
   <string name="dialog_title">Fill in your data</string>
   <string name="label_map">Map</string>
@@ -193,7 +194,9 @@
   <string name="photo">Photo</string>
   <string name="no_internet_connection">No Internet connection!</string>
   <string name="timetable_missing">Timetable not available</string>
-  <plurals name="stations_loaded">
+    <string name="select_nickname">Select photographer</string>
+    <string name="no_nicknames_found">No photographers found</string>
+    <plurals name="stations_loaded">
     <item quantity="one">%d station loaded</item>
     <item quantity="other">%d stations loaded</item>
   </plurals>

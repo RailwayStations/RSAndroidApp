@@ -171,6 +171,14 @@ public class BaseApplication extends Application {
         putString(R.string.PHOTO_FILTER, photoFilter.toString());
     }
 
+    public String getNicknameFilter() {
+        return preferences.getString(getString(R.string.NICKNAME_FILTER), getNickname());
+    }
+
+    public void setNicknameFilter(String nicknameFilter) {
+        putString(R.string.NICKNAME_FILTER, nicknameFilter);
+    }
+
     public long getLastUpdate() {
         return preferences.getLong(getString(R.string.LAST_UPDATE), 0L);
     }
