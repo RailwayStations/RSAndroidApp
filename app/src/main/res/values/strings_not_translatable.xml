@@ -15,6 +15,7 @@
     <string name="railway_stations_activity" translatable="false">https://railway-stations.org</string>
     <string name="FRIENDLY_ENGAGE_TOPIC" translatable="false">friendly_engage</string>
     <string name="PHOTO_FILTER" translatable="false">APP_PREF_PHOTO_FILTER</string>
+    <string name="NICKNAME_FILTER" translatable="false">APP_PREF_NICKNAME_FILTER</string>
     <string name="LAST_UPDATE" translatable="false">APP_PREF_LAST_UPDATE</string>
 
     <string name="rbLinkingTwitter" translatable="false">Twitter</string>

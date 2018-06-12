@@ -22,6 +22,10 @@
         app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView"/>
     <item
+        android:id="@+id/nicknameFilter"
+        android:title="@string/nicknameFilter"
+        app:showAsAction="collapseActionView|ifRoom" />
+    <item
         android:id="@+id/countrySelection"
         android:title="@string/countrySelection"
         android:icon="@drawable/ic_language_white_24px"

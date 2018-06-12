@@ -167,7 +167,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void readBahnhoefe() {
         try {
-            bahnhofMarker = dbAdapter.getAllBahnhoefe(baseApplication.getPhotoFilter());
+            bahnhofMarker = dbAdapter.getAllBahnhoefe(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
         } catch (Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
@@ -365,7 +365,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         nextCameraChangeIsManual = false;
-        if (myLocSwitch.isChecked()) {
+        if (myLocSwitch != null && myLocSwitch.isChecked()) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, mMap.getCameraPosition().zoom));
         }
     }

@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,6 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -26,6 +29,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import org.json.JSONObject;
 
 public class HighScoreActivity extends AppCompatActivity {
@@ -140,6 +144,17 @@ public class HighScoreActivity extends AppCompatActivity {
             assert listView != null;
             adapter = new HighScoreAdapter(HighScoreActivity.this, highScore);
             listView.setAdapter(adapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
+                    HighScoreItem highScoreItem = (HighScoreItem)adapter.getItemAtPosition(position);
+                    BaseApplication baseApplication = (BaseApplication) getApplication();
+                    baseApplication.setPhotoFilter(PhotoFilter.NICKNAME);
+                    baseApplication.setNicknameFilter(highScoreItem.getName());
+                    Intent intent = new Intent(HighScoreActivity.this, MapsActivity.class);
+                    startActivity(intent);
+                }
+            });
         }
     }
 
