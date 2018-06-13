@@ -30,7 +30,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.maps.model.LatLng;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager;
@@ -44,7 +43,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     private final String TAG = NearbyNotificationService.class.getSimpleName();
     private List<Bahnhof> nearStations;
-    private LatLng myPos = new LatLng(50d, 8d);
+    private Location myPos = new Location((String)null);
 
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
 
@@ -65,6 +64,8 @@ public class NearbyNotificationService extends Service implements LocationListen
     public void onCreate() {
         Log.i(TAG, "About to create");
         super.onCreate();
+        myPos.setLatitude(50d);
+        myPos.setLongitude(8d);
         nearStations = new ArrayList<>(0); // no markers until we know where we are
         notifiedStationManager = null;
         baseApplication = (BaseApplication)getApplication();
@@ -152,7 +153,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     public void onLocationChanged(Location location) {
         Log.i(TAG, "Received new location: " + location);
         try {
-            myPos = new LatLng(location.getLatitude(), location.getLongitude());
+            myPos = location;
 
             // check if currently advertised station is still in range
             if (notifiedStationManager != null) {
@@ -217,9 +218,9 @@ public class NearbyNotificationService extends Service implements LocationListen
      */
     private double calcDistance(Bahnhof bahnhof) {
         // Wir nähern für glatte Oberflächen, denn wir sind an Abständen kleiner 1km interessiert
-        double lateralDiff = myPos.latitude - bahnhof.getLat();
-        double longDiff = (Math.abs(myPos.latitude) < 89.99d) ?
-                (myPos.longitude - bahnhof.getLon()) * Math.cos(myPos.latitude / 180 * Math.PI) :
+        double lateralDiff = myPos.getLatitude() - bahnhof.getLat();
+        double longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
+                (myPos.getLongitude() - bahnhof.getLon()) * Math.cos(myPos.getLatitude() / 180 * Math.PI) :
                 0.0d; // at the poles, longitude doesn't matter
         // simple Pythagoras now.
         return Math.sqrt(Math.pow(lateralDiff, 2.0d) + Math.pow(longDiff, 2.0d)) * EARTH_CIRCUMFERENCE / 360.0d;
@@ -341,7 +342,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     private void readStations() {
         try {
             Log.i(TAG, "Lade nahegelegene Bahnhoefe");
-            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos.getLatitude(), myPos.getLongitude(), baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
         } catch (Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         }

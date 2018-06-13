@@ -4,82 +4,85 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.ClusterManager;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.GeoItem;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MapsforgeMapView;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.TapHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+import org.mapsforge.core.graphics.Align;
+import org.mapsforge.core.graphics.Bitmap;
+import org.mapsforge.core.graphics.FontFamily;
+import org.mapsforge.core.graphics.FontStyle;
+import org.mapsforge.core.graphics.Paint;
+import org.mapsforge.core.graphics.Style;
+import org.mapsforge.core.model.LatLong;
+import org.mapsforge.core.model.MapPosition;
+import org.mapsforge.core.model.Point;
+import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
+import org.mapsforge.map.android.input.MapZoomControls;
+import org.mapsforge.map.android.util.AndroidUtil;
+import org.mapsforge.map.layer.cache.TileCache;
+import org.mapsforge.map.layer.download.TileDownloadLayer;
+import org.mapsforge.map.layer.download.tilesource.OpenStreetMapMapnik;
+import org.mapsforge.map.model.MapViewPosition;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem> {
 
-    public static final int LOCATION_REQUEST_INTERVAL_MILLIS = 500;
-    private GoogleMap mMap;
+    // The minimum distance to change Updates in meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // meters
+
+    // The minimum time between updates in milliseconds
+    private static final long MIN_TIME_BW_UPDATES = 500; // minute
+
     private static final String TAG = MapsActivity.class.getSimpleName();
-    private static final int PERMISSION_REQUEST_CODE = 200;
 
-    private List<Bahnhof> bahnhofMarker;
-    private LatLng myPos;
+    protected MapsforgeMapView mapView;
+    protected TileDownloadLayer downloadLayer;
+    protected ClusterManager clusterer = null;
+    protected List<TileCache> tileCaches = new ArrayList<TileCache>();
+
+    private List<Bahnhof> bahnhofList;
+    private LatLong myPos = null;
 
     private CheckBox myLocSwitch = null;
 
-    /**
-     * Provides the entry point to Google Play services.
-     */
-    private GoogleApiClient mGoogleApiClient;
-
-    /**
-     * Stores parameters for requests to the FusedLocationProviderApi.
-     */
-    private LocationRequest mLocationRequest;
-    private boolean nextCameraChangeIsManual = true;
     private BahnhofsDbAdapter dbAdapter;
     private String nickname;
-    private Marker myPositionMarker;
     private BaseApplication baseApplication;
+    private LocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AndroidGraphicFactory.createInstance(this.getApplication());
+
         setContentView(R.layout.activity_maps_activity);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -87,22 +90,135 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             window.setStatusBarColor(Color.parseColor("#c71c4d"));
         }
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.maps_toolbar);
+        Toolbar myToolbar = findViewById(R.id.maps_toolbar);
         setSupportActionBar(myToolbar);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
         nickname = baseApplication.getNickname();
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        bahnhofList = new ArrayList<>(0); // no markers until we know where we are
 
-        bahnhofMarker = new ArrayList<>(0); // no markers until we know where we are
+        createMapViews();
+        createTileCaches();
+        checkPermissionsAndCreateLayersAndControls();
+    }
 
-        buildGoogleApiClient();
+    protected void createTileCaches() {
+        this.tileCaches.add(AndroidUtil.createTileCache(this, getPersistableId(),
+                this.mapView.getModel().displayModel.getTileSize(), this.getScreenRatio(),
+                this.mapView.getModel().frameBufferModel.getOverdrawFactor(), true));
+    }
+
+    /**
+     * The persistable ID is used to store settings information, like the center of the last view
+     * and the zoomlevel. By default the simple name of the class is used. The value is not user
+     * visibile.
+     *
+     * @return the id that is used to save this mapview.
+     */
+    protected String getPersistableId() {
+        return this.getClass().getSimpleName();
+    }
+
+    /**
+     * Returns the relative size of a map view in relation to the screen size of the device. This
+     * is used for cache size calculations.
+     * By default this returns 1.0, for a full size map view.
+     *
+     * @return the screen ratio of the mapview
+     */
+    protected float getScreenRatio() {
+        return 1.0f;
+    }
+
+    /**
+     * Hook to check for Android Runtime Permissions.
+     */
+    protected void checkPermissionsAndCreateLayersAndControls() {
+        createLayers();
+        createControls();
+    }
+
+    /**
+     * Hook to create controls, such as scale bars.
+     * You can add more controls.
+     */
+    protected void createControls() {
+        initializePosition(mapView.getModel().mapViewPosition);
+    }
+
+    /**
+     * initializes the map view position.
+     *
+     * @param mvp the map view position to be set
+     * @return the mapviewposition set
+     */
+    protected MapViewPosition initializePosition(MapViewPosition mvp) {
+        if (myPos != null) {
+            mvp.setMapPosition(new MapPosition(myPos, getZoomLevelDefault()));
+        } else {
+            mvp.setMapPosition(new MapPosition(new LatLong(0, 0), getZoomLevelDefault()));
+        }
+        mvp.setZoomLevelMax(getZoomLevelMax());
+        mvp.setZoomLevelMin(getZoomLevelMin());
+        return mvp;
+    }
+
+    /**
+     * @return the default starting zoom level if nothing is encoded in the map file.
+     */
+    protected byte getZoomLevelDefault() {
+        return (byte) 12;
+    }
+
+    /**
+     * Template method to create the map views.
+     */
+    protected void createMapViews() {
+        mapView = findViewById(getMapViewId());
+        mapView.setClickable(true);
+        mapView.setOnMapDragListener(new MapsforgeMapView.MapDragListener() {
+            @Override
+            public void onDrag() {
+                myLocSwitch.setChecked(false);
+            }
+        });
+        mapView.getMapScaleBar().setVisible(true);
+        mapView.setBuiltInZoomControls(true);
+        mapView.getMapZoomControls().setAutoHide(true);
+        mapView.getMapZoomControls().setZoomLevelMin(getZoomLevelMin());
+        mapView.getMapZoomControls().setZoomLevelMax(getZoomLevelMax());
+
+        //this.mapView.getModel().displayModel.setFixedTileSize(256);
+        mapView.getMapZoomControls().setZoomControlsOrientation(MapZoomControls.Orientation.VERTICAL_IN_OUT);
+        mapView.getMapZoomControls().setZoomInResource(R.drawable.zoom_control_in);
+        mapView.getMapZoomControls().setZoomOutResource(R.drawable.zoom_control_out);
+        mapView.getMapZoomControls().setMarginHorizontal(getResources().getDimensionPixelOffset(R.dimen.controls_margin));
+        mapView.getMapZoomControls().setMarginVertical(getResources().getDimensionPixelOffset(R.dimen.controls_margin));
+    }
+
+    protected int getMapViewId() {
+        return R.id.mapView;
+    }
+
+    protected byte getZoomLevelMax() {
+        return mapView.getModel().mapViewPosition.getZoomLevelMax();
+    }
+
+    protected byte getZoomLevelMin() {
+        return mapView.getModel().mapViewPosition.getZoomLevelMin();
+    }
+
+    protected void createLayers() {
+        this.downloadLayer = new TileDownloadLayer(this.tileCaches.get(0),
+                this.mapView.getModel().mapViewPosition, OpenStreetMapMapnik.INSTANCE,
+                AndroidGraphicFactory.INSTANCE);
+        mapView.getLayerManager().getLayers().add(this.downloadLayer);
+
+        mapView.setZoomLevelMin(OpenStreetMapMapnik.INSTANCE.getZoomLevelMin());
+        mapView.setZoomLevelMax(OpenStreetMapMapnik.INSTANCE.getZoomLevelMax());
     }
 
     @Override
@@ -119,6 +235,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         menu.findItem(R.id.menu_toggle_photo).setIcon(baseApplication.getPhotoFilter().getIcon());
 
         return true;
+    }
+
+    /**
+     * Android Activity life cycle method.
+     */
+    @Override
+    protected void onDestroy() {
+        mapView.destroyAll();
+        AndroidGraphicFactory.clearResourceMemoryCache();
+        tileCaches.clear();
+        super.onDestroy();
     }
 
     @Override
@@ -140,6 +267,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         new LoadMapMarkerTask().execute((Void)null);
     }
 
+    @Override
+    public void onTap(BahnhofGeoItem marker) {
+        Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
+        String id = marker.getBahnhof().getId();
+        try {
+            Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
+            intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+            startActivity(intent);
+        } catch (RuntimeException e) {
+            Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);
+        }
+    }
+
     private class LoadMapMarkerTask extends AsyncTask<Void, Void, Integer> {
 
         final android.app.AlertDialog progress = ProgressDialog.show(MapsActivity.this, "", getResources().getString(R.string.loading_stations));
@@ -147,67 +287,88 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected void onPreExecute() {
             progress.show();
-            mMap.clear();
-            myPositionMarker = null;
+            destroyClusterManager();
         }
 
         @Override
         protected Integer doInBackground(Void... params) {
             readBahnhoefe();
-            return bahnhofMarker.size();
+            return bahnhofList.size();
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
-            addMarkers(bahnhofMarker);
+            createClusterManager();
+            addMarkers(bahnhofList);
             progress.dismiss();
-            Toast.makeText(MapsActivity.this, getResources().getQuantityString(R.plurals.stations_loaded, bahnhofMarker.size(), bahnhofMarker.size()), Toast.LENGTH_LONG).show();
+            Toast.makeText(MapsActivity.this, getResources().getQuantityString(R.plurals.stations_loaded, bahnhofList.size(), bahnhofList.size()), Toast.LENGTH_LONG).show();
         }
     }
 
     private void readBahnhoefe() {
         try {
-            bahnhofMarker = dbAdapter.getAllBahnhoefe(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            bahnhofList = dbAdapter.getAllBahnhoefe(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
         } catch (Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
     }
 
+    private List<MarkerBitmap> getMarkerBitmap() {
+        List<MarkerBitmap> markerBitmaps = new ArrayList<MarkerBitmap>();
+        // prepare for marker icons.
+        Drawable balloon;
+        // small icon for maximum single item
+        balloon = getResources().getDrawable(R.drawable.marker_green);
+        Bitmap bitmapWithPhoto = AndroidGraphicFactory.convertToBitmap(balloon);
+        bitmapWithPhoto.incrementRefCount();
+        balloon = getResources().getDrawable(R.drawable.marker_red);
+        Bitmap markerWithoutPhoto = AndroidGraphicFactory.convertToBitmap(balloon);
+        markerWithoutPhoto.incrementRefCount();
+        balloon = getResources().getDrawable(R.drawable.marker_violet);
+        Bitmap markerOwnPhoto = AndroidGraphicFactory.convertToBitmap(balloon);
+        markerWithoutPhoto.incrementRefCount();
+        Paint paint1;
+        paint1 = AndroidGraphicFactory.INSTANCE.createPaint();
+        paint1.setStyle(Style.FILL);
+        paint1.setTextAlign(Align.CENTER);
+        FontFamily fontFamily = FontFamily.DEFAULT;
+        FontStyle fontStyle = FontStyle.BOLD;
+        paint1.setTypeface(fontFamily, fontStyle);
+        paint1.setColor(Color.RED);
+        markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), markerWithoutPhoto, bitmapWithPhoto, markerOwnPhoto,
+                new Point(0, -(markerWithoutPhoto.getHeight()/2)), 10f, 1, paint1));
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
-    public void onMapReady(final GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.getUiSettings().setZoomControlsEnabled(true);
-        reloadMap();
-        if (myPos != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 11));
-        } else {
-            mMap.moveCamera(CameraUpdateFactory.zoomBy(11));
-        }
-        nextCameraChangeIsManual = false;
-        mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
-            @Override
-            public void onCameraMoveStarted(int i) {
-                if (nextCameraChangeIsManual) {
-                    myLocSwitch.setChecked(false);
-                }
-            }
-        });
-        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-            @Override
-            public void onCameraIdle() {
-                nextCameraChangeIsManual = true;
-            }
-        });
+        // small cluster icon. for 10 or less items.
+        balloon = getResources().getDrawable(R.drawable.balloon_s_n);
+        Bitmap bitmapBalloonSN = AndroidGraphicFactory
+                .convertToBitmap(balloon);
+        bitmapBalloonSN.incrementRefCount();
+        Paint paint2;
+        paint2 = AndroidGraphicFactory.INSTANCE.createPaint();
+        paint2.setStyle(Style.FILL);
+        paint2.setTextAlign(Align.CENTER);
+        fontFamily = FontFamily.DEFAULT;
+        fontStyle = FontStyle.BOLD;
+        paint2.setTypeface(fontFamily, fontStyle);
+        paint2.setColor(Color.BLACK);
+        markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), bitmapBalloonSN,
+                bitmapBalloonSN, bitmapBalloonSN, new Point(0, 0), 9f, 10, paint2));
+
+        // large cluster icon. 100 will be ignored.
+        balloon = getResources().getDrawable(R.drawable.balloon_m_n);
+        Bitmap bitmapBalloonMN = AndroidGraphicFactory.convertToBitmap(balloon);
+        bitmapBalloonMN.incrementRefCount();
+        Paint paint3;
+        paint3 = AndroidGraphicFactory.INSTANCE.createPaint();
+        paint3.setStyle(Style.FILL);
+        paint3.setTextAlign(Align.CENTER);
+        fontFamily = FontFamily.DEFAULT;
+        fontStyle = FontStyle.BOLD;
+        paint3.setTypeface(fontFamily, fontStyle);
+        paint3.setColor(Color.BLACK);
+        markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), bitmapBalloonMN,
+                bitmapBalloonMN, bitmapBalloonMN, new Point(0, 0), 11f, 100, paint3));
+        return markerBitmaps;
     }
 
     private void addMarkers(List<Bahnhof> bahnhofMarker) {
@@ -216,7 +377,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         double minLon = 0;
         double maxLon = 0;
         for (Bahnhof bahnhof : bahnhofMarker) {
-            LatLng bahnhofPos = bahnhof.getPosition();
+            BahnhofGeoItem geoItem = new BahnhofGeoItem(bahnhof);
+            LatLong bahnhofPos = geoItem.getLatLong();
             if (minLat == 0.0) {
                 minLat = bahnhofPos.latitude;
                 maxLat = bahnhofPos.latitude;
@@ -228,233 +390,200 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 minLon = Math.min(minLon, bahnhofPos.longitude);
                 maxLon = Math.max(maxLon, bahnhofPos.longitude);
             }
-            mMap.addMarker(new MarkerOptions()
-                    .title(bahnhof.getTitle())
-                    .position(bahnhofPos)
-                    .snippet(bahnhof.getId())
-                    .icon(getMarkerIcon(bahnhof, nickname)));
+            clusterer.addItem(geoItem);
         }
 
-        mMap.setInfoWindowAdapter(this);
-        mMap.setOnInfoWindowClickListener(this);
+        clusterer.redraw();
+        setProgressBarIndeterminateVisibility(false);
+
         if (myPos == null || (myPos.latitude == 0.0 && myPos.longitude == 0.0)) {
-            myPos = new LatLng((minLat + maxLat) / 2, (minLon + maxLon) / 2);
-            updatePosition();
+            myPos = new LatLong((minLat + maxLat) / 2, (minLon + maxLon) / 2);
         }
-    }
-
-    private BitmapDescriptor getMarkerIcon(Bahnhof bahnhof, String nickname) {
-        if (!bahnhof.hasPhoto()) {
-            return BitmapDescriptorFactory.defaultMarker(343);
-        } else if (bahnhof.getPhotographer().equals(nickname)) {
-            return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
-        }
-        return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
-    }
-
-    @Override
-    public View getInfoWindow(Marker marker) {
-        return null;
-    }
-
-
-    @Override
-    public View getInfoContents(Marker marker) {
-        LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = layoutInflater.inflate(R.layout.info_window, null, false);
-        ((TextView) view.findViewById(R.id.tvbahnhofname)).setText(marker.getTitle());
-        if (marker.getSnippet() != null) {
-            ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText(getString(R.string.stationId) + marker.getSnippet());
-        } else {
-            ((TextView) view.findViewById(R.id.tvbahnhofnr)).setText(" ");
-        }
-
-        ((TextView) view.findViewById(R.id.tvlatlon)).setText(marker.getPosition().toString());
-        return view;
-    }
-
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        if (marker.getSnippet() != null) {
-            Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
-            String id = marker.getSnippet();
-            try {
-                Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
-                intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
-                startActivity(intent);
-            } catch (RuntimeException e) {
-                Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);
-            }
-        } else {
-            marker.hideInfoWindow();
-        }
-
-
-    }
-
-
-    /**
-     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
-     */
-    protected synchronized void buildGoogleApiClient() {
-        createLocationRequest();
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
+        updatePosition();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // Within {@code onPause()}, we pause location updates, but leave the
-        // connection to GoogleApiClient intact.  Here, we resume receiving
-        // location updates if the user has requested them.
-        startLocationUpdates();
+        this.downloadLayer.onResume();
+        reloadMap();
+        registerLocationManager();
+    }
+
+    private void createClusterManager() {
+        // create clusterer instance
+        clusterer = new ClusterManager(
+                mapView,
+                getMarkerBitmap(),
+                getZoomLevelMax(),
+                this);
+        // this uses the framebuffer position, the mapview position can be out of sync with
+        // what the user sees on the screen if an animation is in progress
+        this.mapView.getModel().frameBufferModel.addObserver(clusterer);
     }
 
     @Override
     protected void onPause() {
+        this.downloadLayer.onPause();
+        unregisterLocationManager();
+        destroyClusterManager();
         super.onPause();
-        stopLocationUpdates();
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        startLocationUpdates();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.i(TAG, "Connection suspended");
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+    private void destroyClusterManager() {
+        if (clusterer != null) {
+            clusterer.destroyGeoClusterer();
+            this.mapView.getModel().frameBufferModel.removeObserver(clusterer);
+            clusterer = null;
+        }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        myPos = new LatLng(location.getLatitude(), location.getLongitude());
+        myPos = new LatLong(location.getLatitude(), location.getLongitude());
         updatePosition();
     }
 
-    private void updatePosition() {
-        if (myPositionMarker == null) {
-            myPositionMarker = mMap.addMarker(new MarkerOptions().position(myPos).title(getResources().getString(R.string.my_position)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
-        } else {
-            myPositionMarker.setPosition(myPos);
-        }
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
-        nextCameraChangeIsManual = false;
-        if (myLocSwitch != null && myLocSwitch.isChecked()) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, mMap.getCameraPosition().zoom));
-        }
     }
 
-    protected void startLocationUpdates() {
-        if (!mGoogleApiClient.isConnected()) {
-            return;
-        }
-        // The final argument to {@code requestLocationUpdates()} is a LocationListener
-        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    @Override
+    public void onProviderEnabled(String provider) {
 
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Check Permissions Now
+    }
 
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    showMessageOKCancel(getString(R.string.need_to_allow_location_access),
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    ActivityCompat.requestPermissions(MapsActivity.this,
-                                            new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                                            PERMISSION_REQUEST_CODE);
-                                }
-                            });
-                    LocationServices.FusedLocationApi.requestLocationUpdates(
-                            mGoogleApiClient, mLocationRequest, this);
-                } else {
-                    ActivityCompat.requestPermissions(
-                            this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                            PERMISSION_REQUEST_CODE);
+    @Override
+    public void onProviderDisabled(String provider) {
 
+    }
+
+    public void registerLocationManager() {
+
+        try {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for Activity#requestPermissions for more details.
+                throw new RuntimeException("No Permission for ACCESS_FINE_LOCATION");
+            }
+
+            locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+
+            // getting GPS status
+            boolean isGPSEnabled = locationManager
+                    .isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            // if GPS Enabled get lat/long using GPS Services
+            if (isGPSEnabled) {
+                locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                Log.d(TAG, "GPS Enabled");
+                if (locationManager != null) {
+                    Location loc = locationManager
+                            .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    myPos = new LatLong(loc.getLatitude(), loc.getLongitude());
                 }
             } else {
-                // permission has been granted, continue as usual
-                LocationServices.FusedLocationApi.requestLocationUpdates(
-                        mGoogleApiClient, mLocationRequest, this);
+                // getting network status
+                boolean isNetworkEnabled = locationManager
+                        .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+                // First get location from Network Provider
+                if (isNetworkEnabled) {
+                    locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    Log.d(TAG, "Network Location enabled");
+                    if (locationManager != null) {
+                        Location loc = locationManager
+                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        myPos = new LatLong(loc.getLatitude(), loc.getLongitude());
+                    }
+                }
             }
-        } else {
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    mGoogleApiClient, mLocationRequest, this);
+        }catch (Exception e) {
+            Log.e(TAG, "Error registering LocationManager", e);
+            Bundle b = new Bundle();
+            b.putString("error", "Error registering LocationManager: " + e.toString());
+            locationManager = null;
+            myPos = null;
+            return;
         }
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        Log.i(TAG, "LocationManager registered");
+        updatePosition();
     }
 
-    protected void stopLocationUpdates() {
-        if (mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    private void unregisterLocationManager() {
+        if (locationManager != null) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for Activity#requestPermissions for more details.
+                locationManager = null;
+            } else {
+                locationManager.removeUpdates(this);
+            }
+            locationManager = null;
+        }
+        Log.i(TAG, "LocationManager unregistered");
+    }
+
+    private void updatePosition() {
+        if (myLocSwitch != null && myLocSwitch.isChecked()) {
+            mapView.setCenter(myPos);
+        }
+    }
+
+    protected class BahnhofGeoItem implements GeoItem {
+        public Bahnhof bahnhof;
+        public LatLong latLong;
+
+        public BahnhofGeoItem(Bahnhof bahnhof) {
+            this.bahnhof = bahnhof;
+            this.latLong = new LatLong(bahnhof.getLat(), bahnhof.getLon());
         }
 
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
+        public LatLong getLatLong() {
+            return latLong;
+        }
 
-    /**
-     * Sets up the location request. Android has two location request settings:
-     * {@code ACCESS_COARSE_LOCATION} and {@code ACCESS_FINE_LOCATION}. These settings control
-     * the accuracy of the current location. This sample uses ACCESS_FINE_LOCATION, as defined in
-     * the AndroidManifest.xml.
-     * <p/>
-     * When the ACCESS_FINE_LOCATION setting is specified, combined with a fast update
-     * interval (5 seconds), the Fused Location Provider API returns location updates that are
-     * accurate to within a few feet.
-     * <p/>
-     * These settings are appropriate for mapping applications that show real-time location
-     * updates.
-     */
-    protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        // Sets the desired interval for active location updates. This interval is
-        // inexact. You may not receive updates at all if no location sources are available, or
-        // you may receive them slower than requested. You may also receive updates faster than
-        // requested if other applications are requesting location at a faster interval.
-        mLocationRequest.setInterval(LOCATION_REQUEST_INTERVAL_MILLIS);
+        @Override
+        public String getTitle() {
+            return bahnhof.getTitle();
+        }
 
-        // Sets the fastest rate for active location updates. This interval is exact, and your
-        // application will never receive updates faster than this value.
-        mLocationRequest.setFastestInterval(LOCATION_REQUEST_INTERVAL_MILLIS);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
+        @Override
+        public boolean hasPhoto() {
+            return bahnhof.hasPhoto();
+        }
 
-    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(MapsActivity.this)
-                .setMessage(message)
-                .setPositiveButton(R.string.button_ok_text, okListener)
-                .setNegativeButton(R.string.button_cancel_text, null)
-                .create()
-                .show();
+        @Override
+        public boolean ownPhoto() {
+            return hasPhoto() && bahnhof.getPhotographer().equals(nickname);
+        }
+
+        public Bahnhof getBahnhof() {
+            return bahnhof;
+        }
+
     }
 
 }

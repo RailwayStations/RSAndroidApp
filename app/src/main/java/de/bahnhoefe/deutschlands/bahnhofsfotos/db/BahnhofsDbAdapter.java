@@ -11,7 +11,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.android.gms.maps.model.LatLng;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
@@ -386,9 +385,7 @@ public class BahnhofsDbAdapter {
         return bahnhofList;
     }
 
-    public List<Bahnhof> getBahnhoefeByLatLngRectangle(LatLng position, PhotoFilter photoFilter, String nickname) {
-        double lat = position.latitude;
-        double lng = position.longitude;
+    public List<Bahnhof> getBahnhoefeByLatLngRectangle(double lat, double lng, PhotoFilter photoFilter, String nickname) {
         List<Bahnhof> bahnhofList = new ArrayList<>();
         // Select All Query with rectangle - might be later change with it
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE + " where " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " < " + (lat + 0.5) + " AND " + Constants.DB_JSON_CONSTANTS.KEY_LAT + " > " + (lat - 0.5)
