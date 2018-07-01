@@ -297,12 +297,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public void onClick(DialogInterface dialog, int whichButton) {
                     dialog.dismiss();
                     int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-                    baseApplication.setNicknameFilter(nicknames[selectedPosition]);
-                    PhotoFilter photoFilter = PhotoFilter.NICKNAME;
-                    baseApplication.setPhotoFilter(photoFilter);
-                    item.setIcon(photoFilter.getIcon());
-                    cursor = dbAdapter.getStationsList(photoFilter, baseApplication.getNicknameFilter());
-                    customAdapter.swapCursor(cursor);
+                    if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
+                        baseApplication.setNicknameFilter(nicknames[selectedPosition]);
+                        PhotoFilter photoFilter = PhotoFilter.NICKNAME;
+                        baseApplication.setPhotoFilter(photoFilter);
+                        item.setIcon(photoFilter.getIcon());
+                        cursor = dbAdapter.getStationsList(photoFilter, baseApplication.getNicknameFilter());
+                        customAdapter.swapCursor(cursor);
+                    }
                 }
             });
         } else if (id == R.id.notify) {
