@@ -37,4 +37,5 @@
     <string name="messageTimeStamp" translatable="false">MessageTimeStamp</string>
     <string name="navHeaderUpdate" translatable="false">navHeaderUpdate</string>
 
+    <string name="copyright_osm" translatable="false">Map data © OpenStreetMap contributors</string>
 </resources>

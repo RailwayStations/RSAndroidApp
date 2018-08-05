@@ -2,8 +2,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 import java.io.Serializable;
 
-import com.google.android.gms.maps.model.LatLng;
-
 public class Bahnhof implements Serializable {
     private String id;  //Bahnhofsnummer
     private String title; //Bahnhofsname
@@ -46,10 +44,6 @@ public class Bahnhof implements Serializable {
 
     public void setLon(double lon) {
         this.lon = lon;
-    }
-
-    public LatLng getPosition() {
-        return new LatLng(lat, lon);
     }
 
     public long getDatum() {

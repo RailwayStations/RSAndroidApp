@@ -621,30 +621,29 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Intent intent = null;
                 switch (navItem) {
                     case 0:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", bahnhof.getLat(), bahnhof.getLon());
                         Log.d("findnavigation case 0", dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 1:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=d", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=d", bahnhof.getLat(), bahnhof.getLon());
                         Log.d("findnavigation case 1", dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
 
                     case 2:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
-                                bahnhof.getPosition().latitude,
-                                bahnhof.getPosition().longitude);
+                                bahnhof.getLat(), bahnhof.getLon());
                         Log.d("findnavigation case 2", dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 3:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=w", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude);
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=w", bahnhof.getLat(), bahnhof.getLon());
                         Log.d("findnavigation case 3", dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 4:
-                        dlocation = String.format("geo:%s,%s?q=%s", bahnhof.getPosition().latitude, bahnhof.getPosition().longitude, bahnhof.getTitle());
+                        dlocation = String.format("geo:%s,%s?q=%s", bahnhof.getLat(), bahnhof.getLon(), bahnhof.getTitle());
                         Log.d("findnavigation case 4", dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
