@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -23,6 +24,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -62,6 +64,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private static final long MIN_TIME_BW_UPDATES = 500; // minute
 
     private static final String TAG = MapsActivity.class.getSimpleName();
+    private static final int REQUEST_FINE_LOCATION = 1;
 
     protected MapsforgeMapView mapView;
     protected TileDownloadLayer downloadLayer;
@@ -77,6 +80,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private String nickname;
     private BaseApplication baseApplication;
     private LocationManager locationManager;
+    private boolean askedForPermission = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,6 +235,18 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector);
         myLocSwitch.setChecked(true);
         item.setActionView(myLocSwitch);
+        myLocSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+               @Override
+               public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+                   if (isChecked) {
+                       askedForPermission = false;
+                       registerLocationManager();
+                   } else {
+                       unregisterLocationManager();
+                   }
+               }
+           }
+        );
 
         menu.findItem(R.id.menu_toggle_photo).setIcon(baseApplication.getPhotoFilter().getIcon());
 
@@ -277,6 +293,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             startActivity(intent);
         } catch (RuntimeException e) {
             Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);
+        }
+    }
+
+    public void setMyLocSwitch(boolean checked) {
+        if (myLocSwitch != null) {
+            myLocSwitch.setChecked(checked);
         }
     }
 
@@ -464,18 +486,32 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_FINE_LOCATION) {
+            Log.i(TAG, "Received response for location permission request.");
+
+            // Check if the required permission has been granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Location permission has been granted
+                registerLocationManager();
+            } else {
+                //Permission not granted
+                Toast.makeText(MapsActivity.this, R.string.grant_location_permission, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     public void registerLocationManager() {
 
         try {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for Activity#requestPermissions for more details.
-                throw new RuntimeException("No Permission for ACCESS_FINE_LOCATION");
+                if (!askedForPermission) {
+                    ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
+                    askedForPermission = true;
+                }
+                setMyLocSwitch(false);
+                return;
             }
 
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -515,12 +551,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                     }
                 }
             }
-        }catch (Exception e) {
+            setMyLocSwitch(true);
+        } catch (Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
             Bundle b = new Bundle();
             b.putString("error", "Error registering LocationManager: " + e.toString());
             locationManager = null;
             myPos = null;
+            setMyLocSwitch(false);
             return;
         }
         Log.i(TAG, "LocationManager registered");
@@ -530,13 +568,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private void unregisterLocationManager() {
         if (locationManager != null) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for Activity#requestPermissions for more details.
+                // if we don't have location permission we cannot remove updates (should not happen, but the API requires this check
+                // so we just set it to null
                 locationManager = null;
             } else {
                 locationManager.removeUpdates(this);
@@ -549,6 +582,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private void updatePosition() {
         if (myLocSwitch != null && myLocSwitch.isChecked()) {
             mapView.setCenter(myPos);
+            mapView.repaint();
         }
     }
 

@@ -165,6 +165,7 @@
   <string name="chat_notification_disabled">You have successfully turned off the chat notifications</string>
   <string name="unable_to_create_folder_structure">Failed to create directory structure</string>
   <string name="select_picture">Select Photo</string>
+  <string name="grant_location_permission">Without location permission we cannot show your current position</string>
   <string name="grant_camera_permission">You need to grant permission to use the camera</string>
   <string name="grant_external_storage">You need to grant permission to use the external storage</string>
   <string name="photofile_not_existing">Photo file does not exist</string>
