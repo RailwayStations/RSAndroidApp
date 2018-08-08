@@ -146,7 +146,7 @@ public class Cluster<T extends GeoItem> {
      */
     public void redraw() {
         Layers mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
-        if (clusterMarker != null && !clusterManager.getCurBounds().contains(center)
+        if (clusterMarker != null && center != null && !clusterManager.getCurBounds().contains(center)
                 && mapOverlays.contains(clusterMarker)) {
             mapOverlays.remove(clusterMarker);
             return;
