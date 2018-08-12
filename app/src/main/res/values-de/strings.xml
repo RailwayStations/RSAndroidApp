@@ -101,9 +101,9 @@
     <string name="fab_chooser_title">Mail versenden</string>
     <string name="menu_title_introslider">Anleitung</string>
     <string name="menu_follow_my_location">Folge meiner Position</string>
-    <string name="text_intro_slider1">Wir sammeln Bahnhofsfotos von Benutzern, die wir unter freier Lizenz anderen Entwicklern zur Verfügung stellen können. Unsere Lieblings-Lizenz ist CC0. "\n\n"<b>Mit dieser Version wird der Länderwechsel einfacher.</b></string>
+    <string name="text_intro_slider1">Wir sammeln Bahnhofsfotos von Benutzern, die wir unter freier Lizenz anderen Entwicklern zur Verfügung stellen können. Unsere Lieblings-Lizenz ist CC0. "\n\n"<b>Mit dieser Version wechseln wir mit der Karte von Google zu OpenStreetMap.</b></string>
     <string name="text_intro_slider2">Bitte trage im Menüpunkt \'Meine Daten\' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne den Eintrag des Nicknamens kannst Du aus der App heraus nicht fotografieren. "\n\n"<b>Das Anfordern des Token für den Upload geht übrigens ganz schnell und unkompliziert.</b></string>
-    <string name="text_intro_slider3">Im Menü unter<b> \'Bahnhofskarte\' </b>und auf der <b>Startseiten-Liste</b> findest Du im Menü eine Auswahl, ob Du <b>alle</b> Bahnhöfe (längere Ladezeit), nur die <b>mit</b> Foto oder nur die <b>ohne</b> Fotos angezeigt haben möchtest.</string>
+    <string name="text_intro_slider3">Im Menü unter<b> \'Bahnhofskarte\' </b>und auf der <b>Startseiten-Liste</b> findest Du im Menü eine Auswahl, ob Du <b>alle</b> Bahnhöfe (längere Ladezeit), nur die <b>mit</b> Foto, nur die <b>ohne</b> Fotos oder die <b>eigenen</b> Fotos angezeigt haben möchtest.</string>
     <string name="text_intro_slider4">Du kommst über 2 Wege zum Fotografieren eines Bahnhofs: über die Suche auf dem <b>Startbildschirm</b> oder <b>über den Karten-Menüpunkt \'Bahnhofskarte\'</b>. Das FotoIcon wird nur anklickbar, wenn Du Dein Smartphone quer hältst.</string>
     <string name="text_intro_slider5">Sobald Du einen Bahnhof fotografiert hast, wird das Foto angezeigt und Du kannst es hochladen.</string>
     <string name="text_intro_slider6">Im gleichen Bildschirm findest Du oben das Symbol zum Teilen des Fotos. Wenn Du z.B. die Twitter-App verwendest, werden gleich alle Hashtags mit übernommen.</string>
