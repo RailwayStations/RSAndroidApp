@@ -7,5 +7,4 @@ app/src/main/res/values/google_maps_api.xml
 app/src/main/res/values/rs_api.xml
 app/google-services.json
 crowdin/credentials
-app/build/outputs/apk/debug/bahnhofsfotos-debug.apk
-app/build/outputs/apk/debug/output.json
+release/
