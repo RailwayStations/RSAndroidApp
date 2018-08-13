@@ -69,7 +69,7 @@
   <string name="template_long_text" formatted="false">Station: %s\ndistance: %.2f km\n%s</string>
   <string name="photo_exists">Photo: open for license info</string>
   <string name="nearby_notification_active">Notification of nearby stations is active</string>
-  <string name="license_tag" formatted="false">Owner: %s</string>
+  <string name="license_tag" formatted="false">Owner: %s, %s</string>
   <!--Firebase-Chat-->
   <string name="sign_out">Sign Out</string>
   <string name="invite_menu_label">Invite</string>

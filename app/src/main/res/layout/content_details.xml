@@ -31,6 +31,16 @@
             android:contentDescription="@string/station_photo"/>
 
         <TextView
+            android:id="@+id/coordinates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/tvbahnhofname"
+            android:layout_marginBottom="20sp"
+            android:background="#80ffffff"
+            android:padding="8dp" />
+
+        <TextView
             android:id="@+id/tvbahnhofname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,7 +49,6 @@
             android:layout_alignTop="@id/tvbahnhofname"
             android:textSize="25sp"
             android:textStyle="bold"
-            android:layout_marginBottom="20sp"
             android:background="#50ffffff"
             android:padding="8dp" />
 

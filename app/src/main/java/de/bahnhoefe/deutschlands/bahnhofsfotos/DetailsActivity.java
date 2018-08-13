@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -100,9 +101,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String token;
     private String countryShortCode;
     private TextView licenseTagView;
+    private TextView coordinates;
     private ViewGroup detailsLayout;
     private boolean fullscreen;
     private BaseApplication baseApplication;
+    private LinearLayout header;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,16 +120,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        detailsLayout = (ViewGroup) findViewById(R.id.content_details);
-        tvBahnhofName = (TextView) findViewById(R.id.tvbahnhofname);
-        imageView = (ImageView) findViewById(R.id.imageview);
+        detailsLayout = findViewById(R.id.content_details);
+        header = findViewById(R.id.header);
+        tvBahnhofName = findViewById(R.id.tvbahnhofname);
+        coordinates = findViewById(R.id.coordinates);
+        imageView = findViewById(R.id.imageview);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onPictureClicked();
             }
         });
-        takePictureButton = (ImageButton) findViewById(R.id.button_take_picture);
+        takePictureButton = findViewById(R.id.button_take_picture);
         takePictureButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -135,7 +140,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     }
                 }
         );
-        selectPictureButton = (ImageButton) findViewById(R.id.button_select_picture);
+        selectPictureButton = findViewById(R.id.button_select_picture);
         selectPictureButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -145,7 +150,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
         );
 
-        licenseTagView = (TextView) findViewById(R.id.license_tag);
+        licenseTagView = findViewById(R.id.license_tag);
         licenseTagView.setMovementMethod(LinkMovementMethod.getInstance());
 
         // switch off image and license view until we actually have a foto
@@ -170,6 +175,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
+            coordinates.setText(bahnhof.getLat() + ", " + bahnhof.getLon());
 
             if (bahnhof.hasPhoto()) {
                 if (ConnectionUtil.checkInternetConnection(this)) {
@@ -684,7 +690,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             licenseTagView.setText(
                     String.format(
                             getText(R.string.license_tag).toString(),
-                            bahnhof.getPhotographer())
+                            bahnhof.getPhotographer(),
+                            bahnhof.getLicense())
             );
             licenseTagView.setOnClickListener(
                     new View.OnClickListener() {
@@ -749,7 +756,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
             float alpha = (float) animation.getAnimatedValue();
-            tvBahnhofName.setAlpha(alpha);
+            if (header == null) {
+                tvBahnhofName.setAlpha(alpha);
+            } else {
+                header.setAlpha(alpha);
+            }
             licenseTagView.setAlpha(alpha);
         }
     }
@@ -791,7 +802,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public void onPictureClicked() {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
                 !fullscreen) {
-            ValueAnimator animation = ValueAnimator.ofFloat(tvBahnhofName.getAlpha(), 0f);
+            ValueAnimator animation = ValueAnimator.ofFloat(header.getAlpha(), 0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();
@@ -807,7 +818,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 sbar.hide();
             fullscreen = true;
         } else {
-            ValueAnimator animation = ValueAnimator.ofFloat(tvBahnhofName.getAlpha(), 1.0f);
+            ValueAnimator animation = ValueAnimator.ofFloat(header == null? tvBahnhofName.getAlpha() : header.getAlpha(), 1.0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();
