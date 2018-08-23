@@ -274,7 +274,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private boolean isMyDataIncomplete() {
-        return TextUtils.isEmpty(nickname);
+        return TextUtils.isEmpty(nickname) || license == License.UNKNOWN || photoOwner == PhotoOwner.UNKNOWN;
     }
 
     @Override
@@ -526,23 +526,31 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
                 break;
             case R.id.send_email:
-                Intent emailIntent = createFotoSendIntent();
-                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{country.getEmail()});
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
-                emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + license
-                        + "\n selbst fotografiert: " + photoOwner
-                        + "\n Nickname: " + nickname
-                        + "\n Verlinken bitte mit: " + linking
-                        + "\n Link zum Account: " + link);
-                emailIntent.setType("multipart/byteranges");
-                startActivity(Intent.createChooser(emailIntent, getResources().getString(R.string.send_email)));
+                if (isMyDataIncomplete()) {
+                    checkMyData();
+                } else {
+                    Intent emailIntent = createFotoSendIntent();
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{country.getEmail()});
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + license
+                            + "\n selbst fotografiert: " + photoOwner
+                            + "\n Nickname: " + nickname
+                            + "\n Verlinken bitte mit: " + linking
+                            + "\n Link zum Account: " + link);
+                    emailIntent.setType("multipart/byteranges");
+                    startActivity(Intent.createChooser(emailIntent, getResources().getString(R.string.send_email)));
+                }
                 break;
             case R.id.photo_upload:
-                if (TextUtils.isEmpty(email) || TextUtils.isEmpty(token)) {
-                    Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
+                if (isMyDataIncomplete()) {
+                    checkMyData();
                 } else {
-                    if (ConnectionUtil.checkInternetConnection(this)) {
-                        new PhotoUploadTask(countryShortCode.toLowerCase(), nickname, email, bahnhof.getId(), getStoredMediaFile(), getString(R.string.rs_api_key), token).execute();
+                    if (TextUtils.isEmpty(email) || TextUtils.isEmpty(token)) {
+                        Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
+                    } else {
+                        if (ConnectionUtil.checkInternetConnection(this)) {
+                            new PhotoUploadTask(countryShortCode.toLowerCase(), nickname, email, bahnhof.getId(), getStoredMediaFile(), getString(R.string.rs_api_key), token).execute();
+                        }
                     }
                 }
                 break;

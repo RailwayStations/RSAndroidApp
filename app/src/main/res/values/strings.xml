@@ -24,7 +24,7 @@
   <string name="title_activity_my_data">Your data</string>
   <string name="CC0">CC0 - without attribution</string>
   <string name="CC4">CC4. 0 with attribution (no longer supported)</string>
-  <string name="tvLicence">Under what license would you like to submit your photos?</string>
+  <string name="tvLicense">Photo license</string>
   <string name="tvOwnPhoto">Are the photos submitted your own photos?</string>
   <string name="rbOwnPhotoYes">Yes</string>
   <string name="rbOwnPhotoNo">No</string>
@@ -145,7 +145,7 @@
   <string name="menu_photo_filter">Filter with/without photo</string>
   <string name="loading_stations">Load stations</string>
   <string name="search_nickname_hint">Search photographer</string>
-  <string name="cc4_warning">CC4 is only available for historical reasons. Please choose CC0, so that we can use your photos without any problems.</string>
+  <string name="cc0_needed">Please accept CC0, so that we can use your photos without any problems.</string>
   <string name="update_available">New station photos are available. Update?</string>
   <string name="button_cancel_text">Cancel</string>
   <string name="update_manual">Manual</string>

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -31,7 +32,8 @@ import org.json.JSONObject;
 public class MyDataActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
     private EditText etNickname, etLink, etEmail, etUploadToken;
-    private RadioGroup rgLicence, rgPhotoOwner, rgLinking, rgUpdatePolicy;
+    private CheckBox cbLicenseCC0;
+    private RadioGroup rgPhotoOwner, rgLinking, rgUpdatePolicy;
     private License license;
     private PhotoOwner photoOwner;
     private String nickname;
@@ -50,18 +52,18 @@ public class MyDataActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(R.string.title_activity_my_data);
         baseApplication = (BaseApplication) getApplication();
 
-        etNickname = (EditText) findViewById(R.id.etNickname);
-        etUploadToken = (EditText) findViewById(R.id.etUploadToken);
-        etEmail = (EditText) findViewById(R.id.etEmail);
-        etLink = (EditText) findViewById(R.id.etLinking);
+        etNickname = findViewById(R.id.etNickname);
+        etUploadToken = findViewById(R.id.etUploadToken);
+        etEmail = findViewById(R.id.etEmail);
+        etLink = findViewById(R.id.etLinking);
 
-        rgLicence = (RadioGroup) findViewById(R.id.rgLicence);
-        rgPhotoOwner = (RadioGroup) findViewById(R.id.rgOwnPhoto);
-        rgLinking = (RadioGroup) findViewById(R.id.rgLinking);
-        rgUpdatePolicy = (RadioGroup) findViewById(R.id.rgUpdatePolicy);
+        cbLicenseCC0 = findViewById(R.id.cbLicenseCC0);
+        rgPhotoOwner = findViewById(R.id.rgOwnPhoto);
+        rgLinking = findViewById(R.id.rgLinking);
+        rgUpdatePolicy = findViewById(R.id.rgUpdatePolicy);
 
         license = baseApplication.getLicense();
-        rgLicence.check(license.getId());
+        cbLicenseCC0.setChecked(license == License.CC0);
 
         photoOwner = baseApplication.getPhotoOwner();
         rgPhotoOwner.check(photoOwner.getId());
@@ -106,10 +108,10 @@ public class MyDataActivity extends AppCompatActivity {
         receiveUploadToken(intent);
     }
 
-    public void selectLicence(View view) {
-        license = License.byId(view.getId());
-        if (license == License.CC4) {
-            new SimpleDialogs().confirm(this, R.string.cc4_warning);
+    public void selectLicense(View view) {
+        license = cbLicenseCC0.isChecked() ? License.CC0 : License.UNKNOWN;
+        if (license != License.CC0) {
+            new SimpleDialogs().confirm(this, R.string.cc0_needed);
         }
     }
 
@@ -167,7 +169,7 @@ public class MyDataActivity extends AppCompatActivity {
 
     public boolean isValid() {
         if (license == License.UNKNOWN) {
-            new SimpleDialogs().confirm(this, R.string.missing_licence);
+            new SimpleDialogs().confirm(this, R.string.cc0_needed);
             return false;
         }
         if (photoOwner == PhotoOwner.UNKNOWN) {

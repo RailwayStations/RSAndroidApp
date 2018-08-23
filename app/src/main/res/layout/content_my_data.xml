@@ -25,38 +25,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvLicence"
-            android:text="@string/tvLicence"
+            android:text="@string/tvLicense"
             android:textSize="20sp"
             android:textStyle="bold"/>
-        <RadioGroup
+        <CheckBox
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvLicence"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:id="@+id/rgLicence"
+            android:id="@+id/cbLicenseCC0"
             android:layout_marginBottom="20dp"
+            android:text="@string/CC0"
+            android:onClick="selectLicense"
             >
-            <RadioButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/rbCC0"
-                android:text="@string/CC0"
-                android:onClick="selectLicence"
-                android:focusable="true"
-                android:focusableInTouchMode="true"/>
-            <RadioButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/rbCC40"
-                android:text="@string/CC4"
-                android:onClick="selectLicence"/>
-        </RadioGroup>
+        </CheckBox>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvOwnPhoto"
-            android:layout_below="@+id/rgLicence"
+            android:layout_below="@+id/cbLicenseCC0"
             android:text="@string/tvOwnPhotos"
             android:textSize="20sp"
             android:textStyle="bold"
