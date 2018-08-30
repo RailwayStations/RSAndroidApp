@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private CustomAdapter customAdapter;
     private Cursor cursor;
+    private String searchString;
 
     private FirebaseAuth mFirebaseAuth;
 
@@ -200,32 +201,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public boolean onQueryTextSubmit(String s) {
-                Log.d(TAG, "onQueryTextSubmit ");
-                try {
-                    cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-                    if (cursor == null) {
-                        Toast.makeText(MainActivity.this, R.string.no_records_found, Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, getResources().getQuantityString(R.plurals.records_found, cursor.getCount(), cursor.getCount()), Toast.LENGTH_LONG).show();
-                    }
-                    customAdapter.swapCursor(cursor);
-                } catch (Exception e) {
-                    Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
-                }
+                Log.d(TAG, "onQueryTextSubmit: " + s);
+                searchKeyword(s);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
-                Log.d(TAG, "onQueryTextChange ");
-                try {
-                    cursor = dbAdapter.getBahnhofsListByKeyword(s, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-                    if (cursor != null) {
-                        customAdapter.swapCursor(cursor);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
-                }
+                Log.d(TAG, "onQueryTextChange: " + s);
+                searchKeyword(s);
                 return false;
             }
 
@@ -237,6 +221,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initNotificationMenuItem(menu.findItem(R.id.notify), false);
 
         return true;
+    }
+
+    private void searchKeyword(String keyword) {
+        searchString = keyword;
+        try {
+            cursor = dbAdapter.getBahnhofsListByKeyword(keyword, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            if (cursor != null) {
+                customAdapter.swapCursor(cursor);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
+        }
     }
 
     /**
@@ -686,7 +682,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (photoFilterMenuItem != null) {
             photoFilterMenuItem.setIcon(baseApplication.getPhotoFilter().getIcon());
         }
-        if (customAdapter != null) {
+        if (searchString != null && searchString.length() > 0) {
+            searchKeyword(searchString);
+        } else if (customAdapter != null) {
             cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
             customAdapter.swapCursor(cursor);
         }
