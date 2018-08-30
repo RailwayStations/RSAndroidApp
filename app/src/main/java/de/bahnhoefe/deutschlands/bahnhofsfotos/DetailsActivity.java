@@ -657,7 +657,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 4:
-                        dlocation = String.format("geo:%s,%s?q=%s", bahnhof.getLat(), bahnhof.getLon(), bahnhof.getTitle());
+                        dlocation = String.format("geo:0,0?q=%s,%s(%s)", bahnhof.getLat(), bahnhof.getLon(), bahnhof.getTitle());
                         Log.d("findnavigation case 4", dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
