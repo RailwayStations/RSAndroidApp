@@ -233,11 +233,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         final MenuItem item = menu.findItem(R.id.menu_toggle_mypos);
         myLocSwitch = new CheckBox(this);
         myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector);
-        myLocSwitch.setChecked(true);
+        myLocSwitch.setChecked(baseApplication.isLocationUpdates());
         item.setActionView(myLocSwitch);
         myLocSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                @Override
                public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+                   baseApplication.setLocationUpdates(isChecked);
                    if (isChecked) {
                        askedForPermission = false;
                        registerLocationManager();
@@ -300,6 +301,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         if (myLocSwitch != null) {
             myLocSwitch.setChecked(checked);
         }
+        baseApplication.setLocationUpdates(checked);
     }
 
     private class LoadMapMarkerTask extends AsyncTask<Void, Void, Integer> {
@@ -434,7 +436,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         super.onResume();
         this.downloadLayer.onResume();
         reloadMap();
-        registerLocationManager();
+        if (baseApplication.isLocationUpdates()) {
+            registerLocationManager();
+        }
     }
 
     private void createClusterManager() {

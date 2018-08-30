@@ -187,4 +187,11 @@ public class BaseApplication extends Application {
         putLong(R.string.LAST_UPDATE, lastUpdate);
     }
 
+    public void setLocationUpdates(boolean locationUpdates) {
+        putBoolean(R.string.LOCATION_UPDATES, locationUpdates);
+    }
+
+    public boolean isLocationUpdates() {
+        return preferences.getBoolean(getString(R.string.LOCATION_UPDATES), true);
+    }
 }

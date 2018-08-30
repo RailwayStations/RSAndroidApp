@@ -14,6 +14,7 @@
     <string name="menu_title_website" translatable="false">railway-stations.org</string>
     <string name="railway_stations_activity" translatable="false">https://railway-stations.org</string>
     <string name="FRIENDLY_ENGAGE_TOPIC" translatable="false">friendly_engage</string>
+    <string name="LOCATION_UPDATES" translatable="false">LOCATION_UPDATES</string>
     <string name="PHOTO_FILTER" translatable="false">APP_PREF_PHOTO_FILTER</string>
     <string name="NICKNAME_FILTER" translatable="false">APP_PREF_NICKNAME_FILTER</string>
     <string name="LAST_UPDATE" translatable="false">APP_PREF_LAST_UPDATE</string>
