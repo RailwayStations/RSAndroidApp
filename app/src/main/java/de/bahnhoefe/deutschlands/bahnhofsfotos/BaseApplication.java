@@ -12,6 +12,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Linking;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+import org.mapsforge.core.model.LatLong;
+import org.mapsforge.core.model.MapPosition;
 
 public class BaseApplication extends Application {
 
@@ -73,6 +75,19 @@ public class BaseApplication extends Application {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(getString(key), value);
         editor.apply();
+    }
+
+    private void putDouble(int key, double value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putLong(getString(key), Double.doubleToRawLongBits(value));
+        editor.apply();
+    }
+
+    private double getDouble(int key, final double defaultValue) {
+        if ( !preferences.contains(getString(key)))
+            return defaultValue;
+
+        return Double.longBitsToDouble(preferences.getLong(getString(key), 0));
     }
 
     public void setCountryShortCode(String countryShortCode) {
@@ -194,4 +209,24 @@ public class BaseApplication extends Application {
     public boolean isLocationUpdates() {
         return preferences.getBoolean(getString(R.string.LOCATION_UPDATES), true);
     }
+
+    public void setLastMapPosition(MapPosition lastMapPosition) {
+        putDouble(R.string.LAST_POSITION_LAT, lastMapPosition.latLong.latitude);
+        putDouble(R.string.LAST_POSITION_LON, lastMapPosition.latLong.longitude);
+        putLong(R.string.LAST_POSITION_ZOOM, lastMapPosition.zoomLevel);
+    }
+
+    public MapPosition getLastMapPosition() {
+        LatLong latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT, 0.0), getDouble(R.string.LAST_POSITION_LON, 0.0));
+        MapPosition mapPosition = new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
+        return mapPosition;
+    }
+
+    /**
+     * @return the default starting zoom level if nothing is encoded in the map file.
+     */
+    public byte getZoomLevelDefault() {
+        return (byte) 12;
+    }
+
 }

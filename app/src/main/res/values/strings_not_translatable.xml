@@ -15,6 +15,9 @@
     <string name="railway_stations_activity" translatable="false">https://railway-stations.org</string>
     <string name="FRIENDLY_ENGAGE_TOPIC" translatable="false">friendly_engage</string>
     <string name="LOCATION_UPDATES" translatable="false">LOCATION_UPDATES</string>
+    <string name="LAST_POSITION_LAT" translatable="false">LAST_POSITION_LAT</string>
+    <string name="LAST_POSITION_LON" translatable="false">LAST_POSITION_LON</string>
+    <string name="LAST_POSITION_ZOOM" translatable="false">LAST_POSITION_ZOOM</string>
     <string name="PHOTO_FILTER" translatable="false">APP_PREF_PHOTO_FILTER</string>
     <string name="NICKNAME_FILTER" translatable="false">APP_PREF_NICKNAME_FILTER</string>
     <string name="LAST_UPDATE" translatable="false">APP_PREF_LAST_UPDATE</string>

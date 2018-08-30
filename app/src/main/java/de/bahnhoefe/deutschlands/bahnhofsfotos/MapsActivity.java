@@ -161,20 +161,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      */
     protected MapViewPosition initializePosition(MapViewPosition mvp) {
         if (myPos != null) {
-            mvp.setMapPosition(new MapPosition(myPos, getZoomLevelDefault()));
+            mvp.setMapPosition(new MapPosition(myPos, baseApplication.getZoomLevelDefault()));
         } else {
-            mvp.setMapPosition(new MapPosition(new LatLong(0, 0), getZoomLevelDefault()));
+            mvp.setMapPosition(baseApplication.getLastMapPosition());
         }
         mvp.setZoomLevelMax(getZoomLevelMax());
         mvp.setZoomLevelMin(getZoomLevelMin());
         return mvp;
-    }
-
-    /**
-     * @return the default starting zoom level if nothing is encoded in the map file.
-     */
-    protected byte getZoomLevelDefault() {
-        return (byte) 12;
     }
 
     /**
@@ -457,6 +450,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     protected void onPause() {
         this.downloadLayer.onPause();
         unregisterLocationManager();
+        final MapPosition mapPosition = mapView.getModel().mapViewPosition.getMapPosition();
+        baseApplication.setLastMapPosition(mapPosition);
         destroyClusterManager();
         super.onPause();
     }
