@@ -19,14 +19,15 @@
         android:layout_weight="50" />
 
     <TextView
-        android:layout_width="318dp"
-        android:layout_height="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/txtStationName"
         android:text="@string/bahnhofname"
         android:textStyle="bold"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@id/hasPhoto"/>
 
     <ImageView
         android:layout_width="24dp"
