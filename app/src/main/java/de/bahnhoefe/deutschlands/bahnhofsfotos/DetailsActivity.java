@@ -83,7 +83,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final int REQUEST_SELECT_PICTURE_PERMISSION = 1;
     private static final int REQUEST_TAKE_PICTURE = 2;
     private static final int REQUEST_SELECT_PICTURE = 3;
-    private static final int alpha = 128;
+    private static final int ALPHA = 128;
 
     private ImageButton takePictureButton;
     private ImageButton selectPictureButton;
@@ -508,7 +508,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         MenuItem menuItem = menu.findItem(id).setEnabled(false);
         menuItem.getIcon().mutate();
         menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-        menuItem.getIcon().setAlpha(alpha);
+        menuItem.getIcon().setAlpha(ALPHA);
     }
 
     @Override
