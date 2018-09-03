@@ -106,6 +106,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private boolean fullscreen;
     private BaseApplication baseApplication;
     private LinearLayout header;
+    private Bitmap publicBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -487,12 +488,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         if (localFotoUsed) {
             enableMenuItem(menu, R.id.send_email);
-            enableMenuItem(menu, R.id.share_photo);
             enableMenuItem(menu, R.id.photo_upload);
         } else {
             disableMenuItem(menu, R.id.send_email);
-            disableMenuItem(menu, R.id.share_photo);
             disableMenuItem(menu, R.id.photo_upload);
+        }
+
+        if (localFotoUsed || bahnhof.hasPhoto()) {
+            enableMenuItem(menu, R.id.share_photo);
+        } else {
+            disableMenuItem(menu, R.id.share_photo);
         }
 
         return super.onPrepareOptionsMenu(menu);
@@ -586,9 +591,20 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Intent createFotoSendIntent() {
         Intent sendIntent = new Intent(Intent.ACTION_SEND);
         File file = getStoredMediaFile();
-        if (file != null) {
+        if (file != null && file.canRead()) {
             sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                     "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
+        } else if (publicBitmap != null) {
+            File imagePath = new File(getApplicationContext().getCacheDir(), "images");
+            imagePath.mkdirs();
+            File newFile = new File(imagePath, bahnhof.getId() + ".jpg");
+            try {
+                saveScaledBitmap(newFile, publicBitmap);
+                sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
+                        "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", newFile));
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Error saving cached bitmap", e);
+            }
         }
         return sendIntent;
     }
@@ -677,11 +693,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     /**
      * This gets called if the requested bitmap is available. Finish and issue the notification.
      *
-     * @param publicBitmap the fetched Bitmap for the notification. May be null
+     * @param bitmapFromCache the fetched Bitmap for the notification. May be null
      */
     @Override
-    public void onBitmapAvailable(final @Nullable Bitmap publicBitmap) {
+    public void onBitmapAvailable(final @Nullable Bitmap bitmapFromCache) {
         localFotoUsed = false;
+        publicBitmap = bitmapFromCache;
         takePictureButton.setVisibility(View.INVISIBLE);
         if (publicBitmap == null) {
             // keine Bitmap ausgelesen
