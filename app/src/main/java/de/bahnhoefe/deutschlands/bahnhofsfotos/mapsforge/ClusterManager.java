@@ -253,10 +253,10 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
                         + mapView.getWidth() + " || " + mapView.getHeight());
             }
             /** North-West geo point of the bound */
-            LatLong nw_ = mapView.getMapViewProjection().fromPixels(0, 0);
+            LatLong nw_ = mapView.getMapViewProjection().fromPixels(-mapView.getWidth() * 0.5, -mapView.getHeight() * 0.5);
             /** South-East geo point of the bound */
-            LatLong se_ = mapView.getMapViewProjection().fromPixels(mapView.getWidth(),
-                    mapView.getHeight());
+            LatLong se_ = mapView.getMapViewProjection().fromPixels(mapView.getWidth() + mapView.getWidth() * 0.5,
+                    mapView.getHeight() + mapView.getHeight() * 0.5);
             if (se_ != null && nw_ != null) {
                 if (se_.latitude > nw_.latitude) {
                     currBoundingBox = new BoundingBox(nw_.latitude, se_.longitude, se_.latitude,
