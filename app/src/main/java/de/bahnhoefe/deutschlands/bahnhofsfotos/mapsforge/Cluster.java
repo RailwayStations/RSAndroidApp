@@ -158,4 +158,9 @@ public class Cluster<T extends GeoItem> {
             mapOverlays.add(1, clusterMarker);
         }
     }
+
+    public int getSize() {
+        return items.size();
+    }
+
 }

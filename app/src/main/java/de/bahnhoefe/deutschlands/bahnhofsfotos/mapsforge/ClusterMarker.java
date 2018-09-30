@@ -74,7 +74,6 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         boolean hasPhoto = hasPhoto();
         boolean ownPhoto = ownPhoto();
         if (cluster.getClusterManager() == null ||
-                // cluster.getClusterManager().isClustering ||
                 this.getLatLong() == null) {
             return;
         }

@@ -48,6 +48,7 @@ import org.mapsforge.map.view.MapView;
  * Should be added as Observer on Mapsforge frameBufferModel.
  */
 public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T> {
+    protected static final int MIN_CLUSTER_SIZE = 5;
     /**
      * A 'Toast' to display information, intended to show information on {@link ClusterMarker}
      * with more than one {@link GeoItem} (while Marker with a single GeoItem should have their
@@ -57,7 +58,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
     /**
      * grid size for Clustering(dip).
      */
-    protected final float GRIDSIZE = 28 * DisplayModel.getDeviceScaleFactor();
+    protected final float GRIDSIZE = 60 * DisplayModel.getDeviceScaleFactor();
     /**
      * MapView object.
      */
@@ -173,23 +174,21 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
             synchronized (clusters) {
                 for (Cluster<T> mCluster : clusters) {
                     if (clusterTask != null && clusterTask.isCancelled()) return;
-                    if (mCluster.getItems().size() == 0)
+                    if (mCluster.getItems().size() == 0) {
                         throw new IllegalArgumentException("cluster.getItems().size() == 0");
+                    }
+
                     // find a cluster which contains the marker.
                     // use 1st element to fix the location, hinder the cluster from
                     // running around and isClustering.
-                    LatLong gpCenter = mCluster.getItems().get(0)
-                            .getLatLong();
-                    if (gpCenter == null)
+                    LatLong gpCenter = mCluster.getItems().get(0).getLatLong();
+                    if (gpCenter == null) {
                         throw new IllegalArgumentException();
+                    }
+
                     Point ptCenter = mapView.getMapViewProjection().toPixels(gpCenter);
                     // find a cluster which contains the marker.
-                    if (pos.distance(ptCenter) <= GRIDSIZE
-                    /*
-                     * pos.x >= ptCenter.x - GRIDSIZE && pos.x <= ptCenter.x +
-                     * GRIDSIZE && pos.y >= ptCenter.y - GRIDSIZE && pos.y <=
-                     * ptCenter.y + GRIDSIZE
-                     */) {
+                    if (pos.distance(ptCenter) <= GRIDSIZE) {
                         mCluster.addItem(item);
                         return;
                     }
@@ -220,10 +219,25 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      */
     public synchronized void redraw() {
         synchronized (clusters) {
-            if (!isClustering)
+            if (!isClustering) {
+                List<Cluster<T>> removed = new ArrayList<>();
+                List<Cluster<T>> singles = new ArrayList<>();
+                for (Cluster<T> mCluster : clusters) {
+                    if (mCluster.getSize() < MIN_CLUSTER_SIZE) {
+                        for (T item : mCluster.getItems()) {
+                            singles.add(createCluster(item));
+                        }
+                        mCluster.clear();
+                        removed.add(mCluster);
+                    }
+                }
+                clusters.removeAll(removed);
+                clusters.addAll(singles);
+
                 for (Cluster<T> mCluster : clusters) {
                     mCluster.redraw();
                 }
+            }
         }
     }
 
