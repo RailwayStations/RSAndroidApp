@@ -139,6 +139,7 @@
   <string name="missing_linking">Please choose if you would like to be linked</string>
   <string name="missing_link">Please provide a valid URL if you like to be linked</string>
   <string name="upload_conflict">Your photo is uploaded, but there might be a conflict. Either you have uploaded twice or another user uploaded a photo for the same station.</string>
+  <string name="remove_station">Report station to be removed</string>
   <string name="select_photo">Photo selection</string>
   <string name="station_photo">Station photo</string>
   <string name="menu_title_stations_map">Station map</string>
@@ -197,7 +198,8 @@
   <string name="timetable_missing">Timetable not available</string>
     <string name="select_nickname">Select photographer</string>
     <string name="no_nicknames_found">No photographers found</string>
-    <plurals name="stations_loaded">
+  <string name="report_ghost_station">Upload this photo to report a non-existing station.</string>
+  <plurals name="stations_loaded">
     <item quantity="one">%d station loaded</item>
     <item quantity="other">%d stations loaded</item>
   </plurals>

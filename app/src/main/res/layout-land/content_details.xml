@@ -93,6 +93,15 @@
                 android:src="@drawable/ic_photo_red_48px"
                 android:background="@null"
                 android:contentDescription="@string/select_photo"/>
+
+            <ImageButton
+                android:id="@+id/button_remove_station"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_remove_station_red_48px"
+                android:background="@null"
+                android:contentDescription="@string/remove_station"/>
+
         </LinearLayout>
 
     </RelativeLayout>
