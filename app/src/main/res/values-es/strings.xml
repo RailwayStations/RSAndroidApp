@@ -6,16 +6,16 @@
   <string name="navigation_drawer_close">Cerrar cajón de navegación</string>
   <string name="menu_title_your_data">Mis datos</string>
   <string name="menu_title_update_photos">Actualizar</string>
-  <string name="menu_title_stations_with_photo">Estaciones con foto</string>
+  <string name="menu_title_stations_with_photo">estaciónes con foto</string>
   <string name="menu_title_stations_without_photo">Cerca de </string>
-  <string name="menu_title_all_stations_without_photo">Todas las estaciones sin foto</string>
+  <string name="menu_title_all_stations_without_photo">Todas las estaciónes sin foto</string>
   <string name="menu_title_share">Compartir</string>
   <string name="menu_title_send">Enviar</string>
   <string name="action_settings">Ajustes</string>
   <string name="maps_activity">Mapa de la estación</string>
   <string name="no_location_detected">Posición no encontrada</string>
   <string name="title_activity_details">Detalles de la estación</string>
-  <string name="no_stations_loaded">No hay estaciones cargadas. Porfavor da click en actualizar.</string>
+  <string name="no_stations_loaded">No hay estaciónes cargadas. Porfavor da click en actualizar.</string>
   <string name="no_stations_in_database">Aun no ocurre una actualización</string>
   <string name="take_photo">Tomar una foto</string>
   <string name="send_email">Enviar  E-Mail</string>
@@ -31,13 +31,13 @@
   <string name="tvLinking">Desea ser enviado a nuestra base de datos de fotos?</string>
   <string name="etLinking">Porfavor ingresa la URL  a tu cuenta</string>
   <string name="rbLinkingYes">Si</string>
-  <string name="rbLinkingNo">No (sera guardado como anonimo)</string>
-  <string name="rbLinkingwebpage">Mi pagina web</string>
+  <string name="rbLinkingNo">No (sera guardado como anónimo)</string>
+  <string name="rbLinkingwebpage">Mi página web</string>
   <string name="etNickname">Por favor meta su nickname aqui.         \n Si ya \eres un fotógrafo, insertalo exactamente como aparece en el highscore.
     </string>
   <string name="menu_title_your_own_station_photos">Tus propias fotos</string>
   <string name="rbLinkingWith">Enlazar con: </string>
-  <string name="ownPhoto">mi foto</string>
+  <string name="ownPhoto">Mi foto</string>
   <string name="bt_mydata_commit">Guardar</string>
   <string name="bt_mydata_clear">Reiniciar</string>
   <string name="preferences_saved">Tus datos estan guardados. </string>
@@ -60,20 +60,20 @@
         \n\n<b>- Alexandra Schön (design)</b>
         \n\n<b>- Katrin Schönherr (php development)</b>
     </string>
-  <string name="information">Informacion</string>
+  <string name="information">Información</string>
   <string name="menu_title_info">Acerca de la App</string>
   <string name="benachrichtigen">Notificaciones</string>
-  <string name="nahe_gelegenen_bahnhof_melden">Reportar estaciones cercanas</string>
-  <string name="station_is_near">Estaciones cercanas</string>
+  <string name="nahe_gelegenen_bahnhof_melden">Reportar estaciónes cercanas</string>
+  <string name="station_is_near">estaciónes cercanas</string>
   <string name="template_short_text" formatted="false">Estación %s en %.2f km</string>
   <string name="template_long_text" formatted="false">Estación: %s\ndistance: %.2f km\n%s</string>
   <string name="photo_exists">Foto: abierta para licensia de foto</string>
-  <string name="nearby_notification_active">Notificación de estaciones cercanas activa</string>
+  <string name="nearby_notification_active">Notificación de estaciónes cercanas activa</string>
   <string name="license_tag" formatted="false">Dueño: %s, %s</string>
   <!--Firebase-Chat-->
   <string name="sign_out">Cerrar sesión</string>
   <string name="invite_menu_label">Invitar</string>
-  <string name="invitation_message">Plpor favor entra al chat de la foto de la estación</string>
+  <string name="invitation_message">Por favor entra al chat de la foto de la estación</string>
   <string name="invitation_cta">Enviar invitación</string>
   <string name="invitation_title">Invitación al chat de la foto de la estación</string>
   <string name="sign_in">Puedes iniciar sesión con tu cuenta de Google!</string>
@@ -92,15 +92,15 @@
   <string name="fab_chooser_title">Enviar correo</string>
   <string name="menu_title_introslider">Manual</string>
   <string name="menu_follow_my_location">Seguir mi posición</string>
-  <string name="text_intro_slider1">Coleccionamos fotos de estaciones tomadas por usuarios, la cual podemos dar a otros developers por licencias gratis. Nuestra licencia favorita es CC0. \n\n<b>Con esta versión el cambio de país es más sencillo.</b></string>
+  <string name="text_intro_slider1">Coleccionamos fotos de estaciónes tomadas por usuarios, la cual podemos dar a otros developers por licencias gratis. Nuestra licencia favorita es CC0. \n\n<b>Con esta versión el cambio de país es más sencillo.</b></string>
   <string name="text_intro_slider2">Por favor llena los datos pedidos debajo de  \'Mis datos\', para que podamos darle a tus fotos el nombre correcto.Sin tu nickname no puedes tomar fotografias dentro de la app. \n\n<b>Pedir el token para subirla es fácil y rápido.</b></string>
-  <string name="text_intro_slider3">En el menu debajo de <b> \'Mapa de estación\' </b>y en ka <b>lista de pagina de inicio</b> puede encontrar la seleccion al menu, depende si quiera <b>todas</b> las estaciones (más tiempo de carga),solo esta estación <b>con </b> foto o solo estaciones <b>sin</b> fotos para ser mostradas.</string>
-  <string name="text_intro_slider4">Hay dos maneras de tomar fotos en la estación: buscando en la <b>Pagina principal</b> o  <b>mediante el mapa en el menu de  \'Mapa de la estación\'</b>. El icono de la foto solo es clickeable si tiene su dispositivo horizontalmente.</string>
+  <string name="text_intro_slider3">En el menu debajo de <b> \'Mapa de estación\' </b>y en ka <b>lista de página de inicio</b> puede encontrar la seleccion al menu, depende si quiera <b>todas</b> las estaciónes (más tiempo de carga),solo esta estación <b>con </b> foto o solo estaciónes <b>sin</b> fotos para ser mostradas.</string>
+  <string name="text_intro_slider4">Hay dos maneras de tomar fotos en la estación: buscando en la <b>página principal</b> o  <b>mediante el mapa en el menu de  \'Mapa de la estación\'</b>. El icono de la foto solo es clickeable si tiene su dispositivo horizontalmente.</string>
   <string name="text_intro_slider5">En cuanto haya tomado la foto, sera mostrada y podra subirla.</string>
   <string name="text_intro_slider6">En esta pantalla podra ver un icono para compartir. Cuando usted elige por ejemplo Twitter-App, todos los hashtags son usados automáticamente.</string>
-  <string name="text_intro_slider7">Cuando vas en camino y quieres ser informado de estaciones cercanas, puede cambiar el icono de notificacion de estaciones cercanas.\n\n<b>La seleccion de estaciones mostradas esta dada por sus preferencias en la pagina principal - veasé seleccion de estaciones estación -.</b></string>
-  <string name="text_intro_slider8">Para que los usuarios se puedan cordinar en que estaciones quieren tomar , hemos implementado un chat.Tan pronto como un nuevo mensaje sea enviado se le notificara. Por supuesto, puede desactivar esta notificacion si asi lo desea.</string>
-  <string name="text_intro_slider9">Al iniciar la app, las estaciones de Alemania son cargadas. Si quiere cambiar el pais de  AL a <b>otro</b> pais, puede hacerlo en la esquina superior de la pantalla de inicio. En cuanto presione el boton de regresar, el nuevo pais sera cargado.</string>
+  <string name="text_intro_slider7">Cuando vas en camino y quieres ser informado de estaciónes cercanas, puede cambiar el icono de notificacion de estaciónes cercanas.\n\n<b>La seleccion de estaciónes mostradas esta dada por sus preferencias en la página principal - veasé seleccion de estaciónes estación -.</b></string>
+  <string name="text_intro_slider8">Para que los usuarios se puedan cordinar en que estaciónes quieren tomar , hemos implementado un chat.Tan pronto como un nuevo mensaje sea enviado se le notificara. Por supuesto, puede desactivar esta notificacion si asi lo desea.</string>
+  <string name="text_intro_slider9">Al iniciar la app, las estaciónes de Alemania son cargadas. Si quiere cambiar el pais de  AL a <b>otro</b> pais, puede hacerlo en la esquina superior de la pantalla de inicio. En cuanto presione el boton de regresar, el nuevo pais sera cargado.</string>
   <string name="next">SIGUIENTE</string>
   <string name="skip">CANCELAR</string>
   <string name="proceed">INICIAR</string>
@@ -129,7 +129,7 @@
   <string name="title_slider3">Selección de estación</string>
   <string name="title_slider4">Tomar una foto</string>
   <string name="title_slider6">Compartir una foto</string>
-  <string name="title_slider7">Notificar de estaciones cercanas</string>
+  <string name="title_slider7">Notificar de estaciónes cercanas</string>
   <string name="title_slider8">El chat</string>
   <string name="title_slider9">Seleccionar pais</string>
   <string name="missing_licence">Najo que licencia quiere subir sus fotos?</string>
@@ -141,29 +141,29 @@
   <string name="upload_conflict">Su foto ha sido subida,pero puede haber un conflicto. O ha subido la misma foto dos veces, u otro usuario ya subio una fotografia.</string>
   <string name="select_photo">Selección de foto</string>
   <string name="station_photo">Foto de la estación</string>
-  <string name="menu_title_stations_map">Mapa de la estacion</string>
+  <string name="menu_title_stations_map">Mapa de la estación</string>
   <string name="menu_photo_filter">Filtrar con/sin foto</string>
-  <string name="loading_stations">Cargar estaciones</string>
+  <string name="loading_stations">Cargar estaciónes</string>
   <string name="search_nickname_hint">Buscar fotógrafo </string>
   <string name="cc0_needed">Por favor acepte CC0, para que podamos usar su foto sin problemas.</string>
   <string name="update_available">Nuevas fotos de la estación disponibles, actualizar?</string>
   <string name="button_cancel_text">Cancelar</string>
   <string name="update_manual">Manual</string>
   <string name="update_notify">Preguntar</string>
-  <string name="update_automatic">Automaticamente</string>
+  <string name="update_automatic">Automáticamente</string>
   <string name="tvUpdatePolicy">Subir los datos de la estación</string>
   <string name="send">Enviar</string>
   <string name="logo_train">logo de una pequeña locomotora</string>
   <string name="license_info_not_readable">Información de la licencia ilegible por el momento</string>
   <string name="station_not_found">Estación no encontrada</string>
   <string name="last_update_at">Ultima vez actualizado en: </string>
-  <string name="station_update_failed">Actualización de estacion fallida:</string>
+  <string name="station_update_failed">Actualización de estación fallida:</string>
   <string name="stationId">StationNbr: </string>
   <string name="need_to_allow_location_access">Necesita acceder a dar permisos locales</string>
   <string name="my_position">Mi posición actual es : </string>
   <string name="chat_notification_enabled">Ha activado satisfactoriamente las notificaciones del chat</string>
   <string name="chat_notification_disabled">Ha desactivado satisfactoriamente las notificaciones del chat</string>
-  <string name="unable_to_create_folder_structure">Fallo al crear estructura de direcciones/string>
+  <string name="unable_to_create_folder_structure">Fallo al crear estructura de direcciones</string>
   <string name="select_picture">Seleccione foto</string>
   <string name="grant_location_permission">Sin permiso de acceso a su localización no podemos mostrar su localización</string>
   <string name="grant_camera_permission">Necesita dar permiso para uso de cámara</string>
@@ -176,19 +176,19 @@
   <string name="sending">Enviando……</string>
   <string name="send_data">Enviando data…</string>
   <string name="error_no_sdcard_found">No se encontro tarjeta SD!</string>
-  <string name="cannot_associate_photo_to_station">No se puede asociar esta foto a esta estacion</string>
+  <string name="cannot_associate_photo_to_station">No se puede asociar esta foto a esta estación</string>
   <string name="no_records_found">No se encontraron datos!</string>
   <string name="reading_data">Leyendo data…</string>
   <string name="processing_data">Procesando...</string>
   <string name="processing_item_of">Procesando %1$d/%2$d</string>
   <string name="writing_to_database">Escribiendo a la base de datos</string>
-  <string name="stations_database_updated">Base de datos de estaciones actualizada</string>
+  <string name="stations_database_updated">Base de datos de estaciónes actualizada</string>
   <string name="loading_data">Cargando datos…</string>
   <string name="processing_countries">Procesando paises……</string>
   <string name="countries_database_updated">Base de datos de paises actualizada</string>
   <string name="error_updating_countries">Fallo al actualizar base de datos de paises:</string>
-  <string name="processing_statistics">Procesando estadisticas……</string>
-  <string name="open_once_nearby">Por favor abra primero \'Mapa de la estacion\' una vez</string>
+  <string name="processing_statistics">Procesando estadísticas……</string>
+  <string name="open_once_nearby">Por favor abra primero \'Mapa de la estación\' una vez</string>
   <string name="welcome">Bienvenido</string>
   <string name="authentication_failed">Fallo al autenticar!</string>
   <string name="google_play_services_error">Error en Google play services.</string>
