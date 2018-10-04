@@ -216,5 +216,7 @@
     <string name="nicknameFilter">Fotografenfilter</string>
     <string name="select_nickname">Wähle Fotograf</string>
     <string name="no_nicknames_found">Keine Fotografen gefunden</string>
+    <string name="remove_station">Melde Bahnhof zum Löschen</string>
+    <string name="report_ghost_station">Lade dieses Foto hoch, um einen Fehlenden Bahnhof zu melden.</string>
 
 </resources>

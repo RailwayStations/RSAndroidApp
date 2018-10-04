@@ -83,10 +83,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final int REQUEST_SELECT_PICTURE_PERMISSION = 1;
     private static final int REQUEST_TAKE_PICTURE = 2;
     private static final int REQUEST_SELECT_PICTURE = 3;
+    private static final int REQUEST_REPORT_GHOST_PERMISSION = 4;
     private static final int ALPHA = 128;
 
     private ImageButton takePictureButton;
     private ImageButton selectPictureButton;
+    private ImageButton reportGhostStationButton;
     private ImageView imageView;
     private Bahnhof bahnhof;
     private Country country;
@@ -150,6 +152,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     }
                 }
         );
+        reportGhostStationButton = findViewById(R.id.button_remove_station);
+        reportGhostStationButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        reportGhostStationWithPermissionCheck();
+                    }
+                }
+        );
 
         licenseTagView = findViewById(R.id.license_tag);
         licenseTagView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -159,6 +170,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         licenseTagView.setVisibility(View.INVISIBLE);
         takePictureButton.setVisibility(View.INVISIBLE);
         selectPictureButton.setVisibility(View.INVISIBLE);
+        reportGhostStationButton.setVisibility(View.INVISIBLE);
 
         fullscreen = false;
 
@@ -224,11 +236,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     /**
-     * Method to request permission for selecting picture
+     * Method to request permission for specific action
      */
-    private void requestPermissionAndSelectPicture() {
+    private void requestStoragePermission(int requestCode) {
         // Write permission has not been granted yet. Request it directly.
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_SELECT_PICTURE_PERMISSION);
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
     }
 
     public void selectPicture() {
@@ -274,6 +286,36 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
+    public void reportGhostStation() {
+        if (bahnhof.hasPhoto()) {
+            return;
+        }
+
+        if (isMyDataIncomplete()) {
+            checkMyData();
+        } else {
+            File file = getStoredMediaFile();
+            if (file != null) {
+                try {
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ghost_station);
+                    int sampling = bitmap.getWidth() / STORED_FOTO_WIDTH;
+                    Bitmap scaledScreen = bitmap;
+                    if (sampling > 1) {
+                        scaledScreen = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / sampling, bitmap.getHeight() / sampling, false);
+                    }
+
+                    saveScaledBitmap(file, scaledScreen);
+                    Toast.makeText(getApplicationContext(), getString(R.string.report_ghost_station), Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing photo", e);
+                    Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     private boolean isMyDataIncomplete() {
         return TextUtils.isEmpty(nickname) || license == License.UNKNOWN || photoOwner == PhotoOwner.UNKNOWN;
     }
@@ -303,7 +345,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 //Permission not granted
                 Toast.makeText(DetailsActivity.this, R.string.grant_external_storage, Toast.LENGTH_LONG).show();
             }
+        } else if (requestCode == REQUEST_REPORT_GHOST_PERMISSION) {
+            Log.i(TAG, "Received response for report ghost permission request.");
 
+            // Check if the only required permission has been granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Write permission has been granted, preview can be displayed
+                reportGhostStation();
+            } else {
+                //Permission not granted
+                Toast.makeText(DetailsActivity.this, R.string.grant_external_storage, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -332,12 +384,29 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
                 // Write permission has not been granted.
-                requestPermissionAndSelectPicture();
+                requestStoragePermission(REQUEST_SELECT_PICTURE_PERMISSION);
             } else {
                 selectPicture();
             }
         } else {
             selectPicture();
+        }
+    }
+
+    /**
+     * Method to check permission before selecting a picture
+     */
+    void reportGhostStationWithPermissionCheck() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Write permission has not been granted.
+                requestStoragePermission(REQUEST_REPORT_GHOST_PERMISSION);
+            } else {
+                reportGhostStation();
+            }
+        } else {
+            reportGhostStation();
         }
     }
 
@@ -745,6 +814,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private void setLocalBitmap() {
         takePictureButton.setVisibility(View.VISIBLE);
         selectPictureButton.setVisibility(View.VISIBLE);
+        reportGhostStationButton.setVisibility(View.VISIBLE);
 
         Bitmap showBitmap = checkForLocalPhoto();
         if (showBitmap == null) {
