@@ -568,7 +568,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     String countryName = jsonObj.getString("name");
                     String email = jsonObj.getString("email");
                     String twitterTags = jsonObj.getString("twitterTags");
-                    String timetableUrlTemplate = jsonObj.getString("timetableUrlTemplate");
+                    String timetableUrlTemplate = jsonObj.isNull("timetableUrlTemplate") ? null : jsonObj.getString("timetableUrlTemplate");
 
                     Country country = new Country();
                     country.setCountryShortCode(countryShortCode);
