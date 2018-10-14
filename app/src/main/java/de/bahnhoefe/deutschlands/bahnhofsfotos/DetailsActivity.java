@@ -795,8 +795,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                             Intent mapIntent = new Intent(Intent.ACTION_VIEW);
                             String photographerUrl = bahnhof.getPhotographerUrl();
                             if (photographerUrl != null && !photographerUrl.isEmpty()) {
-                                mapIntent.setData(Uri.parse(photographerUrl));
-                                startActivity(mapIntent);
+                                final Uri uri = Uri.parse(photographerUrl);
+                                if (uri.getScheme() != null && uri.getScheme().startsWith("http")) {
+                                    mapIntent.setData(uri);
+                                    startActivity(mapIntent);
+                                }
                             }
                         }
                     }
