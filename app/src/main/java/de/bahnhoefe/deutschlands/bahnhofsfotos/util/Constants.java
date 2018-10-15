@@ -15,6 +15,7 @@ public class Constants {
         public static final String KEY_PHOTOGRAPHER = "photographer";
         public static final String KEY_PHOTOGRAPHER_URL = "photographerUrl";
         public static final String KEY_LICENSE = "license";
+        public static final String KEY_LICENSE_URL = "licenseUrl";
         public static final String KEY_DS100 = "DS100";
 
         //Länderkonstanten

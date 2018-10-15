@@ -218,5 +218,9 @@
     <string name="no_nicknames_found">Keine Fotografen gefunden</string>
     <string name="remove_station">Melde Bahnhof zum Löschen</string>
     <string name="report_ghost_station">Lade dieses Foto hoch, um einen Fehlenden Bahnhof zu melden.</string>
+    <string name="photograph">Fotograf</string>
+    <string name="photographNotAvailable">Fotograf (nicht verfügbar)</string>
+    <string name="tvLicenseNotAvailable">Fotolizenz (nicht verfügbar)</string>
+    <string name="openWebsite">Öffne Webseite</string>
 
 </resources>

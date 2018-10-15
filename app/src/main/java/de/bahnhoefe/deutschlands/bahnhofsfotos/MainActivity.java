@@ -432,6 +432,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     String photographer = getNullableString(jsonObj, "photographer");
                     String photographerUrl = getNullableString(jsonObj, "photographerUrl");
                     String license = getNullableString(jsonObj, "license");
+                    String licenseUrl = getNullableString(jsonObj, "licenseUrl");
                     String ds100 = getNullableString(jsonObj, "DS100");
 
                     Bahnhof bahnhof = new Bahnhof();
@@ -444,6 +445,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     bahnhof.setPhotographer(photographer);
                     bahnhof.setPhotographerUrl(photographerUrl);
                     bahnhof.setLicense(license);
+                    bahnhof.setLicenseUrl(licenseUrl);
                     bahnhof.setDS100(ds100);
 
                     bahnhoefe.add(bahnhof);
