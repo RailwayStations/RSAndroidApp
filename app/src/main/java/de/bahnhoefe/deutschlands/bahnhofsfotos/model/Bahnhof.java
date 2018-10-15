@@ -13,6 +13,7 @@ public class Bahnhof implements Serializable {
     private String photographer;
     private String photographerUrl;
     private String license;
+    private String licenseUrl;
 
     public String getId() {
         return id;
@@ -113,6 +114,14 @@ public class Bahnhof implements Serializable {
 
     public String getLicense() {
         return license;
+    }
+
+    public String getLicenseUrl() {
+        return licenseUrl;
+    }
+
+    public void setLicenseUrl(String licenseUrl) {
+        this.licenseUrl = licenseUrl;
     }
 
     public boolean hasPhoto() {

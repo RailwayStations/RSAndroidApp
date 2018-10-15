@@ -22,7 +22,7 @@ public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
             + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
@@ -34,6 +34,7 @@ public class BahnhofsDbAdapter {
             + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_LICENSE + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_LICENSE_URL + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_DS100 + " TEXT)";
     private static final String CREATE_STATEMENT_2 = "CREATE INDEX " + DATABASE_TABLE + "_IDX "
             + "ON " + DATABASE_TABLE + "(" + Constants.DB_JSON_CONSTANTS.KEY_ID + ")";
@@ -88,6 +89,7 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER, bahnhof.getPhotographer());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL, bahnhof.getPhotographerUrl());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LICENSE, bahnhof.getLicense());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_LICENSE_URL, bahnhof.getLicenseUrl());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_DS100, bahnhof.getDS100());
 
                 db.insert(DATABASE_TABLE, null, values);
@@ -289,6 +291,7 @@ public class BahnhofsDbAdapter {
         String photographer = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER));
         String photographerUrl = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL));
         String license = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LICENSE));
+        String licenseUrl = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LICENSE_URL));
         String ds100 = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_DS100));
         Bahnhof bahnhof = new Bahnhof();
         bahnhof.setTitle(title);
@@ -299,6 +302,7 @@ public class BahnhofsDbAdapter {
         bahnhof.setPhotographer(photographer);
         bahnhof.setPhotographerUrl(photographerUrl);
         bahnhof.setLicense(license);
+        bahnhof.setLicenseUrl(licenseUrl);
         bahnhof.setDS100(ds100);
         return bahnhof;
     }
