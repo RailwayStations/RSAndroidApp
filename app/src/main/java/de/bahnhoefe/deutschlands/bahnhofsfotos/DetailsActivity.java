@@ -2,7 +2,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.animation.ValueAnimator;
 import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.TaskStackBuilder;
 import android.content.Context;
@@ -25,11 +24,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +42,8 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.flags.impl.DataUtils;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -86,6 +88,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final int REQUEST_SELECT_PICTURE = 3;
     private static final int REQUEST_REPORT_GHOST_PERMISSION = 4;
     private static final int ALPHA = 128;
+
+    private static final String LINK_FORMAT = "<b><a href=\"%s\">%s</a></b>";
 
     private ImageButton takePictureButton;
     private ImageButton selectPictureButton;
@@ -782,62 +786,35 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // Lizenzinfo aufbauen und einblenden
         licenseTagView.setVisibility(View.VISIBLE);
         if (bahnhof.getLicense() != null) {
-            licenseTagView.setText(
-                    String.format(
-                            getText(R.string.license_tag).toString(),
-                            bahnhof.getPhotographer(),
-                            bahnhof.getLicense())
-            );
             final boolean photographerUrlAvailable = bahnhof.getPhotographerUrl() != null && !bahnhof.getPhotographerUrl().isEmpty();
             final boolean licenseUrlAvailable = bahnhof.getLicenseUrl() != null && !bahnhof.getLicenseUrl().isEmpty();
 
-            final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item) {
-                @Override
-                public boolean isEnabled(int position) {
-                    if (position == 0) {
-                        return photographerUrlAvailable;
-                    } else if (position == 1) {
-                        return licenseUrlAvailable;
-                    }
-                    return true;
-                }
-            };
-            adapter.add(photographerUrlAvailable ? getString(R.string.photograph) : getString(R.string.photographNotAvailable));
-            adapter.add(licenseUrlAvailable ? getString(R.string.tvLicense) : getString(R.string.tvLicenseNotAvailable));
+            final String photographerText;
+            if (photographerUrlAvailable) {
+                photographerText = String.format(
+                        LINK_FORMAT,
+                        bahnhof.getPhotographerUrl(),
+                        bahnhof.getPhotographer());
+            } else {
+                photographerText = bahnhof.getPhotographer();
+            }
 
-            licenseTagView.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            new AlertDialog.Builder(new ContextThemeWrapper(DetailsActivity.this, R.style.AlertDialogCustom))
-                                    .setTitle(R.string.openWebsite)
-                                    .setAdapter(adapter, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int item) {
-                                            if (item == 0) {
-                                                openUrl(bahnhof.getPhotographerUrl());
-                                            } else if (item == 1) {
-                                                openUrl(bahnhof.getLicenseUrl());
-                                            }
-                                        }
-
-                                        private void openUrl(String url) {
-                                            final Intent mapIntent = new Intent(Intent.ACTION_VIEW);
-                                            final Uri uri = Uri.parse(url);
-                                            if (uri.getScheme() != null && uri.getScheme().startsWith("http")) {
-                                                mapIntent.setData(uri);
-                                                startActivity(mapIntent);
-                                            }
-                                        }
-                                    })
-                                    .setNegativeButton(R.string.button_cancel_text, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                        }
-                                    })
-                                    .create().show();
-                        }
-                    }
+            final String licenseText;
+            if (licenseUrlAvailable) {
+                licenseText = String.format(
+                        LINK_FORMAT,
+                        bahnhof.getLicenseUrl(),
+                        bahnhof.getLicense());
+            } else {
+                licenseText = bahnhof.getLicense();
+            }
+            licenseTagView.setText(
+                    Html.fromHtml(
+                        String.format(
+                                getText(R.string.license_tag).toString(),
+                                photographerText,
+                                licenseText)
+                    )
             );
         } else {
             licenseTagView.setText(R.string.license_info_not_readable);
