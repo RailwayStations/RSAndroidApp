@@ -58,12 +58,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignEnd="@id/imageview"
-            android:autoLink="web"
-            android:linksClickable="true"
-            android:clickable="true"
             android:text="@string/license_tag"
             android:background="#50ffffff"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:textColorLink="@color/colorPrimary"/>
 
 
         <LinearLayout
