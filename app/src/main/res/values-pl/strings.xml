@@ -69,15 +69,6 @@
   <string name="photo_exists">Zdjęcie: otwórz aby zobaczyć licencję</string>
   <string name="nearby_notification_active">Powiadomienia o okolicznych stacjach sa włączone</string>
   <string name="license_tag" formatted="false">Właściciel: %s, %s</string>
-  <!--Firebase-Chat-->
-  <string name="sign_out">Wyloguj</string>
-  <string name="invite_menu_label">Zaproś</string>
-  <string name="invitation_message">Dołącz do czatu</string>
-  <string name="invitation_cta">Wyślij zaproszenie</string>
-  <string name="invitation_title">Zaproszenie do czatu</string>
-  <string name="sign_in">Możesz zalogować się przy użyciu konta Google</string>
-  <string name="chatActivity">Chat</string>
-  <string name="LogInActivity">Login</string>
   <string name="picture_landscape_only">Użyj orientacji horyzontalnej</string>
   <string name="no_location_enabled">Lokalizacja wyłączona</string>
   <string name="country_activity">Wybór kraju</string>
@@ -103,10 +94,6 @@
   <string name="next">NEXT</string>
   <string name="skip">CANCEL</string>
   <string name="proceed">START</string>
-  <string name="menu_title_zum_chat">To the chat</string>
-  <string name="pref_title_new_message_notifications">Register or unregister for Push Notification</string>
-  <string name="pref_header_notifications">Tab Menu Website</string>
-  <string name="push_notifications_menu_label">Disable notifications</string>
   <string name="title_activity_high_score">Highscore</string>
   <string name="menu_title_highscore">Highscore</string>
   <string name="photo_upload">Upload photo</string>
@@ -161,8 +148,6 @@
   <string name="stationId">StationNbr: </string>
   <string name="need_to_allow_location_access">You need to grant location permission</string>
   <string name="my_position">My current location: </string>
-  <string name="chat_notification_enabled">You have successfully activated the chat notifications</string>
-  <string name="chat_notification_disabled">You have successfully turned off the chat notifications</string>
   <string name="unable_to_create_folder_structure">Nie udało się utworzyć struktury plików</string>
   <string name="select_picture">Wybierz zdjęcie</string>
   <string name="grant_location_permission">Bez pozwolenia na lokalizację nie możemy pokazać twojej obecnej pozycji</string>
@@ -189,8 +174,6 @@
   <string name="error_updating_countries">Nie udało się uaktualnić danych krajów:</string>
   <string name="processing_statistics">Przetwarzanie statystyk…</string>
   <string name="open_once_nearby">Otwórz najpierw \'Mapę stacji\'</string>
-  <string name="welcome">Witaj</string>
-  <string name="authentication_failed">Błąd uwierzytelnienia.</string>
   <string name="google_play_services_error">Błąd w serwisie Google play.</string>
   <string name="photo">Zdjęcie</string>
   <string name="no_internet_connection">Brak połączenia internetowego!</string>
@@ -200,11 +183,20 @@
   <string name="report_ghost_station">Wczytaj to zdjęcie by zgłosić nieistniejącą stację.</string>
   <plurals name="stations_loaded">
     <item quantity="one">Załadowano %d stację</item>
+    <item quantity="few">Załadowano %d stacje</item>
+    <item quantity="many">Załadowano %d stacje</item>
     <item quantity="other">Załadowano %d stacje</item>
   </plurals>
   <plurals name="records_found">
     <item quantity="one">Znaleziono %d wpis</item>
+    <item quantity="few">Znaleziono %d wpisów</item>
+    <item quantity="many">Znaleziono %d wpisów</item>
     <item quantity="other">Znaleziono %d wpisów</item>
   </plurals>
-  <!--Firebase-Chat-->
+  <string name="photograph">Photograph</string>
+  <string name="photographNotAvailable">Photograph (not available)</string>
+  <string name="tvLicenseNotAvailable">Photo license (not available)</string>
+  <string name="openWebsite">Open Website</string>
+    <string name="button_ok_text">Ok</string>
+
 </resources>

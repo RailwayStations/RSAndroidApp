@@ -71,15 +71,7 @@
   <string name="nearby_notification_active">Notification of nearby stations is active</string>
   <string name="license_tag" formatted="false">Owner: %s, %s</string>
   <!--Firebase-Chat-->
-  <string name="sign_out">Sign Out</string>
-  <string name="invite_menu_label">Invite</string>
-  <string name="invitation_message">Please join the station photo chat</string>
-  <string name="invitation_cta">Send invitation</string>
-  <string name="invitation_title">Invitation to the station photo chat</string>
-  <string name="sign_in">You can log on with your Google account</string>
-  <string name="chatActivity">Chat</string>
-  <string name="LogInActivity">Login</string>
-  <string name="picture_landscape_only">Please use landscape orientation</string>
+    <string name="picture_landscape_only">Please use landscape orientation</string>
   <string name="no_location_enabled">Location disabled</string>
   <string name="country_activity">Country selection</string>
   <string name="countrySelection">Country selection</string>
@@ -104,11 +96,7 @@
   <string name="next">NEXT</string>
   <string name="skip">CANCEL</string>
   <string name="proceed">START</string>
-  <string name="menu_title_zum_chat">To the chat</string>
-  <string name="pref_title_new_message_notifications">Register or unregister for Push Notification</string>
-  <string name="pref_header_notifications">Tab Menu Website</string>
-  <string name="push_notifications_menu_label">Disable notifications</string>
-  <string name="title_activity_high_score">Highscore</string>
+    <string name="title_activity_high_score">Highscore</string>
   <string name="menu_title_highscore">Highscore</string>
   <string name="photo_upload">Upload photo</string>
   <string name="upload_completed">Upload successfully</string>
@@ -162,9 +150,7 @@
   <string name="stationId">StationNbr: </string>
   <string name="need_to_allow_location_access">You need to grant location permission</string>
   <string name="my_position">My current location: </string>
-  <string name="chat_notification_enabled">You have successfully activated the chat notifications</string>
-  <string name="chat_notification_disabled">You have successfully turned off the chat notifications</string>
-  <string name="unable_to_create_folder_structure">Failed to create directory structure</string>
+    <string name="unable_to_create_folder_structure">Failed to create directory structure</string>
   <string name="select_picture">Select Photo</string>
   <string name="grant_location_permission">Without location permission we cannot show your current position</string>
   <string name="grant_camera_permission">You need to grant permission to use the camera</string>
@@ -190,9 +176,7 @@
   <string name="error_updating_countries">Failed to update the country data:</string>
   <string name="processing_statistics">Processing statistics…</string>
   <string name="open_once_nearby">Please first open \'Station Map\' once</string>
-  <string name="welcome">Welcome</string>
-  <string name="authentication_failed">Authentication failed.</string>
-  <string name="google_play_services_error">Error in the Google play services.</string>
+    <string name="google_play_services_error">Error in the Google play services.</string>
   <string name="photo">Photo</string>
   <string name="no_internet_connection">No Internet connection!</string>
   <string name="timetable_missing">Timetable not available</string>
@@ -211,4 +195,5 @@
   <string name="photographNotAvailable">Photograph (not available)</string>
   <string name="tvLicenseNotAvailable">Photo license (not available)</string>
   <string name="openWebsite">Open Website</string>
+  <string name="button_ok_text">Ok</string>
 </resources>

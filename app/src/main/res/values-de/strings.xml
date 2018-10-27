@@ -80,14 +80,6 @@
     <string name="license_tag" formatted="false">Urheber: %s, %s</string>
 
     <!--Firebase-Chat-->
-    <string name="sign_out">Sign Out</string>
-    <string name="invite_menu_label">Invite</string>
-    <string name="invitation_message">Bitte trete dem Bahnhofsfoto-Chat bei</string>
-    <string name="invitation_cta">Einladung senden</string>
-    <string name="invitation_title">Einladung zum Bahnhofsfoto-Chat</string>
-    <string name="sign_in">Hier kannst Du Dich mit Deinem Google-Account einloggen</string>
-    <string name="chatActivity">Chat</string>
-    <string name="LogInActivity">Login</string>
 
     <string name="picture_landscape_only">Bitte auf Querformat drehen</string>
     <string name="no_location_enabled">Einstellungen erlauben keine Ortung</string>
@@ -113,10 +105,6 @@
     <string name="next">WEITER</string>
     <string name="skip">ABBRECHEN</string>
     <string name="proceed">STARTEN</string>
-    <string name="menu_title_zum_chat">Zum Chat</string>
-    <string name="pref_title_new_message_notifications">Register or unregister for Push Notification</string>
-    <string name="pref_header_notifications">Tab Menu Website</string>
-    <string name="push_notifications_menu_label">Benachrichtigungen ausschalten</string>
     <string name="title_activity_high_score">Rangliste</string>
     <string name="menu_title_highscore">Rangliste</string>
     <string name="photo_upload">Foto hochladen</string>
@@ -171,8 +159,6 @@
     <string name="stationId">BahnhofNr: </string>
     <string name="need_to_allow_location_access">You need to allow access to Locations</string>
     <string name="my_position">Meine aktuelle Position: </string>
-    <string name="chat_notification_enabled">Du hast die Chat-Benachrichtigungen erfolgreich eingeschaltet</string>
-    <string name="chat_notification_disabled">Du hast die Chat-Benachrichtigungen erfolgreich ausgeschaltet</string>
     <string name="unable_to_create_folder_structure">Kann keine Verzeichnisstruktur anlegen</string>
     <string name="select_picture">Foto auswählen</string>
     <string name="grant_location_permission">Ohne Zugriff auf den Standort können wir deine Position nicht anzeigen</string>
@@ -199,8 +185,6 @@
     <string name="error_updating_countries">Fehler beim Aktualisieren der Länderdaten:</string>
     <string name="processing_statistics">Verarbeite Statistik…</string>
     <string name="open_once_nearby">Bitte einmal die \"Bahnhofskarte\" aufrufen</string>
-    <string name="welcome">Welcome</string>
-    <string name="authentication_failed">Authentifizierung fehlgeschlagen.</string>
     <string name="google_play_services_error">Fehler in den Google Play Diensten.</string>
     <string name="photo">Foto</string>
     <string name="no_internet_connection">Keine Internetverbindung!</string>
@@ -222,5 +206,6 @@
     <string name="photographNotAvailable">Fotograf (nicht verfügbar)</string>
     <string name="tvLicenseNotAvailable">Fotolizenz (nicht verfügbar)</string>
     <string name="openWebsite">Öffne Webseite</string>
+    <string name="button_ok_text">Ok</string>
 
 </resources>

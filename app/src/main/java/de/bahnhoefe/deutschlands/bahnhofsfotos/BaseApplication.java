@@ -106,14 +106,6 @@ public class BaseApplication extends Application {
         return preferences.getBoolean(getString(R.string.FIRSTAPPSTART), DEFAULT_FIRSTAPPSTART);
     }
 
-    public boolean subscribtionStatus() {
-        return preferences.getBoolean(getString(R.string.FRIENDLY_ENGAGE_TOPIC), false);
-    }
-
-    public void saveSubscribtionStatus(boolean status) {
-        putBoolean(R.string.FRIENDLY_ENGAGE_TOPIC, status);
-    }
-
     public License getLicense() {
         return License.byName(preferences.getString(getString(R.string.LICENCE), License.UNKNOWN.toString()));
     }

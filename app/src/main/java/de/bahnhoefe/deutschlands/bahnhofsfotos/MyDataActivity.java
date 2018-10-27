@@ -30,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MyDataActivity extends AppCompatActivity {
+
     private final String TAG = getClass().getSimpleName();
     private EditText etNickname, etLink, etEmail, etUploadToken;
     private CheckBox cbLicenseCC0;
