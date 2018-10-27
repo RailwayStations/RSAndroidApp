@@ -71,14 +71,6 @@
   <string name="nearby_notification_active">Notificación de estaciónes cercanas activa</string>
   <string name="license_tag" formatted="false">Dueño: %s, %s</string>
   <!--Firebase-Chat-->
-  <string name="sign_out">Cerrar sesión</string>
-  <string name="invite_menu_label">Invitar</string>
-  <string name="invitation_message">Por favor entra al chat de la foto de la estación</string>
-  <string name="invitation_cta">Enviar invitación</string>
-  <string name="invitation_title">Invitación al chat de la foto de la estación</string>
-  <string name="sign_in">Puedes iniciar sesión con tu cuenta de Google!</string>
-  <string name="chatActivity">Chat</string>
-  <string name="LogInActivity">Inicio de sesión</string>
   <string name="picture_landscape_only">Por favor use orientación horizontal</string>
   <string name="no_location_enabled">Localización desactivada</string>
   <string name="country_activity">Seleccionar pais</string>
@@ -104,10 +96,6 @@
   <string name="next">SIGUIENTE</string>
   <string name="skip">CANCELAR</string>
   <string name="proceed">INICIAR</string>
-  <string name="menu_title_zum_chat">Ir al chat</string>
-  <string name="pref_title_new_message_notifications">Registrar o borrar registro para recibir notificaciones</string>
-  <string name="pref_header_notifications">Menu del sitio</string>
-  <string name="push_notifications_menu_label">Desactivar notificaciones</string>
   <string name="title_activity_high_score">Highscore</string>
   <string name="menu_title_highscore">Highscore</string>
   <string name="photo_upload">Subir foto</string>
@@ -139,6 +127,7 @@
   <string name="missing_linking">Por favor eliga si desea ser enlazado</string>
   <string name="missing_link">Por favor ingrese una URL valida si desea ser enlazado</string>
   <string name="upload_conflict">Su foto ha sido subida,pero puede haber un conflicto. O ha subido la misma foto dos veces, u otro usuario ya subio una fotografia.</string>
+  <string name="remove_station">Report station to be removed</string>
   <string name="select_photo">Selección de foto</string>
   <string name="station_photo">Foto de la estación</string>
   <string name="menu_title_stations_map">Mapa de la estación</string>
@@ -161,8 +150,6 @@
   <string name="stationId">StationNbr: </string>
   <string name="need_to_allow_location_access">Necesita acceder a dar permisos locales</string>
   <string name="my_position">Mi posición actual es : </string>
-  <string name="chat_notification_enabled">Ha activado satisfactoriamente las notificaciones del chat</string>
-  <string name="chat_notification_disabled">Ha desactivado satisfactoriamente las notificaciones del chat</string>
   <string name="unable_to_create_folder_structure">Fallo al crear estructura de direcciones</string>
   <string name="select_picture">Seleccione foto</string>
   <string name="grant_location_permission">Sin permiso de acceso a su localización no podemos mostrar su localización</string>
@@ -189,15 +176,14 @@
   <string name="error_updating_countries">Fallo al actualizar base de datos de paises:</string>
   <string name="processing_statistics">Procesando estadísticas……</string>
   <string name="open_once_nearby">Por favor abra primero \'Mapa de la estación\' una vez</string>
-  <string name="welcome">Bienvenido</string>
-  <string name="authentication_failed">Fallo al autenticar!</string>
   <string name="google_play_services_error">Error en Google play services.</string>
   <string name="photo">Foto</string>
   <string name="no_internet_connection">No hay conexion a Internet </string>
   <string name="timetable_missing">Tabla de horarios no disponibles</string>
-    <string name="select_nickname">Seleccione fotografo</string>
-    <string name="no_nicknames_found">No se encontraron fotografos</string>
-    <plurals name="stations_loaded">
+  <string name="select_nickname">Seleccione fotografo</string>
+  <string name="no_nicknames_found">No se encontraron fotografos</string>
+  <string name="report_ghost_station">Upload this photo to report a non-existing station.</string>
+  <plurals name="stations_loaded">
     <item quantity="one">%d estación cargadas</item>
     <item quantity="other">%d estaciónes cargadas</item>
   </plurals>
@@ -205,4 +191,9 @@
     <item quantity="one">%d selección encontrada</item>
     <item quantity="other">%d selecciones encontradas</item>
   </plurals>
+  <string name="photograph">Photograph</string>
+  <string name="photographNotAvailable">Photograph (not available)</string>
+  <string name="tvLicenseNotAvailable">Photo license (not available)</string>
+  <string name="openWebsite">Open Website</string>
+    <string name="button_ok_text">Ok</string>
 </resources>

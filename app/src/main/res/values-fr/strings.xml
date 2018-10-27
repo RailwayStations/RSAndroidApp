@@ -15,8 +15,8 @@
   <string name="maps_activity">Les cartes des stations</string>
   <string name="no_location_detected">Nul stationnement trouvé </string>
   <string name="title_activity_details">Les détails des stations</string>
-  <string name="no_stations_loaded">Nul station téléchargées. Presser s'il vous plaît mettre à jour avant.</string>
-  <string name="no_stations_in_database">Le mettre à jour n'est pas encore eu lieu </string>
+  <string name="no_stations_loaded">Nul station téléchargées. Presser s\'il vous plaît mettre à jour avant.</string>
+  <string name="no_stations_in_database">Le mettre à jour n\'est pas encore eu lieu </string>
   <string name="take_photo">Prendre une photo</string>
   <string name="send_email">Envoyer un courriel</string>
   <string name="share_photo">Partager</string>
@@ -29,11 +29,11 @@
   <string name="rbOwnPhotoYes">Oui</string>
   <string name="rbOwnPhotoNo">Non</string>
   <string name="tvLinking">Voudriez-vous être lié à notre base de données des photos?</string>
-  <string name="etLinking">Faites entrer s'il vous plaît l\'URL de votre compte</string>
+  <string name="etLinking">Faites entrer s\'il vous plaît l\'URL de votre compte</string>
   <string name="rbLinkingYes">Oui</string>
   <string name="rbLinkingNo">Non (vous serez gardé anonyme)</string>
   <string name="rbLinkingwebpage">Votre Web page</string>
-  <string name="etNickname">Entrez votre nom d\'utilisateur ici s'il vous plaît.         \n Si vous êtes déjà un photographe, entrez-le s'il vous plaît exactement comme il est dans le tableau des succès.
+  <string name="etNickname">Entrez votre nom d\'utilisateur ici s\'il vous plaît.         \n Si vous êtes déjà un photographe, entrez-le s\'il vous plaît exactement comme il est dans le tableau des succès.
     </string>
   <string name="menu_title_your_own_station_photos">Vos propres photos</string>
   <string name="rbLinkingWith">Lier avec: </string>
@@ -50,7 +50,7 @@
   <string name="nav_show">uniquement l\'emplacement</string>
   <string name="navMethod">Montrer la route…</string>
   <string name="title_activity_gallery">Vos photos de la station</string>
-  <string name="activitynotfound">Vous n'avez pas d\'application de navigation sur votre Smartphone</string>
+  <string name="activitynotfound">Vous n\'avez pas d\'application de navigation sur votre Smartphone</string>
   <string name="count_of_images">Vous avez %1$d photo(s) de la station dans le stockage</string>
   <string name="search_hint">Chercher la station</string>
   <string name="app_info_title">A propos d\'application</string>
@@ -65,49 +65,36 @@
   <string name="benachrichtigen">Notifications</string>
   <string name="nahe_gelegenen_bahnhof_melden">Faire connaître les stations de près</string>
   <string name="station_is_near">Les stations de près</string>
-  <string name="template_short_text" formaté="faux">Station %s dans %.2f km</string>
-  <string name="template_long_text" formaté="faux">Station: %s\n distance: %.2f km\n%s</string>
+  <string name="template_short_text" formatted="false">Station %s dans %.2f km</string>
+  <string name="template_long_text" formatted="false">Station: %s\n distance: %.2f km\n%s</string>
   <string name="photo_exists">Photo: ouvrir pour information sur licence</string>
   <string name="nearby_notification_active">Notification des stations de près est activé</string>
-  <string name="license_tag" formaté="faux">Propriétaire: %s, %s</string>
-  <!--Firebase-Chat-->
-  <string name="sign_out">Se déconnecter</string>
-  <string name="invite_menu_label">Invitation</string>
-  <string name="invitation_message">Rejoignez s'il vous plaît le chat de la photo de la station</string>
-  <string name="invitation_cta">Envoyer l\'invitation</string>
-  <string name="invitation_title">Invitation dans le chat de la photo de la station</string>
-  <string name="sign_in">Vous pouvez vous connecter avec votre 	compte Google</string>
-  <string name="chatActivity">Chat</string>
-  <string name="LogInActivity">Se connecter</string>
-  <string name="picture_landscape_only">Utilisez s'il vous plait le mode du paysage</string>
+  <string name="license_tag" formatted="false">Propriétaire: %s, %s</string>
+  <string name="picture_landscape_only">Utilisez s\'il vous plait l\'orientation du paysage</string>
   <string name="no_location_enabled">Emplacement désactivé</string>
   <string name="country_activity">Sélection du pays</string>
   <string name="countrySelection">Sélection du pays</string>
   <string name="nicknameFilter">Filter photo par le photographe</string>
-  <string name="dialog_message">Vous n'avez pas encore rempli votre compte dans \"Mes données\". Vous pouver enregistrer une photo uniquement après avoir fait cela.</string>
+  <string name="dialog_message">Vous n\'avez pas encore rempli votre compte dans \"Mes données\". Vous pouver enregistrer une photo uniquement après avoir fait cela.</string>
   <string name="dialog_title">Remplir vos données</string>
   <string name="label_map">Carte</string>
   <string name="label_timetable">Les temps de départ</string>
-  <string name="fab_subject">Message dans l'application des photos des stations</string>
+  <string name="fab_subject">Message dans l\'application des photos des stations</string>
   <string name="fab_chooser_title">Envoyer le courriel</string>
-  <string name="menu_title_introslider">L'instruction </string>
+  <string name="menu_title_introslider">L\'instruction </string>
   <string name="menu_follow_my_location">Suivre ma position</string>
   <string name="text_intro_slider1">Nous réunissons les photos des stations des internautes, et nous pouvons les fournir à disposition des autres développeurs pour licence gratuite. Notre licence favori est CC0. \n\n<b>Avec cette version le changement des vues sera plus simple.</b></string>
-  <string name="text_intro_slider2">Entrez s'il vous plait l'information nécessaire dans \'Mes données\', pour que nous puissions nommer correctement vos photos fichiers. Sans votre nom d'utilisateur vous ne pouvez pas faire des photos directement dans l\'application. \n\n<b>La demande de l\'attribut pour le	chargement est assès simple et vite.</b></string>
-  <string name="text_intro_slider3">Dans le menu 	au-dessous de<b> \'Carte de la station\' </b>et dans la <b>liste sur la page d'accueil</b> vous pouvez trouver une sélection dans le menu, soit voulez-vous <b>toutes</b> les stations (cela prendra plus de temps), uniquement les stations <b>avec</b> une photo soit voir tout simplement les stations <b>sans</b> photos.</string>
-  <string name="text_intro_slider4">Il y a deux variantes comment prendre une photo de la station de la gare: avec la recherche sur <b>la page d'accueil</b> ou <b>avec l\'option dans le menu \'La carte des stations\'</b>. La 	vignette d'une photo peut seulement être tapé si vous aves votre Smartphone dans le mode du paysage.</string>
+  <string name="text_intro_slider2">Entrez s\'il vous plait l\'information nécessaire dans \'Mes données\', pour que nous puissions nommer correctement vos photos fichiers. Sans votre nom d\'utilisateur vous ne pouvez pas faire des photos directement dans l\'application. \n\n<b>La demande de l\'attribut pour le	chargement est assès simple et vite.</b></string>
+  <string name="text_intro_slider3">Dans le menu 	au-dessous de<b> \'Carte de la station\' </b>et dans la <b>liste sur la page d\'accueil</b> vous pouvez trouver une sélection dans le menu, soit voulez-vous <b>toutes</b> les stations (cela prendra plus de temps), uniquement les stations <b>avec</b> une photo soit voir tout simplement les stations <b>sans</b> photos.</string>
+  <string name="text_intro_slider4">Il y a deux variantes comment prendre une photo de la station de la gare: avec la recherche sur <b>la page d\'accueil</b> ou <b>avec l\'option dans le menu \'La carte des stations\'</b>. La 	vignette d\'une photo peut seulement être tapé si vous aves votre Smartphone dans le mode du paysage.</string>
   <string name="text_intro_slider5">As soon as you have taken a photo, it will be displayed and you can upload it.<b>Non-existing stations can now also be reported using the new button.</b></string>
-  <string name="text_intro_slider6">Sur cet écran vous pouver trouver la vignette pour partager la photo. Lorsque vous choisissez utiliser l'application Twitter, pae exemple, tout les hashtags sont utilisé automatiquement.</string>
+  <string name="text_intro_slider6">Sur cet écran vous pouver trouver la vignette pour partager la photo. Lorsque vous choisissez utiliser l\'application Twitter, pae exemple, tout les hashtags sont utilisé automatiquement.</string>
   <string name="text_intro_slider7">Lorsque vous êtes en route et vous voulez être informé des stations de près, vous pouver mettre en route les notifications de la location des stations.\n\n<b>La sélection des stations pour les notifications dépend de la sélection de la liste sur la page d\'accueil - voir la sélection des stations -.</b></string>
-  <string name="text_intro_slider8">Pour que les utilisateurs puissent coordonner les stations qu'ils veulent prendre, nous avons mis en place un chat. Dès qu'un nouveau message est envoyé, vous serez averti par notification push. Vous pouvez aussi désactiver les notifications.</string>
-  <string name="text_intro_slider9">Lors du démarrage de l'application, les stations D'Allemagne sont chargées. Si vous voulez changer le pays de DE à un <b>autre</b> pays, vous pouvez le faire dans l'écran d'accueil en haut à droite. Dès que vous appuyez sur le bouton de retour, le nouveau pays sera chargé</string>
+  <string name="text_intro_slider8">Pour que les utilisateurs puissent coordonner les stations qu\'ils veulent prendre, nous avons mis en place un chat. Dès qu\'un nouveau message est envoyé, vous serez averti par notification push. Vous pouvez aussi désactiver les notifications.</string>
+  <string name="text_intro_slider9">Lors du démarrage de l\'application, les stations D\'Allemagne sont chargées. Si vous voulez changer le pays de DE à un <b>autre</b> pays, vous pouvez le faire dans l\'écran d\'accueil en haut à droite. Dès que vous appuyez sur le bouton de retour, le nouveau pays sera chargé</string>
   <string name="next">LA SUITE</string>
   <string name="skip">ANNULER</string>
   <string name="proceed">COMMENCER</string>
-  <string name="menu_title_zum_chat">Au chat</string>
-  <string name="pref_title_new_message_notifications">Activer ou désactiver les notifications push</string>
-  <string name="pref_header_notifications">Menu De L'Onglet Site Web</string>
-  <string name="push_notifications_menu_label">Désactiver les notifications</string>
   <string name="title_activity_high_score">Score élevé</string>
   <string name="menu_title_highscore">Score élevé</string>
   <string name="photo_upload">Télécharger une photo</string>
@@ -117,7 +104,7 @@
   <string name="etEmail">Veuillez entrer votre adresse e-mail
 \n et cliquez sur \'Demande de token\'</string>
   <string name="etUploadToken">Veuillez entrer le token reçu ici</string>
-  <string name="tvPhotoUpload">Voulez-vous télécharger des photos de l'application?</string>
+  <string name="tvPhotoUpload">Voulez-vous télécharger des photos de l\'application?</string>
   <string name="bt_mydata_get_token">Demande de token</string>
   <string name="registration_completed"> Le téléchargement de jeton demandé, veuillez regarder votre boîte e-mail.</string>
   <string name="registration_failed">Impossible de demander un token de téléchargement: %1d</string>
@@ -140,7 +127,7 @@
   <string name="missing_link">Veuillez fournir une URL valide si vous souhaitez être lié</string>
   <string name="upload_conflict">Votre photo est téléchargée, mais il pourrait y avoir un conflit. Soit vous avez la téléchargé deux fois ou un autre utilisateur a téléchargé une photo pour la même station.</string>
   <string name="remove_station">Signaler la station à supprimer</string>
-  <string name="select_photo">Sélection d'une photo</string>
+  <string name="select_photo">Sélection d\'une photo</string>
   <string name="station_photo">La photo de la station</string>
   <string name="menu_title_stations_map">Carte des stations</string>
   <string name="menu_photo_filter">Filtrer avec/sans photo</string>
@@ -162,36 +149,32 @@
   <string name="stationId">StationNbr: </string>
   <string name="need_to_allow_location_access">Vous devez accorder la permission de localisation</string>
   <string name="my_position">Mon emplacement actuel: </string>
-  <string name="chat_notification_enabled">Vous avez activé avec succès les notifications de chat</string>
-  <string name="chat_notification_disabled">Vous avez désactivé avec succès les notifications de chat</string>
-  <string name="unable_to_create_folder_structure">Échec de la création d'une structure de répertoire</string>
+  <string name="unable_to_create_folder_structure">Échec de la création d\'une structure de répertoire</string>
   <string name="select_picture">Sélectionner la Photo</string>
   <string name="grant_location_permission">Sans autorisation de localisation nous ne pouvons pas montrer votre emplacement actuel</string>
-  <string name="grant_camera_permission">Vous devez accorder la permission d'utiliser la caméra</string>
-  <string name="grant_external_storage">YVous devez accorder la permission d'utiliser le stockage externe</string>
-  <string name="photofile_not_existing">Le fichier photo n'existe pas</string>
+  <string name="grant_camera_permission">Vous devez accorder la permission d\'utiliser la caméra</string>
+  <string name="grant_external_storage">YVous devez accorder la permission d\'utiliser le stockage externe</string>
+  <string name="photofile_not_existing">Le fichier photo n\'existe pas</string>
   <string name="error_processing_photo">Échec du traitement des photos:</string>
-  <string name="error_scaling_photo">Mise à l'échelle de la photo échoué</string>
+  <string name="error_scaling_photo">Mise à l\'échelle de la photo échoué</string>
   <string name="photo_need_landscape_orientation">La photo doit être en mode paysage!</string>
   <string name="connecting">En train de connecter…</string>
-  <string name="sending">En train d'envoyer…</string>
+  <string name="sending">En train d\'envoyer…</string>
   <string name="send_data">Envoyer les données…</string>
   <string name="error_no_sdcard_found">Aucune carte SD externe trouvée!</string>
-  <string name="cannot_associate_photo_to_station">Impossible d'associer cette photo à une station</string>
+  <string name="cannot_associate_photo_to_station">Impossible d\'associer cette photo à une station</string>
   <string name="no_records_found">Aucun enregistrement trouvé!</string>
   <string name="reading_data">En train de lire les données…</string>
   <string name="processing_data">Le traitement…</string>
   <string name="processing_item_of">Traitement %1$d/%2$d</string>
-  <string name="writing_to_database">En train d'écrire à la base de données</string>
+  <string name="writing_to_database">En train d\'écrire à la base de données</string>
   <string name="stations_database_updated">La base de données des stations mise à jour</string>
   <string name="loading_data">En train de charger des données…</string>
   <string name="processing_countries">Le traitement des pays en cours</string>
   <string name="countries_database_updated">La base de données des pays mise à jour</string>
   <string name="error_updating_countries">Échec de la mise à jour des données du pays:</string>
   <string name="processing_statistics">Le traitement des statistics en cours…</string>
-  <string name="open_once_nearby">Veillez d'abord ouvrir \'La carte de la Station\' une fois</string>
-  <string name="welcome">Bienvenue</string>
-  <string name="authentication_failed">Authentification échouée.</string>
+  <string name="open_once_nearby">Veillez d\'abord ouvrir \'La carte de la Station\' une fois</string>
   <string name="google_play_services_error">Erreur dans les services de Google Play.</string>
   <string name="photo">Photo</string>
   <string name="no_internet_connection">Pas de connexion Internet!</string>
@@ -211,4 +194,5 @@
   <string name="photographNotAvailable">Photographie (non disponible)</string>
   <string name="tvLicenseNotAvailable">Licence de photo (non disponible)</string>
   <string name="openWebsite">Ouvrir le Website</string>
+  <string name="button_ok_text">Ok</string>
 </resources>

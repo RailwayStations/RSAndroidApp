@@ -13,7 +13,6 @@
     <string name="fab_email" translatable="false">bahnhofsfotos@deutschlands-bahnhoefe.de</string>
     <string name="menu_title_website" translatable="false">railway-stations.org</string>
     <string name="railway_stations_activity" translatable="false">https://railway-stations.org</string>
-    <string name="FRIENDLY_ENGAGE_TOPIC" translatable="false">friendly_engage</string>
     <string name="LOCATION_UPDATES" translatable="false">LOCATION_UPDATES</string>
     <string name="LAST_POSITION_LAT" translatable="false">LAST_POSITION_LAT</string>
     <string name="LAST_POSITION_LON" translatable="false">LAST_POSITION_LON</string>
@@ -36,9 +35,6 @@
     <string name="highscorePosition" translatable="false">177</string>
     <string name="highscorePhotos" translatable="false">188</string>
     <string name="highscoreName" translatable="false">ten</string>
-    <string name="messageText" translatable="false">MessageText</string>
-    <string name="messageSender" translatable="false">MessageSender</string>
-    <string name="messageTimeStamp" translatable="false">MessageTimeStamp</string>
     <string name="navHeaderUpdate" translatable="false">navHeaderUpdate</string>
 
     <string name="copyright_osm" translatable="false">Map data © OpenStreetMap contributors</string>

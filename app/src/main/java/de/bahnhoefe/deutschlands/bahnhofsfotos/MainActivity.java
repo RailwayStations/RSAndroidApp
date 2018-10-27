@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.google.firebase.auth.FirebaseAuth;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
@@ -76,8 +75,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CustomAdapter customAdapter;
     private Cursor cursor;
     private String searchString;
-
-    private FirebaseAuth mFirebaseAuth;
 
     private NearbyNotificationService.StatusBinder statusBinder;
 
@@ -144,9 +141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intentDetails);
             }
         });
-
-        // Initialize FirebaseAuth
-        mFirebaseAuth = FirebaseAuth.getInstance();
 
         Intent searchIntent = getIntent();
         if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
@@ -349,15 +343,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_app_info) {
             AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(), DIALOG_TAG);
-        } else if (id == R.id.nav_user_register) {
-            if (mFirebaseAuth.getCurrentUser() == null) {
-                Intent intentSignIn = new Intent(MainActivity.this, SignInActivity.class);
-                startActivity(intentSignIn);
-            } else {
-                Intent intentAuth = new Intent(MainActivity.this, AuthActivity.class);
-                startActivity(intentAuth);
-            }
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
