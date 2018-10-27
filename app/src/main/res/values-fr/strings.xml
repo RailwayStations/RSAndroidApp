@@ -96,7 +96,7 @@
   <string name="text_intro_slider2">Entrez s'il vous plait l'information nécessaire dans \'Mes données\', pour que nous puissions nommer correctement vos photos fichiers. Sans votre nom d'utilisateur vous ne pouvez pas faire des photos directement dans l\'application. \n\n<b>La demande de l\'attribut pour le	chargement est assès simple et vite.</b></string>
   <string name="text_intro_slider3">Dans le menu 	au-dessous de<b> \'Carte de la station\' </b>et dans la <b>liste sur la page d'accueil</b> vous pouvez trouver une sélection dans le menu, soit voulez-vous <b>toutes</b> les stations (cela prendra plus de temps), uniquement les stations <b>avec</b> une photo soit voir tout simplement les stations <b>sans</b> photos.</string>
   <string name="text_intro_slider4">Il y a deux variantes comment prendre une photo de la station de la gare: avec la recherche sur <b>la page d'accueil</b> ou <b>avec l\'option dans le menu \'La carte des stations\'</b>. La 	vignette d'une photo peut seulement être tapé si vous aves votre Smartphone dans le mode du paysage.</string>
-  <string name="text_intro_slider5">As soon as you have taken a photo, it will be displayed and you can upload it.</string>
+  <string name="text_intro_slider5">As soon as you have taken a photo, it will be displayed and you can upload it.<b>Non-existing stations can now also be reported using the new button.</b></string>
   <string name="text_intro_slider6">Sur cet écran vous pouver trouver la vignette pour partager la photo. Lorsque vous choisissez utiliser l'application Twitter, pae exemple, tout les hashtags sont utilisé automatiquement.</string>
   <string name="text_intro_slider7">Lorsque vous êtes en route et vous voulez être informé des stations de près, vous pouver mettre en route les notifications de la location des stations.\n\n<b>La sélection des stations pour les notifications dépend de la sélection de la liste sur la page d\'accueil - voir la sélection des stations -.</b></string>
   <string name="text_intro_slider8">For users to be able to coordinate, which stations they want to take, we have implemented a chat. As soon as a new message is sent you will be notified by push notification. Of course you can disable the notification if you like.</string>
@@ -207,4 +207,8 @@
     <item quantity="one">%d entry found</item>
     <item quantity="other">%d entries found</item>
   </plurals>
+  <string name="photograph">Photograph</string>
+  <string name="photographNotAvailable">Photograph (not available)</string>
+  <string name="tvLicenseNotAvailable">Photo license (not available)</string>
+  <string name="openWebsite">Open Website</string>
 </resources>
