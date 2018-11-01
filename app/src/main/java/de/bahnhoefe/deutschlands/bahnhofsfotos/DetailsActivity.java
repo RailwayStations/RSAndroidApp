@@ -171,9 +171,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // switch off image and license view until we actually have a foto
         imageView.setVisibility(View.INVISIBLE);
         licenseTagView.setVisibility(View.INVISIBLE);
-        takePictureButton.setVisibility(View.INVISIBLE);
-        selectPictureButton.setVisibility(View.INVISIBLE);
-        reportGhostStationButton.setVisibility(View.INVISIBLE);
+        setPictureButtonsVisibility(View.INVISIBLE);
 
         fullscreen = false;
 
@@ -197,9 +195,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (ConnectionUtil.checkInternetConnection(this)) {
                     BitmapCache.getInstance().getFoto(this, bahnhof.getPhotoUrl());
                 }
+                setPictureButtonsVisibility(TextUtils.equals(nickname, bahnhof.getPhotographer()) ? View.VISIBLE : View.INVISIBLE);
             } else {
-                takePictureButton.setVisibility(View.VISIBLE);
-                selectPictureButton.setVisibility(View.VISIBLE);
                 setLocalBitmap();
             }
         }
@@ -247,7 +244,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void selectPicture() {
-        if (bahnhof.hasPhoto()) {
+        if (!canSetPhoto()) {
             return;
         }
 
@@ -266,8 +263,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
+    private boolean canSetPhoto() {
+        return !bahnhof.hasPhoto() || TextUtils.equals(nickname, bahnhof.getPhotographer());
+    }
+
     public void takePicture() {
-        if (bahnhof.hasPhoto()) {
+        if (!canSetPhoto()) {
             return;
         }
 
@@ -289,33 +290,46 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
-    public void reportGhostStation() {
-        if (bahnhof.hasPhoto()) {
+    public void reportGhostStationWithConfirmation() {
+        if (!canSetPhoto()) {
             return;
         }
 
         if (isMyDataIncomplete()) {
             checkMyData();
         } else {
-            File file = getStoredMediaFile();
-            if (file != null) {
-                try {
-                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ghost_station);
-                    int sampling = bitmap.getWidth() / STORED_FOTO_WIDTH;
-                    Bitmap scaledScreen = bitmap;
-                    if (sampling > 1) {
-                        scaledScreen = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / sampling, bitmap.getHeight() / sampling, false);
+            if (localFotoUsed || bahnhof.hasPhoto()) {
+                new SimpleDialogs().confirm(this, R.string.confirm_replace_with_ghost, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        reportGhostStation();
                     }
-
-                    saveScaledBitmap(file, scaledScreen);
-                    Toast.makeText(getApplicationContext(), getString(R.string.report_ghost_station), Toast.LENGTH_LONG).show();
-                } catch (Exception e) {
-                    Log.e(TAG, "Error processing photo", e);
-                    Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
+                });
             } else {
-                Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
+                reportGhostStation();
             }
+        }
+    }
+
+    public void reportGhostStation() {
+        File file = getStoredMediaFile();
+        if (file != null) {
+            try {
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ghost_station);
+                int sampling = bitmap.getWidth() / STORED_FOTO_WIDTH;
+                Bitmap scaledScreen = bitmap;
+                if (sampling > 1) {
+                    scaledScreen = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / sampling, bitmap.getHeight() / sampling, false);
+                }
+
+                saveScaledBitmap(file, scaledScreen);
+                Toast.makeText(getApplicationContext(), getString(R.string.report_ghost_station), Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Log.e(TAG, "Error processing photo", e);
+                Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -354,7 +368,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // Check if the only required permission has been granted
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Write permission has been granted, preview can be displayed
-                reportGhostStation();
+                reportGhostStationWithConfirmation();
             } else {
                 //Permission not granted
                 Toast.makeText(DetailsActivity.this, R.string.grant_external_storage, Toast.LENGTH_LONG).show();
@@ -406,10 +420,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 // Write permission has not been granted.
                 requestStoragePermission(REQUEST_REPORT_GHOST_PERMISSION);
             } else {
-                reportGhostStation();
+                reportGhostStationWithConfirmation();
             }
         } else {
-            reportGhostStation();
+            reportGhostStationWithConfirmation();
         }
     }
 
@@ -771,7 +785,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public void onBitmapAvailable(final @Nullable Bitmap bitmapFromCache) {
         localFotoUsed = false;
         publicBitmap = bitmapFromCache;
-        takePictureButton.setVisibility(View.INVISIBLE);
         if (publicBitmap == null) {
             // keine Bitmap ausgelesen
             // switch off image and license view until we actually have a foto
@@ -825,9 +838,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * Fetch bitmap from device local location, if  it exists, and set the foto view.
      */
     private void setLocalBitmap() {
-        takePictureButton.setVisibility(View.VISIBLE);
-        selectPictureButton.setVisibility(View.VISIBLE);
-        reportGhostStationButton.setVisibility(View.VISIBLE);
+        setPictureButtonsVisibility(View.VISIBLE);
 
         Bitmap showBitmap = checkForLocalPhoto();
         if (showBitmap == null) {
@@ -839,6 +850,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         } else {
             setBitmap(showBitmap);
         }
+    }
+
+    private void setPictureButtonsVisibility(int visible) {
+        takePictureButton.setVisibility(visible);
+        selectPictureButton.setVisibility(visible);
+        reportGhostStationButton.setVisibility(visible);
     }
 
     private void setBitmap(final Bitmap showBitmap) {

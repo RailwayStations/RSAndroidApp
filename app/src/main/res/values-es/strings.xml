@@ -191,9 +191,7 @@
     <item quantity="one">%d selección encontrada</item>
     <item quantity="other">%d selecciones encontradas</item>
   </plurals>
-  <string name="photograph">Photograph</string>
-  <string name="photographNotAvailable">Photograph (not available)</string>
-  <string name="tvLicenseNotAvailable">Photo license (not available)</string>
-  <string name="openWebsite">Open Website</string>
+    <string name="openWebsite">Open Website</string>
     <string name="button_ok_text">Ok</string>
+    <string name="confirm_replace_with_ghost">Replace current Photo with Ghoststation?</string>
 </resources>

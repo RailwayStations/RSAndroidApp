@@ -190,9 +190,7 @@
     <item quantity="one">%d entrée trouvée</item>
     <item quantity="other">%d entrées trouvées</item>
   </plurals>
-  <string name="photograph">Photographie</string>
-  <string name="photographNotAvailable">Photographie (non disponible)</string>
-  <string name="tvLicenseNotAvailable">Licence de photo (non disponible)</string>
-  <string name="openWebsite">Ouvrir le Website</string>
+    <string name="openWebsite">Ouvrir le Website</string>
   <string name="button_ok_text">Ok</string>
+    <string name="confirm_replace_with_ghost">Replace current Photo with Ghoststation?</string>
 </resources>
