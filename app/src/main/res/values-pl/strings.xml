@@ -198,5 +198,8 @@
     <string name="confirm_replace_with_ghost">Replace current Photo with Ghoststation?</string>
     <string name="upload_bad_request">Bad Request (Unknown Station, Wrong Fileformat, Invalid User, …)</string>
   <string name="upload_too_big">Photo too big (20 MB max)</string>
+    <string name="anonymous">Anonymous</string>
+  <string name="registration_wrong_data">Bad request: something is wrong with your data, please contact our support.</string>
+  <string name="registration_conflict">Registration failed, there is a conflict with your nickname and/or email.</string>
 
 </resources>

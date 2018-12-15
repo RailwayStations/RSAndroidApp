@@ -207,5 +207,8 @@
     <string name="confirm_replace_with_ghost">Soll das aktuelle Foto durch einen Geisterbahnhof ersetzt werden?</string>
     <string name="upload_bad_request">Fehlerhafte Anfrage (Unbekannter Bahnhof, Nicht-Unterstütztes Dateiformat, Ungültiges Benutzerprofil, …)</string>
     <string name="upload_too_big">Foto zu groß (maximal 20 MB)</string>
+    <string name="anonymous">Anonym</string>
+    <string name="registration_wrong_data">Fehlerhafte Daten, bitte wende Dich an unseren Support.</string>
+    <string name="registration_conflict">Registrierung fehlgeschlagen: es gibt einen Konflikt mit Deinem Nicknamen und/oder Email.</string>
 
 </resources>

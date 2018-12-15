@@ -30,14 +30,6 @@
         android:title="@string/photo_upload"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/send_email"
-        android:orderInCategory="300"
-        android:icon="@drawable/ic_mail_white_24px"
-        app:itemIconTint="@color/colorActions"
-        app:itemTextColor="@color/colorActions"
-        android:title="@string/send_email"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/share_photo"
         android:orderInCategory="400"
         android:icon="@drawable/ic_share_white_24px"

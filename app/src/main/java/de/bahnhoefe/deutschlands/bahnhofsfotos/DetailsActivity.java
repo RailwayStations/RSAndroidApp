@@ -62,7 +62,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Linking;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
@@ -99,8 +98,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private boolean localFotoUsed = false;
     private License license;
     private PhotoOwner photoOwner;
-    private Linking linking;
-    private String link;
     private String nickname;
     private String email;
     private String token;
@@ -215,8 +212,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private void readPreferences() {
         license = baseApplication.getLicense();
         photoOwner = baseApplication.getPhotoOwner();
-        linking = baseApplication.getLinking();
-        link = baseApplication.getPhotographerLink();
         nickname = baseApplication.getNickname();
         email = baseApplication.getEmail();
         token = baseApplication.getUploadToken();
@@ -573,10 +568,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
         if (localFotoUsed) {
-            enableMenuItem(menu, R.id.send_email);
             enableMenuItem(menu, R.id.photo_upload);
         } else {
-            disableMenuItem(menu, R.id.send_email);
             disableMenuItem(menu, R.id.photo_upload);
         }
 
@@ -614,22 +607,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     startActivity(timetableIntent);
                 } else {
                     Toast.makeText(this, R.string.timetable_missing, Toast.LENGTH_LONG).show();
-                }
-                break;
-            case R.id.send_email:
-                if (isMyDataIncomplete()) {
-                    checkMyData();
-                } else {
-                    Intent emailIntent = createFotoSendIntent();
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{country.getEmail()});
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bahnhofsfoto: " + bahnhof.getTitle());
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Lizenz: " + license
-                            + "\n selbst fotografiert: " + photoOwner
-                            + "\n Nickname: " + nickname
-                            + "\n Verlinken bitte mit: " + linking
-                            + "\n Link zum Account: " + link);
-                    emailIntent.setType("multipart/byteranges");
-                    startActivity(Intent.createChooser(emailIntent, getResources().getString(R.string.send_email)));
                 }
                 break;
             case R.id.photo_upload:

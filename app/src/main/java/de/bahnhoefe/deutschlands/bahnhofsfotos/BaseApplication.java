@@ -8,7 +8,6 @@ import android.support.multidex.MultiDex;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Linking;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
@@ -130,14 +129,6 @@ public class BaseApplication extends Application {
         putString(R.string.PHOTO_OWNER, photoOwner.toString());
     }
 
-    public Linking getLinking() {
-        return Linking.byName(preferences.getString(getString(R.string.LINKING), Linking.UNKNOWN.toString()));
-    }
-
-    public void setLinking(Linking linking) {
-        putString(R.string.LINKING, linking.toString());
-    }
-
     public String getPhotographerLink() {
         return preferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
     }
@@ -219,6 +210,14 @@ public class BaseApplication extends Application {
      */
     public byte getZoomLevelDefault() {
         return (byte) 12;
+    }
+
+    public boolean getAnonymous() {
+        return preferences.getBoolean(getString(R.string.ANONYMOUS), false);
+    }
+
+    public void setAnonymous(boolean anonymous) {
+        putBoolean(R.string.ANONYMOUS, anonymous);
     }
 
 }

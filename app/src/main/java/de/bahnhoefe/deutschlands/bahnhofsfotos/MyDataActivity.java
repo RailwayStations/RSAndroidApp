@@ -21,7 +21,6 @@ import java.net.URL;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Linking;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
@@ -34,13 +33,13 @@ public class MyDataActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
     private EditText etNickname, etLink, etEmail, etUploadToken;
     private CheckBox cbLicenseCC0;
-    private RadioGroup rgPhotoOwner, rgLinking, rgUpdatePolicy;
+    private CheckBox cbAnonymous;
+    private RadioGroup rgPhotoOwner, rgUpdatePolicy;
     private License license;
     private PhotoOwner photoOwner;
     private String nickname;
     private String email;
     private String link;
-    private Linking linking;
     private String uploadToken;
     private BaseApplication baseApplication;
     private UpdatePolicy updatePolicy;
@@ -60,7 +59,7 @@ public class MyDataActivity extends AppCompatActivity {
 
         cbLicenseCC0 = findViewById(R.id.cbLicenseCC0);
         rgPhotoOwner = findViewById(R.id.rgOwnPhoto);
-        rgLinking = findViewById(R.id.rgLinking);
+        cbAnonymous = findViewById(R.id.cbAnonymous);
         rgUpdatePolicy = findViewById(R.id.rgUpdatePolicy);
 
         license = baseApplication.getLicense();
@@ -69,8 +68,7 @@ public class MyDataActivity extends AppCompatActivity {
         photoOwner = baseApplication.getPhotoOwner();
         rgPhotoOwner.check(photoOwner.getId());
 
-        linking = baseApplication.getLinking();
-        rgLinking.check(linking.getId());
+        cbAnonymous.setChecked(baseApplication.getAnonymous());
 
         link = baseApplication.getPhotographerLink();
         etLink.setText(link);
@@ -124,10 +122,6 @@ public class MyDataActivity extends AppCompatActivity {
         photoOwner = PhotoOwner.byId(view.getId());
     }
 
-    public void linkToPhotographer(View view) {
-        linking = Linking.byId(view.getId());
-    }
-
     public void register(View view) {
         if (!isValid()) {
             return;
@@ -141,7 +135,7 @@ public class MyDataActivity extends AppCompatActivity {
     public void saveSettings(View view) {
         baseApplication.setLicense(license);
         baseApplication.setPhotoOwner(photoOwner);
-        baseApplication.setLinking(linking);
+        baseApplication.setAnonymous(cbAnonymous.isChecked());
         baseApplication.setPhotographerLink(etLink.getText().toString().trim());
         baseApplication.setNickname(etNickname.getText().toString().trim());
         baseApplication.setEmail(etEmail.getText().toString().trim());
@@ -153,7 +147,7 @@ public class MyDataActivity extends AppCompatActivity {
     public void clearSettings(View viewButtonClear) {
         baseApplication.setLicense(License.UNKNOWN);
         baseApplication.setPhotoOwner(PhotoOwner.UNKNOWN);
-        baseApplication.setLinking(Linking.UNKNOWN);
+        baseApplication.setAnonymous(false);
         baseApplication.setPhotographerLink(null);
         baseApplication.setNickname(null);
         baseApplication.setEmail(null);
@@ -185,12 +179,8 @@ public class MyDataActivity extends AppCompatActivity {
             new SimpleDialogs().confirm(this, R.string.missing_email_address);
             return false;
         }
-        if (linking == Linking.UNKNOWN) {
-            new SimpleDialogs().confirm(this, R.string.missing_linking);
-            return false;
-        }
         String url = etLink.getText().toString();
-        if (linking != Linking.NO && !isValidHTTPURL(url)) {
+        if (url != null && url.trim().length() > 0 && !isValidHTTPURL(url)) {
             new SimpleDialogs().confirm(this, R.string.missing_link);
             return false;
         }
@@ -229,7 +219,7 @@ public class MyDataActivity extends AppCompatActivity {
                 registrationData.put("email", etEmail.getText().toString().trim());
                 registrationData.put("license", license);
                 registrationData.put("photoOwner", photoOwner.isOwner());
-                registrationData.put("linking", linking);
+                registrationData.put("anonymous", cbAnonymous.isChecked());
                 registrationData.put("link", etLink.getText().toString().trim());
             } catch (JSONException e) {
                 throw new RuntimeException("Error creating RegistrationData", e);
@@ -289,6 +279,10 @@ public class MyDataActivity extends AppCompatActivity {
             }
             if (result == 202) {
                 new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_completed);
+            } else if (result == 400) {
+                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_wrong_data);
+            } else if (result == 409) {
+                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_conflict);
             } else if (result == 422) {
                 new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
             } else {

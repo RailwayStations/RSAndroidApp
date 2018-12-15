@@ -2,12 +2,12 @@
     <string name="LICENCE" translatable="false">APP_PREF_LICENCE</string>
     <string name="UPDATE_POLICY" translatable="false">APP_PREF_UPDATE_POLICY</string>
     <string name="PHOTO_OWNER" translatable="false">APP_PREF_PHOTO_OWNER</string>
-    <string name="LINKING" translatable="false">APP_PREF_LINKING</string>
     <string name="NICKNAME" translatable="false">APP_PREF_NICKNAME</string>
     <string name="EMAIL" translatable="false">APP_PREF_EMAIL</string>
     <string name="UPLOAD_TOKEN" translatable="false">APP_PREF_UPLOAD_TOKEN</string>
     <string name="LINK_TO_PHOTOGRAPHER" translatable="false">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
     <string name="COUNTRY" translatable="false">APP_PREF_COUNTRY</string>
+    <string name="ANONYMOUS" translatable="false">APP_PREF_ANONYMOUS</string>
 
     <string name="FIRSTAPPSTART" translatable="false">FirstAppStart</string>
     <string name="fab_email" translatable="false">bahnhofsfotos@deutschlands-bahnhoefe.de</string>
