@@ -205,5 +205,7 @@
     <string name="openWebsite">Öffne Webseite</string>
     <string name="button_ok_text">Ok</string>
     <string name="confirm_replace_with_ghost">Soll das aktuelle Foto durch einen Geisterbahnhof ersetzt werden?</string>
+    <string name="upload_bad_request">Fehlerhafte Anfrage (Unbekannter Bahnhof, Nicht-Unterstütztes Dateiformat, Ungültiges Benutzerprofil, …)</string>
+    <string name="upload_too_big">Foto zu groß (maximal 20 MB)</string>
 
 </resources>

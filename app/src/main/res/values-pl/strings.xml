@@ -196,5 +196,7 @@
   <string name="openWebsite">Open Website</string>
     <string name="button_ok_text">Ok</string>
     <string name="confirm_replace_with_ghost">Replace current Photo with Ghoststation?</string>
+    <string name="upload_bad_request">Bad Request (Unknown Station, Wrong Fileformat, Invalid User, …)</string>
+  <string name="upload_too_big">Photo too big (20 MB max)</string>
 
 </resources>

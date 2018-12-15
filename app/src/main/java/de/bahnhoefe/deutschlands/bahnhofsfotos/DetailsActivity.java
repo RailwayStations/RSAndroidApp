@@ -1049,10 +1049,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
             if (result == 202) {
                 new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_completed);
+            } else if (result == 400) {
+                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_bad_request);
             } else if (result == 401) {
                 new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_token_invalid);
             } else if (result == 409) {
                 new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
+            } else if (result == 413) {
+                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_too_big);
             } else {
                 new SimpleDialogs().confirm(DetailsActivity.this,
                         String.format(getText(R.string.upload_failed).toString(), result));
