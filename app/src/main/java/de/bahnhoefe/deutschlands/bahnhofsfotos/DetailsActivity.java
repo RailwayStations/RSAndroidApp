@@ -62,7 +62,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
@@ -97,7 +96,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private License license;
-    private PhotoOwner photoOwner;
+    private boolean photoOwner;
     private String nickname;
     private String email;
     private String token;
@@ -329,7 +328,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private boolean isMyDataIncomplete() {
-        return TextUtils.isEmpty(nickname) || license == License.UNKNOWN || photoOwner == PhotoOwner.UNKNOWN;
+        return TextUtils.isEmpty(nickname) || license == License.UNKNOWN || !photoOwner;
     }
 
     @Override

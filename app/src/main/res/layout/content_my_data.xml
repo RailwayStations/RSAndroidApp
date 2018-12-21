@@ -49,30 +49,28 @@
             android:textSize="20sp"
             android:textStyle="bold"
             />
-        <RadioGroup
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/rgOwnPhoto"
-            android:layout_below="@+id/tvOwnPhoto"
-            android:layout_marginBottom="20dp"
-             >
-            <RadioButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/rbOwnPhotoYes"
-                android:text="@string/rbOwnPhotoYes"
-                android:onClick="selectPhotoOwner"/>
-            <RadioButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/rbOwnPhotoNo"
-                android:text="@string/rbOwnPhotoNo"
-                android:onClick="selectPhotoOwner"/>
-        </RadioGroup>
         <CheckBox
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/rgOwnPhoto"
+            android:id="@+id/cbOwnPhoto"
+            android:layout_below="@+id/tvOwnPhoto"
+            android:layout_marginBottom="20dp"
+            android:text="@string/yesPhotoOwner"
+             >
+        </CheckBox>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvAnonymous"
+            android:layout_below="@+id/cbOwnPhoto"
+            android:text="@string/tvAnonymous"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            />
+        <CheckBox
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvAnonymous"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:id="@+id/cbAnonymous"

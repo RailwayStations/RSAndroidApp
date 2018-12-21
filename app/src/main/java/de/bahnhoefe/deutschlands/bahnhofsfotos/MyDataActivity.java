@@ -21,7 +21,6 @@ import java.net.URL;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
@@ -34,9 +33,9 @@ public class MyDataActivity extends AppCompatActivity {
     private EditText etNickname, etLink, etEmail, etUploadToken;
     private CheckBox cbLicenseCC0;
     private CheckBox cbAnonymous;
-    private RadioGroup rgPhotoOwner, rgUpdatePolicy;
+    private CheckBox cbPhotoOwner;
+    private RadioGroup rgUpdatePolicy;
     private License license;
-    private PhotoOwner photoOwner;
     private String nickname;
     private String email;
     private String link;
@@ -58,16 +57,13 @@ public class MyDataActivity extends AppCompatActivity {
         etLink = findViewById(R.id.etLinking);
 
         cbLicenseCC0 = findViewById(R.id.cbLicenseCC0);
-        rgPhotoOwner = findViewById(R.id.rgOwnPhoto);
-        cbAnonymous = findViewById(R.id.cbAnonymous);
-        rgUpdatePolicy = findViewById(R.id.rgUpdatePolicy);
-
         license = baseApplication.getLicense();
         cbLicenseCC0.setChecked(license == License.CC0);
 
-        photoOwner = baseApplication.getPhotoOwner();
-        rgPhotoOwner.check(photoOwner.getId());
+        cbPhotoOwner = findViewById(R.id.cbOwnPhoto);
+        cbPhotoOwner.setChecked(baseApplication.getPhotoOwner());
 
+        cbAnonymous = findViewById(R.id.cbAnonymous);
         cbAnonymous.setChecked(baseApplication.getAnonymous());
 
         link = baseApplication.getPhotographerLink();
@@ -82,6 +78,7 @@ public class MyDataActivity extends AppCompatActivity {
         uploadToken = baseApplication.getUploadToken();
         etUploadToken.setText(uploadToken);
 
+        rgUpdatePolicy = findViewById(R.id.rgUpdatePolicy);
         updatePolicy = baseApplication.getUpdatePolicy();
         rgUpdatePolicy.check(updatePolicy.getId());
 
@@ -118,10 +115,6 @@ public class MyDataActivity extends AppCompatActivity {
         updatePolicy = UpdatePolicy.byId(view.getId());
     }
 
-    public void selectPhotoOwner(View view) {
-        photoOwner = PhotoOwner.byId(view.getId());
-    }
-
     public void register(View view) {
         if (!isValid()) {
             return;
@@ -134,7 +127,7 @@ public class MyDataActivity extends AppCompatActivity {
 
     public void saveSettings(View view) {
         baseApplication.setLicense(license);
-        baseApplication.setPhotoOwner(photoOwner);
+        baseApplication.setPhotoOwner(cbPhotoOwner.isChecked());
         baseApplication.setAnonymous(cbAnonymous.isChecked());
         baseApplication.setPhotographerLink(etLink.getText().toString().trim());
         baseApplication.setNickname(etNickname.getText().toString().trim());
@@ -146,7 +139,7 @@ public class MyDataActivity extends AppCompatActivity {
 
     public void clearSettings(View viewButtonClear) {
         baseApplication.setLicense(License.UNKNOWN);
-        baseApplication.setPhotoOwner(PhotoOwner.UNKNOWN);
+        baseApplication.setPhotoOwner(false);
         baseApplication.setAnonymous(false);
         baseApplication.setPhotographerLink(null);
         baseApplication.setNickname(null);
@@ -167,7 +160,7 @@ public class MyDataActivity extends AppCompatActivity {
             new SimpleDialogs().confirm(this, R.string.cc0_needed);
             return false;
         }
-        if (photoOwner == PhotoOwner.UNKNOWN) {
+        if (cbPhotoOwner.isChecked()) {
             new SimpleDialogs().confirm(this, R.string.missing_photoOwner);
             return false;
         }
@@ -218,7 +211,7 @@ public class MyDataActivity extends AppCompatActivity {
                 registrationData.put("nickname", etNickname.getText().toString().trim());
                 registrationData.put("email", etEmail.getText().toString().trim());
                 registrationData.put("license", license);
-                registrationData.put("photoOwner", photoOwner.isOwner());
+                registrationData.put("photoOwner", cbPhotoOwner.isChecked());
                 registrationData.put("anonymous", cbAnonymous.isChecked());
                 registrationData.put("link", etLink.getText().toString().trim());
             } catch (JSONException e) {
