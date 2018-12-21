@@ -105,7 +105,7 @@
   <string name="etUploadToken">Please enter the received token here</string>
   <string name="tvPhotoUpload">Do you want to upload photos from within the app?</string>
   <string name="bt_mydata_get_token">Request token</string>
-  <string name="registration_completed">Upload token requested, please have a look in your email inbox.</string>
+  <string name="upload_token_email">Upload token requested, please have a look in your email inbox.</string>
   <string name="registration_failed">Failed to request an upload token: %1d</string>
   <string name="registration_needed">To be able to use the upload function, you have to request an upload token under \"My Data\".</string>
   <string name="registration_data_incomplete">Incomplete registration</string>
@@ -199,10 +199,14 @@
     <string name="upload_bad_request">Bad Request (Unknown Station, Wrong Fileformat, Invalid User, …)</string>
   <string name="upload_too_big">Photo too big (20 MB max)</string>
     <string name="anonymous">Anonymous</string>
-  <string name="registration_wrong_data">Bad request: something is wrong with your data, please contact our support.</string>
-  <string name="registration_conflict">Registration failed, there is a conflict with your nickname and/or email.</string>
+  <string name="profile_wrong_data">Bad request: something is wrong with your data, please contact our support.</string>
+  <string name="profile_conflict">There is a conflict with your nickname and/or email, please contact our support.</string>
     <string name="yesPhotoOwner">Yes, these are my own photos</string>
   <string name="tvAnonymous">Do you want to be an anonymous photographer?</string>
     <string name="channel_name">Nearby Stations Notifications</string>
+    <string name="save_profile_failed">Failed to write user profile: %1d</string>
+    <string name="read_profile_failed">Reading remote profile failed: %1d</string>
+    <string name="tvRegisterWithGoogle">Register with Google</string>
+  <string name="upload_token_received">Upload token received.</string>
 
 </resources>

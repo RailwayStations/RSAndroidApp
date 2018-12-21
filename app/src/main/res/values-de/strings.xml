@@ -117,7 +117,7 @@
         "\n"den Upload-Token ein</string>
     <string name="tvPhotoUpload">Möchtest Du den Foto-Upload aus der App nutzen?</string>
     <string name="bt_mydata_get_token">Token anfordern</string>
-    <string name="registration_completed">Upload Token angefordert, bitte schaue in Deine Email.</string>
+    <string name="upload_token_email">Upload Token angefordert, bitte schaue in Deine Email.</string>
     <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1d</string>
     <string name="registration_needed">Um die Upload-Funktion zu nutzen, musst Du unter \"Meine Daten\" ein Upload-Token anfordern.</string>
     <string name="registration_data_incomplete">Daten für die Registrierung sind unvollständig</string>
@@ -208,10 +208,14 @@
     <string name="upload_bad_request">Fehlerhafte Anfrage (Unbekannter Bahnhof, Nicht-Unterstütztes Dateiformat, Ungültiges Benutzerprofil, …)</string>
     <string name="upload_too_big">Foto zu groß (maximal 20 MB)</string>
     <string name="anonymous">Anonym</string>
-    <string name="registration_wrong_data">Fehlerhafte Daten, bitte wende Dich an unseren Support.</string>
-    <string name="registration_conflict">Registrierung fehlgeschlagen: es gibt einen Konflikt mit Deinem Nicknamen und/oder Email.</string>
+    <string name="profile_wrong_data">Fehlerhafte Daten, bitte wende Dich an unseren Support.</string>
+    <string name="profile_conflict">Es gibt einen Konflikt mit Deinem Nicknamen und/oder Email, bitte kontaktiere unseren Support.</string>
     <string name="yesPhotoOwner">Ja, das sind meine eigenen Fotos</string>
     <string name="tvAnonymous">Möchtest Du als Fotograf anonym bleiben?</string>
     <string name="channel_name">Bahnhofsortung</string>
+    <string name="save_profile_failed">Fehler beim Hochladen des Benutzerprofils: %1d</string>
+    <string name="read_profile_failed">Fehler beim Lesen des Benutzerprofils: %1d</string>
+    <string name="tvRegisterWithGoogle">Registrierung mit Google</string>
+    <string name="upload_token_received">Upload Token empfangen</string>
 
 </resources>
