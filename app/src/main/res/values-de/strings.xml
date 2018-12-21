@@ -5,9 +5,9 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="menu_title_your_data">Meine Daten</string>
     <string name="menu_title_update_photos">Aktualisieren</string>
-    <string name="menu_title_stations_with_photo">Bahnhöfe mit Photo</string>
+    <string name="menu_title_stations_with_photo">Bahnhöfe mit Foto</string>
     <string name="menu_title_stations_without_photo">In der Nähe</string>
-    <string name="menu_title_all_stations_without_photo">Alle Bahnhöfe ohne Photo</string>
+    <string name="menu_title_all_stations_without_photo">Alle Bahnhöfe ohne Foto</string>
     <string name="menu_title_share">Teilen</string>
     <string name="menu_title_send">Senden</string>
 
@@ -15,9 +15,9 @@
     <string name="maps_activity">Bahnhofskarte</string>
     <string name="no_location_detected">Keine Position gefunden</string>
     <string name="title_activity_details">Bahnhofs-Details</string>
-    <string name="no_stations_loaded">Keine Bahnhöfe geladen. Bitte zuerst Photos aktualisieren klicken.</string>
+    <string name="no_stations_loaded">Keine Bahnhöfe geladen. Bitte zuerst Fotos aktualisieren klicken.</string>
     <string name="no_stations_in_database">Eine Aktualisierung hat noch nicht stattgefunden</string>
-    <string name="take_photo">Photografieren</string>
+    <string name="take_photo">Fotografieren</string>
     <string name="send_email">Sende E-Mail</string>
     <string name="share_photo">Teilen</string>
     <string name="nav_to_station">Navigiere zum Bahnhof</string>
@@ -25,7 +25,7 @@
     <string name="CC0">CC0 - ohne Namensnennung</string>
     <string name="CC4">CC4.0 mit Namensnennung (nicht mehr unterstützt)</string>
     <string name="tvLicense">Fotolizenz</string>
-    <string name="tvOwnPhoto">Handelt es sich bei den von Dir eingereichten Photos um Deine eigenen Photos?</string>
+    <string name="tvOwnPhoto">Handelt es sich bei den von Dir eingereichten Fotos um Deine eigenen Fotos?</string>
     <string name="rbOwnPhotoYes">Ja</string>
     <string name="rbOwnPhotoNo">Nein</string>
     <string name="tvLinking">Möchtest Du in unserer Fotodatenbank verlinkt werden?</string>
@@ -38,7 +38,7 @@
     </string>
     <string name="menu_title_your_own_station_photos">Eigene Fotos</string>
     <string name="rbLinkingWith">Verlinkung mit: </string>
-    <string name="ownPhoto">eigenes Photo</string>
+    <string name="ownPhoto">eigenes Foto</string>
     <string name="bt_mydata_commit">Speichern</string>
     <string name="bt_mydata_clear">Reset</string>
     <string name="preferences_saved">Deine Daten wurden gespeichert. </string>
@@ -61,7 +61,7 @@
     <string name="app_info_text">App-Entwicklung:"\n"<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>
         "\n"in 08/2016 im Rahmen des OpenSource-Projekts <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands Bahnhöfe</a></b>.
         "\n\n"Die Bahnhofsdaten wurden von der Deutschen Bahn im Rahmen des dortigen <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData-Projektes</a></b> zur Verfügung gestellt.
-        "\n\n"Die json-Datei, die die Photos und die Bahnhofsdaten zusammenführt, wird über die von <b><a href="https://twitter.com/storchp">Peter Storch</a></b> entwickelte Java-Applikation bereitgestellt.
+        "\n\n"Die json-Datei, die die Fotos und die Bahnhofsdaten zusammenführt, wird über die von <b><a href="https://twitter.com/storchp">Peter Storch</a></b> entwickelte Java-Applikation bereitgestellt.
         "\n\n"Für die App werden <a href="https://design.google.com/icons/">Material-Design-Icons von Google</a> genutzt, die unter Apache License Version 2.0. zur Verfügung stehen
         "\n\n"<b>Beteiligte</b> am "Deutschlands-Bahnhöfe"-Projekt:
         "\n\n"<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedorn (Kartenentwicklung)</a></b>
@@ -75,7 +75,7 @@
     <string name="station_is_near">Bahnhof in der Nähe</string>
     <string name="template_short_text" formatted="false">Bahnhof %s in %.2f km</string>
     <string name="template_long_text" formatted="false">Bahnhof: %s\nEntfernung: %.2f km\n%s</string>
-    <string name="photo_exists">Photo: für Lizenzinfos Detailansicht öffnen</string>
+    <string name="photo_exists">Foto: für Lizenzinfos Detailansicht öffnen</string>
     <string name="nearby_notification_active">Bahnhofsortung aktiv</string>
     <string name="license_tag" formatted="false">Urheber: %s, %s</string>
 
@@ -115,7 +115,7 @@
         "\n"ein und klicke \'Token anfordern\'</string>
     <string name="etUploadToken">Bitte trage hier nach Erhalt der E-Mail
         "\n"den Upload-Token ein</string>
-    <string name="tvPhotoUpload">Möchtest Du den Photo-Upload aus der App nutzen?</string>
+    <string name="tvPhotoUpload">Möchtest Du den Foto-Upload aus der App nutzen?</string>
     <string name="bt_mydata_get_token">Token anfordern</string>
     <string name="registration_completed">Upload Token angefordert, bitte schaue in Deine Email.</string>
     <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1d</string>
@@ -210,5 +210,7 @@
     <string name="anonymous">Anonym</string>
     <string name="registration_wrong_data">Fehlerhafte Daten, bitte wende Dich an unseren Support.</string>
     <string name="registration_conflict">Registrierung fehlgeschlagen: es gibt einen Konflikt mit Deinem Nicknamen und/oder Email.</string>
+    <string name="yesPhotoOwner">Ja, das sind meine eigenen Fotos</string>
+    <string name="tvAnonymous">Möchtest Du als Fotograf anonym bleiben?</string>
 
 </resources>

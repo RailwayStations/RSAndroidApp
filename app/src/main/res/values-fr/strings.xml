@@ -198,4 +198,6 @@
     <string name="anonymous">Anonymous</string>
   <string name="registration_wrong_data">Bad request: something is wrong with your data, please contact our support.</string>
   <string name="registration_conflict">Registration failed, there is a conflict with your nickname and/or email.</string>
+    <string name="yesPhotoOwner">Yes, these are my own photos</string>
+  <string name="tvAnonymous">Do you want to be an anonymous photographer?</string>
 </resources>

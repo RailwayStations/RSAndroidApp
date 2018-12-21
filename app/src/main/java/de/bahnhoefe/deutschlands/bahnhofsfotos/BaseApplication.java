@@ -8,7 +8,6 @@ import android.support.multidex.MultiDex;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoOwner;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import org.mapsforge.core.model.LatLong;
@@ -56,6 +55,12 @@ public class BaseApplication extends Application {
         dbAdapter.open();
 
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
+
+        // migrate photo owner preference to boolean
+        final Object photoOwner = preferences.getAll().get(getString(R.string.PHOTO_OWNER));
+        if (photoOwner instanceof String && "YES".equals(photoOwner)) {
+            setPhotoOwner(true);
+        }
     }
 
     private void putBoolean(int key, boolean value) {
@@ -121,12 +126,12 @@ public class BaseApplication extends Application {
         putString(R.string.UPDATE_POLICY, updatePolicy.toString());
     }
 
-    public PhotoOwner getPhotoOwner() {
-        return PhotoOwner.byName(preferences.getString(getString(R.string.PHOTO_OWNER), PhotoOwner.UNKNOWN.toString()));
+    public boolean getPhotoOwner() {
+        return preferences.getBoolean(getString(R.string.PHOTO_OWNER), false);
     }
 
-    public void setPhotoOwner(PhotoOwner photoOwner) {
-        putString(R.string.PHOTO_OWNER, photoOwner.toString());
+    public void setPhotoOwner(boolean photoOwner) {
+        putBoolean(R.string.PHOTO_OWNER, photoOwner);
     }
 
     public String getPhotographerLink() {
