@@ -107,7 +107,7 @@
   <string name="etUploadToken">Por favor ingrese el token que recibio</string>
   <string name="tvPhotoUpload">Desea subir estas fotos dentro de la app?</string>
   <string name="bt_mydata_get_token">Pedir token</string>
-  <string name="registration_completed">Subir token solicitada, por favor chece su bandeja de entrada del correo dado.</string>
+  <string name="upload_token_email">Subir token solicitada, por favor chece su bandeja de entrada del correo dado.</string>
   <string name="registration_failed">No se pudo solicitar token: %1d</string>
   <string name="registration_needed">Para poder usar la función de subida, tiene que solicitar una token debajo de  \"Mis datos\".</string>
   <string name="registration_data_incomplete">Registro incompleto</string>
@@ -197,9 +197,13 @@
     <string name="upload_bad_request">Bad Request (Unknown Station, Wrong Fileformat, Invalid User, …)</string>
   <string name="upload_too_big">Photo too big (20 MB max)</string>
     <string name="anonymous">Anonymous</string>
-  <string name="registration_wrong_data">Bad request: something is wrong with your data, please contact our support.</string>
-  <string name="registration_conflict">Registration failed, there is a conflict with your nickname and/or email.</string>
+  <string name="profile_wrong_data">Bad request: something is wrong with your data, please contact our support.</string>
+  <string name="profile_conflict">There is a conflict with your nickname and/or email, please contact our support.</string>
     <string name="yesPhotoOwner">Yes, these are my own photos</string>
   <string name="tvAnonymous">Do you want to be an anonymous photographer?</string>
     <string name="channel_name">Nearby Stations Notifications</string>
+    <string name="save_profile_failed">Failed to write user profile: %1d</string>
+    <string name="read_profile_failed">Reading remote profile failed: %1d</string>
+    <string name="tvRegisterWithGoogle">Register with Google</string>
+  <string name="upload_token_received">Upload token received.</string>
 </resources>

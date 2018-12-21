@@ -8,6 +8,7 @@ import android.support.multidex.MultiDex;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import org.mapsforge.core.model.LatLong;
@@ -225,4 +226,25 @@ public class BaseApplication extends Application {
         putBoolean(R.string.ANONYMOUS, anonymous);
     }
 
+    public void setProfile(Profile profile) {
+        setLicense(profile.getLicense());
+        setPhotoOwner(profile.isPhotoOwner());
+        setAnonymous(profile.isAnonymous());
+        setPhotographerLink(profile.getLink());
+        setNickname(profile.getNickname());
+        setEmail(profile.getEmail());
+        setUploadToken(profile.getUploadToken());
+    }
+
+    public Profile getProfile() {
+        Profile profile = new Profile();
+        profile.setLicense(getLicense());
+        profile.setPhotoOwner(getPhotoOwner());
+        profile.setAnonymous(getAnonymous());
+        profile.setLink(getPhotographerLink());
+        profile.setNickname(getNickname());
+        profile.setEmail(getEmail());
+        profile.setUploadToken(getUploadToken());
+        return profile;
+    }
 }

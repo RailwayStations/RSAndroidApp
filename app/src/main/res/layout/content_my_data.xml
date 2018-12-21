@@ -24,7 +24,21 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/tvGoogleSignIn"
+            android:text="@string/tvRegisterWithGoogle"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/sign_in_button"
+            android:layout_below="@+id/tvGoogleSignIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/tvLicence"
+            android:layout_below="@+id/sign_in_button"
             android:text="@string/tvLicense"
             android:textSize="20sp"
             android:textStyle="bold"/>
@@ -210,20 +224,6 @@
             android:text="@string/bt_mydata_commit"
             android:onClick="saveSettings"
             />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_mydata_clear"
-            android:layout_marginTop="10dp"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/vThirdDivider"
-            android:layout_toEndOf="@+id/bt_mydata_commit"
-            android:text="@string/bt_mydata_clear"
-            android:onClick="clearSettings"
-            />
-
-
 
     </RelativeLayout>
 
