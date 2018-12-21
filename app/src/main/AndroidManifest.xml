@@ -17,6 +17,7 @@
     <application
         android:name=".BaseApplication"
         android:allowBackup="true"
+        android:fullBackupOnly="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:backupAgent=".util.BahnhofsfotosBackupAgent"
@@ -142,6 +143,9 @@
             android:name=".IntroSliderActivity"
             android:label="IntroSlider"
             android:theme="@style/AppTheme.NoActionBar"/>
+
+        <meta-data android:name="com.google.android.backup.api_key"
+                   android:value="AEdPqrEAAAAIIrH2HptM5967MTY4piXZ_qtnIjYV-cA3JEIVqA" />
 
         <!-- debug-KEY -->
 
