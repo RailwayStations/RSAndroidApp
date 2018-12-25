@@ -212,5 +212,6 @@
     <string name="registration_conflict">Registrierung fehlgeschlagen: es gibt einen Konflikt mit Deinem Nicknamen und/oder Email.</string>
     <string name="yesPhotoOwner">Ja, das sind meine eigenen Fotos</string>
     <string name="tvAnonymous">Möchtest Du als Fotograf anonym bleiben?</string>
+    <string name="channel_name">Bahnhofsortung</string>
 
 </resources>
