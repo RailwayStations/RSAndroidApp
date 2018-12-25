@@ -53,7 +53,7 @@ import org.mapsforge.map.android.util.AndroidUtil;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.download.TileDownloadLayer;
 import org.mapsforge.map.layer.download.tilesource.OpenStreetMapMapnik;
-import org.mapsforge.map.model.MapViewPosition;
+import org.mapsforge.map.model.IMapViewPosition;
 
 public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem> {
 
@@ -159,7 +159,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      * @param mvp the map view position to be set
      * @return the mapviewposition set
      */
-    protected MapViewPosition initializePosition(MapViewPosition mvp) {
+    protected IMapViewPosition initializePosition(IMapViewPosition mvp) {
         if (myPos != null) {
             mvp.setMapPosition(new MapPosition(myPos, baseApplication.getZoomLevelDefault()));
         } else {
