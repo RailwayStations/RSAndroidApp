@@ -101,8 +101,10 @@ public class NearbyNotificationService extends Service implements LocationListen
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
+        NearbyBahnhofNotificationManager.createChannel(this);
+
         // show a permanent notification to indicate that position detection is running
-        final Notification ongoingNotification = new NotificationCompat.Builder(this)
+        final Notification ongoingNotification = new NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(getString(R.string.nearby_notification_active))
                 .setOngoing(true)

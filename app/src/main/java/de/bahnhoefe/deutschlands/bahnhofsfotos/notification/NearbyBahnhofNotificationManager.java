@@ -1,11 +1,14 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -24,6 +27,8 @@ public abstract class NearbyBahnhofNotificationManager {
     private static final int REQUEST_TIMETABLE = 0x30;
     private static final int REQUEST_STATION = 0x40;
     protected final String TAG = NearbyBahnhofNotificationManager.class.getSimpleName();
+
+    public static final String CHANNEL_ID = "bahnhoefe_channel_01";// The id of the channel.
 
     private final String DB_BAHNHOF_LIVE_PKG = "de.deutschebahn.bahnhoflive";
     private final String DB_BAHNHOF_LIVE_CLASS = "de.deutschebahn.bahnhoflive.MeinBahnhofActivity";
@@ -96,12 +101,14 @@ public abstract class NearbyBahnhofNotificationManager {
         // Build an intent to launch the DB Bahnhöfe Live app
         PendingIntent stationPendingIntent = getStationPendingIntent();
 
+        createChannel(context);
+
         // Texts and bigStyle
         TextCreator textCreator = new TextCreator().invoke();
         String shortText = textCreator.getShortText();
         NotificationCompat.BigTextStyle bigStyle = textCreator.getBigStyle();
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_logotrain_found)
                 .setContentTitle(context.getString(R.string.station_is_near))
                 .setContentText(shortText)
@@ -110,8 +117,11 @@ public abstract class NearbyBahnhofNotificationManager {
                         context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
                 .setStyle(bigStyle)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true)
-                .setVisibility(Notification.VISIBILITY_PUBLIC);
+                .setOnlyAlertOnce(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                builder.setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
 
         if (timetablePendingIntent != null) {
             builder.addAction(R.drawable.ic_timetable,
@@ -123,7 +133,7 @@ public abstract class NearbyBahnhofNotificationManager {
                     "Bahnhofsinfos",
                     stationPendingIntent);*/
 
-        return new NotificationCompat.Builder(context)
+        builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_logotrain_found)
                 .setContentTitle(context.getString(R.string.station_is_near))
                 .setContentText(shortText)
@@ -133,8 +143,23 @@ public abstract class NearbyBahnhofNotificationManager {
                 .addAction(R.drawable.ic_timetable, context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_timetable), timetablePendingIntent)
                 .setStyle(bigStyle)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true)
-                .setVisibility(Notification.VISIBILITY_PUBLIC);
+                .setOnlyAlertOnce(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
+
+        return builder;
+    }
+
+    public static void createChannel(Context context) {
+        CharSequence name = context.getString(R.string.channel_name);// The user-visible name of the channel.
+        NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+            mNotificationManager.createNotificationChannel(mChannel);
+        }
     }
 
     protected PendingIntent pendifyMe(Intent intent, int requestCode) {
