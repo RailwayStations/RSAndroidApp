@@ -160,7 +160,7 @@ public class MyDataActivity extends AppCompatActivity {
             new SimpleDialogs().confirm(this, R.string.cc0_needed);
             return false;
         }
-        if (cbPhotoOwner.isChecked()) {
+        if (!cbPhotoOwner.isChecked()) {
             new SimpleDialogs().confirm(this, R.string.missing_photoOwner);
             return false;
         }
