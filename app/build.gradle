@@ -57,6 +57,9 @@ dependencies {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+
     implementation 'org.mapsforge:mapsforge-core:0.10.0'
     implementation 'org.mapsforge:mapsforge-map:0.10.0'
     implementation 'org.mapsforge:mapsforge-map-reader:0.10.0'

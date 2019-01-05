@@ -28,7 +28,7 @@ public class Constants {
 
     }
 
-    // Links zusammenschrauben
+    // API URL
     public static final String API_START_URL = "https://api.railway-stations.org";
 
 }

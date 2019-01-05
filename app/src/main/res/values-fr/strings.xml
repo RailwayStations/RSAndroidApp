@@ -100,14 +100,14 @@
   <string name="photo_upload">Télécharger une photo</string>
   <string name="upload_completed">Téléchargeé avec succès</string>
   <string name="upload_token_invalid">Votre token de téléchargement est invalide. Veuillez en demander un nouveau.</string>
-  <string name="upload_failed">Échec du téléchargement de la photo %1d</string>
+  <string name="upload_failed">Échec du téléchargement de la photo: %1s</string>
   <string name="etEmail">Veuillez entrer votre adresse e-mail
 \n et cliquez sur \'Demande de token\'</string>
   <string name="etUploadToken">Veuillez entrer le token reçu ici</string>
   <string name="tvPhotoUpload">Voulez-vous télécharger des photos de l\'application?</string>
   <string name="bt_mydata_get_token">Demande de token</string>
   <string name="upload_token_email"> Le téléchargement de jeton demandé, veuillez regarder votre boîte e-mail.</string>
-  <string name="registration_failed">Impossible de demander un token de téléchargement: %1d</string>
+  <string name="registration_failed">Impossible de demander un token de téléchargement: %1s</string>
   <string name="registration_needed">Pour pouvoir utiliser la fonction de téléchargement, vous devez demander un token de téléchargement sous \"Mes données\".</string>
   <string name="registration_data_incomplete">Inscription incomplète</string>
   <string name="title_slider5">Télécharger une photo</string>
@@ -201,8 +201,10 @@
     <string name="yesPhotoOwner">Yes, these are my own photos</string>
   <string name="tvAnonymous">Do you want to be an anonymous photographer?</string>
     <string name="channel_name">Nearby Stations Notifications</string>
-    <string name="save_profile_failed">Failed to write user profile: %1d</string>
-    <string name="read_profile_failed">Reading remote profile failed: %1d</string>
+    <string name="save_profile_failed">Failed to write user profile: %1s</string>
+    <string name="read_profile_failed">Reading remote profile failed: %1s</string>
     <string name="tvRegisterWithGoogle">Register with Google</string>
   <string name="upload_token_received">Upload token received.</string>
+    <string name="error_loading_highscore">Error loading highscore:</string>
+  <string name="google_sign_in_failed">Google SignIn failed: %1s</string>
 </resources>

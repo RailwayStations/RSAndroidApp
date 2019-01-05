@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,21 +15,13 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
-import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HighScoreActivity extends AppCompatActivity {
 
@@ -42,9 +33,35 @@ public class HighScoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_high_score);
 
-        if (ConnectionUtil.checkInternetConnection(this)) {
-            new JSONHighscoreTask(((BaseApplication) getApplication()).getCountryShortCode()).execute();
-        }
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        baseApplication.getRSAPI().getHighScore(baseApplication.getCountryCode()).enqueue(new Callback<HighScore>() {
+            @Override
+            public void onResponse(Call<HighScore> call, Response<HighScore> response) {
+                if (response.isSuccessful()) {
+                    final ListView listView = findViewById(R.id.highscore_list);
+                    assert listView != null;
+                    adapter = new HighScoreAdapter(HighScoreActivity.this, response.body().getItems());
+                    listView.setAdapter(adapter);
+                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
+                            HighScoreItem highScoreItem = (HighScoreItem) adapter.getItemAtPosition(position);
+                            BaseApplication baseApplication = (BaseApplication) getApplication();
+                            baseApplication.setPhotoFilter(PhotoFilter.NICKNAME);
+                            baseApplication.setNicknameFilter(highScoreItem.getName());
+                            Intent intent = new Intent(HighScoreActivity.this, MapsActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HighScore> call, Throwable t) {
+                Log.e(TAG, "Error loading highscore", t);
+                Toast.makeText(getBaseContext(), getString(R.string.error_loading_highscore) + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -83,79 +100,6 @@ public class HighScoreActivity extends AppCompatActivity {
         });
 
         return true;
-    }
-
-
-    public class JSONHighscoreTask extends AsyncTask<Void, String, List<HighScoreItem>> {
-
-        private final String countryCode;
-
-        protected JSONHighscoreTask(final String countryCode) {
-            this.countryCode = countryCode;
-        }
-
-        protected List<HighScoreItem> doInBackground(final Void... params) {
-            BufferedReader reader = null;
-            final List<HighScoreItem> highScore = new ArrayList<>();
-
-            try {
-                final URL url = new URL(String.format("%s/%s/photographers.json", Constants.API_START_URL, countryCode.toLowerCase()));
-                final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
-                final InputStream stream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(stream));
-                final StringBuilder buffer = new StringBuilder();
-                String line = "";
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-                final String finalJson = buffer.toString();
-                int position = 0;
-
-                final JSONObject photographers = new JSONObject(finalJson);
-                Log.i(TAG, "Parsed " + photographers.length() + " photographers");
-
-                final Iterator<String> photographerNames = photographers.keys();
-                int lastPhotos = 0;
-                while (photographerNames.hasNext()) {
-                    final String name = photographerNames.next();
-                    final int photos = photographers.getInt(name);
-                    if (lastPhotos == 0 || lastPhotos > photos) {
-                        position++;
-                    }
-                    lastPhotos = photos;
-                    highScore.add(new HighScoreItem(name, photos, position));
-                }
-            } catch (final Exception e) {
-                Log.e(TAG, "Error loading HighScore", e);
-            }
-
-            return highScore;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(final List<HighScoreItem> highScore) {
-            final ListView listView = (ListView) findViewById(R.id.highscore_list);
-            assert listView != null;
-            adapter = new HighScoreAdapter(HighScoreActivity.this, highScore);
-            listView.setAdapter(adapter);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
-                    HighScoreItem highScoreItem = (HighScoreItem)adapter.getItemAtPosition(position);
-                    BaseApplication baseApplication = (BaseApplication) getApplication();
-                    baseApplication.setPhotoFilter(PhotoFilter.NICKNAME);
-                    baseApplication.setNicknameFilter(highScoreItem.getName());
-                    Intent intent = new Intent(HighScoreActivity.this, MapsActivity.class);
-                    startActivity(intent);
-                }
-            });
-        }
     }
 
 }

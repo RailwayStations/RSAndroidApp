@@ -56,11 +56,11 @@ public class CountryActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         BaseApplication baseApplication = BaseApplication.getInstance();
-        String prefCountry = baseApplication.getCountryShortCode();
+        String prefCountry = baseApplication.getCountryCode();
         String selectedCountry = countryAdapter.getSelectedCountry();
 
         if (!prefCountry.equals(selectedCountry)) {
-            baseApplication.setCountryShortCode(selectedCountry);
+            baseApplication.setCountryCode(selectedCountry);
             baseApplication.setLastUpdate(0L);
         }
         super.onBackPressed();

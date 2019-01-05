@@ -110,7 +110,7 @@
     <string name="photo_upload">Foto hochladen</string>
     <string name="upload_completed">Foto erfolgreich hochgeladen</string>
     <string name="upload_token_invalid">Dein Upload-Token ist ungültig. Bitte fordere ein Neues an.</string>
-    <string name="upload_failed">Foto konnte nicht hochgeladen werden %1d</string>
+    <string name="upload_failed">Foto konnte nicht hochgeladen werden: %1s</string>
     <string name="etEmail">Bitte trage hier Deine Email-Adresse
         "\n"ein und klicke \'Token anfordern\'</string>
     <string name="etUploadToken">Bitte trage hier nach Erhalt der E-Mail
@@ -118,7 +118,7 @@
     <string name="tvPhotoUpload">Möchtest Du den Foto-Upload aus der App nutzen?</string>
     <string name="bt_mydata_get_token">Token anfordern</string>
     <string name="upload_token_email">Upload Token angefordert, bitte schaue in Deine Email.</string>
-    <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1d</string>
+    <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1s</string>
     <string name="registration_needed">Um die Upload-Funktion zu nutzen, musst Du unter \"Meine Daten\" ein Upload-Token anfordern.</string>
     <string name="registration_data_incomplete">Daten für die Registrierung sind unvollständig</string>
     <string name="title_slider5">Foto hochladen</string>
@@ -213,9 +213,11 @@
     <string name="yesPhotoOwner">Ja, das sind meine eigenen Fotos</string>
     <string name="tvAnonymous">Möchtest Du als Fotograf anonym bleiben?</string>
     <string name="channel_name">Bahnhofsortung</string>
-    <string name="save_profile_failed">Fehler beim Hochladen des Benutzerprofils: %1d</string>
-    <string name="read_profile_failed">Fehler beim Lesen des Benutzerprofils: %1d</string>
+    <string name="save_profile_failed">Fehler beim Hochladen des Benutzerprofils: %1s</string>
+    <string name="read_profile_failed">Fehler beim Lesen des Benutzerprofils: %1s</string>
     <string name="tvRegisterWithGoogle">Registrierung mit Google</string>
     <string name="upload_token_received">Upload Token empfangen</string>
+    <string name="error_loading_highscore">Fehler beim Laden der Rangliste: </string>
+    <string name="google_sign_in_failed">Fehler beim Anmelden über Google: %1s</string>
 
 </resources>

@@ -6,13 +6,18 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 
+import com.google.gson.GsonBuilder;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BaseApplication extends Application {
 
@@ -21,10 +26,11 @@ public class BaseApplication extends Application {
     private static final String DEFAULT = "";
     private static BaseApplication instance;
 
-    public static final String DEFAULT_COUNTRY = "DE";
+    public static final String DEFAULT_COUNTRY = "de";
     public static final String PREF_FILE = "APP_PREF_FILE";
 
     private BahnhofsDbAdapter dbAdapter;
+    private RSAPI api;
     private SharedPreferences preferences;
 
     public BaseApplication() {
@@ -54,6 +60,17 @@ public class BaseApplication extends Application {
         super.onCreate();
         dbAdapter = new BahnhofsDbAdapter(this);
         dbAdapter.open();
+
+        GsonBuilder gson = new GsonBuilder();
+        gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
+        gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.API_START_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson.create()))
+                .build();
+
+        api = retrofit.create(RSAPI.class);
 
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
 
@@ -95,12 +112,12 @@ public class BaseApplication extends Application {
         return Double.longBitsToDouble(preferences.getLong(getString(key), 0));
     }
 
-    public void setCountryShortCode(String countryShortCode) {
-        putString(R.string.COUNTRY, countryShortCode);
+    public void setCountryCode(String countryCode) {
+        putString(R.string.COUNTRY, countryCode);
     }
 
-    public String getCountryShortCode() {
-        return preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
+    public String getCountryCode() {
+        return preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY).toLowerCase();
     }
 
     public void setFirstAppStart(boolean firstAppStart) {
@@ -116,7 +133,7 @@ public class BaseApplication extends Application {
     }
 
     public void setLicense(License license) {
-        putString(R.string.LICENCE, license.toString());
+        putString(R.string.LICENCE, license != null ? license.toString() : License.UNKNOWN.toString());
     }
 
     public UpdatePolicy getUpdatePolicy() {
@@ -246,5 +263,9 @@ public class BaseApplication extends Application {
         profile.setEmail(getEmail());
         profile.setUploadToken(getUploadToken());
         return profile;
+    }
+
+    public RSAPI getRSAPI() {
+        return api;
     }
 }

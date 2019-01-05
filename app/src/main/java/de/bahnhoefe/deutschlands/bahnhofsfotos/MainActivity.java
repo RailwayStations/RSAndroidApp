@@ -9,11 +9,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -36,16 +33,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
@@ -56,11 +45,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -77,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String searchString;
 
     private NearbyNotificationService.StatusBinder statusBinder;
+    private RSAPI rsapi;
 
 
     @Override
@@ -88,8 +78,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
+        rsapi = baseApplication.getRSAPI();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -99,19 +90,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         handleGalleryNavItem();
 
         View header = navigationView.getHeaderView(0);
-        TextView tvUpdate = (TextView) header.findViewById(R.id.tvUpdate);
+        TextView tvUpdate = header.findViewById(R.id.tvUpdate);
 
         if (!baseApplication.getFirstAppStart()) {
             startActivity(new Intent(this, IntroSliderActivity.class));
@@ -127,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
         customAdapter = new CustomAdapter(this, cursor, 0);
-        ListView listView = (ListView) findViewById(R.id.lstStations);
+        ListView listView = findViewById(R.id.lstStations);
         assert listView != null;
         listView.setAdapter(customAdapter);
 
@@ -175,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -345,296 +336,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             appInfoFragment.show(getSupportFragmentManager(), DIALOG_TAG);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    public class JSONTask extends AsyncTask<Void, String, List<Bahnhof>> {
-
-        private final String countryCode;
-        private ProgressDialog progressDialog;
-        private Exception exception;
-
-        // from https://developer.android.com/training/efficient-downloads/redundant_redundant.html
-        private void enableHttpResponseCache() {
-            try {
-                long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
-                File httpCacheDir = new File(getCacheDir(), "http");
-                Class.forName("android.net.http.HttpResponseCache")
-                        .getMethod("install", File.class, long.class)
-                        .invoke(null, httpCacheDir, httpCacheSize);
-            } catch (Exception httpResponseCacheNotAvailable) {
-                Log.i(TAG, "HTTP response cache is unavailable.");
-            }
-        }
-
-        protected JSONTask(final String countryCode) {
-            enableHttpResponseCache();
-            this.countryCode = countryCode;
-        }
-
-        @Override
-        protected List<Bahnhof> doInBackground(Void... params) {
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-            Date date = new Date();
-            long aktuellesDatum = date.getTime();
-            int count = 0;
-
-            publishProgress(getResources().getString(R.string.connecting));
-            List<Bahnhof> bahnhoefe = new ArrayList<>(count);
-            try {
-                URL url = new URL(String.format("%s/%s/stations", Constants.API_START_URL, countryCode.toLowerCase()));
-                connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
-
-                publishProgress(getString(R.string.reading_data));
-                InputStream stream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(stream));
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-                String finalJson = buffer.toString();
-
-                publishProgress(getString(R.string.processing_data));
-                JSONArray bahnhofList = new JSONArray(finalJson);
-                count = bahnhofList.length();
-                Log.i(TAG, "Parsed " + count + " stations");
-
-                for (int i = 0; i < bahnhofList.length(); i++) {
-                    publishProgress(getResources().getString(R.string.processing_item_of,i, count));
-                    JSONObject jsonObj = (JSONObject) bahnhofList.get(i);
-
-                    String title = jsonObj.getString("title");
-                    String id = jsonObj.getString("idStr");
-                    String lat = jsonObj.getString("lat");
-                    String lon = jsonObj.getString("lon");
-                    String photoUrl = getNullableString(jsonObj, "photoUrl");
-                    String photographer = getNullableString(jsonObj, "photographer");
-                    String photographerUrl = getNullableString(jsonObj, "photographerUrl");
-                    String license = getNullableString(jsonObj, "license");
-                    String licenseUrl = getNullableString(jsonObj, "licenseUrl");
-                    String ds100 = getNullableString(jsonObj, "DS100");
-
-                    Bahnhof bahnhof = new Bahnhof();
-                    bahnhof.setTitle(title);
-                    bahnhof.setId(id);
-                    bahnhof.setLat(Float.parseFloat(lat));
-                    bahnhof.setLon(Float.parseFloat(lon));
-                    bahnhof.setDatum(aktuellesDatum);
-                    bahnhof.setPhotoUrl(photoUrl);
-                    bahnhof.setPhotographer(photographer);
-                    bahnhof.setPhotographerUrl(photographerUrl);
-                    bahnhof.setLicense(license);
-                    bahnhof.setLicenseUrl(licenseUrl);
-                    bahnhof.setDS100(ds100);
-
-                    bahnhoefe.add(bahnhof);
-                    Log.d("DatenbankInsertOk ...", bahnhof.toString());
-                }
-                publishProgress(getString(R.string.writing_to_database));
-
-                dbAdapter.insertBahnhoefe(bahnhoefe);
-                publishProgress(getString(R.string.stations_database_updated));
-            } catch (Exception e) {
-                Log.e(TAG, "Error refreshing stations", e);
-                exception = e;
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG, "Cannot close reader", e);
-                }
-            }
-            return bahnhoefe;
-        }
-
-        private String getNullableString(JSONObject jsonObj, String name) {
-            if (jsonObj.isNull(name)) {
-                return null;
-            }
-            return jsonObj.optString(name, null);
-        }
-
-        @Override
-        protected void onPostExecute(List<Bahnhof> result) {
-            if (MainActivity.this.isDestroyed()) {
-                return;
-            }
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-
-            if (exception != null) {
-                Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + exception.getMessage(), Toast.LENGTH_LONG).show();
-            } else {
-                baseApplication.setLastUpdate(System.currentTimeMillis());
-                TextView tvUpdate = (TextView) findViewById(R.id.tvUpdate);
-                try {
-                    tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
-                } catch (Exception e) {
-                    Log.e(TAG, "Error writing updatedate.txt", e);
-                }
-                customAdapter.swapCursor(dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter()));
-            }
-
-            unlockScreenOrientation();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            lockScreenOrientation();
-            progressDialog = new ProgressDialog(MainActivity.this);
-            progressDialog.setIndeterminate(false);
-
-            // show it
-            progressDialog.show();
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            progressDialog.setMessage(getString(R.string.loading_data) + values[0]);
-
-        }
-
-        private void lockScreenOrientation() {
-            int currentOrientation = getResources().getConfiguration().orientation;
-            if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            } else {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            }
-        }
-
-        private void unlockScreenOrientation() {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        }
-    }
-
-    public class JSONLaenderTask extends AsyncTask<Void, String, List<Country>> {
-
-        private Exception exception;
-
-        protected List<Country> doInBackground(Void... params) {
-            int count = 0;
-
-            List<Country> countries = new ArrayList<>(count);
-            try {
-                URL url = new URL(Constants.API_START_URL + "/countries");
-                HttpURLConnection laenderConnection = (HttpURLConnection) url.openConnection();
-                laenderConnection.connect();
-                InputStream stream = laenderConnection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-                String finalJson = buffer.toString();
-
-                publishProgress(getString(R.string.processing_countries));
-                JSONArray countryList = new JSONArray(finalJson);
-                count = countryList.length();
-                Log.i(TAG, "Parsed " + count + " countries");
-
-                for (int i = 0; i < countryList.length(); i++) {
-                    publishProgress(getResources().getString(R.string.processing_item_of, i, count));
-                    JSONObject jsonObj = (JSONObject) countryList.get(i);
-
-                    String countryShortCode = jsonObj.getString("code").toUpperCase();
-                    String countryName = jsonObj.getString("name");
-                    String email = jsonObj.getString("email");
-                    String twitterTags = jsonObj.getString("twitterTags");
-                    String timetableUrlTemplate = jsonObj.isNull("timetableUrlTemplate") ? null : jsonObj.getString("timetableUrlTemplate");
-
-                    Country country = new Country();
-                    country.setCountryShortCode(countryShortCode);
-                    country.setCountryName(countryName);
-                    country.setEmail(email);
-                    country.setTwitterTags(twitterTags);
-                    country.setTimetableUrlTemplate(timetableUrlTemplate);
-
-                    countries.add(country);
-                    Log.d("DatenbankInsertLdOk ...", country.toString());
-                }
-                publishProgress(getString(R.string.writing_to_database));
-                dbAdapter.insertCountries(countries);
-                publishProgress(getString(R.string.countries_database_updated));
-            } catch (final Exception e) {
-                Log.e(TAG, "Error loading countries", e);
-                exception = e;
-            }
-
-            return countries;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(List<Country> countries) {
-            recreate();
-            if (exception != null) {
-                Toast.makeText(getBaseContext(), getString(R.string.error_updating_countries) + exception.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    public class JSONStatisticTask extends AsyncTask<Void, String, Statistic> {
-
-        private final String countryCode;
-
-        protected JSONStatisticTask(final String countryCode) {
-            this.countryCode = countryCode;
-        }
-
-        protected Statistic doInBackground(Void... params) {
-            try {
-                URL url = new URL(Constants.API_START_URL + "/" + countryCode.toLowerCase() + "/stats");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
-                InputStream stream = connection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-                String finalJson = buffer.toString();
-
-                publishProgress(getString(R.string.processing_statistics));
-                JSONObject statsJson = new JSONObject(finalJson);
-                Statistic statistic = new Statistic(statsJson.getInt("total"),
-                                            statsJson.getInt("withPhoto"),
-                                            statsJson.getInt("withoutPhoto"),
-                                            statsJson.getInt("photographers"));
-
-                Log.i(TAG, "Stat: " + statistic);
-                return statistic;
-            } catch (final Exception e) {
-                Log.e(TAG, "Error loading countries", e);
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Statistic statistic) {
-            checkForUpdates(statistic);
-        }
-
     }
 
     /**
@@ -643,13 +348,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * from http://blogs.innovationm.com/multiple-asynctask-in-android/
      */
     private void runUpdateTasks() {
-        if (ConnectionUtil.checkInternetConnection(this)) {
-            // First Task
-            new JSONTask(baseApplication.getCountryShortCode()).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        final ProgressDialog progress = new ProgressDialog(MainActivity.this);
+        progress.setMessage(getResources().getString(R.string.loading_stations));
+        progress.setTitle(getResources().getString(R.string.app_name));
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress.show();
 
-            // Second Task
-            new JSONLaenderTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
-        }
+        rsapi.getCountries().enqueue(new Callback<List<Country>>() {
+            @Override
+            public void onResponse(Call<List<Country>> call, Response<List<Country>> response) {
+                if (response.isSuccessful()) {
+                    dbAdapter.insertCountries(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Country>> call, Throwable t) {
+                Log.e(TAG, "Error refreshing countries", t);
+                Toast.makeText(getBaseContext(), getString(R.string.error_updating_countries) + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        rsapi.getStations(baseApplication.getCountryCode().toLowerCase()).enqueue(new Callback<List<Bahnhof>>() {
+            @Override
+            public void onResponse(Call<List<Bahnhof>> call, Response<List<Bahnhof>> response) {
+                if (response.isSuccessful()) {
+                    dbAdapter.insertBahnhoefe(response.body());
+
+                    baseApplication.setLastUpdate(System.currentTimeMillis());
+                    TextView tvUpdate = findViewById(R.id.tvUpdate);
+                    tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
+                    customAdapter.swapCursor(dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter()));
+                }
+                progress.dismiss();
+            }
+
+            @Override
+            public void onFailure(Call<List<Bahnhof>> call, Throwable t) {
+                Log.e(TAG, "Error refreshing stations", t);
+                progress.dismiss();
+                Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
 
@@ -662,7 +403,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (System.currentTimeMillis() - baseApplication.getLastUpdate() > CHECK_UPDATE_INTERVAL) {
             baseApplication.setLastUpdate(System.currentTimeMillis());
             if (baseApplication.getUpdatePolicy() != UpdatePolicy.MANUAL) {
-                new JSONStatisticTask(baseApplication.getCountryShortCode()).execute();
+                rsapi.getStatistic(baseApplication.getCountryCode().toLowerCase()).enqueue(new Callback<Statistic>() {
+                    @Override
+                    public void onResponse(Call<Statistic> call, Response<Statistic> response) {
+                        if (response.isSuccessful()) {
+                            checkForUpdates(response.body());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Statistic> call, Throwable t) {
+                        Log.e(TAG, "Error loading country statistic", t);
+                    }
+                });
             }
         }
 

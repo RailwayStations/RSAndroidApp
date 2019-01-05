@@ -110,8 +110,8 @@ public class BahnhofsDbAdapter {
 
             for (Country country : countries) {
                 ContentValues values = new ContentValues();
-                values.put(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE, country.getCountryShortCode());
-                values.put(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME, country.getCountryName());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE, country.getCode());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME, country.getName());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_EMAIL, country.getEmail());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS, country.getTwitterTags());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE, country.getTimetableUrlTemplate());
@@ -315,8 +315,8 @@ public class BahnhofsDbAdapter {
         String twitterTags = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS));
         String timetableUrlTemplate = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE));
         Country country = new Country();
-        country.setCountryShortCode(countryShortCode);
-        country.setCountryName(countryName);
+        country.setCode(countryShortCode);
+        country.setName(countryName);
         country.setEmail(email);
         country.setTwitterTags(twitterTags);
         country.setTimetableUrlTemplate(timetableUrlTemplate);
@@ -345,9 +345,9 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    public Country fetchCountryByCountryShortCode(String countryShortCode) {
+    public Country fetchCountryByCountryCode(String countryCode) {
         Cursor cursor = db.query(DATABASE_TABLE_LAENDER, null, Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + "=?", new String[]{
-                countryShortCode + ""}, null, null, null);
+                countryCode + ""}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             Country country = createCountryFromCursor(cursor);
             cursor.close();
