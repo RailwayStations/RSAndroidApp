@@ -14,7 +14,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -43,15 +42,11 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLConnection;
 
 import static android.content.Intent.createChooser;
@@ -68,6 +63,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
 
@@ -100,7 +100,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String nickname;
     private String email;
     private String token;
-    private String countryShortCode;
+    private String countryCode;
     private TextView licenseTagView;
     private TextView coordinates;
     private ViewGroup detailsLayout;
@@ -108,6 +108,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private BaseApplication baseApplication;
     private LinearLayout header;
     private Bitmap publicBitmap;
+    private RSAPI rsapi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,9 +116,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         setContentView(R.layout.activity_details);
 
         baseApplication = (BaseApplication) getApplication();
+        rsapi = baseApplication.getRSAPI();
         BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
-        countryShortCode = baseApplication.getCountryShortCode();
-        country = dbAdapter.fetchCountryByCountryShortCode(countryShortCode);
+        countryCode = baseApplication.getCountryCode();
+        country = dbAdapter.fetchCountryByCountryCode(countryCode);
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -615,9 +617,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     if (TextUtils.isEmpty(email) || TextUtils.isEmpty(token)) {
                         Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
                     } else {
-                        if (ConnectionUtil.checkInternetConnection(this)) {
-                            new PhotoUploadTask(countryShortCode.toLowerCase(), nickname, email, bahnhof.getId(), getStoredMediaFile(), getString(R.string.rs_api_key), token).execute();
-                        }
+                        uploadPhoto();
                     }
                 }
                 break;
@@ -647,6 +647,51 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         return true;
+    }
+
+    private void uploadPhoto() {
+        final ProgressDialog progress = new ProgressDialog(DetailsActivity.this);
+        progress.setMessage(getResources().getString(R.string.send));
+        progress.setTitle(getResources().getString(R.string.app_name));
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress.show();
+
+        final File mediaFile = getStoredMediaFile();
+        RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
+        rsapi.photoUpload(email, token, bahnhof.getId(), countryCode.toLowerCase(), file).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                progress.dismiss();
+                switch (response.code()) {
+                    case 202 :
+                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_completed);
+                        break;
+                    case 400 :
+                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_bad_request);
+                        break;
+                    case 401 :
+                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_token_invalid);
+                        break;
+                    case 409 :
+                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
+                        break;
+                    case 413 :
+                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_too_big);
+                        break;
+                    default :
+                        new SimpleDialogs().confirm(DetailsActivity.this,
+                            String.format(getText(R.string.upload_failed).toString(), response.code()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Error uploading photo", t);
+                progress.dismiss();
+                new SimpleDialogs().confirm(DetailsActivity.this,
+                        String.format(getText(R.string.upload_failed).toString(), t.getMessage()));
+            }
+        });
     }
 
 
@@ -931,128 +976,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             if (sbar != null)
                 sbar.show();
             fullscreen = false;
-        }
-
-    }
-
-    public class PhotoUploadTask extends AsyncTask<Void, String, Integer> {
-
-        private final String countryCode;
-        private final String nickname;
-        private final String stationId;
-        private final File file;
-        private final String apiKey;
-        private final String token;
-        private final String email;
-        private ProgressDialog progressDialog;
-
-        public PhotoUploadTask(String countryCode, String nickname, String email, String stationId, File file, String apiKey, String token) {
-            this.countryCode = countryCode;
-            this.nickname = nickname;
-            this.email = email;
-            this.stationId = stationId;
-            this.file = file;
-            this.apiKey = apiKey;
-            this.token = token;
-        }
-
-
-        @Override
-        protected Integer doInBackground(Void... params) {
-            HttpURLConnection conn = null;
-            DataOutputStream wr = null;
-            FileInputStream is = null;
-            int status = -1;
-
-            publishProgress(getString(R.string.connecting));
-            try {
-                URL url = new URL(String.format("%s/photoUpload", Constants.API_START_URL));
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", URLConnection.guessContentTypeFromName(file.getName()));
-                conn.setRequestProperty( "Content-Length", String.valueOf(file.length()));
-                conn.setRequestProperty( "API-Key", apiKey);
-                conn.setRequestProperty( "Nickname", nickname);
-                conn.setRequestProperty( "Email", email);
-                conn.setRequestProperty( "Upload-Token", token);
-                conn.setRequestProperty( "Station-Id", stationId);
-                conn.setRequestProperty( "Country", countryCode);
-                conn.setUseCaches( false );
-
-                wr = new DataOutputStream( conn.getOutputStream());
-                is = new FileInputStream(file);
-                byte[] buffer = new byte[8196];
-                int bytesRead = 0;
-                while ((bytesRead = is.read(buffer)) > 0) {
-                    publishProgress(getString(R.string.sending));
-                    wr.write( buffer, 0, bytesRead );
-                }
-                wr.flush();
-
-                status = conn.getResponseCode();
-                Log.i(TAG, "Upload photo response: " + status);
-            } catch ( Exception e) {
-                status = -2;
-                Log.e(TAG, "Could upload photo", e);
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
-                try {
-                    if (wr != null) {
-                        wr.close();
-                    }
-                    if (is != null) {
-                        is.close();
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG, "Cannot close stream", e);
-                }
-            }
-
-            return status;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (DetailsActivity.this.isDestroyed()) {
-                return;
-            }
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-            if (result == 202) {
-                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_completed);
-            } else if (result == 400) {
-                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_bad_request);
-            } else if (result == 401) {
-                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_token_invalid);
-            } else if (result == 409) {
-                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
-            } else if (result == 413) {
-                new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_too_big);
-            } else {
-                new SimpleDialogs().confirm(DetailsActivity.this,
-                        String.format(getText(R.string.upload_failed).toString(), result));
-            }
-        }
-
-        @Override
-        protected void onPreExecute() {
-            progressDialog = new ProgressDialog(DetailsActivity.this);
-            progressDialog.setIndeterminate(false);
-
-            // show it
-            progressDialog.show();
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            progressDialog.setMessage(getString(R.string.send_data) + values[0]);
-
         }
 
     }

@@ -24,7 +24,7 @@ public class CountryAdapter extends CursorAdapter {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         BaseApplication baseApplication = BaseApplication.getInstance();
-        selectedCountry = baseApplication.getCountryShortCode();
+        selectedCountry = baseApplication.getCountryCode();
     }
 
     // new refactored after https://www.youtube.com/watch?v=wDBM6wVEO70&feature=youtu.be&t=7m

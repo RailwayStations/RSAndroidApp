@@ -99,14 +99,14 @@
   <string name="photo_upload">Upload photo</string>
   <string name="upload_completed">Upload successfully</string>
   <string name="upload_token_invalid">Your upload token is invalid. Please request a new one.</string>
-  <string name="upload_failed">Photo upload failed %1d</string>
+  <string name="upload_failed">Photo upload failed: %1s</string>
   <string name="etEmail">Please enter your email address
 \n and click on \'Request token\'</string>
   <string name="etUploadToken">Please enter the received token here</string>
   <string name="tvPhotoUpload">Do you want to upload photos from within the app?</string>
   <string name="bt_mydata_get_token">Request token</string>
   <string name="upload_token_email">Upload token requested, please have a look in your email inbox.</string>
-  <string name="registration_failed">Failed to request an upload token: %1d</string>
+  <string name="registration_failed">Failed to request an upload token: %1s</string>
   <string name="registration_needed">To be able to use the upload function, you have to request an upload token under \"My Data\".</string>
   <string name="registration_data_incomplete">Incomplete registration</string>
   <string name="title_slider5">Upload photo</string>
@@ -204,9 +204,11 @@
     <string name="yesPhotoOwner">Yes, these are my own photos</string>
   <string name="tvAnonymous">Do you want to be an anonymous photographer?</string>
     <string name="channel_name">Nearby Stations Notifications</string>
-    <string name="save_profile_failed">Failed to write user profile: %1d</string>
-    <string name="read_profile_failed">Reading remote profile failed: %1d</string>
+    <string name="save_profile_failed">Failed to write user profile: %1s</string>
+    <string name="read_profile_failed">Reading remote profile failed: %1s</string>
     <string name="tvRegisterWithGoogle">Register with Google</string>
   <string name="upload_token_received">Upload token received.</string>
+    <string name="error_loading_highscore">Error loading highscore:</string>
+  <string name="google_sign_in_failed">Google SignIn failed: %1s</string>
 
 </resources>

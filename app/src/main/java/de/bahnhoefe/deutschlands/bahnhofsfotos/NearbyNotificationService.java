@@ -208,7 +208,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                 notifiedStationManager = null;
             }
         }
-        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance, bahnhofsDbAdapter.fetchCountryByCountryShortCode(baseApplication.getCountryShortCode()));
+        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance, bahnhofsDbAdapter.fetchCountryByCountryCode(baseApplication.getCountryCode()));
         notifiedStationManager.notifyUser();
     }
 

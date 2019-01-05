@@ -3,8 +3,8 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 import java.io.Serializable;
 
 public class Country implements Serializable {
-    private String countryName;
-    private String countryShortCode;
+    private String name;
+    private String code;
     private String email;
     private String twitterTags;
     private String timetableUrlTemplate;
@@ -13,28 +13,28 @@ public class Country implements Serializable {
 
     }
 
-    public Country(String countryName, String countryShortCode, String email, String twitterTags, String timetableUrlTemplate) {
-        this.countryName = countryName;
-        this.countryShortCode = countryShortCode;
+    public Country(String name, String code, String email, String twitterTags, String timetableUrlTemplate) {
+        this.name = name;
+        this.code = code;
         this.email = email;
         this.twitterTags = twitterTags;
         this.timetableUrlTemplate = timetableUrlTemplate;
     }
 
-    public String getCountryName() {
-        return countryName;
+    public String getName() {
+        return name;
     }
 
-    public void setCountryName(String countryName) {
-        this.countryName = countryName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getCountryShortCode() {
-        return countryShortCode;
+    public String getCode() {
+        return code;
     }
 
-    public void setCountryShortCode(String countryShortCode) {
-        this.countryShortCode = countryShortCode;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getEmail() {
@@ -63,7 +63,7 @@ public class Country implements Serializable {
 
     @Override
     public String toString() {
-        return "Land [Laendername=" + countryName + ", Laenderkuerzel=" + countryShortCode + ", E-Mail=" + email + ", TwitterTags=" + twitterTags + ", TimetableUrlTemplate=" + timetableUrlTemplate + "]";
+        return "Land [Laendername=" + name + ", Laenderkuerzel=" + code + ", E-Mail=" + email + ", TwitterTags=" + twitterTags + ", TimetableUrlTemplate=" + timetableUrlTemplate + "]";
     }
 
 }

@@ -1,9 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,13 +11,6 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -34,10 +25,10 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MyDataActivity extends AppCompatActivity {
 
@@ -50,6 +41,7 @@ public class MyDataActivity extends AppCompatActivity {
     private CheckBox cbPhotoOwner;
     private License license;
     private BaseApplication baseApplication;
+    private RSAPI rsapi;
     private UpdatePolicy updatePolicy;
     private Profile profile;
     private GoogleSignInClient mGoogleSignInClient;
@@ -71,6 +63,8 @@ public class MyDataActivity extends AppCompatActivity {
         RadioGroup rgUpdatePolicy = findViewById(R.id.rgUpdatePolicy);
 
         baseApplication = (BaseApplication) getApplication();
+        rsapi = baseApplication.getRSAPI();
+
         updatePolicy = baseApplication.getUpdatePolicy();
         setProfileToUI(baseApplication.getProfile());
         rgUpdatePolicy.check(updatePolicy.getId());
@@ -107,10 +101,45 @@ public class MyDataActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 String idToken = account.getIdToken();
                 Log.e(TAG, "idToken=" + idToken);
-                new RegisterTask(this, createProfileFromUI(), idToken).execute();
+                rsapi.registrationWithGoogleIdToken(idToken, createProfileFromUI()).enqueue(new Callback<Profile>() {
+                    @Override
+                    public void onResponse(Call<Profile> call, Response<Profile> response) {
+                        switch (response.code()) {
+                            case 202 :
+                                final Profile profile = response.body();
+                                if (StringUtils.isNotBlank(profile.getUploadToken())) {
+                                    saveLocalProfile(profile);
+                                    new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_received);
+                                } else {
+                                    new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_email);
+                                }
+                                break;
+                            case 400 :
+                                new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_wrong_data);
+                                break;
+                            case 409 :
+                                new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_conflict);
+                                break;
+                            case 422 :
+                                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
+                                break;
+                            default :
+                                new SimpleDialogs().confirm(MyDataActivity.this,
+                                        String.format(getText(R.string.registration_failed).toString(), response.code()));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Profile> call, Throwable t) {
+                        Log.e(TAG, "Registration via Google sign in failed", t);
+                        new SimpleDialogs().confirm(MyDataActivity.this,
+                                String.format(getText(R.string.registration_failed).toString(), t));
+                    }
+                });
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
+                new SimpleDialogs().confirm(MyDataActivity.this,
+                        String.format(getText(R.string.google_sign_in_failed).toString(), e));
             }
         }
     }
@@ -129,9 +158,33 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     private void loadRemoteProfile() {
-        if (isUploadTokenAvailable() && ConnectionUtil.checkInternetConnection(this)) {
+        if (isUploadTokenAvailable()) {
             final Profile profile = createProfileFromUI();
-            new ReadProfileTask(this, profile.getEmail(), profile.getUploadToken()).execute();
+            rsapi.getProfile(profile.getEmail(), profile.getUploadToken()).enqueue(new Callback<Profile>() {
+                @Override
+                public void onResponse(Call<Profile> call, Response<Profile> response) {
+                    switch (response.code()) {
+                        case 200 :
+                            Log.i(TAG, "Successfully loaded profile");
+                            final Profile remoteProfile = response.body();
+                            remoteProfile.setUploadToken(profile.getUploadToken());
+                            saveLocalProfile(remoteProfile);
+                            break;
+                        case 401 :
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_invalid);
+                            break;
+                        default :
+                            new SimpleDialogs().confirm(MyDataActivity.this,
+                                    String.format(getText(R.string.read_profile_failed).toString(), response.code()));
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Profile> call, Throwable t) {
+                    new SimpleDialogs().confirm(MyDataActivity.this,
+                            String.format(getText(R.string.read_profile_failed).toString(), t.getMessage()));
+                }
+            });
         }
     }
 
@@ -143,7 +196,7 @@ public class MyDataActivity extends AppCompatActivity {
                     profile.setUploadToken(data.getLastPathSegment());
                     etUploadToken.setText(profile.getUploadToken());
                     baseApplication.setUploadToken(profile.getUploadToken());
-                    new ReadProfileTask(this, profile.getEmail(), profile.getUploadToken());
+                    loadRemoteProfile();
                 }
             }
         }
@@ -171,9 +224,35 @@ public class MyDataActivity extends AppCompatActivity {
             return;
         }
         saveSettings(view);
-        if (ConnectionUtil.checkInternetConnection(this)) {
-            new RegisterTask(this, createProfileFromUI() , null).execute();
-        }
+        rsapi.registration(createProfileFromUI()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                switch (response.code()) {
+                    case 202 :
+                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_email);
+                        break;
+                    case 400 :
+                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_wrong_data);
+                        break;
+                    case 409 :
+                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_conflict);
+                        break;
+                    case 422 :
+                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
+                        break;
+                    default :
+                        new SimpleDialogs().confirm(MyDataActivity.this,
+                            String.format(getText(R.string.registration_failed).toString(), response.code()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Registration failed", t);
+                new SimpleDialogs().confirm(MyDataActivity.this,
+                        String.format(getText(R.string.registration_failed).toString(), t));
+            }
+        });
     }
 
     private Profile createProfileFromUI() {
@@ -189,9 +268,40 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void saveSettings(View view) {
-        if (isUploadTokenAvailable() && ConnectionUtil.checkInternetConnection(this)) {
+        if (isUploadTokenAvailable()) {
             // TODO: email must be the old one if changed
-            new SaveProfileTask(this, createProfileFromUI(), etEmail.getText().toString().trim()).execute();
+            rsapi.saveProfile(etEmail.getText().toString(), etUploadToken.getText().toString(), createProfileFromUI()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    switch (response.code()) {
+                        case 200 :
+                            Log.i(TAG, "Successfully saved profile");
+                            break;
+                        case 202 :
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_email);
+                            break;
+                        case 400 :
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_wrong_data);
+                            break;
+                        case 401 :
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_invalid);
+                            break;
+                        case 409 :
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_conflict);
+                            break;
+                        default :
+                            new SimpleDialogs().confirm(MyDataActivity.this,
+                                    String.format(getText(R.string.save_profile_failed).toString(), response.code()));
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Log.e(TAG, "Error uploading profile", t);
+                    new SimpleDialogs().confirm(MyDataActivity.this,
+                            String.format(getText(R.string.save_profile_failed).toString(), t.getMessage()));
+                }
+            });
         }
 
         saveLocalProfile(createProfileFromUI());
@@ -254,266 +364,6 @@ public class MyDataActivity extends AppCompatActivity {
 
     public boolean isValidEmail(CharSequence target) {
         return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-
-    }
-
-    public static class RegisterTask extends AsyncTask<Void, String, Profile> {
-
-        private final JSONObject registrationData;
-        private final WeakReference<MyDataActivity> activityRef;
-        private final Resources resource;
-        private final String googleIdToken;
-        private int status = -1;
-
-        public RegisterTask(MyDataActivity activity, Profile profile, String googleIdToken) {
-            this.activityRef = new WeakReference<>(activity);
-            this.resource = activity.getResources();
-            this.registrationData = profile.toJson();
-            this.googleIdToken = googleIdToken;
-        }
-
-        @Override
-        protected Profile doInBackground(Void... params) {
-            HttpURLConnection conn = null;
-            DataOutputStream wr = null;
-            Profile profile = new Profile();
-
-            try {
-                URL url = new URL(String.format("%s/registration%s", Constants.API_START_URL, googleIdToken != null ? "/withGoogleIdToken" : ""));
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/json");
-                if (googleIdToken != null) {
-                    conn.setRequestProperty( "Google-Id-Token", googleIdToken);
-                }
-                conn.setUseCaches( false );
-
-                wr = new DataOutputStream( conn.getOutputStream());
-                wr.writeChars( registrationData.toString() );
-                wr.flush();
-
-                status = conn.getResponseCode();
-                Log.i(TAG, "Registration response: " + status);
-                if (status == 202) {
-                    InputStream stream = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                    StringBuffer buffer = new StringBuffer();
-                    String line = "";
-                    while ((line = reader.readLine()) != null) {
-                        buffer.append(line);
-                    }
-                    String content = buffer.toString();
-                    JSONObject jsonObj = new JSONObject(content);
-                    profile.setUploadToken(jsonObj.getString("uploadToken"));
-                    profile.setEmail(jsonObj.getString("email"));
-                    profile.setNickname(jsonObj.getString("nickname"));
-                    profile.setLink(jsonObj.getString("link"));
-                    profile.setAnonymous(jsonObj.getBoolean("anonymous"));
-                    profile.setPhotoOwner(jsonObj.getBoolean("photoOwner"));
-                    profile.setLicense(License.byName(jsonObj.getString("license")));
-                }
-            } catch ( Exception e) {
-                Log.e(TAG, "Could not register", e);
-                throw new RuntimeException("Error sending registration", e);
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
-                try {
-                    if (wr != null) {
-                        wr.close();
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG, "Cannot close stream", e);
-                }
-            }
-
-            return profile;
-        }
-
-        @Override
-        protected void onPostExecute(Profile result) {
-            MyDataActivity activity = activityRef.get();
-            if (activity == null || activity.isDestroyed()) {
-                return;
-            }
-            if (status == 202) {
-                if (StringUtils.isNotBlank(result.getUploadToken())) {
-                    activity.saveLocalProfile(result);
-                    new SimpleDialogs().confirm(activity, R.string.upload_token_received);
-                } else {
-                    new SimpleDialogs().confirm(activity, R.string.upload_token_email);
-                }
-            } else if (status == 400) {
-                new SimpleDialogs().confirm(activity, R.string.profile_wrong_data);
-            } else if (status == 409) {
-                new SimpleDialogs().confirm(activity, R.string.profile_conflict);
-            } else if (status == 422) {
-                new SimpleDialogs().confirm(activity, R.string.registration_data_incomplete);
-            } else {
-                new SimpleDialogs().confirm(activity,
-                        String.format(resource.getText(R.string.registration_failed).toString(), result));
-            }
-        }
-
-    }
-
-    public static class SaveProfileTask extends AsyncTask<Void, String, Integer> {
-
-        private final WeakReference<MyDataActivity> activityRef;
-        private final JSONObject registrationData;
-        private final String email;
-        private final String uploadToken;
-
-        public SaveProfileTask(MyDataActivity activity, Profile profile, String email) {
-            this.activityRef = new WeakReference<>(activity);
-            this.registrationData = profile.toJson();
-            this.uploadToken = profile.getUploadToken();
-            this.email = email;
-        }
-
-        @Override
-        protected Integer doInBackground(Void... params) {
-            HttpURLConnection conn = null;
-            DataOutputStream wr = null;
-            final int status;
-
-            try {
-                URL url = new URL(String.format("%s/myProfile", Constants.API_START_URL));
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput( true );
-                conn.setInstanceFollowRedirects( false );
-                conn.setRequestMethod( "POST" );
-                conn.setRequestProperty( "Content-Type", "application/json");
-                conn.setRequestProperty( "Upload-Token", uploadToken);
-                conn.setRequestProperty( "Email", email);
-                conn.setUseCaches( false );
-
-                wr = new DataOutputStream( conn.getOutputStream());
-                wr.writeChars( registrationData.toString() );
-                wr.flush();
-
-                status = conn.getResponseCode();
-                Log.i(TAG, "Profile response: " + status);
-            } catch ( Exception e) {
-                Log.e(TAG, "Couldn't save profile", e);
-                throw new RuntimeException("Error sending profile", e);
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
-                try {
-                    if (wr != null) {
-                        wr.close();
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG, "Cannot close stream", e);
-                }
-            }
-
-            return status;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            MyDataActivity activity = activityRef.get();
-            if (activity == null || activity.isDestroyed()) {
-                return;
-            }
-            if (result == 200) {
-                Log.i(TAG, "Successfully saved profile");
-            } else if (result == 202) {
-                new SimpleDialogs().confirm(activity, R.string.upload_token_email);
-            } else if (result == 400) {
-                new SimpleDialogs().confirm(activity, R.string.profile_wrong_data);
-            } else if (result == 401) {
-                new SimpleDialogs().confirm(activity, R.string.upload_token_invalid);
-            } else if (result == 409) {
-                new SimpleDialogs().confirm(activity, R.string.profile_conflict);
-            } else {
-                new SimpleDialogs().confirm(activity,
-                        String.format(activity.getText(R.string.save_profile_failed).toString(), result));
-            }
-        }
-
-    }
-
-    public static class ReadProfileTask extends AsyncTask<Void, String, Profile> {
-
-        private final WeakReference<MyDataActivity> activityRef;
-        private final String email;
-        private final String uploadToken;
-        private int status = -1;
-
-        public ReadProfileTask(MyDataActivity activity, String email, String uploadToken) {
-            this.activityRef = new WeakReference<>(activity);
-            this.uploadToken = uploadToken;
-            this.email = email;
-        }
-
-        @Override
-        protected Profile doInBackground(Void... params) {
-            HttpURLConnection conn = null;
-            Profile profile = new Profile();
-
-            try {
-                URL url = new URL(String.format("%s/myProfile", Constants.API_START_URL));
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestProperty( "Content-Type", "application/json");
-                conn.setRequestProperty( "Upload-Token", uploadToken);
-                conn.setRequestProperty( "Email", email);
-                conn.connect();
-                status = conn.getResponseCode();
-                Log.i(TAG, "Profile response: " + status);
-
-                if (status == 200) {
-                    InputStream stream = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                    StringBuffer buffer = new StringBuffer();
-                    String line = "";
-                    while ((line = reader.readLine()) != null) {
-                        buffer.append(line);
-                    }
-                    String content = buffer.toString();
-                    JSONObject jsonObj = new JSONObject(content);
-                    profile.setUploadToken(uploadToken);
-                    profile.setEmail(email);
-                    profile.setNickname(jsonObj.getString("nickname"));
-                    profile.setLink(jsonObj.getString("link"));
-                    profile.setAnonymous(jsonObj.getBoolean("anonymous"));
-                    profile.setPhotoOwner(jsonObj.getBoolean("photoOwner"));
-                    profile.setLicense(License.byName(jsonObj.getString("license")));
-                }
-            } catch ( Exception e) {
-                Log.e(TAG, "Couldn't read profile", e);
-                throw new RuntimeException("Error reading profile", e);
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
-            }
-
-            return profile;
-        }
-
-        @Override
-        protected void onPostExecute(Profile result) {
-            MyDataActivity activity = activityRef.get();
-            if (activity == null || activity.isDestroyed()) {
-                return;
-            }
-            if (status == 200) {
-                Log.i(TAG, "Successfully loaded profile");
-                activity.saveLocalProfile(result);
-            } else if (status == 401) {
-                new SimpleDialogs().confirm(activity, R.string.upload_token_invalid);
-            } else {
-                new SimpleDialogs().confirm(activity,
-                        String.format(activity.getText(R.string.read_profile_failed).toString(), result));
-            }
-        }
 
     }
 

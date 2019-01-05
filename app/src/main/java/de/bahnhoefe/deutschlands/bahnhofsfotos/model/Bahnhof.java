@@ -2,8 +2,10 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 import java.io.Serializable;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Bahnhof implements Serializable {
-    private String id;  //Bahnhofsnummer
+    @SerializedName("idStr") private String id;  //Bahnhofsnummer
     private String title; //Bahnhofsname
     private double lat;
     private double lon;

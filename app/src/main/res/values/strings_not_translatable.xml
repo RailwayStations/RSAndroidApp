@@ -30,7 +30,7 @@
     <string name="bahnhofname" translatable="false">BahnhofName</string>
     <string name="bahnhofnr" translatable="false">BahnhofNr</string>
     <string name="latlong" translatable="false">Geoposition</string>
-    <string name="countryName" translatable="false">CountryName</string>
+    <string name="name" translatable="false">CountryName</string>
     <string name="countryCode" translatable="false">DE</string>
     <string name="highscorePosition" translatable="false">177</string>
     <string name="highscorePhotos" translatable="false">188</string>
