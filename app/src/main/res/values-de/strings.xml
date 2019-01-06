@@ -219,5 +219,6 @@
     <string name="upload_token_received">Upload Token empfangen</string>
     <string name="error_loading_highscore">Fehler beim Laden der Rangliste: </string>
     <string name="google_sign_in_failed">Fehler beim Anmelden über Google: %1s</string>
+    <string name="update_policy">Aktualisierung</string>
 
 </resources>

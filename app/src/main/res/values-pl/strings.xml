@@ -210,5 +210,6 @@
   <string name="upload_token_received">Upload token received.</string>
     <string name="error_loading_highscore">Error loading highscore:</string>
   <string name="google_sign_in_failed">Google SignIn failed: %1s</string>
+    <string name="update_policy">Update policy</string>
 
 </resources>

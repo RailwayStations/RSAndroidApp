@@ -168,51 +168,6 @@
             android:layout_below="@+id/bt_get_token"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvUpdatePolicy"
-            android:text="@string/tvUpdatePolicy"
-            android:layout_below="@id/vSecondDivider"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
-        <RadioGroup
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvUpdatePolicy"
-            android:id="@+id/rgUpdatePolicy"
-            android:layout_marginBottom="20dp"
-            >
-            <RadioButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/rb_update_manual"
-                android:text="@string/update_manual"
-                android:onClick="selectUpdatePolicy"
-                android:focusable="true"
-                android:focusableInTouchMode="true"/>
-            <RadioButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/rb_update_notify"
-                android:text="@string/update_notify"
-                android:onClick="selectUpdatePolicy"/>
-            <RadioButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/rb_update_automatic"
-                android:text="@string/update_automatic"
-                android:onClick="selectUpdatePolicy"/>
-        </RadioGroup>
-
-        <View
-            android:id="@+id/vThirdDivider"
-            android:layout_width="fill_parent"
-            android:layout_height="3dip"
-            android:background="@color/uploadTokenDivider"
-            android:layout_below="@+id/rgUpdatePolicy"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"/>
 
         <Button
             android:layout_width="wrap_content"
@@ -220,7 +175,7 @@
             android:id="@+id/bt_mydata_commit"
             android:layout_marginTop="10dp"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/vThirdDivider"
+            android:layout_below="@+id/vSecondDivider"
             android:text="@string/bt_mydata_commit"
             android:onClick="saveSettings"
             />
