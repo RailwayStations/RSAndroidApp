@@ -30,4 +30,17 @@
         android:title="@string/countrySelection"
         android:icon="@drawable/ic_language_white_24px"
         app:showAsAction="collapseActionView|ifRoom" />
+    <item
+        android:title="@string/update_policy">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item android:id="@+id/rb_update_manual"
+                       android:title="@string/update_manual" />
+                <item android:id="@+id/rb_update_notify"
+                       android:title="@string/update_notify" />
+                <item android:id="@+id/rb_update_automatic"
+                      android:title="@string/update_automatic" />
+            </group>
+        </menu>
+    </item>
 </menu>

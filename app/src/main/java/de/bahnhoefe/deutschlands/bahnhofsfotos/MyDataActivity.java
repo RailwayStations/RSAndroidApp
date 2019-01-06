@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import java.net.MalformedURLException;
@@ -24,7 +23,6 @@ import com.google.android.gms.tasks.Task;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import org.apache.commons.lang3.StringUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,7 +40,6 @@ public class MyDataActivity extends AppCompatActivity {
     private License license;
     private BaseApplication baseApplication;
     private RSAPI rsapi;
-    private UpdatePolicy updatePolicy;
     private Profile profile;
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -60,14 +57,11 @@ public class MyDataActivity extends AppCompatActivity {
         cbLicenseCC0 = findViewById(R.id.cbLicenseCC0);
         cbPhotoOwner = findViewById(R.id.cbOwnPhoto);
         cbAnonymous = findViewById(R.id.cbAnonymous);
-        RadioGroup rgUpdatePolicy = findViewById(R.id.rgUpdatePolicy);
 
         baseApplication = (BaseApplication) getApplication();
         rsapi = baseApplication.getRSAPI();
 
-        updatePolicy = baseApplication.getUpdatePolicy();
         setProfileToUI(baseApplication.getProfile());
-        rgUpdatePolicy.check(updatePolicy.getId());
 
         // Create GoogleSignIn
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -215,10 +209,6 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    public void selectUpdatePolicy(View view) {
-        updatePolicy = UpdatePolicy.byId(view.getId());
-    }
-
     public void register(View view) {
         if (!isValid()) {
             return;
@@ -305,7 +295,6 @@ public class MyDataActivity extends AppCompatActivity {
         }
 
         saveLocalProfile(createProfileFromUI());
-        baseApplication.setUpdatePolicy(updatePolicy);
         Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
     }
 

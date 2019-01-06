@@ -205,6 +205,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initNotificationMenuItem(menu.findItem(R.id.notify), false);
 
+        final UpdatePolicy updatePolicy = baseApplication.getUpdatePolicy();
+        menu.findItem(updatePolicy.getId()).setChecked(true);
+
         return true;
     }
 
@@ -249,6 +252,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        // necessary for the update policy submenu
+        if(item.isChecked()) {
+            item.setChecked(false);
+        } else {
+            item.setChecked(true);
+        }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.countrySelection) {
@@ -296,6 +306,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 stopService(intent);
             }
+        } else if (id == R.id.rb_update_manual) {
+            baseApplication.setUpdatePolicy(UpdatePolicy.MANUAL);
+        } else if (id == R.id.rb_update_automatic) {
+            baseApplication.setUpdatePolicy(UpdatePolicy.AUTOMATIC);
+        } else if (id == R.id.rb_update_notify) {
+            baseApplication.setUpdatePolicy(UpdatePolicy.NOTIFY);
         }
 
         return super.onOptionsItemSelected(item);
