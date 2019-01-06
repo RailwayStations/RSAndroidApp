@@ -33,8 +33,7 @@
   <string name="rbLinkingYes">Si</string>
   <string name="rbLinkingNo">No (sera guardado como anónimo)</string>
   <string name="rbLinkingwebpage">Mi página web</string>
-  <string name="etNickname">Por favor meta su nickname aqui.         \n Si ya \eres un fotógrafo, insertalo exactamente como aparece en el highscore.
-    </string>
+  <string name="tvNickname">Nickname</string>
   <string name="menu_title_your_own_station_photos">Tus propias fotos</string>
   <string name="rbLinkingWith">Enlazar con: </string>
   <string name="ownPhoto">Mi foto</string>
@@ -209,4 +208,6 @@
     <string name="error_loading_highscore">Error loading highscore:</string>
   <string name="google_sign_in_failed">Google SignIn failed: %1s</string>
     <string name="update_policy">Update policy</string>
+  <string name="tvEmail">Email</string>
+  <string name="tvUploadToken">Upload Token</string>
 </resources>

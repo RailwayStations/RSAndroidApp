@@ -147,6 +147,7 @@ public class MyDataActivity extends AppCompatActivity {
         cbLicenseCC0.setChecked(license == License.CC0);
         cbPhotoOwner.setChecked(profile.isPhotoOwner());
         cbAnonymous.setChecked(profile.isAnonymous());
+        onAnonymousChecked(null);
 
         this.profile = profile;
     }
@@ -259,6 +260,9 @@ public class MyDataActivity extends AppCompatActivity {
 
     public void saveSettings(View view) {
         if (isUploadTokenAvailable()) {
+            if (!isValid()) {
+                return;
+            }
             // TODO: email must be the old one if changed
             rsapi.saveProfile(etEmail.getText().toString(), etUploadToken.getText().toString(), createProfileFromUI()).enqueue(new Callback<Void>() {
                 @Override
@@ -322,7 +326,7 @@ public class MyDataActivity extends AppCompatActivity {
             new SimpleDialogs().confirm(this, R.string.missing_photoOwner);
             return false;
         }
-        if (etNickname.getText().toString().isEmpty()) {
+        if (StringUtils.isBlank(etNickname.getText())) {
             new SimpleDialogs().confirm(this, R.string.missing_nickname);
             return false;
         }
@@ -331,7 +335,7 @@ public class MyDataActivity extends AppCompatActivity {
             return false;
         }
         String url = etLink.getText().toString();
-        if (url != null && url.trim().length() > 0 && !isValidHTTPURL(url)) {
+        if (StringUtils.isNotBlank(url)&& !isValidHTTPURL(url)) {
             new SimpleDialogs().confirm(this, R.string.missing_link);
             return false;
         }
@@ -356,4 +360,13 @@ public class MyDataActivity extends AppCompatActivity {
 
     }
 
+    public void onAnonymousChecked(View view) {
+        if (cbAnonymous.isChecked()) {
+            etLink.setVisibility(View.GONE);
+            findViewById(R.id.tvLinking).setVisibility(View.GONE);
+        } else {
+            etLink.setVisibility(View.VISIBLE);
+            findViewById(R.id.tvLinking).setVisibility(View.VISIBLE);
+        }
+    }
 }

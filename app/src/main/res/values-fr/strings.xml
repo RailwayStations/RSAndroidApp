@@ -33,8 +33,7 @@
   <string name="rbLinkingYes">Oui</string>
   <string name="rbLinkingNo">Non (vous serez gardé anonyme)</string>
   <string name="rbLinkingwebpage">Votre Web page</string>
-  <string name="etNickname">Entrez votre nom d\'utilisateur ici s\'il vous plaît.         \n Si vous êtes déjà un photographe, entrez-le s\'il vous plaît exactement comme il est dans le tableau des succès.
-    </string>
+  <string name="tvNickname">Nom d\'utilisateur</string>
   <string name="menu_title_your_own_station_photos">Vos propres photos</string>
   <string name="rbLinkingWith">Lier avec: </string>
   <string name="ownPhoto">propres photos</string>
@@ -203,9 +202,11 @@
     <string name="channel_name">Nearby Stations Notifications</string>
     <string name="save_profile_failed">Failed to write user profile: %1s</string>
     <string name="read_profile_failed">Reading remote profile failed: %1s</string>
-    <string name="tvRegisterWithGoogle">Register with Google</string>
+    <string name="tvRegisterWithGoogle">Register with Google or manually</string>
   <string name="upload_token_received">Upload token received.</string>
     <string name="error_loading_highscore">Error loading highscore:</string>
   <string name="google_sign_in_failed">Google SignIn failed: %1s</string>
     <string name="update_policy">Update policy</string>
+  <string name="tvEmail">Email</string>
+  <string name="tvUploadToken">Upload Token</string>
 </resources>

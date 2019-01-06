@@ -33,7 +33,7 @@
   <string name="rbLinkingYes">Tak</string>
   <string name="rbLinkingNo">Nie (anonimowo)</string>
   <string name="rbLinkingwebpage">Własna strona</string>
-  <string name="etNickname">Podaj swój nick.\nJeżeli jesteż już w naszym systemie, podaj swój istniejący nick.</string>
+  <string name="tvNickname">Nick</string>
   <string name="menu_title_your_own_station_photos">Twoje zdjęcia</string>
   <string name="rbLinkingWith">Linkuj z: </string>
   <string name="ownPhoto">własne zdjęcie</string>
@@ -211,5 +211,7 @@
     <string name="error_loading_highscore">Error loading highscore:</string>
   <string name="google_sign_in_failed">Google SignIn failed: %1s</string>
     <string name="update_policy">Update policy</string>
+  <string name="tvEmail">Email</string>
+  <string name="tvUploadToken">Upload Token</string>
 
 </resources>
