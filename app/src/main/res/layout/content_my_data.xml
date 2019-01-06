@@ -21,24 +21,105 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         >
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvGoogleSignIn"
             android:text="@string/tvRegisterWithGoogle"
             android:textSize="20sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:layout_marginRight="10dp"
+            />
         <com.google.android.gms.common.SignInButton
             android:id="@+id/sign_in_button"
-            android:layout_below="@+id/tvGoogleSignIn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvGoogleSignIn"
+            />
+
+        <View
+            android:id="@+id/vFirstDivider"
+            android:layout_width="fill_parent"
+            android:layout_height="3dip"
+            android:background="@color/uploadTokenDivider"
+            android:layout_below="@+id/sign_in_button"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvEmail"
+            android:layout_below="@+id/vFirstDivider"
+            android:text="@string/tvEmail"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginRight="10dp"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/etEmail"
+            android:layout_below="@+id/tvEmail"
+            android:inputType="textEmailAddress"
+            android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvUploadToken"
+            android:layout_below="@+id/etEmail"
+            android:text="@string/tvUploadToken"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginRight="10dp"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/etUploadToken"
+            android:hint="@string/etUploadToken"
+            android:layout_below="@+id/tvUploadToken"
+            android:layout_marginRight="10dp"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_get_token"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/etUploadToken"
+            android:text="@string/bt_mydata_get_token"
+            android:onClick="register"
+            />
+        <View
+            android:id="@+id/vSecondDivider"
+            android:layout_width="fill_parent"
+            android:layout_height="3dip"
+            android:background="@color/uploadTokenDivider"
+            android:layout_below="@+id/bt_get_token"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvNickname"
+            android:text="@string/tvNickname"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_below="@+id/vSecondDivider"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/etNickname"
+            android:layout_below="@+id/tvNickname"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvLicence"
-            android:layout_below="@+id/sign_in_button"
+            android:layout_below="@+id/etNickname"
             android:text="@string/tvLicense"
             android:textSize="20sp"
             android:textStyle="bold"/>
@@ -70,7 +151,7 @@
             android:layout_below="@+id/tvOwnPhoto"
             android:layout_marginBottom="20dp"
             android:text="@string/yesPhotoOwner"
-             >
+            >
         </CheckBox>
         <TextView
             android:layout_width="wrap_content"
@@ -88,6 +169,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:id="@+id/cbAnonymous"
+            android:onClick="onAnonymousChecked"
             android:layout_marginBottom="20dp"
             android:text="@string/anonymous"
             >
@@ -107,67 +189,6 @@
             android:id="@+id/etLinking"
             android:hint="@string/etLinking"
             android:layout_below="@+id/tvLinking"/>
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etNickname"
-            android:hint="@string/etNickname"
-            android:layout_below="@+id/etLinking"/>
-
-        <View
-            android:id="@+id/vDivider"
-            android:layout_width="fill_parent"
-            android:layout_height="3dip"
-            android:background="@color/uploadTokenDivider"
-            android:layout_below="@+id/etNickname"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvPhotoUpload"
-            android:layout_below="@+id/vDivider"
-            android:text="@string/tvPhotoUpload"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            />
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etEmail"
-            android:hint="@string/etEmail"
-            android:layout_below="@+id/tvPhotoUpload"
-            android:inputType="textEmailAddress"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"/>
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etUploadToken"
-            android:hint="@string/etUploadToken"
-            android:layout_below="@+id/etEmail"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_get_token"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_below="@+id/etUploadToken"
-            android:text="@string/bt_mydata_get_token"
-            android:onClick="register"
-            />
-        <View
-            android:id="@+id/vSecondDivider"
-            android:layout_width="fill_parent"
-            android:layout_height="3dip"
-            android:background="@color/uploadTokenDivider"
-            android:layout_below="@+id/bt_get_token"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"/>
 
         <Button
             android:layout_width="wrap_content"
@@ -175,7 +196,7 @@
             android:id="@+id/bt_mydata_commit"
             android:layout_marginTop="10dp"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/vSecondDivider"
+            android:layout_below="@+id/etLinking"
             android:text="@string/bt_mydata_commit"
             android:onClick="saveSettings"
             />

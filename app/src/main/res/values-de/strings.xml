@@ -33,9 +33,7 @@
     <string name="rbLinkingYes">Ja</string>
     <string name="rbLinkingNo">Nein (wird unter Anonym gespeichert)</string>
     <string name="rbLinkingwebpage">Eigene Webseite</string>
-    <string name="etNickname">Bitte trage hier Deinen Nicknamen ein.
-        "\n" Wenn Du schon Fotograf bist, bitte exakt, wie er in der Rangliste erscheint.
-    </string>
+    <string name="tvNickname">Nickname</string>
     <string name="menu_title_your_own_station_photos">Eigene Fotos</string>
     <string name="rbLinkingWith">Verlinkung mit: </string>
     <string name="ownPhoto">eigenes Foto</string>
@@ -215,10 +213,12 @@
     <string name="channel_name">Bahnhofsortung</string>
     <string name="save_profile_failed">Fehler beim Hochladen des Benutzerprofils: %1s</string>
     <string name="read_profile_failed">Fehler beim Lesen des Benutzerprofils: %1s</string>
-    <string name="tvRegisterWithGoogle">Registrierung mit Google</string>
+    <string name="tvRegisterWithGoogle">Registrierung mit Google oder manuell</string>
     <string name="upload_token_received">Upload Token empfangen</string>
     <string name="error_loading_highscore">Fehler beim Laden der Rangliste: </string>
     <string name="google_sign_in_failed">Fehler beim Anmelden über Google: %1s</string>
     <string name="update_policy">Aktualisierung</string>
+    <string name="tvEmail">Email</string>
+    <string name="tvUploadToken">Upload Token</string>
 
 </resources>
