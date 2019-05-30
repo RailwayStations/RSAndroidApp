@@ -209,13 +209,15 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     protected void createLayers() {
+        OpenStreetMapMapnik tileSource = OpenStreetMapMapnik.INSTANCE;
+        tileSource.setUserAgent("railway-stations.org-android");
         this.downloadLayer = new TileDownloadLayer(this.tileCaches.get(0),
-                this.mapView.getModel().mapViewPosition, OpenStreetMapMapnik.INSTANCE,
+                this.mapView.getModel().mapViewPosition, tileSource,
                 AndroidGraphicFactory.INSTANCE);
         mapView.getLayerManager().getLayers().add(this.downloadLayer);
 
-        mapView.setZoomLevelMin(OpenStreetMapMapnik.INSTANCE.getZoomLevelMin());
-        mapView.setZoomLevelMax(OpenStreetMapMapnik.INSTANCE.getZoomLevelMax());
+        mapView.setZoomLevelMin(tileSource.getZoomLevelMin());
+        mapView.setZoomLevelMax(tileSource.getZoomLevelMax());
     }
 
     @Override
