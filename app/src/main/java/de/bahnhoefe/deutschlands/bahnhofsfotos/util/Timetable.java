@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import org.apache.commons.lang3.StringUtils;
 
 public class Timetable {
 
@@ -25,7 +26,7 @@ public class Timetable {
 
         timeTableTemplate = timeTableTemplate.replace("{id}", station.getId());
         timeTableTemplate = timeTableTemplate.replace("{title}", station.getTitle());
-        timeTableTemplate = timeTableTemplate.replace("{DS100}", station.getDS100());
+        timeTableTemplate = timeTableTemplate.replace("{DS100}", StringUtils.trimToEmpty(station.getDS100()));
 
         Uri timeTableUri = Uri.parse(
                 String.format(timeTableTemplate, Uri.encode(station.getTitle()))
