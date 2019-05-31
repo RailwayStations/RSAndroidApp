@@ -8,6 +8,10 @@
     <string name="LINK_TO_PHOTOGRAPHER" translatable="false">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
     <string name="COUNTRY" translatable="false">APP_PREF_COUNTRY</string>
     <string name="ANONYMOUS" translatable="false">APP_PREF_ANONYMOUS</string>
+    <string name="MAP_FILE" translatable="false">APP_PREF_MAP_FILE</string>
+    <string name="MAP_DIRECTORY" translatable="false">APP_PREF_MAP_DIRECTORY</string>
+    <string name="MAP_THEME_DIRECTORY" translatable="false">APP_PREF_MAP_THEME_DIRECTORY</string>
+    <string name="MAP_THEME" translatable="false">APP_PREF_MAP_THEME</string>
 
     <string name="FIRSTAPPSTART" translatable="false">FirstAppStart</string>
     <string name="fab_email" translatable="false">bahnhofsfotos@deutschlands-bahnhoefe.de</string>

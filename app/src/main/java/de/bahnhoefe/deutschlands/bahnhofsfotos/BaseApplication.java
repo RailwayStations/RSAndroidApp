@@ -268,4 +268,37 @@ public class BaseApplication extends Application {
     public RSAPI getRSAPI() {
         return api;
     }
+
+    public String getMapFileName() {
+        return preferences.getString(getString(R.string.MAP_FILE), null);
+    }
+
+    public void setMapFileName(String mapFileName) {
+        putString(R.string.MAP_FILE, mapFileName);
+    }
+
+    public String getMapDirectory() {
+        return preferences.getString(getString(R.string.MAP_DIRECTORY), null);
+    }
+
+    public void setMapDirectory(String mapDirectory) {
+        putString(R.string.MAP_DIRECTORY, mapDirectory);
+    }
+
+    public String getMapThemeDirectory() {
+        return preferences.getString(getString(R.string.MAP_THEME_DIRECTORY), null);
+    }
+
+    public void setMapThemeDirectory(String mapThemeDirectory) {
+        putString(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
+    }
+
+    public String getMapTheme() {
+        return preferences.getString(getString(R.string.MAP_THEME), null);
+    }
+
+    public void setMapTheme(String mapTheme) {
+        putString(R.string.MAP_THEME, mapTheme);
+    }
+
 }

@@ -220,5 +220,23 @@
     <string name="update_policy">Aktualisierung</string>
     <string name="tvEmail">Email</string>
     <string name="tvUploadToken">Upload Token</string>
+    <string name="osm_mapnik">OSM: Mapnik</string>
+    <string name="map_folder">Offlinekarten Verzeichnis</string>
+    <string name="theme_folder">Kartendesign Verzeichnis</string>
+    <string name="default_theme">Standard Design</string>
+    <string name="maps">Karten</string>
+    <string name="themes">Karten Designs</string>
+    <string name="map_info_menu">Karten Info</string>
+    <string name="map_info_ok">OK</string>
+    <string name="map_info_text">Die Standardkarte wird von <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b> angeboten.
+        \nTritt der Gemeinschaft bei und hilf die Kartendaten zu verbessern: <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
+        \n\nBitte nutze eine Offlinekarte, um die Serverlast und dein mobiles Datenvolumen zu schonen.
+        \nOfflinekarten gibt es z.B. hier:
+        \n<b>- <a href="http://download.mapsforge.org/">Mapsforge</a></b>
+        \n<b>- <a href="https://www.freizeitkarte-osm.de/android/de/">Freizeitkarte Android</a></b>
+        \n<b>- <a href="https://www.openandromaps.org">OpenAndroMaps</a></b>
+        \n<b>- ...</b>
+        \n\nEinige Karte brauchen ein passendes Design, um korrekt dargestellt zu werden! Diese müssen ebenfalls heruntergeladen und konfiguriert werden.</string>
+    <string name="map_info_title">Über die Bahnhofskarte</string>
 
 </resources>
