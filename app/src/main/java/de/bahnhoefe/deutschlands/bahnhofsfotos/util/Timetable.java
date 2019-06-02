@@ -26,7 +26,7 @@ public class Timetable {
 
         timeTableTemplate = timeTableTemplate.replace("{id}", station.getId());
         timeTableTemplate = timeTableTemplate.replace("{title}", station.getTitle());
-        timeTableTemplate = timeTableTemplate.replace("{DS100}", StringUtils.trimToEmpty(station.getDS100()));
+        timeTableTemplate = timeTableTemplate.replace("{DS100}", StringUtils.trimToEmpty(station.getDs100()));
 
         Uri timeTableUri = Uri.parse(
                 String.format(timeTableTemplate, Uri.encode(station.getTitle()))

@@ -10,7 +10,8 @@ public class Bahnhof implements Serializable {
     private double lat;
     private double lon;
     private long datum; // not used in the database
-    private String ds100;
+
+    @SerializedName("DS100") private String ds100;
     private String photoUrl;
     private String photographer;
     private String photographerUrl;
@@ -75,14 +76,14 @@ public class Bahnhof implements Serializable {
 
     @Override
     public String toString() {
-        return "Bahnhof [id=" + id + ", title=" + title + ", lat=" + lat + ", lon=" + lon + "]";
+        return "Bahnhof [id=" + id + ", title=" + title + ", lat=" + lat + ", lon=" + lon + ", DS100=" + ds100 + "]";
     }
 
-    public String getDS100() {
+    public String getDs100() {
         return ds100;
     }
 
-    public void setDS100(String ds100) {
+    public void setDs100(String ds100) {
         this.ds100 = ds100;
     }
 

@@ -90,7 +90,7 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL, bahnhof.getPhotographerUrl());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LICENSE, bahnhof.getLicense());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LICENSE_URL, bahnhof.getLicenseUrl());
-                values.put(Constants.DB_JSON_CONSTANTS.KEY_DS100, bahnhof.getDS100());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_DS100, bahnhof.getDs100());
 
                 db.insert(DATABASE_TABLE, null, values);
             }
@@ -303,7 +303,7 @@ public class BahnhofsDbAdapter {
         bahnhof.setPhotographerUrl(photographerUrl);
         bahnhof.setLicense(license);
         bahnhof.setLicenseUrl(licenseUrl);
-        bahnhof.setDS100(ds100);
+        bahnhof.setDs100(ds100);
         return bahnhof;
     }
 
