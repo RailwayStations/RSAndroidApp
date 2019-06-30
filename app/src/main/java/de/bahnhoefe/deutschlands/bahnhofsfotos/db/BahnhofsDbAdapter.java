@@ -9,7 +9,9 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
@@ -22,11 +24,12 @@ public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
-            + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
-            + KEY_ID + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + Constants.DB_JSON_CONSTANTS.KEY_COUNTRY + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_ID + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_TITLE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_LAT + " REAL, "
             + Constants.DB_JSON_CONSTANTS.KEY_LON + " REAL, "
@@ -77,11 +80,10 @@ public class BahnhofsDbAdapter {
 
         db.beginTransaction(); // soll die Performance verbessern, heißt's.
         try {
-            deleteBahnhoefe();
-
             for (Bahnhof bahnhof : bahnhoefe) {
                 ContentValues values = new ContentValues();
                 values.put(KEY_ID, bahnhof.getId());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_COUNTRY, bahnhof.getCountry());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_TITLE, bahnhof.getTitle());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LAT, bahnhof.getLat());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LON, bahnhof.getLon());
@@ -137,7 +139,8 @@ public class BahnhofsDbAdapter {
         String selectQuery = "SELECT rowid _id, " +
                 KEY_ID + ", " +
                 Constants.DB_JSON_CONSTANTS.KEY_TITLE + ", " +
-                Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL +
+                Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + ", " +
+                Constants.DB_JSON_CONSTANTS.KEY_COUNTRY +
                 " FROM " + DATABASE_TABLE;
 
         if (photoFilter == PhotoFilter.NICKNAME) {
@@ -216,7 +219,7 @@ public class BahnhofsDbAdapter {
 
         Cursor cursor = db.query(DATABASE_TABLE,
                 new String[]{
-                        "rowid _id", Constants.DB_JSON_CONSTANTS.KEY_ID, Constants.DB_JSON_CONSTANTS.KEY_TITLE, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL
+                        "rowid _id", Constants.DB_JSON_CONSTANTS.KEY_ID, Constants.DB_JSON_CONSTANTS.KEY_TITLE, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL, Constants.DB_JSON_CONSTANTS.KEY_COUNTRY
                 },
                 selectQuery,
                 queryArgs, null, null, Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc");
@@ -232,10 +235,10 @@ public class BahnhofsDbAdapter {
         return cursor;
     }
 
-    public Statistic getStatistic() {
+    public Statistic getStatistic(String country) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT count(*), count(" + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + "), count(distinct(" + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE, null);
+        Cursor cursor = db.rawQuery("SELECT count(*), count(" + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + "), count(distinct(" + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE + " WHERE country = ?", new String[]{country});
         if (!cursor.moveToNext()) {
             return null;
         }
@@ -345,15 +348,26 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    public Country fetchCountryByCountryCode(String countryCode) {
-        Cursor cursor = db.query(DATABASE_TABLE_LAENDER, null, Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + "=?", new String[]{
-                countryCode + ""}, null, null, null);
+    public Set<Country> fetchCountriesByCountryCodes(Set<String> countryCodes) {
+        StringBuilder countryList = new StringBuilder();
+        for (String countryCode : countryCodes) {
+            if (countryList.length() > 0) {
+                countryList.append(',');
+            }
+            countryList.append('\'').append(countryCode).append('\'');
+        }
+        Cursor cursor = db.query(DATABASE_TABLE_LAENDER, null, Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE + " in (" + countryList.toString() + ")",
+                null, null, null, null);
+        Set<Country> countries = new HashSet<>();
         if (cursor != null && cursor.moveToFirst()) {
-            Country country = createCountryFromCursor(cursor);
+            do {
+                countries.add(createCountryFromCursor(cursor));
+            } while (cursor.moveToNext());
             cursor.close();
-            return country;
-        } else
-            return null;
+            return countries;
+        }
+
+        return countries;
     }
 
     public List<Bahnhof> getAllBahnhoefe(PhotoFilter photoFilter, String nickname) {

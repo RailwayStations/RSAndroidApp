@@ -385,10 +385,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        rsapi.getStations(baseApplication.getCountryCode().toLowerCase()).enqueue(new Callback<List<Bahnhof>>() {
+        rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<List<Bahnhof>>() {
             @Override
             public void onResponse(Call<List<Bahnhof>> call, Response<List<Bahnhof>> response) {
                 if (response.isSuccessful()) {
+                    dbAdapter.deleteBahnhoefe();
                     dbAdapter.insertBahnhoefe(response.body());
 
                     baseApplication.setLastUpdate(System.currentTimeMillis());
@@ -402,6 +403,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onFailure(Call<List<Bahnhof>> call, Throwable t) {
                 Log.e(TAG, "Error refreshing stations", t);
+                // TODO: dismiss only on last country loaded
                 progress.dismiss();
                 Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
             }
@@ -419,19 +421,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (System.currentTimeMillis() - baseApplication.getLastUpdate() > CHECK_UPDATE_INTERVAL) {
             baseApplication.setLastUpdate(System.currentTimeMillis());
             if (baseApplication.getUpdatePolicy() != UpdatePolicy.MANUAL) {
-                rsapi.getStatistic(baseApplication.getCountryCode().toLowerCase()).enqueue(new Callback<Statistic>() {
-                    @Override
-                    public void onResponse(Call<Statistic> call, Response<Statistic> response) {
-                        if (response.isSuccessful()) {
-                            checkForUpdates(response.body());
+                for (final String country : baseApplication.getCountryCodes()) {
+                    rsapi.getStatistic(country).enqueue(new Callback<Statistic>() {
+                        @Override
+                        public void onResponse(Call<Statistic> call, Response<Statistic> response) {
+                            if (response.isSuccessful()) {
+                                checkForUpdates(response.body(), country);
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Call<Statistic> call, Throwable t) {
-                        Log.e(TAG, "Error loading country statistic", t);
-                    }
-                });
+                        @Override
+                        public void onFailure(Call<Statistic> call, Throwable t) {
+                            Log.e(TAG, "Error loading country statistic", t);
+                        }
+                    });
+                }
             }
         }
 
@@ -446,12 +450,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void checkForUpdates(Statistic apiStat) {
+    private void checkForUpdates(Statistic apiStat, String country) {
         if (apiStat == null) {
             return;
         }
 
-        Statistic dbStat = dbAdapter.getStatistic();
+        Statistic dbStat = dbAdapter.getStatistic(country);
         Log.d(TAG, "DbStat: " + dbStat);
         if (apiStat.getTotal() != dbStat.getTotal() || apiStat.getWithPhoto() != dbStat.getWithPhoto() || apiStat.getWithoutPhoto() != dbStat.getWithoutPhoto()) {
             if (baseApplication.getUpdatePolicy() == UpdatePolicy.AUTOMATIC) {

@@ -10,21 +10,23 @@ import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 public class CountryAdapter extends CursorAdapter {
-    private int selectedPosition = -1;
     private final LayoutInflater mInflater;
     private final String TAG = getClass().getSimpleName();
-    private String selectedCountry = null;
+    private Set<String> selectedCountries = null;
 
     public CountryAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         BaseApplication baseApplication = BaseApplication.getInstance();
-        selectedCountry = baseApplication.getCountryCode();
+        selectedCountries = new HashSet<>(baseApplication.getCountryCodes());
     }
 
     // new refactored after https://www.youtube.com/watch?v=wDBM6wVEO70&feature=youtu.be&t=7m
@@ -52,14 +54,13 @@ public class CountryAdapter extends CursorAdapter {
         holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
 
         final String newCountry = cursor.getString(1);
-        Log.i(TAG, newCountry + " " + selectedCountry);
-        if (newCountry.equals(selectedCountry)) {
-            holder.checkCountry.setChecked(true);
-        } else if (selectedPosition == cursor.getPosition()) {
-            holder.checkCountry.setChecked(true);
-            selectedCountry = newCountry;
-        } else {
+        Log.i(TAG, newCountry);
+        if (selectedCountries.contains(newCountry)) {
             holder.checkCountry.setChecked(false);
+            selectedCountries.remove(newCountry);
+        } else {
+            holder.checkCountry.setChecked(true);
+            selectedCountries.add(newCountry);
         }
 
         return convertView;
@@ -91,16 +92,8 @@ public class CountryAdapter extends CursorAdapter {
         holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
 
         final String newCountry = cursor.getString(1);
-        Log.i(TAG, newCountry + " " + selectedCountry);
-        if (newCountry.equals(selectedCountry)) {
-            holder.checkCountry.setChecked(true);
-        } else if (selectedPosition == cursor.getPosition()) {
-            holder.checkCountry.setChecked(true);
-            selectedCountry = newCountry;
-        } else {
-            holder.checkCountry.setChecked(false);
-        }
-
+        Log.i(TAG, newCountry);
+        holder.checkCountry.setChecked(selectedCountries.contains(newCountry));
         holder.checkCountry.setOnClickListener(onStateChangedListener(holder.checkCountry, cursor.getPosition()));
     }
 
@@ -108,23 +101,19 @@ public class CountryAdapter extends CursorAdapter {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            if (checkCountry.isChecked()) {
-                selectedPosition = position;
-
-            } else {
-                selectedPosition = -1;
-            }
-            notifyDataSetChanged();
+                Cursor cursor = (Cursor) getItem(position);
+                String country = cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE));
+                if (checkCountry.isChecked()) {
+                    selectedCountries.add(country);
+                } else {
+                    selectedCountries.remove(country);
+                }
             }
         };
     }
 
-    public void setSelectedIndex(int index) {
-        selectedPosition = index;
-    }
-
-    public String getSelectedCountry() {
-        return selectedCountry;
+    public Set<String> getSelectedCountries() {
+        return selectedCountries;
     }
 
     private static class ViewHolder {

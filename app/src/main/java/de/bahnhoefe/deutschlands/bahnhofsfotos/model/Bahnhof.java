@@ -5,6 +5,9 @@ import java.io.Serializable;
 import com.google.gson.annotations.SerializedName;
 
 public class Bahnhof implements Serializable {
+
+    private String country;
+
     @SerializedName("idStr") private String id;  //Bahnhofsnummer
     private String title; //Bahnhofsname
     private double lat;
@@ -131,4 +134,11 @@ public class Bahnhof implements Serializable {
         return photoUrl != null;
     }
 
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 }

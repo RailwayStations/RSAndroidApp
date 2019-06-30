@@ -1,6 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 import java.io.Serializable;
+import java.util.Objects;
+import java.util.Set;
 
 public class Country implements Serializable {
     private String name;
@@ -19,6 +21,15 @@ public class Country implements Serializable {
         this.email = email;
         this.twitterTags = twitterTags;
         this.timetableUrlTemplate = timetableUrlTemplate;
+    }
+
+    public static Country getCountryByCode(Set<Country> countries, String countryCode) {
+        for (Country country : countries) {
+            if (country.getCode().equals(countryCode)) {
+                return country;
+            }
+        }
+        return null;
     }
 
     public String getName() {
@@ -62,8 +73,21 @@ public class Country implements Serializable {
     }
 
     @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Country country = (Country) o;
+        return code.equals(country.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code);
+    }
+
+    @Override
     public String toString() {
-        return "Land [Laendername=" + name + ", Laenderkuerzel=" + code + ", E-Mail=" + email + ", TwitterTags=" + twitterTags + ", TimetableUrlTemplate=" + timetableUrlTemplate + "]";
+        return name;
     }
 
 }

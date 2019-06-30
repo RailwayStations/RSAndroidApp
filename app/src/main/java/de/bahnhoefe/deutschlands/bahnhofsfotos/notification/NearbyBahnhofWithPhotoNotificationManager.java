@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import java.util.Set;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
@@ -23,8 +25,8 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     private static final long[] VIBRATION_PATTERN = new long[]{300};
     private static final int LED_COLOR = 0x00ff0000;
 
-    public NearbyBahnhofWithPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance, Country country) {
-        super(context, bahnhof, distance, country);
+    public NearbyBahnhofWithPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance, Set<Country> countries) {
+        super(context, bahnhof, distance, countries);
         Log.d(TAG, "Creating " + getClass().getSimpleName());
     }
 

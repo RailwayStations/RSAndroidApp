@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.util.Set;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CountryAdapter;
 
@@ -25,7 +27,7 @@ public class CountryActivity extends AppCompatActivity {
 
         final Cursor cursor = dbAdapter.getCountryList();
         countryAdapter = new CountryAdapter(this, cursor, 0);
-        final ListView listView = (ListView) findViewById(R.id.lstCountries);
+        final ListView listView = findViewById(R.id.lstCountries);
 
         assert listView != null;
         listView.setAdapter(countryAdapter);
@@ -33,8 +35,6 @@ public class CountryActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
-                countryAdapter.setSelectedIndex(position);
-                countryAdapter.notifyDataSetChanged();
                 countryAdapter.getView(position, view, listView, cursor);
             }
 
@@ -49,18 +49,18 @@ public class CountryActivity extends AppCompatActivity {
                 onBackPressed();
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return false;
         }
     }
 
     @Override
     public void onBackPressed() {
         BaseApplication baseApplication = BaseApplication.getInstance();
-        String prefCountry = baseApplication.getCountryCode();
-        String selectedCountry = countryAdapter.getSelectedCountry();
+        Set<String> prefCountries = baseApplication.getCountryCodes();
+        Set<String> selectedCountries = countryAdapter.getSelectedCountries();
 
-        if (!prefCountry.equals(selectedCountry)) {
-            baseApplication.setCountryCode(selectedCountry);
+        if (!prefCountries.equals(selectedCountries)) {
+            baseApplication.setCountryCodes(selectedCountries);
             baseApplication.setLastUpdate(0L);
         }
         super.onBackPressed();
