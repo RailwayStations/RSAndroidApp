@@ -287,6 +287,7 @@ public class BahnhofsDbAdapter {
     @NonNull
     private Bahnhof createBahnhofFromCursor(@NonNull Cursor cursor) {
         String title = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TITLE));
+        String country = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_COUNTRY));
         String bahnhofsnr = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ID));
         Double lon = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LON));
         Double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LAT));
@@ -298,6 +299,7 @@ public class BahnhofsDbAdapter {
         String ds100 = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_DS100));
         Bahnhof bahnhof = new Bahnhof();
         bahnhof.setTitle(title);
+        bahnhof.setCountry(country);
         bahnhof.setId(bahnhofsnr);
         bahnhof.setLat(lat);
         bahnhof.setLon(lon);
