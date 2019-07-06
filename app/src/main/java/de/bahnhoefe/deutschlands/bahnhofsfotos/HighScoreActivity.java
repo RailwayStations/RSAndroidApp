@@ -17,7 +17,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import java.util.Set;
+import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
@@ -39,12 +39,19 @@ public class HighScoreActivity extends AppCompatActivity {
         setContentView(R.layout.activity_high_score);
 
         final BaseApplication baseApplication = (BaseApplication) getApplication();
-        Set<String> countryCodes = baseApplication.getCountryCodes();
-        final Set<Country> countries = baseApplication.getDbAdapter().fetchCountriesByCountryCodes(countryCodes);
+        String firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
+        final List<Country> countries = baseApplication.getDbAdapter().getAllCountries();
+        int selectedItem = 0;
+        for (Country country : countries) {
+            if (country.getCode().equals(firstSelectedCountry)) {
+                selectedItem = countries.indexOf(country);
+            }
+        }
 
         Spinner countrySpinner = findViewById(R.id.countries);
         ArrayAdapter<Country> countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, countries.toArray(new Country[0]));
         countrySpinner.setAdapter(countryAdapter);
+        countrySpinner.setSelection(selectedItem);
         countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
