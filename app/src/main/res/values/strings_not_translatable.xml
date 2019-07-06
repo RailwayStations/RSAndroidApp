@@ -7,6 +7,7 @@
     <string name="UPLOAD_TOKEN" translatable="false">APP_PREF_UPLOAD_TOKEN</string>
     <string name="LINK_TO_PHOTOGRAPHER" translatable="false">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
     <string name="COUNTRY" translatable="false">APP_PREF_COUNTRY</string>
+    <string name="COUNTRIES" translatable="false">APP_PREF_COUNTRIES</string>
     <string name="ANONYMOUS" translatable="false">APP_PREF_ANONYMOUS</string>
     <string name="MAP_FILE" translatable="false">APP_PREF_MAP_FILE</string>
     <string name="MAP_DIRECTORY" translatable="false">APP_PREF_MAP_DIRECTORY</string>

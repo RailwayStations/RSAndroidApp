@@ -6,6 +6,10 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.gson.GsonBuilder;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
@@ -93,6 +97,12 @@ public class BaseApplication extends Application {
         editor.apply();
     }
 
+    private void putStringSet(int key, Set<String> value) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putStringSet(getString(key), value);
+        editor.apply();
+    }
+
     private void putLong(int key, long value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(getString(key), value);
@@ -112,12 +122,13 @@ public class BaseApplication extends Application {
         return Double.longBitsToDouble(preferences.getLong(getString(key), 0));
     }
 
-    public void setCountryCode(String countryCode) {
-        putString(R.string.COUNTRY, countryCode);
+    public void setCountryCodes(Set<String> countryCodes) {
+        putStringSet(R.string.COUNTRIES, countryCodes);
     }
 
-    public String getCountryCode() {
-        return preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY).toLowerCase();
+    public Set<String> getCountryCodes() {
+        String oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
+        return preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
     }
 
     public void setFirstAppStart(boolean firstAppStart) {

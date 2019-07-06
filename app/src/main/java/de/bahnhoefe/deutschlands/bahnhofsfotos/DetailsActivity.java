@@ -48,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.Set;
 
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
@@ -92,7 +93,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private ImageButton reportGhostStationButton;
     private ImageView imageView;
     private Bahnhof bahnhof;
-    private Country country;
+    private Set<Country> countries;
     private TextView tvBahnhofName;
     private boolean localFotoUsed = false;
     private License license;
@@ -100,7 +101,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String nickname;
     private String email;
     private String token;
-    private String countryCode;
+    private Set<String> countryCodes;
     private TextView licenseTagView;
     private TextView coordinates;
     private ViewGroup detailsLayout;
@@ -118,8 +119,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         baseApplication = (BaseApplication) getApplication();
         rsapi = baseApplication.getRSAPI();
         BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
-        countryCode = baseApplication.getCountryCode();
-        country = dbAdapter.fetchCountryByCountryCode(countryCode);
+        countryCodes = baseApplication.getCountryCodes();
+        countries = dbAdapter.fetchCountriesByCountryCodes(countryCodes);
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -603,7 +604,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 startNavigation(DetailsActivity.this);
                 break;
             case R.id.timetable:
-                final Intent timetableIntent = new Timetable().createTimetableIntent(country, bahnhof);
+                final Intent timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, bahnhof.getCountry()), bahnhof);
                 if (timetableIntent != null) {
                     startActivity(timetableIntent);
                 } else {
@@ -623,7 +624,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 break;
             case R.id.share_photo:
                 Intent shareIntent = createFotoSendIntent();
-                shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + bahnhof.getTitle());
+                shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, bahnhof.getCountry()).getTwitterTags() + " " + bahnhof.getTitle());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
@@ -658,7 +659,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         final File mediaFile = getStoredMediaFile();
         RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
-        rsapi.photoUpload(email, token, bahnhof.getId(), countryCode.toLowerCase(), file).enqueue(new Callback<Void>() {
+        rsapi.photoUpload(email, token, bahnhof.getId(), bahnhof.getCountry(), file).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 progress.dismiss();

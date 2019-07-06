@@ -15,11 +15,12 @@ import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface RSAPI {
 
-    @GET("/{country}/stations")
-    Call<List<Bahnhof>> getStations(@Path("country") String country);
+    @GET("/stations")
+    Call<List<Bahnhof>> getStations(@Query("country") String... countries);
 
     @GET("/countries")
     Call<List<Country>> getCountries();

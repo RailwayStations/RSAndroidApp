@@ -14,6 +14,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
+import java.util.Set;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -32,7 +34,7 @@ public abstract class NearbyBahnhofNotificationManager {
 
     private final String DB_BAHNHOF_LIVE_PKG = "de.deutschebahn.bahnhoflive";
     private final String DB_BAHNHOF_LIVE_CLASS = "de.deutschebahn.bahnhoflive.MeinBahnhofActivity";
-    private final Country country;
+    private final Set<Country> countries;
 
     /**
      * The Bahnhof about which a notification is being built.
@@ -56,11 +58,11 @@ public abstract class NearbyBahnhofNotificationManager {
      * @param bahnhof  the station to issue a notification for.
      * @param distance a double giving the distance from current location to bahnhof (in km)
      */
-    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance, Country country) {
+    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance, Set<Country> countries) {
         this.context = context;
         notificationDistance = distance;
         this.notificationStation = bahnhof;
-        this.country = country;
+        this.countries = countries;
     }
 
     /**
@@ -97,7 +99,7 @@ public abstract class NearbyBahnhofNotificationManager {
         // Build an intent to see the station on a map
         PendingIntent mapPendingIntent = getMapPendingIntent();
         // Build an intent to view the station's timetable
-        PendingIntent timetablePendingIntent = getTimetablePendingIntent(country, notificationStation);
+        PendingIntent timetablePendingIntent = getTimetablePendingIntent(Country.getCountryByCode(countries, notificationStation.getCountry()), notificationStation);
         // Build an intent to launch the DB Bahnhöfe Live app
         PendingIntent stationPendingIntent = getStationPendingIntent();
 

@@ -12,10 +12,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.Set;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
@@ -33,8 +38,30 @@ public class HighScoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_high_score);
 
-        BaseApplication baseApplication = (BaseApplication) getApplication();
-        baseApplication.getRSAPI().getHighScore(baseApplication.getCountryCode()).enqueue(new Callback<HighScore>() {
+        final BaseApplication baseApplication = (BaseApplication) getApplication();
+        Set<String> countryCodes = baseApplication.getCountryCodes();
+        final Set<Country> countries = baseApplication.getDbAdapter().fetchCountriesByCountryCodes(countryCodes);
+
+        Spinner countrySpinner = findViewById(R.id.countries);
+        ArrayAdapter<Country> countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, countries.toArray(new Country[0]));
+        countrySpinner.setAdapter(countryAdapter);
+        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                loadHighScore(baseApplication, (Country)parent.getSelectedItem());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // nothing todo
+            }
+        });
+
+        loadHighScore(baseApplication, (Country) countrySpinner.getSelectedItem());
+    }
+
+    private void loadHighScore(BaseApplication baseApplication, Country selectedCountry) {
+        baseApplication.getRSAPI().getHighScore(selectedCountry.getCode()).enqueue(new Callback<HighScore>() {
             @Override
             public void onResponse(Call<HighScore> call, Response<HighScore> response) {
                 if (response.isSuccessful()) {
