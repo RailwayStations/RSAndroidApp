@@ -612,7 +612,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         markerWithoutPhoto.incrementRefCount();
         balloon = getResources().getDrawable(R.drawable.marker_violet);
         Bitmap markerOwnPhoto = AndroidGraphicFactory.convertToBitmap(balloon);
-        markerWithoutPhoto.incrementRefCount();
+        markerOwnPhoto.incrementRefCount();
         Paint paint1;
         paint1 = AndroidGraphicFactory.INSTANCE.createPaint();
         paint1.setStyle(Style.FILL);
