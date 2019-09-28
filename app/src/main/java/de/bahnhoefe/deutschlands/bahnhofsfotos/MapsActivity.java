@@ -600,21 +600,15 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private List<MarkerBitmap> getMarkerBitmap() {
-        List<MarkerBitmap> markerBitmaps = new ArrayList<MarkerBitmap>();
+        List<MarkerBitmap> markerBitmaps = new ArrayList<>();
         // prepare for marker icons.
-        Drawable balloon;
+
         // small icon for maximum single item
-        balloon = getResources().getDrawable(R.drawable.marker_green);
-        Bitmap bitmapWithPhoto = AndroidGraphicFactory.convertToBitmap(balloon);
-        bitmapWithPhoto.incrementRefCount();
-        balloon = getResources().getDrawable(R.drawable.marker_red);
-        Bitmap markerWithoutPhoto = AndroidGraphicFactory.convertToBitmap(balloon);
-        markerWithoutPhoto.incrementRefCount();
-        balloon = getResources().getDrawable(R.drawable.marker_violet);
-        Bitmap markerOwnPhoto = AndroidGraphicFactory.convertToBitmap(balloon);
-        markerOwnPhoto.incrementRefCount();
-        Paint paint1;
-        paint1 = AndroidGraphicFactory.INSTANCE.createPaint();
+        Bitmap bitmapWithPhoto = loadBitmap(R.drawable.marker_green);
+        Bitmap markerWithoutPhoto = loadBitmap(R.drawable.marker_red);
+        Bitmap markerOwnPhoto = loadBitmap(R.drawable.marker_violet);
+
+        Paint paint1 = AndroidGraphicFactory.INSTANCE.createPaint();
         paint1.setStyle(Style.FILL);
         paint1.setTextAlign(Align.CENTER);
         FontFamily fontFamily = FontFamily.DEFAULT;
@@ -625,12 +619,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 new Point(0, -(markerWithoutPhoto.getHeight()/2)), 10f, 1, paint1));
 
         // small cluster icon. for 10 or less items.
-        balloon = getResources().getDrawable(R.drawable.balloon_s_n);
-        Bitmap bitmapBalloonSN = AndroidGraphicFactory
-                .convertToBitmap(balloon);
-        bitmapBalloonSN.incrementRefCount();
-        Paint paint2;
-        paint2 = AndroidGraphicFactory.INSTANCE.createPaint();
+        Bitmap bitmapBalloonSN = loadBitmap(R.drawable.balloon_s_n);
+        Paint paint2 = AndroidGraphicFactory.INSTANCE.createPaint();
         paint2.setStyle(Style.FILL);
         paint2.setTextAlign(Align.CENTER);
         fontFamily = FontFamily.DEFAULT;
@@ -641,11 +631,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 bitmapBalloonSN, bitmapBalloonSN, new Point(0, 0), 9f, 10, paint2));
 
         // large cluster icon. 100 will be ignored.
-        balloon = getResources().getDrawable(R.drawable.balloon_m_n);
-        Bitmap bitmapBalloonMN = AndroidGraphicFactory.convertToBitmap(balloon);
-        bitmapBalloonMN.incrementRefCount();
-        Paint paint3;
-        paint3 = AndroidGraphicFactory.INSTANCE.createPaint();
+        Bitmap bitmapBalloonMN = loadBitmap(R.drawable.balloon_m_n);
+        Paint paint3 = AndroidGraphicFactory.INSTANCE.createPaint();
         paint3.setStyle(Style.FILL);
         paint3.setTextAlign(Align.CENTER);
         fontFamily = FontFamily.DEFAULT;
@@ -655,6 +642,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), bitmapBalloonMN,
                 bitmapBalloonMN, bitmapBalloonMN, new Point(0, 0), 11f, 100, paint3));
         return markerBitmaps;
+    }
+
+    private Bitmap loadBitmap(int resourceId){
+        Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(getResources().getDrawable(resourceId));
+        bitmap.incrementRefCount();
+        return bitmap;
     }
 
     private void addMarkers(List<Bahnhof> bahnhofMarker) {
