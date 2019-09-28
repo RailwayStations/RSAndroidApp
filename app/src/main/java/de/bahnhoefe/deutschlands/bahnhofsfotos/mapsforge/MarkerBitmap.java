@@ -171,6 +171,18 @@ public class MarkerBitmap {
     public Paint getPaint() {
         return paint;
     }
+
+    public void decrementRefCounters() {
+        if (iconBmpOwnPhoto != null) {
+            iconBmpOwnPhoto.decrementRefCount();
+        }
+        if (iconBmpWithPhoto != null) {
+            iconBmpWithPhoto.decrementRefCount();
+        }
+        if (iconBmpWithoutPhoto != null) {
+            iconBmpWithoutPhoto.decrementRefCount();
+        }
+    }
 }
 
 

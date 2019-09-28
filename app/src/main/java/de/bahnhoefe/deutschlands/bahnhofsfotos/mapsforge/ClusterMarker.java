@@ -83,50 +83,41 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         double pixelY = MercatorProjection.latitudeToPixelY(this.getLatLong().latitude, mapSize);
         double halfBitmapWidth;
         double halfBitmapHeight;
+        MarkerBitmap markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
+        Bitmap bitmap = markerBitmap.getBitmap(hasPhoto, ownPhoto);
         try {
-            halfBitmapWidth = cluster.getClusterManager().markerIconBmps
-                    .get(markerType).getBitmap(hasPhoto, ownPhoto).getWidth() / 2f;
-            halfBitmapHeight = cluster.getClusterManager().markerIconBmps.get(markerType).getBitmap(hasPhoto, ownPhoto).getHeight() / 2f;
+            halfBitmapWidth = bitmap.getWidth() / 2f;
+            halfBitmapHeight = bitmap.getHeight() / 2f;
         } catch (NullPointerException e) {
             Log.e(ClusterMarker.TAG, e.getMessage(), e);
             return;
         }
-        int left = (int) (pixelX - topLeftPoint.x - halfBitmapWidth
-                + cluster.getClusterManager().markerIconBmps.get(markerType).getIconOffset().x);
-        int top = (int) (pixelY - topLeftPoint.y - halfBitmapHeight
-                + cluster.getClusterManager().markerIconBmps.get(markerType).getIconOffset().y);
-        int right = (left
-                + cluster.getClusterManager().markerIconBmps.get(markerType).getBitmap(hasPhoto, ownPhoto)
-                .getWidth());
-        int bottom = (top
-                + cluster.getClusterManager().markerIconBmps.get(markerType).getBitmap(hasPhoto, ownPhoto)
-                .getHeight());
+        int left = (int) (pixelX - topLeftPoint.x - halfBitmapWidth + markerBitmap.getIconOffset().x);
+        int top = (int) (pixelY - topLeftPoint.y - halfBitmapHeight + markerBitmap.getIconOffset().y);
+        int right = (left + bitmap.getWidth());
+        int bottom = (top + bitmap.getHeight());
         Rectangle mBitmapRectangle = new Rectangle(left, top, right, bottom);
         Rectangle canvasRectangle = new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight());
         if (!canvasRectangle.intersects(mBitmapRectangle)) {
             return;
         }
         // Draw bitmap
-        canvas.drawBitmap(cluster.getClusterManager().markerIconBmps
-                .get(markerType).getBitmap(hasPhoto, ownPhoto), left, top);
+        canvas.drawBitmap(bitmap, left, top);
 
         // Draw Text
         if (markerType == 0) {
             // Draw bitmap
             bubble = MarkerBitmap.getBitmapFromTitle(cluster.getTitle(),
-                    cluster.getClusterManager().markerIconBmps
-                            .get(markerType).getPaint());
+                    markerBitmap.getPaint());
             canvas.drawBitmap(bubble,
                     (int) (left + halfBitmapWidth - bubble.getWidth() / 2),
                     (int) (top - bubble.getHeight()));
         } else {
             int x = (int) (left + halfBitmapWidth);
             int y = (int) (top + halfBitmapHeight
-                    + cluster.getClusterManager().markerIconBmps
-                    .get(markerType).getPaint().getTextHeight(cluster.getTitle()) / 2);
+                    + markerBitmap.getPaint().getTextHeight(cluster.getTitle()) / 2);
             canvas.drawText(cluster.getTitle(), x, y,
-                    cluster.getClusterManager().markerIconBmps
-                            .get(markerType).getPaint());
+                    markerBitmap.getPaint());
         }
 
     }
@@ -183,23 +174,13 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         boolean hasPhoto = hasPhoto();
         boolean ownPhoto = ownPhoto();
 
+        MarkerBitmap markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
+        Bitmap bitmap = markerBitmap.getBitmap(hasPhoto, ownPhoto);
         return new Rectangle(
-                center.x
-                        - (float) cluster.getClusterManager().markerIconBmps.get(markerType)
-                        .getBitmap(hasPhoto, ownPhoto).getWidth()
-                        + cluster.getClusterManager().markerIconBmps.get(markerType).getIconOffset().x,
-                center.y
-                        - (float) cluster.getClusterManager().markerIconBmps.get(markerType)
-                        .getBitmap(hasPhoto, ownPhoto).getHeight()
-                        + cluster.getClusterManager().markerIconBmps.get(markerType).getIconOffset().y,
-                center.x
-                        + (float) cluster.getClusterManager().markerIconBmps.get(markerType)
-                        .getBitmap(hasPhoto, ownPhoto).getWidth()
-                        + cluster.getClusterManager().markerIconBmps.get(markerType).getIconOffset().x,
-                center.y
-                        + (float) cluster.getClusterManager().markerIconBmps.get(markerType)
-                        .getBitmap(hasPhoto, ownPhoto).getHeight()
-                        + cluster.getClusterManager().markerIconBmps.get(markerType).getIconOffset().y);
+                center.x - (float) bitmap.getWidth() + markerBitmap.getIconOffset().x,
+                center.y - (float) bitmap.getHeight() + markerBitmap.getIconOffset().y,
+                center.x + (float) bitmap.getWidth() + markerBitmap.getIconOffset().x,
+                center.y + (float) bitmap.getHeight() + markerBitmap.getIconOffset().y);
     }
 
     public Boolean hasPhoto() {

@@ -356,15 +356,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
             clusters.clear();
         }
         for (MarkerBitmap markerBitmap : markerIconBmps) {
-            if (markerBitmap.getBitmap(true, false) != null) {
-                markerBitmap.getBitmap(true, false).decrementRefCount();
-            }
-            if (markerBitmap.getBitmap(true, true) != null) {
-                markerBitmap.getBitmap(true, true).decrementRefCount();
-            }
-            if (markerBitmap.getBitmap(false, false) != null) {
-                markerBitmap.getBitmap(false, false).decrementRefCount();
-            }
+            markerBitmap.decrementRefCounters();
         }
         synchronized (leftItems) {
             leftItems.clear();
