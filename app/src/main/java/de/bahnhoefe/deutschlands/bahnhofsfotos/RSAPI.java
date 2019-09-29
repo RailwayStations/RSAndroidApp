@@ -56,6 +56,10 @@ public interface RSAPI {
     Call<Void> photoUpload(@Header("Email") String email, @Header("Upload-Token") String uploadToken,
                            @Header("Station-Id") String stationId,
                            @Header("Country") String countryCode,
+                           @Header("Station-Title") String stationTitle,
+                           @Header("Latitude") Double latitude,
+                           @Header("Longitude") Double longitude,
+                           @Header("Comment") String comment,
                            @Body RequestBody file);
 
 }

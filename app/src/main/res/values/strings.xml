@@ -229,5 +229,10 @@
   <string name="maps">Maps</string>
   <string name="themes">Map Themes</string>
   <string name="map_info_menu">Map Info</string>
-    <string name="nav_show_on_map">on station map</string>
+  <string name="add_missing_station">Add missing station?</string>
+  <string name="station_or_coords_not_found">Station not found and no coordinates given</string>
+  <string name="station_name">Name of the station</string>
+  <string name="comment">Comment</string>
+  <string name="station_title_needed">Please enter a title for the station</string>
+  <string name="nav_show_on_map">on station map</string>
 </resources>

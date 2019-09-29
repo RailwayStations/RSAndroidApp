@@ -38,23 +38,37 @@
             android:layout_centerHorizontal="true"
             android:layout_alignTop="@id/header"
             android:orientation="vertical">
-            <TextView
-                android:id="@+id/tvbahnhofname"
+            <EditText
+                android:id="@+id/etbahnhofname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
                 android:textSize="25sp"
                 android:textStyle="bold"
                 android:background="#80ffffff"
-                android:padding="8dp" />
+                android:padding="8dp"
+                android:hint="@string/station_name" />
+
             <TextView
                 android:id="@+id/coordinates"
                 android:textAlignment="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20sp"
                 android:background="#80ffffff"
                 android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/etComment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:background="#80ffffff"
+                android:padding="8dp"
+                android:layout_marginBottom="20sp"
+                android:hint="@string/comment" />
+
         </LinearLayout>
 
         <TextView

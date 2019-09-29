@@ -35,22 +35,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/tvbahnhofname"
+            android:layout_below="@id/etbahnhofname"
             android:layout_marginBottom="20sp"
             android:background="#80ffffff"
             android:padding="8dp" />
 
-        <TextView
-            android:id="@+id/tvbahnhofname"
+        <EditText
+            android:id="@+id/etbahnhofname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_alignTop="@id/tvbahnhofname"
+            android:layout_alignTop="@id/etbahnhofname"
             android:textSize="25sp"
             android:textStyle="bold"
             android:background="#50ffffff"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:hint="@string/station_name" />
+
+        <EditText
+            android:id="@+id/etComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/coordinates"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="#50ffffff"
+            android:padding="8dp"
+            android:hint="@string/comment" />
 
         <TextView
             android:id="@+id/license_tag"
