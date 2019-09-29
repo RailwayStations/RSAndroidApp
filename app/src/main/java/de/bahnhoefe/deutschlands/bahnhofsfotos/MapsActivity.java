@@ -76,6 +76,9 @@ import org.mapsforge.map.rendertheme.XmlRenderTheme;
 
 public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem>, DirectoryChooserFragment.OnFragmentInteractionListener  {
 
+    public static final String EXTRAS_LATITUDE = "Extras_Latitude";
+    public static final String EXTRAS_LONGITUDE = "Extras_Longitude";
+
     // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // meters
 
@@ -129,6 +132,15 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         nickname = baseApplication.getNickname();
 
         bahnhofList = new ArrayList<>(0); // no markers until we know where we are
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            Double latitude = (Double) intent.getSerializableExtra(EXTRAS_LATITUDE);
+            Double longitude = (Double) intent.getSerializableExtra(EXTRAS_LONGITUDE);
+            if (latitude != null && longitude != null) {
+                myPos = new LatLong(latitude, longitude);
+            }
+        }
 
         createMapViews();
         createTileCaches();

@@ -723,7 +723,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 new NavItem("   " + getString(R.string.nav_car), R.drawable.ic_directions_car_gray_24px),
                 new NavItem("   " + getString(R.string.nav_bike), R.drawable.ic_directions_bike_gray_24px),
                 new NavItem("   " + getString(R.string.nav_walk), R.drawable.ic_directions_walk_gray_24px),
-                new NavItem("   " + getString(R.string.nav_show), R.drawable.ic_info_gray_24px)
+                new NavItem("   " + getString(R.string.nav_show), R.drawable.ic_info_gray_24px),
+                new NavItem("   " + getString(R.string.nav_show_on_map), R.drawable.ic_map_gray_24px)
         };
 
 
@@ -760,30 +761,36 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 switch (navItem) {
                     case 0:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", bahnhof.getLat(), bahnhof.getLon());
-                        Log.d("findnavigation case 0", dlocation);
+                        Log.d(TAG, "findnavigation case 0: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 1:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=d", bahnhof.getLat(), bahnhof.getLon());
-                        Log.d("findnavigation case 1", dlocation);
+                        Log.d(TAG,"findnavigation case 1: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
 
                     case 2:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
                                 bahnhof.getLat(), bahnhof.getLon());
-                        Log.d("findnavigation case 2", dlocation);
+                        Log.d(TAG,"findnavigation case 2: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 3:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=w", bahnhof.getLat(), bahnhof.getLon());
-                        Log.d("findnavigation case 3", dlocation);
+                        Log.d(TAG,"findnavigation case 3: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 4:
                         dlocation = String.format("geo:0,0?q=%s,%s(%s)", bahnhof.getLat(), bahnhof.getLon(), bahnhof.getTitle());
-                        Log.d("findnavigation case 4", dlocation);
+                        Log.d(TAG,"findnavigation case 4: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                        break;
+                    case 5:
+                        intent = new Intent(DetailsActivity.this, MapsActivity.class);
+                        intent.putExtra(MapsActivity.EXTRAS_LATITUDE, bahnhof.getLat());
+                        intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, bahnhof.getLon());
+                        Log.d(TAG,"findnavigation case 5: " + bahnhof.getLat() + "," + bahnhof.getLon());
                         break;
 
                 }

@@ -238,5 +238,6 @@
         \n<b>- ...</b>
         \n\nEinige Karte brauchen ein passendes Design, um korrekt dargestellt zu werden! Diese müssen ebenfalls heruntergeladen und konfiguriert werden.</string>
     <string name="map_info_title">Über die Bahnhofskarte</string>
+    <string name="nav_show_on_map">auf der Bahnhofskarte</string>
 
 </resources>
