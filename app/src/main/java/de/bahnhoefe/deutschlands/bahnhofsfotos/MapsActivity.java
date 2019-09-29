@@ -4,6 +4,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -24,6 +25,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -40,6 +42,7 @@ import java.util.List;
 
 import static android.view.Menu.NONE;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MapInfoFragment;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.ClusterManager;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.GeoItem;
@@ -61,6 +64,7 @@ import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.core.model.Point;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.input.MapZoomControls;
+import org.mapsforge.map.android.layers.MyLocationOverlay;
 import org.mapsforge.map.android.util.AndroidUtil;
 import org.mapsforge.map.android.util.ExternalRenderThemeUsingJarResources;
 import org.mapsforge.map.datastore.MapDataStore;
@@ -68,6 +72,7 @@ import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.download.TileDownloadLayer;
 import org.mapsforge.map.layer.download.tilesource.OpenStreetMapMapnik;
+import org.mapsforge.map.layer.overlay.Marker;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.model.IMapViewPosition;
 import org.mapsforge.map.reader.MapFile;
@@ -110,6 +115,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private BaseApplication baseApplication;
     private LocationManager locationManager;
     private boolean askedForPermission = false;
+    private Marker missingMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -286,19 +292,63 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         final MapDataStore mapFile = getMapFile();
 
         if (mapFile != null) {
-            this.layer = AndroidUtil.createTileRendererLayer(this.tileCaches.get(0),
-                    this.mapView.getModel().mapViewPosition, mapFile, getRenderTheme(), false, true, false);
+            TileRendererLayer tileRendererLayer1 = new TileRendererLayer(this.tileCaches.get(0), mapFile,
+                    this.mapView.getModel().mapViewPosition, false, true, false, AndroidGraphicFactory.INSTANCE) {
+                @Override
+                public boolean onLongPress(LatLong tapLatLong, Point thisXY,
+                                           Point tapXY) {
+                    MapsActivity.this.onLongPress(tapLatLong);
+                    return true;
+                }
+            };
+            tileRendererLayer1.setXmlRenderTheme(getRenderTheme());
+            this.layer = tileRendererLayer1;
             mapView.getLayerManager().getLayers().add(this.layer);
         } else {
             OpenStreetMapMapnik tileSource = OpenStreetMapMapnik.INSTANCE;
             tileSource.setUserAgent("railway-stations.org-android");
             this.layer = new TileDownloadLayer(this.tileCaches.get(0),
                     this.mapView.getModel().mapViewPosition, tileSource,
-                    AndroidGraphicFactory.INSTANCE);
+                    AndroidGraphicFactory.INSTANCE) {
+                @Override
+                public boolean onLongPress(LatLong tapLatLong, Point thisXY,
+                                           Point tapXY) {
+                    MapsActivity.this.onLongPress(tapLatLong);
+                    return true;
+                }
+            };
             mapView.getLayerManager().getLayers().add(this.layer);
 
             mapView.setZoomLevelMin(tileSource.getZoomLevelMin());
             mapView.setZoomLevelMax(tileSource.getZoomLevelMax());
+        }
+
+    }
+
+    private void onLongPress(LatLong tapLatLong) {
+        if (missingMarker == null) {
+            // marker to show at the location
+            Drawable drawable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? getDrawable(R.drawable.marker_missing) : getResources().getDrawable(R.drawable.marker_missing);
+            Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
+            missingMarker = new Marker(tapLatLong, bitmap, 0, -bitmap.getHeight()) {
+                @Override
+                public boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
+                    new SimpleDialogs().confirm(MapsActivity.this, R.string.add_missing_station, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
+                            intent.putExtra(DetailsActivity.EXTRA_LATITUDE, getLatLong().latitude);
+                            intent.putExtra(DetailsActivity.EXTRA_LONGITUDE, getLatLong().longitude);
+                            startActivity(intent);
+                        }
+                    });
+                    return false;
+                }
+            };
+            mapView.getLayerManager().getLayers().add(missingMarker);
+        } else {
+            missingMarker.setLatLong(tapLatLong);
+            missingMarker.requestRedraw();
         }
 
     }
