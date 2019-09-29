@@ -229,4 +229,5 @@
   <string name="maps">Maps</string>
   <string name="themes">Map Themes</string>
   <string name="map_info_menu">Map Info</string>
+    <string name="nav_show_on_map">on station map</string>
 </resources>

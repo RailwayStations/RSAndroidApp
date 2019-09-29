@@ -227,4 +227,5 @@
         \n<b>- ...</b>
         \n\nSome maps require special themes to render correctly! These need to be downloaded and configured accordingly.</string>
   <string name="map_info_title">About Maps</string>
+    <string name="nav_show_on_map">on station map</string>
 </resources>
