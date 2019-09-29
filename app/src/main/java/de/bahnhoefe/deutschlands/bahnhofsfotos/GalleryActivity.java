@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -19,6 +20,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.GridViewAdapter;
 
 public class GalleryActivity extends AppCompatActivity {
+    private static final String TAG = "GalleryActivity";
     // Declare variables
     private String[] filePathStrings;
     private String[] fileNameStrings;
@@ -88,18 +90,44 @@ public class GalleryActivity extends AppCompatActivity {
         grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String fileName = fileNameStrings[position];
-                String[] nameParts = fileName.split("[-.]");
+                String fileName = fileNameStrings[position].substring(0, fileNameStrings[position].length() - 4);
                 boolean shown = false;
-                if (nameParts.length == 3) {
-                    String stationId = nameParts[1];
-                    Bahnhof station = dbAdapter.fetchBahnhofByBahnhofId(stationId);
-                    if (station != null) {
-                        Intent detailIntent = new Intent(GalleryActivity.this, DetailsActivity.class);
-                        detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, station);
-                        startActivity(detailIntent);
-                        shown = true;
+                Intent detailIntent = new Intent(GalleryActivity.this, DetailsActivity.class);
+
+                String[] nameParts = fileName.split("[_]");
+                if (nameParts.length >= 2) {
+                    if (nameParts.length == 2) {
+                        String stationId = nameParts[1];
+                        Bahnhof station = dbAdapter.fetchBahnhofByBahnhofId(stationId);
+
+                        if (station != null) {
+                            detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, station);
+                        }
+                    } else {
+                        try {
+                            Double latitude = Double.parseDouble(nameParts[1]);
+                            Double longitude = Double.parseDouble(nameParts[2]);
+                            detailIntent.putExtra(DetailsActivity.EXTRA_LATITUDE, latitude);
+                            detailIntent.putExtra(DetailsActivity.EXTRA_LONGITUDE, longitude);
+                        } catch (NumberFormatException e) {
+                            Log.w(TAG, "Error extracting coordinates from filename: " + fileName);
+                        }
                     }
+                } else {
+                    nameParts = fileName.split("[-]"); // fallback to old naming convention
+                    if (nameParts.length == 2) {
+                        String stationId = nameParts[1];
+                        Bahnhof station = dbAdapter.fetchBahnhofByBahnhofId(stationId);
+
+                        if (station != null) {
+                            detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, station);
+                        }
+                    }
+                }
+
+                if (detailIntent.hasExtra(DetailsActivity.EXTRA_BAHNHOF) || detailIntent.hasExtra(DetailsActivity.EXTRA_LATITUDE)) {
+                    startActivity(detailIntent);
+                    shown = true;
                 }
                 if (!shown) {
                     Toast.makeText(GalleryActivity.this,

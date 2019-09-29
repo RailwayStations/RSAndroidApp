@@ -35,6 +35,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -75,6 +76,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     // Names of Extras that this class reacts to
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
     public static final String EXTRA_BAHNHOF = "bahnhof";
+    public static final String EXTRA_LATITUDE = "latitude";
+    public static final String EXTRA_LONGITUDE = "longitude";
     public static final int STORED_FOTO_WIDTH = 1920;
     public static final int STORED_FOTO_QUALITY = 95;
 
@@ -94,7 +97,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private ImageView imageView;
     private Bahnhof bahnhof;
     private Set<Country> countries;
-    private TextView tvBahnhofName;
+    private EditText etBahnhofName;
+    private EditText etComment;
     private boolean localFotoUsed = false;
     private License license;
     private boolean photoOwner;
@@ -110,6 +114,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private LinearLayout header;
     private Bitmap publicBitmap;
     private RSAPI rsapi;
+    private Double latitude;
+    private Double longitude;
+    private String bahnhofId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +134,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         detailsLayout = findViewById(R.id.content_details);
         header = findViewById(R.id.header);
-        tvBahnhofName = findViewById(R.id.tvbahnhofname);
+        etBahnhofName = findViewById(R.id.etbahnhofname);
+        etComment = findViewById(R.id.etComment);
         coordinates = findViewById(R.id.coordinates);
         imageView = findViewById(R.id.imageview);
         imageView.setOnClickListener(new View.OnClickListener() {
@@ -179,25 +187,43 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         boolean directPicture = false;
         if (intent != null) {
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
-            if (bahnhof == null) {
-                Log.w(TAG, "EXTRA_BAHNHOF in intent data missing");
-                Toast.makeText(this, R.string.station_not_found, Toast.LENGTH_LONG).show();
+            latitude = (Double) intent.getSerializableExtra(EXTRA_LATITUDE);
+            longitude = (Double) intent.getSerializableExtra(EXTRA_LONGITUDE);
+            if (bahnhof == null && (latitude == null || longitude == null)) {
+                Log.w(TAG, "EXTRA_BAHNHOF and EXTRA_LATITUDE or EXTRA_LONGITUDE in intent data missing");
+                Toast.makeText(this, R.string.station_or_coords_not_found, Toast.LENGTH_LONG).show();
                 finish();
                 return;
             }
 
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
-            tvBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhof.getId() + ")");
-            coordinates.setText(bahnhof.getLat() + ", " + bahnhof.getLon());
+            if (bahnhof != null) {
+                bahnhofId = bahnhof.getId();
+                etBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhofId + ")");
+                etBahnhofName.setEnabled(false);
+                coordinates.setText(bahnhof.getLat() + ", " + bahnhof.getLon());
 
-            if (bahnhof.hasPhoto()) {
-                if (ConnectionUtil.checkInternetConnection(this)) {
-                    BitmapCache.getInstance().getFoto(this, bahnhof.getPhotoUrl());
+                if (bahnhof.hasPhoto()) {
+                    if (ConnectionUtil.checkInternetConnection(this)) {
+                        BitmapCache.getInstance().getFoto(this, bahnhof.getPhotoUrl());
+                    }
+                    if (canSetPhoto()) {
+                        setPictureButtonsVisibility(View.VISIBLE);
+                    } else {
+                        setPictureButtonsVisibility(View.INVISIBLE);
+                        etComment.setVisibility(View.INVISIBLE);
+                    }
+                } else {
+                    setLocalBitmap();
                 }
-                setPictureButtonsVisibility(TextUtils.equals(nickname, bahnhof.getPhotographer()) ? View.VISIBLE : View.INVISIBLE);
             } else {
+                etBahnhofName.setEnabled(true);
+                coordinates.setText(latitude + ", " + longitude);
+                bahnhofId = latitude + "_" + longitude;
+                setPictureButtonsVisibility(View.VISIBLE);
                 setLocalBitmap();
             }
+
         }
 
         if (directPicture) {
@@ -261,7 +287,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private boolean canSetPhoto() {
-        return !bahnhof.hasPhoto() || TextUtils.equals(nickname, bahnhof.getPhotographer());
+        return bahnhof == null || !bahnhof.hasPhoto() || TextUtils.equals(nickname, bahnhof.getPhotographer());
     }
 
     public void takePicture() {
@@ -278,7 +304,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Uri photoURI = FileProvider.getUriForFile(this, "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
-                intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, bahnhof.getTitle());
+                intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, etBahnhofName.getText());
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 startActivityForResult(intent, REQUEST_TAKE_PICTURE);
             } else {
@@ -295,7 +321,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (isMyDataIncomplete()) {
             checkMyData();
         } else {
-            if (localFotoUsed || bahnhof.hasPhoto()) {
+            if (localFotoUsed || (bahnhof != null && bahnhof.hasPhoto())) {
                 new SimpleDialogs().confirm(this, R.string.confirm_replace_with_ghost, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -531,11 +557,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             return null;
         }
 
-        Log.d(TAG, "BahnhofNrAbfrage: " + bahnhof.getId());
-        File file = new File(mediaStorageDir, String.format("%s-%s.jpg", nickname, bahnhof.getId()));
-        Log.d("FilePfad", file.toString());
+        File storeMediaFile = new File(mediaStorageDir, String.format("%s_%s.jpg", nickname, bahnhofId));
+        Log.d(TAG, storeMediaFile.toString());
 
-        return file;
+        return storeMediaFile;
 
     }
 
@@ -553,8 +578,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         }
 
-        Log.d(TAG, "Temporary BahnhofNrAbfrage: " + bahnhof.getId());
-        File file = new File(temporaryStorageDir, String.format("%s-%s.jpg", nickname, bahnhof.getId()));
+        Log.d(TAG, "Temporary BahnhofNrAbfrage: " + bahnhofId);
+        File file = new File(temporaryStorageDir, String.format("%s_%s.jpg", nickname, bahnhofId));
         Log.d("FilePfad", file.toString());
 
         return file;
@@ -575,7 +600,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             disableMenuItem(menu, R.id.photo_upload);
         }
 
-        if (localFotoUsed || bahnhof.hasPhoto()) {
+        if (localFotoUsed || (bahnhof != null && bahnhof.hasPhoto())) {
             enableMenuItem(menu, R.id.share_photo);
         } else {
             disableMenuItem(menu, R.id.share_photo);
@@ -604,7 +629,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 startNavigation(DetailsActivity.this);
                 break;
             case R.id.timetable:
-                final Intent timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, bahnhof.getCountry()), bahnhof);
+                final Intent timetableIntent = bahnhof != null ? new Timetable().createTimetableIntent(Country.getCountryByCode(countries, bahnhof.getCountry()), bahnhof) : null;
                 if (timetableIntent != null) {
                     startActivity(timetableIntent);
                 } else {
@@ -617,6 +642,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 } else {
                     if (TextUtils.isEmpty(email) || TextUtils.isEmpty(token)) {
                         Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
+                    } else if (TextUtils.isEmpty(etBahnhofName.getText())) {
+                        Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
                     } else {
                         uploadPhoto();
                     }
@@ -624,7 +651,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 break;
             case R.id.share_photo:
                 Intent shareIntent = createFotoSendIntent();
-                shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, bahnhof.getCountry()).getTwitterTags() + " " + bahnhof.getTitle());
+                shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, bahnhof != null ? bahnhof.getCountry() : null).getTwitterTags() + " " + etBahnhofName.getText());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
@@ -659,7 +686,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         final File mediaFile = getStoredMediaFile();
         RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
-        rsapi.photoUpload(email, token, bahnhof.getId(), bahnhof.getCountry(), file).enqueue(new Callback<Void>() {
+        rsapi.photoUpload(email, token, bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
+                etBahnhofName.getText().toString(), latitude, longitude, etComment.getText().toString(), file).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 progress.dismiss();
@@ -705,7 +733,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         } else if (publicBitmap != null) {
             File imagePath = new File(getApplicationContext().getCacheDir(), "images");
             imagePath.mkdirs();
-            File newFile = new File(imagePath, bahnhof.getId() + ".jpg");
+            File newFile = new File(imagePath, bahnhofId + ".jpg");
             try {
                 saveScaledBitmap(newFile, publicBitmap);
                 sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
@@ -751,6 +779,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         };
 
+        final double lat = bahnhof != null ? bahnhof.getLat() : latitude;
+        final double lon = bahnhof != null ? bahnhof.getLon() : longitude;
         AlertDialog.Builder navBuilder = new AlertDialog.Builder(this);
         navBuilder.setIcon(R.mipmap.ic_launcher);
         navBuilder.setTitle(R.string.navMethod);
@@ -760,12 +790,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Intent intent = null;
                 switch (navItem) {
                     case 0:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", bahnhof.getLat(), bahnhof.getLon());
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", lat, lon);
                         Log.d(TAG, "findnavigation case 0: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 1:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=d", bahnhof.getLat(), bahnhof.getLon());
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=d", lat, lon);
                         Log.d(TAG,"findnavigation case 1: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
@@ -777,12 +807,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 3:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=w", bahnhof.getLat(), bahnhof.getLon());
+                        dlocation = String.format("google.navigation:ll=%s,%s&mode=w", lat, lon);
                         Log.d(TAG,"findnavigation case 3: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
                     case 4:
-                        dlocation = String.format("geo:0,0?q=%s,%s(%s)", bahnhof.getLat(), bahnhof.getLon(), bahnhof.getTitle());
+                        dlocation = String.format("geo:0,0?q=%s,%s(%s)", lat, lon, etBahnhofName.getText());
                         Log.d(TAG,"findnavigation case 4: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
@@ -825,7 +855,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         // Lizenzinfo aufbauen und einblenden
         licenseTagView.setVisibility(View.VISIBLE);
-        if (bahnhof.getLicense() != null) {
+        if (bahnhof != null && bahnhof.getLicense() != null) {
             final boolean photographerUrlAvailable = bahnhof.getPhotographerUrl() != null && !bahnhof.getPhotographerUrl().isEmpty();
             final boolean licenseUrlAvailable = bahnhof.getLicenseUrl() != null && !bahnhof.getLicenseUrl().isEmpty();
 
@@ -911,7 +941,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         public void onAnimationUpdate(ValueAnimator animation) {
             float alpha = (float) animation.getAnimatedValue();
             if (header == null) {
-                tvBahnhofName.setAlpha(alpha);
+                etBahnhofName.setAlpha(alpha);
             } else {
                 header.setAlpha(alpha);
             }
@@ -944,7 +974,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             localFotoUsed = false;
             Log.e(TAG,
                     String.format("Media file not available for station %s and nickname %s ",
-                            bahnhof.getId(),
+                            bahnhofId,
                             nickname
                     )
             );
@@ -972,7 +1002,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 sbar.hide();
             fullscreen = true;
         } else {
-            ValueAnimator animation = ValueAnimator.ofFloat(header == null? tvBahnhofName.getAlpha() : header.getAlpha(), 1.0f);
+            ValueAnimator animation = ValueAnimator.ofFloat(header == null? etBahnhofName.getAlpha() : header.getAlpha(), 1.0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();

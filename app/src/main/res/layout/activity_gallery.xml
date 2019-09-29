@@ -17,13 +17,13 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvImageCount"
-            android:layout_margin="5dp"
-            android:columnWidth="100dp"
+            android:layout_margin="0dp"
+            android:columnWidth="150dp"
             android:drawSelectorOnTop="true"
             android:gravity="center"
             android:numColumns="auto_fit"
             android:stretchMode="columnWidth"
-            android:verticalSpacing="5dp"
+            android:verticalSpacing="0dp"
             android:focusable="true"
             android:clickable="true"/>
 

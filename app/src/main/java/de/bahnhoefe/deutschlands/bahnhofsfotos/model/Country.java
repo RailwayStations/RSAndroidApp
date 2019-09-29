@@ -29,7 +29,7 @@ public class Country implements Serializable {
                 return country;
             }
         }
-        return null;
+        return countries.iterator().next(); // get first country as fallback
     }
 
     public String getName() {

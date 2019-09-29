@@ -238,6 +238,11 @@
         \n<b>- ...</b>
         \n\nEinige Karte brauchen ein passendes Design, um korrekt dargestellt zu werden! Diese müssen ebenfalls heruntergeladen und konfiguriert werden.</string>
     <string name="map_info_title">Über die Bahnhofskarte</string>
+    <string name="add_missing_station">Fehlenden Bahnhof melden?</string>
+    <string name="station_or_coords_not_found">Bahnhof nicht gefunden und keine Koordinaten angegeben</string>
+    <string name="station_name">Name des Bahnhofs</string>
+    <string name="comment">Kommentar</string>
+    <string name="station_title_needed">Bitte gib einen Bahnhofsnamen an.</string>
     <string name="nav_show_on_map">auf der Bahnhofskarte</string>
     <string name="login">Einloggen</string>
     <string name="bt_new_register">Neues Konto registrieren</string>
