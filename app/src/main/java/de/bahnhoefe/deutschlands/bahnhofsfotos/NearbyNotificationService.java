@@ -1,11 +1,15 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -15,27 +19,27 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
+
+import org.mapsforge.core.model.LatLong;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManagerFactory;
 
-public class NearbyNotificationService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class NearbyNotificationService extends Service implements LocationListener {
+
+    // The minimum distance to change Updates in meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1000; // 1km
+
+    // The minimum time between updates in milliseconds
+    private static final long MIN_TIME_BW_UPDATES = 10000; // 10 seconds
 
     private static final double MIN_NOTIFICATION_DISTANCE = 1.0d; // km
     private static final double EARTH_CIRCUMFERENCE = 40075.017d; // km at equator
@@ -45,10 +49,9 @@ public class NearbyNotificationService extends Service implements LocationListen
     private List<Bahnhof> nearStations;
     private Location myPos = new Location((String)null);
 
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
+    private LocationManager locationManager;
 
     private NearbyBahnhofNotificationManager notifiedStationManager;
-    private GoogleApiClient googleApiClient = null;
     private BaseApplication baseApplication = null;
     private BahnhofsDbAdapter bahnhofsDbAdapter = null;
 
@@ -70,16 +73,6 @@ public class NearbyNotificationService extends Service implements LocationListen
         notifiedStationManager = null;
         baseApplication = (BaseApplication)getApplication();
         bahnhofsDbAdapter = baseApplication.getDbAdapter();
-
-        // Create an instance of GoogleAPIClient.
-        if (googleApiClient == null) {
-            googleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
-
     }
 
     @Override
@@ -87,10 +80,6 @@ public class NearbyNotificationService extends Service implements LocationListen
         cancelNotification();
 
         Log.i(TAG, "Received start command");
-        // connect google services
-        if (!googleApiClient.isConnected()) {
-            googleApiClient.connect();
-        }
 
         Intent resultIntent = new Intent(this, MainActivity.class);
         PendingIntent resultPendingIntent =
@@ -114,6 +103,8 @@ public class NearbyNotificationService extends Service implements LocationListen
         final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
 
+        registerLocationManager();
+
         return START_STICKY;
     }
 
@@ -129,12 +120,10 @@ public class NearbyNotificationService extends Service implements LocationListen
         Log.i(TAG, "Service gets destroyed");
         try {
             cancelNotification();
-            stopLocationUpdates();
+            unregisterLocationManager();
         } catch (Throwable t) {
             Log.wtf(TAG, "Unknown problem when trying to de-register from GPS updates", t);
         }
-
-        googleApiClient.disconnect();
 
         // Cancel the ongoing notification
         NotificationManagerCompat notificationManager =
@@ -171,6 +160,21 @@ public class NearbyNotificationService extends Service implements LocationListen
         } catch (Throwable t) {
             Log.e(TAG, "Unknown Problem arised during location change handling", t);
         }
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 
     private void checkNearestStation() {
@@ -228,91 +232,72 @@ public class NearbyNotificationService extends Service implements LocationListen
         return Math.sqrt(Math.pow(lateralDiff, 2.0d) + Math.pow(longDiff, 2.0d)) * EARTH_CIRCUMFERENCE / 360.0d;
     }
 
-    private void startLocationUpdates() {
-        LocationRequest locationRequest = new LocationRequest()
-                .setInterval(2 * FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
-                .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(googleApiClient,
-                        builder.build());
-
-        AsyncTask<PendingResult<LocationSettingsResult>, Void, Boolean> task =
-                new AsyncTask<PendingResult<LocationSettingsResult>, Void, Boolean>() {
-
-                    @Override
-                    @SafeVarargs
-                    final protected Boolean doInBackground(PendingResult<LocationSettingsResult>... pendingResults) {
-                        com.google.android.gms.common.api.Status status = pendingResults[0].await().getStatus();
-                        int statusCode = status.getStatusCode();
-                        return statusCode == LocationSettingsStatusCodes.SUCCESS
-                                || statusCode == LocationSettingsStatusCodes.SUCCESS_CACHE;
-                    }
-
-                    @Override
-                    final protected void onPostExecute(Boolean success) {
-                        super.onPostExecute(success);
-                        if (!success) {
-                            Log.e(TAG, "Device settings unsuitable for location");
-                            Toast.makeText(NearbyNotificationService.this, R.string.no_location_enabled, Toast.LENGTH_LONG).show();
-                            stopSelf();
-                        }
-                    }
-                };
-        //noinspection unchecked
-        task.execute(result);
+    public void registerLocationManager() {
 
         try {
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    googleApiClient, locationRequest, this);
-        } catch (SecurityException se) {
-            Log.e(TAG, "Still no permission for location services");
-            Toast.makeText(this, R.string.open_once_nearby, Toast.LENGTH_LONG).show();
-            stopSelf();
-        }
-    }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.w(TAG, "No Location Permission");
+                return;
+            }
 
-    private void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                googleApiClient, this);
-    }
+            locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
-    /**
-     * Called by Google Play when the client has connected.
-     *
-     * @param bundle the Bundle corresponding to the event
-     */
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        try {
-            startLocationUpdates();
-        } catch (Throwable t) {
-            Log.wtf(TAG, "Unknown problem when trying to register for GPS updates", t);
-        }
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "No permission for location service");
-            Toast.makeText(this, R.string.open_once_nearby, Toast.LENGTH_LONG).show();
+            // getting GPS status
+            boolean isGPSEnabled = locationManager
+                    .isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            // if GPS Enabled get lat/long using GPS Services
+            if (isGPSEnabled) {
+                locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                Log.d(TAG, "GPS Enabled");
+                if (locationManager != null) {
+                    myPos = locationManager
+                            .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                }
+            } else {
+                // getting network status
+                boolean isNetworkEnabled = locationManager
+                        .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+                // First get location from Network Provider
+                if (isNetworkEnabled) {
+                    locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    Log.d(TAG, "Network Location enabled");
+                    if (locationManager != null) {
+                        myPos = locationManager
+                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error registering LocationManager", e);
+            Bundle b = new Bundle();
+            b.putString("error", "Error registering LocationManager: " + e.toString());
+            locationManager = null;
+            myPos = null;
             return;
         }
-        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                googleApiClient);
-        if (lastLocation != null) {
-            onLocationChanged(lastLocation);
+        Log.i(TAG, "LocationManager registered");
+    }
+
+    private void unregisterLocationManager() {
+        if (locationManager != null) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // if we don't have location permission we cannot remove updates (should not happen, but the API requires this check
+                // so we just set it to null
+                locationManager = null;
+            } else {
+                locationManager.removeUpdates(this);
+            }
+            locationManager = null;
         }
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.i(TAG, "Google Play Service connection suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, "Google Play Service connection failed: " + connectionResult.getErrorMessage());
-        stopSelf();
+        Log.i(TAG, "LocationManager unregistered");
     }
 
     /**
