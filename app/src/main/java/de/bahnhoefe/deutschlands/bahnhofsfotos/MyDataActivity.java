@@ -6,20 +6,15 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
@@ -31,7 +26,6 @@ import retrofit2.Response;
 public class MyDataActivity extends AppCompatActivity {
 
     private static final String TAG = MyDataActivity.class.getSimpleName();
-    private static final int RC_SIGN_IN = 1;
 
     private EditText etNickname, etLink, etEmail, etUploadToken;
     private CheckBox cbLicenseCC0;
@@ -41,7 +35,13 @@ public class MyDataActivity extends AppCompatActivity {
     private BaseApplication baseApplication;
     private RSAPI rsapi;
     private Profile profile;
-    private GoogleSignInClient mGoogleSignInClient;
+    private View loginForm;
+    private View profileForm;
+    private EditText etEmailOrNickname;
+    private EditText etLoginUploadToken;
+    private TextView tvProfileHeadline;
+    private Button btProfileSave;
+    private TextView tvUploadToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,98 +50,39 @@ public class MyDataActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.title_activity_my_data);
 
+        loginForm = findViewById(R.id.login_form);
+        profileForm = findViewById(R.id.profile_form);
+        profileForm.setVisibility(View.INVISIBLE);
+
         etNickname = findViewById(R.id.etNickname);
         etUploadToken = findViewById(R.id.etUploadToken);
+        etLoginUploadToken = findViewById(R.id.etLoginUploadToken);
         etEmail = findViewById(R.id.etEmail);
+        etEmailOrNickname = findViewById(R.id.etEmailOrNickname);
         etLink = findViewById(R.id.etLinking);
         cbLicenseCC0 = findViewById(R.id.cbLicenseCC0);
         cbPhotoOwner = findViewById(R.id.cbOwnPhoto);
         cbAnonymous = findViewById(R.id.cbAnonymous);
+
+        tvProfileHeadline = findViewById(R.id.tvProfileHeadline);
+        btProfileSave = findViewById(R.id.btProfileSave);
+        tvUploadToken = findViewById(R.id.tvUploadToken);
 
         baseApplication = (BaseApplication) getApplication();
         rsapi = baseApplication.getRSAPI();
 
         setProfileToUI(baseApplication.getProfile());
 
-        // Create GoogleSignIn
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.rsapi_client_id))
-                .requestEmail()
-                .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
-        SignInButton signInButton = findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
-            }
-        });
-
         receiveUploadToken(getIntent());
-        loadRemoteProfile();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                // Google Sign In was successful
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                String idToken = account.getIdToken();
-                Log.e(TAG, "idToken=" + idToken);
-                rsapi.registrationWithGoogleIdToken(idToken, createProfileFromUI()).enqueue(new Callback<Profile>() {
-                    @Override
-                    public void onResponse(Call<Profile> call, Response<Profile> response) {
-                        switch (response.code()) {
-                            case 202 :
-                                final Profile profile = response.body();
-                                if (StringUtils.isNotBlank(profile.getUploadToken())) {
-                                    saveLocalProfile(profile);
-                                    new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_received);
-                                } else {
-                                    new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_email);
-                                }
-                                break;
-                            case 400 :
-                                new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_wrong_data);
-                                break;
-                            case 409 :
-                                new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_conflict);
-                                break;
-                            case 422 :
-                                new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
-                                break;
-                            default :
-                                new SimpleDialogs().confirm(MyDataActivity.this,
-                                        String.format(getText(R.string.registration_failed).toString(), response.code()));
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Profile> call, Throwable t) {
-                        Log.e(TAG, "Registration via Google sign in failed", t);
-                        new SimpleDialogs().confirm(MyDataActivity.this,
-                                String.format(getText(R.string.registration_failed).toString(), t));
-                    }
-                });
-            } catch (ApiException e) {
-                Log.w(TAG, "Google sign in failed", e);
-                new SimpleDialogs().confirm(MyDataActivity.this,
-                        String.format(getText(R.string.google_sign_in_failed).toString(), e));
-            }
-        }
+        loadRemoteProfile(profile.getEmail(), profile.getUploadToken());
     }
 
     private void setProfileToUI(Profile profile) {
         etNickname.setText(profile.getNickname());
         etUploadToken.setText(profile.getUploadToken());
+        etLoginUploadToken.setText(profile.getUploadToken());
         etEmail.setText(profile.getEmail());
+        etEmailOrNickname.setText(profile.getEmail());
         etLink.setText(profile.getLink());
         license = profile.getLicense();
         cbLicenseCC0.setChecked(license == License.CC0);
@@ -152,18 +93,26 @@ public class MyDataActivity extends AppCompatActivity {
         this.profile = profile;
     }
 
-    private void loadRemoteProfile() {
-        if (isUploadTokenAvailable()) {
-            final Profile profile = createProfileFromUI();
-            rsapi.getProfile(profile.getEmail(), profile.getUploadToken()).enqueue(new Callback<Profile>() {
+    private void loadRemoteProfile(String email, final String uploadToken) {
+        if (isUploadTokenAvailable(email, uploadToken)) {
+            loginForm.setVisibility(View.VISIBLE);
+            profileForm.setVisibility(View.GONE);
+
+            rsapi.getProfile(email, uploadToken).enqueue(new Callback<Profile>() {
                 @Override
                 public void onResponse(Call<Profile> call, Response<Profile> response) {
                     switch (response.code()) {
                         case 200 :
                             Log.i(TAG, "Successfully loaded profile");
                             final Profile remoteProfile = response.body();
-                            remoteProfile.setUploadToken(profile.getUploadToken());
+                            remoteProfile.setUploadToken(uploadToken);
                             saveLocalProfile(remoteProfile);
+                            loginForm.setVisibility(View.GONE);
+                            profileForm.setVisibility(View.VISIBLE);
+                            tvProfileHeadline.setText(R.string.tvProfile);
+                            btProfileSave.setText(R.string.bt_mydata_commit);
+                            etUploadToken.setVisibility(View.VISIBLE);
+                            tvUploadToken.setVisibility(View.VISIBLE);
                             break;
                         case 401 :
                             new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_invalid);
@@ -191,7 +140,7 @@ public class MyDataActivity extends AppCompatActivity {
                     profile.setUploadToken(data.getLastPathSegment());
                     etUploadToken.setText(profile.getUploadToken());
                     baseApplication.setUploadToken(profile.getUploadToken());
-                    loadRemoteProfile();
+                    loadRemoteProfile(profile.getEmail(), profile.getUploadToken());
                 }
             }
         }
@@ -211,6 +160,10 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void register(View view) {
+        if (btProfileSave.getText().equals(getResources().getText(R.string.bt_mydata_commit))) {
+            saveSettings(view);
+            return;
+        }
         if (!isValid()) {
             return;
         }
@@ -259,7 +212,7 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void saveSettings(View view) {
-        if (isUploadTokenAvailable()) {
+        if (isUploadTokenAvailable(etEmail.getText().toString(), etUploadToken.getText().toString())) {
             if (!isValid()) {
                 return;
             }
@@ -307,8 +260,8 @@ public class MyDataActivity extends AppCompatActivity {
         setProfileToUI(profile);
     }
 
-    private boolean isUploadTokenAvailable() {
-        return StringUtils.isNotBlank(etUploadToken.getText().toString()) && StringUtils.isNotBlank(etEmail.getText().toString());
+    private boolean isUploadTokenAvailable(String email, String uploadToken) {
+        return StringUtils.isNotBlank(uploadToken) && StringUtils.isNotBlank(email);
     }
 
     @Override
@@ -368,5 +321,72 @@ public class MyDataActivity extends AppCompatActivity {
             etLink.setVisibility(View.VISIBLE);
             findViewById(R.id.tvLinking).setVisibility(View.VISIBLE);
         }
+    }
+
+    public void newRegister(View view) {
+        etEmail.setText(etEmailOrNickname.getText());
+        profileForm.setVisibility(View.VISIBLE);
+        loginForm.setVisibility(View.GONE);
+        etUploadToken.setVisibility(View.GONE);
+        tvUploadToken.setVisibility(View.GONE);
+        tvProfileHeadline.setText(R.string.tvRegistration);
+        btProfileSave.setText(R.string.bt_register);
+    }
+
+    public void login(View view) {
+        String email = etEmailOrNickname.getText().toString();
+        String uploadToken = etLoginUploadToken.getText().toString();
+        if (isUploadTokenAvailable(email, uploadToken)) {
+            baseApplication.setEmail(email);
+            baseApplication.setUploadToken(uploadToken);
+            loadRemoteProfile(email, uploadToken);
+        } else {
+            new SimpleDialogs().confirm(this, R.string.missing_login_data);
+        }
+    }
+
+    public void logout(View view) {
+        profile.setNickname(null);;
+        profile.setEmail(null);
+        profile.setUploadToken(null);
+        saveLocalProfile(profile);
+        profileForm.setVisibility(View.GONE);
+        loginForm.setVisibility(View.VISIBLE);
+    }
+
+    public void newUploadToken(View view) {
+        String emailOrNickname = etEmailOrNickname.getText().toString();
+        if (StringUtils.isBlank(emailOrNickname)) {
+            new SimpleDialogs().confirm(this, R.string.missing_email_or_nickname);
+            return;
+        }
+        profile.setEmail(emailOrNickname);
+        saveLocalProfile(profile);
+        rsapi.newUploadToken(emailOrNickname).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                switch (response.code()) {
+                    case 202 :
+                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.upload_token_email);
+                        break;
+                    case 400 :
+                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_wrong_data);
+                        break;
+                    case 404 :
+                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_not_found);
+                        break;
+                    default :
+                        new SimpleDialogs().confirm(MyDataActivity.this,
+                                String.format(getText(R.string.request_uploadtoken_failed).toString(), response.code()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Request new UploadToken failed", t);
+                new SimpleDialogs().confirm(MyDataActivity.this,
+                        String.format(getText(R.string.request_uploadtoken_failed).toString(), t));
+            }
+        });
     }
 }

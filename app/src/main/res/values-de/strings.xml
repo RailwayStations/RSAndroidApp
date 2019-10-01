@@ -244,5 +244,16 @@
     <string name="comment">Kommentar</string>
     <string name="station_title_needed">Bitte gib einen Bahnhofsnamen an.</string>
     <string name="nav_show_on_map">auf der Bahnhofskarte</string>
+    <string name="login">Einloggen</string>
+    <string name="bt_new_register">Neues Konto registrieren</string>
+    <string name="tvEmailOrNickname">Email oder Nickname</string>
+    <string name="missing_login_data">Bitte gib Email/Nickname und UploadToken ein, um Dich einzuloggen.</string>
+    <string name="bt_logout">Ausloggen</string>
+    <string name="profile_not_found">Email oder Nickname unbekannt.</string>
+    <string name="missing_email_or_nickname">Bitte gib Email oder Nickname an, um einen neuen UploadToken anzufordern.</string>
+    <string name="request_uploadtoken_failed">Fehler beim Anfordern des UploadTokens</string>
+    <string name="bt_register">Registrieren</string>
+    <string name="tvRegistration">Registrierung</string>
+    <string name="tvProfile">Benutzerprofil</string>
 
 </resources>
