@@ -1,0 +1,12 @@
+Mit der Bahnhofsfotos-App kannst Du das OpenData Projekt https://railway-Stations.org unterstützen. Wähle ein Land und finde Bahnhöfe zu denen wir noch kein Bahnhofsfoto auf http://www.deutschlands-bahnhoefe.de / https://railway-stations.org haben. Inzwischen sind über 20 Länder in unserer Datenbank. Weitere werden Stück für Stück hinzugefügt.
+
+Im Menüpunkt "Deine Daten" gibst Du an, wie Du die Fotos schicken möchtest - als verlinkter Fotograf oder anonym, mit Lizenz ohne Namensnennung und ob Du das Foto selbst geknipst hast. Wenn Du verlinkt werden möchtest, benötigen wir den Link und den Nicknamen zu z.B. Deinem Twitter-Account.
+Wenn Du einen Token anforderst, kannst Du Deine Fotos auch hochladen.
+
+Mittles Klick auf das Suchsymbol oben im Startbildschirm, kannst Du eine Volltextsuche auslösen.
+
+Im Menüpunkt "Bahnhofskarte" kannst Du Deinen Standord ermitteln und Bahnhöfe in der Nähe finden. Es lässt sich filtern, ob Du nur Bahnhöfe mit oder ohne Foto sehen möchtest. 
+
+Melde inaktive oder fehlende Bahnhöfe über die App.
+
+Du kannst auch auswählen, ob Du benachrichtigt werden möchtest, wenn sich ein Bahnhof in unmittelbarer Nähe befindet. 

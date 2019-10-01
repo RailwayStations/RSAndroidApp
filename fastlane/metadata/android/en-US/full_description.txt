@@ -1,0 +1,7 @@
+Support the https://railway-stations.org OpenData project with the Railway stations photo app. Select a country and find a station without a photo. Over 20 countries are already in our database, more to be added step by step.
+
+Create an account under "My Data". You can contribute photos anonymously or with your nicknamen. If you like you can define a link to a social media profile of yours, e.g. Twitter, then we add it to all of your uploaded photos.
+
+With the station map you can find your location and stations nearby. Stations can be filtered by if they already have a photo or not. You can mark a station as inactive or report missing stations by long clicking on the position on the map.
+
+You can enable notifications of nearby stations when you are on a tour.

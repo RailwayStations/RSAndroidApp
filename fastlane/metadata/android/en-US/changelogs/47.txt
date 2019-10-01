@@ -1,0 +1,3 @@
+- report missing station
+- navigate from station details to map
+- cleanup "My data" with login, registration and profile information
