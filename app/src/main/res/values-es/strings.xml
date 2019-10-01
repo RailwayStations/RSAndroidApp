@@ -229,4 +229,15 @@
         \n\nSome maps require special themes to render correctly! These need to be downloaded and configured accordingly.</string>
   <string name="map_info_title">About Maps</string>
     <string name="nav_show_on_map">on station map</string>
+    <string name="login">Login</string>
+  <string name="bt_new_register">Register new account</string>
+    <string name="tvEmailOrNickname">Email or Nickname</string>
+    <string name="missing_login_data">Please provide eMail/Nickname and UploadToken to login</string>
+    <string name="bt_logout">Logout</string>
+    <string name="profile_not_found">Unknown email or nickname</string>
+  <string name="missing_email_or_nickname">Please provide email or nickname</string>
+  <string name="request_uploadtoken_failed">Request new UploadToken failed</string>
+  <string name="bt_register">Register</string>
+  <string name="tvRegistration">Registration</string>
+  <string name="tvProfile">Userprofile</string>
 </resources>
