@@ -46,11 +46,8 @@ public interface RSAPI {
     @POST("/registration")
     Call<Void> registration(@Body Profile profile);
 
-    @Headers({
-            "Content-Type: application/json"
-    })
-    @POST("/registration/withGoogleIdToken")
-    Call<Profile> registrationWithGoogleIdToken(@Header("Google-Id-Token") String googleIdToken, @Body Profile profile);
+    @POST("/newUploadToken")
+    Call<Void> newUploadToken(@Header("Email") String emailOrNickname);
 
     @POST("/photoUpload")
     Call<Void> photoUpload(@Header("Email") String email, @Header("Upload-Token") String uploadToken,
