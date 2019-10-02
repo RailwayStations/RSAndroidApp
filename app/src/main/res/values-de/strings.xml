@@ -255,5 +255,5 @@
     <string name="bt_register">Registrieren</string>
     <string name="tvRegistration">Registrierung</string>
     <string name="tvProfile">Benutzerprofil</string>
-
+    <string name="station_inactive">Bahnhof nicht aktiv</string>
 </resources>

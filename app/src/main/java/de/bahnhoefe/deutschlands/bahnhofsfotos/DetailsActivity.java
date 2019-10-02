@@ -137,6 +137,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         etBahnhofName = findViewById(R.id.etbahnhofname);
         etComment = findViewById(R.id.etComment);
         coordinates = findViewById(R.id.coordinates);
+        TextView isInactive = findViewById(R.id.isinactive);
         imageView = findViewById(R.id.imageview);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -202,6 +203,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 etBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhofId + ")");
                 etBahnhofName.setEnabled(false);
                 coordinates.setText(bahnhof.getLat() + ", " + bahnhof.getLon());
+            if (!bahnhof.isActive()) {
+                isInactive.setVisibility(View.VISIBLE);
+            }
 
                 if (bahnhof.hasPhoto()) {
                     if (ConnectionUtil.checkInternetConnection(this)) {

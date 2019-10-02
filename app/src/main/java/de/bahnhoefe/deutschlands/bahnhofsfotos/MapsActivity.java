@@ -608,6 +608,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         Bitmap markerWithoutPhoto = loadBitmap(R.drawable.marker_red);
         Bitmap markerOwnPhoto = loadBitmap(R.drawable.marker_violet);
 
+        Bitmap markerWithPhotoInactive = loadBitmap(R.drawable.marker_green_inactive);
+        Bitmap markerWithoutPhotoInactive = loadBitmap(R.drawable.marker_red_inactive);
+        Bitmap markerOwnPhotoInactive = loadBitmap(R.drawable.marker_violet_inactive);
+
         Paint paint1 = AndroidGraphicFactory.INSTANCE.createPaint();
         paint1.setStyle(Style.FILL);
         paint1.setTextAlign(Align.CENTER);
@@ -616,6 +620,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         paint1.setTypeface(fontFamily, fontStyle);
         paint1.setColor(Color.RED);
         markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), markerWithoutPhoto, bitmapWithPhoto, markerOwnPhoto,
+                markerWithoutPhotoInactive, markerWithPhotoInactive, markerOwnPhotoInactive,
                 new Point(0, -(markerWithoutPhoto.getHeight()/2)), 10f, 1, paint1));
 
         // small cluster icon. for 10 or less items.
@@ -628,7 +633,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         paint2.setTypeface(fontFamily, fontStyle);
         paint2.setColor(Color.BLACK);
         markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), bitmapBalloonSN,
-                bitmapBalloonSN, bitmapBalloonSN, new Point(0, 0), 9f, 10, paint2));
+                new Point(0, 0), 9f, 10, paint2));
 
         // large cluster icon. 100 will be ignored.
         Bitmap bitmapBalloonMN = loadBitmap(R.drawable.balloon_m_n);
@@ -640,7 +645,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         paint3.setTypeface(fontFamily, fontStyle);
         paint3.setColor(Color.BLACK);
         markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), bitmapBalloonMN,
-                bitmapBalloonMN, bitmapBalloonMN, new Point(0, 0), 11f, 100, paint3));
+                new Point(0, 0), 11f, 100, paint3));
         return markerBitmaps;
     }
 
@@ -899,6 +904,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         @Override
         public boolean ownPhoto() {
             return hasPhoto() && bahnhof.getPhotographer().equals(nickname);
+        }
+
+        @Override
+        public boolean stationActive() {
+            return bahnhof.isActive();
         }
 
         public Bahnhof getBahnhof() {

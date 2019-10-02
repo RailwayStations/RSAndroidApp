@@ -24,7 +24,7 @@ public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 11;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
             + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -38,7 +38,8 @@ public class BahnhofsDbAdapter {
             + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER_URL + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_LICENSE + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_LICENSE_URL + " TEXT, "
-            + Constants.DB_JSON_CONSTANTS.KEY_DS100 + " TEXT)";
+            + Constants.DB_JSON_CONSTANTS.KEY_DS100 + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_ACTIVE + " INTEGER)";
     private static final String CREATE_STATEMENT_2 = "CREATE INDEX " + DATABASE_TABLE + "_IDX "
             + "ON " + DATABASE_TABLE + "(" + Constants.DB_JSON_CONSTANTS.KEY_ID + ")";
     private static final String CREATE_STATEMENT_COUNTRIES = "CREATE TABLE " + DATABASE_TABLE_LAENDER + " ("
@@ -93,6 +94,7 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LICENSE, bahnhof.getLicense());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_LICENSE_URL, bahnhof.getLicenseUrl());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_DS100, bahnhof.getDs100());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_ACTIVE, bahnhof.isActive());
 
                 db.insert(DATABASE_TABLE, null, values);
             }
@@ -297,6 +299,7 @@ public class BahnhofsDbAdapter {
         String license = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LICENSE));
         String licenseUrl = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_LICENSE_URL));
         String ds100 = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_DS100));
+        boolean isActive = cursor.getInt(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_ACTIVE)) == 1;
         Bahnhof bahnhof = new Bahnhof();
         bahnhof.setTitle(title);
         bahnhof.setCountry(country);
@@ -309,6 +312,7 @@ public class BahnhofsDbAdapter {
         bahnhof.setLicense(license);
         bahnhof.setLicenseUrl(licenseUrl);
         bahnhof.setDs100(ds100);
+        bahnhof.setActive(isActive);
         return bahnhof;
     }
 

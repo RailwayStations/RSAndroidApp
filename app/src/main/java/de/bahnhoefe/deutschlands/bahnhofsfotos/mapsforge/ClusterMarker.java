@@ -73,6 +73,7 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
             , org.mapsforge.core.graphics.Canvas canvas, Point topLeftPoint) {
         boolean hasPhoto = hasPhoto();
         boolean ownPhoto = ownPhoto();
+        Boolean stationActive = stationActive();
         if (cluster.getClusterManager() == null ||
                 this.getLatLong() == null) {
             return;
@@ -84,7 +85,7 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         double halfBitmapWidth;
         double halfBitmapHeight;
         MarkerBitmap markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
-        Bitmap bitmap = markerBitmap.getBitmap(hasPhoto, ownPhoto);
+        Bitmap bitmap = markerBitmap.getBitmap(hasPhoto, ownPhoto, stationActive);
         try {
             halfBitmapWidth = bitmap.getWidth() / 2f;
             halfBitmapHeight = bitmap.getHeight() / 2f;
@@ -173,9 +174,10 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     private Rectangle getBitmapRectangle(Point center) {
         boolean hasPhoto = hasPhoto();
         boolean ownPhoto = ownPhoto();
+        boolean stationActive = stationActive();
 
         MarkerBitmap markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
-        Bitmap bitmap = markerBitmap.getBitmap(hasPhoto, ownPhoto);
+        Bitmap bitmap = markerBitmap.getBitmap(hasPhoto, ownPhoto, stationActive);
         return new Rectangle(
                 center.x - (float) bitmap.getWidth() + markerBitmap.getIconOffset().x,
                 center.y - (float) bitmap.getHeight() + markerBitmap.getIconOffset().y,
@@ -191,6 +193,11 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     public Boolean ownPhoto() {
         return (cluster.getItems().size() == 1 &&
                 cluster.getItems().get(0).ownPhoto());
+    }
+
+    public Boolean stationActive() {
+        return (cluster.getItems().size() == 1 &&
+                cluster.getItems().get(0).stationActive());
     }
 
 }

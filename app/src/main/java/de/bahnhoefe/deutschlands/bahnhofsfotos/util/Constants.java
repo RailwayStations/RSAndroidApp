@@ -18,6 +18,7 @@ public class Constants {
         public static final String KEY_LICENSE = "license";
         public static final String KEY_LICENSE_URL = "licenseUrl";
         public static final String KEY_DS100 = "DS100";
+        public static final String KEY_ACTIVE = "active";
 
         //Länderkonstanten
         public static final String KEY_COUNTRYNAME = "country";

@@ -41,4 +41,9 @@ public interface GeoItem {
 
     boolean ownPhoto();
 
+    /**
+     * @return true if the station is active
+     */
+    boolean stationActive();
+
 }

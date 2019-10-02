@@ -246,4 +246,5 @@
   <string name="bt_register">Register</string>
   <string name="tvRegistration">Registration</string>
   <string name="tvProfile">Userprofile</string>
+  <string name="station_inactive">Station inactive</string>
 </resources>

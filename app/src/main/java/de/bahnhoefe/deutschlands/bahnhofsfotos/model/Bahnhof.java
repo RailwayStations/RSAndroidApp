@@ -20,6 +20,7 @@ public class Bahnhof implements Serializable {
     private String photographerUrl;
     private String license;
     private String licenseUrl;
+    private boolean active;
 
     public String getId() {
         return id;
@@ -61,6 +62,13 @@ public class Bahnhof implements Serializable {
         this.datum = datum;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     @Override
     public boolean equals(Object o) {

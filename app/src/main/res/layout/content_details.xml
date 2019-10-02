@@ -36,7 +36,6 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/etbahnhofname"
-            android:layout_marginBottom="20sp"
             android:background="#80ffffff"
             android:padding="8dp" />
 
@@ -64,6 +63,18 @@
             android:background="#50ffffff"
             android:padding="8dp"
             android:hint="@string/comment" />
+
+        <TextView
+            android:id="@+id/isinactive"
+            android:text="@string/station_inactive"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/etComment"
+            android:layout_marginBottom="20sp"
+            android:background="#80ffffff"
+            android:padding="8dp" />
 
         <TextView
             android:id="@+id/license_tag"
