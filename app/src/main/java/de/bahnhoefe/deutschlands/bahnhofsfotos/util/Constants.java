@@ -27,6 +27,7 @@ public class Constants {
         public static final String KEY_TWITTERTAGS = "twitter_tags";
         public static final String KEY_ROWID_COUNTRIES = "rowidcountries";
         public static final String KEY_TIMETABLE_URL_TEMPLATE = "timetable_url_template";
+        public static final String KEY_PROVIDER_ANDROID_APP = "provider_android_app";
 
     }
 

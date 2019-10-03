@@ -10,6 +10,7 @@ public class Country implements Serializable {
     private String email;
     private String twitterTags;
     private String timetableUrlTemplate;
+    private String providerAndroidApp;
 
     public Country() {
 
@@ -70,6 +71,14 @@ public class Country implements Serializable {
 
     public void setTimetableUrlTemplate(String timetableUrlTemplate) {
         this.timetableUrlTemplate = timetableUrlTemplate;
+    }
+
+    public String getProviderAndroidApp() {
+        return providerAndroidApp;
+    }
+
+    public void setProviderAndroidApp(String providerAndroidApp) {
+        this.providerAndroidApp = providerAndroidApp;
     }
 
     @Override

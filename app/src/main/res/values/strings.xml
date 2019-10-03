@@ -191,6 +191,7 @@
   <string name="photo">Photo</string>
   <string name="no_internet_connection">No Internet connection!</string>
   <string name="timetable_missing">Timetable not available</string>
+  <string name="provider_app_missing">Provider App not available</string>
     <string name="select_nickname">Select photographer</string>
     <string name="no_nicknames_found">No photographers found</string>
   <string name="report_ghost_station">Upload this photo to report a non-existing station.</string>
@@ -247,4 +248,5 @@
   <string name="tvRegistration">Registration</string>
   <string name="tvProfile">Userprofile</string>
   <string name="station_inactive">Station inactive</string>
+    <string name="provider_android_app">Provider App</string>
 </resources>

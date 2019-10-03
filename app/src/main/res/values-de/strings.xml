@@ -187,6 +187,7 @@
     <string name="photo">Foto</string>
     <string name="no_internet_connection">Keine Internetverbindung!</string>
     <string name="timetable_missing">Abfahrtszeiten nicht verfügbar</string>
+    <string name="provider_app_missing">Betreiber App nicht verfügbar</string>
     <plurals name="stations_loaded">
         <item quantity="one">%d Bahnhof geladen</item>
         <item quantity="other">%d Bahnhöfe geladen</item>
@@ -256,4 +257,5 @@
     <string name="tvRegistration">Registrierung</string>
     <string name="tvProfile">Benutzerprofil</string>
     <string name="station_inactive">Bahnhof nicht aktiv</string>
+    <string name="provider_android_app">Betreiber App</string>
 </resources>
