@@ -611,8 +611,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             disableMenuItem(menu, R.id.share_photo);
         }
 
-        Country countryByCode = Country.getCountryByCode(countries, bahnhof.getCountry());
-        if (countryByCode.getProviderAndroidApp() == null) {
+        String providerAndroidApp = null;
+        if (bahnhof != null) {
+            Country countryByCode = Country.getCountryByCode(countries, bahnhof.getCountry());
+            providerAndroidApp = countryByCode.getProviderAndroidApp();
+        }
+        if (providerAndroidApp == null) {
             disableMenuItem(menu, R.id.provider_android_app);
         } else {
             enableMenuItem(menu, R.id.provider_android_app);
