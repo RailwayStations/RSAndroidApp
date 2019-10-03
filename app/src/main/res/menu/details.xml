@@ -17,6 +17,13 @@
         app:itemIconTint="@color/colorActions"
         app:itemTextColor="@color/colorActions"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/provider_android_app"
+        android:icon="@drawable/ic_launch_white_24px"
+        android:orderInCategory="100"
+        android:title="@string/provider_android_app"
+        app:itemTextColor="@color/colorActions"
+        app:showAsAction="ifRoom" />
 
     <!-- menu group -->
     <group android:id="@+id/group_depencies">

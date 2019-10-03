@@ -64,6 +64,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -610,6 +611,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             disableMenuItem(menu, R.id.share_photo);
         }
 
+        Country countryByCode = Country.getCountryByCode(countries, bahnhof.getCountry());
+        if (countryByCode.getProviderAndroidApp() == null) {
+            disableMenuItem(menu, R.id.provider_android_app);
+        } else {
+            enableMenuItem(menu, R.id.provider_android_app);
+        }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -658,6 +666,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, bahnhof != null ? bahnhof.getCountry() : null).getTwitterTags() + " " + etBahnhofName.getText());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
+                break;
+            case R.id.provider_android_app:
+                Country country = Country.getCountryByCode(countries, bahnhof.getCountry());
+                String providerAndroidApp = country.getProviderAndroidApp();
+                if (providerAndroidApp != null) {
+                    ProviderApp.openAppOrPlayStore(getApplicationContext(), providerAndroidApp);
+                } else {
+                    Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG).show();
+                }
+
                 break;
             case android.R.id.home:
                 Intent upIntent = NavUtils.getParentActivityIntent(this);

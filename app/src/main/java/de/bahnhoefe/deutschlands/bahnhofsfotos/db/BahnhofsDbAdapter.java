@@ -24,7 +24,7 @@ public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
     private static final String DATABASE_TABLE_LAENDER = "laender";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
 
     private static final String CREATE_STATEMENT_1 = "CREATE TABLE " + DATABASE_TABLE + " ("
             + Constants.DB_JSON_CONSTANTS.KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -48,7 +48,8 @@ public class BahnhofsDbAdapter {
             + Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_EMAIL + " TEXT, "
             + Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS + " TEXT, "
-            + Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE + " TEXT)";
+            + Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE + " TEXT, "
+            + Constants.DB_JSON_CONSTANTS.KEY_PROVIDER_ANDROID_APP + " TEXT)";
 
     private static final String DROP_STATEMENT_1 = "DROP INDEX IF EXISTS " + DATABASE_TABLE + "_IDX";
     private static final String DROP_STATEMENT_2 = "DROP TABLE IF EXISTS " + DATABASE_TABLE;
@@ -119,6 +120,7 @@ public class BahnhofsDbAdapter {
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_EMAIL, country.getEmail());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS, country.getTwitterTags());
                 values.put(Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE, country.getTimetableUrlTemplate());
+                values.put(Constants.DB_JSON_CONSTANTS.KEY_PROVIDER_ANDROID_APP, country.getProviderAndroidApp());
 
                 db.insert(DATABASE_TABLE_LAENDER, null, values);
 
@@ -323,12 +325,14 @@ public class BahnhofsDbAdapter {
         String email = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_EMAIL));
         String twitterTags = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TWITTERTAGS));
         String timetableUrlTemplate = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_TIMETABLE_URL_TEMPLATE));
+        String providerAndroidApp = cursor.getString(cursor.getColumnIndexOrThrow(Constants.DB_JSON_CONSTANTS.KEY_PROVIDER_ANDROID_APP));
         Country country = new Country();
         country.setCode(countryShortCode);
         country.setName(countryName);
         country.setEmail(email);
         country.setTwitterTags(twitterTags);
         country.setTimetableUrlTemplate(timetableUrlTemplate);
+        country.setProviderAndroidApp(providerAndroidApp);
         return country;
     }
 
