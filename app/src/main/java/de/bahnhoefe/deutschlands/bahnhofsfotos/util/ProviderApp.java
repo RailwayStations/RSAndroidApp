@@ -8,49 +8,27 @@ import android.net.Uri;
 
 public class ProviderApp {
 
-    private static final String PLAYSTORE_ID_PREFIX = "?id=";
+    private static final String PLAY_STORE_LINK = "https://play.google.com/store/apps/details?id=";
 
     /**
      * Tries to open the provider app if installed. If it is not installed or cannot be opened Google Play Store will be opened instead.
      *
-     * @param context                current Context, like Activity, App, or Service
-     * @param providerAndroidAppLink play store link, beginning with "https://play.google.com/store/apps/details?id="
+     * @param context     activity context
+     * @param packageName play store package name
      */
-    public static void openAppOrPlayStore(Context context, String providerAndroidAppLink) {
+    public static void openAppOrPlayStore(Context context, String packageName) {
         // Try to open App
-        boolean success = ProviderApp.openAppFromUrl(context, providerAndroidAppLink);
+        boolean success = openApp(context, packageName);
         // Could not open App, open play store instead
         if (!success) {
-            ProviderApp.openUrl(context, providerAndroidAppLink);
+            ProviderApp.openUrl(context, packageName);
         }
-    }
-
-    /**
-     * Parses a link and tries to find the apps packageName. On success the app will be opened.
-     *
-     * @param context                current Context, like Activity, App, or Service
-     * @param providerAndroidAppLink play store link, beginning with "https://play.google.com/store/apps/details?id="
-     * @return true if likely successful, false if unsuccessful
-     */
-    private static boolean openAppFromUrl(Context context, String providerAndroidAppLink) {
-        // Try to open App
-        int index = providerAndroidAppLink.indexOf(PLAYSTORE_ID_PREFIX);
-        boolean success = false;
-        if (index > 0) {
-            try {
-                String packageName = providerAndroidAppLink.substring(index + PLAYSTORE_ID_PREFIX.length());
-                success = openApp(context, packageName);
-            } catch (IndexOutOfBoundsException e) {
-                return false;
-            }
-        }
-        return success;
     }
 
     /**
      * Open another app.
      *
-     * @param context     current Context, like Activity, App, or Service
+     * @param context     activity context
      * @param packageName the full package name of the app to open
      * @return true if likely successful, false if unsuccessful
      * @see https://stackoverflow.com/a/7596063/714965
@@ -74,10 +52,10 @@ public class ProviderApp {
     /**
      * Build an intent for an action to view a provider app on the play store.
      */
-    private static void openUrl(Context context, String providerAndroidApp) {
+    private static void openUrl(Context context, String packageName) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        Uri uri = Uri.parse(providerAndroidApp);
+        Uri uri = Uri.parse(PLAY_STORE_LINK + packageName);
         intent.setData(uri);
         context.startActivity(intent);
     }
