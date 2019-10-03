@@ -671,7 +671,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Country country = Country.getCountryByCode(countries, bahnhof.getCountry());
                 String providerAndroidApp = country.getProviderAndroidApp();
                 if (providerAndroidApp != null) {
-                    ProviderApp.openAppOrPlayStore(getApplicationContext(), providerAndroidApp);
+                    ProviderApp.openAppOrPlayStore(this, providerAndroidApp);
                 } else {
                     Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG).show();
                 }
