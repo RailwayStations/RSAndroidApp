@@ -60,11 +60,11 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
-    implementation 'org.mapsforge:mapsforge-core:0.11.0'
-    implementation 'org.mapsforge:mapsforge-map:0.11.0'
-    implementation 'org.mapsforge:mapsforge-map-reader:0.11.0'
-    implementation 'org.mapsforge:mapsforge-themes:0.11.0'
-    implementation 'org.mapsforge:mapsforge-map-android:0.11.0'
+    implementation 'org.mapsforge:mapsforge-core:0.12.0'
+    implementation 'org.mapsforge:mapsforge-map:0.12.0'
+    implementation 'org.mapsforge:mapsforge-map-reader:0.12.0'
+    implementation 'org.mapsforge:mapsforge-themes:0.12.0'
+    implementation 'org.mapsforge:mapsforge-map-android:0.12.0'
     implementation 'net.sf.kxml:kxml2:2.3.0'
     implementation 'com.caverock:androidsvg:1.3'
 
