@@ -19,19 +19,17 @@ public class Timetable {
     public Intent createTimetableIntent(Country country, Bahnhof station) {
         final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
 
-        String timeTableTemplate = country.getTimetableUrlTemplate();
-        if (timeTableTemplate == null || timeTableTemplate.isEmpty()) {
+        if (!country.hasTimetableUrlTemplate()) {
             return null;
         }
+
+        String timeTableTemplate = country.getTimetableUrlTemplate();
 
         timeTableTemplate = timeTableTemplate.replace("{id}", station.getId());
         timeTableTemplate = timeTableTemplate.replace("{title}", station.getTitle());
         timeTableTemplate = timeTableTemplate.replace("{DS100}", StringUtils.trimToEmpty(station.getDs100()));
 
-        Uri timeTableUri = Uri.parse(
-                String.format(timeTableTemplate, Uri.encode(station.getTitle()))
-        );
-        timetableIntent.setData(timeTableUri);
+        timetableIntent.setData(Uri.parse(timeTableTemplate));
         return timetableIntent;
     }
 }

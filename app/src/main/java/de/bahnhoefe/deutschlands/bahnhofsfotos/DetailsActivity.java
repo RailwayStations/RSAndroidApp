@@ -611,6 +611,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             disableMenuItem(menu, R.id.share_photo);
         }
 
+        if (bahnhof != null && Country.getCountryByCode(countries, bahnhof.getCountry()).hasTimetableUrlTemplate()) {
+            enableMenuItem(menu, R.id.timetable);
+        } else {
+            disableMenuItem(menu, R.id.timetable);
+        }
+
         String providerAndroidApp = null;
         if (bahnhof != null) {
             Country countryByCode = Country.getCountryByCode(countries, bahnhof.getCountry());
@@ -645,7 +651,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 startNavigation(DetailsActivity.this);
                 break;
             case R.id.timetable:
-                final Intent timetableIntent = bahnhof != null ? new Timetable().createTimetableIntent(Country.getCountryByCode(countries, bahnhof.getCountry()), bahnhof) : null;
+                final Intent timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, bahnhof.getCountry()), bahnhof);
                 if (timetableIntent != null) {
                     startActivity(timetableIntent);
                 } else {

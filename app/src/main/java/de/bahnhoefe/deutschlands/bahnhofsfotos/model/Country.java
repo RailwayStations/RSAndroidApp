@@ -69,6 +69,10 @@ public class Country implements Serializable {
         return timetableUrlTemplate;
     }
 
+    public boolean hasTimetableUrlTemplate() {
+        return timetableUrlTemplate != null && !timetableUrlTemplate.isEmpty();
+    }
+
     public void setTimetableUrlTemplate(String timetableUrlTemplate) {
         this.timetableUrlTemplate = timetableUrlTemplate;
     }
