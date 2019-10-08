@@ -39,16 +39,16 @@ public class MyDataActivity extends AppCompatActivity {
     private View profileForm;
     private EditText etEmailOrNickname;
     private EditText etLoginUploadToken;
-    private TextView tvProfileHeadline;
     private Button btProfileSave;
     private TextView tvUploadToken;
+    private Button btLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydata);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(R.string.title_activity_my_data);
+        getSupportActionBar().setTitle(R.string.login);
 
         loginForm = findViewById(R.id.login_form);
         profileForm = findViewById(R.id.profile_form);
@@ -64,8 +64,8 @@ public class MyDataActivity extends AppCompatActivity {
         cbPhotoOwner = findViewById(R.id.cbOwnPhoto);
         cbAnonymous = findViewById(R.id.cbAnonymous);
 
-        tvProfileHeadline = findViewById(R.id.tvProfileHeadline);
         btProfileSave = findViewById(R.id.btProfileSave);
+        btLogout = findViewById(R.id.bt_logout);
         tvUploadToken = findViewById(R.id.tvUploadToken);
 
         baseApplication = (BaseApplication) getApplication();
@@ -109,8 +109,9 @@ public class MyDataActivity extends AppCompatActivity {
                             saveLocalProfile(remoteProfile);
                             loginForm.setVisibility(View.GONE);
                             profileForm.setVisibility(View.VISIBLE);
-                            tvProfileHeadline.setText(R.string.tvProfile);
+                            getSupportActionBar().setTitle(R.string.tvProfile);
                             btProfileSave.setText(R.string.bt_mydata_commit);
+                            btLogout.setVisibility(View.VISIBLE);
                             etUploadToken.setVisibility(View.VISIBLE);
                             tvUploadToken.setVisibility(View.VISIBLE);
                             break;
@@ -329,8 +330,9 @@ public class MyDataActivity extends AppCompatActivity {
         loginForm.setVisibility(View.GONE);
         etUploadToken.setVisibility(View.GONE);
         tvUploadToken.setVisibility(View.GONE);
-        tvProfileHeadline.setText(R.string.tvRegistration);
+        getSupportActionBar().setTitle(R.string.tvRegistration);
         btProfileSave.setText(R.string.bt_register);
+        btLogout.setVisibility(View.GONE);
     }
 
     public void login(View view) {
@@ -352,6 +354,7 @@ public class MyDataActivity extends AppCompatActivity {
         saveLocalProfile(profile);
         profileForm.setVisibility(View.GONE);
         loginForm.setVisibility(View.VISIBLE);
+        getSupportActionBar().setTitle(R.string.login);
     }
 
     public void newUploadToken(View view) {
