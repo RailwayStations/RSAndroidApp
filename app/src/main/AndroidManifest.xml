@@ -90,6 +90,10 @@
                     android:host="railway-stations.org"
                     android:pathPrefix="/uploadToken"
                     android:scheme="http"/>
+                <data
+                    android:host="railway-stations.org"
+                    android:pathPrefix="/uploadToken"
+                    android:scheme="https"/>
             </intent-filter>
         </activity>
         <activity
