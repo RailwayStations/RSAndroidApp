@@ -139,6 +139,7 @@ public class MyDataActivity extends AppCompatActivity {
                 Uri data = intent.getData();
                 if (data != null) {
                     profile.setUploadToken(data.getLastPathSegment());
+                    etLoginUploadToken.setText(profile.getUploadToken());
                     etUploadToken.setText(profile.getUploadToken());
                     baseApplication.setUploadToken(profile.getUploadToken());
                     loadRemoteProfile(profile.getEmail(), profile.getUploadToken());
