@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Set;
 
 import static android.content.Intent.createChooser;
@@ -66,7 +67,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ProviderApp;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -130,7 +131,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         rsapi = baseApplication.getRSAPI();
         BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
         countryCodes = baseApplication.getCountryCodes();
-        countries = dbAdapter.fetchCountriesByCountryCodes(countryCodes);
+        countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -619,15 +620,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             disableMenuItem(menu, R.id.timetable);
         }
 
-        String providerAndroidApp = null;
+        boolean hasProviderApps = false;
         if (bahnhof != null) {
             Country countryByCode = Country.getCountryByCode(countries, bahnhof.getCountry());
-            providerAndroidApp = countryByCode.getProviderAndroidApp();
+            hasProviderApps = countryByCode.hasCompatibleProviderApps();
         }
-        if (providerAndroidApp == null) {
-            disableMenuItem(menu, R.id.provider_android_app);
-        } else {
+        if (hasProviderApps) {
             enableMenuItem(menu, R.id.provider_android_app);
+        } else {
+            disableMenuItem(menu, R.id.provider_android_app);
         }
 
         return super.onPrepareOptionsMenu(menu);
@@ -681,9 +682,23 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 break;
             case R.id.provider_android_app:
                 Country country = Country.getCountryByCode(countries, bahnhof.getCountry());
-                String providerAndroidApp = country.getProviderAndroidApp();
-                if (providerAndroidApp != null) {
-                    ProviderApp.openAppOrPlayStore(this, providerAndroidApp);
+                final List<ProviderApp> providerApps = country.getCompatibleProviderApps();
+                if (providerApps.size() == 1) {
+                    providerApps.get(0).openAppOrPlayStore(this);
+                } else if (providerApps.size() > 1) {
+                    CharSequence[] appNames = new CharSequence[providerApps.size()];
+                    for (int i = 0; i < providerApps.size(); i++) {
+                        appNames[i] = providerApps.get(i).getName();
+                    }
+                    new SimpleDialogs().select(this, getResources().getString(R.string.choose_provider_app), appNames, -1, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            int selectedPosition = ((android.app.AlertDialog)dialog).getListView().getCheckedItemPosition();
+                            if (selectedPosition >= 0 && providerApps.size() > selectedPosition) {
+                                providerApps.get(selectedPosition).openAppOrPlayStore(DetailsActivity.this);
+                            }
+                        }
+                    });
                 } else {
                     Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG).show();
                 }

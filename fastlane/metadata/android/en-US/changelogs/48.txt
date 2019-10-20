@@ -1,2 +1,3 @@
 - Fix Upload of photos with special characters in station title
 - Show inactive stations
+- Open Provider Apps if available

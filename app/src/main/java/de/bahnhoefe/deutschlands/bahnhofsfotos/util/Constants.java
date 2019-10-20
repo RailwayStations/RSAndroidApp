@@ -29,6 +29,9 @@ public class Constants {
         public static final String KEY_TIMETABLE_URL_TEMPLATE = "timetable_url_template";
         public static final String KEY_PROVIDER_ANDROID_APP = "provider_android_app";
 
+        public static final String KEY_PA_TYPE = "type";
+        public static final String KEY_PA_NAME = "name";
+        public static final String KEY_PA_URL = "url";
     }
 
     // API URL

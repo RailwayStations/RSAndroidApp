@@ -1,6 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -10,7 +12,7 @@ public class Country implements Serializable {
     private String email;
     private String twitterTags;
     private String timetableUrlTemplate;
-    private String providerAndroidApp;
+    private List<ProviderApp> providerApps = new ArrayList<>();
 
     public Country() {
 
@@ -77,14 +79,6 @@ public class Country implements Serializable {
         this.timetableUrlTemplate = timetableUrlTemplate;
     }
 
-    public String getProviderAndroidApp() {
-        return providerAndroidApp;
-    }
-
-    public void setProviderAndroidApp(String providerAndroidApp) {
-        this.providerAndroidApp = providerAndroidApp;
-    }
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -103,4 +97,19 @@ public class Country implements Serializable {
         return name;
     }
 
+    public List<ProviderApp> getProviderApps() {
+        return providerApps;
+    }
+
+    public void setProviderApps(List<ProviderApp> providerApps) {
+        this.providerApps = providerApps;
+    }
+
+    public boolean hasCompatibleProviderApps() {
+        return ProviderApp.hasCompatibleProviderApps(providerApps);
+    }
+
+    public List<ProviderApp> getCompatibleProviderApps() {
+        return ProviderApp.getCompatibleProviderApps(providerApps);
+    }
 }

@@ -245,4 +245,5 @@
   <string name="bt_register">Register</string>
   <string name="tvRegistration">Registration</string>
   <string name="tvProfile">Userprofile</string>
+    <string name="choose_provider_app">Choose Provider App</string>
 </resources>
