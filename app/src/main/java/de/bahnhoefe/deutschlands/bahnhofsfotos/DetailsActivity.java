@@ -48,7 +48,9 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Set;
 
 import static android.content.Intent.createChooser;
@@ -716,10 +718,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.show();
 
+        String stationTitle = etBahnhofName.getText().toString();
+
+        try {
+            stationTitle = URLEncoder.encode(etBahnhofName.getText().toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Error encoding station title", e);
+        }
+
         final File mediaFile = getStoredMediaFile();
         RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
         rsapi.photoUpload(email, token, bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
-                etBahnhofName.getText().toString(), latitude, longitude, etComment.getText().toString(), file).enqueue(new Callback<Void>() {
+                stationTitle, latitude, longitude, etComment.getText().toString(), file).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 progress.dismiss();
