@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.ContextThemeWrapper;
+import android.widget.ArrayAdapter;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
@@ -43,4 +44,13 @@ public class SimpleDialogs {
                 .setPositiveButton(message, listener)
                 .create().show();
     }
+
+    public void simpleSelect(Context context, CharSequence message, CharSequence[] items, int checkedItem, DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(message)
+                .setAdapter(new ArrayAdapter(context, android.R.layout.simple_list_item_1, 0, items), listener)
+                .create().show();
+    }
+
 }

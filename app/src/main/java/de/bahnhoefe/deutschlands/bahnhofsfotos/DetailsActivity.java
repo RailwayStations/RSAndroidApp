@@ -690,12 +690,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     for (int i = 0; i < providerApps.size(); i++) {
                         appNames[i] = providerApps.get(i).getName();
                     }
-                    new SimpleDialogs().select(this, getResources().getString(R.string.choose_provider_app), appNames, -1, new DialogInterface.OnClickListener() {
+                    new SimpleDialogs().simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, -1, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            int selectedPosition = ((android.app.AlertDialog)dialog).getListView().getCheckedItemPosition();
-                            if (selectedPosition >= 0 && providerApps.size() > selectedPosition) {
-                                providerApps.get(selectedPosition).openAppOrPlayStore(DetailsActivity.this);
+                            if (which >= 0 && providerApps.size() > which) {
+                                providerApps.get(which).openAppOrPlayStore(DetailsActivity.this);
                             }
                         }
                     });
