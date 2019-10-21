@@ -108,7 +108,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private boolean photoOwner;
     private String nickname;
     private String email;
-    private String token;
+    private String password;
     private Set<String> countryCodes;
     private TextView licenseTagView;
     private TextView coordinates;
@@ -250,7 +250,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         photoOwner = baseApplication.getPhotoOwner();
         nickname = baseApplication.getNickname();
         email = baseApplication.getEmail();
-        token = baseApplication.getUploadToken();
+        password = baseApplication.getPassword();
     }
 
     private void checkMyData() {
@@ -665,7 +665,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (isMyDataIncomplete()) {
                     checkMyData();
                 } else {
-                    if (TextUtils.isEmpty(email) || TextUtils.isEmpty(token)) {
+                    if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
                         Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
                     } else if (TextUtils.isEmpty(etBahnhofName.getText())) {
                         Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
@@ -742,7 +742,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         final File mediaFile = getStoredMediaFile();
         RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
-        rsapi.photoUpload(email, token, bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
+        rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
                 stationTitle, latitude, longitude, etComment.getText().toString(), file).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {

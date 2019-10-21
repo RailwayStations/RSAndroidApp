@@ -1,5 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.util.Base64;
+
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -32,13 +35,13 @@ public interface RSAPI {
     Call<HighScore> getHighScore(@Path("country") String country);
 
     @GET("/myProfile")
-    Call<Profile> getProfile(@Header("Email") String email, @Header("Upload-Token") String uploadToken);
+    Call<Profile> getProfile(@Header("Authorization") String authorization);
 
     @Headers({
             "Content-Type: application/json"
     })
     @POST("/myProfile")
-    Call<Void> saveProfile(@Header("Email") String email, @Header("Upload-Token") String uploadToken, @Body Profile profile);
+    Call<Void> saveProfile(@Header("Authorization") String authorization, @Body Profile profile);
 
     @Headers({
             "Content-Type: application/json"
@@ -46,11 +49,14 @@ public interface RSAPI {
     @POST("/registration")
     Call<Void> registration(@Body Profile profile);
 
-    @POST("/newUploadToken")
-    Call<Void> newUploadToken(@Header("Email") String emailOrNickname);
+    @POST("/resetPassword")
+    Call<Void> resetPassword(@Header("Email") String emailOrNickname);
+
+    @POST("/changePassword")
+    Call<Void> changePassword(@Header("Authorization") String authorization, @Header("New-Password") String newPassword);
 
     @POST("/photoUpload")
-    Call<Void> photoUpload(@Header("Email") String email, @Header("Upload-Token") String uploadToken,
+    Call<Void> photoUpload(@Header("Authorization") String authorization,
                            @Header("Station-Id") String stationId,
                            @Header("Country") String countryCode,
                            @Header("Station-Title") String stationTitle,
@@ -58,5 +64,16 @@ public interface RSAPI {
                            @Header("Longitude") Double longitude,
                            @Header("Comment") String comment,
                            @Body RequestBody file);
+
+    class Helper {
+        static String getAuthorizationHeader(String email, String password) {
+            byte[] data = new byte[0];
+            try {
+                data = (email + ":" + password).getBytes("UTF-8");
+            } catch (UnsupportedEncodingException ignored) {
+            }
+            return "Basic " + Base64.encodeToString(data, Base64.NO_WRAP);
+        }
+    }
 
 }

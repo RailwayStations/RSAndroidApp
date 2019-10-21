@@ -187,12 +187,14 @@ public class BaseApplication extends Application {
         putString(R.string.EMAIL, email);
     }
 
-    public String getUploadToken() {
-        return preferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT);
+    public String getPassword() {
+        return preferences.getString(getString(R.string.PASSWORD),
+                preferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT)); // for backward compatibility
     }
 
-    public void setUploadToken(String uploadToken) {
-        putString(R.string.UPLOAD_TOKEN, uploadToken);
+    public void setPassword(String password) {
+        putString(R.string.UPLOAD_TOKEN, DEFAULT); // for backward compatibility
+        putString(R.string.PASSWORD, password);
     }
 
     public PhotoFilter getPhotoFilter() {
@@ -261,7 +263,7 @@ public class BaseApplication extends Application {
         setPhotographerLink(profile.getLink());
         setNickname(profile.getNickname());
         setEmail(profile.getEmail());
-        setUploadToken(profile.getUploadToken());
+        setPassword(profile.getPassword());
     }
 
     public Profile getProfile() {
@@ -272,7 +274,7 @@ public class BaseApplication extends Application {
         profile.setLink(getPhotographerLink());
         profile.setNickname(getNickname());
         profile.setEmail(getEmail());
-        profile.setUploadToken(getUploadToken());
+        profile.setPassword(getPassword());
         return profile;
     }
 

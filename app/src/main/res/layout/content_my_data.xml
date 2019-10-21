@@ -48,9 +48,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/tvLoginUploadToken"
+            android:id="@+id/tvPassword"
             android:layout_below="@+id/etEmailOrNickname"
-            android:text="@string/tvUploadToken"
+            android:text="@string/tvPassword"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginRight="10dp"
@@ -58,34 +58,35 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/etLoginUploadToken"
-            android:hint="@string/etUploadToken"
-            android:layout_below="@+id/tvLoginUploadToken"
+            android:id="@+id/etPassword"
+            android:hint="@string/etPassword"
+            android:inputType="textPassword"
+            android:layout_below="@+id/tvPassword"
             android:layout_marginRight="10dp"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bt_login"
             android:layout_marginTop="10dp"
-            android:layout_below="@+id/etLoginUploadToken"
+            android:layout_below="@+id/etPassword"
             android:text="@string/login"
             android:onClick="login"
             />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/bt_login_get_token"
+            android:id="@+id/bt_login_reset_password"
             android:layout_marginTop="10dp"
             android:layout_below="@+id/bt_login"
-            android:text="@string/bt_mydata_get_token"
-            android:onClick="newUploadToken"
+            android:text="@string/bt_mydata_reset_password"
+            android:onClick="resetPassword"
             />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bt_register"
             android:layout_marginTop="10dp"
-            android:layout_below="@+id/bt_login_get_token"
+            android:layout_below="@+id/bt_login_reset_password"
             android:text="@string/bt_new_register"
             android:onClick="newRegister"
             />
@@ -122,30 +123,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/tvUploadToken"
-            android:layout_below="@+id/etEmail"
-            android:text="@string/tvUploadToken"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginRight="10dp"
-            />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etUploadToken"
-            android:hint="@string/etUploadToken"
-            android:layout_below="@+id/tvUploadToken"
-            android:layout_marginRight="10dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/tvNickname"
             android:text="@string/tvNickname"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_below="@+id/etUploadToken"/>
+            android:layout_below="@+id/etEmail"/>
 
         <EditText
             android:layout_width="match_parent"
@@ -233,7 +215,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/btProfileSave"
             android:layout_marginTop="10dp"
-            android:layout_alignParentBottom="true"
             android:layout_below="@+id/etLinking"
             android:text="@string/bt_register"
             android:onClick="register"
@@ -244,10 +225,21 @@
             android:layout_height="wrap_content"
             android:id="@+id/bt_logout"
             android:layout_marginTop="10dp"
-            android:layout_alignParentBottom="true"
             android:layout_toRightOf="@+id/btProfileSave"
+            android:layout_below="@+id/etLinking"
             android:text="@string/bt_logout"
             android:onClick="logout"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_changePassword"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/btProfileSave"
+            android:text="@string/bt_change_password"
+            android:onClick="changePassword"
             />
 
     </RelativeLayout>

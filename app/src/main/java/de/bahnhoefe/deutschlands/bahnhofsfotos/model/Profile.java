@@ -1,8 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class Profile {
     private String nickname;
     private String email;
@@ -10,7 +7,8 @@ public class Profile {
     private boolean photoOwner;
     private boolean anonymous;
     private String link;
-    private String uploadToken;
+
+    private transient String password;
 
     public String getLink() {
         return link;
@@ -60,26 +58,11 @@ public class Profile {
         this.nickname = nickname;
     }
 
-    public JSONObject toJson() {
-        JSONObject json = new JSONObject();
-        try {
-            json.put("nickname", nickname);
-            json.put("email", email);
-            json.put("license", license);
-            json.put("photoOwner", photoOwner);
-            json.put("anonymous", anonymous);
-            json.put("link", link);
-        } catch (JSONException e) {
-            throw new RuntimeException("Error creating Json from Profile", e);
-        }
-        return json;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public String getUploadToken() {
-        return uploadToken;
-    }
-
-    public void setUploadToken(String uploadToken) {
-        this.uploadToken = uploadToken;
+    public String getPassword() {
+        return password;
     }
 }

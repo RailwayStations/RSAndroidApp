@@ -120,7 +120,7 @@
   <string name="bt_mydata_get_token">Request token</string>
   <string name="upload_token_email">Upload token requested, please have a look in your email inbox.</string>
   <string name="registration_failed">Failed to request an upload token: %1s</string>
-  <string name="registration_needed">To be able to use the upload function, you have to request an upload token under \"My Data\".</string>
+  <string name="registration_needed">To be able to use the upload function, you have to login under \"My Data\".</string>
   <string name="registration_data_incomplete">Incomplete registration</string>
   <string name="title_slider5">Upload photo</string>
   <string name="title_slider1">Railway station photos</string>
@@ -239,7 +239,7 @@
     <string name="login">Login</string>
     <string name="bt_new_register">Register new account</string>
     <string name="tvEmailOrNickname">Email or Nickname</string>
-    <string name="missing_login_data">Please provide eMail/Nickname and UploadToken to login</string>
+    <string name="missing_login_data">Please provide eMail/Nickname and password (or upload token) to login</string>
     <string name="bt_logout">Logout</string>
     <string name="profile_not_found">Unknown email or nickname</string>
   <string name="missing_email_or_nickname">Please provide email or nickname</string>
@@ -250,4 +250,17 @@
   <string name="station_inactive">Station inactive</string>
     <string name="provider_android_app">Provider App</string>
     <string name="choose_provider_app">Choose Provider App</string>
+  <string name="tvPassword">Password</string>
+  <string name="etPassword">Please enter password or upload token</string>
+  <string name="bt_mydata_reset_password">Reset password</string>
+  <string name="bt_change_password">Change password</string>
+  <string name="password_email">New password requested, please have a look in your email inbox. Also check SPAM folder.</string>
+  <string name="request_password_failed">Request new password failed</string>
+  <string name="authorization_failed">Authorization failed</string>
+  <string name="password">Password (min 8 chars)</string>
+  <string name="password_repeat">Repeat password</string>
+  <string name="password_too_short">Password must be at least 8 characters long</string>
+  <string name="password_repeat_fail">Passwords do not match</string>
+  <string name="password_changed">Password successfully changed</string>
+  <string name="change_password_failed">Change password failed</string>
 </resources>

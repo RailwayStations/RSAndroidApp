@@ -117,7 +117,7 @@
     <string name="bt_mydata_get_token">Token anfordern</string>
     <string name="upload_token_email">Upload Token angefordert, bitte schaue in Deine Email.</string>
     <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1s</string>
-    <string name="registration_needed">Um die Upload-Funktion zu nutzen, musst Du unter \"Meine Daten\" ein Upload-Token anfordern.</string>
+    <string name="registration_needed">Um die Upload-Funktion zu nutzen, musst Du Dich unter \"Meine Daten\" einloggen.</string>
     <string name="registration_data_incomplete">Daten für die Registrierung sind unvollständig</string>
     <string name="title_slider5">Foto hochladen</string>
     <string name="title_slider1">Bahnhofsfotos</string>
@@ -248,7 +248,7 @@
     <string name="login">Einloggen</string>
     <string name="bt_new_register">Neues Konto registrieren</string>
     <string name="tvEmailOrNickname">Email oder Nickname</string>
-    <string name="missing_login_data">Bitte gib Email/Nickname und UploadToken ein, um Dich einzuloggen.</string>
+    <string name="missing_login_data">Bitte gib Email/Nickname und Passwort (oder Upload-Token) ein, um Dich einzuloggen.</string>
     <string name="bt_logout">Ausloggen</string>
     <string name="profile_not_found">Email oder Nickname unbekannt.</string>
     <string name="missing_email_or_nickname">Bitte gib Email oder Nickname an, um einen neuen UploadToken anzufordern.</string>
@@ -259,4 +259,17 @@
     <string name="station_inactive">Bahnhof nicht aktiv</string>
     <string name="provider_android_app">Betreiber App</string>
     <string name="choose_provider_app">Betreiber App auswählen</string>
+    <string name="tvPassword">Passwort</string>
+    <string name="etPassword">Bitte trage hier dein Passwort oder den Upload-Token ein</string>
+    <string name="bt_mydata_reset_password">Passwort zurücksetzen</string>
+    <string name="bt_change_password">Passwort ändern</string>
+    <string name="password_email">Neues Password angefordert, bitte schaue in Deine Email und prüfe den SPAM Ordner.</string>
+    <string name="request_password_failed">Fehler beim Anfordern des neuen Passworts.</string>
+    <string name="authorization_failed">Autorisierung fehlgeschlagen</string>
+    <string name="password">Passwort (min 8 Zeichen)</string>
+    <string name="password_repeat">Passwort wiederholen</string>
+    <string name="password_too_short">Passwort muss mindestens 8 Zeichen lang sein!</string>
+    <string name="password_repeat_fail">Passwörter stimmen nicht überein!</string>
+    <string name="password_changed">Passwort erfolgreich geändert</string>
+    <string name="change_password_failed">Passwortänderung fehlgeschlagen</string>
 </resources>
