@@ -50,7 +50,7 @@ public interface RSAPI {
     Call<Void> registration(@Body Profile profile);
 
     @POST("/resetPassword")
-    Call<Void> resetPassword(@Header("Email") String emailOrNickname);
+    Call<Void> resetPassword(@Header("NameOrEmail") String emailOrNickname);
 
     @POST("/changePassword")
     Call<Void> changePassword(@Header("Authorization") String authorization, @Header("New-Password") String newPassword);

@@ -755,7 +755,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_bad_request);
                         break;
                     case 401 :
-                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_token_invalid);
+                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.authorization_failed);
                         break;
                     case 409 :
                         new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
