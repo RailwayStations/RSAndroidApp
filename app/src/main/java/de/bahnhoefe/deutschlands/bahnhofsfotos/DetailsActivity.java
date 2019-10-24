@@ -29,17 +29,22 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -102,7 +107,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Bahnhof bahnhof;
     private Set<Country> countries;
     private EditText etBahnhofName;
-    private EditText etComment;
     private boolean localFotoUsed = false;
     private License license;
     private boolean photoOwner;
@@ -115,7 +119,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private ViewGroup detailsLayout;
     private boolean fullscreen;
     private BaseApplication baseApplication;
-    private LinearLayout header;
+    private RelativeLayout header;
     private Bitmap publicBitmap;
     private RSAPI rsapi;
     private Double latitude;
@@ -139,9 +143,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         detailsLayout = findViewById(R.id.content_details);
         header = findViewById(R.id.header);
         etBahnhofName = findViewById(R.id.etbahnhofname);
-        etComment = findViewById(R.id.etComment);
+        etBahnhofName.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getRawX() <= (etBahnhofName.getCompoundDrawables()[0].getBounds().width())) {
+                    Toast.makeText(DetailsActivity.this, "Click on Marker", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+                return false;
+            }
+        });
         coordinates = findViewById(R.id.coordinates);
-        TextView isInactive = findViewById(R.id.isinactive);
         imageView = findViewById(R.id.imageview);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,11 +217,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             if (bahnhof != null) {
                 bahnhofId = bahnhof.getId();
                 etBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhofId + ")");
-                etBahnhofName.setEnabled(false);
+                etBahnhofName.setInputType(EditorInfo.TYPE_NULL);
                 coordinates.setText(bahnhof.getLat() + ", " + bahnhof.getLon());
-            if (!bahnhof.isActive()) {
-                isInactive.setVisibility(View.VISIBLE);
-            }
 
                 if (bahnhof.hasPhoto()) {
                     if (ConnectionUtil.checkInternetConnection(this)) {
@@ -219,13 +228,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         setPictureButtonsVisibility(View.VISIBLE);
                     } else {
                         setPictureButtonsVisibility(View.INVISIBLE);
-                        etComment.setVisibility(View.INVISIBLE);
+                    }
+
+                    if (isOwner()) {
+                        etBahnhofName.setCompoundDrawablesRelativeWithIntrinsicBounds(bahnhof.isActive() ? R.drawable.marker_violet : R.drawable.marker_violet_inactive, 0, 0, 0);
+                    } else {
+                        etBahnhofName.setCompoundDrawablesRelativeWithIntrinsicBounds(bahnhof.isActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive, 0, 0, 0);
                     }
                 } else {
+                    etBahnhofName.setCompoundDrawablesRelativeWithIntrinsicBounds(bahnhof.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive, 0, 0, 0);
                     setLocalBitmap();
                 }
             } else {
-                etBahnhofName.setEnabled(true);
+                etBahnhofName.setInputType(EditorInfo.TYPE_CLASS_TEXT);
                 coordinates.setText(latitude + ", " + longitude);
                 bahnhofId = latitude + "_" + longitude;
                 setPictureButtonsVisibility(View.VISIBLE);
@@ -295,7 +310,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private boolean canSetPhoto() {
-        return bahnhof == null || !bahnhof.hasPhoto() || TextUtils.equals(nickname, bahnhof.getPhotographer());
+        return bahnhof == null || !bahnhof.hasPhoto() || isOwner();
+    }
+
+    private boolean isOwner() {
+        return TextUtils.equals(nickname, bahnhof.getPhotographer());
     }
 
     public void takePicture() {
@@ -726,55 +745,80 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void uploadPhoto() {
-        final ProgressDialog progress = new ProgressDialog(DetailsActivity.this);
-        progress.setMessage(getResources().getString(R.string.send));
-        progress.setTitle(getResources().getString(R.string.app_name));
-        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progress.show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.upload_comment, null);
+        final EditText etComment = dialogView.findViewById(R.id.comment);
 
-        String stationTitle = etBahnhofName.getText().toString();
+        builder.setTitle(R.string.comment)
+                .setView(dialogView)
+                .setIcon(R.mipmap.ic_launcher)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
 
-        try {
-            stationTitle = URLEncoder.encode(etBahnhofName.getText().toString(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            Log.e(TAG, "Error encoding station title", e);
-        }
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
 
-        final File mediaFile = getStoredMediaFile();
-        RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
-        rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
-                stationTitle, latitude, longitude, etComment.getText().toString(), file).enqueue(new Callback<Void>() {
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                progress.dismiss();
-                switch (response.code()) {
-                    case 202 :
-                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_completed);
-                        break;
-                    case 400 :
-                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_bad_request);
-                        break;
-                    case 401 :
-                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.authorization_failed);
-                        break;
-                    case 409 :
-                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
-                        break;
-                    case 413 :
-                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_too_big);
-                        break;
-                    default :
-                        new SimpleDialogs().confirm(DetailsActivity.this,
-                            String.format(getText(R.string.upload_failed).toString(), response.code()));
-                }
+            public void onClick(View v) {
+            alertDialog.dismiss();
+
+            final ProgressDialog progress = new ProgressDialog(DetailsActivity.this);
+            progress.setMessage(getResources().getString(R.string.send));
+            progress.setTitle(getResources().getString(R.string.app_name));
+            progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progress.show();
+
+            String stationTitle = etBahnhofName.getText().toString();
+
+            try {
+                stationTitle = URLEncoder.encode(etBahnhofName.getText().toString(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                Log.e(TAG, "Error encoding station title", e);
             }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Log.e(TAG, "Error uploading photo", t);
-                progress.dismiss();
-                new SimpleDialogs().confirm(DetailsActivity.this,
-                        String.format(getText(R.string.upload_failed).toString(), t.getMessage()));
+            final File mediaFile = getStoredMediaFile();
+            RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
+            rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
+                    stationTitle, latitude, longitude, etComment.getText().toString(), file).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    progress.dismiss();
+                    switch (response.code()) {
+                        case 202 :
+                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_completed);
+                            break;
+                        case 400 :
+                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_bad_request);
+                            break;
+                        case 401 :
+                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.authorization_failed);
+                            break;
+                        case 409 :
+                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
+                            break;
+                        case 413 :
+                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_too_big);
+                            break;
+                        default :
+                            new SimpleDialogs().confirm(DetailsActivity.this,
+                                String.format(getText(R.string.upload_failed).toString(), response.code()));
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Log.e(TAG, "Error uploading photo", t);
+                    progress.dismiss();
+                    new SimpleDialogs().confirm(DetailsActivity.this,
+                            String.format(getText(R.string.upload_failed).toString(), t.getMessage()));
+                }
+            });
             }
         });
     }

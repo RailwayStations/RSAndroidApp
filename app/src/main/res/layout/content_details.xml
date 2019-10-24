@@ -30,49 +30,27 @@
             android:scaleType="fitCenter"
             android:contentDescription="@string/station_photo"/>
 
-        <TextView
-            android:id="@+id/coordinates"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/etbahnhofname"
-            android:background="#80ffffff"
-            android:padding="8dp" />
-
         <EditText
             android:id="@+id/etbahnhofname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_alignTop="@id/etbahnhofname"
+            android:layout_alignParentStart="true"
+            android:drawableStart="@drawable/marker_missing"
+            android:drawablePadding="8dp"
             android:textSize="25sp"
+            android:inputType="none"
             android:textStyle="bold"
             android:background="#50ffffff"
             android:padding="8dp"
             android:hint="@string/station_name" />
 
-        <EditText
-            android:id="@+id/etComment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/coordinates"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:background="#50ffffff"
-            android:padding="8dp"
-            android:hint="@string/comment" />
-
         <TextView
-            android:id="@+id/isinactive"
-            android:text="@string/station_inactive"
-            android:visibility="gone"
+            android:id="@+id/coordinates"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/etComment"
-            android:layout_marginBottom="20sp"
+            android:layout_below="@id/etbahnhofname"
+            android:layout_alignStart="@id/imageview"
             android:background="#80ffffff"
             android:padding="8dp" />
 
@@ -86,7 +64,6 @@
             android:background="#50ffffff"
             android:padding="8dp"
             android:textColorLink="@color/colorPrimary"/>
-
 
         <LinearLayout
             android:id="@+id/buttons"

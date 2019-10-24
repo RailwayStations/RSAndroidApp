@@ -262,4 +262,5 @@
   <string name="password_repeat_fail">Passwords do not match</string>
   <string name="password_changed">Password successfully changed</string>
   <string name="change_password_failed">Change password failed</string>
+    <string name="comment_hint">Remarks on this photo for the team</string>
 </resources>
