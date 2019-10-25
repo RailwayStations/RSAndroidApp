@@ -775,17 +775,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             progress.show();
 
             String stationTitle = etBahnhofName.getText().toString();
+            String comment = etComment.getText().toString();
 
             try {
                 stationTitle = URLEncoder.encode(etBahnhofName.getText().toString(), "UTF-8");
+                comment = URLEncoder.encode(etComment.getText().toString(), "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                Log.e(TAG, "Error encoding station title", e);
+                Log.e(TAG, "Error encoding station title or comment", e);
             }
 
             final File mediaFile = getStoredMediaFile();
             RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
             rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
-                    stationTitle, latitude, longitude, etComment.getText().toString(), file).enqueue(new Callback<Void>() {
+                    stationTitle, latitude, longitude, comment, file).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     progress.dismiss();
