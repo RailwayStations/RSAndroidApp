@@ -262,4 +262,7 @@
   <string name="password_changed">Password successfully changed</string>
   <string name="change_password_failed">Change password failed</string>
     <string name="comment_hint">Remarks on this photo for the team</string>
+    <string name="station_info">Info</string>
+    <string name="station_active">Station active</string>
+  <string name="photographer">Photographer: %s</string>
 </resources>

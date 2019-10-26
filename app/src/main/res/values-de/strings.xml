@@ -273,4 +273,7 @@
     <string name="password_changed">Passwort erfolgreich geändert</string>
     <string name="change_password_failed">Passwortänderung fehlgeschlagen</string>
     <string name="comment_hint">Hinweise zum Foto an das Team</string>
+    <string name="station_info">Info</string>
+    <string name="station_active">Bahnhof ist aktiv</string>
+    <string name="photographer">Fotograf: %s</string>
 </resources>

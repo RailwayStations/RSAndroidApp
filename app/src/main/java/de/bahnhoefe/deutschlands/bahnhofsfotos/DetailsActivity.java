@@ -42,7 +42,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -59,26 +58,27 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
-import static android.content.Intent.createChooser;
-import static android.graphics.Color.WHITE;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static android.content.Intent.createChooser;
+import static android.graphics.Color.WHITE;
 
 public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
 
@@ -115,7 +115,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String password;
     private Set<String> countryCodes;
     private TextView licenseTagView;
-    private TextView coordinates;
     private ViewGroup detailsLayout;
     private boolean fullscreen;
     private BaseApplication baseApplication;
@@ -125,6 +124,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Double latitude;
     private Double longitude;
     private String bahnhofId;
+    private ImageView marker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,18 +142,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         detailsLayout = findViewById(R.id.content_details);
         header = findViewById(R.id.header);
+        marker = findViewById(R.id.marker);
         etBahnhofName = findViewById(R.id.etbahnhofname);
-        etBahnhofName.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(event.getRawX() <= (etBahnhofName.getCompoundDrawables()[0].getBounds().width())) {
-                    Toast.makeText(DetailsActivity.this, "Click on Marker", Toast.LENGTH_LONG).show();
-                    return true;
-                }
-                return false;
-            }
-        });
-        coordinates = findViewById(R.id.coordinates);
         imageView = findViewById(R.id.imageview);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,10 +206,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             if (bahnhof != null) {
                 bahnhofId = bahnhof.getId();
-                etBahnhofName.setText(bahnhof.getTitle() + " (" + bahnhofId + ")");
+                etBahnhofName.setText(bahnhof.getTitle());
                 etBahnhofName.setInputType(EditorInfo.TYPE_NULL);
-                coordinates.setText(bahnhof.getLat() + ", " + bahnhof.getLon());
+                etBahnhofName.setSingleLine(false);
 
+                int markerRes = R.drawable.marker_missing;
                 if (bahnhof.hasPhoto()) {
                     if (ConnectionUtil.checkInternetConnection(this)) {
                         BitmapCache.getInstance().getFoto(this, bahnhof.getPhotoUrl());
@@ -231,17 +222,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     }
 
                     if (isOwner()) {
-                        etBahnhofName.setCompoundDrawablesRelativeWithIntrinsicBounds(bahnhof.isActive() ? R.drawable.marker_violet : R.drawable.marker_violet_inactive, 0, 0, 0);
+                        markerRes = bahnhof.isActive() ? R.drawable.marker_violet : R.drawable.marker_violet_inactive;
                     } else {
-                        etBahnhofName.setCompoundDrawablesRelativeWithIntrinsicBounds(bahnhof.isActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive, 0, 0, 0);
+                        markerRes = bahnhof.isActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive;
                     }
                 } else {
-                    etBahnhofName.setCompoundDrawablesRelativeWithIntrinsicBounds(bahnhof.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive, 0, 0, 0);
+                    markerRes = bahnhof.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
                     setLocalBitmap();
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    marker.setImageDrawable(getDrawable(markerRes));
+                } else {
+                    marker.setImageDrawable(getResources().getDrawable(markerRes));
                 }
             } else {
                 etBahnhofName.setInputType(EditorInfo.TYPE_CLASS_TEXT);
-                coordinates.setText(latitude + ", " + longitude);
                 bahnhofId = latitude + "_" + longitude;
                 setPictureButtonsVisibility(View.VISIBLE);
                 setLocalBitmap();
@@ -699,6 +694,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 break;
+            case R.id.station_info:
+                showStationInfo(null);
+                break;
             case R.id.provider_android_app:
                 Country country = Country.getCountryByCode(countries, bahnhof.getCountry());
                 final List<ProviderApp> providerApps = country.getCompatibleProviderApps();
@@ -742,6 +740,32 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         return true;
+    }
+
+    public void showStationInfo(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.station_info, null);
+        TextView title = dialogView.findViewById(R.id.title);
+        title.setText(etBahnhofName.getText());
+        TextView id = dialogView.findViewById(R.id.id);
+        id.setText("ID: " + (bahnhof != null ? bahnhof.getId() : ""));
+        TextView coordinates = dialogView.findViewById(R.id.coordinates);
+        final double lat = bahnhof != null ? bahnhof.getLat() : latitude;
+        final double lon = bahnhof != null ? bahnhof.getLon() : longitude;
+        coordinates.setText(lat + "," + lon);
+        TextView active = dialogView.findViewById(R.id.active);
+        active.setText(bahnhof != null && bahnhof.isActive() ? R.string.station_active : R.string.station_inactive);
+        TextView owner = dialogView.findViewById(R.id.owner);
+        owner.setText(getResources().getString(R.string.photographer, (bahnhof != null && bahnhof.getPhotographer() != null ? bahnhof.getPhotographer() : "")));
+
+        builder.setTitle(R.string.station_info)
+                .setView(dialogView)
+                .setIcon(R.mipmap.ic_launcher)
+                .setPositiveButton(android.R.string.ok, null);
+
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private void uploadPhoto() {

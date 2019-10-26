@@ -30,29 +30,29 @@
             android:scaleType="fitCenter"
             android:contentDescription="@string/station_photo"/>
 
+        <ImageView
+            android:id="@+id/marker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/marker_missing"
+            android:scaleType="centerCrop"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            tools:scaleType="centerCrop"
+            android:contentDescription="@string/station_info"
+            android:onClick="showStationInfo"/>
+
         <EditText
             android:id="@+id/etbahnhofname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            android:drawableStart="@drawable/marker_missing"
-            android:drawablePadding="8dp"
+            android:layout_toEndOf="@id/marker"
             android:textSize="25sp"
             android:inputType="none"
             android:textStyle="bold"
             android:background="#50ffffff"
             android:padding="8dp"
             android:hint="@string/station_name" />
-
-        <TextView
-            android:id="@+id/coordinates"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/etbahnhofname"
-            android:layout_alignStart="@id/imageview"
-            android:background="#80ffffff"
-            android:padding="8dp" />
 
         <TextView
             android:id="@+id/license_tag"

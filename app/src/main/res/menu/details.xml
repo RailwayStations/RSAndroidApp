@@ -47,4 +47,13 @@
 
     </group>
 
+    <item
+        android:id="@+id/station_info"
+        android:orderInCategory="500"
+        android:icon="@drawable/ic_info_white_24px"
+        app:itemIconTint="@color/colorActions"
+        app:itemTextColor="@color/colorActions"
+        android:title="@string/station_info"
+        app:showAsAction="ifRoom" />
+
 </menu>
