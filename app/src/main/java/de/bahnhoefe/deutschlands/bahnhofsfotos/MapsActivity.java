@@ -332,7 +332,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             // marker to show at the location
             Drawable drawable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? getDrawable(R.drawable.marker_missing) : getResources().getDrawable(R.drawable.marker_missing);
             Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-            missingMarker = new Marker(tapLatLong, bitmap, 0, -bitmap.getHeight()) {
+            missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth()/2), -bitmap.getHeight()) {
                 @Override
                 public boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
                     new SimpleDialogs().confirm(MapsActivity.this, R.string.add_missing_station, new DialogInterface.OnClickListener() {
