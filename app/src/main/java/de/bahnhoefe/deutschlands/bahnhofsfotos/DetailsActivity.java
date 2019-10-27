@@ -55,7 +55,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
@@ -750,10 +752,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         title.setText(etBahnhofName.getText());
         TextView id = dialogView.findViewById(R.id.id);
         id.setText(bahnhof != null ? bahnhof.getId() : "");
+
         TextView coordinates = dialogView.findViewById(R.id.coordinates);
         final double lat = bahnhof != null ? bahnhof.getLat() : latitude;
         final double lon = bahnhof != null ? bahnhof.getLon() : longitude;
-        coordinates.setText(getResources().getString(R.string.coordinates, lat, lon));
+        coordinates.setText(String.format(Locale.US, getResources().getString(R.string.coordinates), lat, lon));
+
         TextView active = dialogView.findViewById(R.id.active);
         active.setText(bahnhof != null && bahnhof.isActive() ? R.string.active : R.string.inactive);
         TextView owner = dialogView.findViewById(R.id.owner);
