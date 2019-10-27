@@ -256,7 +256,6 @@
     <string name="bt_register">Registrieren</string>
     <string name="tvRegistration">Registrierung</string>
     <string name="tvProfile">Benutzerprofil</string>
-    <string name="station_inactive">Bahnhof nicht aktiv</string>
     <string name="provider_android_app">Betreiber App</string>
     <string name="choose_provider_app">Betreiber App auswählen</string>
     <string name="tvPassword">Passwort</string>
@@ -274,6 +273,9 @@
     <string name="change_password_failed">Passwortänderung fehlgeschlagen</string>
     <string name="comment_hint">Hinweise zum Foto an das Team</string>
     <string name="station_info">Info</string>
-    <string name="station_active">Bahnhof ist aktiv</string>
-    <string name="photographer">Fotograf: %s</string>
+    <string name="id_label">ID:</string>
+    <string name="active_label">Status:</string>
+    <string name="owner_label">Fotograf:</string>
+    <string name="active">aktiv</string>
+    <string name="inactive">inaktiv</string>
 </resources>

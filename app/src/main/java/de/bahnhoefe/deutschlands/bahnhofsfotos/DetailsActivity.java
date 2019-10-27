@@ -749,15 +749,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         TextView title = dialogView.findViewById(R.id.title);
         title.setText(etBahnhofName.getText());
         TextView id = dialogView.findViewById(R.id.id);
-        id.setText("ID: " + (bahnhof != null ? bahnhof.getId() : ""));
+        id.setText(bahnhof != null ? bahnhof.getId() : "");
         TextView coordinates = dialogView.findViewById(R.id.coordinates);
         final double lat = bahnhof != null ? bahnhof.getLat() : latitude;
         final double lon = bahnhof != null ? bahnhof.getLon() : longitude;
-        coordinates.setText(lat + "," + lon);
+        coordinates.setText(getResources().getString(R.string.coordinates, lat, lon));
         TextView active = dialogView.findViewById(R.id.active);
-        active.setText(bahnhof != null && bahnhof.isActive() ? R.string.station_active : R.string.station_inactive);
+        active.setText(bahnhof != null && bahnhof.isActive() ? R.string.active : R.string.inactive);
         TextView owner = dialogView.findViewById(R.id.owner);
-        owner.setText(getResources().getString(R.string.photographer, (bahnhof != null && bahnhof.getPhotographer() != null ? bahnhof.getPhotographer() : "")));
+        owner.setText(bahnhof != null && bahnhof.getPhotographer() != null ? bahnhof.getPhotographer() : "");
 
         builder.setTitle(R.string.station_info)
                 .setView(dialogView)

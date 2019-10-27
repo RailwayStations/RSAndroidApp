@@ -37,6 +37,7 @@
     <string name="highscorePhotos" translatable="false">188</string>
     <string name="highscoreName" translatable="false">ten</string>
     <string name="navHeaderUpdate" translatable="false">navHeaderUpdate</string>
+    <string name="coordinates" translatable="false">%.10f,%.10f</string>
 
     <string name="copyright_osm" translatable="false">Map data © OpenStreetMap contributors</string>
 </resources>

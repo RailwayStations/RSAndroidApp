@@ -247,8 +247,7 @@
   <string name="bt_register">Register</string>
   <string name="tvRegistration">Registration</string>
   <string name="tvProfile">Userprofile</string>
-  <string name="station_inactive">Station inactive</string>
-    <string name="provider_android_app">Provider App</string>
+  <string name="provider_android_app">Provider App</string>
     <string name="choose_provider_app">Choose Provider App</string>
   <string name="tvPassword">Password</string>
   <string name="etPassword">Please enter password or upload token</string>
@@ -265,6 +264,9 @@
   <string name="change_password_failed">Change password failed</string>
   <string name="comment_hint">Remarks on this photo for the team</string>
     <string name="station_info">Info</string>
-  <string name="station_active">Station active</string>
-  <string name="photographer">Photographer: %s</string>
+  <string name="id_label">ID:</string>
+  <string name="active_label">State:</string>
+  <string name="owner_label">Photographer:</string>
+  <string name="active">active</string>
+  <string name="inactive">inactive</string>
 </resources>

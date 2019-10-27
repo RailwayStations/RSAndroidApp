@@ -251,7 +251,6 @@
     <string name="bt_change_password">Change password</string>
   <string name="password_email">New password requested, please have a look in your email inbox. Also check SPAM folder.</string>
   <string name="request_password_failed">Request new password failed</string>
-  <string name="station_inactive">Station inactive</string>
   <string name="provider_android_app">Provider App</string>
   <string name="provider_app_missing">Provider App not available</string>
   <string name="authorization_failed">Authorization failed</string>
@@ -263,6 +262,9 @@
   <string name="change_password_failed">Change password failed</string>
     <string name="comment_hint">Remarks on this photo for the team</string>
     <string name="station_info">Info</string>
-    <string name="station_active">Station active</string>
-  <string name="photographer">Photographer: %s</string>
+  <string name="id_label">ID:</string>
+  <string name="active_label">State:</string>
+  <string name="owner_label">Photographer:</string>
+  <string name="active">active</string>
+  <string name="inactive">inactive</string>
 </resources>
