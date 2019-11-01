@@ -723,25 +723,29 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
                 break;
             case android.R.id.home:
-                Intent upIntent = NavUtils.getParentActivityIntent(this);
-                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
-                    // This activity is NOT part of this app's task, so create a new task
-                    // when navigating up, with a synthesized back stack.
-                    TaskStackBuilder.create(this)
-                            // Add all of this activity's parents to the back stack
-                            .addNextIntentWithParentStack(upIntent)
-                            // Navigate up to the closest parent
-                            .startActivities();
-                } else {
-                    onBackPressed();
-                }
-
+                navigateUp();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        navigateUp();
+    }
+
+    public void navigateUp() {
+        final Intent upIntent = NavUtils.getParentActivityIntent(this);
+        upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot()) {
+            Log.v(TAG, "Recreate back stack");
+            TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent).startActivities();
+        }
+
+        finish();
     }
 
     public void showStationInfo(View view) {
