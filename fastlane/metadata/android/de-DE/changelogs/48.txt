@@ -1,0 +1,4 @@
+- Fehler beim Hochladen von Fotos mit speziellen Zeichen im Bahnhofsnamen behoben
+- inaktive Bahnhöfe werden nun angezeigt
+- wenn vorhanden, werden lokale Betreiber-Apps angezeigt wie z.B.. DB Navigator
+- Benutzerdefinierte Passwörter sind nun möglich

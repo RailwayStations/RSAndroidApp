@@ -1,0 +1,3 @@
+- fehlende Bahnhöfe melden
+- von der Bahnhofsdetail-Ansicht zur Karte navigieren
+- "Meine Daten" reorganisiert
