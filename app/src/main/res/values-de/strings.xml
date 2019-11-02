@@ -91,7 +91,7 @@
     <string name="fab_chooser_title">Mail versenden</string>
     <string name="menu_title_introslider">Anleitung</string>
     <string name="menu_follow_my_location">Folge meiner Position</string>
-    <string name="text_intro_slider1">Wir sammeln Bahnhofsfotos von Benutzern, die wir unter freier Lizenz anderen Entwicklern zur Verfügung stellen können. Unsere Lieblings-Lizenz ist CC0."\n\n"<b>Neu ist in dieser Version, dass Du mehrere Länder gleichzeitig auswählen kannst.</b></string>
+    <string name="text_intro_slider1">Wir sammeln Bahnhofsfotos von Benutzern, die wir unter freier Lizenz anderen Entwicklern zur Verfügung stellen können. Unsere Lieblings-Lizenz ist CC0."\n\n"<b>Neu ist in dieser Version, dass Du fehlende Bahnhöfe mit Longclick in der Karte melden kannst.</b></string>
     <string name="text_intro_slider2">Bitte trage im Menüpunkt \'Meine Daten\' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne den Eintrag des Nicknamens kannst Du aus der App heraus nicht fotografieren. "\n\n"<b>Das Anfordern des Token für den Upload geht übrigens ganz schnell und unkompliziert.</b></string>
     <string name="text_intro_slider3">Im Menü unter<b> \'Bahnhofskarte\' </b>und auf der <b>Startseiten-Liste</b> findest Du im Menü eine Auswahl, ob Du <b>alle</b> Bahnhöfe (längere Ladezeit), nur die <b>mit</b> Foto, nur die <b>ohne</b> Fotos oder die <b>eigenen</b> Fotos angezeigt haben möchtest.</string>
     <string name="text_intro_slider4">Du kommst über 2 Wege zum Fotografieren eines Bahnhofs: über die Suche auf dem <b>Startbildschirm</b> oder <b>über den Karten-Menüpunkt \'Bahnhofskarte\'</b>. Das FotoIcon wird nur anklickbar, wenn Du Dein Smartphone quer hältst.</string>
@@ -131,7 +131,7 @@
     <string name="missing_licence">Bitte gib an, unter welcher Lizenz Du Deine Fotos einreichen möchtest</string>
     <string name="missing_photoOwner">Bitte gib an, ob es sich um Deine eigenen Fotos handelt</string>
     <string name="missing_nickname">Bitte gib Deinen Nickname an</string>
-    <string name="missing_email_address">Bitte gib einge gültige E-Mail-Adresse an</string>
+    <string name="missing_email_address">Bitte gib eine gültige E-Mail-Adresse an</string>
     <string name="missing_linking">Bitte gib an, ob Du verlinkt werden möchtest</string>
     <string name="missing_link">Gib bitte einen gültigen Link an, wenn Du verlinkt werden möchtest</string>
     <string name="upload_conflict">Dein Foto wurde hochgeladen, es liegt aber möglicherweise ein Konflikt vor.</string>
@@ -273,7 +273,7 @@
     <string name="change_password_failed">Passwortänderung fehlgeschlagen</string>
     <string name="comment_hint">Hinweise zum Foto an das Team</string>
     <string name="station_info">Info</string>
-    <string name="id_label">ID:</string>
+    <string name="id_label">Id:</string>
     <string name="active_label">Status:</string>
     <string name="owner_label">Fotograf:</string>
     <string name="active">aktiv</string>

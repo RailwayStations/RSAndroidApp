@@ -95,7 +95,7 @@
   <string name="fab_chooser_title">Send mail</string>
   <string name="menu_title_introslider">Manual</string>
   <string name="menu_follow_my_location">Follow my position</string>
-  <string name="text_intro_slider1">We collect station photos from users, which we can provide to other developers under a free license. Our favorite license is CC0. \n\n<b>New in this version is that you can select several countries at the same time.</b></string>
+  <string name="text_intro_slider1">We collect station photos from users, which we can provide to other developers under a free license. Our favorite license is CC0. \n\n<b>New in this version is that you can report missing stations with Longclick on the map.</b></string>
   <string name="text_intro_slider2">Please fill in the required data under \'My data\', so that we can give your photo files a correct name. Without the nick name entry you can not shoot photos from within the app. \n\n<b>Requesting the token for the upload is quite easy and quick.</b></string>
   <string name="text_intro_slider3">In the menu under<b> \'Station map\' </b>and on the <b>list on the homepage</b> you can find a selection in the menu, whether you want <b>all</b> stations (longer loading time), only the stations <b>with</b> photo or just stations <b>without</b> photos to be displayed.</string>
   <string name="text_intro_slider4">There are 2 ways to take a photo of a train station: about the search on the <b>Mainpage</b> or <b>through the map menu point \'Station map\'</b>. The photo icon is only clickable if you\'re holding your Smartphone in landscape mode.</string>
