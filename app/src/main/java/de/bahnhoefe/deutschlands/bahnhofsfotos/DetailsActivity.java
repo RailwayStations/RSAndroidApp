@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.app.TaskStackBuilder;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -738,11 +739,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void navigateUp() {
-        final Intent upIntent = NavUtils.getParentActivityIntent(this);
-        upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot()) {
-            Log.v(TAG, "Recreate back stack");
-            TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent).startActivities();
+        ComponentName callingActivity = getCallingActivity(); // if MapsActivity was calling, then we don't want to rebuild the Backstack
+        if (callingActivity == null) {
+            final Intent upIntent = NavUtils.getParentActivityIntent(this);
+            upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot()) {
+                Log.v(TAG, "Recreate back stack");
+                TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent).startActivities();
+            }
         }
 
         finish();

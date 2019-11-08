@@ -1,0 +1,1 @@
+- Fehler beim Zurücksprung von der Detailansicht zur Karte

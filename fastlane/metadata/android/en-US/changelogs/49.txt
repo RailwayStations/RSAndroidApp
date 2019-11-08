@@ -1,0 +1,1 @@
+- fix return from station details to the station map

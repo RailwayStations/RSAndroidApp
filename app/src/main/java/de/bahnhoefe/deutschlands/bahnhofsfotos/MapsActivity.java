@@ -341,7 +341,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                             Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
                             intent.putExtra(DetailsActivity.EXTRA_LATITUDE, getLatLong().latitude);
                             intent.putExtra(DetailsActivity.EXTRA_LONGITUDE, getLatLong().longitude);
-                            startActivity(intent);
+                            startActivityForResult(intent, 0); // workaround to handle backstack correctly in DetailsActivity
                         }
                     });
                     return false;
@@ -562,7 +562,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         try {
             Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
             intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
-            startActivity(intent);
+            startActivityForResult(intent, 0); // workaround to handle backstack correctly in DetailsActivity
         } catch (RuntimeException e) {
             Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);
         }
