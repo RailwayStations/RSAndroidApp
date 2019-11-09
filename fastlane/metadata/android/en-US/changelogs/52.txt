@@ -2,3 +2,5 @@
 - display the result of the stationfilter
 - modernized the progress bar
 - User-Agent with app version
+- Refactored "Your station photos" into "In Progress"
+- Show upload-status on Details page

@@ -61,7 +61,7 @@
         <activity
             android:name=".DetailsActivity"
             android:label="@string/title_activity_details"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

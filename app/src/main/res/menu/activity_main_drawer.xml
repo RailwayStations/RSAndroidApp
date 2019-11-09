@@ -21,7 +21,7 @@
         <item
             android:id="@+id/nav_your_own_station_photos"
             android:icon="@drawable/ic_photo_gray_24px"
-            android:title="@string/menu_title_your_own_station_photos" />
+            android:title="@string/menu_title_in_progress" />
         <item
             android:id="@+id/nav_stations_map"
             android:icon="@drawable/ic_map_gray_24px"

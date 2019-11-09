@@ -4,6 +4,10 @@
     <color name="colorPrimaryDark">#C71C4D</color>
     <color name="colorAccent">#D0C332</color>
     <color name="colorActions">#ffffff</color>
+    <color name="gridItemError">#ff0000</color>
+    <color name="gridItem">#000000</color>
+    <color name="gridItemGood">#00ff00</color>
+    <color name="gridItemReview">#0000ff</color>
     <color name="listItem1">#ffffff</color>
     <color name="listItem2">#F5F5F5</color>
     <color name="listItemSelected">#c71c4d</color>

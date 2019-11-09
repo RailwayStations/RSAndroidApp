@@ -17,7 +17,6 @@ import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -35,7 +34,6 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -56,7 +54,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.Formatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -67,11 +65,13 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
 import okhttp3.MediaType;
@@ -219,7 +219,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 etBahnhofName.setInputType(EditorInfo.TYPE_NULL);
                 etBahnhofName.setSingleLine(false);
 
-                int markerRes = R.drawable.marker_missing;
+                int markerRes;
                 if (bahnhof.hasPhoto()) {
                     if (ConnectionUtil.checkInternetConnection(this)) {
                         BitmapCache.getInstance().getFoto(this, bahnhof.getPhotoUrl());
@@ -235,6 +235,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     } else {
                         markerRes = bahnhof.isActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive;
                     }
+
+                    // check for local photo
+                    File localFile = getStoredMediaFile();
+                    if (localFile != null && localFile.canRead()) {
+                        new SimpleDialogs().confirm(this, R.string.local_photo_exists, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                setPictureButtonsVisibility(View.VISIBLE);
+                                setLocalBitmap();
+                            }
+                        });
+                    }
                 } else {
                     markerRes = bahnhof.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
                     setLocalBitmap();
@@ -246,7 +258,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
             } else {
                 etBahnhofName.setInputType(EditorInfo.TYPE_CLASS_TEXT);
-                bahnhofId = latitude + "_" + longitude;
+                bahnhofId = LocalPhoto.getIdByLatLon(latitude, longitude);
                 setPictureButtonsVisibility(View.VISIBLE);
                 setLocalBitmap();
             }
@@ -560,40 +572,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     /**
-     * Get the base directory for storing fotos
-     *
-     * @return the File denoting the base directory.
-     */
-    @Nullable
-    private File getMediaStorageDir() {
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), Constants.PHOTO_DIRECTORY);
-
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.e(TAG, "Cannot create directory structure " + mediaStorageDir.getAbsolutePath());
-                return null;
-            }
-        }
-        return mediaStorageDir;
-    }
-
-    /**
-     * Get the file path for storing this station's foto
+     * Get the file path for storing this stations foto
      *
      * @return the File
      */
     @Nullable
     public File getStoredMediaFile() {
-        File mediaStorageDir = getMediaStorageDir();
-        if (mediaStorageDir == null) {
-            return null;
-        }
-
-        File storeMediaFile = new File(mediaStorageDir, String.format("%s_%s.jpg", nickname, bahnhofId));
-        Log.d(TAG, storeMediaFile.toString());
-
-        return storeMediaFile;
-
+        return FileUtils.getStoredMediaFile(bahnhof != null ? bahnhof.getCountry() : null, bahnhofId);
     }
 
     /**
@@ -602,19 +587,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * @return the File
      */
     private File getCameraMediaFile() {
-        File temporaryStorageDir = new File(getMediaStorageDir(), ".temp");
-        if (!temporaryStorageDir.exists()) {
-            if (!temporaryStorageDir.mkdirs()) {
-                Log.e(TAG, "Cannot create directory structure " + temporaryStorageDir.getAbsolutePath());
-                return null;
-            }
-        }
-
-        Log.d(TAG, "Temporary BahnhofNrAbfrage: " + bahnhofId);
-        File file = new File(temporaryStorageDir, String.format("%s_%s.jpg", nickname, bahnhofId));
-        Log.d("FilePfad", file.toString());
-
-        return file;
+        return FileUtils.getCameraMediaFile(bahnhofId);
     }
 
 
@@ -876,9 +849,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                     "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
         } else if (publicBitmap != null) {
-            File imagePath = new File(getApplicationContext().getCacheDir(), "images");
-            imagePath.mkdirs();
-            File newFile = new File(imagePath, bahnhofId + ".jpg");
+            File newFile = FileUtils.getImageCacheFile(getApplicationContext(), bahnhofId);
             try {
                 saveScaledBitmap(newFile, publicBitmap);
                 sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
@@ -1039,7 +1010,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     /**
-     * Fetch bitmap from device local location, if  it exists, and set the foto view.
+     * Fetch bitmap from device local location, if it exists, and set the photo view.
      */
     private void setLocalBitmap() {
         setPictureButtonsVisibility(View.VISIBLE);
@@ -1053,7 +1024,45 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             licenseTagView.setVisibility(View.INVISIBLE);
         } else {
             setBitmap(showBitmap);
+            fetchUploadStatus();
         }
+    }
+
+    private void fetchUploadStatus() {
+        List<LocalPhoto> localPhotos = new ArrayList<>();
+        LocalPhoto localPhoto = new LocalPhoto(getStoredMediaFile());
+        if (bahnhof != null) {
+            localPhoto.setCountryCode(bahnhof.getCountry());
+            localPhoto.setId(bahnhof.getId());
+        } else {
+            localPhoto.setLat(latitude);
+            localPhoto.setLon(longitude);
+        }
+        localPhotos.add(localPhoto);
+
+        baseApplication.getRSAPI().queryUploadState(RSAPI.Helper.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), localPhotos).enqueue(new Callback<List<UploadStateQuery>>() {
+            @Override
+            public void onResponse(Call<List<UploadStateQuery>> call, Response<List<UploadStateQuery>> response) {
+                List<UploadStateQuery> stateQueries = response.body();
+                if (stateQueries != null && stateQueries.size() == 1) {
+                    UploadStateQuery stateQuery = stateQueries.get(0);
+                    licenseTagView.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
+                    licenseTagView.setTextColor(getResources().getColor(stateQuery.getState().getColorId()));
+                    licenseTagView.setVisibility(View.VISIBLE);
+                } else {
+                    Log.w(TAG, "Upload states not processable");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<UploadStateQuery>> call, Throwable t) {
+                Log.e(TAG, "Error retrieving upload state", t);
+                Toast.makeText(DetailsActivity.this,
+                        R.string.error_retrieving_upload_state,
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     private void setPictureButtonsVisibility(int visible) {
@@ -1102,14 +1111,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     @Nullable
     private Bitmap checkForLocalPhoto() {
         // show the image
-        Bitmap scaledScreen = null;
         File localFile = getStoredMediaFile();
-
         if (localFile != null && localFile.canRead()) {
             Log.d(TAG, "File: " + localFile);
             Log.d(TAG, "FileGetPath: " + localFile.getPath().toString());
 
-            scaledScreen = BitmapFactory.decodeFile(
+            Bitmap scaledScreen = BitmapFactory.decodeFile(
                     localFile.getPath());
             Log.d(TAG, "img width " + scaledScreen.getWidth());
             Log.d(TAG, "img height " + scaledScreen.getHeight());
@@ -1140,11 +1147,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_IMMERSIVE);
             ActionBar bar = getActionBar();
-            if (bar != null)
+            if (bar != null) {
                 bar.hide();
+            }
             android.support.v7.app.ActionBar sbar = getSupportActionBar();
-            if (sbar != null)
+            if (sbar != null) {
                 sbar.hide();
+            }
             fullscreen = true;
         } else {
             ValueAnimator animation = ValueAnimator.ofFloat(header == null? etBahnhofName.getAlpha() : header.getAlpha(), 1.0f);
@@ -1153,11 +1162,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             animation.start();
             detailsLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             ActionBar bar = getActionBar();
-            if (bar != null)
+            if (bar != null) {
                 bar.show();
+            }
             android.support.v7.app.ActionBar sbar = getSupportActionBar();
-            if (sbar != null)
+            if (sbar != null) {
                 sbar.show();
+            }
             fullscreen = false;
         }
 

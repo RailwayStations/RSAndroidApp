@@ -2,21 +2,21 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -34,7 +34,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -46,7 +45,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final String DIALOG_TAG = "App Info Dialog";
     private static final long CHECK_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes
+    private static final int REQUEST_FILE_PERMISSION = 1;
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private BaseApplication baseApplication;
@@ -104,8 +103,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         progressBar = findViewById(R.id.progressBar);
 
-        handleGalleryNavItem();
-
         View header = navigationView.getHeaderView(0);
         TextView tvUpdate = header.findViewById(R.id.tvUpdate);
 
@@ -130,26 +127,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bindToStatus();
     }
 
-
-    private void handleGalleryNavItem() {
-        File file = new File(Environment.getExternalStorageDirectory()
-                + File.separator + Constants.PHOTO_DIRECTORY);
-        Log.d(TAG, file.toString());
-
-        Menu menuNav = navigationView.getMenu();
-        MenuItem nav_itemGallery = menuNav.findItem(R.id.nav_your_own_station_photos);
-
-        if (file.isDirectory()) {
-            String[] files = file.list();
-            if (files == null) {
-                nav_itemGallery.setEnabled(false);
+    private void onGalleryNavItemWithPermissionCheck() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Write permission has not been granted.
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_FILE_PERMISSION);
             } else {
-                nav_itemGallery.setEnabled(true);
+                onGalleryNavItem();
             }
         } else {
-            nav_itemGallery.setEnabled(false);
+            onGalleryNavItem();
         }
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_FILE_PERMISSION) {
+            Log.i(TAG, "Received response for file permission request.");
+
+            // Check if the only required permission has been granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Write permission has been granted, preview can be displayed
+                onGalleryNavItem();
+            } else {
+                //Permission not granted
+                Toast.makeText(MainActivity.this, R.string.grant_external_storage, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void onGalleryNavItem() {
+        Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -344,8 +354,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_own_station_photos) {
-            Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
-            startActivity(intent);
+            onGalleryNavItemWithPermissionCheck();
         } else if (id == R.id.nav_stations_map) {
             Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
@@ -398,6 +407,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     TextView tvUpdate = findViewById(R.id.tvUpdate);
                     tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
                     updateStationList();
+                    baseApplication.migrateLocalPhotos();
                 }
                 progressBar.setVisibility(View.GONE);
             }
@@ -416,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onResume() {
         super.onResume();
-        handleGalleryNavItem();
+
         if (baseApplication.getLastUpdate() == 0) {
             runUpdateTasks();
         } else if (System.currentTimeMillis() - baseApplication.getLastUpdate() > CHECK_UPDATE_INTERVAL) {

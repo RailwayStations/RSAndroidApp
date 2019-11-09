@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="local_photo_delete_options">
+        <item>@string/local_photo_delete_accepted</item>
+        <item>@string/local_photo_delete_other_user</item>
+    </string-array>
+</resources>

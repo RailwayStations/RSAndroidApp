@@ -48,7 +48,7 @@
   <string name="nav_walk">wandelen</string>
   <string name="nav_show">alleen de locatie</string>
   <string name="navMethod">Route tonen</string>
-  <string name="title_activity_gallery">Mijn stationsfoto\'s</string>
+  <string name="title_activity_gallery">In Progress</string>
   <string name="activitynotfound">Je hebt geen navigatie-app op je telefoon.</string>
   <string name="count_of_images">Je hebt %1$d stationsfoto(\'s)</string>
   <string name="search_hint">Station zoeken</string>
@@ -271,4 +271,17 @@
   <string name="inactive">inactief</string>
     <string name="new_registration">New account registered, please have a look in your email inbox for the initial password. Also check SPAM folder.</string>
     <string name="filter_result">Selected %d of %d stations</string>
+    <string name="files_migrated">Local photos migrated: %d, failed: %d</string>
+    <string name="delete_local_photo">Delete local photo %s?</string>
+    <string name="menu_title_in_progress">In progress</string>
+    <string name="error_retrieving_upload_state">Error retrieving upload state</string>
+    <string name="upload_state">State: %s</string>
+    <string name="upload_state_unknown">unknown</string>
+  <string name="upload_state_in_review">in review</string>
+  <string name="upload_state_accepted">accepted</string>
+  <string name="upload_state_other_user">other user</string>
+    <string name="confirm_delete_local_photos">Delete local copies of:</string>
+    <string name="local_photo_delete_accepted">accepted photos</string>
+  <string name="local_photo_delete_other_user">photos of other users</string>
+    <string name="local_photo_exists">A photo of this station exists on your local storage. Show it instead of the official one?</string>
 </resources>

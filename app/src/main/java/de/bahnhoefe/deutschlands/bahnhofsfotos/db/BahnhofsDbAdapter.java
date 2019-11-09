@@ -390,11 +390,33 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    public Bahnhof fetchBahnhofByBahnhofId(String id) {
-        Cursor cursor = db.query(DATABASE_TABLE, null, Constants.DB_JSON_CONSTANTS.KEY_ID + "=?", new String[]{
-                id + ""}, null, null, null);
+    public Bahnhof fetchBahnhof(String country, String id) {
+        if (country == null) {
+            // fallback to fetchBahnhofByBahnhofId if country is unknown
+            return fetchBahnhofByBahnhofId(id);
+        }
+        Cursor cursor = db.query(DATABASE_TABLE, null, Constants.DB_JSON_CONSTANTS.KEY_COUNTRY + "=? and " + Constants.DB_JSON_CONSTANTS.KEY_ID + "=?",
+                new String[]{ country, id}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             Bahnhof bahnhof = createBahnhofFromCursor(cursor);
+            cursor.close();
+            return bahnhof;
+        } else
+            return null;
+    }
+
+    /**
+     * Only used as a fallback, use fetchBahnhof with country instead
+     */
+    @Deprecated
+    private Bahnhof fetchBahnhofByBahnhofId(String id) {
+        Cursor cursor = db.query(DATABASE_TABLE, null, Constants.DB_JSON_CONSTANTS.KEY_ID + "=?", new String[]{
+                id + ""}, null, null, null);
+        if (cursor != null) {
+            Bahnhof bahnhof = null;
+            if (cursor.moveToFirst() && cursor.getCount() == 1) {
+                bahnhof = createBahnhofFromCursor(cursor);
+            }
             cursor.close();
             return bahnhof;
         } else

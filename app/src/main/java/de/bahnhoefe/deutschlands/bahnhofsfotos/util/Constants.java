@@ -2,8 +2,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 public class Constants {
 
-    public static final String PHOTO_DIRECTORY = "Bahnhofsfotos";
-
     public final static class DB_JSON_CONSTANTS {
         //Bahnhofs-Konstanten
         public static final String KEY_ROWID = "rowid";

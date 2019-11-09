@@ -50,7 +50,7 @@
 
     <string name="navMethod">Zeige den Weg…</string>
 
-    <string name="title_activity_gallery">Deine Bahnhofsfotos</string>
+    <string name="title_activity_gallery">In Bearbeitung</string>
     <string name="activitynotfound">Du hast keine Navigations-App auf Deinem Smartphone</string>
     <string name="count_of_images">Du hast %1$d Bahnhofsfoto(s) im Speicher</string>
     <string name="search_hint">Bahnhof suchen</string>
@@ -280,4 +280,17 @@
     <string name="inactive">inaktiv</string>
     <string name="new_registration">Neues Konto angelegt, ein Initialpasswort wird Dir per Email zugeschickt. Bitte prüfe auch den SPAM Ordner.</string>
     <string name="filter_result">%d von %d Bahnhöfen selektiert</string>
+    <string name="files_migrated">Lokale Fotos migriert: %d, fehlerhaft: %d</string>
+    <string name="delete_local_photo">Lokales Foto %s löschen?</string>
+    <string name="menu_title_in_progress">In Bearbeitung</string>
+    <string name="error_retrieving_upload_state">Fehler beim Lesen des Bearbeitungsstatus</string>
+    <string name="upload_state">Status: %s</string>
+    <string name="upload_state_unknown">unbekannt</string>
+    <string name="upload_state_in_review">in Prüfung</string>
+    <string name="upload_state_accepted">freigeschaltet</string>
+    <string name="upload_state_other_user">anderer Fotograf</string>
+    <string name="confirm_delete_local_photos">Lösche lokale Kopien von:</string>
+    <string name="local_photo_delete_accepted">akzeptierten Fotos</string>
+    <string name="local_photo_delete_other_user">Fotos anderer Fotografen</string>
+    <string name="local_photo_exists">Für diesen Bahnhof existiert ein Foto in deinem lokalen Speicher. Soll dieses anstelle des offiziellen Fotos geladen werden?</string>
 </resources>

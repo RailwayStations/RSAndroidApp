@@ -27,4 +27,15 @@
         android:ellipsize="end"
         android:textSize="12sp" />
 
+    <TextView
+        android:id="@+id/upload_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="@string/upload_state"
+        android:ellipsize="end"
+        android:textSize="12sp" />
+
 </LinearLayout>

@@ -560,8 +560,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     public void onTap(BahnhofGeoItem marker) {
         Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
         String id = marker.getBahnhof().getId();
+        String country = marker.getBahnhof().getCountry();
         try {
-            Bahnhof bahnhof = dbAdapter.fetchBahnhofByBahnhofId(id);
+            Bahnhof bahnhof = dbAdapter.fetchBahnhof(country, id);
             intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
             startActivityForResult(intent, 0); // workaround to handle backstack correctly in DetailsActivity
         } catch (RuntimeException e) {

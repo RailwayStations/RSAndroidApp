@@ -36,6 +36,16 @@ public class SimpleDialogs {
                 .create().show();
     }
 
+    public void confirm(Context context, String message, DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setPositiveButton(R.string.button_ok_text, listener)
+                .setNegativeButton(R.string.button_cancel_text, null)
+                .create().show();
+    }
+
     public void select(Context context, CharSequence message, CharSequence[] items, int checkedItem, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
                 .setIcon(R.mipmap.ic_launcher)
