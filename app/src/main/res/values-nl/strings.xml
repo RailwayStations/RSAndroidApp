@@ -15,7 +15,7 @@
   <string name="maps_activity">Stationskaart</string>
   <string name="no_location_detected">Kan locatie niet ophalen</string>
   <string name="title_activity_details">Stationsinformatie</string>
-  <string name="no_stations_loaded">Geen stations geladen; druk eerst op 'Bijwerken'.</string>
+  <string name="no_stations_loaded">Geen stations geladen; druk eerst op \'Bijwerken\'.</string>
   <string name="no_stations_in_database">Nog niet bijgewerkt</string>
   <string name="take_photo">Foto maken</string>
   <string name="send_email">E-mail versturen</string>
@@ -53,17 +53,17 @@
   <string name="count_of_images">Je hebt %1$d stationsfoto(\'s)</string>
   <string name="search_hint">Station zoeken</string>
   <string name="app_info_title">Over de app</string>
-  <string name="app_info_ok">Oké</string>
+  <string name="app_info_ok">OkÃ©</string>
   <string name="app_info_text">App-ontwikkeling: \n<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>
-        \nin 08/2016 tijdens het opensourceproject van <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands BahnhÃ¶fe</a></b>.          \n\nDe stationsinformatie is aangeleverd door Deutsche Bahn in de context van het lokale <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData-project</a></b>.          \n\nHet json-bestand dat de foto\'s en stationsinformatie samenvoegt is aangeleverd door de Java-app, ontwikkeld door <b><a href="https://twitter.com/storchp">Peter Storch</a></b>.           \n\nDe app gebruikt de <a href="https://design.google.com/icons/">material-design-icons van Google,</a> uitgebracht onder de Apache-licentie, versie 2.0\n\n<b>Medewerkers</b> van het 'Deutschlands-BahnhÃ¶fe'-project: \n\n<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedor n (kaartsamenstelling)</a></b>
+        \nin 08/2016 tijdens het opensourceproject van <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands BahnhÃ¶fe</a></b>.          \n\nDe stationsinformatie is aangeleverd door Deutsche Bahn in de context van het lokale <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData-project</a></b>.          \n\nHet json-bestand dat de foto\'s en stationsinformatie samenvoegt is aangeleverd door de Java-app, ontwikkeld door <b><a href="https://twitter.com/storchp">Peter Storch</a></b>.           \n\nDe app gebruikt de <a href="https://design.google.com/icons/">material-design-icons van Google,</a> uitgebracht onder de Apache-licentie, versie 2.0\n\n<b>Medewerkers</b> van het 'Deutschlands-BahnhÃƒÂ¶fe'-project: \n\n<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedor n (kaartsamenstelling)</a></b>
         \n\n<b>- Alexandra SchÃ¶n (ontwerk)</b>
         \n\n<b>- Katrin SchÃ¶nherr (php-ontwikkeling)</b>
     </string>
   <string name="map_info_title">Over kaarten</string>
-  <string name="map_info_ok">Oké</string>
+  <string name="map_info_ok">OkÃ©</string>
   <string name="map_info_text">De standaardkaart is aangeleverd door <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
         \nWordt lid van de gemeenschap en help de kaart te verbeteren. Zie <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
-        \n\nOverweeg een offline-kaart te downloaden om de serverbelasting te verlagen en mb's te besparen.
+        \n\nOverweeg een offline-kaart te downloaden om de serverbelasting te verlagen en mb\'s te besparen.
         \nEnkele offline-kaarten zijn hier te vinden:
         \n<b>- <a href="http://download.mapsforge.org/">Mapsforge</a></b>
         \n<b>- <a href="https://www.freizeitkarte-osm.de/android/en/">Freizeitkarte Android</a></b>
@@ -99,9 +99,9 @@
   <string name="text_intro_slider2">Voer de vereiste gegevens in onder \'Mijn gegevens\' zodat we je fotobestanden van de juiste naam kunnen voorzien. Zonder bijnaam kun je geen foto\'s plaatsen. \n\n<b>Je kunt de upload-toegangssleutel snel en makkelijk ophalen.</b></string>
   <string name="text_intro_slider3">In het menu onder<b> \'Stationskaart\' </b>en op de <b>lijst op de startpagina</b> vind je een keuze om <b>alle</b> stations te laden (duurt langer), alleen de stations <b>voorzien</b> van een foto, of alleen stations <b>zonder</b> foto.</string>
   <string name="text_intro_slider4">Er zijn twee manieren om een foto van een station te maken: middels het zoekvak op de <b>startpagina</b> of <b>middels het menuitem \'Stationskaart\'</b>. Het fotopictogram is alleen aanklikbaar als je je telefoon horizontaal houdt.</string>
-  <string name="text_intro_slider5">Zodra je een foto hebt genomen, wordt deze getoond en kun je hem uploaden.<b>Niet-bestaande stations kunnen worden gemeld middels de knop 'Nieuw'.</b></string>
+  <string name="text_intro_slider5">Zodra je een foto hebt genomen, wordt deze getoond en kun je hem uploaden.<b>Niet-bestaande stations kunnen worden gemeld middels de knop \'Nieuw\'.</b></string>
   <string name="text_intro_slider6">Op deze pagina vind je het pictogram om de foto te delen. Kies je bijv. voor de Twitter-App, dan wordt je tweet automatisch voorzien van hashtags.</string>
-  <string name="text_intro_slider7">Als je onderweg bent en wilt worden geïnformeerd over stations in de buurt, dan kun je de locatiemelding van stations inschakelen.\n\n<b>De in de melding getoonde stations zijn afhankelijk van de selectie op de lijst op de startpagina - zie stationskeuze -.</b></string>
+  <string name="text_intro_slider7">Als je onderweg bent en wilt worden geÃ¯nformeerd over stations in de buurt, dan kun je de locatiemelding van stations inschakelen.\n\n<b>De in de melding getoonde stations zijn afhankelijk van de selectie op de lijst op de startpagina - zie stationskeuze -.</b></string>
   <string name="text_intro_slider8">Chatten is uitgeschakeld. Je kunt ons altijd bereiken op Twitter.</string>
   <string name="text_intro_slider9">Als je de app start, dan worden Duitse stations geladen. Je kunt een <b>ander</b> land kiezen in de rechter bovenhoek op de startpagina. Zodra je op de terugknop drukt, wordt het gekozen land geladen.</string>
   <string name="next">VOLGENDE</string>
@@ -112,7 +112,7 @@
   <string name="photo_upload">Foto uploaden</string>
   <string name="upload_completed">Uploaden voltooid</string>
   <string name="upload_token_invalid">Je upload-toegangssleutel is ongeldig. Vroog een nieuwe aan.</string>
-  <string name="upload_failed">De foto kan niet worden geüpload: %1s</string>
+  <string name="upload_failed">De foto kan niet worden geÃ¼pload: %1s</string>
   <string name="etEmail">Voer je e-mailadres in
 \n en druk op \'Toegangssleutel aanvragen\'</string>
   <string name="etUploadToken">Voer hier de ontvangen toegangssleutel in</string>
@@ -137,7 +137,7 @@
   <string name="missing_email_address">Geef een geldig e-mailadres op</string>
   <string name="missing_linking">Geef aan of je vermeld wilt worden</string>
   <string name="missing_link">Geef een geldige url op als je vermeld wilt worden</string>
-  <string name="upload_conflict">Je foto is geüpload, maar er is mogelijk een conflict. Óf je hebt de foto twee keer geüpload óf een andere gebruiker heeft een foto geüpload bij hetzelfde station.</string>
+  <string name="upload_conflict">Je foto is geÃ¼pload, maar er is mogelijk een conflict. Ã“f je hebt de foto twee keer geÃ¼pload Ã³f een andere gebruiker heeft een foto geÃ¼pload bij hetzelfde station.</string>
   <string name="remove_station">Station markeren voor verwijdering</string>
   <string name="select_photo">Fotokeuze</string>
   <string name="station_photo">Stationsfoto</string>
@@ -186,7 +186,7 @@
   <string name="countries_database_updated">De landdatabank is bijgewerkt</string>
   <string name="error_updating_countries">De landinformatie kan niet worden bijgewerkt:</string>
   <string name="processing_statistics">Bezig met verwerken van statistieken?</string>
-  <string name="open_once_nearby">Open de \'stationskaart\' minimaal één keer</string>
+  <string name="open_once_nearby">Open de \'stationskaart\' minimaal Ã©Ã©n keer</string>
     <string name="google_play_services_error">Fout in de Google Play Services.</string>
   <string name="photo">Foto</string>
   <string name="no_internet_connection">Geen internetverbinding!</string>
@@ -204,14 +204,14 @@
     <item quantity="other">%d items gevonden</item>
   </plurals>
     <string name="openWebsite">Website openen</string>
-  <string name="button_ok_text">Oké</string>
+  <string name="button_ok_text">OkÃ©</string>
     <string name="confirm_replace_with_ghost">Wil je de huidige foto vervangen door een spookstation?</string>
     <string name="upload_bad_request">Onjuist verzoek (onbekend station, onjuist bestandsformaat, ongeldige gebruiker, ?)</string>
   <string name="upload_too_big">De foto is te groot (max. 20 MB)</string>
     <string name="anonymous">Anoniem</string>
   <string name="profile_wrong_data">Onjuist verzoek: er is iets mis met je gegevens. Neem contact op met ons ondersteuningsteam.</string>
   <string name="profile_conflict">Er is een conflict met je gebruikersnaam en/of e-mailadres. Neem contact op met ons ondersteuningsteam.</string>
-    <string name="yesPhotoOwner">Ja, dit zijn mijn eigen foto's</string>
+    <string name="yesPhotoOwner">Ja, dit zijn mijn eigen foto\'s</string>
   <string name="tvAnonymous">Wil je anoniem blijven?</string>
   <string name="channel_name">Meldingen over stations in de buurt</string>
   <string name="save_profile_failed">Kan gebruikersprofiel niet uploaden: %1s</string>
@@ -231,7 +231,7 @@
   <string name="themes">Themakaarten</string>
   <string name="map_info_menu">Kaartinformatie</string>
   <string name="add_missing_station">Ontbrekend station toevoegen?</string>
-  <string name="station_or_coords_not_found">Station niet gevonden en geen coördinaten opgegeven</string>
+  <string name="station_or_coords_not_found">Station niet gevonden en geen coÃ¶rdinaten opgegeven</string>
   <string name="station_name">Stationsnaam</string>
   <string name="comment">Aantekening</string>
   <string name="station_title_needed">Voer een naam in voor het station</string>
