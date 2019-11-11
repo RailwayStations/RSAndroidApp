@@ -1,1 +1,3 @@
 - fix return from station details to the station map
+- fix registration flow
+- new translation: dutch
