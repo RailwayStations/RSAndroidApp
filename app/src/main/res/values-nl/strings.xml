@@ -119,7 +119,7 @@
   <string name="tvPhotoUpload">Wil je foto\'s uploaden middels de app?</string>
   <string name="bt_mydata_get_token">Toegangssleutel aanvragen</string>
   <string name="upload_token_email">De toegangssleutel is aangevraagd. Controleer je Postvak IN.</string>
-  <string name="registration_failed">De toegangssleutel kan niet worden aangevraagd: %1s</string>
+  <string name="registration_failed">Failed to register account: %1s</string>
   <string name="registration_needed">Log in via \'Mijn profiel\' om de uploadfunctie te gebruiken.</string>
   <string name="registration_data_incomplete">Onvolledige registratie</string>
   <string name="title_slider5">Foto uploaden</string>
@@ -269,4 +269,5 @@
   <string name="owner_label">Fotograaf:</string>
   <string name="active">actief</string>
   <string name="inactive">inactief</string>
+    <string name="new_registration">New account registered, please have a look in your email inbox for the initial password. Also check SPAM folder.</string>
 </resources>

@@ -116,7 +116,7 @@
     <string name="tvPhotoUpload">Möchtest Du den Foto-Upload aus der App nutzen?</string>
     <string name="bt_mydata_get_token">Token anfordern</string>
     <string name="upload_token_email">Upload Token angefordert, bitte schaue in Deine Email.</string>
-    <string name="registration_failed">Upload Token konnte nicht angefordert werden: %1s</string>
+    <string name="registration_failed">Registrierung fehlgeschlagen: %1s</string>
     <string name="registration_needed">Um die Upload-Funktion zu nutzen, musst Du Dich unter \"Meine Daten\" einloggen.</string>
     <string name="registration_data_incomplete">Daten für die Registrierung sind unvollständig</string>
     <string name="title_slider5">Foto hochladen</string>
@@ -278,4 +278,5 @@
     <string name="owner_label">Fotograf:</string>
     <string name="active">aktiv</string>
     <string name="inactive">inaktiv</string>
+    <string name="new_registration">Neues Konto angelegt, ein Initialpasswort wird Dir per Email zugeschickt. Bitte prüfe auch den SPAM Ordner.</string>
 </resources>

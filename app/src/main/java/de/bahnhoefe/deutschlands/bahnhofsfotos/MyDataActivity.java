@@ -47,6 +47,7 @@ public class MyDataActivity extends AppCompatActivity {
     private Button btProfileSave;
     private Button btLogout;
     private String authorizationHeader;
+    private Button btChangePassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,7 @@ public class MyDataActivity extends AppCompatActivity {
 
         btProfileSave = findViewById(R.id.btProfileSave);
         btLogout = findViewById(R.id.bt_logout);
+        btChangePassword = findViewById(R.id.bt_changePassword);
 
         baseApplication = (BaseApplication) getApplication();
         rsapi = baseApplication.getRSAPI();
@@ -117,6 +119,7 @@ public class MyDataActivity extends AppCompatActivity {
                             getSupportActionBar().setTitle(R.string.tvProfile);
                             btProfileSave.setText(R.string.bt_mydata_commit);
                             btLogout.setVisibility(View.VISIBLE);
+                            btChangePassword.setVisibility(View.VISIBLE);
                             break;
                         case 401 :
                             authorizationHeader = null;
@@ -168,43 +171,43 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void register(View view) {
-        if (btProfileSave.getText().equals(getResources().getText(R.string.bt_mydata_commit))) {
-            saveProfile(view);
+        if (btProfileSave.getText().equals(getResources().getText(R.string.bt_register))) {
+            authorizationHeader = null;
+        }
+        if (!saveProfile(view)) {
             return;
         }
-        if (!isValid()) {
-            return;
-        }
-        saveProfile(view);
-        rsapi.registration(createProfileFromUI()).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                switch (response.code()) {
-                    case 202 :
-                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.password_email);
-                        break;
-                    case 400 :
-                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_wrong_data);
-                        break;
-                    case 409 :
-                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_conflict);
-                        break;
-                    case 422 :
-                        new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
-                        break;
-                    default :
-                        new SimpleDialogs().confirm(MyDataActivity.this,
-                            String.format(getText(R.string.registration_failed).toString(), response.code()));
+        if (authorizationHeader == null) {
+            rsapi.registration(createProfileFromUI()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    switch (response.code()) {
+                        case 202:
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.new_registration);
+                            break;
+                        case 400:
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_wrong_data);
+                            break;
+                        case 409:
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_conflict);
+                            break;
+                        case 422:
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.registration_data_incomplete);
+                            break;
+                        default:
+                            new SimpleDialogs().confirm(MyDataActivity.this,
+                                    String.format(getText(R.string.registration_failed).toString(), response.code()));
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Log.e(TAG, "Registration failed", t);
-                new SimpleDialogs().confirm(MyDataActivity.this,
-                        String.format(getText(R.string.registration_failed).toString(), t));
-            }
-        });
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Log.e(TAG, "Registration failed", t);
+                    new SimpleDialogs().confirm(MyDataActivity.this,
+                            String.format(getText(R.string.registration_failed).toString(), t));
+                }
+            });
+        }
     }
 
     private Profile createProfileFromUI() {
@@ -219,12 +222,12 @@ public class MyDataActivity extends AppCompatActivity {
         return profile;
     }
 
-    public void saveProfile(View view) {
+    public boolean saveProfile(View view) {
+        profile = createProfileFromUI();
+        if (!isValid()) {
+            return false;
+        }
         if (authorizationHeader != null) {
-            if (!isValid()) {
-                return;
-            }
-            profile = createProfileFromUI();
             rsapi.saveProfile(authorizationHeader, profile).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
@@ -264,6 +267,7 @@ public class MyDataActivity extends AppCompatActivity {
 
         saveLocalProfile(profile);
         Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
+        return true;
     }
 
     private void saveLocalProfile(Profile profile) {
@@ -335,12 +339,14 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void newRegister(View view) {
+        authorizationHeader = null;
         etEmail.setText(etEmailOrNickname.getText());
         profileForm.setVisibility(View.VISIBLE);
         loginForm.setVisibility(View.GONE);
         getSupportActionBar().setTitle(R.string.tvRegistration);
         btProfileSave.setText(R.string.bt_register);
         btLogout.setVisibility(View.GONE);
+        btChangePassword.setVisibility(View.GONE);
     }
 
     public void login(View view) {
@@ -367,6 +373,7 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void resetPassword(View view) {
+        authorizationHeader = null;
         String emailOrNickname = etEmailOrNickname.getText().toString();
         if (StringUtils.isBlank(emailOrNickname)) {
             new SimpleDialogs().confirm(this, R.string.missing_email_or_nickname);

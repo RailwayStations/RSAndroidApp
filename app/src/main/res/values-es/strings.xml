@@ -107,7 +107,7 @@
   <string name="tvPhotoUpload">Desea subir estas fotos dentro de la app?</string>
   <string name="bt_mydata_get_token">Pedir token</string>
   <string name="upload_token_email">Subir token solicitada, por favor chece su bandeja de entrada del correo dado.</string>
-  <string name="registration_failed">No se pudo solicitar token: %1s</string>
+  <string name="registration_failed">Failed to register account: %1s</string>
   <string name="registration_needed">To be able to use the upload function, you have to login under \"My Data\".</string>
   <string name="registration_data_incomplete">Registro incompleto</string>
   <string name="title_slider5">Subir foto</string>
@@ -268,4 +268,5 @@
   <string name="owner_label">Photographer:</string>
   <string name="active">active</string>
   <string name="inactive">inactive</string>
+    <string name="new_registration">New account registered, please have a look in your email inbox for the initial password. Also check SPAM folder.</string>
 </resources>
