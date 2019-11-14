@@ -145,6 +145,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         if (intent != null) {
             Double latitude = (Double) intent.getSerializableExtra(EXTRAS_LATITUDE);
             Double longitude = (Double) intent.getSerializableExtra(EXTRAS_LONGITUDE);
+            setMyLocSwitch(false);
             if (latitude != null && longitude != null) {
                 myPos = new LatLong(latitude, longitude);
             }
