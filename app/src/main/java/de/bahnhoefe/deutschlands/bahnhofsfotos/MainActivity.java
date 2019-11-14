@@ -55,7 +55,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final String DIALOG_TAG = "App Info Dialog";
     private static final long CHECK_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes
-    public final String TAG = "Bahnhoefe";
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private BaseApplication baseApplication;
     private BahnhofsDbAdapter dbAdapter;
     private NavigationView navigationView;
@@ -116,22 +117,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvUpdate.setText(R.string.no_stations_in_database);
         }
 
-        cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-        customAdapter = new CustomAdapter(this, cursor, 0);
-        ListView listView = findViewById(R.id.lstStations);
-        assert listView != null;
-        listView.setAdapter(customAdapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
-                Bahnhof bahnhof = dbAdapter.fetchBahnhofByRowId(id);
-                Class cls = DetailsActivity.class;
-                Intent intentDetails = new Intent(MainActivity.this, cls);
-                intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
-                startActivityForResult(intentDetails, 0);
-            }
-        });
+        updateStationList();
 
         Intent searchIntent = getIntent();
         if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
@@ -187,14 +173,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public boolean onQueryTextSubmit(String s) {
                 Log.d(TAG, "onQueryTextSubmit: " + s);
-                searchKeyword(s);
+                searchString = s;
+                updateStationList();
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
                 Log.d(TAG, "onQueryTextChange: " + s);
-                searchKeyword(s);
+                searchString = s;
+                updateStationList();
                 return false;
             }
 
@@ -211,12 +199,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void searchKeyword(String keyword) {
-        searchString = keyword;
+    private void updateStationList() {
         try {
-            cursor = dbAdapter.getBahnhofsListByKeyword(keyword, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            cursor = dbAdapter.getBahnhofsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
             if (cursor != null) {
-                customAdapter.swapCursor(cursor);
+                if (customAdapter != null) {
+                    customAdapter.swapCursor(cursor);
+                } else {
+                    cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+                    customAdapter = new CustomAdapter(this, cursor, 0);
+                    ListView listView = findViewById(R.id.lstStations);
+                    assert listView != null;
+                    listView.setAdapter(customAdapter);
+
+                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
+                            Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
+                            intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, dbAdapter.fetchBahnhofByRowId(id));
+                            startActivityForResult(intentDetails, 0);
+                        }
+                    });
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
@@ -269,8 +273,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
             item.setIcon(photoFilter.getIcon());
             baseApplication.setPhotoFilter(photoFilter);
-            cursor = dbAdapter.getStationsList(photoFilter, baseApplication.getNicknameFilter());
-            customAdapter.swapCursor(cursor);
+            updateStationList();
         } else if (id == R.id.nicknameFilter) {
             int selectedNickname = -1;
             final String[] nicknames = dbAdapter.getPhotographerNicknames();
@@ -293,8 +296,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         PhotoFilter photoFilter = PhotoFilter.NICKNAME;
                         baseApplication.setPhotoFilter(photoFilter);
                         item.setIcon(photoFilter.getIcon());
-                        cursor = dbAdapter.getStationsList(photoFilter, baseApplication.getNicknameFilter());
-                        customAdapter.swapCursor(cursor);
+                        updateStationList();
                     }
                 }
             });
@@ -395,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     baseApplication.setLastUpdate(System.currentTimeMillis());
                     TextView tvUpdate = findViewById(R.id.tvUpdate);
                     tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
-                    customAdapter.swapCursor(dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter()));
+                    updateStationList();
                 }
                 progress.dismiss();
             }
@@ -442,12 +444,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (photoFilterMenuItem != null) {
             photoFilterMenuItem.setIcon(baseApplication.getPhotoFilter().getIcon());
         }
-        if (searchString != null && searchString.length() > 0) {
-            searchKeyword(searchString);
-        } else if (customAdapter != null) {
-            cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-            customAdapter.swapCursor(cursor);
-        }
+        updateStationList();
     }
 
     private void checkForUpdates(Statistic apiStat, String country) {

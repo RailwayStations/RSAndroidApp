@@ -8,11 +8,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
@@ -20,8 +20,9 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.DB_JSON_CONSTANTS.KEY_ID;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+
+import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.DB_JSON_CONSTANTS.KEY_ID;
 
 public class BahnhofsDbAdapter {
     private static final String DATABASE_TABLE = "bahnhoefe";
@@ -63,7 +64,7 @@ public class BahnhofsDbAdapter {
     private static final String DROP_STATEMENT_2 = "DROP TABLE IF EXISTS " + DATABASE_TABLE;
     private static final String DROP_STATEMENT_COUNTRIES = "DROP TABLE IF EXISTS " + DATABASE_TABLE_COUNTRIES;
     private static final String DROP_STATEMENT_PROVIDER_APPS = "DROP TABLE IF EXISTS " + DATABASE_TABLE_PROVIDER_APPS;
-    private static final String TAG = BahnhoefeDbOpenHelper.class.getSimpleName();
+    private static final String TAG = BahnhofsDbAdapter.class.getSimpleName();
 
 
     private final Context context;
@@ -224,18 +225,22 @@ public class BahnhofsDbAdapter {
     public Cursor getBahnhofsListByKeyword(String search, PhotoFilter photoFilter, String nickname) {
         //Open connection to read only
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String selectQuery = String.format("%s LIKE ?", Constants.DB_JSON_CONSTANTS.KEY_TITLE);
+        String selectQuery = "1 = 1";
+        List<String> queryArgs = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(search)) {
+            selectQuery += String.format(" AND %s LIKE ?", Constants.DB_JSON_CONSTANTS.KEY_TITLE);
+            queryArgs.add("%" + StringUtils.trimToEmpty(search) + "%");
+        }
+
         if (photoFilter == PhotoFilter.NICKNAME) {
             selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTOGRAPHER + " = ?";
         } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
             selectQuery += " AND " + Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
         }
 
-        String[] queryArgs;
         if (photoFilter == PhotoFilter.NICKNAME) {
-            queryArgs = new String[]{"%" + search + "%", nickname};
-        } else {
-            queryArgs = new String[]{"%" + search + "%"};
+            queryArgs.add(nickname);
         }
 
         Cursor cursor = db.query(DATABASE_TABLE,
@@ -243,8 +248,7 @@ public class BahnhofsDbAdapter {
                         "rowid _id", Constants.DB_JSON_CONSTANTS.KEY_ID, Constants.DB_JSON_CONSTANTS.KEY_TITLE, Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL, Constants.DB_JSON_CONSTANTS.KEY_COUNTRY
                 },
                 selectQuery,
-                queryArgs, null, null, Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc");
-        // looping through all rows and adding to list
+                queryArgs.toArray(new String[0]), null, null, Constants.DB_JSON_CONSTANTS.KEY_TITLE + " asc");
 
         if (cursor == null) {
             return null;
