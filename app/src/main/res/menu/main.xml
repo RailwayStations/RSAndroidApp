@@ -24,6 +24,7 @@
     <item
         android:id="@+id/nicknameFilter"
         android:title="@string/nicknameFilter"
+        android:icon="@drawable/ic_person_24px"
         app:showAsAction="collapseActionView|ifRoom" />
     <item
         android:id="@+id/countrySelection"
