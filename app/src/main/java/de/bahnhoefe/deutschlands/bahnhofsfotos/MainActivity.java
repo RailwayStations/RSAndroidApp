@@ -117,14 +117,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvUpdate.setText(R.string.no_stations_in_database);
         }
 
-        updateStationList();
-
         Intent searchIntent = getIntent();
         if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
-            String query = searchIntent.getStringExtra(SearchManager.QUERY);
-            Toast.makeText(MainActivity.this, query, Toast.LENGTH_SHORT).show();
+            searchString = searchIntent.getStringExtra(SearchManager.QUERY);
         }
 
+        updateStationList();
         bindToStatus();
     }
 
@@ -165,8 +163,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
 
-        SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView search = (SearchView) menu.findItem(R.id.search).getActionView();
+        final SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final MenuItem searchMenu = menu.findItem(R.id.search);
+        final SearchView search = (SearchView) searchMenu.getActionView();
         search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
