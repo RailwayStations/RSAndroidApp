@@ -193,7 +193,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         fullscreen = false;
 
         readPreferences();
-        Intent intent = getIntent();
+        onNewIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
         boolean directPicture = false;
         if (intent != null) {
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
@@ -250,6 +256,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (directPicture) {
             takePictureWithPermissionCheck();
         }
+
     }
 
     @Override

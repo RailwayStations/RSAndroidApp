@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Class cls = DetailsActivity.class;
                 Intent intentDetails = new Intent(MainActivity.this, cls);
                 intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
-                startActivity(intentDetails);
+                startActivityForResult(intentDetails, 0);
             }
         });
 
