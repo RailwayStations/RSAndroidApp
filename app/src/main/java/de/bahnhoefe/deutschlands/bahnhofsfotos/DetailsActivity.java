@@ -947,7 +947,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
                     case 2:
                         dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
-                                bahnhof.getLat(), bahnhof.getLon());
+                                lat, lon);
                         Log.d(TAG,"findnavigation case 2: " + dlocation);
                         intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
                         break;
@@ -963,9 +963,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         break;
                     case 5:
                         intent = new Intent(DetailsActivity.this, MapsActivity.class);
-                        intent.putExtra(MapsActivity.EXTRAS_LATITUDE, bahnhof.getLat());
-                        intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, bahnhof.getLon());
-                        Log.d(TAG,"findnavigation case 5: " + bahnhof.getLat() + "," + bahnhof.getLon());
+                        intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat);
+                        intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon);
+                        Log.d(TAG,"findnavigation case 5: " + lat + "," + lon);
                         break;
 
                 }
