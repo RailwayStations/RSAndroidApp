@@ -20,6 +20,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.HashMap;
@@ -129,6 +130,7 @@ public class MarkerBitmap {
     public static Bitmap getBitmapFromTitle(String title, Paint paint) {
         if (!captionViews.containsKey(title)) {
             TextView bubbleView = new TextView(context);
+            bubbleView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             Utils.setBackground(bubbleView, context.getResources().getDrawable(R.drawable.caption_background));
             bubbleView.setGravity(Gravity.CENTER);
             bubbleView.setMaxEms(20);

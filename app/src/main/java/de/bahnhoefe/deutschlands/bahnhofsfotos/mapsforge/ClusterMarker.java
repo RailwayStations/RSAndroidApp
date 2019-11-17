@@ -114,8 +114,8 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
                     (int) (left + halfBitmapWidth - bubble.getWidth() / 2),
                     (int) (top - bubble.getHeight()));
         } else {
-            int x = (int) (left + halfBitmapWidth);
-            int y = (int) (top + halfBitmapHeight
+            int x = (int) (left + bitmap.getWidth() * 1.3);
+            int y = (int) (top + bitmap.getHeight() * 1.3
                     + markerBitmap.getPaint().getTextHeight(cluster.getTitle()) / 2);
             canvas.drawText(cluster.getTitle(), x, y,
                     markerBitmap.getPaint());
