@@ -1,0 +1,5 @@
+- Fehler beim Zurücksprung von der Detailansicht zur Karte
+- Fehler bei neuer Registrierung behoben
+- Neue Übersetzung: niederländisch
+- Fehler bei Filterkombination in der Bahnhofsliste
+- Fehler bei Clustermarker-Text behoben
