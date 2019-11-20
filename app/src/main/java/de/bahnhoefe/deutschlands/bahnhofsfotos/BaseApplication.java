@@ -3,9 +3,11 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +22,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -69,8 +76,13 @@ public class BaseApplication extends Application {
         gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
         gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
 
+        OkHttpClient okHttp = new OkHttpClient.Builder()
+                .addInterceptor(new UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT))
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.API_START_URL)
+                .client(okHttp)
                 .addConverterFactory(GsonConverterFactory.create(gson.create()))
                 .build();
 
@@ -312,6 +324,25 @@ public class BaseApplication extends Application {
 
     public void setMapTheme(String mapTheme) {
         putString(R.string.MAP_THEME, mapTheme);
+    }
+
+    /* This interceptor adds a custom User-Agent. */
+    public static class UserAgentInterceptor implements Interceptor {
+
+        private final String userAgent;
+
+        public UserAgentInterceptor(String userAgent) {
+            this.userAgent = userAgent;
+        }
+
+        @Override
+        public Response intercept(Interceptor.Chain chain) throws IOException {
+            Request originalRequest = chain.request();
+            Request requestWithUserAgent = originalRequest.newBuilder()
+                    .header("User-Agent", userAgent)
+                    .build();
+            return chain.proceed(requestWithUserAgent);
+        }
     }
 
 }
