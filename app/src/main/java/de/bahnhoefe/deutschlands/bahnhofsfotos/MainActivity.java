@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CustomAdapter customAdapter;
     private Cursor cursor;
     private String searchString;
+    private ProgressBar progressBar;
 
     private NearbyNotificationService.StatusBinder statusBinder;
     private RSAPI rsapi;
@@ -99,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        progressBar = findViewById(R.id.progressBar);
 
         handleGalleryNavItem();
 
@@ -200,27 +204,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void updateStationList() {
         try {
+            int stationCount = dbAdapter.countBahnhoefe();
             cursor = dbAdapter.getBahnhofsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-            if (cursor != null) {
-                if (customAdapter != null) {
-                    customAdapter.swapCursor(cursor);
-                } else {
-                    cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-                    customAdapter = new CustomAdapter(this, cursor, 0);
-                    ListView listView = findViewById(R.id.lstStations);
-                    assert listView != null;
-                    listView.setAdapter(customAdapter);
+            if (customAdapter != null) {
+                customAdapter.swapCursor(cursor);
+            } else {
+                cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+                customAdapter = new CustomAdapter(this, cursor, 0);
+                ListView listView = findViewById(R.id.lstStations);
+                assert listView != null;
+                listView.setAdapter(customAdapter);
 
-                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
-                            Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
-                            intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, dbAdapter.fetchBahnhofByRowId(id));
-                            startActivityForResult(intentDetails, 0);
-                        }
-                    });
-                }
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
+                        Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
+                        intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, dbAdapter.fetchBahnhofByRowId(id));
+                        startActivityForResult(intentDetails, 0);
+                    }
+                });
             }
+            TextView filterResult = findViewById(R.id.filter_result);
+            filterResult.setText(getString(R.string.filter_result, customAdapter.getCount(), stationCount));
         } catch (Exception e) {
             Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
         }
@@ -365,11 +370,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * from http://blogs.innovationm.com/multiple-asynctask-in-android/
      */
     private void runUpdateTasks() {
-        final ProgressDialog progress = new ProgressDialog(MainActivity.this);
-        progress.setMessage(getResources().getString(R.string.loading_stations));
-        progress.setTitle(getResources().getString(R.string.app_name));
-        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progress.show();
+        progressBar.setVisibility(View.VISIBLE);
 
         rsapi.getCountries().enqueue(new Callback<List<Country>>() {
             @Override
@@ -398,14 +399,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
                     updateStationList();
                 }
-                progress.dismiss();
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void onFailure(Call<List<Bahnhof>> call, Throwable t) {
                 Log.e(TAG, "Error refreshing stations", t);
-                // TODO: dismiss only on last country loaded
-                progress.dismiss();
+                progressBar.setVisibility(View.GONE);
                 Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });

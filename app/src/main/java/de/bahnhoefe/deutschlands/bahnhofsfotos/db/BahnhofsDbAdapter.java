@@ -282,6 +282,14 @@ public class BahnhofsDbAdapter {
         return photographers.toArray(new String[0]);
     }
 
+    public int countBahnhoefe() {
+        Cursor query = db.rawQuery("SELECT count(*) FROM " + DATABASE_TABLE, null);
+        if (query != null && query.moveToFirst()) {
+            return query.getInt(0);
+        }
+        return 0;
+    }
+
     class BahnhoefeDbOpenHelper extends SQLiteOpenHelper {
 
         BahnhoefeDbOpenHelper(Context context) {

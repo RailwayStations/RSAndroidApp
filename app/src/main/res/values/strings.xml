@@ -270,4 +270,5 @@
   <string name="active">active</string>
   <string name="inactive">inactive</string>
   <string name="new_registration">New account registered, please have a look in your email inbox for the initial password. Also check SPAM folder.</string>
+    <string name="filter_result">Selected %d of %d stations</string>
 </resources>

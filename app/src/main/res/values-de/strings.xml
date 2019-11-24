@@ -279,4 +279,5 @@
     <string name="active">aktiv</string>
     <string name="inactive">inaktiv</string>
     <string name="new_registration">Neues Konto angelegt, ein Initialpasswort wird Dir per Email zugeschickt. Bitte prüfe auch den SPAM Ordner.</string>
+    <string name="filter_result">%d von %d Bahnhöfen selektiert</string>
 </resources>

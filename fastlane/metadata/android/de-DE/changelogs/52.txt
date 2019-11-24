@@ -1,0 +1,4 @@
+- Fehler im Bahnhofsfilter der Hauptseite behoben, wenn keine Bahnhöfe gefunden werden
+- Anzeige des Filterergebnisses
+- ProgressBar modernisiert
+- User-Agent mit version der App

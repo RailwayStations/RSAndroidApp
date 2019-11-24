@@ -1,0 +1,4 @@
+- fixed stationfilter of the main page if no stations found
+- display the result of the stationfilter
+- modernized the progress bar
+- User-Agent with app version
