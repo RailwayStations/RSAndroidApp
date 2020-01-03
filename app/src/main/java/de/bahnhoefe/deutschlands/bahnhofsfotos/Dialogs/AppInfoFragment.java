@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 public class AppInfoFragment extends DialogFragment {
@@ -25,10 +26,10 @@ public class AppInfoFragment extends DialogFragment {
         textView.setTextSize((float) 18);
         textView.setPadding(50, 50, 50, 50);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
-        textView.setText(R.string.app_info_text);
+        textView.setText(getResources().getString(R.string.app_info_text, BuildConfig.VERSION_NAME));
         textView.setLinkTextColor(Color.parseColor("#c71c4d"));
 
-        builder.setIcon(R.mipmap.ic_launcher)
+        builder.setIcon(BuildConfig.DEBUG ? R.mipmap.ic_launcher_debug : R.mipmap.ic_launcher)
                 .setTitle(R.string.app_info_title)
                 //.setMessage(R.string.app_info_text)
                 .setPositiveButton(R.string.app_info_ok, new DialogInterface.OnClickListener() {

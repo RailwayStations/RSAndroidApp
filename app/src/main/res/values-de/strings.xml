@@ -56,16 +56,7 @@
     <string name="search_hint">Bahnhof suchen</string>
     <string name="app_info_title">Über die App</string>
     <string name="app_info_ok">OK</string>
-    <string name="app_info_text">App-Entwicklung:"\n"<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>
-        "\n"in 08/2016 im Rahmen des OpenSource-Projekts <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands Bahnhöfe</a></b>.
-        "\n\n"Die Bahnhofsdaten wurden von der Deutschen Bahn im Rahmen des dortigen <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData-Projektes</a></b> zur Verfügung gestellt.
-        "\n\n"Die json-Datei, die die Fotos und die Bahnhofsdaten zusammenführt, wird über die von <b><a href="https://twitter.com/storchp">Peter Storch</a></b> entwickelte Java-Applikation bereitgestellt.
-        "\n\n"Für die App werden <a href="https://design.google.com/icons/">Material-Design-Icons von Google</a> genutzt, die unter Apache License Version 2.0. zur Verfügung stehen
-        "\n\n"<b>Beteiligte</b> am "Deutschlands-Bahnhöfe"-Projekt:
-        "\n\n"<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedorn (Kartenentwicklung)</a></b>
-        "\n\n"<b>- Alexandra Schön (Design)</b>
-        "\n\n"<b>- Katrin Schönherr (php-Entwicklung)</b>
-    </string>
+    <string name="app_info_text">Version: <b>%s</b>App-Entwicklung:\n<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>\n        \nin 08/2016 im Rahmen des OpenSource-Projekts <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands Bahnhöfe</a></b>.\n        \n\nDie Bahnhofsdaten wurden von der Deutschen Bahn im Rahmen des dortigen <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData-Projektes</a></b> zur Verfügung gestellt.\n        \n\nDie json-Datei, die die Fotos und die Bahnhofsdaten zusammenführt, wird über die von <b><a href="https://twitter.com/storchp">Peter Storch</a></b> entwickelte Java-Applikation bereitgestellt.\n        \n\nFür die App werden <a href="https://design.google.com/icons/">Material-Design-Icons von Google</a> genutzt, die unter Apache License Version 2.0. zur Verfügung stehen\n        \n\n<b>Beteiligte</b> am Deutschlands-Bahnhöfe-Projekt:\n        \n\n<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedorn (Kartenentwicklung)</a></b>\n        \n\n<b>- Alexandra Schön (Design)</b>\n        \n\n<b>- Katrin Schönherr (php-Entwicklung)</b></string>
     <string name="information">Informationen</string>
     <string name="menu_title_info">Über die App</string>
     <string name="benachrichtigen">Benachrichtigen</string>
@@ -294,4 +285,5 @@
     <string name="local_photo_delete_other_user">Fotos anderer Fotografen</string>
     <string name="local_photo_exists">Für diesen Bahnhof existiert ein Foto in deinem lokalen Speicher. Soll dieses anstelle des offiziellen Fotos geladen werden?</string>
     <string name="all_countries">Alle Länder</string>
+    <string name="app_name_debug">Bahnhofsfotos (debug)</string>
 </resources>

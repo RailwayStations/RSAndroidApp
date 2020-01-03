@@ -22,6 +22,11 @@ android {
         versionName "12.3.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        manifestPlaceholders = [
+                applicationLogo: "@mipmap/ic_launcher",
+        ]
+
+        buildConfigField "String", "VERSION_NAME_FULL", "\"${getVersionName()}\""
 
         // by convention, the folder name "app" is used for the APK file name. we want bahnhofsfotos instead
         archivesBaseName = "bahnhofsfotos"
@@ -36,9 +41,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             zipAlignEnabled true
+            manifestPlaceholders = [
+                    applicationLogo: "@mipmap/ic_launcher_debug",
+            ]
         }
     }
 

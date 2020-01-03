@@ -20,7 +20,7 @@
         android:name=".BaseApplication"
         android:allowBackup="true"
         android:fullBackupOnly="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="${applicationLogo}"
         android:label="@string/app_name"
         android:backupAgent=".util.BahnhofsfotosBackupAgent"
         android:supportsRtl="true"
@@ -162,7 +162,7 @@
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

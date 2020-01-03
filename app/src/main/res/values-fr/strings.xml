@@ -54,11 +54,7 @@
   <string name="search_hint">Chercher la station</string>
   <string name="app_info_title">A propos d\'application</string>
   <string name="app_info_ok">OK</string>
-  <string name="app_info_text">Application développement: \n<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>
-        \nin 08/2016 pendant l\'OpenSource projet de <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands Bahnhöfe</a></b>.          \n\nThe station data were provided by Deutsche Bahn in the context of the local <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData project</a></b>.          \n\nThe json file that merges the photos and the station data, is provided by the Java application developed by <b><a href="https://twitter.com/storchp">Peter Storch</a></b>.           \n\nThe app uses the <a href="https://design.google.com/icons/">material-design-icons used by Google,</a> under Apache license version 2.0\n\n<b>Involved</b> in the "Deutschlands-Bahnhöfe" project: \n\n<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedor n (map development)</a></b>
-        \n\n<b>- Alexandra Schön (design)</b>
-        \n\n<b>- Katrin Schönherr (php développement)</b>
-    </string>
+  <string name="app_info_text">Version: <b>%s</b>Application développement: \n<b><a href="http://www.gaby-becker.de">Gaby Becker</a></b>\n        \nin 08/2016 pendant l\'OpenSource projet de <b><a href="http://www.deutschlands-bahnhoefe.org">Deutschlands Bahnhöfe</a></b>.          \n\nThe station data were provided by Deutsche Bahn in the context of the local <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData project</a></b>.          \n\nThe json file that merges the photos and the station data, is provided by the Java application developed by <b><a href="https://twitter.com/storchp">Peter Storch</a></b>.           \n\nThe app uses the <a href="https://design.google.com/icons/">material-design-icons used by Google,</a> under Apache license version 2.0\n\n<b>Involved</b> in the Deutschlands-Bahnhöfe project: \n\n<b>- <a href="https://www.twitter.com/khgdrn">Kirsten Hagedor n (map development)</a></b>\n        \n\n<b>- Alexandra Schön (design)</b>\n        \n\n<b>- Katrin Schönherr (php développement)</b></string>
   <string name="information">Information</string>
   <string name="menu_title_info">A propos d\'application</string>
   <string name="benachrichtigen">Notifications</string>
@@ -283,4 +279,5 @@
   <string name="local_photo_delete_other_user">photos of other users</string>
     <string name="local_photo_exists">A photo of this station exists on your local storage. Show it instead of the official one?</string>
     <string name="all_countries">All countries</string>
+    <string name="app_name_debug">Les photos de la station de chemin de fer (debug)</string>
 </resources>
