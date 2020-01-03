@@ -36,6 +36,9 @@ public interface RSAPI {
     @GET("/{country}/photographers.json")
     Call<HighScore> getHighScore(@Path("country") String country);
 
+    @GET("/photographers.json")
+    Call<HighScore> getHighScore();
+
     @GET("/myProfile")
     Call<Profile> getProfile(@Header("Authorization") String authorization);
 

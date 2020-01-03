@@ -293,4 +293,5 @@
     <string name="local_photo_delete_accepted">akzeptierten Fotos</string>
     <string name="local_photo_delete_other_user">Fotos anderer Fotografen</string>
     <string name="local_photo_exists">Für diesen Bahnhof existiert ein Foto in deinem lokalen Speicher. Soll dieses anstelle des offiziellen Fotos geladen werden?</string>
+    <string name="all_countries">Alle Länder</string>
 </resources>

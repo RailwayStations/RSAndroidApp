@@ -41,6 +41,7 @@ public class HighScoreActivity extends AppCompatActivity {
         final BaseApplication baseApplication = (BaseApplication) getApplication();
         String firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
         final List<Country> countries = baseApplication.getDbAdapter().getAllCountries();
+        countries.add(0, new Country(getString(R.string.all_countries), "", null, null, null));
         int selectedItem = 0;
         for (Country country : countries) {
             if (country.getCode().equals(firstSelectedCountry)) {
@@ -63,12 +64,11 @@ public class HighScoreActivity extends AppCompatActivity {
                 // nothing todo
             }
         });
-
-        loadHighScore(baseApplication, (Country) countrySpinner.getSelectedItem());
     }
 
     private void loadHighScore(BaseApplication baseApplication, Country selectedCountry) {
-        baseApplication.getRSAPI().getHighScore(selectedCountry.getCode()).enqueue(new Callback<HighScore>() {
+        Call<HighScore> highScoreCall = selectedCountry.getCode().isEmpty() ? baseApplication.getRSAPI().getHighScore() : baseApplication.getRSAPI().getHighScore(selectedCountry.getCode());
+        highScoreCall.enqueue(new Callback<HighScore>() {
             @Override
             public void onResponse(Call<HighScore> call, Response<HighScore> response) {
                 if (response.isSuccessful()) {
