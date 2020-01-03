@@ -233,7 +233,7 @@ public class BaseApplication extends Application {
     }
 
     public PhotoFilter getPhotoFilter() {
-        return PhotoFilter.valueOf(preferences.getString(getString(R.string.PHOTO_FILTER), PhotoFilter.STATIONS_WITHOUT_PHOTO.toString()));
+        return PhotoFilter.valueOf(preferences.getString(getString(R.string.PHOTO_FILTER), PhotoFilter.ALL_STATIONS.toString()));
     }
 
     public void setPhotoFilter(PhotoFilter photoFilter) {
