@@ -376,7 +376,11 @@ public class BaseApplication extends Application {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            List<LocalPhoto> localPhotos = FileUtils.getLocalPhotos(FileUtils.getLocalFotoDir());
+            File localFotoDir = FileUtils.getLocalFotoDir();
+            if (localFotoDir == null) {
+                return null; // nothing to migrate
+            }
+            List<LocalPhoto> localPhotos = FileUtils.getLocalPhotos(localFotoDir);
             for (LocalPhoto photo : localPhotos) {
                 if (photo.isOldFile()) {
                     if (photo.getId() != null) {
