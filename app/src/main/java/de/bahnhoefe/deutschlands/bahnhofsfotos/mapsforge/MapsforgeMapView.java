@@ -22,8 +22,12 @@ public class MapsforgeMapView extends MapView {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(final MotionEvent ev) {
-        gestureDetector.onTouchEvent(ev);
-        return super.onTouchEvent(ev);
+        try {
+            gestureDetector.onTouchEvent(ev);
+            return super.onTouchEvent(ev);
+        } catch (Exception ignored) {
+        }
+        return false;
     }
 
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
