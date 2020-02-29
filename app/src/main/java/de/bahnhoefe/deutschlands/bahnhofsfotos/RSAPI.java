@@ -8,6 +8,7 @@ import java.util.List;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
@@ -61,14 +62,14 @@ public interface RSAPI {
     Call<Void> changePassword(@Header("Authorization") String authorization, @Header("New-Password") String newPassword);
 
     @POST("/photoUpload")
-    Call<Void> photoUpload(@Header("Authorization") String authorization,
-                           @Header("Station-Id") String stationId,
-                           @Header("Country") String countryCode,
-                           @Header("Station-Title") String stationTitle,
-                           @Header("Latitude") Double latitude,
-                           @Header("Longitude") Double longitude,
-                           @Header("Comment") String comment,
-                           @Body RequestBody file);
+    Call<InboxResponse> photoUpload(@Header("Authorization") String authorization,
+                                    @Header("Station-Id") String stationId,
+                                    @Header("Country") String countryCode,
+                                    @Header("Station-Title") String stationTitle,
+                                    @Header("Latitude") Double latitude,
+                                    @Header("Longitude") Double longitude,
+                                    @Header("Comment") String comment,
+                                    @Body RequestBody file);
 
     @Headers({
             "Content-Type: application/json"

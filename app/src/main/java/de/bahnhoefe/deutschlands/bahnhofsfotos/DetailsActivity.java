@@ -64,6 +64,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
@@ -516,7 +517,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     /**
-     * Get the file path for the Camera app to store the unprocessed foto to.
+     * Get the file path for the Camera app to store the unprocessed photo to.
      *
      * @return the File
      */
@@ -735,36 +736,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
 
             final File mediaFile = getStoredMediaFile();
-            RequestBody file = RequestBody.create(MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())), mediaFile);
+            RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
             rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
-                    stationTitle, latitude, longitude, comment, file).enqueue(new Callback<Void>() {
+                    stationTitle, latitude, longitude, comment, file).enqueue(new Callback<InboxResponse>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(Call<InboxResponse> call, Response<InboxResponse> response) {
                     progress.dismiss();
-                    switch (response.code()) {
-                        case 202 :
-                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_completed);
-                            break;
-                        case 400 :
-                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_bad_request);
-                            break;
-                        case 401 :
-                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.authorization_failed);
-                            break;
-                        case 409 :
-                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_conflict);
-                            break;
-                        case 413 :
-                            new SimpleDialogs().confirm(DetailsActivity.this, R.string.upload_too_big);
-                            break;
-                        default :
-                            new SimpleDialogs().confirm(DetailsActivity.this,
-                                String.format(getText(R.string.upload_failed).toString(), response.code()));
-                    }
+                    InboxResponse inboxResponse = response.body();
+                    // TODO: insert into DB
+                    new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(Call<InboxResponse> call, Throwable t) {
                     Log.e(TAG, "Error uploading photo", t);
                     progress.dismiss();
                     new SimpleDialogs().confirm(DetailsActivity.this,
