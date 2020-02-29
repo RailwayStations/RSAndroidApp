@@ -319,50 +319,36 @@ public class BaseApplication extends Application {
         return api;
     }
 
-    public Uri getMap() {
-        return getUri(getString(R.string.MAP_FILE));
+    public String getMapFileName() {
+        return preferences.getString(getString(R.string.MAP_FILE), null);
     }
 
-    public void setMap(Uri map) {
-        putUri(R.string.MAP_FILE, map);
+    public void setMapFileName(String mapFileName) {
+        putString(R.string.MAP_FILE, mapFileName);
     }
 
-    private void putUri(int key, Uri uri) {
-        putString(key, uri != null ? uri.toString() : null);
+    public String getMapDirectory() {
+        return preferences.getString(getString(R.string.MAP_DIRECTORY), null);
     }
 
-    public Uri getMapDirectory() {
-        return getUri(getString(R.string.MAP_DIRECTORY));
+    public void setMapDirectory(String mapDirectory) {
+        putString(R.string.MAP_DIRECTORY, mapDirectory);
     }
 
-    private Uri getUri(String key) {
-        String value = preferences.getString(key, null);
-        try {
-            return Uri.parse(value);
-        } catch (Exception ignored) {
-            Log.e(TAG, "can't read Uri string " + value);
-        }
-        return null;
+    public String getMapThemeDirectory() {
+        return preferences.getString(getString(R.string.MAP_THEME_DIRECTORY), null);
     }
 
-    public void setMapDirectory(Uri mapDirectory) {
-        putUri(R.string.MAP_DIRECTORY, mapDirectory);
+    public void setMapThemeDirectory(String mapThemeDirectory) {
+        putString(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
     }
 
-    public Uri getMapThemeDirectory() {
-        return getUri(getString(R.string.MAP_THEME_DIRECTORY));
+    public String getMapTheme() {
+        return preferences.getString(getString(R.string.MAP_THEME), null);
     }
 
-    public void setMapThemeDirectory(Uri mapThemeDirectory) {
-        putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
-    }
-
-    public Uri getMapTheme() {
-        return getUri(getString(R.string.MAP_THEME));
-    }
-
-    public void setMapTheme(Uri mapTheme) {
-        putUri(R.string.MAP_THEME, mapTheme);
+    public void setMapTheme(String mapTheme) {
+        putString(R.string.MAP_THEME, mapTheme);
     }
 
     /* This interceptor adds a custom User-Agent. */
