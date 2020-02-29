@@ -2,14 +2,13 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 import android.content.Context;
 import android.os.Environment;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
@@ -27,9 +26,8 @@ public class FileUtils {
      * @return the File denoting the base directory or null, if cannot write to it
      */
     @Nullable
-    public static File getLocalFotoDir() {
-        File mediaStorageDir = mkdirs(new File(Environment.getExternalStorageDirectory(), PHOTO_DIR));
-        return mediaStorageDir.isDirectory() && mediaStorageDir.canWrite() ? mediaStorageDir : null;
+    public static File getLocalFotoDir(Context context) {
+        return mkdirs(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES));
     }
 
     private static File mkdirs(File dir) {
@@ -48,13 +46,14 @@ public class FileUtils {
      * @return the File
      */
     @Nullable
-    public static File getStoredMediaFile(String country, String bahnhofId) {
-        File mediaStorageDir = mkdirs(new File(FileUtils.getLocalFotoDir(), country != null ? country : MISSING_DIR));
+    public static File getStoredMediaFile(Context context, String country, String bahnhofId) {
+        String countryPrefix = country != null ? country : MISSING_DIR;
+        File mediaStorageDir = mkdirs(FileUtils.getLocalFotoDir(context));
         if (mediaStorageDir == null) {
             return null;
         }
 
-        File storeMediaFile = new File(mediaStorageDir, String.format("%s.jpg", bahnhofId));
+        File storeMediaFile = new File(mediaStorageDir, String.format("%s-%s.jpg", countryPrefix, bahnhofId));
         Log.d(TAG, "StoredMediaFile: " + storeMediaFile.toString());
 
         return storeMediaFile;
@@ -65,16 +64,8 @@ public class FileUtils {
      *
      * @return the File
      */
-    public static File getCameraMediaFile(String bahnhofId) {
-        File temporaryStorageDir = mkdirs(new File(FileUtils.getLocalFotoDir(), TEMP_DIR));
-        if (temporaryStorageDir == null) {
-            return null;
-        }
-
-        File file = new File(temporaryStorageDir, String.format("%s.jpg", bahnhofId));
-        Log.d(TAG, "CameraFilePath: " + file.toString());
-
-        return file;
+    public static File getCameraMediaFile(Context context, String bahnhofId) {
+        return getImageCacheFile(context, bahnhofId);
     }
 
     public static File getImageCacheFile(Context applicationContext, String bahnhofId) {
@@ -83,8 +74,8 @@ public class FileUtils {
         return new File(imagePath, bahnhofId + ".jpg");
     }
 
-    public static List<LocalPhoto> getLocalPhotos() {
-        File fotoDir = FileUtils.getLocalFotoDir();
+    public static List<LocalPhoto> getLocalPhotos(Context context) {
+        File fotoDir = FileUtils.getLocalFotoDir(context);
 
         List<LocalPhoto> localPhotos = new ArrayList<>();
         if (fotoDir != null) {
@@ -138,4 +129,16 @@ public class FileUtils {
         return file.getParentFile().getName().equals(PHOTO_DIR);
     }
 
+    public static void moveFile(File file, File targetFile) throws IOException {
+        org.apache.commons.io.FileUtils.copyFile(file, targetFile);
+        org.apache.commons.io.FileUtils.forceDelete(file);
+    }
+
+    public static void deleteQuietly(File file) {
+        try {
+            org.apache.commons.io.FileUtils.forceDelete(file);
+        } catch (IOException ignored) {
+            Log.w(TAG, "unable to delete file " + file, ignored);
+        }
+    }
 }

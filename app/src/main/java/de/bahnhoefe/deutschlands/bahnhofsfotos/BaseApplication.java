@@ -3,10 +3,12 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.multidex.MultiDex;
+
+import androidx.annotation.NonNull;
+import androidx.multidex.MultiDex;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -317,36 +319,50 @@ public class BaseApplication extends Application {
         return api;
     }
 
-    public String getMapFileName() {
-        return preferences.getString(getString(R.string.MAP_FILE), null);
+    public Uri getMap() {
+        return getUri(getString(R.string.MAP_FILE));
     }
 
-    public void setMapFileName(String mapFileName) {
-        putString(R.string.MAP_FILE, mapFileName);
+    public void setMap(Uri map) {
+        putUri(R.string.MAP_FILE, map);
     }
 
-    public String getMapDirectory() {
-        return preferences.getString(getString(R.string.MAP_DIRECTORY), null);
+    private void putUri(int key, Uri uri) {
+        putString(key, uri != null ? uri.toString() : null);
     }
 
-    public void setMapDirectory(String mapDirectory) {
-        putString(R.string.MAP_DIRECTORY, mapDirectory);
+    public Uri getMapDirectory() {
+        return getUri(getString(R.string.MAP_DIRECTORY));
     }
 
-    public String getMapThemeDirectory() {
-        return preferences.getString(getString(R.string.MAP_THEME_DIRECTORY), null);
+    private Uri getUri(String key) {
+        String value = preferences.getString(key, null);
+        try {
+            return Uri.parse(value);
+        } catch (Exception ignored) {
+            Log.e(TAG, "can't read Uri string " + value);
+        }
+        return null;
     }
 
-    public void setMapThemeDirectory(String mapThemeDirectory) {
-        putString(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
+    public void setMapDirectory(Uri mapDirectory) {
+        putUri(R.string.MAP_DIRECTORY, mapDirectory);
     }
 
-    public String getMapTheme() {
-        return preferences.getString(getString(R.string.MAP_THEME), null);
+    public Uri getMapThemeDirectory() {
+        return getUri(getString(R.string.MAP_THEME_DIRECTORY));
     }
 
-    public void setMapTheme(String mapTheme) {
-        putString(R.string.MAP_THEME, mapTheme);
+    public void setMapThemeDirectory(Uri mapThemeDirectory) {
+        putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
+    }
+
+    public Uri getMapTheme() {
+        return getUri(getString(R.string.MAP_THEME));
+    }
+
+    public void setMapTheme(Uri mapTheme) {
+        putUri(R.string.MAP_THEME, mapTheme);
     }
 
     /* This interceptor adds a custom User-Agent. */
@@ -376,7 +392,7 @@ public class BaseApplication extends Application {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            File localFotoDir = FileUtils.getLocalFotoDir();
+            File localFotoDir = FileUtils.getLocalFotoDir(getApplicationContext());
             if (localFotoDir == null) {
                 return null; // nothing to migrate
             }
@@ -387,9 +403,9 @@ public class BaseApplication extends Application {
                         Bahnhof bahnhof = dbAdapter.fetchBahnhof(null, photo.getId());
                         if (bahnhof != null) {
                             // move to country folder
-                            File targetFile = FileUtils.getStoredMediaFile(bahnhof.getCountry(), photo.getId());
+                            File targetFile = FileUtils.getStoredMediaFile(getApplicationContext(), bahnhof.getCountry(), photo.getId());
                             try {
-                                org.apache.commons.io.FileUtils.moveFile(photo.getFile(), targetFile);
+                                FileUtils.moveFile(photo.getFile(), targetFile);
                                 successCount++;
                             } catch (IOException e) {
                                 errorCount++;
@@ -401,9 +417,9 @@ public class BaseApplication extends Application {
                         }
                     } else if (photo.hasCoords()) {
                         // move to missing folder
-                        File targetFile = FileUtils.getStoredMediaFile(null, LocalPhoto.getIdByLatLon(photo.getLat(), photo.getLon()));
+                        File targetFile = FileUtils.getStoredMediaFile(getApplicationContext(), null, LocalPhoto.getIdByLatLon(photo.getLat(), photo.getLon()));
                         try {
-                            org.apache.commons.io.FileUtils.moveFile(photo.getFile(), targetFile);
+                            FileUtils.moveFile(photo.getFile(), targetFile);
                             successCount++;
                         } catch (IOException e) {
                             errorCount++;

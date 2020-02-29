@@ -3,10 +3,8 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.nfc.Tag;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -15,7 +13,6 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +48,7 @@ public class GalleryActivity extends AppCompatActivity {
 
         grid = findViewById(R.id.gridview);
 
-        final List<LocalPhoto> files = FileUtils.getLocalPhotos();
+        final List<LocalPhoto> files = FileUtils.getLocalPhotos(this);
         adapter = new GridViewAdapter(GalleryActivity.this, files);
         grid.setAdapter(adapter);
 
@@ -96,7 +93,7 @@ public class GalleryActivity extends AppCompatActivity {
                 new SimpleDialogs().confirm(GalleryActivity.this, getResources().getString(R.string.delete_local_photo, photo.getDisplayName()), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        org.apache.commons.io.FileUtils.deleteQuietly(photo.getFile());
+                        FileUtils.deleteQuietly(photo.getFile());
                         files.remove(photo);
                         adapter.notifyDataSetChanged();
                     }
@@ -158,11 +155,11 @@ public class GalleryActivity extends AppCompatActivity {
                     List<LocalPhoto> deleted = new ArrayList<>();
                     for (LocalPhoto photo : files) {
                         if (checkedItems[0] && photo.getState() == UploadStateQuery.UploadStateState.ACCEPTED) {
-                            org.apache.commons.io.FileUtils.deleteQuietly(photo.getFile());
+                            FileUtils.deleteQuietly(photo.getFile());
                             deleted.add(photo);
                         }
                         if (checkedItems[1] && photo.getState() == UploadStateQuery.UploadStateState.OTHER_USER) {
-                            org.apache.commons.io.FileUtils.deleteQuietly(photo.getFile());
+                            FileUtils.deleteQuietly(photo.getFile());
                             deleted.add(photo);
                         }
                     }
@@ -170,7 +167,7 @@ public class GalleryActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                 }
             })
-            .setNegativeButton(R.string.cancel_label, null)
+            .setNegativeButton(R.string.button_cancel_text, null)
             .create().show();
     }
 

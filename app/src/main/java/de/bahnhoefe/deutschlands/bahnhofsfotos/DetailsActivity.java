@@ -19,12 +19,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NavUtils;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NavUtils;
+import androidx.core.content.FileProvider;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -335,7 +335,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void takePicture() {
-        if (!canSetPhoto()) {
+        if (!canSetPhoto() || !getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return;
         }
 
@@ -343,16 +343,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             checkMyData();
         } else {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            File file = getCameraMediaFile();
-            if (file != null) {
-                Uri photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", file);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
-                intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, etBahnhofName.getText());
-                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                startActivityForResult(intent, REQUEST_TAKE_PICTURE);
-            } else {
-                Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                File file = getCameraMediaFile();
+                if (file != null) {
+                    Uri photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", file);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
+                    intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, etBahnhofName.getText());
+                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    startActivityForResult(intent, REQUEST_TAKE_PICTURE);
+                } else {
+                    Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
@@ -404,94 +406,25 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return TextUtils.isEmpty(nickname) || license == License.UNKNOWN || !photoOwner;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_TAKE_PICTURE_PERMISSION) {
-            Log.i(TAG, "Received response for Camera permission request.");
-
-            // Check if the only required permission has been granted
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                // Camera and Write permission has been granted, preview can be displayed
-                takePicture();
-            } else {
-                //Permission not granted
-                Toast.makeText(DetailsActivity.this, R.string.grant_camera_permission, Toast.LENGTH_LONG).show();
-            }
-        } else if (requestCode == REQUEST_SELECT_PICTURE_PERMISSION) {
-            Log.i(TAG, "Received response for select image permission request.");
-
-            // Check if the only required permission has been granted
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Write permission has been granted, preview can be displayed
-                selectPicture();
-            } else {
-                //Permission not granted
-                Toast.makeText(DetailsActivity.this, R.string.grant_external_storage, Toast.LENGTH_LONG).show();
-            }
-        } else if (requestCode == REQUEST_REPORT_GHOST_PERMISSION) {
-            Log.i(TAG, "Received response for report ghost permission request.");
-
-            // Check if the only required permission has been granted
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Write permission has been granted, preview can be displayed
-                reportGhostStationWithConfirmation();
-            } else {
-                //Permission not granted
-                Toast.makeText(DetailsActivity.this, R.string.grant_external_storage, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
     /**
      * Method to check permission before taking a picture
      */
     void takePictureWithPermissionCheck() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Camera permission has not been granted.
-                requestPermissionAndTakePicture();
-            } else {
-                takePicture();
-            }
-        } else {
-            takePicture();
-        }
+        takePicture();
     }
 
     /**
      * Method to check permission before selecting a picture
      */
     void selectPictureWithPermissionCheck() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Write permission has not been granted.
-                requestStoragePermission(REQUEST_SELECT_PICTURE_PERMISSION);
-            } else {
-                selectPicture();
-            }
-        } else {
-            selectPicture();
-        }
+        selectPicture();
     }
 
     /**
      * Method to check permission before selecting a picture
      */
     void reportGhostStationWithPermissionCheck() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Write permission has not been granted.
-                requestStoragePermission(REQUEST_REPORT_GHOST_PERMISSION);
-            } else {
-                reportGhostStationWithConfirmation();
-            }
-        } else {
-            reportGhostStationWithConfirmation();
-        }
+        reportGhostStationWithConfirmation();
     }
 
     @Override
@@ -558,6 +491,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             return;
         }
 
+        Log.d(TAG, "Save photo to: " + storagePictureFile);
         scaledScreen.compress(Bitmap.CompressFormat.JPEG, STORED_FOTO_QUALITY, new FileOutputStream(storagePictureFile));
         setLocalBitmap();
     }
@@ -578,7 +512,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      */
     @Nullable
     public File getStoredMediaFile() {
-        return FileUtils.getStoredMediaFile(bahnhof != null ? bahnhof.getCountry() : null, bahnhofId);
+        return FileUtils.getStoredMediaFile(this, bahnhof != null ? bahnhof.getCountry() : null, bahnhofId);
     }
 
     /**
@@ -587,7 +521,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * @return the File
      */
     private File getCameraMediaFile() {
-        return FileUtils.getCameraMediaFile(bahnhofId);
+        return FileUtils.getCameraMediaFile(this, bahnhofId);
     }
 
 
@@ -1112,8 +1046,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Bitmap checkForLocalPhoto() {
         // show the image
         File localFile = getStoredMediaFile();
+        Log.d(TAG, "File: " + localFile);
         if (localFile != null && localFile.canRead()) {
-            Log.d(TAG, "File: " + localFile);
             Log.d(TAG, "FileGetPath: " + localFile.getPath().toString());
 
             Bitmap scaledScreen = BitmapFactory.decodeFile(
@@ -1150,7 +1084,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             if (bar != null) {
                 bar.hide();
             }
-            android.support.v7.app.ActionBar sbar = getSupportActionBar();
+            androidx.appcompat.app.ActionBar sbar = getSupportActionBar();
             if (sbar != null) {
                 sbar.hide();
             }
@@ -1165,7 +1099,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             if (bar != null) {
                 bar.show();
             }
-            android.support.v7.app.ActionBar sbar = getSupportActionBar();
+            androidx.appcompat.app.ActionBar sbar = getSupportActionBar();
             if (sbar != null) {
                 sbar.show();
             }
