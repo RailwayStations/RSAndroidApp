@@ -44,4 +44,9 @@
             </group>
         </menu>
     </item>
+    <item
+        android:id="@+id/apiUrl"
+        android:title="@string/apiUrl"
+        android:icon="@drawable/ic_build_white_24px"
+        app:showAsAction="collapseActionView|ifRoom" />
 </menu>

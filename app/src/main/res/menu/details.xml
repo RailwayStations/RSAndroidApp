@@ -29,14 +29,6 @@
     <group android:id="@+id/group_depencies">
 
     <item
-        android:id="@+id/photo_upload"
-        android:orderInCategory="300"
-        android:icon="@drawable/ic_file_upload_white_24dp"
-        app:itemIconTint="@color/colorActions"
-        app:itemTextColor="@color/colorActions"
-        android:title="@string/photo_upload"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/share_photo"
         android:orderInCategory="400"
         android:icon="@drawable/ic_share_white_24px"

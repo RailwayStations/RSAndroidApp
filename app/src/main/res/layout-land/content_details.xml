@@ -108,6 +108,15 @@
                 android:background="@null"
                 android:contentDescription="@string/remove_station"/>
 
+            <ImageButton
+                android:id="@+id/button_upload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_file_upload_red_48dp"
+                android:background="@null"
+                android:visibility="invisible"
+                android:contentDescription="@string/photo_upload"/>
+
         </LinearLayout>
 
     </RelativeLayout>

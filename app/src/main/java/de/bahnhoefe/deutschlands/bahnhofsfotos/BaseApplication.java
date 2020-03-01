@@ -30,6 +30,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+
+import org.apache.commons.lang3.StringUtils;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 
@@ -83,30 +85,6 @@ public class BaseApplication extends Application {
         dbAdapter = new BahnhofsDbAdapter(this);
         dbAdapter.open();
 
-        GsonBuilder gson = new GsonBuilder();
-        gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
-        gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
-
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .addInterceptor(new UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
-
-        if (BuildConfig.DEBUG) {
-                builder.addInterceptor(loggingInterceptor);
-        }
-
-        OkHttpClient okHttp = builder.build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.API_START_URL)
-                .client(okHttp)
-                .addConverterFactory(GsonConverterFactory.create(gson.create()))
-                .build();
-
-        api = retrofit.create(RSAPI.class);
-
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
 
         // migrate photo owner preference to boolean
@@ -116,6 +94,15 @@ public class BaseApplication extends Application {
         }
 
         migrateLocalPhotos();
+    }
+
+    public String getApiUrl() {
+        return preferences.getString(getString(R.string.API_URL), "https://api.railway-stations.org");
+    }
+
+    public void setApiUrl(String apiUrl) {
+        putString(R.string.API_URL, apiUrl);
+        this.api = null;
     }
 
     public void migrateLocalPhotos() {
@@ -130,7 +117,7 @@ public class BaseApplication extends Application {
 
     private void putString(int key, String value) {
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(getString(key), value);
+        editor.putString(getString(key), StringUtils.trimToNull(value));
         editor.apply();
     }
 
@@ -316,6 +303,31 @@ public class BaseApplication extends Application {
     }
 
     public RSAPI getRSAPI() {
+        if (api == null) {
+            GsonBuilder gson = new GsonBuilder();
+            gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
+            gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
+
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                    .addInterceptor(new UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
+
+            if (BuildConfig.DEBUG) {
+                builder.addInterceptor(loggingInterceptor);
+            }
+
+            OkHttpClient okHttp = builder.build();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(getApiUrl())
+                    .client(okHttp)
+                    .addConverterFactory(GsonConverterFactory.create(gson.create()))
+                    .build();
+
+            api = retrofit.create(RSAPI.class);
+        }
         return api;
     }
 

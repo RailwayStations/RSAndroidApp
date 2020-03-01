@@ -45,9 +45,9 @@ public class CustomAdapter extends CursorAdapter {
         }
 
         ViewHolder holder = (ViewHolder) view.getTag();
-        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRY)) + ": " + cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_ID)));
-        holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_TITLE)));
-        holder.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
+        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.COUNTRY)) + ": " + cursor.getString(cursor.getColumnIndex(Constants.STATIONS.ID)));
+        holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.TITLE)));
+        holder.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
     }
 
     static class ViewHolder {

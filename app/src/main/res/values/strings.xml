@@ -286,4 +286,6 @@
   <string name="local_photo_delete_other_user">photos of other users</string>
     <string name="local_photo_exists">A photo of this station exists on your local storage. Show it instead of the official one?</string>
     <string name="all_countries">All countries</string>
+    <string name="apiUrl">API URL</string>
+    <string name="api_url_hint">Enter API URL, leave blank for default</string>
 </resources>

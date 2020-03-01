@@ -23,12 +23,17 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.text.InputType;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -328,6 +333,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             baseApplication.setUpdatePolicy(UpdatePolicy.AUTOMATIC);
         } else if (id == R.id.rb_update_notify) {
             baseApplication.setUpdatePolicy(UpdatePolicy.NOTIFY);
+        } else if (id == R.id.apiUrl) {
+            new SimpleDialogs().prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
+                baseApplication.setApiUrl(v);
+                baseApplication.setLastUpdate(0);
+                recreate();
+            });
         }
 
         return super.onOptionsItemSelected(item);

@@ -286,4 +286,6 @@
     <string name="local_photo_exists">Für diesen Bahnhof existiert ein Foto in deinem lokalen Speicher. Soll dieses anstelle des offiziellen Fotos geladen werden?</string>
     <string name="all_countries">Alle Länder</string>
     <string name="app_name_debug">Bahnhofsfotos (debug)</string>
+    <string name="apiUrl">API URL</string>
+    <string name="api_url_hint">Enter API URL, leave blank for default</string>
 </resources>

@@ -46,6 +46,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -129,6 +132,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Double longitude;
     private String bahnhofId;
     private ImageView marker;
+    private ImageButton uploadPhotoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,38 +153,34 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         marker = findViewById(R.id.marker);
         etBahnhofName = findViewById(R.id.etbahnhofname);
         imageView = findViewById(R.id.imageview);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onPictureClicked();
-            }
-        });
+        imageView.setOnClickListener(v -> onPictureClicked());
         takePictureButton = findViewById(R.id.button_take_picture);
         takePictureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        takePictureWithPermissionCheck();
-                    }
-                }
+                v -> takePictureWithPermissionCheck()
         );
         selectPictureButton = findViewById(R.id.button_select_picture);
         selectPictureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        selectPictureWithPermissionCheck();
-                    }
-                }
+                v -> selectPictureWithPermissionCheck()
         );
         reportGhostStationButton = findViewById(R.id.button_remove_station);
         reportGhostStationButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        reportGhostStationWithPermissionCheck();
+                v -> reportGhostStationWithPermissionCheck()
+        );
+
+        uploadPhotoButton = findViewById(R.id.button_upload);
+        uploadPhotoButton.setOnClickListener(v -> {
+                if (isMyDataIncomplete()) {
+                    checkMyData();
+                } else {
+                    if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+                        Toast.makeText(DetailsActivity.this, R.string.registration_needed, Toast.LENGTH_LONG).show();
+                    } else if (TextUtils.isEmpty(etBahnhofName.getText())) {
+                        Toast.makeText(DetailsActivity.this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
+                    } else {
+                        uploadPhoto();
                     }
                 }
+            }
         );
 
         licenseTagView = findViewById(R.id.license_tag);
@@ -430,6 +430,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) {
             return;
         }
@@ -534,12 +535,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         navToStation.getIcon().mutate();
         navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
-        if (localFotoUsed) {
-            enableMenuItem(menu, R.id.photo_upload);
-        } else {
-            disableMenuItem(menu, R.id.photo_upload);
-        }
-
         if (localFotoUsed || (bahnhof != null && bahnhof.hasPhoto())) {
             enableMenuItem(menu, R.id.share_photo);
         } else {
@@ -591,19 +586,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     startActivity(timetableIntent);
                 } else {
                     Toast.makeText(this, R.string.timetable_missing, Toast.LENGTH_LONG).show();
-                }
-                break;
-            case R.id.photo_upload:
-                if (isMyDataIncomplete()) {
-                    checkMyData();
-                } else {
-                    if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-                        Toast.makeText(this, R.string.registration_needed, Toast.LENGTH_LONG).show();
-                    } else if (TextUtils.isEmpty(etBahnhofName.getText())) {
-                        Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
-                    } else {
-                        uploadPhoto();
-                    }
                 }
                 break;
             case R.id.share_photo:
@@ -696,29 +678,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void uploadPhoto() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.upload_comment, null);
-        final EditText etComment = dialogView.findViewById(R.id.comment);
-
-        builder.setTitle(R.string.comment)
-                .setView(dialogView)
-                .setIcon(R.mipmap.ic_launcher)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-
-        final AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            alertDialog.dismiss();
-
+        new SimpleDialogs().prompt(this, R.string.comment, EditorInfo.TYPE_CLASS_TEXT, R.string.comment_hint, null, v -> {
             final ProgressDialog progress = new ProgressDialog(DetailsActivity.this);
             progress.setMessage(getResources().getString(R.string.send));
             progress.setTitle(getResources().getString(R.string.app_name));
@@ -726,11 +686,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             progress.show();
 
             String stationTitle = etBahnhofName.getText().toString();
-            String comment = etComment.getText().toString();
+            String comment = v;
 
             try {
                 stationTitle = URLEncoder.encode(etBahnhofName.getText().toString(), "UTF-8");
-                comment = URLEncoder.encode(etComment.getText().toString(), "UTF-8");
+                comment = URLEncoder.encode(v, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
@@ -742,8 +702,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 @Override
                 public void onResponse(Call<InboxResponse> call, Response<InboxResponse> response) {
                     progress.dismiss();
-                    InboxResponse inboxResponse = response.body();
-                    // TODO: insert into DB
+                    InboxResponse inboxResponse = null;
+                    if (response.isSuccessful()) {
+                        response.body();
+                    } else {
+                        Gson gson = new Gson();
+                        inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
+                    }
+
+                    int uploadId = 0; // TODO
+                    baseApplication.getDbAdapter().updateUpload(inboxResponse, uploadId);
                     new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
                 }
 
@@ -755,7 +723,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                             String.format(getText(R.string.upload_failed).toString(), t.getMessage()));
                 }
             });
-            }
         });
     }
 
@@ -877,6 +844,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     @Override
     public void onBitmapAvailable(final @Nullable Bitmap bitmapFromCache) {
         localFotoUsed = false;
+        uploadPhotoButton.setVisibility(View.INVISIBLE);
         publicBitmap = bitmapFromCache;
         if (publicBitmap == null) {
             // keine Bitmap ausgelesen
@@ -937,6 +905,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (showBitmap == null) {
             // lokal keine Bitmap
             localFotoUsed = false;
+            uploadPhotoButton.setVisibility(View.INVISIBLE);
             // switch off image and license view until we actually have a foto
             imageView.setVisibility(View.INVISIBLE);
             licenseTagView.setVisibility(View.INVISIBLE);
@@ -1039,9 +1008,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             Log.d(TAG, "img width " + scaledScreen.getWidth());
             Log.d(TAG, "img height " + scaledScreen.getHeight());
             localFotoUsed = true;
+            uploadPhotoButton.setVisibility(View.VISIBLE);
             return scaledScreen;
         } else {
             localFotoUsed = false;
+            uploadPhotoButton.setVisibility(View.INVISIBLE);
             Log.e(TAG,
                     String.format("Media file not available for station %s and nickname %s ",
                             bahnhofId,
