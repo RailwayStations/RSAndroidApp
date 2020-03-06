@@ -2,6 +2,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,10 +13,10 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -28,14 +29,11 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import net.rdrei.android.dirchooser.DirectoryChooserConfig;
-import net.rdrei.android.dirchooser.DirectoryChooserFragment;
+import androidx.documentfile.provider.DocumentFile;
 
 import org.mapsforge.core.graphics.Align;
 import org.mapsforge.core.graphics.Bitmap;
@@ -49,7 +47,6 @@ import org.mapsforge.core.model.Point;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.input.MapZoomControls;
 import org.mapsforge.map.android.util.AndroidUtil;
-import org.mapsforge.map.android.util.ExternalRenderThemeUsingJarResources;
 import org.mapsforge.map.datastore.MapDataStore;
 import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.cache.TileCache;
@@ -60,12 +57,11 @@ import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.model.IMapViewPosition;
 import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
+import org.mapsforge.map.rendertheme.StreamRenderTheme;
 import org.mapsforge.map.rendertheme.XmlRenderTheme;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +79,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 import static android.view.Menu.NONE;
 
-public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem>, DirectoryChooserFragment.OnFragmentInteractionListener {
+public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem> {
 
     public static final String EXTRAS_LATITUDE = "Extras_Latitude";
     public static final String EXTRAS_LONGITUDE = "Extras_Longitude";
@@ -95,8 +91,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private static final long MIN_TIME_BW_UPDATES = 500; // minute
 
     private static final String TAG = MapsActivity.class.getSimpleName();
-    private static final String TAG_MAP_DIR = MapsActivity.class.getSimpleName() + ".MapDirChooser";
-    private static final String TAG_THEME_DIR = MapsActivity.class.getSimpleName() + ".ThemeDirChooser";
     private static final int REQUEST_FINE_LOCATION = 1;
     private static final int REQUEST_MAP_DIRECTORY = 2;
     private static final int REQUEST_THEME_DIRECTORY = 3;
@@ -105,8 +99,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     protected Layer layer;
     protected ClusterManager clusterer = null;
     protected List<TileCache> tileCaches = new ArrayList<TileCache>();
-
-    private DirectoryChooserFragment mDirectoryChooser;
 
     private List<Bahnhof> bahnhofList;
     private LatLong myPos = null;
@@ -268,28 +260,31 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     protected XmlRenderTheme getRenderTheme() {
-        String mapTheme = baseApplication.getMapTheme();
+        Uri mapTheme = baseApplication.getMapThemeUri();
         if (mapTheme == null) {
             return InternalRenderTheme.DEFAULT;
         }
         try {
-            File renderThemeFile = new File(mapTheme);
-            if (renderThemeFile.isDirectory()) {
-                renderThemeFile = new File(renderThemeFile, renderThemeFile.getName() + ".xml");
-            }
-            return new ExternalRenderThemeUsingJarResources(renderThemeFile);
-        } catch (FileNotFoundException e) {
+            DocumentFile renderThemeFile = DocumentFile.fromSingleUri(getApplication(), mapTheme);
+            return new StreamRenderTheme("/assets/", getContentResolver().openInputStream(renderThemeFile.getUri()));
+        } catch (Exception e) {
             Log.e( TAG,"Error loading theme " + mapTheme, e);
             return InternalRenderTheme.DEFAULT;
         }
     }
 
     protected MapDataStore getMapFile() {
-        if (baseApplication.getMapFileName() == null) {
+        final Uri mapFile = baseApplication.getMapUri();
+        if (mapFile == null || !DocumentFile.isDocumentUri(this, mapFile)) {
             return null;
         }
-        final File mapFile = new File(baseApplication.getMapFileName());
-        return mapFile.canRead() ? new MapFile(mapFile) : null;
+        try {
+            FileInputStream inputStream = (FileInputStream) getContentResolver().openInputStream(mapFile);
+            return new MapFile(inputStream, 0, null);
+        } catch (FileNotFoundException ignored) {
+            Log.e(TAG, "Can't open mapFile", ignored);
+        }
+        return null;
     }
 
     protected void createLayers() {
@@ -390,28 +385,24 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         menu.findItem(R.id.menu_toggle_photo).setIcon(baseApplication.getPhotoFilter().getIcon());
 
-        final String mapFileName = baseApplication.getMapFileName();
+        final Uri mapUri = baseApplication.getMapUri();
 
         MenuItem osmMapnick = menu.findItem(R.id.osm_mapnik);
-        osmMapnick.setChecked(mapFileName == null);
+        osmMapnick.setChecked(mapUri == null);
         osmMapnick.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, null));
 
         SubMenu mapSubmenu = menu.findItem(R.id.maps_submenu).getSubMenu();
 
-        final String mapDirectory = baseApplication.getMapDirectory();
+        final Uri mapDirectory = baseApplication.getMapDirectoryUri();
         if (mapDirectory != null) {
-            final File mapDirectoryFile = new File(mapDirectory);
-            if (mapDirectoryFile.canRead() && mapDirectoryFile.isDirectory()) {
-                File[] maps = mapDirectoryFile.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        return name.endsWith(".map");
+            DocumentFile documentsTree = getDocumentFileFromTreeUri(mapDirectory);
+            if (documentsTree != null) {
+                for (DocumentFile file : documentsTree.listFiles()) {
+                    if (file.isFile() && file.getName().endsWith(".map")) {
+                        MenuItem mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, file.getName());
+                        mapItem.setChecked(file.getUri().equals(mapUri));
+                        mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, file.getUri()));
                     }
-                });
-                for (File map : maps) {
-                    MenuItem mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, map.getName());
-                    mapItem.setChecked(map.getAbsolutePath().equals(mapFileName));
-                    mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, mapDirectoryFile));
                 }
             }
         }
@@ -421,17 +412,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         mapFolder.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (ContextCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MapsActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_MAP_DIRECTORY);
-                } else {
-                    openMapDirectoryChooser();
-                }
+                openMapDirectoryChooser();
                 return false;
             }
         });
 
-        final String mapTheme = baseApplication.getMapTheme();
-        final String mapThemeDirectory = baseApplication.getMapThemeDirectory();
+        final Uri mapTheme = baseApplication.getMapThemeUri();
+        final Uri mapThemeDirectory = baseApplication.getMapThemeDirectoryUri();
 
         MenuItem defaultTheme = menu.findItem(R.id.default_theme);
         defaultTheme.setChecked(mapTheme == null);
@@ -439,29 +426,23 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         SubMenu themeSubmenu = menu.findItem(R.id.themes_submenu).getSubMenu();
 
         if (mapThemeDirectory != null) {
-            final File mapThemeDirectoryFile = new File(mapThemeDirectory);
-            if (mapThemeDirectoryFile.canRead() && mapThemeDirectoryFile.isDirectory()) {
-                File[] themes = mapThemeDirectoryFile.listFiles(new FileFilter() {
-                    @Override
-                    public boolean accept(File file) {
-                        if (file.isFile() && file.getName().endsWith(".xml")) {
-                            return true;
+            DocumentFile documentsTree = getDocumentFileFromTreeUri(mapThemeDirectory);
+            if (documentsTree != null) {
+                for (DocumentFile file : documentsTree.listFiles()) {
+                    if (file.isFile() && file.getName().endsWith(".xml")) {
+                        String themeName = file.getName();
+                        MenuItem themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
+                        themeItem.setChecked(file.getUri().equals(mapTheme));
+                        themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, file.getUri()));
+                    } else if (file.isDirectory()) {
+                        DocumentFile childFile = file.findFile(file.getName() + ".xml");
+                        if (childFile != null) {
+                            String themeName = file.getName();
+                            MenuItem themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
+                            themeItem.setChecked(childFile.getUri().equals(mapTheme));
+                            themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, childFile.getUri()));
                         }
-                        if (file.isDirectory()) {
-                            File theme = new File(file, file.getName() + ".xml");
-                            if (theme.exists() && theme.canRead()) {
-                                return true;
-                            }
-                        }
-                        return false;
                     }
-
-                });
-                for (File theme : themes) {
-                    String themeName = theme.getName();
-                    MenuItem themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
-                    themeItem.setChecked(theme.getAbsolutePath().equals(mapTheme));
-                    themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, mapThemeDirectoryFile));
                 }
             }
         }
@@ -471,11 +452,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         themeFolder.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (ContextCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MapsActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_MAP_DIRECTORY);
-                } else {
-                    openThemeDirectoryChooser();
-                }
+                openThemeDirectoryChooser();
                 return false;
             }
         });
@@ -483,43 +460,49 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         return true;
     }
 
-    private void openDirectoryChooser(String dir, String tag) {
-        if (dir == null) {
-            dir = Environment.getExternalStorageDirectory().getAbsolutePath();
+    private DocumentFile getDocumentFileFromTreeUri(Uri uri) {
+        try {
+            return DocumentFile.fromTreeUri(getApplication(), uri);
+        } catch (Exception e) {
+            Log.w(TAG, "Error getting DocumentFile from Uri: " + uri);
         }
-        final DirectoryChooserConfig config = DirectoryChooserConfig.builder()
-                .newDirectoryName("")
-                .allowNewDirectoryNameModification(true)
-                .allowReadOnlyDirectory(true)
-                .initialDirectory(dir)
-                .build();
-        mDirectoryChooser = DirectoryChooserFragment.newInstance(config);
-
-        mDirectoryChooser.show(getFragmentManager(), tag);
+        return null;
     }
 
+    public void openDirectory(int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        startActivityForResult(intent, requestCode);
+    }
+
+
     private void openMapDirectoryChooser() {
-        openDirectoryChooser(baseApplication.getMapDirectory(), TAG_MAP_DIR);
+        openDirectory(REQUEST_MAP_DIRECTORY);
     }
 
     private void openThemeDirectoryChooser() {
-        openDirectoryChooser(baseApplication.getMapThemeDirectory(), TAG_THEME_DIR);
+        openDirectory(REQUEST_THEME_DIRECTORY);
     }
 
     @Override
-    public void onSelectDirectory(@NonNull String path) {
-        if (mDirectoryChooser.getTag().equals(TAG_MAP_DIR)) {
-            baseApplication.setMapDirectory(path);
-        } else if (mDirectoryChooser.getTag().equals(TAG_THEME_DIR)) {
-            baseApplication.setMapThemeDirectory(path);
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+        if (resultCode == Activity.RESULT_OK && resultData != null) {
+            Uri uri = resultData.getData();
+            if (uri != null) {
+                getContentResolver().takePersistableUriPermission(
+                        resultData.getData(),
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+                if (requestCode == REQUEST_MAP_DIRECTORY) {
+                    baseApplication.setMapDirectoryUri(resultData.getData());
+                    recreate();
+                } else if (requestCode == REQUEST_THEME_DIRECTORY) {
+                    baseApplication.setMapThemeDirectoryUri(resultData.getData());
+                    recreate();
+                }
+            }
         }
-        mDirectoryChooser.dismiss();
-        recreate();
-    }
-
-    @Override
-    public void onCancelChooser() {
-        mDirectoryChooser.dismiss();
     }
 
     /**
@@ -596,10 +579,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         @Override
         protected void onPostExecute(Integer integer) {
-            createClusterManager();
-            addMarkers(bahnhofList);
-            progress.dismiss();
-            Toast.makeText(MapsActivity.this, getResources().getQuantityString(R.plurals.stations_loaded, bahnhofList.size(), bahnhofList.size()), Toast.LENGTH_LONG).show();
+            try {
+                createClusterManager();
+                addMarkers(bahnhofList);
+                progress.dismiss();
+                Toast.makeText(MapsActivity.this, getResources().getQuantityString(R.plurals.stations_loaded, bahnhofList.size(), bahnhofList.size()), Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading markers", e);
+            }
         }
     }
 
@@ -935,21 +922,21 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         private BaseApplication baseApplication;
 
-        private File mapDirectory;
+        private Uri mapUri;
 
-        private MapMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final File mapDirectory) {
+        private MapMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final Uri mapUri) {
             this.mapsActivityRef = new WeakReference<>(mapsActivity);
             this.baseApplication = baseApplication;
-            this.mapDirectory = mapDirectory;
+            this.mapUri = mapUri;
         }
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             item.setChecked(true);
             if (item.getItemId() == R.id.osm_mapnik) { // default Mapnik online tiles
-                baseApplication.setMapFileName(null);
+                baseApplication.setMapUri(null);
             } else {
-                baseApplication.setMapFileName(new File(mapDirectory, item.getTitle().toString()).getAbsolutePath());
+                baseApplication.setMapUri(mapUri);
             }
 
             MapsActivity mapsActivity = mapsActivityRef.get();
@@ -966,21 +953,21 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         private BaseApplication baseApplication;
 
-        private File mapThemeDirectory;
+        private Uri mapThemeUri;
 
-        private MapThemeMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final File mapThemeDirectory) {
+        private MapThemeMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final Uri mapThemeUri) {
             this.mapsActivityRef = new WeakReference<>(mapsActivity);
             this.baseApplication = baseApplication;
-            this.mapThemeDirectory = mapThemeDirectory;
+            this.mapThemeUri = mapThemeUri;
         }
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             item.setChecked(true);
             if (item.getItemId() == R.id.default_theme) { // default theme
-                baseApplication.setMapTheme(null);
+                baseApplication.setMapThemeUri(null);
             } else {
-                baseApplication.setMapTheme(new File(mapThemeDirectory, item.getTitle().toString()).getAbsolutePath());
+                baseApplication.setMapThemeUri(mapThemeUri);
             }
 
             MapsActivity mapsActivity = mapsActivityRef.get();
