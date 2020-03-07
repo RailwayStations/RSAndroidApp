@@ -4,37 +4,29 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.multidex.MultiDex;
-import android.util.Log;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import com.google.gson.GsonBuilder;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -93,7 +85,6 @@ public class BaseApplication extends Application {
             setPhotoOwner(true);
         }
 
-        migrateLocalPhotos();
     }
 
     public String getApiUrl() {
@@ -103,10 +94,6 @@ public class BaseApplication extends Application {
     public void setApiUrl(String apiUrl) {
         putString(R.string.API_URL, apiUrl);
         this.api = null;
-    }
-
-    public void migrateLocalPhotos() {
-        new MigrateLocalFotosTask().execute();
     }
 
     private void putBoolean(int key, boolean value) {
@@ -393,62 +380,6 @@ public class BaseApplication extends Application {
                     .header("User-Agent", userAgent)
                     .build();
             return chain.proceed(requestWithUserAgent);
-        }
-    }
-
-    private class MigrateLocalFotosTask extends AsyncTask<Void, Void, Void> {
-
-        private int successCount = 0;
-
-        private int errorCount = 0;
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            File localFotoDir = FileUtils.getLocalFotoDir(getApplicationContext());
-            if (localFotoDir == null) {
-                return null; // nothing to migrate
-            }
-            List<LocalPhoto> localPhotos = FileUtils.getLocalPhotos(localFotoDir);
-            for (LocalPhoto photo : localPhotos) {
-                if (photo.isOldFile()) {
-                    if (photo.getId() != null) {
-                        Bahnhof bahnhof = dbAdapter.fetchBahnhof(null, photo.getId());
-                        if (bahnhof != null) {
-                            // move to country folder
-                            File targetFile = FileUtils.getStoredMediaFile(getApplicationContext(), bahnhof.getCountry(), photo.getId());
-                            try {
-                                FileUtils.moveFile(photo.getFile(), targetFile);
-                                successCount++;
-                            } catch (IOException e) {
-                                errorCount++;
-                                Log.w(TAG, "Can't move file: " + photo.getFile(), e);
-                            }
-                        } else {
-                            errorCount++;
-                            Log.w(TAG, "Can't move file, unknown country: " + photo.getFile());
-                        }
-                    } else if (photo.hasCoords()) {
-                        // move to missing folder
-                        File targetFile = FileUtils.getStoredMediaFile(getApplicationContext(), null, LocalPhoto.getIdByLatLon(photo.getLat(), photo.getLon()));
-                        try {
-                            FileUtils.moveFile(photo.getFile(), targetFile);
-                            successCount++;
-                        } catch (IOException e) {
-                            errorCount++;
-                            Log.w(TAG, "Can't move file: " + photo.getFile(), e);
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (successCount > 0 || errorCount > 0) {
-                Toast.makeText(BaseApplication.this, getResources().getString(R.string.files_migrated, successCount, errorCount), Toast.LENGTH_LONG).show();
-            }
         }
     }
 

@@ -279,8 +279,13 @@
     <string name="upload_state">State: %s</string>
     <string name="upload_state_unknown">unknown</string>
   <string name="upload_state_in_review">in review</string>
+  <string name="upload_state_conflict">conflict</string>
   <string name="upload_state_accepted">accepted</string>
+  <string name="upload_state_rejected">rejected</string>
   <string name="upload_state_other_user">other user</string>
+  <string name="upload_lat_lon_out_of_range">Invalid coordinates</string>
+  <string name="upload_unsupported_content_type">Unsupported image file format</string>
+  <string name="upload_not_enough_data">Not enough data</string>
     <string name="confirm_delete_local_photos">Delete local copies of:</string>
     <string name="local_photo_delete_accepted">accepted photos</string>
   <string name="local_photo_delete_other_user">photos of other users</string>
@@ -288,4 +293,14 @@
     <string name="all_countries">All countries</string>
     <string name="apiUrl">API URL</string>
     <string name="api_url_hint">Enter API URL, leave blank for default</string>
+    <string name="report_problem">Report problem</string>
+  <string name="report_problem_comment_hint">Comment on the problem</string>
+  <string name="problem_wrong_location">Station has wrong location</string>
+  <string name="problem_station_inactive">Station is inactive</string>
+  <string name="problem_station_nonexistent">Station does not exist</string>
+  <string name="problem_wrong_photo">Station has wrong photo</string>
+  <string name="problem_other">Other problem, details in the comment</string>
+    <string name="problem_please_specify">Please specify type of problem</string>
+  <string name="problem_please_comment">Please comment on the problem</string>
+  <string name="problem_report_failed">Error reporting the problem</string>
 </resources>

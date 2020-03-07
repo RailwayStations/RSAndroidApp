@@ -23,9 +23,10 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
-import static de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.STATIONS.ID;
-
 public class BahnhofsDbAdapter {
+
+    private static final String TAG = BahnhofsDbAdapter.class.getSimpleName();
+
     private static final String DATABASE_TABLE_STATIONS = "bahnhoefe";
     private static final String DATABASE_TABLE_COUNTRIES = "laender";
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
@@ -80,8 +81,6 @@ public class BahnhofsDbAdapter {
     private static final String DROP_STATEMENT_STATIONS = "DROP TABLE IF EXISTS " + DATABASE_TABLE_STATIONS;
     private static final String DROP_STATEMENT_COUNTRIES = "DROP TABLE IF EXISTS " + DATABASE_TABLE_COUNTRIES;
     private static final String DROP_STATEMENT_PROVIDER_APPS = "DROP TABLE IF EXISTS " + DATABASE_TABLE_PROVIDER_APPS;
-    private static final String TAG = BahnhofsDbAdapter.class.getSimpleName();
-
 
     private final Context context;
     private BahnhoefeDbOpenHelper dbHelper;
@@ -110,7 +109,7 @@ public class BahnhofsDbAdapter {
         try {
             for (Bahnhof bahnhof : bahnhoefe) {
                 ContentValues values = new ContentValues();
-                values.put(ID, bahnhof.getId());
+                values.put(Constants.STATIONS.ID, bahnhof.getId());
                 values.put(Constants.STATIONS.COUNTRY, bahnhof.getCountry());
                 values.put(Constants.STATIONS.TITLE, bahnhof.getTitle());
                 values.put(Constants.STATIONS.LAT, bahnhof.getLat());
@@ -175,7 +174,7 @@ public class BahnhofsDbAdapter {
 
     public Cursor getStationsList(PhotoFilter photoFilter, String nickname) {
         String selectQuery = "SELECT rowid _id, " +
-                ID + ", " +
+                Constants.STATIONS.ID + ", " +
                 Constants.STATIONS.TITLE + ", " +
                 Constants.STATIONS.PHOTO_URL + ", " +
                 Constants.STATIONS.COUNTRY +
@@ -431,33 +430,11 @@ public class BahnhofsDbAdapter {
             return null;
     }
 
-    public Bahnhof fetchBahnhof(String country, String id) {
-        if (country == null) {
-            // fallback to fetchBahnhofByBahnhofId if country is unknown
-            return fetchBahnhofByBahnhofId(id);
-        }
+    public Bahnhof getBahnhofByKey(String country, String id) {
         Cursor cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? and " + Constants.STATIONS.ID + "=?",
                 new String[]{ country, id}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             Bahnhof bahnhof = createBahnhofFromCursor(cursor);
-            cursor.close();
-            return bahnhof;
-        } else
-            return null;
-    }
-
-    /**
-     * Only used as a fallback, use fetchBahnhof with country instead
-     */
-    @Deprecated
-    private Bahnhof fetchBahnhofByBahnhofId(String id) {
-        Cursor cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.ID + "=?", new String[]{
-                id + ""}, null, null, null);
-        if (cursor != null) {
-            Bahnhof bahnhof = null;
-            if (cursor.moveToFirst() && cursor.getCount() == 1) {
-                bahnhof = createBahnhofFromCursor(cursor);
-            }
             cursor.close();
             return bahnhof;
         } else

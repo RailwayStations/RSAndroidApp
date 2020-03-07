@@ -10,6 +10,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadStateQuery;
@@ -77,6 +78,12 @@ public interface RSAPI {
     @POST("/photoUpload/queryState")
     Call<List<UploadStateQuery>> queryUploadState(@Header("Authorization") String authorization,
                            @Body List<LocalPhoto> uploadStateQueries);
+
+    @Headers({
+            "Content-Type: application/json"
+    })
+    @POST("/reportProblem")
+    Call<InboxResponse> reportProblem(@Header("Authorization") String authorization, @Body ProblemReport problemReport);
 
     class Helper {
         static String getAuthorizationHeader(String email, String password) {

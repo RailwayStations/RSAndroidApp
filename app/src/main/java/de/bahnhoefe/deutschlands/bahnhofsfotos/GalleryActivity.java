@@ -63,7 +63,7 @@ public class GalleryActivity extends AppCompatActivity {
                 Intent detailIntent = new Intent(GalleryActivity.this, DetailsActivity.class);
 
                 if (photo.getId() != null) {
-                    Bahnhof station = dbAdapter.fetchBahnhof(photo.getCountryCode(), photo.getId());
+                    Bahnhof station = dbAdapter.getBahnhofByKey(photo.getCountryCode(), photo.getId());
 
                     if (station != null) {
                         detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, station);

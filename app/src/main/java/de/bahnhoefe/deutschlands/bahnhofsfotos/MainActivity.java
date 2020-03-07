@@ -418,7 +418,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     TextView tvUpdate = findViewById(R.id.tvUpdate);
                     tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
                     updateStationList();
-                    baseApplication.migrateLocalPhotos();
                 }
                 progressBar.setVisibility(View.GONE);
             }

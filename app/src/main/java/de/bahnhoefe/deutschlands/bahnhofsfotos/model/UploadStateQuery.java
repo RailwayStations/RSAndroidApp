@@ -71,8 +71,10 @@ public class UploadStateQuery {
 
     public enum UploadStateState {
         UNKNOWN(R.string.upload_state_unknown, R.color.gridItem),
-        IN_REVIEW(R.string.upload_state_in_review, R.color.gridItemReview),
+        REVIEW(R.string.upload_state_in_review, R.color.gridItemReview),
+        CONFLICT(R.string.upload_state_conflict, R.color.gridItemError),
         ACCEPTED(R.string.upload_state_accepted, R.color.gridItemGood),
+        REJECTED(R.string.upload_state_rejected, R.color.gridItemError),
         OTHER_USER(R.string.upload_state_other_user, R.color.gridItemError);
 
         private int textId;

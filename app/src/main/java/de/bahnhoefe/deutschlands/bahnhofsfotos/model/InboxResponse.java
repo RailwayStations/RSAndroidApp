@@ -62,9 +62,9 @@ public class InboxResponse {
     @JsonAdapter(InboxResponseState.Serializer.class)
     public enum InboxResponseState {
         REVIEW(R.string.upload_completed),
-        LAT_LON_OUT_OF_RANGE(R.string.upload_bad_request), // TODO: better messages
-        NOT_ENOUGH_DATA(R.string.upload_bad_request),
-        UNSUPPORTED_CONTENT_TYPE(R.string.upload_bad_request),
+        LAT_LON_OUT_OF_RANGE(R.string.upload_lat_lon_out_of_range),
+        NOT_ENOUGH_DATA(R.string.upload_not_enough_data),
+        UNSUPPORTED_CONTENT_TYPE(R.string.upload_unsupported_content_type),
         PHOTO_TOO_LARGE(R.string.upload_too_big),
         CONFLICT(R.string.upload_conflict),
         UNAUTHORIZED(R.string.upload_too_big),

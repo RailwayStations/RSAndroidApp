@@ -11,8 +11,7 @@
 
 
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="0dp"
@@ -78,6 +77,7 @@
 
 
         <LinearLayout
+            android:id="@+id/buttons"
             android:layout_above="@id/license_tag"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
@@ -101,12 +101,12 @@
                 android:contentDescription="@string/select_photo"/>
 
             <ImageButton
-                android:id="@+id/button_remove_station"
+                android:id="@+id/button_report_problem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_remove_station_red_48px"
+                android:src="@drawable/ic_bullhorn_48px"
                 android:background="@null"
-                android:contentDescription="@string/remove_station"/>
+                android:contentDescription="@string/report_problem"/>
 
             <ImageButton
                 android:id="@+id/button_upload"
@@ -114,7 +114,6 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_file_upload_red_48dp"
                 android:background="@null"
-                android:visibility="invisible"
                 android:contentDescription="@string/photo_upload"/>
 
         </LinearLayout>

@@ -41,13 +41,16 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -70,6 +73,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
@@ -109,7 +114,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private ImageButton takePictureButton;
     private ImageButton selectPictureButton;
-    private ImageButton reportGhostStationButton;
+    private ImageButton reportProblemButton;
     private ImageView imageView;
     private Bahnhof bahnhof;
     private Set<Country> countries;
@@ -133,6 +138,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String bahnhofId;
     private ImageView marker;
     private ImageButton uploadPhotoButton;
+    private LinearLayout buttons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,7 +150,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
         countryCodes = baseApplication.getCountryCodes();
         countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
-
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -162,9 +167,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         selectPictureButton.setOnClickListener(
                 v -> selectPictureWithPermissionCheck()
         );
-        reportGhostStationButton = findViewById(R.id.button_remove_station);
-        reportGhostStationButton.setOnClickListener(
-                v -> reportGhostStationWithPermissionCheck()
+        reportProblemButton = findViewById(R.id.button_report_problem);
+        reportProblemButton.setOnClickListener(
+                v -> reportProblem()
         );
 
         uploadPhotoButton = findViewById(R.id.button_upload);
@@ -186,10 +191,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         licenseTagView = findViewById(R.id.license_tag);
         licenseTagView.setMovementMethod(LinkMovementMethod.getInstance());
 
+        buttons = findViewById(R.id.buttons);
+
         // switch off image and license view until we actually have a foto
         imageView.setVisibility(View.INVISIBLE);
         licenseTagView.setVisibility(View.INVISIBLE);
-        setPictureButtonsVisibility(View.INVISIBLE);
+        setPictureButtonsEnabled(false);
+        setButtonEnabled(reportProblemButton, false);
+        setButtonEnabled(uploadPhotoButton, false);
 
         fullscreen = false;
 
@@ -212,6 +221,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 finish();
                 return;
             }
+            setButtonEnabled(reportProblemButton, bahnhof != null);
 
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             if (bahnhof != null) {
@@ -225,11 +235,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     if (ConnectionUtil.checkInternetConnection(this)) {
                         BitmapCache.getInstance().getFoto(this, bahnhof.getPhotoUrl());
                     }
-                    if (canSetPhoto()) {
-                        setPictureButtonsVisibility(View.VISIBLE);
-                    } else {
-                        setPictureButtonsVisibility(View.INVISIBLE);
-                    }
+                    setPictureButtonsEnabled(canSetPhoto());
 
                     if (isOwner()) {
                         markerRes = bahnhof.isActive() ? R.drawable.marker_violet : R.drawable.marker_violet_inactive;
@@ -243,7 +249,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         new SimpleDialogs().confirm(this, R.string.local_photo_exists, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                setPictureButtonsVisibility(View.VISIBLE);
+                                setPictureButtonsEnabled(true);
                                 setLocalBitmap();
                             }
                         });
@@ -260,7 +266,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             } else {
                 etBahnhofName.setInputType(EditorInfo.TYPE_CLASS_TEXT);
                 bahnhofId = LocalPhoto.getIdByLatLon(latitude, longitude);
-                setPictureButtonsVisibility(View.VISIBLE);
                 setLocalBitmap();
             }
 
@@ -332,7 +337,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private boolean isOwner() {
-        return TextUtils.equals(nickname, bahnhof.getPhotographer());
+        return bahnhof != null && TextUtils.equals(nickname, bahnhof.getPhotographer());
     }
 
     public void takePicture() {
@@ -360,49 +365,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
-    public void reportGhostStationWithConfirmation() {
-        if (!canSetPhoto()) {
-            return;
-        }
-
-        if (isMyDataIncomplete()) {
-            checkMyData();
-        } else {
-            if (localFotoUsed || (bahnhof != null && bahnhof.hasPhoto())) {
-                new SimpleDialogs().confirm(this, R.string.confirm_replace_with_ghost, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        reportGhostStation();
-                    }
-                });
-            } else {
-                reportGhostStation();
-            }
-        }
-    }
-
-    public void reportGhostStation() {
-        File file = getStoredMediaFile();
-        if (file != null) {
-            try {
-                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ghost_station);
-                int sampling = bitmap.getWidth() / STORED_FOTO_WIDTH;
-                Bitmap scaledScreen = bitmap;
-                if (sampling > 1) {
-                    scaledScreen = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / sampling, bitmap.getHeight() / sampling, false);
-                }
-
-                saveScaledBitmap(file, scaledScreen);
-                Toast.makeText(getApplicationContext(), getString(R.string.report_ghost_station), Toast.LENGTH_LONG).show();
-            } catch (Exception e) {
-                Log.e(TAG, "Error processing photo", e);
-                Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
-        }
-    }
-
     private boolean isMyDataIncomplete() {
         return TextUtils.isEmpty(nickname) || license == License.UNKNOWN || !photoOwner;
     }
@@ -421,11 +383,73 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         selectPicture();
     }
 
-    /**
-     * Method to check permission before selecting a picture
-     */
-    void reportGhostStationWithPermissionCheck() {
-        reportGhostStationWithConfirmation();
+    void reportProblem() {
+        if (isMyDataIncomplete()) {
+            checkMyData();
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        View dialogView = getLayoutInflater().inflate(R.layout.report_problem, null);
+        final EditText etComment = dialogView.findViewById(R.id.et_problem_comment);
+        etComment.setHint(R.string.report_problem_comment_hint);
+
+        final Spinner problemType = dialogView.findViewById(R.id.problem_type);
+        List<String> problemTypes = new ArrayList<>();
+        problemTypes.add(getString(R.string.problem_please_specify));
+        for (ProblemType type : ProblemType.values()) {
+            problemTypes.add(getString(type.getMessageId()));
+        }
+        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, problemTypes);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        problemType.setAdapter(adapter);
+
+        builder.setTitle(R.string.report_problem)
+                .setView(dialogView)
+                .setIcon(R.drawable.ic_bullhorn_48px)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel());
+
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            int selectedType = problemType.getSelectedItemPosition();
+            if (selectedType == 0) {
+                Toast.makeText(getApplicationContext(), getString(R.string.problem_please_specify), Toast.LENGTH_LONG).show();
+                return;
+            }
+            ProblemType type = ProblemType.values()[selectedType];
+            String comment = etComment.getText().toString();
+            if (StringUtils.isBlank(comment)) {
+                Toast.makeText(getApplicationContext(), getString(R.string.problem_please_comment), Toast.LENGTH_LONG).show();
+                return;
+            }
+            alertDialog.dismiss();
+            rsapi.reportProblem(RSAPI.Helper.getAuthorizationHeader(email, password), new ProblemReport(bahnhof.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<InboxResponse>() {
+                @Override
+                public void onResponse(Call<InboxResponse> call, Response<InboxResponse> response) {
+                    InboxResponse inboxResponse = null;
+                    if (response.isSuccessful()) {
+                        response.body();
+                    } else {
+                        Gson gson = new Gson();
+                        inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
+                    }
+
+                    int uploadId = inboxResponse.getId();
+                    baseApplication.getDbAdapter().updateUpload(inboxResponse, uploadId);
+                    new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
+                }
+
+                @Override
+                public void onFailure(Call<InboxResponse> call, Throwable t) {
+                    Log.e(TAG, "Error reporting problem", t);
+                    new SimpleDialogs().confirm(DetailsActivity.this,
+                            String.format(getText(R.string.problem_report_failed).toString(), t.getMessage()));
+                }
+            });
+        });
     }
 
     @Override
@@ -899,7 +923,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * Fetch bitmap from device local location, if it exists, and set the photo view.
      */
     private void setLocalBitmap() {
-        setPictureButtonsVisibility(View.VISIBLE);
+        setPictureButtonsEnabled(true);
 
         Bitmap showBitmap = checkForLocalPhoto();
         if (showBitmap == null) {
@@ -952,10 +976,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     }
 
-    private void setPictureButtonsVisibility(int visible) {
-        takePictureButton.setVisibility(visible);
-        selectPictureButton.setVisibility(visible);
-        reportGhostStationButton.setVisibility(visible);
+    private void setPictureButtonsEnabled(boolean enabled) {
+        setButtonEnabled(takePictureButton, enabled);
+        setButtonEnabled(selectPictureButton, enabled);
+    }
+
+    private void setButtonEnabled(ImageButton imageButton, boolean enabled) {
+        imageButton.setEnabled(enabled);
+        imageButton.setImageAlpha(enabled ? 255 : 125);
     }
 
     private void setBitmap(final Bitmap showBitmap) {
@@ -987,6 +1015,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 header.setAlpha(alpha);
             }
             licenseTagView.setAlpha(alpha);
+            buttons.setAlpha(alpha);
         }
     }
 
