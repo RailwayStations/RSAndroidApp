@@ -13,8 +13,8 @@ public class Upload {
     private String inboxUrl;
     private ProblemType problemType;
     private String rejectReason;
-    private UploadStateQuery.UploadStateState uploadState;
-    private Long createdAt;
+    private UploadState uploadState = UploadState.UNKNOWN;
+    private Long createdAt = System.currentTimeMillis();
 
     public Upload() {
     }
@@ -107,11 +107,11 @@ public class Upload {
         this.rejectReason = rejectReason;
     }
 
-    public UploadStateQuery.UploadStateState getUploadState() {
+    public UploadState getUploadState() {
         return uploadState;
     }
 
-    public void setUploadState(UploadStateQuery.UploadStateState uploadState) {
+    public void setUploadState(UploadState uploadState) {
         this.uploadState = uploadState;
     }
 
@@ -121,5 +121,25 @@ public class Upload {
 
     public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isUploadForExistingStation() {
+        return country != null && stationId != null && !isProblemReport();
+    }
+
+    public boolean isUploadForMissingStation() {
+        return lat != null && lon != null && !isProblemReport();
+    }
+
+    public boolean isProblemReport() {
+        return problemType != null;
+    }
+
+    public boolean isPendingPhotoUpload() {
+        return (isUploadForExistingStation() || isUploadForMissingStation()) && isPending();
+    }
+
+    private boolean isPending() {
+        return uploadState.isPending();
     }
 }

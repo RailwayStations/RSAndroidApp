@@ -20,6 +20,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.GridViewAdapter;
@@ -110,12 +111,12 @@ public class GalleryActivity extends AppCompatActivity {
                 int otherOwnerCount = 0;
                 if (stateQueries != null && files.size() == stateQueries.size()) {
                     for (int i = 0; i < files.size(); i++) {
-                        UploadStateQuery.UploadStateState state = stateQueries.get(i).getState();
+                        UploadState state = stateQueries.get(i).getState();
                         files.get(i).setState(state);
-                        if (state == UploadStateQuery.UploadStateState.ACCEPTED) {
+                        if (state == UploadState.ACCEPTED) {
                             acceptedCount++;
                         }
-                        if (state == UploadStateQuery.UploadStateState.OTHER_USER) {
+                        if (state == UploadState.OTHER_USER) {
                             otherOwnerCount++;
                         }
                     }
@@ -154,11 +155,11 @@ public class GalleryActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     List<LocalPhoto> deleted = new ArrayList<>();
                     for (LocalPhoto photo : files) {
-                        if (checkedItems[0] && photo.getState() == UploadStateQuery.UploadStateState.ACCEPTED) {
+                        if (checkedItems[0] && photo.getState() == UploadState.ACCEPTED) {
                             FileUtils.deleteQuietly(photo.getFile());
                             deleted.add(photo);
                         }
-                        if (checkedItems[1] && photo.getState() == UploadStateQuery.UploadStateState.OTHER_USER) {
+                        if (checkedItems[1] && photo.getState() == UploadState.OTHER_USER) {
                             FileUtils.deleteQuietly(photo.getFile());
                             deleted.add(photo);
                         }

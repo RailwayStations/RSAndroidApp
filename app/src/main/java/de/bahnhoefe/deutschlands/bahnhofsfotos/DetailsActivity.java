@@ -65,17 +65,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MyDataDialogFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
@@ -96,6 +95,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     // Names of Extras that this class reacts to
     public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
+    public static final String EXTRA_UPLOAD = "upload";
     public static final String EXTRA_BAHNHOF = "bahnhof";
     public static final String EXTRA_LATITUDE = "latitude";
     public static final String EXTRA_LONGITUDE = "longitude";
@@ -103,51 +103,50 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public static final int STORED_FOTO_QUALITY = 95;
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
-    private static final int REQUEST_TAKE_PICTURE_PERMISSION = 0;
-    private static final int REQUEST_SELECT_PICTURE_PERMISSION = 1;
     private static final int REQUEST_TAKE_PICTURE = 2;
     private static final int REQUEST_SELECT_PICTURE = 3;
-    private static final int REQUEST_REPORT_GHOST_PERMISSION = 4;
     private static final int ALPHA = 128;
 
     private static final String LINK_FORMAT = "<b><a href=\"%s\">%s</a></b>";
 
+    private BaseApplication baseApplication;
+    private RSAPI rsapi;
+
+    private LinearLayout buttons;
     private ImageButton takePictureButton;
     private ImageButton selectPictureButton;
     private ImageButton reportProblemButton;
+    private ImageButton uploadPhotoButton;
+
+    private RelativeLayout header;
     private ImageView imageView;
+    private EditText etBahnhofName;
+    private TextView licenseTagView;
+    private ViewGroup detailsLayout;
+    private ImageView marker;
+
+    private Upload upload;
     private Bahnhof bahnhof;
     private Set<Country> countries;
-    private EditText etBahnhofName;
     private boolean localFotoUsed = false;
-    private License license;
-    private boolean photoOwner;
     private String nickname;
     private String email;
     private String password;
     private Set<String> countryCodes;
-    private TextView licenseTagView;
-    private ViewGroup detailsLayout;
     private boolean fullscreen;
-    private BaseApplication baseApplication;
-    private RelativeLayout header;
     private Bitmap publicBitmap;
-    private RSAPI rsapi;
     private Double latitude;
     private Double longitude;
     private String bahnhofId;
-    private ImageView marker;
-    private ImageButton uploadPhotoButton;
-    private LinearLayout buttons;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
         baseApplication = (BaseApplication) getApplication();
         rsapi = baseApplication.getRSAPI();
-        BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
+        final BahnhofsDbAdapter dbAdapter = baseApplication.getDbAdapter();
         countryCodes = baseApplication.getCountryCodes();
         countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
 
@@ -161,11 +160,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         imageView.setOnClickListener(v -> onPictureClicked());
         takePictureButton = findViewById(R.id.button_take_picture);
         takePictureButton.setOnClickListener(
-                v -> takePictureWithPermissionCheck()
+                v -> takePicture()
         );
         selectPictureButton = findViewById(R.id.button_select_picture);
         selectPictureButton.setOnClickListener(
-                v -> selectPictureWithPermissionCheck()
+                v -> selectPicture()
         );
         reportProblemButton = findViewById(R.id.button_report_problem);
         reportProblemButton.setOnClickListener(
@@ -174,16 +173,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         uploadPhotoButton = findViewById(R.id.button_upload);
         uploadPhotoButton.setOnClickListener(v -> {
-                if (isMyDataIncomplete()) {
-                    checkMyData();
-                } else {
-                    if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-                        Toast.makeText(DetailsActivity.this, R.string.registration_needed, Toast.LENGTH_LONG).show();
-                    } else if (TextUtils.isEmpty(etBahnhofName.getText())) {
+                if (!isLoggedIn()) {
+                    Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+                } else if (TextUtils.isEmpty(etBahnhofName.getText())) {
                         Toast.makeText(DetailsActivity.this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
-                    } else {
-                        uploadPhoto();
-                    }
+                } else {
+                    uploadPhoto();
                 }
             }
         );
@@ -207,14 +202,25 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(final Intent intent) {
         super.onNewIntent(intent);
 
         boolean directPicture = false;
         if (intent != null) {
+            upload = (Upload) intent.getSerializableExtra(EXTRA_UPLOAD);
             bahnhof = (Bahnhof) intent.getSerializableExtra(EXTRA_BAHNHOF);
             latitude = (Double) intent.getSerializableExtra(EXTRA_LATITUDE);
             longitude = (Double) intent.getSerializableExtra(EXTRA_LONGITUDE);
+
+            if (bahnhof == null && upload != null && upload.isUploadForExistingStation()) {
+                bahnhof = baseApplication.getDbAdapter().getBahnhofForUpload(upload);
+            }
+
+            if (latitude == null && longitude == null && upload != null && upload.isUploadForMissingStation()) {
+                latitude = upload.getLat();
+                longitude = upload.getLon();
+            }
+
             if (bahnhof == null && (latitude == null || longitude == null)) {
                 Log.w(TAG, "EXTRA_BAHNHOF and EXTRA_LATITUDE or EXTRA_LONGITUDE in intent data missing");
                 Toast.makeText(this, R.string.station_or_coords_not_found, Toast.LENGTH_LONG).show();
@@ -230,7 +236,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 etBahnhofName.setInputType(EditorInfo.TYPE_NULL);
                 etBahnhofName.setSingleLine(false);
 
-                int markerRes;
+                if (upload == null) {
+                    upload = baseApplication.getDbAdapter().getPendingUploadForStation(bahnhof);
+                }
+
+                final int markerRes;
                 if (bahnhof.hasPhoto()) {
                     if (ConnectionUtil.checkInternetConnection(this)) {
                         BitmapCache.getInstance().getFoto(this, bahnhof.getPhotoUrl());
@@ -244,19 +254,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     }
 
                     // check for local photo
-                    File localFile = getStoredMediaFile();
+                    final File localFile = getStoredMediaFile(upload);
                     if (localFile != null && localFile.canRead()) {
                         new SimpleDialogs().confirm(this, R.string.local_photo_exists, new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(final DialogInterface dialog, final int which) {
                                 setPictureButtonsEnabled(true);
-                                setLocalBitmap();
+                                setLocalBitmap(upload);
                             }
                         });
                     }
                 } else {
                     markerRes = bahnhof.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
-                    setLocalBitmap();
+                    setLocalBitmap(upload);
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     marker.setImageDrawable(getDrawable(markerRes));
@@ -264,15 +274,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     marker.setImageDrawable(getResources().getDrawable(markerRes));
                 }
             } else {
+                if (upload == null) {
+                    upload = baseApplication.getDbAdapter().getPendingUploadForCoordinates(latitude, longitude);
+                }
+
                 etBahnhofName.setInputType(EditorInfo.TYPE_CLASS_TEXT);
-                bahnhofId = LocalPhoto.getIdByLatLon(latitude, longitude);
-                setLocalBitmap();
+                setLocalBitmap(upload);
             }
 
         }
 
         if (directPicture) {
-            takePictureWithPermissionCheck();
+            takePicture();
         }
 
     }
@@ -284,52 +297,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void readPreferences() {
-        license = baseApplication.getLicense();
-        photoOwner = baseApplication.getPhotoOwner();
         nickname = baseApplication.getNickname();
         email = baseApplication.getEmail();
         password = baseApplication.getPassword();
-    }
-
-    private void checkMyData() {
-        MyDataDialogFragment myDataDialog = new MyDataDialogFragment();
-        myDataDialog.show(getFragmentManager(), "mydata_dialog");
-    }
-
-    /**
-     * Method to request permission for taking picture
-     */
-    private void requestPermissionAndTakePicture() {
-        // Camera and Write permission has not been granted yet. Request it directly.
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_TAKE_PICTURE_PERMISSION);
-    }
-
-    /**
-     * Method to request permission for specific action
-     */
-    private void requestStoragePermission(int requestCode) {
-        // Write permission has not been granted yet. Request it directly.
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
-    }
-
-    public void selectPicture() {
-        if (!canSetPhoto()) {
-            return;
-        }
-
-        if (isMyDataIncomplete()) {
-            checkMyData();
-        } else {
-            File file = getCameraMediaFile();
-            if (file != null) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), REQUEST_SELECT_PICTURE);
-            } else {
-                Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
-            }
-        }
     }
 
     private boolean canSetPhoto() {
@@ -340,67 +310,66 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return bahnhof != null && TextUtils.equals(nickname, bahnhof.getPhotographer());
     }
 
-    public void takePicture() {
+    private boolean isLoggedIn() {
+        return !TextUtils.isEmpty(password);
+    }
+
+    void takePicture() {
         if (!canSetPhoto() || !getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return;
         }
 
-        if (isMyDataIncomplete()) {
-            checkMyData();
-        } else {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if (intent.resolveActivity(getPackageManager()) != null) {
-                File file = getCameraMediaFile();
-                if (file != null) {
-                    Uri photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", file);
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                    intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
-                    intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, etBahnhofName.getText());
-                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    startActivityForResult(intent, REQUEST_TAKE_PICTURE);
-                } else {
-                    Toast.makeText(this, R.string.unable_to_create_folder_structure, Toast.LENGTH_LONG).show();
-                }
-            }
+        if (!isLoggedIn()) {
+            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+        }
+
+        final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            verifyCurrentPhotoUploadExists();
+            final File file = getCameraTempFile();
+            final Uri photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", file);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
+            intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, etBahnhofName.getText());
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            startActivityForResult(intent, REQUEST_TAKE_PICTURE);
         }
     }
 
-    private boolean isMyDataIncomplete() {
-        return TextUtils.isEmpty(nickname) || license == License.UNKNOWN || !photoOwner;
-    }
-
-    /**
-     * Method to check permission before taking a picture
-     */
-    void takePictureWithPermissionCheck() {
-        takePicture();
-    }
-
-    /**
-     * Method to check permission before selecting a picture
-     */
-    void selectPictureWithPermissionCheck() {
-        selectPicture();
-    }
-
-    void reportProblem() {
-        if (isMyDataIncomplete()) {
-            checkMyData();
+    void selectPicture() {
+        if (!canSetPhoto()) {
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        View dialogView = getLayoutInflater().inflate(R.layout.report_problem, null);
+        if (!isLoggedIn()) {
+            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        final Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), REQUEST_SELECT_PICTURE);
+    }
+
+    void reportProblem() {
+        if (!isLoggedIn()) {
+            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        final View dialogView = getLayoutInflater().inflate(R.layout.report_problem, null);
         final EditText etComment = dialogView.findViewById(R.id.et_problem_comment);
         etComment.setHint(R.string.report_problem_comment_hint);
 
         final Spinner problemType = dialogView.findViewById(R.id.problem_type);
-        List<String> problemTypes = new ArrayList<>();
+        final List<String> problemTypes = new ArrayList<>();
         problemTypes.add(getString(R.string.problem_please_specify));
-        for (ProblemType type : ProblemType.values()) {
+        for (final ProblemType type : ProblemType.values()) {
             problemTypes.add(getString(type.getMessageId()));
         }
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, problemTypes);
+        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, problemTypes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         problemType.setAdapter(adapter);
 
@@ -414,13 +383,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            int selectedType = problemType.getSelectedItemPosition();
+            final int selectedType = problemType.getSelectedItemPosition();
             if (selectedType == 0) {
                 Toast.makeText(getApplicationContext(), getString(R.string.problem_please_specify), Toast.LENGTH_LONG).show();
                 return;
             }
-            ProblemType type = ProblemType.values()[selectedType];
-            String comment = etComment.getText().toString();
+            final ProblemType type = ProblemType.values()[selectedType];
+            final String comment = etComment.getText().toString();
             if (StringUtils.isBlank(comment)) {
                 Toast.makeText(getApplicationContext(), getString(R.string.problem_please_comment), Toast.LENGTH_LONG).show();
                 return;
@@ -428,22 +397,28 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             alertDialog.dismiss();
             rsapi.reportProblem(RSAPI.Helper.getAuthorizationHeader(email, password), new ProblemReport(bahnhof.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<InboxResponse>() {
                 @Override
-                public void onResponse(Call<InboxResponse> call, Response<InboxResponse> response) {
+                public void onResponse(final Call<InboxResponse> call, final Response<InboxResponse> response) {
                     InboxResponse inboxResponse = null;
                     if (response.isSuccessful()) {
                         response.body();
                     } else {
-                        Gson gson = new Gson();
+                        final Gson gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
                     }
 
-                    int uploadId = inboxResponse.getId();
-                    baseApplication.getDbAdapter().updateUpload(inboxResponse, uploadId);
+                    Upload upload = new Upload();
+                    upload.setCountry(bahnhof.getCountry());
+                    upload.setStationId(bahnhof.getId());
+                    upload.setRemoteId(inboxResponse.getId());
+                    upload.setProblemType(type);
+                    upload.setComment(comment);
+                    upload.setUploadState(inboxResponse.getState().getUploadState());
+                    DetailsActivity.this.upload = baseApplication.getDbAdapter().insertUpload(upload);
                     new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
                 }
 
                 @Override
-                public void onFailure(Call<InboxResponse> call, Throwable t) {
+                public void onFailure(final Call<InboxResponse> call, final Throwable t) {
                     Log.e(TAG, "Error reporting problem", t);
                     new SimpleDialogs().confirm(DetailsActivity.this,
                             String.format(getText(R.string.problem_report_failed).toString(), t.getMessage()));
@@ -453,60 +428,71 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) {
             return;
         }
 
         try {
-            File storagePictureFile = getStoredMediaFile();
+            verifyCurrentPhotoUploadExists();
+            final File storagePictureFile = getStoredMediaFile(upload);
             if (requestCode == REQUEST_TAKE_PICTURE) {
                 // die Kamera-App sollte auf temporären Cache-Speicher schreiben, wir laden das Bild von
                 // dort und schreiben es in Standard-Größe in den permanenten Speicher
-                File cameraRawPictureFile = getCameraMediaFile();
-                if (cameraRawPictureFile == null || storagePictureFile == null) {
-                    throw new RuntimeException(getString(R.string.photofile_not_existing));
-                }
-
-                BitmapFactory.Options options = new BitmapFactory.Options();
+                final File cameraRawPictureFile = getCameraTempFile();
+                final BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true; // just query the image size in the first step
                 BitmapFactory.decodeFile(
                         cameraRawPictureFile.getPath(),
                         options);
 
-                int sampling = options.outWidth / STORED_FOTO_WIDTH;
+                final int sampling = options.outWidth / STORED_FOTO_WIDTH;
                 if (sampling > 1) {
                     options.inSampleSize = sampling;
                 }
                 options.inJustDecodeBounds = false;
 
-                Bitmap scaledScreen = BitmapFactory.decodeFile(
+                final Bitmap scaledScreen = BitmapFactory.decodeFile(
                         cameraRawPictureFile.getPath(),
                         options);
 
                 saveScaledBitmap(storagePictureFile, scaledScreen);
-                // temp file begone!
-                cameraRawPictureFile.delete();
+                setLocalBitmap(upload);
+                FileUtils.deleteQuietly(cameraRawPictureFile);
             } else if (requestCode == REQUEST_SELECT_PICTURE) {
-                Uri selectedImageUri = data.getData();
-                Bitmap bitmap = getBitmapFromUri(selectedImageUri);
+                final Uri selectedImageUri = data.getData();
+                final Bitmap bitmap = getBitmapFromUri(selectedImageUri);
 
-                int sampling = bitmap.getWidth() / STORED_FOTO_WIDTH;
+                final int sampling = bitmap.getWidth() / STORED_FOTO_WIDTH;
                 Bitmap scaledScreen = bitmap;
                 if (sampling > 1) {
                     scaledScreen = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / sampling, bitmap.getHeight() / sampling, false);
                 }
 
                 saveScaledBitmap(storagePictureFile, scaledScreen);
+                setLocalBitmap(upload);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Log.e(TAG, "Error processing photo", e);
             Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
-    private void saveScaledBitmap(File storagePictureFile, Bitmap scaledScreen) throws FileNotFoundException {
+    private void verifyCurrentPhotoUploadExists() {
+        if (upload == null || !upload.isPendingPhotoUpload()) {
+            upload = new Upload();
+            if (bahnhof != null) {
+                upload.setCountry(bahnhof.getCountry());
+                upload.setStationId(bahnhof.getId());
+            }
+            upload.setLat(latitude);
+            upload.setLon(longitude);
+            upload = baseApplication.getDbAdapter().insertUpload(upload);
+        }
+    }
+
+    private void saveScaledBitmap(final File storagePictureFile, final Bitmap scaledScreen) throws FileNotFoundException {
         if (scaledScreen == null) {
             throw new RuntimeException(getString(R.string.error_scaling_photo));
         }
@@ -519,14 +505,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         Log.d(TAG, "Save photo to: " + storagePictureFile);
         scaledScreen.compress(Bitmap.CompressFormat.JPEG, STORED_FOTO_QUALITY, new FileOutputStream(storagePictureFile));
-        setLocalBitmap();
     }
 
-    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
-        ParcelFileDescriptor parcelFileDescriptor =
+    private Bitmap getBitmapFromUri(final Uri uri) throws IOException {
+        final ParcelFileDescriptor parcelFileDescriptor =
                 getContentResolver().openFileDescriptor(uri, "r");
-        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-        Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+        final FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+        final Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
         parcelFileDescriptor.close();
         return image;
     }
@@ -537,25 +522,26 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * @return the File
      */
     @Nullable
-    public File getStoredMediaFile() {
-        return FileUtils.getStoredMediaFile(this, bahnhof != null ? bahnhof.getCountry() : null, bahnhofId);
+    public File getStoredMediaFile(final Upload upload) {
+        if (upload == null) {
+            return null;
+        }
+        return FileUtils.getStoredMediaFile(this, upload.getId());
     }
 
     /**
      * Get the file path for the Camera app to store the unprocessed photo to.
-     *
-     * @return the File
      */
-    private File getCameraMediaFile() {
-        return FileUtils.getCameraMediaFile(this, bahnhofId);
+    private File getCameraTempFile() {
+        return FileUtils.getImageCacheFile(this, String.valueOf(upload.getId()));
     }
 
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(final Menu menu) {
         menu.clear();
         getMenuInflater().inflate(R.menu.details, menu);
-        MenuItem navToStation = menu.findItem(R.id.nav_to_station);
+        final MenuItem navToStation = menu.findItem(R.id.nav_to_station);
         navToStation.getIcon().mutate();
         navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
@@ -573,7 +559,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         boolean hasProviderApps = false;
         if (bahnhof != null) {
-            Country countryByCode = Country.getCountryByCode(countries, bahnhof.getCountry());
+            final Country countryByCode = Country.getCountryByCode(countries, bahnhof.getCountry());
             hasProviderApps = countryByCode.hasCompatibleProviderApps();
         }
         if (hasProviderApps) {
@@ -585,21 +571,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return super.onPrepareOptionsMenu(menu);
     }
 
-    private void enableMenuItem(Menu menu, int id) {
-        MenuItem menuItem = menu.findItem(id).setEnabled(true);
+    private void enableMenuItem(final Menu menu, final int id) {
+        final MenuItem menuItem = menu.findItem(id).setEnabled(true);
         menuItem.getIcon().mutate();
         menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
     }
 
-    private void disableMenuItem(Menu menu, int id) {
-        MenuItem menuItem = menu.findItem(id).setEnabled(false);
+    private void disableMenuItem(final Menu menu, final int id) {
+        final MenuItem menuItem = menu.findItem(id).setEnabled(false);
         menuItem.getIcon().mutate();
         menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
         menuItem.getIcon().setAlpha(ALPHA);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
             case R.id.nav_to_station:
                 startNavigation(DetailsActivity.this);
@@ -613,7 +599,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
                 break;
             case R.id.share_photo:
-                Intent shareIntent = createFotoSendIntent();
+                final Intent shareIntent = createFotoSendIntent();
                 shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, bahnhof != null ? bahnhof.getCountry() : null).getTwitterTags() + " " + etBahnhofName.getText());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
@@ -622,18 +608,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 showStationInfo(null);
                 break;
             case R.id.provider_android_app:
-                Country country = Country.getCountryByCode(countries, bahnhof.getCountry());
+                final Country country = Country.getCountryByCode(countries, bahnhof.getCountry());
                 final List<ProviderApp> providerApps = country.getCompatibleProviderApps();
                 if (providerApps.size() == 1) {
                     providerApps.get(0).openAppOrPlayStore(this);
                 } else if (providerApps.size() > 1) {
-                    CharSequence[] appNames = new CharSequence[providerApps.size()];
+                    final CharSequence[] appNames = new CharSequence[providerApps.size()];
                     for (int i = 0; i < providerApps.size(); i++) {
                         appNames[i] = providerApps.get(i).getName();
                     }
                     new SimpleDialogs().simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, -1, new DialogInterface.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                        public void onClick(final DialogInterface dialog, final int which) {
                             if (which >= 0 && providerApps.size() > which) {
                                 providerApps.get(which).openAppOrPlayStore(DetailsActivity.this);
                             }
@@ -660,7 +646,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void navigateUp() {
-        ComponentName callingActivity = getCallingActivity(); // if MapsActivity was calling, then we don't want to rebuild the Backstack
+        final ComponentName callingActivity = getCallingActivity(); // if MapsActivity was calling, then we don't want to rebuild the Backstack
         if (callingActivity == null) {
             final Intent upIntent = NavUtils.getParentActivityIntent(this);
             upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -673,23 +659,23 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         finish();
     }
 
-    public void showStationInfo(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.station_info, null);
-        TextView title = dialogView.findViewById(R.id.title);
+    public void showStationInfo(final View view) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        final LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.station_info, null);
+        final TextView title = dialogView.findViewById(R.id.title);
         title.setText(etBahnhofName.getText());
-        TextView id = dialogView.findViewById(R.id.id);
+        final TextView id = dialogView.findViewById(R.id.id);
         id.setText(bahnhof != null ? bahnhof.getId() : "");
 
-        TextView coordinates = dialogView.findViewById(R.id.coordinates);
+        final TextView coordinates = dialogView.findViewById(R.id.coordinates);
         final double lat = bahnhof != null ? bahnhof.getLat() : latitude;
         final double lon = bahnhof != null ? bahnhof.getLon() : longitude;
         coordinates.setText(String.format(Locale.US, getResources().getString(R.string.coordinates), lat, lon));
 
-        TextView active = dialogView.findViewById(R.id.active);
+        final TextView active = dialogView.findViewById(R.id.active);
         active.setText(bahnhof != null && bahnhof.isActive() ? R.string.active : R.string.inactive);
-        TextView owner = dialogView.findViewById(R.id.owner);
+        final TextView owner = dialogView.findViewById(R.id.owner);
         owner.setText(bahnhof != null && bahnhof.getPhotographer() != null ? bahnhof.getPhotographer() : "");
 
         builder.setTitle(R.string.station_info)
@@ -715,32 +701,34 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             try {
                 stationTitle = URLEncoder.encode(etBahnhofName.getText().toString(), "UTF-8");
                 comment = URLEncoder.encode(v, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
 
-            final File mediaFile = getStoredMediaFile();
-            RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
+            final File mediaFile = getStoredMediaFile(upload);
+            final RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
             rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, bahnhof != null ? bahnhof.getCountry() : null,
                     stationTitle, latitude, longitude, comment, file).enqueue(new Callback<InboxResponse>() {
                 @Override
-                public void onResponse(Call<InboxResponse> call, Response<InboxResponse> response) {
+                public void onResponse(final Call<InboxResponse> call, final Response<InboxResponse> response) {
                     progress.dismiss();
                     InboxResponse inboxResponse = null;
                     if (response.isSuccessful()) {
                         response.body();
                     } else {
-                        Gson gson = new Gson();
+                        final Gson gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
                     }
 
-                    int uploadId = 0; // TODO
-                    baseApplication.getDbAdapter().updateUpload(inboxResponse, uploadId);
+                    upload.setRemoteId(inboxResponse.getId());
+                    upload.setInboxUrl(inboxResponse.getInboxUrl());
+                    upload.setUploadState(inboxResponse.getState().getUploadState());
+                    baseApplication.getDbAdapter().updateUpload(upload);
                     new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
                 }
 
                 @Override
-                public void onFailure(Call<InboxResponse> call, Throwable t) {
+                public void onFailure(final Call<InboxResponse> call, final Throwable t) {
                     Log.e(TAG, "Error uploading photo", t);
                     progress.dismiss();
                     new SimpleDialogs().confirm(DetailsActivity.this,
@@ -752,18 +740,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
 
     private Intent createFotoSendIntent() {
-        Intent sendIntent = new Intent(Intent.ACTION_SEND);
-        File file = getStoredMediaFile();
+        final Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        final File file = getStoredMediaFile(upload);
         if (file != null && file.canRead()) {
             sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                     "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
         } else if (publicBitmap != null) {
-            File newFile = FileUtils.getImageCacheFile(getApplicationContext(), bahnhofId);
+            final File newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
             try {
                 saveScaledBitmap(newFile, publicBitmap);
                 sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                         "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", newFile));
-            } catch (FileNotFoundException e) {
+            } catch (final FileNotFoundException e) {
                 Log.e(TAG, "Error saving cached bitmap", e);
             }
         }
@@ -781,22 +769,22 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         };
 
 
-        ListAdapter adapter = new ArrayAdapter<NavItem>(
+        final ListAdapter adapter = new ArrayAdapter<NavItem>(
                 this,
                 android.R.layout.select_dialog_item,
                 android.R.id.text1,
                 items) {
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(final int position, final View convertView, final ViewGroup parent) {
                 //Use super class to create the View
-                View v = super.getView(position, convertView, parent);
-                TextView tv = (TextView) v.findViewById(android.R.id.text1);
+                final View v = super.getView(position, convertView, parent);
+                final TextView tv = (TextView) v.findViewById(android.R.id.text1);
 
                 //Put the image on the TextView
                 tv.setCompoundDrawablesWithIntrinsicBounds(items[position].icon, 0, 0, 0);
 
                 //Add margin between image and text (support various screen densities)
-                int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
-                int dp7 = (int) (20 * getResources().getDisplayMetrics().density);
+                final int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
+                final int dp7 = (int) (20 * getResources().getDisplayMetrics().density);
                 tv.setCompoundDrawablePadding(dp5);
                 tv.setPadding(dp7, 0, 0, 0);
 
@@ -806,11 +794,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         final double lat = bahnhof != null ? bahnhof.getLat() : latitude;
         final double lon = bahnhof != null ? bahnhof.getLon() : longitude;
-        AlertDialog.Builder navBuilder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder navBuilder = new AlertDialog.Builder(this);
         navBuilder.setIcon(R.mipmap.ic_launcher);
         navBuilder.setTitle(R.string.navMethod);
         navBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int navItem) {
+            public void onClick(final DialogInterface dialog, final int navItem) {
                 String dlocation = "";
                 Intent intent = null;
                 switch (navItem) {
@@ -851,8 +839,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
                 try {
                     startActivity(intent);
-                } catch (Exception e) {
-                    Toast toast = Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG);
+                } catch (final Exception e) {
+                    final Toast toast = Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG);
                     toast.show();
                 }
             }
@@ -868,7 +856,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     @Override
     public void onBitmapAvailable(final @Nullable Bitmap bitmapFromCache) {
         localFotoUsed = false;
-        uploadPhotoButton.setVisibility(View.INVISIBLE);
+        uploadPhotoButton.setEnabled(false);
         publicBitmap = bitmapFromCache;
         if (publicBitmap == null) {
             // keine Bitmap ausgelesen
@@ -922,26 +910,30 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     /**
      * Fetch bitmap from device local location, if it exists, and set the photo view.
      */
-    private void setLocalBitmap() {
+    private void setLocalBitmap(final Upload upload) {
         setPictureButtonsEnabled(true);
 
-        Bitmap showBitmap = checkForLocalPhoto();
+        final Bitmap showBitmap = checkForLocalPhoto(upload);
+        setButtonEnabled(uploadPhotoButton, false);
         if (showBitmap == null) {
             // lokal keine Bitmap
             localFotoUsed = false;
-            uploadPhotoButton.setVisibility(View.INVISIBLE);
             // switch off image and license view until we actually have a foto
             imageView.setVisibility(View.INVISIBLE);
             licenseTagView.setVisibility(View.INVISIBLE);
         } else {
             setBitmap(showBitmap);
-            fetchUploadStatus();
+            fetchUploadStatus(upload);
         }
     }
 
-    private void fetchUploadStatus() {
-        List<LocalPhoto> localPhotos = new ArrayList<>();
-        LocalPhoto localPhoto = new LocalPhoto(getStoredMediaFile());
+    private void fetchUploadStatus(final Upload upload) {
+        if (upload == null) {
+            return;
+        }
+        setButtonEnabled(uploadPhotoButton, true);
+        final List<LocalPhoto> localPhotos = new ArrayList<>();
+        final LocalPhoto localPhoto = new LocalPhoto(getStoredMediaFile(upload));
         if (bahnhof != null) {
             localPhoto.setCountryCode(bahnhof.getCountry());
             localPhoto.setId(bahnhof.getId());
@@ -953,10 +945,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         baseApplication.getRSAPI().queryUploadState(RSAPI.Helper.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), localPhotos).enqueue(new Callback<List<UploadStateQuery>>() {
             @Override
-            public void onResponse(Call<List<UploadStateQuery>> call, Response<List<UploadStateQuery>> response) {
-                List<UploadStateQuery> stateQueries = response.body();
+            public void onResponse(final Call<List<UploadStateQuery>> call, final Response<List<UploadStateQuery>> response) {
+                final List<UploadStateQuery> stateQueries = response.body();
                 if (stateQueries != null && stateQueries.size() == 1) {
-                    UploadStateQuery stateQuery = stateQueries.get(0);
+                    final UploadStateQuery stateQuery = stateQueries.get(0);
                     licenseTagView.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
                     licenseTagView.setTextColor(getResources().getColor(stateQuery.getState().getColorId()));
                     licenseTagView.setVisibility(View.VISIBLE);
@@ -966,7 +958,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
 
             @Override
-            public void onFailure(Call<List<UploadStateQuery>> call, Throwable t) {
+            public void onFailure(final Call<List<UploadStateQuery>> call, final Throwable t) {
                 Log.e(TAG, "Error retrieving upload state", t);
                 Toast.makeText(DetailsActivity.this,
                         R.string.error_retrieving_upload_state,
@@ -976,24 +968,24 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     }
 
-    private void setPictureButtonsEnabled(boolean enabled) {
+    private void setPictureButtonsEnabled(final boolean enabled) {
         setButtonEnabled(takePictureButton, enabled);
         setButtonEnabled(selectPictureButton, enabled);
     }
 
-    private void setButtonEnabled(ImageButton imageButton, boolean enabled) {
+    private void setButtonEnabled(final ImageButton imageButton, final boolean enabled) {
         imageButton.setEnabled(enabled);
         imageButton.setImageAlpha(enabled ? 255 : 125);
     }
 
     private void setBitmap(final Bitmap showBitmap) {
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
+        final Display display = getWindowManager().getDefaultDisplay();
+        final Point size = new Point();
         display.getSize(size);
-        int targetWidth = size.x;
+        final int targetWidth = size.x;
 
         if (showBitmap.getWidth() != targetWidth) {
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
+            final Bitmap scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
                     targetWidth,
                     (int) (((long) showBitmap.getHeight() * (long) targetWidth) / showBitmap.getWidth()),
                     true);
@@ -1007,8 +999,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private class AnimationUpdateListener implements ValueAnimator.AnimatorUpdateListener {
         @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            float alpha = (float) animation.getAnimatedValue();
+        public void onAnimationUpdate(final ValueAnimator animation) {
+            final float alpha = (float) animation.getAnimatedValue();
             if (header == null) {
                 etBahnhofName.setAlpha(alpha);
             } else {
@@ -1025,38 +1017,30 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * @return the Bitmap of the photo, or null if none exists.
      */
     @Nullable
-    private Bitmap checkForLocalPhoto() {
+    private Bitmap checkForLocalPhoto(Upload upload) {
         // show the image
-        File localFile = getStoredMediaFile();
+        final File localFile = getStoredMediaFile(upload);
         Log.d(TAG, "File: " + localFile);
         if (localFile != null && localFile.canRead()) {
-            Log.d(TAG, "FileGetPath: " + localFile.getPath().toString());
-
-            Bitmap scaledScreen = BitmapFactory.decodeFile(
-                    localFile.getPath());
+            Log.d(TAG, "FileGetPath: " + localFile.getPath());
+            final Bitmap scaledScreen = BitmapFactory.decodeFile(localFile.getPath());
             Log.d(TAG, "img width " + scaledScreen.getWidth());
             Log.d(TAG, "img height " + scaledScreen.getHeight());
             localFotoUsed = true;
-            uploadPhotoButton.setVisibility(View.VISIBLE);
+            setButtonEnabled(uploadPhotoButton, true);
             return scaledScreen;
         } else {
             localFotoUsed = false;
-            uploadPhotoButton.setVisibility(View.INVISIBLE);
-            Log.e(TAG,
-                    String.format("Media file not available for station %s and nickname %s ",
-                            bahnhofId,
-                            nickname
-                    )
-            );
+            setButtonEnabled(uploadPhotoButton, false);
+            Log.e(TAG, String.format("Media file not available for station %s", bahnhofId));
             return null;
         }
-
     }
 
     public void onPictureClicked() {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
                 !fullscreen) {
-            ValueAnimator animation = ValueAnimator.ofFloat(header.getAlpha(), 0f);
+            final ValueAnimator animation = ValueAnimator.ofFloat(header.getAlpha(), 0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();
@@ -1064,26 +1048,26 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_IMMERSIVE);
-            ActionBar bar = getActionBar();
+            final ActionBar bar = getActionBar();
             if (bar != null) {
                 bar.hide();
             }
-            androidx.appcompat.app.ActionBar sbar = getSupportActionBar();
+            final androidx.appcompat.app.ActionBar sbar = getSupportActionBar();
             if (sbar != null) {
                 sbar.hide();
             }
             fullscreen = true;
         } else {
-            ValueAnimator animation = ValueAnimator.ofFloat(header == null? etBahnhofName.getAlpha() : header.getAlpha(), 1.0f);
+            final ValueAnimator animation = ValueAnimator.ofFloat(header == null? etBahnhofName.getAlpha() : header.getAlpha(), 1.0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();
             detailsLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            ActionBar bar = getActionBar();
+            final ActionBar bar = getActionBar();
             if (bar != null) {
                 bar.show();
             }
-            androidx.appcompat.app.ActionBar sbar = getSupportActionBar();
+            final androidx.appcompat.app.ActionBar sbar = getSupportActionBar();
             if (sbar != null) {
                 sbar.show();
             }

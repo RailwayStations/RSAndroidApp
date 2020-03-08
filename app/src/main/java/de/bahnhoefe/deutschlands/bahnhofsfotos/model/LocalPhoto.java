@@ -57,10 +57,6 @@ public class LocalPhoto extends UploadStateQuery {
         countryCode = FileUtils.getCountryFromFile(file);
     }
 
-    public static String getIdByLatLon(Double latitude, Double longitude) {
-        return latitude + "_" + longitude;
-    }
-
     public File getFile() {
         return file;
     }

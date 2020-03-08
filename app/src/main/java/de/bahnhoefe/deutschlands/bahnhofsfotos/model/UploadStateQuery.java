@@ -1,7 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-
 public class UploadStateQuery {
 
     protected String countryCode;
@@ -12,7 +10,7 @@ public class UploadStateQuery {
 
     protected Double lon;
 
-    private UploadStateState state = UploadStateState.UNKNOWN;
+    private UploadState state = UploadState.UNKNOWN;
 
     public UploadStateQuery() {
     }
@@ -61,38 +59,12 @@ public class UploadStateQuery {
         this.lon = lon;
     }
 
-    public UploadStateState getState() {
+    public UploadState getState() {
         return state;
     }
 
-    public void setState(UploadStateState state) {
+    public void setState(UploadState state) {
         this.state = state;
-    }
-
-    public enum UploadStateState {
-        UNKNOWN(R.string.upload_state_unknown, R.color.gridItem),
-        REVIEW(R.string.upload_state_in_review, R.color.gridItemReview),
-        CONFLICT(R.string.upload_state_conflict, R.color.gridItemError),
-        ACCEPTED(R.string.upload_state_accepted, R.color.gridItemGood),
-        REJECTED(R.string.upload_state_rejected, R.color.gridItemError),
-        OTHER_USER(R.string.upload_state_other_user, R.color.gridItemError);
-
-        private int textId;
-
-        private int colorId;
-
-        UploadStateState(int textId, int colorId) {
-            this.textId = textId;
-            this.colorId = colorId;
-        }
-
-        public int getTextId() {
-            return textId;
-        }
-
-        public int getColorId() {
-            return colorId;
-        }
     }
 
 }

@@ -303,4 +303,5 @@
     <string name="problem_please_specify">Bitte wähle Art des Problems</string>
     <string name="problem_please_comment">Bitte beschreibe das Problem im Kommentarfeld</string>
     <string name="problem_report_failed">Fehler beim Senden des Problemberichts</string>
+    <string name="please_login">Bitte anmelden</string>
 </resources>

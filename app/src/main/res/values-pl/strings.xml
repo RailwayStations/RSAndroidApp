@@ -301,5 +301,6 @@
     <string name="problem_please_specify">Please specify type of problem</string>
   <string name="problem_please_comment">Please comment on the problem</string>
   <string name="problem_report_failed">Error reporting the problem</string>
+    <string name="please_login">Please login</string>
 
 </resources>
