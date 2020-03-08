@@ -18,7 +18,7 @@ import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
 
@@ -39,7 +39,7 @@ public abstract class NearbyBahnhofNotificationManager {
     /**
      * The Bahnhof about which a notification is being built.
      */
-    protected Bahnhof notificationStation;
+    protected Station notificationStation;
 
     /**
      * The distance of the Bahnhof about which a notification is being built.
@@ -55,13 +55,13 @@ public abstract class NearbyBahnhofNotificationManager {
      * Constructor. After construction, you need to call notifyUser for action to happen.
      *
      * @param context  the Android Context from which this object ist created.
-     * @param bahnhof  the station to issue a notification for.
+     * @param station  the station to issue a notification for.
      * @param distance a double giving the distance from current location to bahnhof (in km)
      */
-    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Bahnhof bahnhof, double distance, Set<Country> countries) {
+    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Station station, double distance, Set<Country> countries) {
         this.context = context;
         notificationDistance = distance;
-        this.notificationStation = bahnhof;
+        this.notificationStation = station;
         this.countries = countries;
     }
 
@@ -181,7 +181,7 @@ public abstract class NearbyBahnhofNotificationManager {
     protected Intent getDetailIntent() {
         // Build an intent for an action to see station details
         Intent detailIntent = new Intent(context, DetailsActivity.class);
-        detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, notificationStation);
+        detailIntent.putExtra(DetailsActivity.EXTRA_STATION, notificationStation);
         return detailIntent;
     }
 
@@ -210,7 +210,7 @@ public abstract class NearbyBahnhofNotificationManager {
      */
     protected
     @Nullable
-    PendingIntent getTimetablePendingIntent(Country country, Bahnhof station) {
+    PendingIntent getTimetablePendingIntent(Country country, Station station) {
         final Intent timetableIntent = new Timetable().createTimetableIntent(country, station);
         if (timetableIntent != null) {
             return pendifyMe(timetableIntent, NearbyBahnhofNotificationManager.REQUEST_TIMETABLE);
@@ -227,7 +227,7 @@ public abstract class NearbyBahnhofNotificationManager {
     protected PendingIntent getStationPendingIntent() {
         // Build an intent for an action to see station details
         Intent stationIntent = new Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS);
-        stationIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, notificationStation);
+        stationIntent.putExtra(DetailsActivity.EXTRA_STATION, notificationStation);
         return pendifyMe(stationIntent, REQUEST_STATION);
     }
 
@@ -240,7 +240,7 @@ public abstract class NearbyBahnhofNotificationManager {
         context = null;
     }
 
-    public Bahnhof getStation() {
+    public Station getStation() {
         return notificationStation;
     }
 

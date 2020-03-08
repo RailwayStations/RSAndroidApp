@@ -5,7 +5,7 @@ import android.util.Base64;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
@@ -27,7 +27,7 @@ import retrofit2.http.Query;
 public interface RSAPI {
 
     @GET("/stations")
-    Call<List<Bahnhof>> getStations(@Query("country") String... countries);
+    Call<List<Station>> getStations(@Query("country") String... countries);
 
     @GET("/countries")
     Call<List<Country>> getCountries();
@@ -75,7 +75,7 @@ public interface RSAPI {
     @Headers({
             "Content-Type: application/json"
     })
-    @POST("/photoUpload/queryState")
+    @POST("/userInbox")
     Call<List<UploadStateQuery>> queryUploadState(@Header("Authorization") String authorization,
                            @Body List<LocalPhoto> uploadStateQueries);
 

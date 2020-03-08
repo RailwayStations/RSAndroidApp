@@ -21,12 +21,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -46,7 +45,7 @@ public class BaseApplication extends Application {
     public static final String DEFAULT_COUNTRY = "de";
     public static final String PREF_FILE = "APP_PREF_FILE";
 
-    private BahnhofsDbAdapter dbAdapter;
+    private DbAdapter dbAdapter;
     private RSAPI api;
     private SharedPreferences preferences;
 
@@ -54,7 +53,7 @@ public class BaseApplication extends Application {
         setInstance(this);
     }
 
-    public BahnhofsDbAdapter getDbAdapter() {
+    public DbAdapter getDbAdapter() {
         return dbAdapter;
     }
 
@@ -75,7 +74,7 @@ public class BaseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        dbAdapter = new BahnhofsDbAdapter(this);
+        dbAdapter = new DbAdapter(this);
         dbAdapter.open();
 
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
@@ -140,7 +139,11 @@ public class BaseApplication extends Application {
 
     public Set<String> getCountryCodes() {
         String oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
-        return preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
+        Set<String> stringSet = preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
+        if (stringSet.isEmpty()) {
+            stringSet = new HashSet<>(Collections.singleton(DEFAULT_COUNTRY));
+        }
+        return stringSet;
     }
 
     public void setFirstAppStart(boolean firstAppStart) {

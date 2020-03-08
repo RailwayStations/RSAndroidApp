@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 
 import static org.junit.Assert.*;
@@ -17,11 +17,11 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class TimetableTest {
 
-    private Bahnhof station;
+    private Station station;
 
     @Before
     public void setUp() {
-        station = new Bahnhof();
+        station = new Station();
         station.setId("4711");
         station.setTitle("Some Famous Station");
         station.setDs100("LOL");

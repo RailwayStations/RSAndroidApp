@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Bahnhof implements Serializable {
+public class Station implements Serializable {
 
     private String country;
 
@@ -73,11 +73,11 @@ public class Bahnhof implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Bahnhof)) return false;
+        if (!(o instanceof Station)) return false;
 
-        Bahnhof bahnhof = (Bahnhof) o;
+        Station station = (Station) o;
 
-        return id.equals(bahnhof.id);
+        return id.equals(station.id);
     }
 
     @Override

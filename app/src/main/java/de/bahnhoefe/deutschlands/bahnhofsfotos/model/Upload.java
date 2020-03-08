@@ -1,6 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
-public class Upload {
+import java.io.Serializable;
+
+public class Upload implements Serializable {
 
     private Long id;
     private String country;
@@ -124,11 +126,11 @@ public class Upload {
     }
 
     public boolean isUploadForExistingStation() {
-        return country != null && stationId != null && !isProblemReport();
+        return country != null && stationId != null;
     }
 
     public boolean isUploadForMissingStation() {
-        return lat != null && lon != null && !isProblemReport();
+        return lat != null && lon != null;
     }
 
     public boolean isProblemReport() {
@@ -136,7 +138,7 @@ public class Upload {
     }
 
     public boolean isPendingPhotoUpload() {
-        return (isUploadForExistingStation() || isUploadForMissingStation()) && isPending();
+        return (isUploadForExistingStation() || isUploadForMissingStation()) && isPending() && !isProblemReport();
     }
 
     private boolean isPending() {

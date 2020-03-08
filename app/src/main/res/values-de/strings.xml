@@ -50,7 +50,7 @@
 
     <string name="navMethod">Zeige den Weg…</string>
 
-    <string name="title_activity_gallery">In Bearbeitung</string>
+    <string name="title_activity_outbox">Ausgangskorb</string>
     <string name="activitynotfound">Du hast keine Navigations-App auf Deinem Smartphone</string>
     <string name="count_of_images">Du hast %1$d Bahnhofsfoto(s) im Speicher</string>
     <string name="search_hint">Bahnhof suchen</string>
@@ -273,7 +273,7 @@
     <string name="filter_result">%d von %d Bahnhöfen selektiert</string>
     <string name="files_migrated">Lokale Fotos migriert: %d, fehlerhaft: %d</string>
     <string name="delete_local_photo">Lokales Foto %s löschen?</string>
-    <string name="menu_title_in_progress">In Bearbeitung</string>
+    <string name="menu_title_outbox">Ausgangskorb</string>
     <string name="error_retrieving_upload_state">Fehler beim Lesen des Bearbeitungsstatus</string>
     <string name="upload_state">Status: %s</string>
     <string name="upload_state_unknown">unbekannt</string>
@@ -304,4 +304,5 @@
     <string name="problem_please_comment">Bitte beschreibe das Problem im Kommentarfeld</string>
     <string name="problem_report_failed">Fehler beim Senden des Problemberichts</string>
     <string name="please_login">Bitte anmelden</string>
+    <string name="delete_upload">Lösche Element #%s</string>
 </resources>

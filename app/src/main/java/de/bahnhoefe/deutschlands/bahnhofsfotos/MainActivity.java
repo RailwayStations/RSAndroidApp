@@ -14,40 +14,37 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-
-import android.text.InputType;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
@@ -63,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private BaseApplication baseApplication;
-    private BahnhofsDbAdapter dbAdapter;
+    private DbAdapter dbAdapter;
     private NavigationView navigationView;
     private MenuItem photoFilterMenuItem;
 
@@ -132,20 +129,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bindToStatus();
     }
 
-    private void onGalleryNavItemWithPermissionCheck() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Write permission has not been granted.
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_FILE_PERMISSION);
-            } else {
-                onGalleryNavItem();
-            }
-        } else {
-            onGalleryNavItem();
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_FILE_PERMISSION) {
@@ -163,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void onGalleryNavItem() {
-        Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
+        Intent intent = new Intent(MainActivity.this, OutboxActivity.class);
         startActivity(intent);
     }
 
@@ -220,23 +203,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void updateStationList() {
         try {
             int stationCount = dbAdapter.countBahnhoefe();
-            cursor = dbAdapter.getBahnhofsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
             if (customAdapter != null) {
                 customAdapter.swapCursor(cursor);
             } else {
-                cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+                cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
                 customAdapter = new CustomAdapter(this, cursor, 0);
                 ListView listView = findViewById(R.id.lstStations);
                 assert listView != null;
                 listView.setAdapter(customAdapter);
 
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
-                        Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
-                        intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, dbAdapter.fetchBahnhofByRowId(id));
-                        startActivityForResult(intentDetails, 0);
-                    }
+                listView.setOnItemClickListener((listview, view, position, id) -> {
+                    Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
+                    intentDetails.putExtra(DetailsActivity.EXTRA_STATION, dbAdapter.fetchStationByRowId(id));
+                    startActivityForResult(intentDetails, 0);
                 });
             }
             TextView filterResult = findViewById(R.id.filter_result);
@@ -246,22 +226,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    /**
-     * Prepare the Screen's standard options menu to be displayed.  This is
-     * called right before the menu is shown, every time it is shown.  You can
-     * use this method to efficiently enable/disable items or otherwise
-     * dynamically modify the contents.
-     * <p>
-     * <p>The default implementation updates the system menu items based on the
-     * activity's state.  Deriving classes should always call through to the
-     * base class implementation.
-     *
-     * @param menu The options menu as last shown or first initialized by
-     *             onCreateOptionsMenu().
-     * @return You must return true for the menu to be displayed;
-     * if you return false it will not be shown.
-     * @see #onCreateOptionsMenu
-     */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.notify);
@@ -271,9 +235,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         // necessary for the update policy submenu
@@ -306,17 +267,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     selectedNickname = i;
                 }
             }
-            new SimpleDialogs().select(this, getString(R.string.select_nickname), nicknames, selectedNickname, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    dialog.dismiss();
-                    int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-                    if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
-                        baseApplication.setNicknameFilter(nicknames[selectedPosition]);
-                        PhotoFilter photoFilter = PhotoFilter.NICKNAME;
-                        baseApplication.setPhotoFilter(photoFilter);
-                        item.setIcon(photoFilter.getIcon());
-                        updateStationList();
-                    }
+            new SimpleDialogs().select(this, getString(R.string.select_nickname), nicknames, selectedNickname, (dialog, whichButton) -> {
+                dialog.dismiss();
+                int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
+                    baseApplication.setNicknameFilter(nicknames[selectedPosition]);
+                    PhotoFilter photoFilter = PhotoFilter.NICKNAME;
+                    baseApplication.setPhotoFilter(photoFilter);
+                    item.setIcon(photoFilter.getIcon());
+                    updateStationList();
                 }
             });
         } else if (id == R.id.notify) {
@@ -365,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_own_station_photos) {
-            onGalleryNavItemWithPermissionCheck();
+            onGalleryNavItem();
         } else if (id == R.id.nav_stations_map) {
             Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
@@ -407,12 +366,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<List<Bahnhof>>() {
+        rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<List<Station>>() {
             @Override
-            public void onResponse(Call<List<Bahnhof>> call, Response<List<Bahnhof>> response) {
+            public void onResponse(Call<List<Station>> call, Response<List<Station>> response) {
                 if (response.isSuccessful()) {
-                    dbAdapter.deleteBahnhoefe();
-                    dbAdapter.insertBahnhoefe(response.body());
+                    dbAdapter.insertBahnhoefe(response.body(), baseApplication.getCountryCodes());
 
                     baseApplication.setLastUpdate(System.currentTimeMillis());
                     TextView tvUpdate = findViewById(R.id.tvUpdate);
@@ -423,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             @Override
-            public void onFailure(Call<List<Bahnhof>> call, Throwable t) {
+            public void onFailure(Call<List<Station>> call, Throwable t) {
                 Log.e(TAG, "Error refreshing stations", t);
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();

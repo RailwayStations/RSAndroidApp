@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.NonNull;
+
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
@@ -25,16 +27,16 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
-public class BahnhofsDbAdapter {
+public class DbAdapter {
 
-    private static final String TAG = BahnhofsDbAdapter.class.getSimpleName();
+    private static final String TAG = DbAdapter.class.getSimpleName();
 
-    private static final String DATABASE_TABLE_STATIONS = "bahnhoefe";
+    public static final String DATABASE_TABLE_STATIONS = "bahnhoefe";
     private static final String DATABASE_TABLE_COUNTRIES = "laender";
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
-    private static final String DATABASE_TABLE_UPLOADS = "uploads";
+    public static final String DATABASE_TABLE_UPLOADS = "uploads";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 15;
 
     private static final String CREATE_STATEMENT_STATIONS = "CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
             + Constants.STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -51,7 +53,7 @@ public class BahnhofsDbAdapter {
             + Constants.STATIONS.DS100 + " TEXT, "
             + Constants.STATIONS.ACTIVE + " INTEGER)";
     private static final String CREATE_STATEMENT_STATIONS_IDX = "CREATE INDEX " + DATABASE_TABLE_STATIONS + "_IDX "
-            + "ON " + DATABASE_TABLE_STATIONS + "(" + Constants.STATIONS.ID + ")";
+            + "ON " + DATABASE_TABLE_STATIONS + "(" + Constants.STATIONS.COUNTRY + ", " + Constants.STATIONS.ID + ")";
     private static final String CREATE_STATEMENT_COUNTRIES = "CREATE TABLE " + DATABASE_TABLE_COUNTRIES + " ("
             + Constants.COUNTRIES.ROWID_COUNTRIES + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + Constants.COUNTRIES.COUNTRYSHORTCODE + " TEXT, "
@@ -85,15 +87,15 @@ public class BahnhofsDbAdapter {
     private static final String DROP_STATEMENT_PROVIDER_APPS = "DROP TABLE IF EXISTS " + DATABASE_TABLE_PROVIDER_APPS;
 
     private final Context context;
-    private BahnhoefeDbOpenHelper dbHelper;
+    private DbOpenHelper dbHelper;
     private SQLiteDatabase db;
 
-    public BahnhofsDbAdapter(final Context context) {
+    public DbAdapter(final Context context) {
         this.context = context;
     }
 
     public void open() {
-        dbHelper = new BahnhoefeDbOpenHelper(context);
+        dbHelper = new DbOpenHelper(context);
         db = dbHelper.getWritableDatabase();
     }
 
@@ -102,27 +104,28 @@ public class BahnhofsDbAdapter {
         dbHelper.close();
     }
 
-    public void insertBahnhoefe(final List<Bahnhof> bahnhoefe) {
+    public void insertBahnhoefe(final List<Station> bahnhoefe, final Set<String> countryCodes) {
         if (bahnhoefe.isEmpty()) {
             return; // nothing todo
         }
 
         db.beginTransaction(); // soll die Performance verbessern, heißt's.
         try {
-            for (final Bahnhof bahnhof : bahnhoefe) {
+            deleteBahnhoefe(countryCodes);
+            for (final Station station : bahnhoefe) {
                 final ContentValues values = new ContentValues();
-                values.put(Constants.STATIONS.ID, bahnhof.getId());
-                values.put(Constants.STATIONS.COUNTRY, bahnhof.getCountry());
-                values.put(Constants.STATIONS.TITLE, bahnhof.getTitle());
-                values.put(Constants.STATIONS.LAT, bahnhof.getLat());
-                values.put(Constants.STATIONS.LON, bahnhof.getLon());
-                values.put(Constants.STATIONS.PHOTO_URL, bahnhof.getPhotoUrl());
-                values.put(Constants.STATIONS.PHOTOGRAPHER, bahnhof.getPhotographer());
-                values.put(Constants.STATIONS.PHOTOGRAPHER_URL, bahnhof.getPhotographerUrl());
-                values.put(Constants.STATIONS.LICENSE, bahnhof.getLicense());
-                values.put(Constants.STATIONS.LICENSE_URL, bahnhof.getLicenseUrl());
-                values.put(Constants.STATIONS.DS100, bahnhof.getDs100());
-                values.put(Constants.STATIONS.ACTIVE, bahnhof.isActive());
+                values.put(Constants.STATIONS.ID, station.getId());
+                values.put(Constants.STATIONS.COUNTRY, station.getCountry());
+                values.put(Constants.STATIONS.TITLE, station.getTitle());
+                values.put(Constants.STATIONS.LAT, station.getLat());
+                values.put(Constants.STATIONS.LON, station.getLon());
+                values.put(Constants.STATIONS.PHOTO_URL, station.getPhotoUrl());
+                values.put(Constants.STATIONS.PHOTOGRAPHER, station.getPhotographer());
+                values.put(Constants.STATIONS.PHOTOGRAPHER_URL, station.getPhotographerUrl());
+                values.put(Constants.STATIONS.LICENSE, station.getLicense());
+                values.put(Constants.STATIONS.LICENSE_URL, station.getLicenseUrl());
+                values.put(Constants.STATIONS.DS100, station.getDs100());
+                values.put(Constants.STATIONS.ACTIVE, station.isActive());
 
                 db.insert(DATABASE_TABLE_STATIONS, null, values);
             }
@@ -183,8 +186,8 @@ public class BahnhofsDbAdapter {
         return upload;
     }
 
-    public void deleteBahnhoefe() {
-        db.delete(DATABASE_TABLE_STATIONS, null, null);
+    public void deleteBahnhoefe(final Set<String> countryCodes) {
+        db.delete(DATABASE_TABLE_STATIONS, whereCountryCodeIn(countryCodes), null);
     }
 
     public void deleteCountries() {
@@ -192,21 +195,22 @@ public class BahnhofsDbAdapter {
         db.delete(DATABASE_TABLE_COUNTRIES, null, null);
     }
 
-    public Cursor getStationsList(final PhotoFilter photoFilter, final String nickname) {
+    public Cursor getStationsList(final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes) {
         String selectQuery = "SELECT rowid _id, " +
                 Constants.STATIONS.ID + ", " +
                 Constants.STATIONS.TITLE + ", " +
                 Constants.STATIONS.PHOTO_URL + ", " +
                 Constants.STATIONS.COUNTRY +
-                " FROM " + DATABASE_TABLE_STATIONS;
+                " FROM " + DATABASE_TABLE_STATIONS + " WHERE " +
+                whereCountryCodeIn(countryCodes);
 
         if (photoFilter == PhotoFilter.NICKNAME) {
-            selectQuery += " WHERE " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
+            selectQuery += " AND " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
         } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
-            selectQuery += " WHERE " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
         }
 
-        selectQuery += " ORDER BY " + Constants.STATIONS.TITLE + " asc";
+        selectQuery += " ORDER BY " + Constants.STATIONS.TITLE + " ASC";
         Log.d(TAG, selectQuery.toString());
 
         final Cursor cursor;
@@ -255,10 +259,11 @@ public class BahnhofsDbAdapter {
      *
      * @param search
      * @param photoFilter if stations need to be filtered by photo available or not
+     * @param countryCodes
      * @return a Cursor representing the matching results
      */
-    public Cursor getBahnhofsListByKeyword(final String search, final PhotoFilter photoFilter, final String nickname) {
-        String selectQuery = "1 = 1";
+    public Cursor getStationsListByKeyword(final String search, final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes) {
+        String selectQuery = whereCountryCodeIn(countryCodes);
         final List<String> queryArgs = new ArrayList<>();
 
         if (StringUtils.isNotBlank(search)) {
@@ -291,6 +296,15 @@ public class BahnhofsDbAdapter {
             return null;
         }
         return cursor;
+    }
+
+    private String whereCountryCodeIn(final Set<String> countryCodes) {
+        String selectQuery = Constants.STATIONS.COUNTRY + " IN (";
+        for (final String country : countryCodes) {
+            selectQuery += "'" + country + "',";
+        }
+        selectQuery = selectQuery.substring(0, selectQuery.length() - 1) + ')';
+        return selectQuery;
     }
 
     public Statistic getStatistic(final String country) {
@@ -337,9 +351,9 @@ public class BahnhofsDbAdapter {
         }
     }
 
-    public Upload getPendingUploadForStation(final Bahnhof bahnhof) {
+    public Upload getPendingUploadForStation(final Station station) {
         final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + "=? and " + Constants.UPLOADS.STATION_ID + "=? and " + getPendingUploadWhereClause(),
-                new String[]{ bahnhof.getCountry(), bahnhof.getId()}, null, null, null);
+                new String[]{ station.getCountry(), station.getId()}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             final Upload upload = createUploadFromCursor(cursor);
             cursor.close();
@@ -362,8 +376,8 @@ public class BahnhofsDbAdapter {
     }
 
     private String getPendingUploadWhereClause() {
-        String where = Constants.UPLOADS.UPLOAD_STATE + " in (";
-        for (UploadState state : UploadState.values()) {
+        String where = Constants.UPLOADS.UPLOAD_STATE + " IN (";
+        for (final UploadState state : UploadState.values()) {
             if (state.isPending()) {
                 where += "'" + state.name() + "',";
             }
@@ -371,9 +385,51 @@ public class BahnhofsDbAdapter {
         return where.substring(0, where.length() - 1) + ')';
     }
 
-    class BahnhoefeDbOpenHelper extends SQLiteOpenHelper {
+    public Cursor getUploadsWithStations() {
+        final SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+        queryBuilder.setTables(DATABASE_TABLE_UPLOADS
+                        + " LEFT JOIN "
+                        + DATABASE_TABLE_STATIONS
+                        + " ON "
+                        + DATABASE_TABLE_STATIONS + "." + Constants.STATIONS.COUNTRY
+                        + " = "
+                        + DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.COUNTRY
+                        + " and "
+                        + DATABASE_TABLE_STATIONS + "." + Constants.STATIONS.ID
+                        + " = "
+                        + DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.STATION_ID);
 
-        BahnhoefeDbOpenHelper(final Context context) {
+        return queryBuilder.query(db, new String[]{
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.ID + " AS _id",
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.REMOTE_ID,
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.COUNTRY,
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.STATION_ID,
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.TITLE,
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.UPLOAD_STATE,
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.PROBLEM_TYPE,
+                DATABASE_TABLE_STATIONS + "." + Constants.UPLOADS.TITLE + " AS stationTitle"
+        }, null, null, null, null, Constants.UPLOADS.CREATED_AT + " DESC");
+    }
+
+    public Upload getUploadById(final long id) {
+        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.ID + "=?",
+                new String[]{ String.valueOf(id)}, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            final Upload upload = createUploadFromCursor(cursor);
+            cursor.close();
+            return upload;
+        }
+
+        return null;
+    }
+
+    public void deleteUpload(final long id) {
+        db.delete(DATABASE_TABLE_UPLOADS, Constants.UPLOADS.ID + "=?", new String[]{ String.valueOf(id)});
+    }
+
+    class DbOpenHelper extends SQLiteOpenHelper {
+
+        DbOpenHelper(final Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
@@ -405,6 +461,9 @@ public class BahnhofsDbAdapter {
             // from now on we need to preserve user data and perform schema changes selectively
             } else if (oldVersion < 14) {
                 db.execSQL(CREATE_STATEMENT_UPLOADS);
+            } else if (oldVersion < 15) {
+                db.execSQL(DROP_STATEMENT_STATIONS_IDX);
+                db.execSQL(CREATE_STATEMENT_STATIONS_IDX);
             }
 
             db.setTransactionSuccessful();
@@ -413,21 +472,21 @@ public class BahnhofsDbAdapter {
     }
 
     @NonNull
-    private Bahnhof createBahnhofFromCursor(@NonNull final Cursor cursor) {
-        final Bahnhof bahnhof = new Bahnhof();
-        bahnhof.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.TITLE)));
-        bahnhof.setCountry(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.COUNTRY)));
-        bahnhof.setId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID)));
-        bahnhof.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LAT)));
-        bahnhof.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LON)));
-        bahnhof.setPhotoUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_URL)));
-        bahnhof.setPhotographer(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER)));
-        bahnhof.setPhotographerUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER_URL)));
-        bahnhof.setLicense(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE)));
-        bahnhof.setLicenseUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE_URL)));
-        bahnhof.setDs100(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.DS100)));
-        bahnhof.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.STATIONS.ACTIVE)) == 1);
-        return bahnhof;
+    private Station createStationFromCursor(@NonNull final Cursor cursor) {
+        final Station station = new Station();
+        station.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.TITLE)));
+        station.setCountry(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.COUNTRY)));
+        station.setId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID)));
+        station.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LAT)));
+        station.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LON)));
+        station.setPhotoUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_URL)));
+        station.setPhotographer(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER)));
+        station.setPhotographerUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER_URL)));
+        station.setLicense(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE)));
+        station.setLicenseUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE_URL)));
+        station.setDs100(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.DS100)));
+        station.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.STATIONS.ACTIVE)) == 1);
+        return station;
     }
 
     @NonNull
@@ -476,39 +535,39 @@ public class BahnhofsDbAdapter {
         return upload;
     }
 
-    public Bahnhof fetchBahnhofByRowId(final long id) {
+    public Station fetchStationByRowId(final long id) {
         final Cursor cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.ROWID + "=?", new String[]{
                 id + ""}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
-            final Bahnhof bahnhof = createBahnhofFromCursor(cursor);
+            final Station station = createStationFromCursor(cursor);
             cursor.close();
-            return bahnhof;
+            return station;
         } else
             return null;
     }
 
-    public Bahnhof getBahnhofByKey(final String country, final String id) {
+    public Station getStationByKey(final String country, final String id) {
         final Cursor cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? and " + Constants.STATIONS.ID + "=?",
                 new String[]{ country, id}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
-            final Bahnhof bahnhof = createBahnhofFromCursor(cursor);
+            final Station station = createStationFromCursor(cursor);
             cursor.close();
-            return bahnhof;
+            return station;
         }
 
         return null;
     }
 
-    public Bahnhof getBahnhofForUpload(final Upload upload) {
+    public Station getStationForUpload(final Upload upload) {
         Cursor cursor = null;
         if (upload.isUploadForExistingStation()) {
             cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? and " + Constants.STATIONS.ID + "=?",
                     new String[]{upload.getCountry(), upload.getStationId()}, null, null, null);
         }
         if (cursor != null && cursor.moveToFirst()) {
-            final Bahnhof bahnhof = createBahnhofFromCursor(cursor);
+            final Station station = createStationFromCursor(cursor);
             cursor.close();
-            return bahnhof;
+            return station;
         }
 
         return null;
@@ -522,7 +581,7 @@ public class BahnhofsDbAdapter {
             }
             countryList.append('\'').append(countryCode).append('\'');
         }
-        final Cursor cursor = db.query(DATABASE_TABLE_COUNTRIES, null, Constants.COUNTRIES.COUNTRYSHORTCODE + " in (" + countryList.toString() + ")",
+        final Cursor cursor = db.query(DATABASE_TABLE_COUNTRIES, null, Constants.COUNTRIES.COUNTRYSHORTCODE + " IN (" + countryList.toString() + ")",
                 null, null, null, null);
         final Set<Country> countries = new HashSet<>();
         if (cursor != null && cursor.moveToFirst()) {
@@ -544,8 +603,8 @@ public class BahnhofsDbAdapter {
         return countries;
     }
 
-    public List<Bahnhof> getAllBahnhoefe(final PhotoFilter photoFilter, final String nickname) {
-        final List<Bahnhof> bahnhofList = new ArrayList<>();
+    public List<Station> getAllStations(final PhotoFilter photoFilter, final String nickname) {
+        final List<Station> stationList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS;
         if (photoFilter == PhotoFilter.NICKNAME) {
             selectQuery += " WHERE " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
@@ -564,21 +623,20 @@ public class BahnhofsDbAdapter {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                final Bahnhof bahnhof = createBahnhofFromCursor(cursor);
-                // Adding bahnhof to list
-                bahnhofList.add(bahnhof);
+                final Station station = createStationFromCursor(cursor);
+                stationList.add(station);
                 if (Log.isLoggable(TAG, Log.DEBUG))
-                    Log.d(TAG, "Bahnhof #" + bahnhofList.size() + " " + bahnhof);
+                    Log.d(TAG, "Station #" + stationList.size() + " " + station);
 
             } while (cursor.moveToNext());
         }
         cursor.close();
 
-        return bahnhofList;
+        return stationList;
     }
 
-    public List<Bahnhof> getBahnhoefeByLatLngRectangle(final double lat, final double lng, final PhotoFilter photoFilter, final String nickname) {
-        final List<Bahnhof> bahnhofList = new ArrayList<>();
+    public List<Station> getStationByLatLngRectangle(final double lat, final double lng, final PhotoFilter photoFilter, final String nickname) {
+        final List<Station> stationList = new ArrayList<>();
         // Select All Query with rectangle - might be later change with it
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS + " where " + Constants.STATIONS.LAT + " < " + (lat + 0.5) + " AND " + Constants.STATIONS.LAT + " > " + (lat - 0.5)
                 + " AND " + Constants.STATIONS.LON + " < " + (lng + 0.5) + " AND " + Constants.STATIONS.LON + " > " + (lng - 0.5);
@@ -597,14 +655,14 @@ public class BahnhofsDbAdapter {
 
         if (cursor.moveToFirst()) {
             do {
-                final Bahnhof bahnhof = createBahnhofFromCursor(cursor);
-                bahnhofList.add(bahnhof);
+                final Station station = createStationFromCursor(cursor);
+                stationList.add(station);
 
             } while (cursor.moveToNext());
         }
         cursor.close();
 
-        return bahnhofList;
+        return stationList;
     }
 
     public List<Country> getAllCountries() {

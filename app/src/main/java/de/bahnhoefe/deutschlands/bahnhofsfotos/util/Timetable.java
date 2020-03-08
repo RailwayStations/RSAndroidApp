@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import androidx.annotation.Nullable;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,7 +16,7 @@ public class Timetable {
      * @return the PendingIntent built.
      */
     @Nullable
-    public Intent createTimetableIntent(Country country, Bahnhof station) {
+    public Intent createTimetableIntent(Country country, Station station) {
         final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
 
         if (!country.hasTimetableUrlTemplate()) {

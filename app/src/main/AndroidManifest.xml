@@ -96,8 +96,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".GalleryActivity"
-            android:label="@string/title_activity_gallery"
+            android:name=".OutboxActivity"
+            android:label="@string/title_activity_outbox"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -3,23 +3,25 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
@@ -28,90 +30,59 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class GalleryActivity extends AppCompatActivity {
+public class OutboxActivity extends AppCompatActivity {
 
-    private static final String TAG = GalleryActivity.class.getSimpleName();
+    private static final String TAG = OutboxActivity.class.getSimpleName();
 
-    private GridView grid;
     private GridViewAdapter adapter;
-    private BahnhofsDbAdapter dbAdapter;
-    private TextView tvCountOfImages;
+    private DbAdapter dbAdapter;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        BaseApplication baseApplication = (BaseApplication) getApplication();
+        final BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
 
-        setContentView(R.layout.activity_gallery);
-        tvCountOfImages = findViewById(R.id.tvImageCount);
+        setContentView(R.layout.activity_outbox);
+        final TextView tvCountOfImages = findViewById(R.id.tvImageCount);
+        final GridView grid = findViewById(R.id.gridview);
 
-        grid = findViewById(R.id.gridview);
-
+        final Cursor uploadsCursor = dbAdapter.getUploadsWithStations();
         final List<LocalPhoto> files = FileUtils.getLocalPhotos(this);
-        adapter = new GridViewAdapter(GalleryActivity.this, files);
+        adapter = new GridViewAdapter(OutboxActivity.this, files, uploadsCursor);
         grid.setAdapter(adapter);
 
         tvCountOfImages.setText(String.format(getResources().getString(R.string.count_of_images), files.size()));
 
         // Capture gridview item click
-        grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                LocalPhoto photo = files.get(position);
-                boolean shown = false;
-                Intent detailIntent = new Intent(GalleryActivity.this, DetailsActivity.class);
-
-                if (photo.getId() != null) {
-                    Bahnhof station = dbAdapter.getBahnhofByKey(photo.getCountryCode(), photo.getId());
-
-                    if (station != null) {
-                        detailIntent.putExtra(DetailsActivity.EXTRA_BAHNHOF, station);
-                    }
-                } else if (photo.hasCoords()) {
-                    detailIntent.putExtra(DetailsActivity.EXTRA_LATITUDE, photo.getLat());
-                    detailIntent.putExtra(DetailsActivity.EXTRA_LONGITUDE, photo.getLon());
-                }
-
-                if (detailIntent.hasExtra(DetailsActivity.EXTRA_BAHNHOF) || detailIntent.hasExtra(DetailsActivity.EXTRA_LATITUDE)) {
-                    startActivityForResult(detailIntent, 0);
-                    shown = true;
-                }
-                if (!shown) {
-                    Toast.makeText(GalleryActivity.this,
-                            R.string.cannot_associate_photo_to_station,
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-
+        grid.setOnItemClickListener((parent, view, position, id) -> {
+            final Upload upload = dbAdapter.getUploadById(id);
+            final Intent detailIntent = new Intent(OutboxActivity.this, DetailsActivity.class);
+            detailIntent.putExtra(DetailsActivity.EXTRA_UPLOAD, upload);
+            startActivityForResult(detailIntent, 0);
         });
 
-        grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                final LocalPhoto photo = files.get(position);
-                new SimpleDialogs().confirm(GalleryActivity.this, getResources().getString(R.string.delete_local_photo, photo.getDisplayName()), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        FileUtils.deleteQuietly(photo.getFile());
-                        files.remove(photo);
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-                return true;
-            }
+        grid.setOnItemLongClickListener((parent, view, position, id) -> {
+            final String uploadId = String.valueOf(id);
+            new SimpleDialogs().confirm(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
+                dbAdapter.deleteUpload(id);
+                File file = FileUtils.getStoredMediaFile(OutboxActivity.this, id);
+                FileUtils.deleteQuietly(file);
+                adapter.notifyDataSetChanged();
+            });
+            return true;
         });
 
         baseApplication.getRSAPI().queryUploadState(RSAPI.Helper.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), files).enqueue(new Callback<List<UploadStateQuery>>() {
             @Override
-            public void onResponse(Call<List<UploadStateQuery>> call, Response<List<UploadStateQuery>> response) {
-                List<UploadStateQuery> stateQueries = response.body();
+            public void onResponse(final Call<List<UploadStateQuery>> call, final Response<List<UploadStateQuery>> response) {
+                final List<UploadStateQuery> stateQueries = response.body();
                 int acceptedCount = 0;
                 int otherOwnerCount = 0;
                 if (stateQueries != null && files.size() == stateQueries.size()) {
                     for (int i = 0; i < files.size(); i++) {
-                        UploadState state = stateQueries.get(i).getState();
+                        final UploadState state = stateQueries.get(i).getState();
                         files.get(i).setState(state);
                         if (state == UploadState.ACCEPTED) {
                             acceptedCount++;
@@ -130,9 +101,9 @@ public class GalleryActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<UploadStateQuery>> call, Throwable t) {
+            public void onFailure(final Call<List<UploadStateQuery>> call, final Throwable t) {
                 Log.e(TAG, "Error retrieving upload state", t);
-                Toast.makeText(GalleryActivity.this,
+                Toast.makeText(OutboxActivity.this,
                         R.string.error_retrieving_upload_state,
                         Toast.LENGTH_LONG).show();
             }
@@ -146,15 +117,15 @@ public class GalleryActivity extends AppCompatActivity {
             .setTitle(R.string.confirm_delete_local_photos)
             .setMultiChoiceItems(R.array.local_photo_delete_options, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                public void onClick(final DialogInterface dialog, final int which, final boolean isChecked) {
                     checkedItems[which] = isChecked;
                 }
             })
             .setPositiveButton(R.string.button_ok_text, new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    List<LocalPhoto> deleted = new ArrayList<>();
-                    for (LocalPhoto photo : files) {
+                public void onClick(final DialogInterface dialog, final int which) {
+                    final List<LocalPhoto> deleted = new ArrayList<>();
+                    for (final LocalPhoto photo : files) {
                         if (checkedItems[0] && photo.getState() == UploadState.ACCEPTED) {
                             FileUtils.deleteQuietly(photo.getFile());
                             deleted.add(photo);

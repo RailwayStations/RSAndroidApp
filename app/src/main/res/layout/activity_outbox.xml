@@ -4,9 +4,9 @@
     android:id="@+id/activity_gallery"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.GalleryActivity">
+    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.OutboxActivity">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:padding="5dip"

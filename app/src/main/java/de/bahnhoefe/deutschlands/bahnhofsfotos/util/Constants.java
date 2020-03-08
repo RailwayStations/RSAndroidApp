@@ -2,6 +2,9 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 public class Constants {
 
+    public static final int STORED_PHOTO_WIDTH = 1920;
+    public static final int STORED_PHOTO_QUALITY = 95;
+
     /**
      * Columns of Stations table
      */

@@ -68,13 +68,13 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MapInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.ClusterManager;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.GeoItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MapsforgeMapView;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.TapHandler;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 import static android.view.Menu.NONE;
@@ -100,12 +100,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     protected ClusterManager clusterer = null;
     protected List<TileCache> tileCaches = new ArrayList<TileCache>();
 
-    private List<Bahnhof> bahnhofList;
+    private List<Station> stationList;
     private LatLong myPos = null;
 
     private CheckBox myLocSwitch = null;
 
-    private BahnhofsDbAdapter dbAdapter;
+    private DbAdapter dbAdapter;
     private String nickname;
     private BaseApplication baseApplication;
     private LocationManager locationManager;
@@ -132,7 +132,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         dbAdapter = baseApplication.getDbAdapter();
         nickname = baseApplication.getNickname();
 
-        bahnhofList = new ArrayList<>(0); // no markers until we know where we are
+        stationList = new ArrayList<>(0); // no markers until we know where we are
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -543,11 +543,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     @Override
     public void onTap(BahnhofGeoItem marker) {
         Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
-        String id = marker.getBahnhof().getId();
-        String country = marker.getBahnhof().getCountry();
+        String id = marker.getStation().getId();
+        String country = marker.getStation().getCountry();
         try {
-            Bahnhof bahnhof = dbAdapter.getBahnhofByKey(country, id);
-            intent.putExtra(DetailsActivity.EXTRA_BAHNHOF, bahnhof);
+            Station station = dbAdapter.getStationByKey(country, id);
+            intent.putExtra(DetailsActivity.EXTRA_STATION, station);
             startActivityForResult(intent, 0); // workaround to handle backstack correctly in DetailsActivity
         } catch (RuntimeException e) {
             Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);
@@ -574,16 +574,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         @Override
         protected Integer doInBackground(Void... params) {
             readBahnhoefe();
-            return bahnhofList.size();
+            return stationList.size();
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             try {
                 createClusterManager();
-                addMarkers(bahnhofList);
+                addMarkers(stationList);
                 progress.dismiss();
-                Toast.makeText(MapsActivity.this, getResources().getQuantityString(R.plurals.stations_loaded, bahnhofList.size(), bahnhofList.size()), Toast.LENGTH_LONG).show();
+                Toast.makeText(MapsActivity.this, getResources().getQuantityString(R.plurals.stations_loaded, stationList.size(), stationList.size()), Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 Log.e(TAG, "Error loading markers", e);
             }
@@ -592,7 +592,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private void readBahnhoefe() {
         try {
-            bahnhofList = dbAdapter.getAllBahnhoefe(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            stationList = dbAdapter.getAllStations(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
         } catch (Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
@@ -654,13 +654,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         return bitmap;
     }
 
-    private void addMarkers(List<Bahnhof> bahnhofMarker) {
+    private void addMarkers(List<Station> stationMarker) {
         double minLat = 0;
         double maxLat = 0;
         double minLon = 0;
         double maxLon = 0;
-        for (Bahnhof bahnhof : bahnhofMarker) {
-            BahnhofGeoItem geoItem = new BahnhofGeoItem(bahnhof);
+        for (Station station : stationMarker) {
+            BahnhofGeoItem geoItem = new BahnhofGeoItem(station);
             LatLong bahnhofPos = geoItem.getLatLong();
             if (minLat == 0.0) {
                 minLat = bahnhofPos.latitude;
@@ -878,12 +878,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     protected class BahnhofGeoItem implements GeoItem {
-        public Bahnhof bahnhof;
+        public Station station;
         public LatLong latLong;
 
-        public BahnhofGeoItem(Bahnhof bahnhof) {
-            this.bahnhof = bahnhof;
-            this.latLong = new LatLong(bahnhof.getLat(), bahnhof.getLon());
+        public BahnhofGeoItem(Station station) {
+            this.station = station;
+            this.latLong = new LatLong(station.getLat(), station.getLon());
         }
 
         public LatLong getLatLong() {
@@ -892,26 +892,26 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         @Override
         public String getTitle() {
-            return bahnhof.getTitle();
+            return station.getTitle();
         }
 
         @Override
         public boolean hasPhoto() {
-            return bahnhof.hasPhoto();
+            return station.hasPhoto();
         }
 
         @Override
         public boolean ownPhoto() {
-            return hasPhoto() && bahnhof.getPhotographer().equals(nickname);
+            return hasPhoto() && station.getPhotographer().equals(nickname);
         }
 
         @Override
         public boolean stationActive() {
-            return bahnhof.isActive();
+            return station.isActive();
         }
 
-        public Bahnhof getBahnhof() {
-            return bahnhof;
+        public Station getStation() {
+            return station;
         }
 
     }
