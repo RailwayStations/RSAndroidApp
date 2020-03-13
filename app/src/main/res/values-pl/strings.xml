@@ -302,5 +302,6 @@
     <string name="problem_report_failed">Error reporting the problem</string>
     <string name="please_login">Please login</string>
     <string name="delete_upload">Delete element #%s</string>
+    <string name="confirm_delete_processed_uploads">Delete all processed uploads?</string>
 
 </resources>

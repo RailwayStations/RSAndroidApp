@@ -70,12 +70,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadStateQuery;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
@@ -678,6 +677,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final TextView owner = dialogView.findViewById(R.id.owner);
         owner.setText(station != null && station.getPhotographer() != null ? station.getPhotographer() : "");
 
+        // TODO: add upload state + rejected reason if exist
+
         builder.setTitle(R.string.station_info)
                 .setView(dialogView)
                 .setIcon(R.mipmap.ic_launcher)
@@ -714,7 +715,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     progress.dismiss();
                     InboxResponse inboxResponse = null;
                     if (response.isSuccessful()) {
-                        response.body();
+                        inboxResponse = response.body();
                     } else {
                         final Gson gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
@@ -928,37 +929,30 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void fetchUploadStatus(final Upload upload) {
-        if (upload == null) {
+        if (upload == null || upload.getRemoteId() == null) {
             return;
         }
         setButtonEnabled(uploadPhotoButton, true);
-        final List<LocalPhoto> localPhotos = new ArrayList<>();
-        final LocalPhoto localPhoto = new LocalPhoto(getStoredMediaFile(upload));
-        if (station != null) {
-            localPhoto.setCountryCode(station.getCountry());
-            localPhoto.setId(station.getId());
-        } else {
-            localPhoto.setLat(latitude);
-            localPhoto.setLon(longitude);
-        }
-        localPhotos.add(localPhoto);
+        final List<InboxStateQuery> stateQueries = new ArrayList<>();
+        stateQueries.add(new InboxStateQuery(upload.getRemoteId()));
 
-        baseApplication.getRSAPI().queryUploadState(RSAPI.Helper.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), localPhotos).enqueue(new Callback<List<UploadStateQuery>>() {
+        baseApplication.getRSAPI().queryUploadState(RSAPI.Helper.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), stateQueries).enqueue(new Callback<List<InboxStateQuery>>() {
             @Override
-            public void onResponse(final Call<List<UploadStateQuery>> call, final Response<List<UploadStateQuery>> response) {
-                final List<UploadStateQuery> stateQueries = response.body();
-                if (stateQueries != null && stateQueries.size() == 1) {
-                    final UploadStateQuery stateQuery = stateQueries.get(0);
+            public void onResponse(final Call<List<InboxStateQuery>> call, final Response<List<InboxStateQuery>> response) {
+                final List<InboxStateQuery> stateQueries = response.body();
+                if (stateQueries != null && !stateQueries.isEmpty()) {
+                    final InboxStateQuery stateQuery = stateQueries.get(0);
                     licenseTagView.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
                     licenseTagView.setTextColor(getResources().getColor(stateQuery.getState().getColorId()));
                     licenseTagView.setVisibility(View.VISIBLE);
+                    baseApplication.getDbAdapter().updateUploadStates(stateQueries);
                 } else {
                     Log.w(TAG, "Upload states not processable");
                 }
             }
 
             @Override
-            public void onFailure(final Call<List<UploadStateQuery>> call, final Throwable t) {
+            public void onFailure(final Call<List<InboxStateQuery>> call, final Throwable t) {
                 Log.e(TAG, "Error retrieving upload state", t);
                 Toast.makeText(DetailsActivity.this,
                         R.string.error_retrieving_upload_state,

@@ -15,10 +15,10 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 /**
  * Adapter for ListView of stations, which don't have a photo
  */
-public class CustomAdapter extends CursorAdapter {
+public class StationListAdapter extends CursorAdapter {
     private final LayoutInflater mInflater;
 
-    public CustomAdapter(Context context, Cursor c, int flags) {
+    public StationListAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -26,9 +26,9 @@ public class CustomAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = mInflater.inflate(R.layout.item, parent, false);
+        View view = mInflater.inflate(R.layout.item_station, parent, false);
         ViewHolder holder = new ViewHolder();
-        holder.txtId = (TextView) view.findViewById(R.id.txtId);
+        holder.txtId = (TextView) view.findViewById(R.id.txtState);
         holder.txtStationName = (TextView) view.findViewById(R.id.txtStationName);
         holder.hasPhoto = (ImageView) view.findViewById(R.id.hasPhoto);
         view.setTag(holder);

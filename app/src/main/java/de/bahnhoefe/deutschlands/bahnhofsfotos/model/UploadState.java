@@ -17,8 +17,7 @@ public enum UploadState {
     REVIEW(R.string.upload_state_in_review, R.color.gridItemReview, true),
     CONFLICT(R.string.upload_state_conflict, R.color.gridItemError, true),
     ACCEPTED(R.string.upload_state_accepted, R.color.gridItemGood, false),
-    REJECTED(R.string.upload_state_rejected, R.color.gridItemError, false),
-    OTHER_USER(R.string.upload_state_other_user, R.color.gridItemError, false);
+    REJECTED(R.string.upload_state_rejected, R.color.gridItemError, false);
 
     private int textId;
 

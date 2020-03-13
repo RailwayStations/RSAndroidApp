@@ -6,13 +6,8 @@ import androidx.annotation.Nullable;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
 
 public class FileUtils {
 
@@ -63,46 +58,6 @@ public class FileUtils {
         final File imagePath = new File(applicationContext.getCacheDir(), "images");
         imagePath.mkdirs();
         return new File(imagePath, imageId + ".jpg");
-    }
-
-    public static List<LocalPhoto> getLocalPhotos(final Context context) {
-        final File fotoDir = FileUtils.getLocalFotoDir(context);
-
-        final List<LocalPhoto> localPhotos = new ArrayList<>();
-        if (fotoDir != null) {
-            // add fotos from root (not yet migrated)
-            localPhotos.addAll(getLocalPhotos(fotoDir));
-
-            // get files from country dirs
-            final File[] listFile = fotoDir.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(final File file) {
-                    return file.isDirectory() && !file.getName().endsWith(TEMP_DIR);
-                }
-            });
-            for (final File subDir : listFile) {
-                localPhotos.addAll(getLocalPhotos(subDir));
-            }
-        }
-        return localPhotos;
-    }
-
-    public static List<LocalPhoto> getLocalPhotos(final File fotoDir) {
-        final File[] listFile = fotoDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(final File file) {
-                return file.isFile() && file.getName().endsWith(".jpg");
-            }
-        });
-        return toLocalPhotos(listFile);
-    }
-
-    public static List<LocalPhoto> toLocalPhotos(final File[] listFile) {
-        final List<LocalPhoto> localPhotos = new ArrayList<>(listFile.length);
-        for (final File file : listFile) {
-            localPhotos.add(new LocalPhoto(file));
-        }
-        return localPhotos;
     }
 
     public static String getCountryFromFile(final File file) {

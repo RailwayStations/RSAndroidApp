@@ -9,11 +9,10 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadStateQuery;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -76,8 +75,8 @@ public interface RSAPI {
             "Content-Type: application/json"
     })
     @POST("/userInbox")
-    Call<List<UploadStateQuery>> queryUploadState(@Header("Authorization") String authorization,
-                           @Body List<LocalPhoto> uploadStateQueries);
+    Call<List<InboxStateQuery>> queryUploadState(@Header("Authorization") String authorization,
+                                                 @Body List<InboxStateQuery> inboxStateQueries);
 
     @Headers({
             "Content-Type: application/json"

@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
@@ -385,6 +386,16 @@ public class DbAdapter {
         return where.substring(0, where.length() - 1) + ')';
     }
 
+    private String getCompletedUploadWhereClause() {
+        String where = Constants.UPLOADS.UPLOAD_STATE + " IN (";
+        for (final UploadState state : UploadState.values()) {
+            if (!state.isPending()) {
+                where += "'" + state.name() + "',";
+            }
+        }
+        return where.substring(0, where.length() - 1) + ')';
+    }
+
     public Cursor getUploadsWithStations() {
         final SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(DATABASE_TABLE_UPLOADS
@@ -425,6 +436,49 @@ public class DbAdapter {
 
     public void deleteUpload(final long id) {
         db.delete(DATABASE_TABLE_UPLOADS, Constants.UPLOADS.ID + "=?", new String[]{ String.valueOf(id)});
+    }
+
+    public List<Upload> getPendingUploads() {
+        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null,
+                Constants.UPLOADS.REMOTE_ID + " IS NOT NULL AND " + getPendingUploadWhereClause(),
+                null,null, null, null);
+        List<Upload> uploads = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            final Upload upload = createUploadFromCursor(cursor);
+            uploads.add(upload);
+        }
+        cursor.close();
+
+        return uploads;
+    }
+
+    public void updateUploadStates(final List<InboxStateQuery> stateQueries) {
+        db.beginTransaction();
+        try {
+            for (InboxStateQuery state : stateQueries) {
+                final ContentValues values = new ContentValues();
+                values.put(Constants.UPLOADS.UPLOAD_STATE, state.getState().name());
+                values.put(Constants.UPLOADS.REJECTED_REASON, state.getRejectedReason());
+                db.update(DATABASE_TABLE_UPLOADS, values, Constants.UPLOADS.REMOTE_ID + " = ?", new String[]{String.valueOf(state.getId())});
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public List<Upload> getCompletedUploads() {
+        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null,
+                Constants.UPLOADS.REMOTE_ID + " IS NOT NULL AND " + getCompletedUploadWhereClause(),
+                null,null, null, null);
+        List<Upload> uploads = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            final Upload upload = createUploadFromCursor(cursor);
+            uploads.add(upload);
+        }
+        cursor.close();
+
+        return uploads;
     }
 
     class DbOpenHelper extends SQLiteOpenHelper {

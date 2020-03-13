@@ -1,44 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_gallery"
+    android:id="@+id/activity_outbox"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.OutboxActivity">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:padding="5dip"
-        android:background="#f0f0f0">
-
-        <GridView
-            android:id="@+id/gridview"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvImageCount"
-            android:layout_margin="0dp"
-            android:columnWidth="150dp"
-            android:drawSelectorOnTop="true"
-            android:gravity="center"
-            android:numColumns="auto_fit"
-            android:stretchMode="columnWidth"
-            android:verticalSpacing="0dp"
-            android:focusable="true"
-            android:clickable="true"/>
-
-        <TextView
-            android:id="@+id/tvImageCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/count_of_images"
-            android:gravity="center_vertical"
-            android:textSize="16sp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
-
-    </RelativeLayout>
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lstUploads"
+        android:layout_margin="10dp"
+        android:layout_alignParentStart="true"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

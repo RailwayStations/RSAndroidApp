@@ -20,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -41,7 +40,7 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
@@ -64,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private MenuItem photoFilterMenuItem;
 
-    private CustomAdapter customAdapter;
+    private StationListAdapter stationListAdapter;
     private Cursor cursor;
     private String searchString;
     private ProgressBar progressBar;
@@ -204,14 +203,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         try {
             int stationCount = dbAdapter.countBahnhoefe();
             cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
-            if (customAdapter != null) {
-                customAdapter.swapCursor(cursor);
+            if (stationListAdapter != null) {
+                stationListAdapter.swapCursor(cursor);
             } else {
                 cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
-                customAdapter = new CustomAdapter(this, cursor, 0);
+                stationListAdapter = new StationListAdapter(this, cursor, 0);
                 ListView listView = findViewById(R.id.lstStations);
                 assert listView != null;
-                listView.setAdapter(customAdapter);
+                listView.setAdapter(stationListAdapter);
 
                 listView.setOnItemClickListener((listview, view, position, id) -> {
                     Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
@@ -220,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
             }
             TextView filterResult = findViewById(R.id.filter_result);
-            filterResult.setText(getString(R.string.filter_result, customAdapter.getCount(), stationCount));
+            filterResult.setText(getString(R.string.filter_result, stationListAdapter.getCount(), stationCount));
         } catch (Exception e) {
             Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
         }
