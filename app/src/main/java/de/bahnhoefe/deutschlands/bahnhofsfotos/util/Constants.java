@@ -4,6 +4,7 @@ public class Constants {
 
     public static final int STORED_PHOTO_WIDTH = 1920;
     public static final int STORED_PHOTO_QUALITY = 95;
+    public static final String CURSOR_ADAPTER_ID = "_id";
 
     /**
      * Columns of Stations table
@@ -34,6 +35,7 @@ public class Constants {
         public static final String TWITTERTAGS = "twitter_tags";
         public static final String ROWID_COUNTRIES = "rowidcountries";
         public static final String TIMETABLE_URL_TEMPLATE = "timetable_url_template";
+        public static final String OVERRIDE_LICENSE = "override_license";
     }
 
     /**
@@ -63,6 +65,7 @@ public class Constants {
         public static final String REJECTED_REASON = "rejectedReason";
         public static final String CREATED_AT = "createdAt";
         public static final String COMMENT = "comment";
+        public static final String JOIN_STATION_TITLE = "stationTitle"; // only for join with station
     }
 
 }

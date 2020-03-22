@@ -41,7 +41,7 @@ public class HighScoreActivity extends AppCompatActivity {
         final BaseApplication baseApplication = (BaseApplication) getApplication();
         String firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
         final List<Country> countries = baseApplication.getDbAdapter().getAllCountries();
-        countries.add(0, new Country(getString(R.string.all_countries), "", null, null, null));
+        countries.add(0, new Country(getString(R.string.all_countries), "", null, null, null, null));
         int selectedItem = 0;
         for (Country country : countries) {
             if (country.getCode().equals(firstSelectedCountry)) {

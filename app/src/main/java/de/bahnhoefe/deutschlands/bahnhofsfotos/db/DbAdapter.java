@@ -32,12 +32,12 @@ public class DbAdapter {
 
     private static final String TAG = DbAdapter.class.getSimpleName();
 
-    public static final String DATABASE_TABLE_STATIONS = "bahnhoefe";
+    private static final String DATABASE_TABLE_STATIONS = "bahnhoefe";
     private static final String DATABASE_TABLE_COUNTRIES = "laender";
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
-    public static final String DATABASE_TABLE_UPLOADS = "uploads";
+    private static final String DATABASE_TABLE_UPLOADS = "uploads";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     private static final String CREATE_STATEMENT_STATIONS = "CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
             + Constants.STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -61,7 +61,8 @@ public class DbAdapter {
             + Constants.COUNTRIES.COUNTRYNAME + " TEXT, "
             + Constants.COUNTRIES.EMAIL + " TEXT, "
             + Constants.COUNTRIES.TWITTERTAGS + " TEXT, "
-            + Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE + " TEXT)";
+            + Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE + " TEXT, "
+            + Constants.COUNTRIES.OVERRIDE_LICENSE + " TEXT)";
     private static final String CREATE_STATEMENT_PROVIDER_APPS = "CREATE TABLE " + DATABASE_TABLE_PROVIDER_APPS + " ("
             + Constants.PROVIDER_APPS.COUNTRYSHORTCODE + " TEXT,"
             + Constants.PROVIDER_APPS.PA_TYPE + " TEXT,"
@@ -151,6 +152,7 @@ public class DbAdapter {
                 values.put(Constants.COUNTRIES.EMAIL, country.getEmail());
                 values.put(Constants.COUNTRIES.TWITTERTAGS, country.getTwitterTags());
                 values.put(Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE, country.getTimetableUrlTemplate());
+                values.put(Constants.COUNTRIES.OVERRIDE_LICENSE, country.getOverrideLicense());
 
                 db.insert(DATABASE_TABLE_COUNTRIES, null, values);
 
@@ -198,7 +200,7 @@ public class DbAdapter {
     }
 
     public Cursor getStationsList(final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes) {
-        String selectQuery = "SELECT rowid _id, " +
+        String selectQuery = "SELECT " + Constants.STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID + ", " +
                 Constants.STATIONS.ID + ", " +
                 Constants.STATIONS.TITLE + ", " +
                 Constants.STATIONS.PHOTO_URL + ", " +
@@ -234,17 +236,12 @@ public class DbAdapter {
     public Cursor getCountryList() {
         //Open connection to read only
         final SQLiteDatabase db = dbHelper.getReadableDatabase();
-        final String selectQueryCountries = "SELECT rowidcountries _id, " +
-                Constants.COUNTRIES.COUNTRYSHORTCODE + ", " +
-                Constants.COUNTRIES.COUNTRYNAME +
-                " FROM " + DATABASE_TABLE_COUNTRIES
-                + " ORDER BY " +
-                Constants.COUNTRIES.COUNTRYNAME + " asc";
+        final String selectQueryCountries = "SELECT " + Constants.COUNTRIES.ROWID_COUNTRIES + " AS " + Constants.CURSOR_ADAPTER_ID + ", " +
+                Constants.COUNTRIES.COUNTRYSHORTCODE + ", " + Constants.COUNTRIES.COUNTRYNAME +
+                " FROM " + DATABASE_TABLE_COUNTRIES + " ORDER BY " + Constants.COUNTRIES.COUNTRYNAME + " ASC";
         Log.d(TAG, selectQueryCountries.toString());
 
-
         final Cursor cursor = db.rawQuery(selectQueryCountries, null);
-        // looping through all rows and adding to list
 
         if (cursor == null) {
             return null;
@@ -285,10 +282,14 @@ public class DbAdapter {
 
         final Cursor cursor = db.query(DATABASE_TABLE_STATIONS,
                 new String[]{
-                        "rowid _id", Constants.STATIONS.ID, Constants.STATIONS.TITLE, Constants.STATIONS.PHOTO_URL, Constants.STATIONS.COUNTRY
+                        Constants.STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID,
+                        Constants.STATIONS.ID,
+                        Constants.STATIONS.TITLE,
+                        Constants.STATIONS.PHOTO_URL,
+                        Constants.STATIONS.COUNTRY
                 },
                 selectQuery,
-                queryArgs.toArray(new String[0]), null, null, Constants.STATIONS.TITLE + " asc");
+                queryArgs.toArray(new String[0]), null, null, Constants.STATIONS.TITLE + " ASC");
 
         if (cursor == null) {
             return null;
@@ -364,7 +365,7 @@ public class DbAdapter {
 
     public Upload getPendingUploadForStation(final Station station) {
         final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + "=? and " + Constants.UPLOADS.STATION_ID + "=? and " + getPendingUploadWhereClause(),
-                new String[]{ station.getCountry(), station.getId()}, null, null, null);
+                new String[]{ station.getCountry(), station.getId()}, null, null, Constants.UPLOADS.CREATED_AT + " DESC");
         if (cursor != null && cursor.moveToFirst()) {
             final Upload upload = createUploadFromCursor(cursor);
             cursor.close();
@@ -376,7 +377,7 @@ public class DbAdapter {
 
     public Upload getPendingUploadForCoordinates(final double lat, final double lon) {
         final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.LAT + "=? and " + Constants.UPLOADS.LON + "=? and " + getPendingUploadWhereClause(),
-                new String[]{ String.valueOf(lat), String.valueOf(lon)}, null, null, null);
+                new String[]{ String.valueOf(lat), String.valueOf(lon)}, null, null, Constants.UPLOADS.CREATED_AT + " DESC");
         if (cursor != null && cursor.moveToFirst()) {
             final Upload upload = createUploadFromCursor(cursor);
             cursor.close();
@@ -406,7 +407,7 @@ public class DbAdapter {
         return where.substring(0, where.length() - 1) + ')';
     }
 
-    public Cursor getUploadsWithStations() {
+    public Cursor getOutbox() {
         final SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(DATABASE_TABLE_UPLOADS
                         + " LEFT JOIN "
@@ -421,14 +422,16 @@ public class DbAdapter {
                         + DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.STATION_ID);
 
         return queryBuilder.query(db, new String[]{
-                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.ID + " AS _id",
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.ID + " AS " + Constants.CURSOR_ADAPTER_ID,
                 DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.REMOTE_ID,
                 DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.COUNTRY,
                 DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.STATION_ID,
                 DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.TITLE,
                 DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.UPLOAD_STATE,
                 DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.PROBLEM_TYPE,
-                DATABASE_TABLE_STATIONS + "." + Constants.UPLOADS.TITLE + " AS stationTitle"
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.COMMENT,
+                DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.REJECTED_REASON,
+                DATABASE_TABLE_STATIONS + "." + Constants.UPLOADS.TITLE + " AS " + Constants.UPLOADS.JOIN_STATION_TITLE
         }, null, null, null, null, Constants.UPLOADS.CREATED_AT + " DESC");
     }
 
@@ -525,9 +528,15 @@ public class DbAdapter {
             // from now on we need to preserve user data and perform schema changes selectively
             } else if (oldVersion < 14) {
                 db.execSQL(CREATE_STATEMENT_UPLOADS);
-            } else if (oldVersion < 15) {
+            }
+
+            if (oldVersion < 15) {
                 db.execSQL(DROP_STATEMENT_STATIONS_IDX);
                 db.execSQL(CREATE_STATEMENT_STATIONS_IDX);
+            }
+
+            if (oldVersion < 16) {
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE_COUNTRIES + " ADD COLUMN " + Constants.COUNTRIES.OVERRIDE_LICENSE + " TEXT");
             }
 
             db.setTransactionSuccessful();
@@ -561,6 +570,7 @@ public class DbAdapter {
         country.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.EMAIL)));
         country.setTwitterTags(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.TWITTERTAGS)));
         country.setTimetableUrlTemplate(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE)));
+        country.setOverrideLicense(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.OVERRIDE_LICENSE)));
         return country;
     }
 

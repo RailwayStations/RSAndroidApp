@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class OutboxActivity extends AppCompatActivity {
         setContentView(R.layout.activity_outbox);
         final ListView list = findViewById(R.id.lstUploads);
 
-        final Cursor uploadsCursor = dbAdapter.getUploadsWithStations();
+        final Cursor uploadsCursor = dbAdapter.getOutbox();
         adapter = new OutboxAdapter(OutboxActivity.this, uploadsCursor);
         list.setAdapter(adapter);
 
@@ -60,7 +59,7 @@ public class OutboxActivity extends AppCompatActivity {
             new SimpleDialogs().confirm(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
                 dbAdapter.deleteUpload(id);
                 FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, id));
-                adapter.changeCursor(dbAdapter.getUploadsWithStations());
+                adapter.changeCursor(dbAdapter.getOutbox());
             });
             return true;
         });
@@ -76,7 +75,7 @@ public class OutboxActivity extends AppCompatActivity {
                 final List<InboxStateQuery> stateQueries = response.body();
                 if (stateQueries != null) {
                     dbAdapter.updateUploadStates(stateQueries);
-                    adapter.changeCursor(dbAdapter.getUploadsWithStations());
+                    adapter.changeCursor(dbAdapter.getOutbox());
                 } else {
                     Log.w(TAG, "Upload states not processable");
                 }
@@ -108,7 +107,7 @@ public class OutboxActivity extends AppCompatActivity {
                     dbAdapter.deleteUpload(upload.getId());
                     FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, upload.getId()));
                 }
-                adapter.changeCursor(dbAdapter.getUploadsWithStations());
+                adapter.changeCursor(dbAdapter.getOutbox());
             })
             .setNegativeButton(R.string.button_cancel_text, null)
             .create().show();
@@ -117,7 +116,7 @@ public class OutboxActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        adapter.changeCursor(dbAdapter.getUploadsWithStations());
+        adapter.changeCursor(dbAdapter.getOutbox());
     }
 
 }

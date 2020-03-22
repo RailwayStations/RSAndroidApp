@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -38,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -131,7 +133,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String nickname;
     private String email;
     private String password;
-    private Set<String> countryCodes;
     private boolean fullscreen;
     private Bitmap publicBitmap;
     private Double latitude;
@@ -146,7 +147,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         baseApplication = (BaseApplication) getApplication();
         rsapi = baseApplication.getRSAPI();
         final DbAdapter dbAdapter = baseApplication.getDbAdapter();
-        countryCodes = baseApplication.getCountryCodes();
+        Set<String> countryCodes = baseApplication.getCountryCodes();
         countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -175,7 +176,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (!isLoggedIn()) {
                     Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
                 } else if (TextUtils.isEmpty(etBahnhofName.getText())) {
-                        Toast.makeText(DetailsActivity.this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
                 } else {
                     uploadPhoto();
                 }
@@ -255,12 +256,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     // check for local photo
                     final File localFile = getStoredMediaFile(upload);
                     if (localFile != null && localFile.canRead()) {
-                        new SimpleDialogs().confirm(this, R.string.local_photo_exists, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog, final int which) {
-                                setPictureButtonsEnabled(true);
-                                setLocalBitmap(upload);
-                            }
+                        new SimpleDialogs().confirm(this, R.string.local_photo_exists, (dialog, which) -> {
+                            setPictureButtonsEnabled(true);
+                            setLocalBitmap(upload);
                         });
                     }
                 } else {
@@ -363,7 +361,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         final View dialogView = getLayoutInflater().inflate(R.layout.report_problem, null);
         final EditText etComment = dialogView.findViewById(R.id.et_problem_comment);
-        etComment.setHint(R.string.report_problem_comment_hint);
         if (upload != null && upload.isProblemReport()) {
             etComment.setText(upload.getComment());
         }
@@ -427,6 +424,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     InboxResponse inboxResponse = null;
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
+                    } else if (response.code() == 401) {
+                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.authorization_failed);
+                        return;
                     } else {
                         final Gson gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
@@ -684,8 +684,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         final LayoutInflater inflater = this.getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.station_info, null);
-        final TextView title = dialogView.findViewById(R.id.title);
-        title.setText(etBahnhofName.getText());
         final TextView id = dialogView.findViewById(R.id.id);
         id.setText(station != null ? station.getId() : "");
 
@@ -699,9 +697,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final TextView owner = dialogView.findViewById(R.id.owner);
         owner.setText(station != null && station.getPhotographer() != null ? station.getPhotographer() : "");
 
-        // TODO: add upload state + rejected reason if exist
-
-        builder.setTitle(R.string.station_info)
+        builder.setTitle(etBahnhofName.getText())
                 .setView(dialogView)
                 .setIcon(R.mipmap.ic_launcher)
                 .setPositiveButton(android.R.string.ok, null);
@@ -711,7 +707,46 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void uploadPhoto() {
-        new SimpleDialogs().prompt(this, R.string.comment, EditorInfo.TYPE_CLASS_TEXT, R.string.comment_hint, upload.getComment(), v -> {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        final View dialogView = getLayoutInflater().inflate(R.layout.upload, null);
+        final EditText etComment = dialogView.findViewById(R.id.et_comment);
+        if (upload != null) {
+            etComment.setText(upload.getComment());
+        }
+        final TextView panorama = dialogView.findViewById(R.id.txt_panorama);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            panorama.setText(Html.fromHtml(getString(R.string.panorama_info),Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            panorama.setText(Html.fromHtml(getString(R.string.panorama_info)));
+        }
+        panorama.setMovementMethod(LinkMovementMethod.getInstance());
+
+        final CheckBox cbSpecialLicense = dialogView.findViewById(R.id.cb_special_license);
+        String overrideLicense = null;
+        if (station != null) {
+            final Country country = Country.getCountryByCode(countries, station.getCountry());
+            overrideLicense = country.getOverrideLicense();
+        }
+        if (overrideLicense != null) {
+            cbSpecialLicense.setText(getString(R.string.special_license, overrideLicense));
+        }
+        cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
+
+        builder.setTitle(R.string.photo_upload)
+                .setView(dialogView)
+                .setIcon(R.drawable.ic_bullhorn_48px)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel());
+
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            if (cbSpecialLicense.getText().length() > 0 && !cbSpecialLicense.isChecked()) {
+                Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show();
+                return;
+            }
+
             final ProgressDialog progress = new ProgressDialog(DetailsActivity.this);
             progress.setMessage(getResources().getString(R.string.send));
             progress.setTitle(getResources().getString(R.string.app_name));
@@ -719,11 +754,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             progress.show();
 
             String stationTitle = etBahnhofName.getText().toString();
-            String comment = v;
+            String comment = etComment.getText().toString();
 
             try {
                 stationTitle = URLEncoder.encode(etBahnhofName.getText().toString(), "UTF-8");
-                comment = URLEncoder.encode(v, "UTF-8");
+                comment = URLEncoder.encode(comment, "UTF-8");
             } catch (final UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
@@ -741,6 +776,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     InboxResponse inboxResponse = null;
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
+                    } else if (response.code() == 401) {
+                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.authorization_failed);
+                        return;
                     } else {
                         final Gson gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
@@ -763,7 +801,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             });
         });
     }
-
 
     private Intent createFotoSendIntent() {
         final Intent sendIntent = new Intent(Intent.ACTION_SEND);
@@ -942,9 +979,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final Bitmap showBitmap = checkForLocalPhoto(upload);
         setButtonEnabled(uploadPhotoButton, false);
         if (showBitmap == null) {
-            // lokal keine Bitmap
+            // there is no local bitmap
             localFotoUsed = false;
-            // switch off image and license view until we actually have a foto
             imageView.setVisibility(View.INVISIBLE);
             licenseTagView.setVisibility(View.INVISIBLE);
         } else {
@@ -957,7 +993,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (upload == null) {
             return;
         }
-        setButtonEnabled(uploadPhotoButton, !upload.isUploaded());
+        setButtonEnabled(uploadPhotoButton, true);
         if (!upload.isUploaded()) {
             return;
         }

@@ -307,4 +307,11 @@
     <string name="delete_upload">Lösche Element #%s</string>
     <string name="confirm_delete_processed_uploads">Alle verarbeiteten Uploads löschen?</string>
     <string name="upload_not_yet_sent">Noch nicht gesendet</string>
+    <string name="panorama_info"><![CDATA[<b>Bitte beachte die <a href="https://de.wikipedia.org/wiki/Panoramafreiheit">Panoramafreiheit</a></b>:
+            <p>- nicht aus dem Zug heraus</p>
+            <p>- keine Innenaufnahme</p>
+            <p>- vom Bahnsteig nur, wenn er von außen öffentlich erreichbar ist</p>
+            ]]></string>
+    <string name="special_license">Für dieses Land ist die abweichende Lizenz nötig:\n%s</string>
+    <string name="special_license_confirm">Bitte die abweichende Lizenz für dieses Land bestätigen.</string>
 </resources>
