@@ -13,6 +13,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 @JsonAdapter(UploadState.Serializer.class)
 public enum UploadState {
+    NOT_YET_SENT(R.string.upload_not_yet_sent, R.color.gridItem, true),
     UNKNOWN(R.string.upload_state_unknown, R.color.gridItem, true),
     REVIEW(R.string.upload_state_in_review, R.color.gridItemReview, true),
     CONFLICT(R.string.upload_state_conflict, R.color.gridItemError, true),

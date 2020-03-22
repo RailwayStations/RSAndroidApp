@@ -306,4 +306,5 @@
     <string name="please_login">Bitte anmelden</string>
     <string name="delete_upload">Lösche Element #%s</string>
     <string name="confirm_delete_processed_uploads">Alle verarbeiteten Uploads löschen?</string>
+    <string name="upload_not_yet_sent">Noch nicht gesendet</string>
 </resources>

@@ -278,6 +278,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
 
                 etBahnhofName.setInputType(EditorInfo.TYPE_CLASS_TEXT);
+                if (upload != null) {
+                    etBahnhofName.setText(upload.getTitle());
+                }
                 setLocalBitmap(upload);
             }
 
@@ -361,16 +364,26 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final View dialogView = getLayoutInflater().inflate(R.layout.report_problem, null);
         final EditText etComment = dialogView.findViewById(R.id.et_problem_comment);
         etComment.setHint(R.string.report_problem_comment_hint);
+        if (upload != null && upload.isProblemReport()) {
+            etComment.setText(upload.getComment());
+        }
 
         final Spinner problemType = dialogView.findViewById(R.id.problem_type);
         final List<String> problemTypes = new ArrayList<>();
         problemTypes.add(getString(R.string.problem_please_specify));
+        int selected = -1;
         for (final ProblemType type : ProblemType.values()) {
             problemTypes.add(getString(type.getMessageId()));
+            if (upload != null && upload.getProblemType() == type) {
+                selected = problemTypes.size() - 1;
+            }
         }
         final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, problemTypes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         problemType.setAdapter(adapter);
+        if (selected > -1) {
+            problemType.setSelection(selected);
+        }
 
         builder.setTitle(R.string.report_problem)
                 .setView(dialogView)
@@ -387,13 +400,27 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Toast.makeText(getApplicationContext(), getString(R.string.problem_please_specify), Toast.LENGTH_LONG).show();
                 return;
             }
-            final ProblemType type = ProblemType.values()[selectedType];
+            final ProblemType type = ProblemType.values()[selectedType - 1];
             final String comment = etComment.getText().toString();
             if (StringUtils.isBlank(comment)) {
                 Toast.makeText(getApplicationContext(), getString(R.string.problem_please_comment), Toast.LENGTH_LONG).show();
                 return;
             }
             alertDialog.dismiss();
+
+            if (upload == null || !upload.isProblemReport() || upload.isUploaded()) {
+                upload = new Upload();
+                upload.setCountry(station.getCountry());
+                upload.setStationId(station.getId());
+                upload.setProblemType(type);
+                upload.setComment(comment);
+                upload = baseApplication.getDbAdapter().insertUpload(upload);
+            } else {
+                upload.setProblemType(type);
+                upload.setComment(comment);
+                baseApplication.getDbAdapter().updateUpload(upload);
+            }
+
             rsapi.reportProblem(RSAPI.Helper.getAuthorizationHeader(email, password), new ProblemReport(station.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<InboxResponse>() {
                 @Override
                 public void onResponse(final Call<InboxResponse> call, final Response<InboxResponse> response) {
@@ -405,14 +432,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
                     }
 
-                    Upload upload = new Upload();
-                    upload.setCountry(station.getCountry());
-                    upload.setStationId(station.getId());
                     upload.setRemoteId(inboxResponse.getId());
-                    upload.setProblemType(type);
-                    upload.setComment(comment);
                     upload.setUploadState(inboxResponse.getState().getUploadState());
-                    DetailsActivity.this.upload = baseApplication.getDbAdapter().insertUpload(upload);
+                    baseApplication.getDbAdapter().updateUpload(upload);
                     new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
                 }
 
@@ -479,7 +501,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void verifyCurrentPhotoUploadExists() {
-        if (upload == null || !upload.isPendingPhotoUpload()) {
+        if (upload == null || upload.isProblemReport() || upload.isUploaded()) {
             upload = new Upload();
             if (station != null) {
                 upload.setCountry(station.getCountry());
@@ -689,7 +711,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void uploadPhoto() {
-        new SimpleDialogs().prompt(this, R.string.comment, EditorInfo.TYPE_CLASS_TEXT, R.string.comment_hint, null, v -> {
+        new SimpleDialogs().prompt(this, R.string.comment, EditorInfo.TYPE_CLASS_TEXT, R.string.comment_hint, upload.getComment(), v -> {
             final ProgressDialog progress = new ProgressDialog(DetailsActivity.this);
             progress.setMessage(getResources().getString(R.string.send));
             progress.setTitle(getResources().getString(R.string.app_name));
@@ -705,6 +727,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             } catch (final UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
+            upload.setTitle(stationTitle);
+            upload.setComment(comment);
+            baseApplication.getDbAdapter().updateUpload(upload);
 
             final File mediaFile = getStoredMediaFile(upload);
             final RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
@@ -929,10 +954,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void fetchUploadStatus(final Upload upload) {
-        if (upload == null || upload.getRemoteId() == null) {
+        if (upload == null) {
             return;
         }
-        setButtonEnabled(uploadPhotoButton, true);
+        setButtonEnabled(uploadPhotoButton, !upload.isUploaded());
+        if (!upload.isUploaded()) {
+            return;
+        }
         final List<InboxStateQuery> stateQueries = new ArrayList<>();
         stateQueries.add(new InboxStateQuery(upload.getRemoteId()));
 

@@ -181,6 +181,7 @@ public class DbAdapter {
         values.put(Constants.UPLOADS.REJECTED_REASON, upload.getRejectReason());
         values.put(Constants.UPLOADS.REMOTE_ID, upload.getRemoteId());
         values.put(Constants.UPLOADS.STATION_ID, upload.getStationId());
+        values.put(Constants.UPLOADS.TITLE, upload.getTitle());
         values.put(Constants.UPLOADS.UPLOAD_STATE, upload.getUploadState().name());
 
         upload.setId(db.insert(DATABASE_TABLE_UPLOADS, null, values));
@@ -342,8 +343,17 @@ public class DbAdapter {
         db.beginTransaction();
         try {
             final ContentValues values = new ContentValues();
-            values.put(Constants.UPLOADS.REMOTE_ID, upload.getRemoteId());
+            values.put(Constants.UPLOADS.COMMENT, upload.getComment());
+            values.put(Constants.UPLOADS.COUNTRY, upload.getCountry());
+            values.put(Constants.UPLOADS.CREATED_AT, upload.getCreatedAt());
             values.put(Constants.UPLOADS.INBOX_URL, upload.getInboxUrl());
+            values.put(Constants.UPLOADS.LAT, upload.getLat());
+            values.put(Constants.UPLOADS.LON, upload.getLon());
+            values.put(Constants.UPLOADS.PROBLEM_TYPE, upload.getProblemType() != null ? upload.getProblemType().name() : null);
+            values.put(Constants.UPLOADS.REJECTED_REASON, upload.getRejectReason());
+            values.put(Constants.UPLOADS.REMOTE_ID, upload.getRemoteId());
+            values.put(Constants.UPLOADS.STATION_ID, upload.getStationId());
+            values.put(Constants.UPLOADS.TITLE, upload.getTitle());
             values.put(Constants.UPLOADS.UPLOAD_STATE, upload.getUploadState().name());
             db.update(DATABASE_TABLE_UPLOADS, values, Constants.UPLOADS.ID + " = ?", new String[]{String.valueOf(upload.getId())});
             db.setTransactionSuccessful();
@@ -572,14 +582,20 @@ public class DbAdapter {
         upload.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.CREATED_AT)));
         upload.setId(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ID)));
         upload.setInboxUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.INBOX_URL)));
-        upload.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LAT)));
-        upload.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LON)));
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LAT))) {
+            upload.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LAT)));
+        }
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LON))) {
+            upload.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LON)));
+        }
         final String problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
         if (problemType != null) {
             upload.setProblemType(ProblemType.valueOf(problemType));
         }
         upload.setRejectReason(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON)));
-        upload.setRemoteId(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID)));
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID))) {
+            upload.setRemoteId(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID)));
+        }
         upload.setStationId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.STATION_ID)));
         upload.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE)));
         final String uploadState = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));

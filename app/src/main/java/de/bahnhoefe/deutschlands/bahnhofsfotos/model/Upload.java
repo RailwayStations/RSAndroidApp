@@ -15,7 +15,7 @@ public class Upload implements Serializable {
     private String inboxUrl;
     private ProblemType problemType;
     private String rejectReason;
-    private UploadState uploadState = UploadState.UNKNOWN;
+    private UploadState uploadState = UploadState.NOT_YET_SENT;
     private Long createdAt = System.currentTimeMillis();
 
     public Upload() {
@@ -141,7 +141,11 @@ public class Upload implements Serializable {
         return (isUploadForExistingStation() || isUploadForMissingStation()) && isPending() && !isProblemReport();
     }
 
-    private boolean isPending() {
+    public boolean isPending() {
         return uploadState.isPending();
+    }
+
+    public boolean isUploaded() {
+        return remoteId != null;
     }
 }

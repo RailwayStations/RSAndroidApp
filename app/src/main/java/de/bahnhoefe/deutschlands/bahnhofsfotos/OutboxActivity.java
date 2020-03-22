@@ -9,6 +9,7 @@ import android.view.ContextThemeWrapper;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
@@ -111,6 +112,12 @@ public class OutboxActivity extends AppCompatActivity {
             })
             .setNegativeButton(R.string.button_cancel_text, null)
             .create().show();
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        adapter.changeCursor(dbAdapter.getUploadsWithStations());
     }
 
 }
