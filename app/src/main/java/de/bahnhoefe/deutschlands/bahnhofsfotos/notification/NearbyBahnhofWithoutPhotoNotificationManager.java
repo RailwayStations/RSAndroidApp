@@ -3,14 +3,14 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 
 public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofNotificationManager {
@@ -19,8 +19,8 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
     public static final int LED_COLOR = 0x0000ffff;
     private static final int REQUEST_FOTO = 0x100;
 
-    public NearbyBahnhofWithoutPhotoNotificationManager(Context context, Bahnhof bahnhof, double distance, Set<Country> countries) {
-        super(context, bahnhof, distance, countries);
+    public NearbyBahnhofWithoutPhotoNotificationManager(Context context, Station station, double distance, Set<Country> countries) {
+        super(context, station, distance, countries);
         Log.d(TAG, "Creating " + getClass().getSimpleName());
     }
 

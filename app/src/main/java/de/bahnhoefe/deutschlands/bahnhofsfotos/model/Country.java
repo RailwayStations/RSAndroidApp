@@ -12,22 +12,24 @@ public class Country implements Serializable {
     private String email;
     private String twitterTags;
     private String timetableUrlTemplate;
+    private String overrideLicense;
     private List<ProviderApp> providerApps = new ArrayList<>();
 
     public Country() {
 
     }
 
-    public Country(String name, String code, String email, String twitterTags, String timetableUrlTemplate) {
+    public Country(final String name, final String code, final String email, final String twitterTags, final String timetableUrlTemplate, final String overrideLicense) {
         this.name = name;
         this.code = code;
         this.email = email;
         this.twitterTags = twitterTags;
         this.timetableUrlTemplate = timetableUrlTemplate;
+        this.overrideLicense = overrideLicense;
     }
 
-    public static Country getCountryByCode(Set<Country> countries, String countryCode) {
-        for (Country country : countries) {
+    public static Country getCountryByCode(final Set<Country> countries, final String countryCode) {
+        for (final Country country : countries) {
             if (country.getCode().equals(countryCode)) {
                 return country;
             }
@@ -39,7 +41,7 @@ public class Country implements Serializable {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -47,7 +49,7 @@ public class Country implements Serializable {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(final String code) {
         this.code = code;
     }
 
@@ -55,7 +57,7 @@ public class Country implements Serializable {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(final String email) {
         this.email = email;
     }
 
@@ -63,7 +65,7 @@ public class Country implements Serializable {
         return twitterTags;
     }
 
-    public void setTwitterTags(String twitterTags) {
+    public void setTwitterTags(final String twitterTags) {
         this.twitterTags = twitterTags;
     }
 
@@ -75,7 +77,7 @@ public class Country implements Serializable {
         return timetableUrlTemplate != null && !timetableUrlTemplate.isEmpty();
     }
 
-    public void setTimetableUrlTemplate(String timetableUrlTemplate) {
+    public void setTimetableUrlTemplate(final String timetableUrlTemplate) {
         this.timetableUrlTemplate = timetableUrlTemplate;
     }
 
@@ -101,7 +103,7 @@ public class Country implements Serializable {
         return providerApps;
     }
 
-    public void setProviderApps(List<ProviderApp> providerApps) {
+    public void setProviderApps(final List<ProviderApp> providerApps) {
         this.providerApps = providerApps;
     }
 
@@ -111,5 +113,13 @@ public class Country implements Serializable {
 
     public List<ProviderApp> getCompatibleProviderApps() {
         return ProviderApp.getCompatibleProviderApps(providerApps);
+    }
+
+    public String getOverrideLicense() {
+        return overrideLicense;
+    }
+
+    public void setOverrideLicense(String overrideLicense) {
+        this.overrideLicense = overrideLicense;
     }
 }

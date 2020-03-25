@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/nav_delete_processed_uploads"
+        android:orderInCategory="100"
+        android:title="@string/nav_delete_processed_uploads"
+        app:itemTextColor="@color/colorActions"
+        app:showAsAction="never" />
+
+</menu>

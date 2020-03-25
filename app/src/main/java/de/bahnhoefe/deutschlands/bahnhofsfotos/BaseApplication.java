@@ -3,34 +3,30 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.multidex.MultiDex;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import androidx.annotation.NonNull;
+import androidx.multidex.MultiDex;
 
 import com.google.gson.GsonBuilder;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.LocalPhoto;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+
+import org.apache.commons.lang3.StringUtils;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -49,7 +45,7 @@ public class BaseApplication extends Application {
     public static final String DEFAULT_COUNTRY = "de";
     public static final String PREF_FILE = "APP_PREF_FILE";
 
-    private BahnhofsDbAdapter dbAdapter;
+    private DbAdapter dbAdapter;
     private RSAPI api;
     private SharedPreferences preferences;
 
@@ -57,7 +53,7 @@ public class BaseApplication extends Application {
         setInstance(this);
     }
 
-    public BahnhofsDbAdapter getDbAdapter() {
+    public DbAdapter getDbAdapter() {
         return dbAdapter;
     }
 
@@ -78,32 +74,8 @@ public class BaseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        dbAdapter = new BahnhofsDbAdapter(this);
+        dbAdapter = new DbAdapter(this);
         dbAdapter.open();
-
-        GsonBuilder gson = new GsonBuilder();
-        gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
-        gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
-
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .addInterceptor(new UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
-
-        if (BuildConfig.DEBUG) {
-                builder.addInterceptor(loggingInterceptor);
-        }
-
-        OkHttpClient okHttp = builder.build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.API_START_URL)
-                .client(okHttp)
-                .addConverterFactory(GsonConverterFactory.create(gson.create()))
-                .build();
-
-        api = retrofit.create(RSAPI.class);
 
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
 
@@ -113,11 +85,15 @@ public class BaseApplication extends Application {
             setPhotoOwner(true);
         }
 
-        migrateLocalPhotos();
     }
 
-    public void migrateLocalPhotos() {
-        new MigrateLocalFotosTask().execute();
+    public String getApiUrl() {
+        return preferences.getString(getString(R.string.API_URL), "https://api.railway-stations.org");
+    }
+
+    public void setApiUrl(String apiUrl) {
+        putString(R.string.API_URL, apiUrl);
+        this.api = null;
     }
 
     private void putBoolean(int key, boolean value) {
@@ -128,7 +104,7 @@ public class BaseApplication extends Application {
 
     private void putString(int key, String value) {
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(getString(key), value);
+        editor.putString(getString(key), StringUtils.trimToNull(value));
         editor.apply();
     }
 
@@ -163,7 +139,11 @@ public class BaseApplication extends Application {
 
     public Set<String> getCountryCodes() {
         String oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
-        return preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
+        Set<String> stringSet = preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
+        if (stringSet.isEmpty()) {
+            stringSet = new HashSet<>(Collections.singleton(DEFAULT_COUNTRY));
+        }
+        return stringSet;
     }
 
     public void setFirstAppStart(boolean firstAppStart) {
@@ -314,39 +294,78 @@ public class BaseApplication extends Application {
     }
 
     public RSAPI getRSAPI() {
+        if (api == null) {
+            GsonBuilder gson = new GsonBuilder();
+            gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
+            gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
+
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                    .addInterceptor(new UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
+
+            if (BuildConfig.DEBUG) {
+                builder.addInterceptor(loggingInterceptor);
+            }
+
+            OkHttpClient okHttp = builder.build();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(getApiUrl())
+                    .client(okHttp)
+                    .addConverterFactory(GsonConverterFactory.create(gson.create()))
+                    .build();
+
+            api = retrofit.create(RSAPI.class);
+        }
         return api;
     }
 
-    public String getMapFileName() {
-        return preferences.getString(getString(R.string.MAP_FILE), null);
+    public Uri getMapUri() {
+        return getUri(getString(R.string.MAP_FILE));
     }
 
-    public void setMapFileName(String mapFileName) {
-        putString(R.string.MAP_FILE, mapFileName);
+    public void setMapUri(Uri map) {
+        putUri(R.string.MAP_FILE, map);
     }
 
-    public String getMapDirectory() {
-        return preferences.getString(getString(R.string.MAP_DIRECTORY), null);
+    private void putUri(int key, Uri uri) {
+        putString(key, uri != null ? uri.toString() : null);
     }
 
-    public void setMapDirectory(String mapDirectory) {
-        putString(R.string.MAP_DIRECTORY, mapDirectory);
+    public Uri getMapDirectoryUri() {
+        return getUri(getString(R.string.MAP_DIRECTORY));
     }
 
-    public String getMapThemeDirectory() {
-        return preferences.getString(getString(R.string.MAP_THEME_DIRECTORY), null);
+    private Uri getUri(String key) {
+        String value = preferences.getString(key, null);
+        try {
+            return Uri.parse(value);
+        } catch (Exception ignored) {
+            Log.e(TAG, "can't read Uri string " + value);
+        }
+        return null;
     }
 
-    public void setMapThemeDirectory(String mapThemeDirectory) {
-        putString(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
+    public void setMapDirectoryUri(Uri mapDirectory) {
+        putUri(R.string.MAP_DIRECTORY, mapDirectory);
     }
 
-    public String getMapTheme() {
-        return preferences.getString(getString(R.string.MAP_THEME), null);
+    public Uri getMapThemeDirectoryUri() {
+        return getUri(getString(R.string.MAP_THEME_DIRECTORY));
     }
 
-    public void setMapTheme(String mapTheme) {
-        putString(R.string.MAP_THEME, mapTheme);
+    public void setMapThemeDirectoryUri(Uri mapThemeDirectory) {
+        putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
+    }
+
+    public Uri getMapThemeUri() {
+        return getUri(getString(R.string.MAP_THEME));
+    }
+
+    public void setMapThemeUri(Uri mapTheme) {
+        putUri(R.string.MAP_THEME, mapTheme);
     }
 
     /* This interceptor adds a custom User-Agent. */
@@ -365,62 +384,6 @@ public class BaseApplication extends Application {
                     .header("User-Agent", userAgent)
                     .build();
             return chain.proceed(requestWithUserAgent);
-        }
-    }
-
-    private class MigrateLocalFotosTask extends AsyncTask<Void, Void, Void> {
-
-        private int successCount = 0;
-
-        private int errorCount = 0;
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            File localFotoDir = FileUtils.getLocalFotoDir();
-            if (localFotoDir == null) {
-                return null; // nothing to migrate
-            }
-            List<LocalPhoto> localPhotos = FileUtils.getLocalPhotos(localFotoDir);
-            for (LocalPhoto photo : localPhotos) {
-                if (photo.isOldFile()) {
-                    if (photo.getId() != null) {
-                        Bahnhof bahnhof = dbAdapter.fetchBahnhof(null, photo.getId());
-                        if (bahnhof != null) {
-                            // move to country folder
-                            File targetFile = FileUtils.getStoredMediaFile(bahnhof.getCountry(), photo.getId());
-                            try {
-                                org.apache.commons.io.FileUtils.moveFile(photo.getFile(), targetFile);
-                                successCount++;
-                            } catch (IOException e) {
-                                errorCount++;
-                                Log.w(TAG, "Can't move file: " + photo.getFile(), e);
-                            }
-                        } else {
-                            errorCount++;
-                            Log.w(TAG, "Can't move file, unknown country: " + photo.getFile());
-                        }
-                    } else if (photo.hasCoords()) {
-                        // move to missing folder
-                        File targetFile = FileUtils.getStoredMediaFile(null, LocalPhoto.getIdByLatLon(photo.getLat(), photo.getLon()));
-                        try {
-                            org.apache.commons.io.FileUtils.moveFile(photo.getFile(), targetFile);
-                            successCount++;
-                        } catch (IOException e) {
-                            errorCount++;
-                            Log.w(TAG, "Can't move file: " + photo.getFile(), e);
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (successCount > 0 || errorCount > 0) {
-                Toast.makeText(BaseApplication.this, getResources().getString(R.string.files_migrated, successCount, errorCount), Toast.LENGTH_LONG).show();
-            }
         }
     }
 

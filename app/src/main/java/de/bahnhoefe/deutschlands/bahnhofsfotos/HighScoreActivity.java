@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -41,7 +41,7 @@ public class HighScoreActivity extends AppCompatActivity {
         final BaseApplication baseApplication = (BaseApplication) getApplication();
         String firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
         final List<Country> countries = baseApplication.getDbAdapter().getAllCountries();
-        countries.add(0, new Country(getString(R.string.all_countries), "", null, null, null));
+        countries.add(0, new Country(getString(R.string.all_countries), "", null, null, null, null));
         int selectedItem = 0;
         for (Country country : countries) {
             if (country.getCode().equals(firstSelectedCountry)) {

@@ -50,7 +50,7 @@
 
     <string name="navMethod">Zeige den Weg…</string>
 
-    <string name="title_activity_gallery">In Bearbeitung</string>
+    <string name="title_activity_outbox">Ausgangskorb</string>
     <string name="activitynotfound">Du hast keine Navigations-App auf Deinem Smartphone</string>
     <string name="count_of_images">Du hast %1$d Bahnhofsfoto(s) im Speicher</string>
     <string name="search_hint">Bahnhof suchen</string>
@@ -273,17 +273,46 @@
     <string name="filter_result">%d von %d Bahnhöfen selektiert</string>
     <string name="files_migrated">Lokale Fotos migriert: %d, fehlerhaft: %d</string>
     <string name="delete_local_photo">Lokales Foto %s löschen?</string>
-    <string name="menu_title_in_progress">In Bearbeitung</string>
+    <string name="menu_title_outbox">Ausgangskorb</string>
     <string name="error_retrieving_upload_state">Fehler beim Lesen des Bearbeitungsstatus</string>
     <string name="upload_state">Status: %s</string>
     <string name="upload_state_unknown">unbekannt</string>
     <string name="upload_state_in_review">in Prüfung</string>
+    <string name="upload_state_conflict">Konflikt</string>
     <string name="upload_state_accepted">freigeschaltet</string>
+    <string name="upload_state_rejected">abgelehnt</string>
     <string name="upload_state_other_user">anderer Fotograf</string>
+    <string name="upload_lat_lon_out_of_range">Ungültige Koordinaten</string>
+    <string name="upload_unsupported_content_type">Nicht unterstützes Bildformat</string>
+    <string name="upload_not_enough_data">Fehlende Daten</string>
     <string name="confirm_delete_local_photos">Lösche lokale Kopien von:</string>
     <string name="local_photo_delete_accepted">akzeptierten Fotos</string>
     <string name="local_photo_delete_other_user">Fotos anderer Fotografen</string>
     <string name="local_photo_exists">Für diesen Bahnhof existiert ein Foto in deinem lokalen Speicher. Soll dieses anstelle des offiziellen Fotos geladen werden?</string>
     <string name="all_countries">Alle Länder</string>
     <string name="app_name_debug">Bahnhofsfotos (debug)</string>
+    <string name="apiUrl">API URL</string>
+    <string name="api_url_hint">Enter API URL, leave blank for default</string>
+    <string name="report_problem">Problem melden</string>
+    <string name="report_problem_comment_hint">Kommentar zum Problem</string>
+    <string name="problem_wrong_location">Bahnhof hat falsche Koordinaten</string>
+    <string name="problem_station_inactive">Bahnhof ist inaktiv</string>
+    <string name="problem_station_nonexistent">Bahnhof existiert nicht</string>
+    <string name="problem_wrong_photo">Bahnhof hat ein falsches Foto</string>
+    <string name="problem_other">Ein anderes Problem, Details im Kommentar.</string>
+    <string name="problem_please_specify">Bitte wähle Art des Problems</string>
+    <string name="problem_please_comment">Bitte beschreibe das Problem im Kommentarfeld</string>
+    <string name="problem_report_failed">Fehler beim Senden des Problemberichts</string>
+    <string name="please_login">Bitte anmelden</string>
+    <string name="delete_upload">Lösche Element #%s</string>
+    <string name="confirm_delete_processed_uploads">Alle verarbeiteten Uploads löschen?</string>
+    <string name="upload_not_yet_sent">Noch nicht gesendet</string>
+    <string name="panorama_info"><![CDATA[<b>Bitte beachte die <a href="https://de.wikipedia.org/wiki/Panoramafreiheit">Panoramafreiheit</a></b>:
+            <p>- nicht aus dem Zug heraus</p>
+            <p>- keine Innenaufnahme</p>
+            <p>- vom Bahnsteig nur, wenn er von außen öffentlich erreichbar ist</p>
+            ]]></string>
+    <string name="special_license">Für dieses Land ist die abweichende Lizenz nötig:\n%s</string>
+    <string name="special_license_confirm">Bitte die abweichende Lizenz für dieses Land bestätigen.</string>
+    <string name="nav_delete_processed_uploads">Lösche verarbeitetet Uploads</string>
 </resources>

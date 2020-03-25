@@ -14,35 +14,36 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CustomAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
@@ -58,11 +59,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private BaseApplication baseApplication;
-    private BahnhofsDbAdapter dbAdapter;
+    private DbAdapter dbAdapter;
     private NavigationView navigationView;
     private MenuItem photoFilterMenuItem;
 
-    private CustomAdapter customAdapter;
+    private StationListAdapter stationListAdapter;
     private Cursor cursor;
     private String searchString;
     private ProgressBar progressBar;
@@ -72,28 +73,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
         rsapi = baseApplication.getRSAPI();
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        final FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
+            public void onClick(final View view) {
+                final Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
                 startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
             }
         });
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
@@ -103,22 +104,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         progressBar = findViewById(R.id.progressBar);
 
-        View header = navigationView.getHeaderView(0);
-        TextView tvUpdate = header.findViewById(R.id.tvUpdate);
+        final View header = navigationView.getHeaderView(0);
+        final TextView tvUpdate = header.findViewById(R.id.tvUpdate);
 
         if (!baseApplication.getFirstAppStart()) {
             startActivity(new Intent(this, IntroSliderActivity.class));
             finish();
         }
 
-        long lastUpdateDate = baseApplication.getLastUpdate();
+        final long lastUpdateDate = baseApplication.getLastUpdate();
         if (lastUpdateDate > 0) {
             tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(lastUpdateDate));
         } else {
             tvUpdate.setText(R.string.no_stations_in_database);
         }
 
-        Intent searchIntent = getIntent();
+        final Intent searchIntent = getIntent();
         if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
             searchString = searchIntent.getStringExtra(SearchManager.QUERY);
         }
@@ -127,22 +128,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bindToStatus();
     }
 
-    private void onGalleryNavItemWithPermissionCheck() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Write permission has not been granted.
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_FILE_PERMISSION);
-            } else {
-                onGalleryNavItem();
-            }
-        } else {
-            onGalleryNavItem();
-        }
-    }
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
         if (requestCode == REQUEST_FILE_PERMISSION) {
             Log.i(TAG, "Received response for file permission request.");
 
@@ -158,13 +145,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void onGalleryNavItem() {
-        Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
+        final Intent intent = new Intent(MainActivity.this, OutboxActivity.class);
         startActivity(intent);
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -174,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
 
         final SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -184,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             @Override
-            public boolean onQueryTextSubmit(String s) {
+            public boolean onQueryTextSubmit(final String s) {
                 Log.d(TAG, "onQueryTextSubmit: " + s);
                 searchString = s;
                 updateStationList();
@@ -192,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             @Override
-            public boolean onQueryTextChange(String s) {
+            public boolean onQueryTextChange(final String s) {
                 Log.d(TAG, "onQueryTextChange: " + s);
                 searchString = s;
                 updateStationList();
@@ -214,62 +201,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void updateStationList() {
         try {
-            int stationCount = dbAdapter.countBahnhoefe();
-            cursor = dbAdapter.getBahnhofsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-            if (customAdapter != null) {
-                customAdapter.swapCursor(cursor);
+            final int stationCount = dbAdapter.countBahnhoefe();
+            cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
+            if (stationListAdapter != null) {
+                stationListAdapter.swapCursor(cursor);
             } else {
-                cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-                customAdapter = new CustomAdapter(this, cursor, 0);
-                ListView listView = findViewById(R.id.lstStations);
+                cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
+                stationListAdapter = new StationListAdapter(this, cursor, 0);
+                final ListView listView = findViewById(R.id.lstStations);
                 assert listView != null;
-                listView.setAdapter(customAdapter);
+                listView.setAdapter(stationListAdapter);
 
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
-                        Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
-                        intentDetails.putExtra(DetailsActivity.EXTRA_BAHNHOF, dbAdapter.fetchBahnhofByRowId(id));
-                        startActivityForResult(intentDetails, 0);
-                    }
+                listView.setOnItemClickListener((listview, view, position, id) -> {
+                    final Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
+                    intentDetails.putExtra(DetailsActivity.EXTRA_STATION, dbAdapter.fetchStationByRowId(id));
+                    startActivityForResult(intentDetails, 0);
                 });
             }
-            TextView filterResult = findViewById(R.id.filter_result);
-            filterResult.setText(getString(R.string.filter_result, customAdapter.getCount(), stationCount));
-        } catch (Exception e) {
+            final TextView filterResult = findViewById(R.id.filter_result);
+            filterResult.setText(getString(R.string.filter_result, stationListAdapter.getCount(), stationCount));
+        } catch (final Exception e) {
             Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
         }
     }
 
-    /**
-     * Prepare the Screen's standard options menu to be displayed.  This is
-     * called right before the menu is shown, every time it is shown.  You can
-     * use this method to efficiently enable/disable items or otherwise
-     * dynamically modify the contents.
-     * <p>
-     * <p>The default implementation updates the system menu items based on the
-     * activity's state.  Deriving classes should always call through to the
-     * base class implementation.
-     *
-     * @param menu The options menu as last shown or first initialized by
-     *             onCreateOptionsMenu().
-     * @return You must return true for the menu to be displayed;
-     * if you return false it will not be shown.
-     * @see #onCreateOptionsMenu
-     */
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.notify);
+    public boolean onPrepareOptionsMenu(final Menu menu) {
+        final MenuItem item = menu.findItem(R.id.notify);
         initNotificationMenuItem(item, statusBinder != null);
         return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        final int id = item.getItemId();
 
         // necessary for the update policy submenu
         if(item.isChecked()) {
@@ -284,14 +249,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
             item.setIcon(R.drawable.ic_language_white_24px);
         } else if (id == R.id.menu_toggle_photo) {
-            PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
+            final PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
             item.setIcon(photoFilter.getIcon());
             baseApplication.setPhotoFilter(photoFilter);
             updateStationList();
         } else if (id == R.id.nicknameFilter) {
             int selectedNickname = -1;
             final String[] nicknames = dbAdapter.getPhotographerNicknames();
-            String selectedNick = baseApplication.getNicknameFilter();
+            final String selectedNick = baseApplication.getNicknameFilter();
             if (nicknames.length == 0) {
                 Toast.makeText(getBaseContext(), getString(R.string.no_nicknames_found), Toast.LENGTH_LONG).show();
                 return true;
@@ -301,17 +266,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     selectedNickname = i;
                 }
             }
-            new SimpleDialogs().select(this, getString(R.string.select_nickname), nicknames, selectedNickname, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    dialog.dismiss();
-                    int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-                    if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
-                        baseApplication.setNicknameFilter(nicknames[selectedPosition]);
-                        PhotoFilter photoFilter = PhotoFilter.NICKNAME;
-                        baseApplication.setPhotoFilter(photoFilter);
-                        item.setIcon(photoFilter.getIcon());
-                        updateStationList();
-                    }
+            new SimpleDialogs().select(this, getString(R.string.select_nickname), nicknames, selectedNickname, (dialog, whichButton) -> {
+                dialog.dismiss();
+                final int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
+                    baseApplication.setNicknameFilter(nicknames[selectedPosition]);
+                    final PhotoFilter photoFilter = PhotoFilter.NICKNAME;
+                    baseApplication.setPhotoFilter(photoFilter);
+                    item.setIcon(photoFilter.getIcon());
+                    updateStationList();
                 }
             });
         } else if (id == R.id.notify) {
@@ -328,46 +291,52 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             baseApplication.setUpdatePolicy(UpdatePolicy.AUTOMATIC);
         } else if (id == R.id.rb_update_notify) {
             baseApplication.setUpdatePolicy(UpdatePolicy.NOTIFY);
+        } else if (id == R.id.apiUrl) {
+            new SimpleDialogs().prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
+                baseApplication.setApiUrl(v);
+                baseApplication.setLastUpdate(0);
+                recreate();
+            });
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void initNotificationMenuItem(MenuItem item, boolean active) {
+    private void initNotificationMenuItem(final MenuItem item, final boolean active) {
         item.setChecked(active);
         item.setIcon(active ? R.drawable.ic_notifications_active_white_24px : R.drawable.ic_notifications_off_white_24px);
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(final MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        final int id = item.getItemId();
         if (id == R.id.nav_slideshow) {
-            Intent intent = new Intent(MainActivity.this, IntroSliderActivity.class);
+            final Intent intent = new Intent(MainActivity.this, IntroSliderActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_data) {
-            Intent intent = new Intent(MainActivity.this, MyDataActivity.class);
+            final Intent intent = new Intent(MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
             runUpdateTasks();
         } else if (id == R.id.nav_highscore) {
-            Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
+            final Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_own_station_photos) {
-            onGalleryNavItemWithPermissionCheck();
+            onGalleryNavItem();
         } else if (id == R.id.nav_stations_map) {
-            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            final Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_web_site) {
-            Uri mapUri = Uri.parse("https://railway-stations.org");
-            Intent intent = new Intent(Intent.ACTION_VIEW, mapUri);
+            final Uri mapUri = Uri.parse("https://railway-stations.org");
+            final Intent intent = new Intent(Intent.ACTION_VIEW, mapUri);
             startActivity(intent);
         } else if (id == R.id.nav_app_info) {
-            AppInfoFragment appInfoFragment = new AppInfoFragment();
+            final AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(), DIALOG_TAG);
         }
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
         assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -383,37 +352,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         rsapi.getCountries().enqueue(new Callback<List<Country>>() {
             @Override
-            public void onResponse(Call<List<Country>> call, Response<List<Country>> response) {
+            public void onResponse(final Call<List<Country>> call, final Response<List<Country>> response) {
                 if (response.isSuccessful()) {
                     dbAdapter.insertCountries(response.body());
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Country>> call, Throwable t) {
+            public void onFailure(final Call<List<Country>> call, final Throwable t) {
                 Log.e(TAG, "Error refreshing countries", t);
                 Toast.makeText(getBaseContext(), getString(R.string.error_updating_countries) + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 
-        rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<List<Bahnhof>>() {
+        rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<List<Station>>() {
             @Override
-            public void onResponse(Call<List<Bahnhof>> call, Response<List<Bahnhof>> response) {
+            public void onResponse(final Call<List<Station>> call, final Response<List<Station>> response) {
                 if (response.isSuccessful()) {
-                    dbAdapter.deleteBahnhoefe();
-                    dbAdapter.insertBahnhoefe(response.body());
+                    dbAdapter.insertBahnhoefe(response.body(), baseApplication.getCountryCodes());
 
                     baseApplication.setLastUpdate(System.currentTimeMillis());
-                    TextView tvUpdate = findViewById(R.id.tvUpdate);
+                    final TextView tvUpdate = findViewById(R.id.tvUpdate);
                     tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
                     updateStationList();
-                    baseApplication.migrateLocalPhotos();
                 }
                 progressBar.setVisibility(View.GONE);
             }
 
             @Override
-            public void onFailure(Call<List<Bahnhof>> call, Throwable t) {
+            public void onFailure(final Call<List<Station>> call, final Throwable t) {
                 Log.e(TAG, "Error refreshing stations", t);
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
@@ -435,14 +402,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 for (final String country : baseApplication.getCountryCodes()) {
                     rsapi.getStatistic(country).enqueue(new Callback<Statistic>() {
                         @Override
-                        public void onResponse(Call<Statistic> call, Response<Statistic> response) {
+                        public void onResponse(final Call<Statistic> call, final Response<Statistic> response) {
                             if (response.isSuccessful()) {
                                 checkForUpdates(response.body(), country);
                             }
                         }
 
                         @Override
-                        public void onFailure(Call<Statistic> call, Throwable t) {
+                        public void onFailure(final Call<Statistic> call, final Throwable t) {
                             Log.e(TAG, "Error loading country statistic", t);
                         }
                     });
@@ -456,12 +423,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         updateStationList();
     }
 
-    private void checkForUpdates(Statistic apiStat, String country) {
+    private void checkForUpdates(final Statistic apiStat, final String country) {
         if (apiStat == null) {
             return;
         }
 
-        Statistic dbStat = dbAdapter.getStatistic(country);
+        final Statistic dbStat = dbAdapter.getStatistic(country);
         Log.d(TAG, "DbStat: " + dbStat);
         if (apiStat.getTotal() != dbStat.getTotal() || apiStat.getWithPhoto() != dbStat.getWithPhoto() || apiStat.getWithoutPhoto() != dbStat.getWithoutPhoto()) {
             if (baseApplication.getUpdatePolicy() == UpdatePolicy.AUTOMATIC) {
@@ -474,14 +441,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setCancelable(true)
                         .setPositiveButton(R.string.button_ok_text, new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(final DialogInterface dialog, final int which) {
                                 runUpdateTasks();
                                 dialog.dismiss();
                             }
                         })
                         .setNegativeButton(R.string.button_cancel_text, new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(final DialogInterface dialog, final int which) {
                                 dialog.dismiss();
                             }
                         })
@@ -491,18 +458,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void bindToStatus() {
-        Intent intent = new Intent(this, NearbyNotificationService.class);
+        final Intent intent = new Intent(this, NearbyNotificationService.class);
         intent.setAction(NearbyNotificationService.STATUS_INTERFACE);
         if (!this.getApplicationContext().bindService(intent, new ServiceConnection() {
             @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
+            public void onServiceConnected(final ComponentName name, final IBinder service) {
                 Log.d(TAG, "Bound to status service of NearbyNotificationService");
                 statusBinder = (NearbyNotificationService.StatusBinder) service;
                 invalidateOptionsMenu();
             }
 
             @Override
-            public void onServiceDisconnected(ComponentName name) {
+            public void onServiceDisconnected(final ComponentName name) {
                 Log.d(TAG, "Unbound from status service of NearbyNotificationService");
                 statusBinder = null;
                 invalidateOptionsMenu();

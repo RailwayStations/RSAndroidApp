@@ -50,8 +50,8 @@ public class CountryAdapter extends CursorAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
-        holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
+        holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE)));
+        holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYNAME)));
 
         final String newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
@@ -88,8 +88,8 @@ public class CountryAdapter extends CursorAdapter {
         }
 
         CountryAdapter.ViewHolder holder = (CountryAdapter.ViewHolder) view.getTag();
-        holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE)));
-        holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYNAME)));
+        holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE)));
+        holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYNAME)));
 
         final String newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
@@ -102,7 +102,7 @@ public class CountryAdapter extends CursorAdapter {
             @Override
             public void onClick(View v) {
                 Cursor cursor = (Cursor) getItem(position);
-                String country = cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRYSHORTCODE));
+                String country = cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE));
                 if (checkCountry.isChecked()) {
                     selectedCountries.add(country);
                 } else {

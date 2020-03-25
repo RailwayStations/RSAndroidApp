@@ -7,19 +7,17 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="true"/>
+        android:required="false"/>
 
     <application
         android:name=".BaseApplication"
         android:allowBackup="true"
         android:fullBackupOnly="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:icon="${applicationLogo}"
         android:label="@string/app_name"
         android:backupAgent=".util.BahnhofsfotosBackupAgent"
@@ -98,8 +96,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".GalleryActivity"
-            android:label="@string/title_activity_gallery"
+            android:name=".OutboxActivity"
+            android:label="@string/title_activity_outbox"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -161,7 +159,7 @@
             android:exported="false"/>
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">

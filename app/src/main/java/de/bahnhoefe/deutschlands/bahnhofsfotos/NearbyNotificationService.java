@@ -13,16 +13,16 @@ import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.BahnhofsDbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Bahnhof;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManagerFactory;
 
@@ -39,14 +39,14 @@ public class NearbyNotificationService extends Service implements LocationListen
     private static final int ONGOING_NOTIFICATION_ID = 0xdeadbeef;
 
     private final String TAG = NearbyNotificationService.class.getSimpleName();
-    private List<Bahnhof> nearStations;
+    private List<Station> nearStations;
     private Location myPos = new Location((String)null);
 
     private LocationManager locationManager;
 
     private NearbyBahnhofNotificationManager notifiedStationManager;
     private BaseApplication baseApplication = null;
-    private BahnhofsDbAdapter bahnhofsDbAdapter = null;
+    private DbAdapter dbAdapter = null;
 
     /**
      * The intent action to use to bind to this service's status interface.
@@ -65,7 +65,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         nearStations = new ArrayList<>(0); // no markers until we know where we are
         notifiedStationManager = null;
         baseApplication = (BaseApplication)getApplication();
-        bahnhofsDbAdapter = baseApplication.getDbAdapter();
+        dbAdapter = baseApplication.getDbAdapter();
     }
 
     @Override
@@ -172,11 +172,11 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     private void checkNearestStation() {
         double minDist = 3e3;
-        Bahnhof nearest = null;
-        for (Bahnhof bahnhof : nearStations) {
-            double dist = calcDistance(bahnhof);
+        Station nearest = null;
+        for (Station station : nearStations) {
+            double dist = calcDistance(station);
             if (dist < minDist) {
-                nearest = bahnhof;
+                nearest = station;
                 minDist = dist;
             }
         }
@@ -196,7 +196,7 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @param nearest  the station nearest to the current position
      * @param distance the distance of the station to the current position
      */
-    private void notifyNearest(Bahnhof nearest, double distance) {
+    private void notifyNearest(Station nearest, double distance) {
         if (notifiedStationManager != null) {
             if (notifiedStationManager.getStation().equals(nearest)) {
                 return; // Notification für diesen Bahnhof schon angezeigt
@@ -205,21 +205,21 @@ public class NearbyNotificationService extends Service implements LocationListen
                 notifiedStationManager = null;
             }
         }
-        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance, bahnhofsDbAdapter.fetchCountriesWithProviderApps(baseApplication.getCountryCodes()));
+        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance, dbAdapter.fetchCountriesWithProviderApps(baseApplication.getCountryCodes()));
         notifiedStationManager.notifyUser();
     }
 
     /**
      * Calculate the distance between the given station and our current position (myLatitude, myLongitude)
      *
-     * @param bahnhof the station to calculate the distance to
+     * @param station the station to calculate the distance to
      * @return the distance
      */
-    private double calcDistance(Bahnhof bahnhof) {
+    private double calcDistance(Station station) {
         // Wir nähern für glatte Oberflächen, denn wir sind an Abständen kleiner 1km interessiert
-        double lateralDiff = myPos.getLatitude() - bahnhof.getLat();
+        double lateralDiff = myPos.getLatitude() - station.getLat();
         double longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
-                (myPos.getLongitude() - bahnhof.getLon()) * Math.cos(myPos.getLatitude() / 180 * Math.PI) :
+                (myPos.getLongitude() - station.getLon()) * Math.cos(myPos.getLatitude() / 180 * Math.PI) :
                 0.0d; // at the poles, longitude doesn't matter
         // simple Pythagoras now.
         return Math.sqrt(Math.pow(lateralDiff, 2.0d) + Math.pow(longDiff, 2.0d)) * EARTH_CIRCUMFERENCE / 360.0d;
@@ -322,7 +322,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     private void readStations() {
         try {
             Log.i(TAG, "Lade nahegelegene Bahnhoefe");
-            nearStations = bahnhofsDbAdapter.getBahnhoefeByLatLngRectangle(myPos.getLatitude(), myPos.getLongitude(), baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            nearStations = dbAdapter.getStationByLatLngRectangle(myPos.getLatitude(), myPos.getLongitude(), baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
         } catch (Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         }

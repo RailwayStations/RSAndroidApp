@@ -15,10 +15,10 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 /**
  * Adapter for ListView of stations, which don't have a photo
  */
-public class CustomAdapter extends CursorAdapter {
+public class StationListAdapter extends CursorAdapter {
     private final LayoutInflater mInflater;
 
-    public CustomAdapter(Context context, Cursor c, int flags) {
+    public StationListAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -26,9 +26,9 @@ public class CustomAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = mInflater.inflate(R.layout.item, parent, false);
+        View view = mInflater.inflate(R.layout.item_station, parent, false);
         ViewHolder holder = new ViewHolder();
-        holder.txtId = (TextView) view.findViewById(R.id.txtId);
+        holder.txtId = (TextView) view.findViewById(R.id.txtState);
         holder.txtStationName = (TextView) view.findViewById(R.id.txtStationName);
         holder.hasPhoto = (ImageView) view.findViewById(R.id.hasPhoto);
         view.setTag(holder);
@@ -45,9 +45,9 @@ public class CustomAdapter extends CursorAdapter {
         }
 
         ViewHolder holder = (ViewHolder) view.getTag();
-        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_COUNTRY)) + ": " + cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_ID)));
-        holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_TITLE)));
-        holder.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.DB_JSON_CONSTANTS.KEY_PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
+        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.COUNTRY)) + ": " + cursor.getString(cursor.getColumnIndex(Constants.STATIONS.ID)));
+        holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.TITLE)));
+        holder.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
     }
 
     static class ViewHolder {
