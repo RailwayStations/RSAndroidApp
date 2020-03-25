@@ -308,4 +308,5 @@
             ]]></string>
     <string name="special_license">This country requires the special license:\n%s</string>
     <string name="special_license_confirm">Please confirm the special license for this country</string>
+    <string name="nav_delete_processed_uploads">Delete processed uploads</string>
 </resources>

@@ -314,4 +314,5 @@
             ]]></string>
     <string name="special_license">Für dieses Land ist die abweichende Lizenz nötig:\n%s</string>
     <string name="special_license_confirm">Bitte die abweichende Lizenz für dieses Land bestätigen.</string>
+    <string name="nav_delete_processed_uploads">Lösche verarbeitetet Uploads</string>
 </resources>

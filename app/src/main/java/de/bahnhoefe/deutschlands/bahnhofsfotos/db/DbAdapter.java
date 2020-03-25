@@ -313,7 +313,7 @@ public class DbAdapter {
     public Statistic getStatistic(final String country) {
         final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        final Cursor cursor = db.rawQuery("SELECT count(*), count(" + Constants.STATIONS.PHOTO_URL + "), count(distinct(" + Constants.STATIONS.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE country = ?", new String[]{country});
+        final Cursor cursor = db.rawQuery("SELECT COUNT(*), COUNT(" + Constants.STATIONS.PHOTO_URL + "), COUNT(DISTINCT(" + Constants.STATIONS.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.COUNTRY + " = ?", new String[]{country});
         if (!cursor.moveToNext()) {
             return null;
         }
@@ -333,7 +333,7 @@ public class DbAdapter {
     }
 
     public int countBahnhoefe() {
-        final Cursor query = db.rawQuery("SELECT count(*) FROM " + DATABASE_TABLE_STATIONS, null);
+        final Cursor query = db.rawQuery("SELECT COUNT(*) FROM " + DATABASE_TABLE_STATIONS, null);
         if (query != null && query.moveToFirst()) {
             return query.getInt(0);
         }
@@ -364,7 +364,7 @@ public class DbAdapter {
     }
 
     public Upload getPendingUploadForStation(final Station station) {
-        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + "=? and " + Constants.UPLOADS.STATION_ID + "=? and " + getPendingUploadWhereClause(),
+        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + "=? AND " + Constants.UPLOADS.STATION_ID + "=? AND " + getPendingUploadWhereClause(),
                 new String[]{ station.getCountry(), station.getId()}, null, null, Constants.UPLOADS.CREATED_AT + " DESC");
         if (cursor != null && cursor.moveToFirst()) {
             final Upload upload = createUploadFromCursor(cursor);
@@ -376,7 +376,7 @@ public class DbAdapter {
     }
 
     public Upload getPendingUploadForCoordinates(final double lat, final double lon) {
-        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.LAT + "=? and " + Constants.UPLOADS.LON + "=? and " + getPendingUploadWhereClause(),
+        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.LAT + "=? AND " + Constants.UPLOADS.LON + "=? AND " + getPendingUploadWhereClause(),
                 new String[]{ String.valueOf(lat), String.valueOf(lon)}, null, null, Constants.UPLOADS.CREATED_AT + " DESC");
         if (cursor != null && cursor.moveToFirst()) {
             final Upload upload = createUploadFromCursor(cursor);
@@ -416,11 +416,10 @@ public class DbAdapter {
                         + DATABASE_TABLE_STATIONS + "." + Constants.STATIONS.COUNTRY
                         + " = "
                         + DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.COUNTRY
-                        + " and "
+                        + " AND "
                         + DATABASE_TABLE_STATIONS + "." + Constants.STATIONS.ID
                         + " = "
                         + DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.STATION_ID);
-
         return queryBuilder.query(db, new String[]{
                 DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.ID + " AS " + Constants.CURSOR_ADAPTER_ID,
                 DATABASE_TABLE_UPLOADS + "." + Constants.UPLOADS.REMOTE_ID,
@@ -627,7 +626,7 @@ public class DbAdapter {
     }
 
     public Station getStationByKey(final String country, final String id) {
-        final Cursor cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? and " + Constants.STATIONS.ID + "=?",
+        final Cursor cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? AND " + Constants.STATIONS.ID + "=?",
                 new String[]{ country, id}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             final Station station = createStationFromCursor(cursor);
@@ -641,7 +640,7 @@ public class DbAdapter {
     public Station getStationForUpload(final Upload upload) {
         Cursor cursor = null;
         if (upload.isUploadForExistingStation()) {
-            cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? and " + Constants.STATIONS.ID + "=?",
+            cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? AND " + Constants.STATIONS.ID + "=?",
                     new String[]{upload.getCountry(), upload.getStationId()}, null, null, null);
         }
         if (cursor != null && cursor.moveToFirst()) {

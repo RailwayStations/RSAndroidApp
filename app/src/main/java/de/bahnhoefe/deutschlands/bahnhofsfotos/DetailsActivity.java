@@ -746,6 +746,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show();
                 return;
             }
+            alertDialog.dismiss();
 
             final ProgressDialog progress = new ProgressDialog(DetailsActivity.this);
             progress.setMessage(getResources().getString(R.string.send));
@@ -755,6 +756,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             String stationTitle = etBahnhofName.getText().toString();
             String comment = etComment.getText().toString();
+            upload.setTitle(stationTitle);
+            upload.setComment(comment);
 
             try {
                 stationTitle = URLEncoder.encode(etBahnhofName.getText().toString(), "UTF-8");
@@ -762,8 +765,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             } catch (final UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
-            upload.setTitle(stationTitle);
-            upload.setComment(comment);
             baseApplication.getDbAdapter().updateUpload(upload);
 
             final File mediaFile = getStoredMediaFile(upload);

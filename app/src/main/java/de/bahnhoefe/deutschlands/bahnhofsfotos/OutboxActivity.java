@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -79,7 +81,6 @@ public class OutboxActivity extends AppCompatActivity {
                 } else {
                     Log.w(TAG, "Upload states not processable");
                 }
-                deleteCompletedUploads();
             }
 
             @Override
@@ -88,9 +89,24 @@ public class OutboxActivity extends AppCompatActivity {
                 Toast.makeText(OutboxActivity.this,
                         R.string.error_retrieving_upload_state,
                         Toast.LENGTH_LONG).show();
-                deleteCompletedUploads();
             }
         });
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(final Menu menu) {
+        menu.clear();
+        getMenuInflater().inflate(R.menu.outbox, menu);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        if (item.getItemId() == R.id.nav_delete_processed_uploads) {
+            deleteCompletedUploads();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void deleteCompletedUploads() {
