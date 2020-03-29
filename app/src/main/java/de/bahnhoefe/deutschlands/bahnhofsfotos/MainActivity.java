@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void updateStationList() {
         try {
-            final int stationCount = dbAdapter.countBahnhoefe();
+            final int stationCount = dbAdapter.countBahnhoefe(baseApplication.getCountryCodes());
             Cursor cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
             if (stationListAdapter != null) {
                 stationListAdapter.swapCursor(cursor);

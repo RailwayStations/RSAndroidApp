@@ -332,8 +332,8 @@ public class DbAdapter {
         return photographers.toArray(new String[0]);
     }
 
-    public int countBahnhoefe() {
-        final Cursor query = db.rawQuery("SELECT COUNT(*) FROM " + DATABASE_TABLE_STATIONS, null);
+    public int countBahnhoefe(final Set<String> countryCodes) {
+        final Cursor query = db.rawQuery("SELECT COUNT(*) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes), null);
         if (query != null && query.moveToFirst()) {
             return query.getInt(0);
         }
@@ -454,7 +454,7 @@ public class DbAdapter {
         final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null,
                 Constants.UPLOADS.REMOTE_ID + " IS NOT NULL AND " + getPendingUploadWhereClause(),
                 null,null, null, null);
-        List<Upload> uploads = new ArrayList<>();
+        final List<Upload> uploads = new ArrayList<>();
         while (cursor.moveToNext()) {
             final Upload upload = createUploadFromCursor(cursor);
             uploads.add(upload);
@@ -467,7 +467,7 @@ public class DbAdapter {
     public void updateUploadStates(final List<InboxStateQuery> stateQueries) {
         db.beginTransaction();
         try {
-            for (InboxStateQuery state : stateQueries) {
+            for (final InboxStateQuery state : stateQueries) {
                 final ContentValues values = new ContentValues();
                 values.put(Constants.UPLOADS.UPLOAD_STATE, state.getState().name());
                 values.put(Constants.UPLOADS.REJECTED_REASON, state.getRejectedReason());
@@ -483,7 +483,7 @@ public class DbAdapter {
         final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null,
                 Constants.UPLOADS.REMOTE_ID + " IS NOT NULL AND " + getCompletedUploadWhereClause(),
                 null,null, null, null);
-        List<Upload> uploads = new ArrayList<>();
+        final List<Upload> uploads = new ArrayList<>();
         while (cursor.moveToNext()) {
             final Upload upload = createUploadFromCursor(cursor);
             uploads.add(upload);
