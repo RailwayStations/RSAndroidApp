@@ -7,7 +7,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
+
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.ContextThemeWrapper;
 import android.widget.TextView;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig;
@@ -18,22 +21,27 @@ public class AppInfoFragment extends DialogFragment {
 
     @Override
     @NonNull
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(final Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialogCustom));
 
-        TextView textView = new TextView(getContext());
+        final TextView textView = new TextView(getContext());
+        textView.setLinksClickable(true);
         textView.setTextSize((float) 18);
         textView.setPadding(50, 50, 50, 50);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
-        textView.setText(getResources().getString(R.string.app_info_text, BuildConfig.VERSION_NAME));
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            textView.setText(Html.fromHtml(getString(R.string.app_info_text, BuildConfig.VERSION_NAME),Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            textView.setText(Html.fromHtml(getString(R.string.app_info_text, BuildConfig.VERSION_NAME)));
+        }
         textView.setLinkTextColor(Color.parseColor("#c71c4d"));
 
         builder.setIcon(BuildConfig.DEBUG ? R.mipmap.ic_launcher_debug : R.mipmap.ic_launcher)
                 .setTitle(R.string.app_info_title)
                 //.setMessage(R.string.app_info_text)
                 .setPositiveButton(R.string.app_info_ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+                    public void onClick(final DialogInterface dialog, final int id) {
                         // it is okay, that the dialog closes if clicked the ok-button
                         // no more action necessary
                     }
@@ -43,7 +51,7 @@ public class AppInfoFragment extends DialogFragment {
         builder.setView(textView);
 
         // Creates the AlertDialog object and return it
-        AlertDialog appInfoDialog = builder.create();
+        final AlertDialog appInfoDialog = builder.create();
         return appInfoDialog;
     }
 

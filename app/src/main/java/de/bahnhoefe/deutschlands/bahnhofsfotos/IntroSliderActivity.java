@@ -39,17 +39,12 @@ public class IntroSliderActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_intro_slider);
 
-        viewPager = (ViewPager) findViewById(R.id.view_pager);
-        dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
-        skip = (Button) findViewById(R.id.btn_slider_skip);
-        next = (Button) findViewById(R.id.btn_slider_next);
+        viewPager = findViewById(R.id.view_pager);
+        dotsLayout = findViewById(R.id.layoutDots);
+        skip = findViewById(R.id.btn_slider_skip);
+        next = findViewById(R.id.btn_slider_next);
 
-        layouts = new int[]{R.layout.intro_slider1, R.layout.intro_slider2,
-                R.layout.intro_slider3, R.layout.intro_slider4,
-                R.layout.intro_slider5, R.layout.intro_slider6,
-                R.layout.intro_slider7, R.layout.intro_slider8,
-                R.layout.intro_slider9
-        };
+        layouts = new int[]{R.layout.intro_slider1, R.layout.intro_slider2};
 
         addBottomDots(0);
         changeStatusBarColor();
@@ -57,27 +52,21 @@ public class IntroSliderActivity extends AppCompatActivity {
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.addOnPageChangeListener(viewListener);
 
-        skip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                baseApplication.setFirstAppStart(true);
+        skip.setOnClickListener(v -> {
+            baseApplication.setFirstAppStart(true);
+            Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        next.setOnClickListener(v -> {
+            int current = getItem(+1);
+            if (current < layouts.length) {
+                viewPager.setCurrentItem(current);
+            } else {
                 Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
-            }
-        });
-
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int current = getItem(+1);
-                if (current < layouts.length) {
-                    viewPager.setCurrentItem(current);
-                } else {
-                    Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
             }
         });
     }

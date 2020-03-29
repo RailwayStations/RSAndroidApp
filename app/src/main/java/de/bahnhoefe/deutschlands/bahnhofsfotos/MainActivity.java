@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -40,8 +39,8 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
@@ -55,22 +54,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final String DIALOG_TAG = "App Info Dialog";
     private static final long CHECK_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes
-    private static final int REQUEST_FILE_PERMISSION = 1;
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private BaseApplication baseApplication;
     private DbAdapter dbAdapter;
-    private NavigationView navigationView;
     private MenuItem photoFilterMenuItem;
 
     private StationListAdapter stationListAdapter;
-    private Cursor cursor;
     private String searchString;
     private ProgressBar progressBar;
 
     private NearbyNotificationService.StatusBinder statusBinder;
     private RSAPI rsapi;
-
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -99,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         progressBar = findViewById(R.id.progressBar);
@@ -126,22 +121,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         updateStationList();
         bindToStatus();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
-        if (requestCode == REQUEST_FILE_PERMISSION) {
-            Log.i(TAG, "Received response for file permission request.");
-
-            // Check if the only required permission has been granted
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Write permission has been granted, preview can be displayed
-                onGalleryNavItem();
-            } else {
-                //Permission not granted
-                Toast.makeText(MainActivity.this, R.string.grant_external_storage, Toast.LENGTH_LONG).show();
-            }
-        }
     }
 
     private void onGalleryNavItem() {
@@ -202,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void updateStationList() {
         try {
             final int stationCount = dbAdapter.countBahnhoefe();
-            cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
+            Cursor cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
             if (stationListAdapter != null) {
                 stationListAdapter.swapCursor(cursor);
             } else {

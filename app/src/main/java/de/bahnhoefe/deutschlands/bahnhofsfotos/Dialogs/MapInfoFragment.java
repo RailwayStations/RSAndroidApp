@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import android.text.method.LinkMovementMethod;
+import android.view.ContextThemeWrapper;
 import android.widget.TextView;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
@@ -17,11 +18,11 @@ public class MapInfoFragment extends DialogFragment {
 
     @Override
     @NonNull
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(final Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialogCustom));
 
-        TextView textView = new TextView(getContext());
+        final TextView textView = new TextView(getContext());
         textView.setTextSize((float) 18);
         textView.setPadding(50, 50, 50, 50);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -31,7 +32,7 @@ public class MapInfoFragment extends DialogFragment {
         builder.setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.map_info_title)
                 .setPositiveButton(R.string.app_info_ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+                    public void onClick(final DialogInterface dialog, final int id) {
                     }
                 });
 
@@ -39,7 +40,7 @@ public class MapInfoFragment extends DialogFragment {
         builder.setView(textView);
 
         // Creates the AlertDialog object and return it
-        AlertDialog mapInfoDialog = builder.create();
+        final AlertDialog mapInfoDialog = builder.create();
         return mapInfoDialog;
     }
 

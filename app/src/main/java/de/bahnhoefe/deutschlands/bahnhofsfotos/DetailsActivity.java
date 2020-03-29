@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.net.Uri;
@@ -720,6 +721,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             panorama.setText(Html.fromHtml(getString(R.string.panorama_info)));
         }
         panorama.setMovementMethod(LinkMovementMethod.getInstance());
+        panorama.setLinkTextColor(Color.parseColor("#c71c4d"));
+
 
         final CheckBox cbSpecialLicense = dialogView.findViewById(R.id.cb_special_license);
         String overrideLicense = null;
