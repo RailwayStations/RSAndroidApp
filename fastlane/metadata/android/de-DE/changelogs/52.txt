@@ -2,5 +2,6 @@
 - Anzeige des Filterergebnisses
 - ProgressBar modernisiert
 - User-Agent mit version der App
-- Umstrukturierung von "Deine Bahnhofsfotos" in "In Bearbeitung"
-- Show upload-status on Details page
+- Umstrukturierung von "Deine Bahnhofsfotos" in "Ausgangskorb"
+- Uploadstatus wird auf der Detailseite angezeigt
+- Überarbeitung der Uploadfunktion inklusive "Problem melden"
