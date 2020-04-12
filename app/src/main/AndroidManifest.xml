@@ -110,6 +110,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".InboxActivity"
+            android:label="@string/title_activity_inbox"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.InboxActivity"/>
+        </activity>
+        <activity
             android:name=".RailwayStationsActivity"
             android:label="@string/railway_stations_activity"
             android:parentActivityName=".MainActivity">

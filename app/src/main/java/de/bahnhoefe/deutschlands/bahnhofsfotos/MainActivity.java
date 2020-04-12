@@ -123,11 +123,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bindToStatus();
     }
 
-    private void onGalleryNavItem() {
-        final Intent intent = new Intent(MainActivity.this, OutboxActivity.class);
-        startActivity(intent);
-    }
-
     @Override
     public void onBackPressed() {
         final DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -301,8 +296,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_highscore) {
             final Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_your_own_station_photos) {
-            onGalleryNavItem();
+        } else if (id == R.id.nav_outbox) {
+            final Intent intent = new Intent(this, OutboxActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_inbox) {
+            final Intent intent = new Intent(this, InboxActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_stations_map) {
             final Intent intent = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(intent);

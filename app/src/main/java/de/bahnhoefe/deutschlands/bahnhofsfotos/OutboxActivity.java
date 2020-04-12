@@ -22,7 +22,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.OutboxAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.OutboxAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

@@ -28,6 +28,7 @@
     <string name="navMethod">Zeige den Weg…</string>
 
     <string name="title_activity_outbox">Ausgangskorb</string>
+    <string name="title_activity_inbox">Eingangskorb</string>
     <string name="activitynotfound">Du hast keine Navigations-App auf Deinem Smartphone</string>
     <string name="search_hint">Bahnhof suchen</string>
     <string name="app_info_title">Über die App</string>
@@ -191,6 +192,7 @@
     <string name="new_registration">Neues Konto angelegt, ein Initialpasswort wird Dir per Email zugeschickt. Bitte prüfe auch den SPAM Ordner.</string>
     <string name="filter_result">%d von %d Bahnhöfen selektiert</string>
     <string name="menu_title_outbox">Ausgangskorb</string>
+    <string name="menu_title_inbox">Eingangskorb</string>
     <string name="error_retrieving_upload_state">Fehler beim Lesen des Bearbeitungsstatus</string>
     <string name="upload_state">Status: %s</string>
     <string name="upload_state_unknown">unbekannt</string>
@@ -231,4 +233,6 @@
     <string name="special_license">Für dieses Land ist die abweichende Lizenz nötig:\n%s</string>
     <string name="special_license_confirm">Bitte die abweichende Lizenz für dieses Land bestätigen.</string>
     <string name="nav_delete_processed_uploads">Lösche verarbeitetet Uploads</string>
+    <string name="error_loading_inbox">Fehler beim Laden des Eingangskorbes</string>
+    <string name="missing_station">Fehlender Bahnhof</string>
 </resources>

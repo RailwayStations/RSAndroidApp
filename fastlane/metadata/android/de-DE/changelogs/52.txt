@@ -5,3 +5,4 @@
 - Umstrukturierung von "Deine Bahnhofsfotos" in "Ausgangskorb"
 - Uploadstatus wird auf der Detailseite angezeigt
 - Überarbeitung der Uploadfunktion inklusive "Problem melden"
+- Neue Funktion "Eingangskorb", mit der Liste der Fotos in Bearbeitung

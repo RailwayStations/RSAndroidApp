@@ -22,16 +22,16 @@ public class CountryAdapter extends CursorAdapter {
     private final String TAG = getClass().getSimpleName();
     private Set<String> selectedCountries = null;
 
-    public CountryAdapter(Context context, Cursor c, int flags) {
+    public CountryAdapter(final Context context, final Cursor c, final int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        BaseApplication baseApplication = BaseApplication.getInstance();
+        final BaseApplication baseApplication = BaseApplication.getInstance();
         selectedCountries = new HashSet<>(baseApplication.getCountryCodes());
     }
 
     // new refactored after https://www.youtube.com/watch?v=wDBM6wVEO70&feature=youtu.be&t=7m
-    public View getView(int selectedPosition, View convertView, ViewGroup parent, Cursor cursor) {
-        ViewHolder holder;
+    public View getView(final int selectedPosition, View convertView, final ViewGroup parent, final Cursor cursor) {
+        final ViewHolder holder;
 
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.item_country, parent, false);
@@ -42,9 +42,9 @@ public class CountryAdapter extends CursorAdapter {
                 convertView.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
             }
             holder = new ViewHolder();
-            holder.checkCountry = (CheckBox) convertView.findViewById(R.id.checkCountry);
-            holder.txtCountryShortCode = (TextView) convertView.findViewById(R.id.txtCountryShortCode);
-            holder.txtCountryName = (TextView) convertView.findViewById(R.id.txtCountryName);
+            holder.checkCountry = convertView.findViewById(R.id.checkCountry);
+            holder.txtCountryShortCode = convertView.findViewById(R.id.txtCountryShortCode);
+            holder.txtCountryName = convertView.findViewById(R.id.txtCountryName);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -67,19 +67,19 @@ public class CountryAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = mInflater.inflate(R.layout.item_country, parent, false);
-        CountryAdapter.ViewHolder holder = new CountryAdapter.ViewHolder();
-        holder.checkCountry = (CheckBox) view.findViewById(R.id.checkCountry);
-        holder.txtCountryShortCode = (TextView) view.findViewById(R.id.txtCountryShortCode);
-        holder.txtCountryName = (TextView) view.findViewById(R.id.txtCountryName);
+    public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
+        final View view = mInflater.inflate(R.layout.item_country, parent, false);
+        final CountryAdapter.ViewHolder holder = new CountryAdapter.ViewHolder();
+        holder.checkCountry = view.findViewById(R.id.checkCountry);
+        holder.txtCountryShortCode = view.findViewById(R.id.txtCountryShortCode);
+        holder.txtCountryName = view.findViewById(R.id.txtCountryName);
         view.setTag(holder);
         return view;
     }
 
     // wird nicht benutzt, ersetzt durch getView()
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(final View view, final Context context, final Cursor cursor) {
         //If you want to have zebra lines color effect uncomment below code
         if (cursor.getPosition() % 2 == 1) {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor);
@@ -87,7 +87,7 @@ public class CountryAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        CountryAdapter.ViewHolder holder = (CountryAdapter.ViewHolder) view.getTag();
+        final CountryAdapter.ViewHolder holder = (CountryAdapter.ViewHolder) view.getTag();
         holder.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE)));
         holder.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYNAME)));
 
@@ -100,9 +100,9 @@ public class CountryAdapter extends CursorAdapter {
     private View.OnClickListener onStateChangedListener(final CheckBox checkCountry, final int position) {
         return new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Cursor cursor = (Cursor) getItem(position);
-                String country = cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE));
+            public void onClick(final View v) {
+                final Cursor cursor = (Cursor) getItem(position);
+                final String country = cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE));
                 if (checkCountry.isChecked()) {
                     selectedCountries.add(country);
                 } else {

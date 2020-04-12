@@ -15,17 +15,21 @@
             android:icon="@drawable/ic_cached_gray_24px"
             android:title="@string/menu_title_update_photos" />
         <item
+            android:id="@+id/nav_stations_map"
+            android:icon="@drawable/ic_map_gray_24px"
+            android:title="@string/menu_title_stations_map" />
+        <item
             android:id="@+id/nav_highscore"
             android:icon="@drawable/ic_trending_up_gray_24px"
             android:title="@string/menu_title_highscore" />
         <item
-            android:id="@+id/nav_your_own_station_photos"
+            android:id="@+id/nav_outbox"
             android:icon="@drawable/ic_outbox_gray_24px"
             android:title="@string/menu_title_outbox" />
         <item
-            android:id="@+id/nav_stations_map"
-            android:icon="@drawable/ic_map_gray_24px"
-            android:title="@string/menu_title_stations_map" />
+            android:id="@+id/nav_inbox"
+            android:icon="@drawable/ic_inbox_gray_24px"
+            android:title="@string/menu_title_inbox" />
     </group>
 
     <item android:title="@string/information">

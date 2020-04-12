@@ -13,21 +13,21 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 /**
- * Adapter for ListView of stations, which don't have a photo
+ * Adapter for ListView of stations
  */
 public class StationListAdapter extends CursorAdapter {
     private final LayoutInflater mInflater;
 
-    public StationListAdapter(Context context, Cursor c, int flags) {
+    public StationListAdapter(final Context context, final Cursor c, final int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = mInflater.inflate(R.layout.item_station, parent, false);
-        ViewHolder holder = new ViewHolder();
+    public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
+        final View view = mInflater.inflate(R.layout.item_station, parent, false);
+        final ViewHolder holder = new ViewHolder();
         holder.txtId = (TextView) view.findViewById(R.id.txtState);
         holder.txtStationName = (TextView) view.findViewById(R.id.txtStationName);
         holder.hasPhoto = (ImageView) view.findViewById(R.id.hasPhoto);
@@ -36,7 +36,7 @@ public class StationListAdapter extends CursorAdapter {
     }
 
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(final View view, final Context context, final Cursor cursor) {
         //If you want to have zebra lines color effect uncomment below code
         if (cursor.getPosition() % 2 == 1) {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor);
@@ -44,8 +44,8 @@ public class StationListAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        ViewHolder holder = (ViewHolder) view.getTag();
-        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.COUNTRY)) + ": " + cursor.getString(cursor.getColumnIndex(Constants.STATIONS.ID)));
+        final ViewHolder holder = (ViewHolder) view.getTag();
+        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.COUNTRY)).concat(": ").concat(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.ID))));
         holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.TITLE)));
         holder.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
     }

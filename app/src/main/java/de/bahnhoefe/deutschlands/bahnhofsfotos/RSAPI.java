@@ -5,6 +5,7 @@ import android.util.Base64;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
@@ -83,6 +84,9 @@ public interface RSAPI {
     })
     @POST("/reportProblem")
     Call<InboxResponse> reportProblem(@Header("Authorization") String authorization, @Body ProblemReport problemReport);
+
+    @GET("/publicInbox")
+    Call<List<PublicInbox>> getPublicInbox();
 
     class Helper {
         static String getAuthorizationHeader(String email, String password) {

@@ -5,3 +5,4 @@
 - Refactored "Your station photos" into "Outbox"
 - Show upload-status on Details page
 - Rework of the uplaod function inclusive problem report
+- New function "Inbox", which lists the photo uploads under review
