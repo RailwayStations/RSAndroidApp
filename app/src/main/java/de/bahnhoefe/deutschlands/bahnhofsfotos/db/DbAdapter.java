@@ -523,19 +523,21 @@ public class DbAdapter {
                 db.execSQL(DROP_STATEMENT_COUNTRIES);
                 db.execSQL(DROP_STATEMENT_PROVIDER_APPS);
                 onCreate(db);
+            } else {
+                // from now on we need to preserve user data and perform schema changes selectively
 
-            // from now on we need to preserve user data and perform schema changes selectively
-            } else if (oldVersion < 14) {
-                db.execSQL(CREATE_STATEMENT_UPLOADS);
-            }
+                if (oldVersion < 14) {
+                    db.execSQL(CREATE_STATEMENT_UPLOADS);
+                }
 
-            if (oldVersion < 15) {
-                db.execSQL(DROP_STATEMENT_STATIONS_IDX);
-                db.execSQL(CREATE_STATEMENT_STATIONS_IDX);
-            }
+                if (oldVersion < 15) {
+                    db.execSQL(DROP_STATEMENT_STATIONS_IDX);
+                    db.execSQL(CREATE_STATEMENT_STATIONS_IDX);
+                }
 
-            if (oldVersion < 16) {
-                db.execSQL("ALTER TABLE " + DATABASE_TABLE_COUNTRIES + " ADD COLUMN " + Constants.COUNTRIES.OVERRIDE_LICENSE + " TEXT");
+                if (oldVersion < 16) {
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_COUNTRIES + " ADD COLUMN " + Constants.COUNTRIES.OVERRIDE_LICENSE + " TEXT");
+                }
             }
 
             db.setTransactionSuccessful();

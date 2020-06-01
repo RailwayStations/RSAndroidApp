@@ -798,7 +798,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 @Override
                 public void onFailure(final Call<InboxResponse> call, final Throwable t) {
                     Log.e(TAG, "Error uploading photo", t);
-                    progress.dismiss();
+                    if (progress.isShowing()) {
+                        progress.dismiss();
+                    }
                     new SimpleDialogs().confirm(DetailsActivity.this,
                             String.format(getText(R.string.upload_failed).toString(), t.getMessage()));
                 }
@@ -811,13 +813,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final File file = getStoredMediaFile(upload);
         if (file != null && file.canRead()) {
             sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
-                    "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", file));
+                    BuildConfig.APPLICATION_ID + ".fileprovider", file));
         } else if (publicBitmap != null) {
             final File newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
             try {
                 saveScaledBitmap(newFile, publicBitmap);
                 sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
-                        "de.bahnhoefe.deutschlands.bahnhofsfotos.fileprovider", newFile));
+                        BuildConfig.APPLICATION_ID + ".fileprovider", newFile));
             } catch (final FileNotFoundException e) {
                 Log.e(TAG, "Error saving cached bitmap", e);
             }

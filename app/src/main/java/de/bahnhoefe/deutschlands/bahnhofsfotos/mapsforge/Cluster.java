@@ -39,7 +39,7 @@ public class Cluster<T extends GeoItem> {
     /**
      * List of GeoItem within cluster
      */
-    private List<T> items = Collections.synchronizedList(new ArrayList<T>());
+    private final List<T> items = Collections.synchronizedList(new ArrayList<T>());
     /**
      * ClusterMarker object
      */
@@ -48,7 +48,7 @@ public class Cluster<T extends GeoItem> {
     /**
      * @param clusterManager ClusterManager object.
      */
-    public Cluster(ClusterManager<T> clusterManager, T item) {
+    public Cluster(final ClusterManager<T> clusterManager, final T item) {
         this.clusterManager = clusterManager;
         this.clusterMarker = new ClusterMarker<T>(this);
         addItem(item);
@@ -63,7 +63,7 @@ public class Cluster<T extends GeoItem> {
             return getItems().get(0).getTitle();
         }
         int photoCount = 0;
-        for (T item: items) {
+        for (final T item: items) {
             if (item.hasPhoto()) {
                 photoCount++;
             }
@@ -76,11 +76,10 @@ public class Cluster<T extends GeoItem> {
      *
      * @param item GeoItem object to be added.
      */
-    public synchronized void addItem(T item) {
+    public synchronized void addItem(final T item) {
         synchronized (items) {
             items.add(item);
         }
-//        clusterMarker.setMarkerBitmap();
         if (center == null) {
             center = item.getLatLong();
         } else {
@@ -88,7 +87,7 @@ public class Cluster<T extends GeoItem> {
             double lat = 0, lon = 0;
             int n = 0;
             synchronized (items) {
-                for (T object : items) {
+                for (final T object : items) {
                     if (object == null) {
                         throw new NullPointerException("object == null");
                     }
@@ -129,7 +128,7 @@ public class Cluster<T extends GeoItem> {
      */
     public void clear() {
         if (clusterMarker != null) {
-            Layers mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
+            final Layers mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
             if (mapOverlays.contains(clusterMarker)) {
                 mapOverlays.remove(clusterMarker);
             }
@@ -145,8 +144,10 @@ public class Cluster<T extends GeoItem> {
      * add the ClusterMarker to the Layers if is within Viewport, otherwise remove.
      */
     public void redraw() {
-        Layers mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
-        if (clusterMarker != null && center != null && !clusterManager.getCurBounds().contains(center)
+        final Layers mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
+        if (clusterMarker != null && center != null
+                && clusterManager.getCurBounds() != null
+                && !clusterManager.getCurBounds().contains(center)
                 && mapOverlays.contains(clusterMarker)) {
             mapOverlays.remove(clusterMarker);
             return;
