@@ -684,15 +684,15 @@ public class DbAdapter {
         return countries;
     }
 
-    public List<Station> getAllStations(final PhotoFilter photoFilter, final String nickname) {
+    public List<Station> getAllStations(final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes) {
         final List<Station> stationList = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS;
+        String selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes);
         if (photoFilter == PhotoFilter.NICKNAME) {
-            selectQuery += " WHERE " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
+            selectQuery += " AND " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
         } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
-            selectQuery += " WHERE " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
         }
-        Log.d(TAG, selectQuery.toString());
+        Log.d(TAG, selectQuery);
 
         final Cursor cursor;
         if (photoFilter == PhotoFilter.NICKNAME) {

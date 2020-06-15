@@ -592,7 +592,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private void readBahnhoefe() {
         try {
-            stationList = dbAdapter.getAllStations(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            stationList = dbAdapter.getAllStations(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
         } catch (final Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
