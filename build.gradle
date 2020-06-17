@@ -15,7 +15,7 @@ buildscript {
 }
 
 ext.buildToolsVersion = "28.0.3"
-ext.minSdkVersion = 19
+ext.minSdkVersion = 21
 
 allprojects {
     repositories {
