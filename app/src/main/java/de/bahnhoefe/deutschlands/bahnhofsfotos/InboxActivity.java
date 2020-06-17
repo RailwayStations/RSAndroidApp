@@ -3,8 +3,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -13,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.InboxAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import retrofit2.Call;
 import retrofit2.Callback;

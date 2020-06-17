@@ -1,17 +1,16 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
-
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.ContextThemeWrapper;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
@@ -39,12 +38,9 @@ public class AppInfoFragment extends DialogFragment {
 
         builder.setIcon(BuildConfig.DEBUG ? R.mipmap.ic_launcher_debug : R.mipmap.ic_launcher)
                 .setTitle(R.string.app_info_title)
-                //.setMessage(R.string.app_info_text)
-                .setPositiveButton(R.string.app_info_ok, new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        // it is okay, that the dialog closes if clicked the ok-button
-                        // no more action necessary
-                    }
+                .setPositiveButton(R.string.app_info_ok, (dialog, id) -> {
+                    // it is okay, that the dialog closes if clicked the ok-button
+                    // no more action necessary
                 });
 
 

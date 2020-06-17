@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +21,9 @@ public class ProviderApp {
      *
      * @param context     activity context
      */
-    public void openAppOrPlayStore(Context context) {
+    public void openAppOrPlayStore(final Context context) {
         // Try to open App
-        boolean success = openApp(context);
+        final boolean success = openApp(context);
         // Could not open App, open play store instead
         if (!success) {
             openUrl(context);
@@ -39,22 +38,22 @@ public class ProviderApp {
      * @see https://stackoverflow.com/a/7596063/714965
      */
     @SuppressWarnings("JavadocReference")
-    private boolean openApp(Context context) {
+    private boolean openApp(final Context context) {
         if (!isAndroid()) {
             return false;
         }
-        PackageManager manager = context.getPackageManager();
+        final PackageManager manager = context.getPackageManager();
         try {
-            Uri uri = Uri.parse(url);
-            String packageName = uri.getQueryParameter("id");
-            Intent intent = manager.getLaunchIntentForPackage(packageName);
+            final Uri uri = Uri.parse(url);
+            final String packageName = uri.getQueryParameter("id");
+            final Intent intent = manager.getLaunchIntentForPackage(packageName);
             if (intent == null) {
                 return false;
             }
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
             context.startActivity(intent);
             return true;
-        } catch (ActivityNotFoundException e) {
+        } catch (final ActivityNotFoundException e) {
             return false;
         }
     }
@@ -64,10 +63,10 @@ public class ProviderApp {
      *
      * @param context     activity context
      */
-    private void openUrl(Context context) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
+    private void openUrl(final Context context) {
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        Uri uri = Uri.parse(url);
+        final Uri uri = Uri.parse(url);
         intent.setData(uri);
         context.startActivity(intent);
     }
@@ -76,7 +75,7 @@ public class ProviderApp {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
 
@@ -84,7 +83,7 @@ public class ProviderApp {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -92,7 +91,7 @@ public class ProviderApp {
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(final String url) {
         this.url = url;
     }
 
@@ -100,7 +99,7 @@ public class ProviderApp {
         return countryCode;
     }
 
-    public void setCountryCode(String countryCode) {
+    public void setCountryCode(final String countryCode) {
         this.countryCode = countryCode;
     }
 
@@ -116,8 +115,8 @@ public class ProviderApp {
         return isAndroid() || isWeb();
     }
 
-    public static boolean hasCompatibleProviderApps(List<ProviderApp> providerApps) {
-        for (ProviderApp pa : providerApps) {
+    public static boolean hasCompatibleProviderApps(final List<ProviderApp> providerApps) {
+        for (final ProviderApp pa : providerApps) {
             if (pa.isCompatible()) {
                 return true;
             }
@@ -125,9 +124,9 @@ public class ProviderApp {
         return false;
     }
 
-    public static List<ProviderApp> getCompatibleProviderApps(List<ProviderApp> providerApps) {
-        List<ProviderApp> compatibleProviderApps = new ArrayList<>();
-        for (ProviderApp pa : providerApps) {
+    public static List<ProviderApp> getCompatibleProviderApps(final List<ProviderApp> providerApps) {
+        final List<ProviderApp> compatibleProviderApps = new ArrayList<>();
+        for (final ProviderApp pa : providerApps) {
             if (pa.isCompatible()) {
                 compatibleProviderApps.add(pa);
             }

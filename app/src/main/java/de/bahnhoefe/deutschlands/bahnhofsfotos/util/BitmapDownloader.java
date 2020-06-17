@@ -28,10 +28,10 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
      * @param handler the BitmapAvailableHandler instance that is called on completion
      * @param url     the URL to fetch the Bitmap from
      */
-    public BitmapDownloader(BitmapAvailableHandler handler, URL url) {
+    public BitmapDownloader(final BitmapAvailableHandler handler, final URL url) {
+        super();
         this.bitmapAvailableHandler = handler;
         this.url = url;
-        this.options = options;
     }
 
     /**
@@ -40,30 +40,30 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
      * @return the constructed Bitmap or null if downloading or construction failed
      */
     @Override
-    protected Bitmap doInBackground(Void... voids) {
+    protected Bitmap doInBackground(final Void... voids) {
         // Fetch the station photo
         Bitmap bitmap = null;
         InputStream is = null;
         try {
             Log.i(TAG, "Feting Bitmap from URL: " + url);
-            HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+            final HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
             is = httpConnection.getInputStream();
             if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                String contentType = httpConnection.getContentType();
+                final String contentType = httpConnection.getContentType();
                 if (contentType != null && !contentType.startsWith("image"))
                     Log.w(TAG, "Supplied URL does not appear to be an image resource (type=" + contentType + ")");
                 bitmap = BitmapFactory.decodeStream(is, null, options);
             } else {
                 Log.e(TAG, "Error downloading photo: " + httpConnection.getResponseCode());
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.e(TAG, "Could not download photo");
             bitmap = null;
         } finally {
             if (is != null) {
                 try {
                     is.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.w(TAG, "Could not close channel to photo download");
                 }
             }
@@ -77,7 +77,7 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
      * @param bitmap the downloaded Bitmap, may be null.
      */
     @Override
-    protected void onPostExecute(Bitmap bitmap) {
+    protected void onPostExecute(final Bitmap bitmap) {
         bitmapAvailableHandler.onBitmapAvailable(bitmap);
     }
 }

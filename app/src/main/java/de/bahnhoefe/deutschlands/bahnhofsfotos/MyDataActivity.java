@@ -1,11 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -15,6 +12,11 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,7 +25,6 @@ import java.net.URLEncoder;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
-import org.apache.commons.lang3.StringUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -50,7 +51,7 @@ public class MyDataActivity extends AppCompatActivity {
     private Button btChangePassword;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydata);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -85,7 +86,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    private void setProfileToUI(Profile profile) {
+    private void setProfileToUI(final Profile profile) {
         etNickname.setText(profile.getNickname());
         etPassword.setText(profile.getPassword());
         etEmail.setText(profile.getEmail());
@@ -107,7 +108,7 @@ public class MyDataActivity extends AppCompatActivity {
 
             rsapi.getProfile(authorizationHeader).enqueue(new Callback<Profile>() {
                 @Override
-                public void onResponse(Call<Profile> call, Response<Profile> response) {
+                public void onResponse(final Call<Profile> call, final Response<Profile> response) {
                     switch (response.code()) {
                         case 200 :
                             Log.i(TAG, "Successfully loaded profile");
@@ -132,7 +133,7 @@ public class MyDataActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<Profile> call, Throwable t) {
+                public void onFailure(final Call<Profile> call, final Throwable t) {
                     new SimpleDialogs().confirm(MyDataActivity.this,
                             String.format(getText(R.string.read_profile_failed).toString(), t.getMessage()));
                 }
@@ -140,10 +141,10 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    private void receiveInitialPassword(Intent intent) {
+    private void receiveInitialPassword(final Intent intent) {
         if (intent != null) {
             if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-                Uri data = intent.getData();
+                final Uri data = intent.getData();
                 if (data != null) {
                     profile.setPassword(data.getLastPathSegment());
                     etPassword.setText(profile.getPassword());
@@ -158,19 +159,19 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(final Intent intent) {
         super.onNewIntent(intent);
         receiveInitialPassword(intent);
     }
 
-    public void selectLicense(View view) {
+    public void selectLicense(final View view) {
         license = cbLicenseCC0.isChecked() ? License.CC0 : License.UNKNOWN;
         if (license != License.CC0) {
             new SimpleDialogs().confirm(this, R.string.cc0_needed);
         }
     }
 
-    public void register(View view) {
+    public void register(final View view) {
         if (btProfileSave.getText().equals(getResources().getText(R.string.bt_register))) {
             authorizationHeader = null;
         }
@@ -180,7 +181,7 @@ public class MyDataActivity extends AppCompatActivity {
         if (authorizationHeader == null) {
             rsapi.registration(createProfileFromUI()).enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(final Call<Void> call, final Response<Void> response) {
                     switch (response.code()) {
                         case 202:
                             new SimpleDialogs().confirm(MyDataActivity.this, R.string.new_registration);
@@ -201,7 +202,7 @@ public class MyDataActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(final Call<Void> call, final Throwable t) {
                     Log.e(TAG, "Registration failed", t);
                     new SimpleDialogs().confirm(MyDataActivity.this,
                             String.format(getText(R.string.registration_failed).toString(), t));
@@ -211,7 +212,7 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     private Profile createProfileFromUI() {
-        Profile profile = new Profile();
+        final Profile profile = new Profile();
         profile.setNickname(etNickname.getText().toString().trim());
         profile.setEmail(etEmail.getText().toString().trim());
         profile.setLicense(license);
@@ -222,7 +223,7 @@ public class MyDataActivity extends AppCompatActivity {
         return profile;
     }
 
-    public boolean saveProfile(View view) {
+    public boolean saveProfile(final View view) {
         profile = createProfileFromUI();
         if (!isValid()) {
             return false;
@@ -230,7 +231,7 @@ public class MyDataActivity extends AppCompatActivity {
         if (authorizationHeader != null) {
             rsapi.saveProfile(authorizationHeader, profile).enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(final Call<Void> call, final Response<Void> response) {
                     switch (response.code()) {
                         case 200 :
                             // create new authorization header in case email changed
@@ -257,7 +258,7 @@ public class MyDataActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(final Call<Void> call, final Throwable t) {
                     Log.e(TAG, "Error uploading profile", t);
                     new SimpleDialogs().confirm(MyDataActivity.this,
                             String.format(getText(R.string.save_profile_failed).toString(), t.getMessage()));
@@ -270,12 +271,12 @@ public class MyDataActivity extends AppCompatActivity {
         return true;
     }
 
-    private void saveLocalProfile(Profile profile) {
+    private void saveLocalProfile(final Profile profile) {
         baseApplication.setProfile(profile);
         setProfileToUI(profile);
     }
 
-    private boolean isLoginDataAvailable(String email, String password) {
+    private boolean isLoginDataAvailable(final String email, final String password) {
         return StringUtils.isNotBlank(password) && StringUtils.isNotBlank(email);
     }
 
@@ -302,7 +303,7 @@ public class MyDataActivity extends AppCompatActivity {
             new SimpleDialogs().confirm(this, R.string.missing_email_address);
             return false;
         }
-        String url = etLink.getText().toString();
+        final String url = etLink.getText().toString();
         if (StringUtils.isNotBlank(url)&& !isValidHTTPURL(url)) {
             new SimpleDialogs().confirm(this, R.string.missing_link);
             return false;
@@ -311,24 +312,24 @@ public class MyDataActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean isValidHTTPURL(String urlString) {
+    private boolean isValidHTTPURL(final String urlString) {
         try {
-            URL url = new URL(urlString);
+            final URL url = new URL(urlString);
             if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
                 return false;
             }
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             return false;
         }
         return true;
     }
 
-    public boolean isValidEmail(CharSequence target) {
+    public boolean isValidEmail(final CharSequence target) {
         return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
 
     }
 
-    public void onAnonymousChecked(View view) {
+    public void onAnonymousChecked(final View view) {
         if (cbAnonymous.isChecked()) {
             etLink.setVisibility(View.GONE);
             findViewById(R.id.tvLinking).setVisibility(View.GONE);
@@ -338,7 +339,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    public void newRegister(View view) {
+    public void newRegister(final View view) {
         authorizationHeader = null;
         etEmail.setText(etEmailOrNickname.getText());
         profileForm.setVisibility(View.VISIBLE);
@@ -349,9 +350,9 @@ public class MyDataActivity extends AppCompatActivity {
         btChangePassword.setVisibility(View.GONE);
     }
 
-    public void login(View view) {
-        String email = etEmailOrNickname.getText().toString();
-        String password = etPassword.getText().toString();
+    public void login(final View view) {
+        final String email = etEmailOrNickname.getText().toString();
+        final String password = etPassword.getText().toString();
         if (isLoginDataAvailable(email, password)) {
             baseApplication.setEmail(email);
             baseApplication.setPassword(password);
@@ -362,7 +363,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    public void logout(View view) {
+    public void logout(final View view) {
         profile.setNickname(null);;
         profile.setEmail(null);
         profile.setPassword(null);
@@ -372,9 +373,9 @@ public class MyDataActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(R.string.login);
     }
 
-    public void resetPassword(View view) {
+    public void resetPassword(final View view) {
         authorizationHeader = null;
-        String emailOrNickname = etEmailOrNickname.getText().toString();
+        final String emailOrNickname = etEmailOrNickname.getText().toString();
         if (StringUtils.isBlank(emailOrNickname)) {
             new SimpleDialogs().confirm(this, R.string.missing_email_or_nickname);
             return;
@@ -383,7 +384,7 @@ public class MyDataActivity extends AppCompatActivity {
         saveLocalProfile(profile);
         rsapi.resetPassword(emailOrNickname).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(final Call<Void> call, final Response<Void> response) {
                 switch (response.code()) {
                     case 202 :
                         new SimpleDialogs().confirm(MyDataActivity.this, R.string.password_email);
@@ -401,7 +402,7 @@ public class MyDataActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(final Call<Void> call, final Throwable t) {
                 Log.e(TAG, "Request new password failed", t);
                 new SimpleDialogs().confirm(MyDataActivity.this,
                         String.format(getText(R.string.request_password_failed).toString(), t));
@@ -409,14 +410,14 @@ public class MyDataActivity extends AppCompatActivity {
         });
     }
 
-    public void changePassword(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+    public void changePassword(final View view) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         // Get the layout inflater
-        LayoutInflater inflater = this.getLayoutInflater();
+        final LayoutInflater inflater = this.getLayoutInflater();
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        View dialogView = inflater.inflate(R.layout.change_password, null);
+        final View dialogView = inflater.inflate(R.layout.change_password, null);
         final EditText etNewPassword = dialogView.findViewById(R.id.password);
         final EditText etPasswordRepeat = dialogView.findViewById(R.id.passwordRepeat);
 
@@ -425,66 +426,59 @@ public class MyDataActivity extends AppCompatActivity {
                .setIcon(R.mipmap.ic_launcher)
                // Add action buttons
                .setPositiveButton(android.R.string.ok, null)
-               .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-               });
+               .setNegativeButton(android.R.string.cancel, (dialog, id) -> dialog.cancel());
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
 
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String newPassword = etNewPassword.getText().toString();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String newPassword = etNewPassword.getText().toString();
 
-                if (newPassword.length() < 8) {
-                    Toast.makeText(MyDataActivity.this, R.string.password_too_short, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                if (!newPassword.equals(etPasswordRepeat.getText().toString())) {
-                    Toast.makeText(MyDataActivity.this, R.string.password_repeat_fail, Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                alertDialog.dismiss();
-
-                try {
-                    newPassword = URLEncoder.encode(etNewPassword.getText().toString(), "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    Log.e(TAG, "Error encoding new password", e);
-                }
-
-                rsapi.changePassword(authorizationHeader, newPassword).enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        switch (response.code()) {
-                            case 200:
-                                Log.i(TAG, "Successfully changed password");
-                                etPassword.setText(etNewPassword.getText());
-                                baseApplication.setPassword(etNewPassword.getText().toString());
-                                authorizationHeader = RSAPI.Helper.getAuthorizationHeader(profile.getEmail(), etNewPassword.getText().toString());
-                                new SimpleDialogs().confirm(MyDataActivity.this, R.string.password_changed);
-                                break;
-                            case 401:
-                                authorizationHeader = null;
-                                new SimpleDialogs().confirm(MyDataActivity.this, R.string.authorization_failed);
-                                break;
-                            default:
-                                new SimpleDialogs().confirm(MyDataActivity.this,
-                                        String.format(getText(R.string.change_password_failed).toString(), response.code()));
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Log.e(TAG, "Error changing password", t);
-                        new SimpleDialogs().confirm(MyDataActivity.this,
-                                String.format(getText(R.string.change_password_failed).toString(), t.getMessage()));
-                    }
-                });
+            if (newPassword.length() < 8) {
+                Toast.makeText(MyDataActivity.this, R.string.password_too_short, Toast.LENGTH_LONG).show();
+                return;
             }
+            if (!newPassword.equals(etPasswordRepeat.getText().toString())) {
+                Toast.makeText(MyDataActivity.this, R.string.password_repeat_fail, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            alertDialog.dismiss();
+
+            try {
+                newPassword = URLEncoder.encode(etNewPassword.getText().toString(), "UTF-8");
+            } catch (final UnsupportedEncodingException e) {
+                Log.e(TAG, "Error encoding new password", e);
+            }
+
+            rsapi.changePassword(authorizationHeader, newPassword).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(final Call<Void> call, final Response<Void> response) {
+                    switch (response.code()) {
+                        case 200:
+                            Log.i(TAG, "Successfully changed password");
+                            etPassword.setText(etNewPassword.getText());
+                            baseApplication.setPassword(etNewPassword.getText().toString());
+                            authorizationHeader = RSAPI.Helper.getAuthorizationHeader(profile.getEmail(), etNewPassword.getText().toString());
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.password_changed);
+                            break;
+                        case 401:
+                            authorizationHeader = null;
+                            new SimpleDialogs().confirm(MyDataActivity.this, R.string.authorization_failed);
+                            break;
+                        default:
+                            new SimpleDialogs().confirm(MyDataActivity.this,
+                                    String.format(getText(R.string.change_password_failed).toString(), response.code()));
+                    }
+                }
+
+                @Override
+                public void onFailure(final Call<Void> call, final Throwable t) {
+                    Log.e(TAG, "Error changing password", t);
+                    new SimpleDialogs().confirm(MyDataActivity.this,
+                            String.format(getText(R.string.change_password_failed).toString(), t.getMessage()));
+                }
+            });
         });
 
     }

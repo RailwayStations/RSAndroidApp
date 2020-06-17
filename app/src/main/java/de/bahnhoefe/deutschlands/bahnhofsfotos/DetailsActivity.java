@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -19,14 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
 import android.provider.MediaStore;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NavUtils;
-import androidx.core.content.FileProvider;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -51,6 +43,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NavUtils;
+import androidx.core.content.FileProvider;
+
 import com.google.gson.Gson;
 
 import org.apache.commons.lang3.StringUtils;
@@ -70,14 +69,14 @@ import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
@@ -148,7 +147,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         baseApplication = (BaseApplication) getApplication();
         rsapi = baseApplication.getRSAPI();
         final DbAdapter dbAdapter = baseApplication.getDbAdapter();
-        Set<String> countryCodes = baseApplication.getCountryCodes();
+        final Set<String> countryCodes = baseApplication.getCountryCodes();
         countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -376,7 +375,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 selected = problemTypes.size() - 1;
             }
         }
-        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, problemTypes);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, problemTypes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         problemType.setAdapter(adapter);
         if (selected > -1) {
@@ -639,12 +638,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     for (int i = 0; i < providerApps.size(); i++) {
                         appNames[i] = providerApps.get(i).getName();
                     }
-                    new SimpleDialogs().simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, -1, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(final DialogInterface dialog, final int which) {
-                            if (which >= 0 && providerApps.size() > which) {
-                                providerApps.get(which).openAppOrPlayStore(DetailsActivity.this);
-                            }
+                    new SimpleDialogs().simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, -1, (dialog, which) -> {
+                        if (which >= 0 && providerApps.size() > which) {
+                            providerApps.get(which).openAppOrPlayStore(DetailsActivity.this);
                         }
                     });
                 } else {
@@ -866,52 +862,50 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final AlertDialog.Builder navBuilder = new AlertDialog.Builder(this);
         navBuilder.setIcon(R.mipmap.ic_launcher);
         navBuilder.setTitle(R.string.navMethod);
-        navBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-            public void onClick(final DialogInterface dialog, final int navItem) {
-                String dlocation = "";
-                Intent intent = null;
-                switch (navItem) {
-                    case 0:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", lat, lon);
-                        Log.d(TAG, "findnavigation case 0: " + dlocation);
-                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                        break;
-                    case 1:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=d", lat, lon);
-                        Log.d(TAG,"findnavigation case 1: " + dlocation);
-                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                        break;
+        navBuilder.setAdapter(adapter, (dialog, navItem) -> {
+            String dlocation = "";
+            Intent intent = null;
+            switch (navItem) {
+                case 0:
+                    dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", lat, lon);
+                    Log.d(TAG, "findnavigation case 0: " + dlocation);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                    break;
+                case 1:
+                    dlocation = String.format("google.navigation:ll=%s,%s&mode=d", lat, lon);
+                    Log.d(TAG,"findnavigation case 1: " + dlocation);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                    break;
 
-                    case 2:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
-                                lat, lon);
-                        Log.d(TAG,"findnavigation case 2: " + dlocation);
-                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                        break;
-                    case 3:
-                        dlocation = String.format("google.navigation:ll=%s,%s&mode=w", lat, lon);
-                        Log.d(TAG,"findnavigation case 3: " + dlocation);
-                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                        break;
-                    case 4:
-                        dlocation = String.format("geo:0,0?q=%s,%s(%s)", lat, lon, etBahnhofName.getText());
-                        Log.d(TAG,"findnavigation case 4: " + dlocation);
-                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                        break;
-                    case 5:
-                        intent = new Intent(DetailsActivity.this, MapsActivity.class);
-                        intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat);
-                        intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon);
-                        Log.d(TAG,"findnavigation case 5: " + lat + "," + lon);
-                        break;
+                case 2:
+                    dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
+                            lat, lon);
+                    Log.d(TAG,"findnavigation case 2: " + dlocation);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                    break;
+                case 3:
+                    dlocation = String.format("google.navigation:ll=%s,%s&mode=w", lat, lon);
+                    Log.d(TAG,"findnavigation case 3: " + dlocation);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                    break;
+                case 4:
+                    dlocation = String.format("geo:0,0?q=%s,%s(%s)", lat, lon, etBahnhofName.getText());
+                    Log.d(TAG,"findnavigation case 4: " + dlocation);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
+                    break;
+                case 5:
+                    intent = new Intent(DetailsActivity.this, MapsActivity.class);
+                    intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat);
+                    intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon);
+                    Log.d(TAG,"findnavigation case 5: " + lat + "," + lon);
+                    break;
 
-                }
-                try {
-                    startActivity(intent);
-                } catch (final Exception e) {
-                    final Toast toast = Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG);
-                    toast.show();
-                }
+            }
+            try {
+                startActivity(intent);
+            } catch (final Exception e) {
+                final Toast toast = Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG);
+                toast.show();
             }
         }).show();
 
@@ -1081,7 +1075,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * @return the Bitmap of the photo, or null if none exists.
      */
     @Nullable
-    private Bitmap checkForLocalPhoto(Upload upload) {
+    private Bitmap checkForLocalPhoto(final Upload upload) {
         // show the image
         final File localFile = getStoredMediaFile(upload);
         Log.d(TAG, "File: " + localFile);

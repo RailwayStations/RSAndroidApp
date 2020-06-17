@@ -58,8 +58,8 @@
     <string name="benachrichtigen">Notifications</string>
     <string name="nahe_gelegenen_bahnhof_melden">Report nearby stations</string>
     <string name="station_is_near">Stations nearby</string>
-    <string name="template_short_text" formatted="false">Station %s in %.2f km</string>
-    <string name="template_long_text" formatted="false">Station: %s\ndistance: %.2f km\n%s</string>
+    <string name="template_short_text" formatted="false">Station %1$s in %2$.2f km</string>
+    <string name="template_long_text" formatted="false">Station: %s$1\ndistance: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Photo: open for license info</string>
     <string name="nearby_notification_active">Notification of nearby stations is active</string>
     <string name="license_tag" formatted="false">Owner: %s, %s</string>

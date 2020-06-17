@@ -22,14 +22,11 @@ public class IntroSliderActivity extends AppCompatActivity {
 
     private ViewPager viewPager;
     private int[] layouts;
-    private TextView[] dots;
     private LinearLayout dotsLayout;
     private Button next, skip;
-    private ViewPagerAdapter viewPagerAdapter;
-
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final BaseApplication baseApplication = (BaseApplication) getApplication();
 
@@ -48,33 +45,33 @@ public class IntroSliderActivity extends AppCompatActivity {
 
         addBottomDots(0);
         changeStatusBarColor();
-        viewPagerAdapter = new ViewPagerAdapter();
+        final ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter();
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.addOnPageChangeListener(viewListener);
 
         skip.setOnClickListener(v -> {
             baseApplication.setFirstAppStart(true);
-            Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
+            final Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         });
 
         next.setOnClickListener(v -> {
-            int current = getItem(+1);
+            final int current = getItem(+1);
             if (current < layouts.length) {
                 viewPager.setCurrentItem(current);
             } else {
-                Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
+                final Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             }
         });
     }
 
-    private void addBottomDots(int position) {
-        dots = new TextView[layouts.length];
-        int[] colorActive = getResources().getIntArray(R.array.dot_active);
-        int[] colorInactive = getResources().getIntArray(R.array.dot_inactive);
+    private void addBottomDots(final int position) {
+        final TextView[] dots = new TextView[layouts.length];
+        final int[] colorActive = getResources().getIntArray(R.array.dot_active);
+        final int[] colorInactive = getResources().getIntArray(R.array.dot_inactive);
         dotsLayout.removeAllViews();
 
         for (int i = 0; i < dots.length; i++) {
@@ -90,20 +87,20 @@ public class IntroSliderActivity extends AppCompatActivity {
         }
     }
 
-    private int getItem(int i) {
+    private int getItem(final int i) {
         return viewPager.getCurrentItem() + i;
     }
 
     ViewPager.OnPageChangeListener viewListener = new ViewPager.OnPageChangeListener() {
 
         @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {
 
         }
 
         @Override
-        public void onPageSelected(int position) {
-            BaseApplication baseApplication = (BaseApplication) getApplication();
+        public void onPageSelected(final int position) {
+            final BaseApplication baseApplication = (BaseApplication) getApplication();
             addBottomDots(position);
 
             if (position == layouts.length - 1) {
@@ -117,14 +114,14 @@ public class IntroSliderActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onPageScrollStateChanged(int state) {
+        public void onPageScrollStateChanged(final int state) {
 
         }
     };
 
     private void changeStatusBarColor() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
+            final Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
         }
@@ -132,19 +129,17 @@ public class IntroSliderActivity extends AppCompatActivity {
 
     public class ViewPagerAdapter extends PagerAdapter {
 
-        private LayoutInflater layoutInflater;
-
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View view = layoutInflater.inflate(layouts[position], container, false);
+        public Object instantiateItem(final ViewGroup container, final int position) {
+            final LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View view = layoutInflater.inflate(layouts[position], container, false);
             container.addView(view);
             return view;
         }
 
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            View view = (View) object;
+        public void destroyItem(final ViewGroup container, final int position, final Object object) {
+            final View view = (View) object;
             container.removeView(view);
         }
 
@@ -154,7 +149,7 @@ public class IntroSliderActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean isViewFromObject(View view, Object object) {
+        public boolean isViewFromObject(final View view, final Object object) {
             return view == object;
         }
     }

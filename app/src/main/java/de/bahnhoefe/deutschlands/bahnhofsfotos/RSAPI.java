@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.util.Base64;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
@@ -89,12 +90,8 @@ public interface RSAPI {
     Call<List<PublicInbox>> getPublicInbox();
 
     class Helper {
-        static String getAuthorizationHeader(String email, String password) {
-            byte[] data = new byte[0];
-            try {
-                data = (email + ":" + password).getBytes("UTF-8");
-            } catch (UnsupportedEncodingException ignored) {
-            }
+        static String getAuthorizationHeader(final String email, final String password) {
+            final byte[] data = (email + ":" + password).getBytes(StandardCharsets.UTF_8);
             return "Basic " + Base64.encodeToString(data, Base64.NO_WRAP);
         }
     }

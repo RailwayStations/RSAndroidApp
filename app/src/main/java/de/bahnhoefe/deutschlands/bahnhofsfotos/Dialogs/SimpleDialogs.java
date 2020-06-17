@@ -13,7 +13,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 public class SimpleDialogs {
 
-    public void confirm(Context context, int message) {
+    public void confirm(final Context context, final int message) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
                 .setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.app_name)
@@ -21,7 +21,7 @@ public class SimpleDialogs {
                 .setNeutralButton(R.string.button_ok_text, null).create().show();
     }
 
-    public void confirm(Context context, CharSequence message) {
+    public void confirm(final Context context, final CharSequence message) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
                 .setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.app_name)
@@ -29,7 +29,7 @@ public class SimpleDialogs {
                 .setNeutralButton(R.string.button_ok_text, null).create().show();
     }
 
-    public void confirm(Context context, int message, DialogInterface.OnClickListener listener) {
+    public void confirm(final Context context, final int message, final DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
                 .setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.app_name)
@@ -39,7 +39,7 @@ public class SimpleDialogs {
                 .create().show();
     }
 
-    public void confirm(Context context, String message, DialogInterface.OnClickListener listener) {
+    public void confirm(final Context context, final String message, final DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
                 .setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.app_name)
@@ -49,7 +49,7 @@ public class SimpleDialogs {
                 .create().show();
     }
 
-    public void select(Context context, CharSequence message, CharSequence[] items, int checkedItem, DialogInterface.OnClickListener listener) {
+    public void select(final Context context, final CharSequence message, final CharSequence[] items, final int checkedItem, final DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
                 .setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.app_name)
@@ -58,18 +58,18 @@ public class SimpleDialogs {
                 .create().show();
     }
 
-    public void simpleSelect(Context context, CharSequence message, CharSequence[] items, int checkedItem, DialogInterface.OnClickListener listener) {
+    public void simpleSelect(final Context context, final CharSequence message, final CharSequence[] items, final int checkedItem, final DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
                 .setIcon(R.mipmap.ic_launcher)
                 .setTitle(message)
-                .setAdapter(new ArrayAdapter(context, android.R.layout.simple_list_item_1, 0, items), listener)
+                .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, 0, items), listener)
                 .create().show();
     }
 
-    public void prompt(Context context, int message, int inputType, int hint, String text, PromptListener listener) {
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom));
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View dialogView = inflater.inflate(R.layout.prompt, null);
+    public void prompt(final Context context, final int message, final int inputType, final int hint, final String text, final PromptListener listener) {
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom));
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        final View dialogView = inflater.inflate(R.layout.prompt, null);
         final EditText etPrompt = dialogView.findViewById(R.id.et_prompt);
         if (text != null) {
             etPrompt.setText(text);

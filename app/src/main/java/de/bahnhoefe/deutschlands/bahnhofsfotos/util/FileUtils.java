@@ -13,7 +13,6 @@ public class FileUtils {
 
     private static final String PHOTO_DIR = "Bahnhofsfotos";
     private static final String TAG = FileUtils.class.getSimpleName();
-    private static final String TEMP_DIR = ".temp";
     public static final String MISSING_DIR = "missing";
 
     /**

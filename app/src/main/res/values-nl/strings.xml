@@ -45,8 +45,8 @@
     <string name="benachrichtigen">Meldingen</string>
     <string name="nahe_gelegenen_bahnhof_melden">Melding tonen als er stations in de buurt zijn</string>
     <string name="station_is_near">Nabije stations</string>
-    <string name="template_short_text" formatted="false">Na %.2f km vind je statin %s</string>
-    <string name="template_long_text" formatted="false">Station: %s\nAfstand: %.2f km\n%s</string>
+    <string name="template_short_text" formatted="false">Na %2$.2f km vind je statin %1$s</string>
+    <string name="template_long_text" formatted="false">Station: %1$s\nAfstand: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Foto: open om licentie-informatie te tonen</string>
     <string name="nearby_notification_active">Je ontvangt een melding als er stations in de buurt zijn</string>
     <string name="license_tag" formatted="false">Eigenaar: %s, %s</string>

@@ -119,7 +119,7 @@ public class Country implements Serializable {
         return overrideLicense;
     }
 
-    public void setOverrideLicense(String overrideLicense) {
+    public void setOverrideLicense(final String overrideLicense) {
         this.overrideLicense = overrideLicense;
     }
 }

@@ -18,12 +18,12 @@ public class CountryActivity extends AppCompatActivity {
     private CountryAdapter countryAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_country);
 
         final BaseApplication baseApplication = (BaseApplication) getApplication();
-        DbAdapter dbAdapter = baseApplication.getDbAdapter();
+        final DbAdapter dbAdapter = baseApplication.getDbAdapter();
 
         final Cursor cursor = dbAdapter.getCountryList();
         countryAdapter = new CountryAdapter(this, cursor, 0);
@@ -32,18 +32,11 @@ public class CountryActivity extends AppCompatActivity {
         assert listView != null;
         listView.setAdapter(countryAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> listview, View view, int position, long id) {
-                countryAdapter.getView(position, view, listView, cursor);
-            }
-
-
-        });
+        listView.setOnItemClickListener((listview, view, position, id) -> countryAdapter.getView(position, view, listView, cursor));
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
@@ -55,9 +48,9 @@ public class CountryActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        BaseApplication baseApplication = BaseApplication.getInstance();
-        Set<String> prefCountries = baseApplication.getCountryCodes();
-        Set<String> selectedCountries = countryAdapter.getSelectedCountries();
+        final BaseApplication baseApplication = BaseApplication.getInstance();
+        final Set<String> prefCountries = baseApplication.getCountryCodes();
+        final Set<String> selectedCountries = countryAdapter.getSelectedCountries();
 
         if (!prefCountries.equals(selectedCountries)) {
             baseApplication.setCountryCodes(selectedCountries);

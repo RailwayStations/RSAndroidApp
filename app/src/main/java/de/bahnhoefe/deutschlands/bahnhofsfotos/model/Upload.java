@@ -25,7 +25,7 @@ public class Upload implements Serializable {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -33,7 +33,7 @@ public class Upload implements Serializable {
         return country;
     }
 
-    public void setCountry(String country) {
+    public void setCountry(final String country) {
         this.country = country;
     }
 
@@ -41,7 +41,7 @@ public class Upload implements Serializable {
         return stationId;
     }
 
-    public void setStationId(String stationId) {
+    public void setStationId(final String stationId) {
         this.stationId = stationId;
     }
 
@@ -49,7 +49,7 @@ public class Upload implements Serializable {
         return remoteId;
     }
 
-    public void setRemoteId(Long remoteId) {
+    public void setRemoteId(final Long remoteId) {
         this.remoteId = remoteId;
     }
 
@@ -57,7 +57,7 @@ public class Upload implements Serializable {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -65,7 +65,7 @@ public class Upload implements Serializable {
         return lat;
     }
 
-    public void setLat(Double lat) {
+    public void setLat(final Double lat) {
         this.lat = lat;
     }
 
@@ -73,7 +73,7 @@ public class Upload implements Serializable {
         return lon;
     }
 
-    public void setLon(Double lon) {
+    public void setLon(final Double lon) {
         this.lon = lon;
     }
 
@@ -81,7 +81,7 @@ public class Upload implements Serializable {
         return comment;
     }
 
-    public void setComment(String comment) {
+    public void setComment(final String comment) {
         this.comment = comment;
     }
 
@@ -89,7 +89,7 @@ public class Upload implements Serializable {
         return inboxUrl;
     }
 
-    public void setInboxUrl(String inboxUrl) {
+    public void setInboxUrl(final String inboxUrl) {
         this.inboxUrl = inboxUrl;
     }
 
@@ -97,7 +97,7 @@ public class Upload implements Serializable {
         return problemType;
     }
 
-    public void setProblemType(ProblemType problemType) {
+    public void setProblemType(final ProblemType problemType) {
         this.problemType = problemType;
     }
 
@@ -105,7 +105,7 @@ public class Upload implements Serializable {
         return rejectReason;
     }
 
-    public void setRejectReason(String rejectReason) {
+    public void setRejectReason(final String rejectReason) {
         this.rejectReason = rejectReason;
     }
 
@@ -113,7 +113,7 @@ public class Upload implements Serializable {
         return uploadState;
     }
 
-    public void setUploadState(UploadState uploadState) {
+    public void setUploadState(final UploadState uploadState) {
         this.uploadState = uploadState;
     }
 
@@ -121,7 +121,7 @@ public class Upload implements Serializable {
         return createdAt;
     }
 
-    public void setCreatedAt(Long createdAt) {
+    public void setCreatedAt(final Long createdAt) {
         this.createdAt = createdAt;
     }
 

@@ -42,69 +42,21 @@ public final class Utils {
     /**
      * Compatibility method.
      *
-     * @param a the current activity
-     */
-    public static void enableHome(Activity a) {
-        a.getActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    /**
-     * Compatibility method.
-     *
      * @param view       the view to set the background on
      * @param background the background
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @SuppressWarnings("deprecation")
-    public static void setBackground(View view, Drawable background) {
+    public static void setBackground(final View view, final Drawable background) {
         view.setBackground(background);
     }
 
-    @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    static Marker createMarker(Context c, int resourceIdentifier,
-                               LatLong latLong) {
-        Drawable drawable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? c.getDrawable(resourceIdentifier) : c.getResources().getDrawable(resourceIdentifier);
-        Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-        return new Marker(latLong, bitmap, 0, -bitmap.getHeight() / 2);
-    }
-
-    static Paint createPaint(int color, int strokeWidth, Style style) {
-        Paint paint = AndroidGraphicFactory.INSTANCE.createPaint();
-        paint.setColor(color);
-        paint.setStrokeWidth(strokeWidth);
-        paint.setStyle(style);
-        return paint;
-    }
-
-    @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    static Marker createTappableMarker(final Context c, int resourceIdentifier,
-                                       LatLong latLong) {
-        Drawable drawable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? c.getDrawable(resourceIdentifier) : c.getResources().getDrawable(resourceIdentifier);
-        Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-        bitmap.incrementRefCount();
-        return new Marker(latLong, bitmap, 0, -bitmap.getHeight() / 2) {
-            @Override
-            public boolean onTap(LatLong geoPoint, Point viewPosition,
-                                 Point tapPoint) {
-                if (contains(viewPosition, tapPoint)) {
-                    Toast.makeText(c,
-                            "The Marker was tapped " + geoPoint.toString(),
-                            Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                return false;
-            }
-        };
-    }
-
-    public static Bitmap viewToBitmap(Context c, View view) {
+    public static Bitmap viewToBitmap(final Context c, final View view) {
         view.measure(MeasureSpec.getSize(view.getMeasuredWidth()),
                 MeasureSpec.getSize(view.getMeasuredHeight()));
         view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
         view.setDrawingCacheEnabled(true);
-        Drawable drawable = new BitmapDrawable(c.getResources(),
+        final Drawable drawable = new BitmapDrawable(c.getResources(),
                 android.graphics.Bitmap.createBitmap(view.getDrawingCache()));
         view.setDrawingCacheEnabled(false);
         return AndroidGraphicFactory.convertToBitmap(drawable);

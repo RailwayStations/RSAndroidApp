@@ -34,8 +34,8 @@
     <string name="benachrichtigen">Notifications</string>
     <string name="nahe_gelegenen_bahnhof_melden">Faire connaître les stations de près</string>
     <string name="station_is_near">Les stations de près</string>
-    <string name="template_short_text" formatted="false">Station %s dans %.2f km</string>
-    <string name="template_long_text" formatted="false">Station: %s\n distance: %.2f km\n%s</string>
+    <string name="template_short_text" formatted="false">Station %1$s dans %2$.2f km</string>
+    <string name="template_long_text" formatted="false">Station: %s1$\n distance: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Photo: ouvrir pour information sur licence</string>
     <string name="nearby_notification_active">Notification des stations de près est activé</string>
     <string name="license_tag" formatted="false">Propriétaire: %s, %s</string>

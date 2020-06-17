@@ -25,7 +25,7 @@ public class MapsforgeMapView extends MapView {
         try {
             gestureDetector.onTouchEvent(ev);
             return super.onTouchEvent(ev);
-        } catch (Exception ignored) {
+        } catch (final Exception ignored) {
         }
         return false;
     }

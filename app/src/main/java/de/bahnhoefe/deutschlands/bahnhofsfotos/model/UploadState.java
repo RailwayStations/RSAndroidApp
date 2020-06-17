@@ -20,13 +20,13 @@ public enum UploadState {
     ACCEPTED(R.string.upload_state_accepted, R.color.gridItemGood, false),
     REJECTED(R.string.upload_state_rejected, R.color.gridItemError, false);
 
-    private int textId;
+    private final int textId;
 
-    private int colorId;
+    private final int colorId;
 
-    private boolean pending;
+    private final boolean pending;
 
-    UploadState(int textId, int colorId, boolean pending) {
+    UploadState(final int textId, final int colorId, final boolean pending) {
         this.textId = textId;
         this.colorId = colorId;
         this.pending = pending;
@@ -46,10 +46,10 @@ public enum UploadState {
 
     static class Serializer implements JsonDeserializer<UploadState> {
         @Override
-        public UploadState deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+        public UploadState deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
             try {
                 return UploadState.valueOf(json.getAsString());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return UNKNOWN;
             }
         }

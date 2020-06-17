@@ -69,13 +69,13 @@ public class NearbyNotificationService extends Service implements LocationListen
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(final Intent intent, final int flags, final int startId) {
         cancelNotification();
 
         Log.i(TAG, "Received start command");
 
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        PendingIntent resultPendingIntent =
+        final Intent resultIntent = new Intent(this, MainActivity.class);
+        final PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
                         this,
                         0,
@@ -114,12 +114,12 @@ public class NearbyNotificationService extends Service implements LocationListen
         try {
             cancelNotification();
             unregisterLocationManager();
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             Log.wtf(TAG, "Unknown problem when trying to de-register from GPS updates", t);
         }
 
         // Cancel the ongoing notification
-        NotificationManagerCompat notificationManager =
+        final NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(this);
         notificationManager.cancel(ONGOING_NOTIFICATION_ID);
 
@@ -134,7 +134,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(final Location location) {
         Log.i(TAG, "Received new location: " + location);
         try {
             myPos = location;
@@ -150,31 +150,31 @@ public class NearbyNotificationService extends Service implements LocationListen
 
             // check if a user notification is appropriate
             checkNearestStation();
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             Log.e(TAG, "Unknown Problem arised during location change handling", t);
         }
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+    public void onStatusChanged(final String provider, final int status, final Bundle extras) {
 
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
+    public void onProviderEnabled(final String provider) {
 
     }
 
     @Override
-    public void onProviderDisabled(String provider) {
+    public void onProviderDisabled(final String provider) {
 
     }
 
     private void checkNearestStation() {
         double minDist = 3e3;
         Station nearest = null;
-        for (Station station : nearStations) {
-            double dist = calcDistance(station);
+        for (final Station station : nearStations) {
+            final double dist = calcDistance(station);
             if (dist < minDist) {
                 nearest = station;
                 minDist = dist;
@@ -196,7 +196,7 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @param nearest  the station nearest to the current position
      * @param distance the distance of the station to the current position
      */
-    private void notifyNearest(Station nearest, double distance) {
+    private void notifyNearest(final Station nearest, final double distance) {
         if (notifiedStationManager != null) {
             if (notifiedStationManager.getStation().equals(nearest)) {
                 return; // Notification für diesen Bahnhof schon angezeigt
@@ -215,10 +215,10 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @param station the station to calculate the distance to
      * @return the distance
      */
-    private double calcDistance(Station station) {
+    private double calcDistance(final Station station) {
         // Wir nähern für glatte Oberflächen, denn wir sind an Abständen kleiner 1km interessiert
-        double lateralDiff = myPos.getLatitude() - station.getLat();
-        double longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
+        final double lateralDiff = myPos.getLatitude() - station.getLat();
+        final double longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
                 (myPos.getLongitude() - station.getLon()) * Math.cos(myPos.getLatitude() / 180 * Math.PI) :
                 0.0d; // at the poles, longitude doesn't matter
         // simple Pythagoras now.
@@ -236,7 +236,7 @@ public class NearbyNotificationService extends Service implements LocationListen
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             // getting GPS status
-            boolean isGPSEnabled = locationManager
+            final boolean isGPSEnabled = locationManager
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             // if GPS Enabled get lat/long using GPS Services
@@ -252,7 +252,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                 }
             } else {
                 // getting network status
-                boolean isNetworkEnabled = locationManager
+                final boolean isNetworkEnabled = locationManager
                         .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
                 // First get location from Network Provider
@@ -268,9 +268,9 @@ public class NearbyNotificationService extends Service implements LocationListen
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
-            Bundle b = new Bundle();
+            final Bundle b = new Bundle();
             b.putString("error", "Error registering LocationManager: " + e.toString());
             locationManager = null;
             myPos = null;
@@ -311,7 +311,7 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @return a Binder instance suitable for the intent supplied, or null if none matches.
      */
     @Override
-    public IBinder onBind(Intent intent) {
+    public IBinder onBind(final Intent intent) {
         if (STATUS_INTERFACE.equals(intent.getAction())) {
             return new StatusBinder();
         } else {
@@ -323,7 +323,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         try {
             Log.i(TAG, "Lade nahegelegene Bahnhoefe");
             nearStations = dbAdapter.getStationByLatLngRectangle(myPos.getLatitude(), myPos.getLongitude(), baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         }
     }

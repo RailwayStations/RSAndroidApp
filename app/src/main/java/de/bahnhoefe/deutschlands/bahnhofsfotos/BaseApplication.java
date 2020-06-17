@@ -58,7 +58,7 @@ public class BaseApplication extends Application {
     }
 
     @Override
-    protected void attachBaseContext(Context base) {
+    protected void attachBaseContext(final Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
     }
@@ -91,54 +91,54 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.API_URL), "https://api.railway-stations.org");
     }
 
-    public void setApiUrl(String apiUrl) {
+    public void setApiUrl(final String apiUrl) {
         putString(R.string.API_URL, apiUrl);
         this.api = null;
     }
 
-    private void putBoolean(int key, boolean value) {
-        SharedPreferences.Editor editor = preferences.edit();
+    private void putBoolean(final int key, final boolean value) {
+        final SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(getString(key), value);
         editor.apply();
     }
 
-    private void putString(int key, String value) {
-        SharedPreferences.Editor editor = preferences.edit();
+    private void putString(final int key, final String value) {
+        final SharedPreferences.Editor editor = preferences.edit();
         editor.putString(getString(key), StringUtils.trimToNull(value));
         editor.apply();
     }
 
-    private void putStringSet(int key, Set<String> value) {
-        SharedPreferences.Editor editor = preferences.edit();
+    private void putStringSet(final int key, final Set<String> value) {
+        final SharedPreferences.Editor editor = preferences.edit();
         editor.putStringSet(getString(key), value);
         editor.apply();
     }
 
-    private void putLong(int key, long value) {
-        SharedPreferences.Editor editor = preferences.edit();
+    private void putLong(final int key, final long value) {
+        final SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(getString(key), value);
         editor.apply();
     }
 
-    private void putDouble(int key, double value) {
-        SharedPreferences.Editor editor = preferences.edit();
+    private void putDouble(final int key, final double value) {
+        final SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(getString(key), Double.doubleToRawLongBits(value));
         editor.apply();
     }
 
-    private double getDouble(int key, final double defaultValue) {
+    private double getDouble(final int key, final double defaultValue) {
         if ( !preferences.contains(getString(key)))
             return defaultValue;
 
         return Double.longBitsToDouble(preferences.getLong(getString(key), 0));
     }
 
-    public void setCountryCodes(Set<String> countryCodes) {
+    public void setCountryCodes(final Set<String> countryCodes) {
         putStringSet(R.string.COUNTRIES, countryCodes);
     }
 
     public Set<String> getCountryCodes() {
-        String oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
+        final String oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
         Set<String> stringSet = preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
         if (stringSet.isEmpty()) {
             stringSet = new HashSet<>(Collections.singleton(DEFAULT_COUNTRY));
@@ -146,7 +146,7 @@ public class BaseApplication extends Application {
         return stringSet;
     }
 
-    public void setFirstAppStart(boolean firstAppStart) {
+    public void setFirstAppStart(final boolean firstAppStart) {
         putBoolean(R.string.FIRSTAPPSTART, firstAppStart);
     }
 
@@ -158,7 +158,7 @@ public class BaseApplication extends Application {
         return License.byName(preferences.getString(getString(R.string.LICENCE), License.UNKNOWN.toString()));
     }
 
-    public void setLicense(License license) {
+    public void setLicense(final License license) {
         putString(R.string.LICENCE, license != null ? license.toString() : License.UNKNOWN.toString());
     }
 
@@ -166,7 +166,7 @@ public class BaseApplication extends Application {
         return UpdatePolicy.byName(preferences.getString(getString(R.string.UPDATE_POLICY), License.UNKNOWN.toString()));
     }
 
-    public void setUpdatePolicy(UpdatePolicy updatePolicy) {
+    public void setUpdatePolicy(final UpdatePolicy updatePolicy) {
         putString(R.string.UPDATE_POLICY, updatePolicy.toString());
     }
 
@@ -174,7 +174,7 @@ public class BaseApplication extends Application {
         return preferences.getBoolean(getString(R.string.PHOTO_OWNER), false);
     }
 
-    public void setPhotoOwner(boolean photoOwner) {
+    public void setPhotoOwner(final boolean photoOwner) {
         putBoolean(R.string.PHOTO_OWNER, photoOwner);
     }
 
@@ -182,7 +182,7 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
     }
 
-    public void setPhotographerLink(String photographerLink) {
+    public void setPhotographerLink(final String photographerLink) {
         putString(R.string.LINK_TO_PHOTOGRAPHER, photographerLink);
     }
 
@@ -190,7 +190,7 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.NICKNAME), DEFAULT);
     }
 
-    public void setNickname(String nickname) {
+    public void setNickname(final String nickname) {
         putString(R.string.NICKNAME, nickname);
     }
 
@@ -198,7 +198,7 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.EMAIL), DEFAULT);
     }
 
-    public void setEmail(String email) {
+    public void setEmail(final String email) {
         putString(R.string.EMAIL, email);
     }
 
@@ -207,7 +207,7 @@ public class BaseApplication extends Application {
                 preferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT)); // for backward compatibility
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         putString(R.string.UPLOAD_TOKEN, DEFAULT); // for backward compatibility
         putString(R.string.PASSWORD, password);
     }
@@ -216,7 +216,7 @@ public class BaseApplication extends Application {
         return PhotoFilter.valueOf(preferences.getString(getString(R.string.PHOTO_FILTER), PhotoFilter.ALL_STATIONS.toString()));
     }
 
-    public void setPhotoFilter(PhotoFilter photoFilter) {
+    public void setPhotoFilter(final PhotoFilter photoFilter) {
         putString(R.string.PHOTO_FILTER, photoFilter.toString());
     }
 
@@ -224,7 +224,7 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.NICKNAME_FILTER), getNickname());
     }
 
-    public void setNicknameFilter(String nicknameFilter) {
+    public void setNicknameFilter(final String nicknameFilter) {
         putString(R.string.NICKNAME_FILTER, nicknameFilter);
     }
 
@@ -232,11 +232,11 @@ public class BaseApplication extends Application {
         return preferences.getLong(getString(R.string.LAST_UPDATE), 0L);
     }
 
-    public void setLastUpdate(long lastUpdate) {
+    public void setLastUpdate(final long lastUpdate) {
         putLong(R.string.LAST_UPDATE, lastUpdate);
     }
 
-    public void setLocationUpdates(boolean locationUpdates) {
+    public void setLocationUpdates(final boolean locationUpdates) {
         putBoolean(R.string.LOCATION_UPDATES, locationUpdates);
     }
 
@@ -244,15 +244,15 @@ public class BaseApplication extends Application {
         return preferences.getBoolean(getString(R.string.LOCATION_UPDATES), true);
     }
 
-    public void setLastMapPosition(MapPosition lastMapPosition) {
+    public void setLastMapPosition(final MapPosition lastMapPosition) {
         putDouble(R.string.LAST_POSITION_LAT, lastMapPosition.latLong.latitude);
         putDouble(R.string.LAST_POSITION_LON, lastMapPosition.latLong.longitude);
         putLong(R.string.LAST_POSITION_ZOOM, lastMapPosition.zoomLevel);
     }
 
     public MapPosition getLastMapPosition() {
-        LatLong latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT, 0.0), getDouble(R.string.LAST_POSITION_LON, 0.0));
-        MapPosition mapPosition = new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
+        final LatLong latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT, 0.0), getDouble(R.string.LAST_POSITION_LON, 0.0));
+        final MapPosition mapPosition = new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
         return mapPosition;
     }
 
@@ -267,11 +267,11 @@ public class BaseApplication extends Application {
         return preferences.getBoolean(getString(R.string.ANONYMOUS), false);
     }
 
-    public void setAnonymous(boolean anonymous) {
+    public void setAnonymous(final boolean anonymous) {
         putBoolean(R.string.ANONYMOUS, anonymous);
     }
 
-    public void setProfile(Profile profile) {
+    public void setProfile(final Profile profile) {
         setLicense(profile.getLicense());
         setPhotoOwner(profile.isPhotoOwner());
         setAnonymous(profile.isAnonymous());
@@ -282,7 +282,7 @@ public class BaseApplication extends Application {
     }
 
     public Profile getProfile() {
-        Profile profile = new Profile();
+        final Profile profile = new Profile();
         profile.setLicense(getLicense());
         profile.setPhotoOwner(getPhotoOwner());
         profile.setAnonymous(getAnonymous());
@@ -295,23 +295,23 @@ public class BaseApplication extends Application {
 
     public RSAPI getRSAPI() {
         if (api == null) {
-            GsonBuilder gson = new GsonBuilder();
+            final GsonBuilder gson = new GsonBuilder();
             gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
             gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
 
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            final HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-            OkHttpClient.Builder builder = new OkHttpClient.Builder()
+            final OkHttpClient.Builder builder = new OkHttpClient.Builder()
                     .addInterceptor(new UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
 
             if (BuildConfig.DEBUG) {
                 builder.addInterceptor(loggingInterceptor);
             }
 
-            OkHttpClient okHttp = builder.build();
+            final OkHttpClient okHttp = builder.build();
 
-            Retrofit retrofit = new Retrofit.Builder()
+            final Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(getApiUrl())
                     .client(okHttp)
                     .addConverterFactory(GsonConverterFactory.create(gson.create()))
@@ -326,11 +326,11 @@ public class BaseApplication extends Application {
         return getUri(getString(R.string.MAP_FILE));
     }
 
-    public void setMapUri(Uri map) {
+    public void setMapUri(final Uri map) {
         putUri(R.string.MAP_FILE, map);
     }
 
-    private void putUri(int key, Uri uri) {
+    private void putUri(final int key, final Uri uri) {
         putString(key, uri != null ? uri.toString() : null);
     }
 
@@ -338,17 +338,17 @@ public class BaseApplication extends Application {
         return getUri(getString(R.string.MAP_DIRECTORY));
     }
 
-    private Uri getUri(String key) {
-        String value = preferences.getString(key, null);
+    private Uri getUri(final String key) {
+        final String value = preferences.getString(key, null);
         try {
             return Uri.parse(value);
-        } catch (Exception ignored) {
+        } catch (final Exception ignored) {
             Log.e(TAG, "can't read Uri string " + value);
         }
         return null;
     }
 
-    public void setMapDirectoryUri(Uri mapDirectory) {
+    public void setMapDirectoryUri(final Uri mapDirectory) {
         putUri(R.string.MAP_DIRECTORY, mapDirectory);
     }
 
@@ -356,7 +356,7 @@ public class BaseApplication extends Application {
         return getUri(getString(R.string.MAP_THEME_DIRECTORY));
     }
 
-    public void setMapThemeDirectoryUri(Uri mapThemeDirectory) {
+    public void setMapThemeDirectoryUri(final Uri mapThemeDirectory) {
         putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
     }
 
@@ -364,7 +364,7 @@ public class BaseApplication extends Application {
         return getUri(getString(R.string.MAP_THEME));
     }
 
-    public void setMapThemeUri(Uri mapTheme) {
+    public void setMapThemeUri(final Uri mapTheme) {
         putUri(R.string.MAP_THEME, mapTheme);
     }
 
@@ -373,14 +373,14 @@ public class BaseApplication extends Application {
 
         private final String userAgent;
 
-        public UserAgentInterceptor(String userAgent) {
+        public UserAgentInterceptor(final String userAgent) {
             this.userAgent = userAgent;
         }
 
         @Override
-        public Response intercept(Interceptor.Chain chain) throws IOException {
-            Request originalRequest = chain.request();
-            Request requestWithUserAgent = originalRequest.newBuilder()
+        public Response intercept(final Interceptor.Chain chain) throws IOException {
+            final Request originalRequest = chain.request();
+            final Request requestWithUserAgent = originalRequest.newBuilder()
                     .header("User-Agent", userAgent)
                     .build();
             return chain.proceed(requestWithUserAgent);

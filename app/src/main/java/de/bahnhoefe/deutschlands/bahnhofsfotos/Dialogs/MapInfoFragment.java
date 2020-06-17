@@ -40,8 +40,7 @@ public class MapInfoFragment extends DialogFragment {
         builder.setView(textView);
 
         // Creates the AlertDialog object and return it
-        final AlertDialog mapInfoDialog = builder.create();
-        return mapInfoDialog;
+        return builder.create();
     }
 
 

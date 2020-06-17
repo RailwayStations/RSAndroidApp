@@ -100,23 +100,23 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
 
     private class HighScoreFilter extends Filter {
 
-        private List<HighScoreItem> originalItems = new ArrayList<>();
+        private final List<HighScoreItem> originalItems = new ArrayList<>();
 
-        public HighScoreFilter(List<HighScoreItem> originalItems) {
+        public HighScoreFilter(final List<HighScoreItem> originalItems) {
             this.originalItems.addAll(originalItems);
         }
 
         @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            FilterResults filterResults = new FilterResults();
-            ArrayList<HighScoreItem> tempList = new ArrayList<>();
+        protected FilterResults performFiltering(final CharSequence constraint) {
+            final FilterResults filterResults = new FilterResults();
+            final ArrayList<HighScoreItem> tempList = new ArrayList<>();
 
-            if (constraint != null && originalItems != null) {
-                String search = constraint.toString().toLowerCase();
-                int length = originalItems.size();
+            if (constraint != null) {
+                final String search = constraint.toString().toLowerCase();
+                final int length = originalItems.size();
                 int i = 0;
                 while (i<length) {
-                    HighScoreItem item = originalItems.get(i);
+                    final HighScoreItem item = originalItems.get(i);
                     if (item.getName().toLowerCase().contains(search))
                     tempList.add(item);
                     i++;
@@ -129,7 +129,7 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
 
         @SuppressWarnings("unchecked")
         @Override
-        protected void publishResults(CharSequence contraint, FilterResults results) {
+        protected void publishResults(final CharSequence contraint, final FilterResults results) {
             highScore = (ArrayList<HighScoreItem>) results.values;
             clear();
             addAll(highScore);

@@ -11,7 +11,7 @@ public enum ProblemType {
 
     private final int messageId;
 
-    ProblemType(int messageId) {
+    ProblemType(final int messageId) {
         this.messageId = messageId;
     }
 

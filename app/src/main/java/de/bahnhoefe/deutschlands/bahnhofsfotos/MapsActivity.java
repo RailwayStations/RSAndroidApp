@@ -1,11 +1,9 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -228,7 +226,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         mapView.getMapZoomControls().setZoomLevelMin(getZoomLevelMin());
         mapView.getMapZoomControls().setZoomLevelMax(getZoomLevelMax());
 
-        //this.mapView.getModel().displayModel.setFixedTileSize(256);
         mapView.getMapZoomControls().setZoomControlsOrientation(MapZoomControls.Orientation.VERTICAL_IN_OUT);
         mapView.getMapZoomControls().setZoomInResource(R.drawable.zoom_control_in);
         mapView.getMapZoomControls().setZoomOutResource(R.drawable.zoom_control_out);
@@ -332,14 +329,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth()/2), -bitmap.getHeight()) {
                 @Override
                 public boolean onTap(final LatLong tapLatLong, final Point layerXY, final Point tapXY) {
-                    new SimpleDialogs().confirm(MapsActivity.this, R.string.add_missing_station, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(final DialogInterface dialogInterface, final int i) {
-                            final Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
-                            intent.putExtra(DetailsActivity.EXTRA_LATITUDE, getLatLong().latitude);
-                            intent.putExtra(DetailsActivity.EXTRA_LONGITUDE, getLatLong().longitude);
-                            startActivityForResult(intent, 0); // workaround to handle backstack correctly in DetailsActivity
-                        }
+                    new SimpleDialogs().confirm(MapsActivity.this, R.string.add_missing_station, (dialogInterface, i) -> {
+                        final Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
+                        intent.putExtra(DetailsActivity.EXTRA_LATITUDE, getLatLong().latitude);
+                        intent.putExtra(DetailsActivity.EXTRA_LONGITUDE, getLatLong().longitude);
+                        startActivityForResult(intent, 0); // workaround to handle backstack correctly in DetailsActivity
                     });
                     return false;
                 }
@@ -409,12 +403,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         mapSubmenu.setGroupCheckable(R.id.maps_group, true, true);
 
         final MenuItem mapFolder = mapSubmenu.add(R.string.map_folder);
-        mapFolder.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(final MenuItem item) {
-                openMapDirectoryChooser();
-                return false;
-            }
+        mapFolder.setOnMenuItemClickListener(item1 -> {
+            openMapDirectoryChooser();
+            return false;
         });
 
         final Uri mapTheme = baseApplication.getMapThemeUri();
@@ -449,12 +440,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         themeSubmenu.setGroupCheckable(R.id.themes_group, true, true);
 
         final MenuItem themeFolder = themeSubmenu.add(R.string.theme_folder);
-        themeFolder.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(final MenuItem item) {
-                openThemeDirectoryChooser();
-                return false;
-            }
+        themeFolder.setOnMenuItemClickListener(item12 -> {
+            openThemeDirectoryChooser();
+            return false;
         });
 
         return true;
@@ -896,11 +884,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private static class MapMenuListener implements MenuItem.OnMenuItemClickListener {
 
-        private WeakReference<MapsActivity> mapsActivityRef;
+        private final WeakReference<MapsActivity> mapsActivityRef;
 
-        private BaseApplication baseApplication;
+        private final BaseApplication baseApplication;
 
-        private Uri mapUri;
+        private final Uri mapUri;
 
         private MapMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final Uri mapUri) {
             this.mapsActivityRef = new WeakReference<>(mapsActivity);
@@ -927,11 +915,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private static class MapThemeMenuListener implements MenuItem.OnMenuItemClickListener {
 
-        private WeakReference<MapsActivity> mapsActivityRef;
+        private final WeakReference<MapsActivity> mapsActivityRef;
 
-        private BaseApplication baseApplication;
+        private final BaseApplication baseApplication;
 
-        private Uri mapThemeUri;
+        private final Uri mapThemeUri;
 
         private MapThemeMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final Uri mapThemeUri) {
             this.mapsActivityRef = new WeakReference<>(mapsActivity);

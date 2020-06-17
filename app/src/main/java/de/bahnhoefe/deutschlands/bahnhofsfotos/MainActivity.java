@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
@@ -80,13 +79,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rsapi = baseApplication.getRSAPI();
 
         final FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                final Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
-                startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
-            }
+        fab.setOnClickListener(view -> {
+            final Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
+            startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
         });
 
         final DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -293,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             final Intent intent = new Intent(MainActivity.this, MyDataActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_update_photos) {
-            runUpdateTasks();
+            runUpdateCountriesAndStations();
         } else if (id == R.id.nav_highscore) {
             final Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
             startActivity(intent);
@@ -321,12 +317,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    /**
-     * Run Multiple Async Tasks
-     * <p>
-     * from http://blogs.innovationm.com/multiple-asynctask-in-android/
-     */
-    private void runUpdateTasks() {
+    private void runUpdateCountriesAndStations() {
         progressBar.setVisibility(View.VISIBLE);
 
         rsapi.getCountries().enqueue(new Callback<List<Country>>() {
@@ -378,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (baseApplication.getLastUpdate() == 0) {
-            runUpdateTasks();
+            runUpdateCountriesAndStations();
         } else if (System.currentTimeMillis() - baseApplication.getLastUpdate() > CHECK_UPDATE_INTERVAL) {
             baseApplication.setLastUpdate(System.currentTimeMillis());
             if (baseApplication.getUpdatePolicy() != UpdatePolicy.MANUAL) {
@@ -415,26 +406,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d(TAG, "DbStat: " + dbStat);
         if (apiStat.getTotal() != dbStat.getTotal() || apiStat.getWithPhoto() != dbStat.getWithPhoto() || apiStat.getWithoutPhoto() != dbStat.getWithoutPhoto()) {
             if (baseApplication.getUpdatePolicy() == UpdatePolicy.AUTOMATIC) {
-                runUpdateTasks();
+                runUpdateCountriesAndStations();
             } else {
                 new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
                         .setIcon(R.mipmap.ic_launcher)
                         .setTitle(R.string.app_name)
                         .setMessage(R.string.update_available)
                         .setCancelable(true)
-                        .setPositiveButton(R.string.button_ok_text, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog, final int which) {
-                                runUpdateTasks();
-                                dialog.dismiss();
-                            }
+                        .setPositiveButton(R.string.button_ok_text, (dialog, which) -> {
+                            runUpdateCountriesAndStations();
+                            dialog.dismiss();
                         })
-                        .setNegativeButton(R.string.button_cancel_text, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog, final int which) {
-                                dialog.dismiss();
-                            }
-                        })
+                        .setNegativeButton(R.string.button_cancel_text, (dialog, which) -> dialog.dismiss())
                         .create().show();
             }
         }

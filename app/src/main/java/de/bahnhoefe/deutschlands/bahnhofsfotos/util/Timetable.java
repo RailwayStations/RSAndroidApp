@@ -16,7 +16,7 @@ public class Timetable {
      * @return the PendingIntent built.
      */
     @Nullable
-    public Intent createTimetableIntent(Country country, Station station) {
+    public Intent createTimetableIntent(final Country country, final Station station) {
         final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
 
         if (!country.hasTimetableUrlTemplate()) {

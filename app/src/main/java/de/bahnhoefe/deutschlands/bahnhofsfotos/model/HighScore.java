@@ -20,13 +20,13 @@ public class HighScore {
 
 
     public static class HighScoreDeserializer implements JsonDeserializer<HighScore> {
-        public HighScore deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+        public HighScore deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
                 throws JsonParseException {
             final HighScore highScore = new HighScore();
 
             int position = 0;
             int lastPhotos = 0;
-            for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
+            for (final Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
                 final String name = entry.getKey();
                 final int photos = entry.getValue().getAsInt();
                 if (lastPhotos == 0 || lastPhotos > photos) {

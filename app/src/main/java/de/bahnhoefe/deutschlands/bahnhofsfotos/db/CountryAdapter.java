@@ -98,16 +98,13 @@ public class CountryAdapter extends CursorAdapter {
     }
 
     private View.OnClickListener onStateChangedListener(final CheckBox checkCountry, final int position) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                final Cursor cursor = (Cursor) getItem(position);
-                final String country = cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE));
-                if (checkCountry.isChecked()) {
-                    selectedCountries.add(country);
-                } else {
-                    selectedCountries.remove(country);
-                }
+        return v -> {
+            final Cursor cursor = (Cursor) getItem(position);
+            final String country = cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE));
+            if (checkCountry.isChecked()) {
+                selectedCountries.add(country);
+            } else {
+                selectedCountries.remove(country);
             }
         };
     }

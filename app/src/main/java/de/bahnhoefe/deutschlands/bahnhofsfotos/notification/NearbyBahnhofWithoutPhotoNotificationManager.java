@@ -19,7 +19,7 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
     public static final int LED_COLOR = 0x0000ffff;
     private static final int REQUEST_FOTO = 0x100;
 
-    public NearbyBahnhofWithoutPhotoNotificationManager(Context context, Station station, double distance, Set<Country> countries) {
+    public NearbyBahnhofWithoutPhotoNotificationManager(final Context context, final Station station, final double distance, final Set<Country> countries) {
         super(context, station, distance, countries);
         Log.d(TAG, "Creating " + getClass().getSimpleName());
     }
@@ -29,7 +29,7 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
         // Build an intent for an action to take a picture
         // actually this launches DetailsActivity with a specific Extra that causes it to launch
         // Photo immediately.
-        Intent detailFotoIntent = getDetailIntent();
+        final Intent detailFotoIntent = getDetailIntent();
         detailFotoIntent.putExtra(DetailsActivity.EXTRA_TAKE_FOTO, true);
         return pendifyMe(detailFotoIntent, REQUEST_FOTO);
     }
@@ -40,9 +40,9 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
      */
     @Override
     public void notifyUser() {
-        NotificationCompat.Builder notificationBuilder = getBasicNotificationBuilder();
+        final NotificationCompat.Builder notificationBuilder = getBasicNotificationBuilder();
 
-        PendingIntent fotoPendingIntent = getFotoPendingIntent();
+        final PendingIntent fotoPendingIntent = getFotoPendingIntent();
 
         notificationBuilder
                 .addAction(R.drawable.ic_photo_camera_white_48px, context.getString(R.string.photo), fotoPendingIntent)

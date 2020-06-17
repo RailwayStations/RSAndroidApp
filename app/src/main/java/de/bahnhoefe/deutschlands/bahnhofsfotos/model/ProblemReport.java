@@ -18,7 +18,7 @@ public class ProblemReport {
         return countryCode;
     }
 
-    public void setCountryCode(String countryCode) {
+    public void setCountryCode(final String countryCode) {
         this.countryCode = countryCode;
     }
 
@@ -26,7 +26,7 @@ public class ProblemReport {
         return stationId;
     }
 
-    public void setStationId(String stationId) {
+    public void setStationId(final String stationId) {
         this.stationId = stationId;
     }
 
@@ -34,7 +34,7 @@ public class ProblemReport {
         return comment;
     }
 
-    public void setComment(String comment) {
+    public void setComment(final String comment) {
         this.comment = comment;
     }
 
@@ -42,7 +42,7 @@ public class ProblemReport {
         return type;
     }
 
-    public void setType(ProblemType type) {
+    public void setType(final ProblemType type) {
         this.type = type;
     }
 }

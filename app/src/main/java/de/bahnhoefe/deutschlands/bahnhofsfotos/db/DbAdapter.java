@@ -493,7 +493,7 @@ public class DbAdapter {
         return uploads;
     }
 
-    class DbOpenHelper extends SQLiteOpenHelper {
+    static class DbOpenHelper extends SQLiteOpenHelper {
 
         DbOpenHelper(final Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);

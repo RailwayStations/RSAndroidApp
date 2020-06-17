@@ -25,7 +25,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     private static final long[] VIBRATION_PATTERN = new long[]{300};
     private static final int LED_COLOR = 0x00ff0000;
 
-    public NearbyBahnhofWithPhotoNotificationManager(Context context, Station station, double distance, Set<Country> countries) {
+    public NearbyBahnhofWithPhotoNotificationManager(final Context context, final Station station, final double distance, final Set<Country> countries) {
         super(context, station, distance, countries);
         Log.d(TAG, "Creating " + getClass().getSimpleName());
     }
@@ -55,25 +55,25 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
             bitmap = getBitmapFromResource(R.drawable.ic_stations_with_photo);
         }
 
-        NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
+        final NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
         if (bitmap != null) {
             bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(notificationStation.getLicense());
         }
 
-        Notification fullImagePage = new NotificationCompat.Builder(context)
+        final Notification fullImagePage = new NotificationCompat.Builder(context)
                 .setStyle(bigPictureStyle)
                 .extend(new NotificationCompat.WearableExtender()
                         .setHintShowBackgroundOnly(true)
                         .setHintScreenTimeout(NotificationCompat.WearableExtender.SCREEN_TIMEOUT_LONG))
                 .build();
 
-        NotificationCompat.WearableExtender wearableExtender =
+        final NotificationCompat.WearableExtender wearableExtender =
                 new NotificationCompat.WearableExtender()
                         .setHintHideIcon(true)
                         .setBackground(bitmap)
                         .addPage(fullImagePage);
 
-        NotificationCompat.Builder notificationBuilder = getBasicNotificationBuilder();
+        final NotificationCompat.Builder notificationBuilder = getBasicNotificationBuilder();
 
         // apply our specifics
         notificationBuilder
@@ -92,14 +92,14 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      * @return the Bitmap. May be null.
      */
     @Nullable
-    private Bitmap getBitmapFromResource(int id) {
+    private Bitmap getBitmapFromResource(final int id) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Drawable vectorDrawable = context.getDrawable(id);
-            int h = 400;
-            int w = 400;
+            final Drawable vectorDrawable = context.getDrawable(id);
+            final int h = 400;
+            final int w = 400;
             vectorDrawable.setBounds(0, 0, w, h);
-            Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bm);
+            final Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            final Canvas canvas = new Canvas(bm);
             canvas.drawColor(Color.WHITE);
             vectorDrawable.draw(canvas);
             return bm;

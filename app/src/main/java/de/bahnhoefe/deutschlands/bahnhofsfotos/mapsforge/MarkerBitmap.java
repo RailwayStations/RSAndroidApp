@@ -38,7 +38,7 @@ import org.mapsforge.map.model.DisplayModel;
  */
 public class MarkerBitmap {
 
-    private static Map<String, Bitmap> captionViews = new HashMap<>();
+    private static final Map<String, Bitmap> captionViews = new HashMap<>();
     private static Context context;
 
     /**
@@ -81,17 +81,17 @@ public class MarkerBitmap {
      * if you are using symmetric icon image, it should be half size of width&height.
      * adjust this parameter to offset the axis of the image.
      */
-    private Point iconOffset;
+    private final Point iconOffset;
 
     /**
      * maximum item size for the marker.
      */
-    private int itemSizeMax;
+    private final int itemSizeMax;
 
     /**
      * text size for icon
      */
-    private float textSize;
+    private final float textSize;
 
     /**
      * NOTE: all src* must be same bitmap size.
@@ -106,9 +106,9 @@ public class MarkerBitmap {
      * @param textSize text size for icon
      * @param maxSize  icon size threshold
      */
-    public MarkerBitmap(Context context, Bitmap srcWithoutPhoto, Bitmap srcWithPhoto, Bitmap srcOwnPhoto,
-                        Bitmap srcWithoutPhotoInactive, Bitmap srcWithPhotoInactive, Bitmap srcOwnPhotoInactive,
-                        Point grid, float textSize, int maxSize, Paint paint) {
+    public MarkerBitmap(final Context context, final Bitmap srcWithoutPhoto, final Bitmap srcWithPhoto, final Bitmap srcOwnPhoto,
+                        final Bitmap srcWithoutPhotoInactive, final Bitmap srcWithPhotoInactive, final Bitmap srcOwnPhotoInactive,
+                        final Point grid, final float textSize, final int maxSize, final Paint paint) {
         MarkerBitmap.context = context;
         iconBmpWithoutPhoto = srcWithoutPhoto;
         iconBmpWithPhoto = srcWithPhoto;
@@ -123,13 +123,13 @@ public class MarkerBitmap {
         this.paint.setTextSize(getTextSize());
     }
 
-    public MarkerBitmap(Context context, Bitmap bitmap, Point grid, float textSize, int maxSize, Paint paint) {
+    public MarkerBitmap(final Context context, final Bitmap bitmap, final Point grid, final float textSize, final int maxSize, final Paint paint) {
         this(context, bitmap, bitmap, bitmap, bitmap, bitmap, bitmap, grid, textSize, maxSize, paint);
     }
 
-    public static Bitmap getBitmapFromTitle(String title, Paint paint) {
+    public static Bitmap getBitmapFromTitle(final String title, final Paint paint) {
         if (!captionViews.containsKey(title)) {
-            TextView bubbleView = new TextView(context);
+            final TextView bubbleView = new TextView(context);
             bubbleView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             Utils.setBackground(bubbleView, context.getResources().getDrawable(R.drawable.caption_background));
             bubbleView.setGravity(Gravity.CENTER);
@@ -139,8 +139,8 @@ public class MarkerBitmap {
             bubbleView.setTextColor(android.graphics.Color.BLACK);
             bubbleView.setText(title);
             //Measure the view at the exact dimensions (otherwise the text won't center correctly)
-            int widthSpec = View.MeasureSpec.makeMeasureSpec(paint.getTextWidth(title), View.MeasureSpec.EXACTLY);
-            int heightSpec = View.MeasureSpec.makeMeasureSpec(paint.getTextHeight(title), View.MeasureSpec.EXACTLY);
+            final int widthSpec = View.MeasureSpec.makeMeasureSpec(paint.getTextWidth(title), View.MeasureSpec.EXACTLY);
+            final int heightSpec = View.MeasureSpec.makeMeasureSpec(paint.getTextHeight(title), View.MeasureSpec.EXACTLY);
             bubbleView.measure(widthSpec, heightSpec);
 
             //Layout the view at the width and height
@@ -153,7 +153,7 @@ public class MarkerBitmap {
     }
 
     protected static void clearCaptionBitmap() {
-        for (Bitmap bitmap : captionViews.values()) {
+        for (final Bitmap bitmap : captionViews.values()) {
             bitmap.decrementRefCount();
         }
         captionViews.clear();
@@ -162,7 +162,7 @@ public class MarkerBitmap {
     /**
      * @return bitmap object according to the state of the stations
      */
-    public final Bitmap getBitmap(boolean hasPhoto, boolean ownPhoto, boolean stationActive) {
+    public final Bitmap getBitmap(final boolean hasPhoto, final boolean ownPhoto, final boolean stationActive) {
         if (ownPhoto) {
             if (stationActive) {
                 return iconBmpOwnPhoto;
