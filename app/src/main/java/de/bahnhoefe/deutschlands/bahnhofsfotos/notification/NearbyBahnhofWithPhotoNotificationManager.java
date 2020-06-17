@@ -7,15 +7,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import android.util.Log;
 
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
@@ -51,6 +52,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
         if (context == null) {
             return; // we're already destroyed
         }
+
         if (bitmap == null) {
             bitmap = getBitmapFromResource(R.drawable.ic_stations_with_photo);
         }
@@ -103,8 +105,8 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
             canvas.drawColor(Color.WHITE);
             vectorDrawable.draw(canvas);
             return bm;
-        } else
-            return null;
+        }
+        return null;
     }
 
 

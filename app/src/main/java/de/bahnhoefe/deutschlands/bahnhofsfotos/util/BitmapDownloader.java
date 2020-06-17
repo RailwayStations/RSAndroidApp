@@ -15,12 +15,11 @@ import java.net.URL;
  *
  * @Author pelzvieh
  */
-public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
+public class BitmapDownloader extends Thread {
+
     private final String TAG = BitmapDownloader.class.getSimpleName();
     private final BitmapAvailableHandler bitmapAvailableHandler;
-
     private final URL url;
-    private BitmapFactory.Options options;
 
     /**
      * Construct a bitmap Downloader for the given URL
@@ -34,25 +33,19 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
         this.url = url;
     }
 
-    /**
-     * Asynchronous fetching from a URL and construction of an image from the resource.
-     *
-     * @return the constructed Bitmap or null if downloading or construction failed
-     */
     @Override
-    protected Bitmap doInBackground(final Void... voids) {
-        // Fetch the station photo
+    public void run() {
         Bitmap bitmap = null;
         InputStream is = null;
         try {
-            Log.i(TAG, "Feting Bitmap from URL: " + url);
+            Log.i(TAG, "Fetching Bitmap from URL: " + url);
             final HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
             is = httpConnection.getInputStream();
             if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 final String contentType = httpConnection.getContentType();
                 if (contentType != null && !contentType.startsWith("image"))
                     Log.w(TAG, "Supplied URL does not appear to be an image resource (type=" + contentType + ")");
-                bitmap = BitmapFactory.decodeStream(is, null, options);
+                bitmap = BitmapFactory.decodeStream(is);
             } else {
                 Log.e(TAG, "Error downloading photo: " + httpConnection.getResponseCode());
             }
@@ -68,16 +61,6 @@ public class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
                 }
             }
         }
-        return bitmap;
-    }
-
-    /**
-     * Run the callback function when Bitmap creation is finished
-     *
-     * @param bitmap the downloaded Bitmap, may be null.
-     */
-    @Override
-    protected void onPostExecute(final Bitmap bitmap) {
         bitmapAvailableHandler.onBitmapAvailable(bitmap);
     }
 }

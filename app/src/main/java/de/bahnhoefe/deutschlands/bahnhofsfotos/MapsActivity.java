@@ -2,6 +2,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -95,10 +96,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     protected MapsforgeMapView mapView;
     protected Layer layer;
-    protected ClusterManager clusterer = null;
-    protected List<TileCache> tileCaches = new ArrayList<TileCache>();
+    protected ClusterManager<GeoItem> clusterer = null;
+    protected List<TileCache> tileCaches = new ArrayList<>();
 
-    private List<Station> stationList;
     private LatLong myPos = null;
 
     private CheckBox myLocSwitch = null;
@@ -109,6 +109,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private LocationManager locationManager;
     private boolean askedForPermission = false;
     private Marker missingMarker;
+    private AlertDialog progress;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -129,8 +130,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
         nickname = baseApplication.getNickname();
-
-        stationList = new ArrayList<>(0); // no markers until we know where we are
 
         final Intent intent = getIntent();
         if (intent != null) {
@@ -525,7 +524,21 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void reloadMap() {
-        new LoadMapMarkerTask().execute((Void)null);
+        progress = ProgressDialog.show(this, "", getResources().getString(R.string.loading_stations));
+        destroyClusterManager();
+
+        new LoadMapMarkerTask(this).start();
+    }
+
+    private void onStationsLoaded(final List<Station> stationList) {
+        try {
+            createClusterManager();
+            addMarkers(stationList);
+            progress.dismiss();
+            Toast.makeText(this, getResources().getQuantityString(R.plurals.stations_loaded, stationList.size(), stationList.size()), Toast.LENGTH_LONG).show();
+        } catch (final Exception e) {
+            Log.e(TAG, "Error loading markers", e);
+        }
     }
 
     @Override
@@ -549,41 +562,33 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         baseApplication.setLocationUpdates(checked);
     }
 
-    private class LoadMapMarkerTask extends AsyncTask<Void, Void, Integer> {
+    private static class LoadMapMarkerTask extends Thread {
+        private WeakReference<MapsActivity> activityRef;
 
-        final android.app.AlertDialog progress = ProgressDialog.show(MapsActivity.this, "", getResources().getString(R.string.loading_stations));
-
-        @Override
-        protected void onPreExecute() {
-            progress.show();
-            destroyClusterManager();
+        public LoadMapMarkerTask(final MapsActivity activity) {
+            this.activityRef = new WeakReference<>(activity);
         }
 
         @Override
-        protected Integer doInBackground(final Void... params) {
-            readBahnhoefe();
-            return stationList.size();
-        }
-
-        @Override
-        protected void onPostExecute(final Integer integer) {
-            try {
-                createClusterManager();
-                addMarkers(stationList);
-                progress.dismiss();
-                Toast.makeText(MapsActivity.this, getResources().getQuantityString(R.plurals.stations_loaded, stationList.size(), stationList.size()), Toast.LENGTH_LONG).show();
-            } catch (final Exception e) {
-                Log.e(TAG, "Error loading markers", e);
+        public void run() {
+            final List<Station> stationList = activityRef.get().readBahnhoefe();
+            final MapsActivity mapsActivity = activityRef.get();
+            if (mapsActivity != null) {
+                mapsActivity.runOnUiThread(()-> {
+                    mapsActivity.onStationsLoaded(stationList);
+                });
             }
         }
+
     }
 
-    private void readBahnhoefe() {
+    private List<Station> readBahnhoefe() {
         try {
-            stationList = dbAdapter.getAllStations(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
+            return dbAdapter.getAllStations(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
         } catch (final Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
+        return null;
     }
 
     private List<MarkerBitmap> getMarkerBitmap() {

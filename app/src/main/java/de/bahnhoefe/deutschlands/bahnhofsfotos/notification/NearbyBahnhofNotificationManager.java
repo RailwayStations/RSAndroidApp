@@ -76,8 +76,9 @@ public abstract class NearbyBahnhofNotificationManager {
      * @param notification
      */
     protected void onNotificationReady(final Notification notification) {
-        if (context == null)
+        if (context == null) {
             return; // we're already destroyed
+        }
 
         // Get an instance of the NotificationManager service
         final NotificationManagerCompat notificationManager =

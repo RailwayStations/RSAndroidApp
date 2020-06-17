@@ -29,8 +29,9 @@ public class BitmapCache {
      */
     public static BitmapCache getInstance() {
         synchronized (BitmapCache.class) {
-            if (instance == null)
+            if (instance == null) {
                 instance = new BitmapCache(10);
+            }
             return instance;
         }
     }
@@ -59,8 +60,9 @@ public class BitmapCache {
         @Override
         public void onBitmapAvailable(@Nullable final Bitmap bitmap) {
             // save the image in the cache if it was constructed
-            if (bitmap != null)
+            if (bitmap != null) {
                 cache.put(url, bitmap);
+            }
 
             // inform all requestors about the available image
             synchronized (requests) {
@@ -115,7 +117,7 @@ public class BitmapCache {
                     handlers.add(callback);
                 }
             }
-            downloader.execute();
+            downloader.start();
         } else {
             callback.onBitmapAvailable(bitmap);
         }

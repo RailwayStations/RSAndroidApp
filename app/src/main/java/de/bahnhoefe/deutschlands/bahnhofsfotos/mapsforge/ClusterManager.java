@@ -76,7 +76,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      * MarkerBitmap object for marker icons, uses Static access.
      */
     protected List<MarkerBitmap> markerIconBmps = Collections
-            .synchronizedList(new ArrayList<MarkerBitmap>());
+            .synchronizedList(new ArrayList<>());
     /**
      * The current BoundingBox of the viewport.
      */
@@ -91,7 +91,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      * Clustered object list.
      */
     protected List<Cluster<T>> clusters = Collections
-            .synchronizedList(new ArrayList<Cluster<T>>());
+            .synchronizedList(new ArrayList<>());
     /**
      * Handles on click on markers
      */

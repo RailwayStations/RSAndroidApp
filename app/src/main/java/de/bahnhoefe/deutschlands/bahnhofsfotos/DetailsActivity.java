@@ -918,56 +918,58 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      */
     @Override
     public void onBitmapAvailable(final @Nullable Bitmap bitmapFromCache) {
-        localFotoUsed = false;
-        uploadPhotoButton.setEnabled(false);
-        publicBitmap = bitmapFromCache;
-        if (publicBitmap == null) {
-            // keine Bitmap ausgelesen
-            // switch off image and license view until we actually have a foto
-            // @todo broken image anzeigen
-            imageView.setVisibility(View.INVISIBLE);
-            licenseTagView.setVisibility(View.INVISIBLE);
-            return;
-        }
-
-        // Lizenzinfo aufbauen und einblenden
-        licenseTagView.setVisibility(View.VISIBLE);
-        if (station != null && station.getLicense() != null) {
-            final boolean photographerUrlAvailable = station.getPhotographerUrl() != null && !station.getPhotographerUrl().isEmpty();
-            final boolean licenseUrlAvailable = station.getLicenseUrl() != null && !station.getLicenseUrl().isEmpty();
-
-            final String photographerText;
-            if (photographerUrlAvailable) {
-                photographerText = String.format(
-                        LINK_FORMAT,
-                        station.getPhotographerUrl(),
-                        station.getPhotographer());
-            } else {
-                photographerText = station.getPhotographer();
+        runOnUiThread(()-> {
+            localFotoUsed = false;
+            uploadPhotoButton.setEnabled(false);
+            publicBitmap = bitmapFromCache;
+            if (publicBitmap == null) {
+                // keine Bitmap ausgelesen
+                // switch off image and license view until we actually have a foto
+                // @todo broken image anzeigen
+                imageView.setVisibility(View.INVISIBLE);
+                licenseTagView.setVisibility(View.INVISIBLE);
+                return;
             }
 
-            final String licenseText;
-            if (licenseUrlAvailable) {
-                licenseText = String.format(
-                        LINK_FORMAT,
-                        station.getLicenseUrl(),
-                        station.getLicense());
-            } else {
-                licenseText = station.getLicense();
-            }
-            licenseTagView.setText(
-                    Html.fromHtml(
-                        String.format(
-                                getText(R.string.license_tag).toString(),
-                                photographerText,
-                                licenseText)
-                    )
-            );
-        } else {
-            licenseTagView.setText(R.string.license_info_not_readable);
-        }
+            // Lizenzinfo aufbauen und einblenden
+            licenseTagView.setVisibility(View.VISIBLE);
+            if (station != null && station.getLicense() != null) {
+                final boolean photographerUrlAvailable = station.getPhotographerUrl() != null && !station.getPhotographerUrl().isEmpty();
+                final boolean licenseUrlAvailable = station.getLicenseUrl() != null && !station.getLicenseUrl().isEmpty();
 
-        setBitmap(publicBitmap);
+                final String photographerText;
+                if (photographerUrlAvailable) {
+                    photographerText = String.format(
+                            LINK_FORMAT,
+                            station.getPhotographerUrl(),
+                            station.getPhotographer());
+                } else {
+                    photographerText = station.getPhotographer();
+                }
+
+                final String licenseText;
+                if (licenseUrlAvailable) {
+                    licenseText = String.format(
+                            LINK_FORMAT,
+                            station.getLicenseUrl(),
+                            station.getLicense());
+                } else {
+                    licenseText = station.getLicense();
+                }
+                licenseTagView.setText(
+                        Html.fromHtml(
+                            String.format(
+                                    getText(R.string.license_tag).toString(),
+                                    photographerText,
+                                    licenseText)
+                        )
+                );
+            } else {
+                licenseTagView.setText(R.string.license_info_not_readable);
+            }
+
+            setBitmap(publicBitmap);
+        });
     }
 
     /**
