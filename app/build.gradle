@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion project.buildToolsVersion
 
     compileOptions {
@@ -17,9 +17,9 @@ android {
     defaultConfig {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
         minSdkVersion 21
-        targetSdkVersion 29
-        versionCode 53
-        versionName "12.3.1"
+        targetSdkVersion 30
+        versionCode 54
+        versionName "12.3.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         manifestPlaceholders = [
