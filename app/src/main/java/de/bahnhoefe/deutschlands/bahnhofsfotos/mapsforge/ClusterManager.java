@@ -16,12 +16,8 @@
  */
 package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 
-import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.LatLong;
@@ -30,6 +26,10 @@ import org.mapsforge.map.model.DisplayModel;
 import org.mapsforge.map.model.IMapViewPosition;
 import org.mapsforge.map.model.common.Observer;
 import org.mapsforge.map.view.MapView;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Class for Clustering geotagged content. this clustering came from
@@ -48,6 +48,7 @@ import org.mapsforge.map.view.MapView;
  * Should be added as Observer on Mapsforge frameBufferModel.
  */
 public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T> {
+    private static final String TAG = ClusterManager.class.getSimpleName();
     protected static final int MIN_CLUSTER_SIZE = 5;
     /**
      * A 'Toast' to display information, intended to show information on {@link ClusterMarker}
@@ -75,8 +76,8 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
     /**
      * MarkerBitmap object for marker icons, uses Static access.
      */
-    protected List<MarkerBitmap> markerIconBmps = Collections
-            .synchronizedList(new ArrayList<>());
+    protected final List<MarkerBitmap> markerIconBmps;
+
     /**
      * The current BoundingBox of the viewport.
      */
@@ -85,17 +86,15 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      * GeoItem ArrayList object that are out of viewport and need to be
      * clustered on panning.
      */
-    protected List<T> leftItems = Collections
-            .synchronizedList(new ArrayList<T>());
+    protected final List<T> leftItems = Collections.synchronizedList(new ArrayList<>());
     /**
      * Clustered object list.
      */
-    protected List<Cluster<T>> clusters = Collections
-            .synchronizedList(new ArrayList<>());
+    protected final List<Cluster<T>> clusters = Collections.synchronizedList(new ArrayList<>());
     /**
      * Handles on click on markers
      */
-    protected TapHandler<T> tapHandler = null;
+    protected TapHandler<T> tapHandler;
 
     /**
      * saves the actual ZoolLevel of the MapView
@@ -105,7 +104,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      * saves the actual Center as LatLong of the MapViewPosition
      */
     private LatLong oldCenterLatLong;
-    private AsyncTask<Boolean, Void, Void> clusterTask;
+    private ClusterTask clusterTask;
 
     /**
      * @param mapView           The Mapview in which the markers are shoen
@@ -119,9 +118,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
         // set to impossible values to trigger clustering at first onChange
         oldZoolLevel = -1;
         oldCenterLatLong = new LatLong(-90.0, -180.0);
-        synchronized (this.markerIconBmps) {
-            this.markerIconBmps = markerBitmaps;
-        }
+        this.markerIconBmps = markerBitmaps;
 
         this.maxClusteringZoom = maxClusteringZoom;
         this.tapHandler = tapHandler;
@@ -142,7 +139,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
     }
 
     public synchronized List<T> getAllItems() {
-        final List<T> rtnList = Collections.synchronizedList(new ArrayList<T>());
+        final List<T> rtnList = Collections.synchronizedList(new ArrayList<>());
         synchronized (leftItems) {
             rtnList.addAll(leftItems);
         }
@@ -163,7 +160,9 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
     public synchronized void addItem(final T item) {
         if (mapView.getWidth() == 0 || !isItemInViewport(item)) {
             synchronized (leftItems) {
-                if (clusterTask != null && clusterTask.isCancelled()) return;
+                if (clusterTask != null && clusterTask.isInterrupted()) {
+                    return;
+                }
                 leftItems.add(item);
             }
         } else if (maxClusteringZoom >= mapView.getModel().mapViewPosition
@@ -173,7 +172,9 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
             // check existing cluster
             synchronized (clusters) {
                 for (final Cluster<T> mCluster : clusters) {
-                    if (clusterTask != null && clusterTask.isCancelled()) return;
+                    if (clusterTask != null && clusterTask.isInterrupted()) {
+                        return;
+                    }
                     if (mCluster.getItems().size() == 0) {
                         throw new IllegalArgumentException("cluster.getItems().size() == 0");
                     }
@@ -211,7 +212,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      * @param item GeoItem to be set to cluster.
      */
     public Cluster<T> createCluster(final T item) {
-        return new Cluster<T>(this, item);
+        return new Cluster<>(this, item);
     }
 
     /**
@@ -291,7 +292,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
         if (leftItems.size() == 0) {
             return;
         }
-        final ArrayList<T> currentLeftItems = new ArrayList<T>(leftItems);
+        final ArrayList<T> currentLeftItems = new ArrayList<>(leftItems);
 
         synchronized (leftItems) {
             leftItems.clear();
@@ -336,13 +337,13 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      */
     private synchronized void resetViewport(final boolean isMoving) {
         isClustering = true;
-        clusterTask = new ClusterTask();
-        clusterTask.execute(isMoving);
+        clusterTask = new ClusterTask(isMoving);
+        clusterTask.start();
     }
 
     public void cancelClusterTask() {
         if (clusterTask != null) {
-            clusterTask.cancel(true);
+            clusterTask.interrupt();
         }
     }
 
@@ -370,12 +371,19 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
         }
     }
 
-    private class ClusterTask extends AsyncTask<Boolean, Void, Void> {
+    private class ClusterTask extends Thread {
+
+        private final boolean isMoving;
+
+        public ClusterTask(final boolean isMoving) {
+            this.isMoving = isMoving;
+        }
 
         @Override
-        protected Void doInBackground(final Boolean... params) {
+        public void run() {
+            Log.d(TAG, "Run ClusterTask");
             // If the map is moved without zoom-change: Add unclustered items.
-            if (params[0]) {
+            if (isMoving) {
                 addLeftItems();
             }
             // If the cluster zoom level changed then destroy the cluster and
@@ -392,7 +400,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
                 synchronized (clusters) {
                     clusters.clear();
                 }
-                if (!isCancelled()) {
+                if (!isInterrupted()) {
                     synchronized (clusters) {
                         if (clusters.size() != 0) {
                             throw new IllegalArgumentException();
@@ -401,13 +409,10 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
                     addLeftItems();
                 }
             }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(final Void result) {
             isClustering = false;
             redraw();
+            Log.d(TAG, "ClusterTask finished");
         }
     }
+
 }
