@@ -1,3 +1,4 @@
 - Länderauswahl auf der Bahnhofskarte behoben
 - Falsch selektierter Menüpunkt im Hauptmenü behoben
 - Neues adaptives Launcher Icon
+- Abfrage, ob fehlender Bahnhof aktiv ist

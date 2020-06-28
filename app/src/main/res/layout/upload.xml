@@ -26,6 +26,14 @@
         android:layout_marginBottom="4dp"
         android:layout_below="@+id/et_comment"/>
 
+    <Spinner
+        android:id="@+id/sp_active"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/cb_special_license">
+
+    </Spinner>
+
     <TextView
         android:id="@+id/txt_panorama"
         android:linksClickable="true"
@@ -35,6 +43,6 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:layout_below="@+id/cb_special_license" />
+        android:layout_below="@+id/sp_active" />
 
 </RelativeLayout>

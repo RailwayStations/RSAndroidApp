@@ -1,3 +1,4 @@
 - fix country selection on station map
 - fix selected menu item on drawer
 - new adaptive launcher icon
+- request active status of missing stations

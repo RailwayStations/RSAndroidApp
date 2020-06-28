@@ -235,4 +235,7 @@
     <string name="nav_delete_processed_uploads">Lösche verarbeitetet Uploads</string>
     <string name="error_loading_inbox">Fehler beim Laden des Eingangskorbes</string>
     <string name="missing_station">Fehlender Bahnhof</string>
+    <string name="active_flag_choose">Is der Bahnhof aktiv?</string>
+    <string name="active_flag_active">Aktiver Bahnhof</string>
+    <string name="active_flag_inactive">Inaktiver Bahnhof</string>
 </resources>

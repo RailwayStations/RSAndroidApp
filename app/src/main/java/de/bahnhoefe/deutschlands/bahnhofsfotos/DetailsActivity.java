@@ -710,6 +710,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (upload != null) {
             etComment.setText(upload.getComment());
         }
+
+        final Spinner activeFlag = dialogView.findViewById(R.id.sp_active);
+        activeFlag.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.active_flag_options)));
+        if (station != null) {
+            activeFlag.setVisibility(View.GONE);
+        } else {
+            activeFlag.setSelection(0);
+        }
+
         final TextView panorama = dialogView.findViewById(R.id.txt_panorama);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             panorama.setText(Html.fromHtml(getString(R.string.panorama_info),Html.FROM_HTML_MODE_COMPACT));
@@ -745,6 +754,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show();
                 return;
             }
+            if (station == null && activeFlag.getSelectedItemPosition() == 0) {
+                Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show();
+                return;
+            }
             alertDialog.dismiss();
 
             final ProgressDialog progress = new ProgressDialog(DetailsActivity.this);
@@ -765,11 +778,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
             baseApplication.getDbAdapter().updateUpload(upload);
+            final Boolean active = activeFlag.getSelectedItemPosition() == 1;
 
             final File mediaFile = getStoredMediaFile(upload);
             final RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
             rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, station != null ? station.getCountry() : null,
-                    stationTitle, latitude, longitude, comment, file).enqueue(new Callback<InboxResponse>() {
+                    stationTitle, latitude, longitude, comment, active, file).enqueue(new Callback<InboxResponse>() {
                 @Override
                 public void onResponse(final Call<InboxResponse> call, final Response<InboxResponse> response) {
                     progress.dismiss();

@@ -234,4 +234,13 @@
     <string name="nav_delete_processed_uploads">Delete processed uploads</string>
     <string name="error_loading_inbox">"Error loading inbox: "</string>
     <string name="missing_station">Missing station</string>
+    <string name="active_flag_choose">Is this station active?</string>
+    <string name="active_flag_active">Active station</string>
+    <string name="active_flag_inactive">Inactive station</string>
+
+    <string-array name="active_flag_options">
+        <item>@string/active_flag_choose</item>
+        <item>@string/active_flag_active</item>
+        <item>@string/active_flag_inactive</item>
+    </string-array>
 </resources>

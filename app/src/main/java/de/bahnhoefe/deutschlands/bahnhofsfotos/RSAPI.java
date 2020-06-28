@@ -71,6 +71,7 @@ public interface RSAPI {
                                     @Header("Latitude") Double latitude,
                                     @Header("Longitude") Double longitude,
                                     @Header("Comment") String comment,
+                                    @Header("Active") Boolean active,
                                     @Body RequestBody file);
 
     @Headers({
