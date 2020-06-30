@@ -226,16 +226,16 @@
     <string name="confirm_delete_processed_uploads">Alle verarbeiteten Uploads löschen?</string>
     <string name="upload_not_yet_sent">Noch nicht gesendet</string>
     <string name="panorama_info"><![CDATA[<b>Bitte beachte die <a href="https://de.wikipedia.org/wiki/Panoramafreiheit">Panoramafreiheit</a></b>:
-            <p>- nicht aus dem Zug heraus</p>
-            <p>- keine Innenaufnahme</p>
-            <p>- vom Bahnsteig nur, wenn er von außen öffentlich erreichbar ist</p>
+            <p>&nbsp; &nbsp;- nicht aus dem Zug heraus</p>
+            <p>&nbsp; &nbsp;- keine Innenaufnahme</p>
+            <p>&nbsp; &nbsp;- vom Bahnsteig nur, wenn er von außen öffentlich erreichbar ist</p>
             ]]></string>
     <string name="special_license">Für dieses Land ist die abweichende Lizenz nötig:\n%s</string>
     <string name="special_license_confirm">Bitte die abweichende Lizenz für dieses Land bestätigen.</string>
     <string name="nav_delete_processed_uploads">Lösche verarbeitetet Uploads</string>
     <string name="error_loading_inbox">Fehler beim Laden des Eingangskorbes</string>
     <string name="missing_station">Fehlender Bahnhof</string>
-    <string name="active_flag_choose">Is der Bahnhof aktiv?</string>
+    <string name="active_flag_choose">Ist der Bahnhof aktiv?</string>
     <string name="active_flag_active">Aktiver Bahnhof</string>
     <string name="active_flag_inactive">Inaktiver Bahnhof</string>
 </resources>
