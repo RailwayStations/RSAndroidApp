@@ -1,0 +1,2 @@
+- Missing stations can now be assigned a country when uploading
+- New user registration with Username and Password and separate eMail-Verification

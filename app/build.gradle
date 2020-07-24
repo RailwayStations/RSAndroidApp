@@ -18,8 +18,8 @@ android {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 54
-        versionName "12.3.2"
+        versionCode 55
+        versionName "12.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         manifestPlaceholders = [
@@ -80,7 +80,7 @@ dependencies {
     implementation 'net.sf.kxml:kxml2:2.3.0'
     implementation 'com.caverock:androidsvg:1.4'
 
-    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'org.apache.commons:commons-lang3:3.10'
     implementation group: 'commons-io', name: 'commons-io', version: '20030203.000550'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

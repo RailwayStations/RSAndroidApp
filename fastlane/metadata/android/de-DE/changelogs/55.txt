@@ -1,0 +1,2 @@
+- Fehlenden Bahnhöfen können jetzt mit Land hochgeladen werden
+- Registrierung mit Benutzername und Passwort mit eMail-Verifizierung
