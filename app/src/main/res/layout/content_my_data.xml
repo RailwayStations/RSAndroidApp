@@ -28,68 +28,71 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvEmailOrNickname"
-            android:text="@string/tvEmailOrNickname"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginRight="10dp"
-            />
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etEmailOrNickname"
-            android:layout_below="@+id/tvEmailOrNickname"
-            android:inputType="textEmailAddress"
-            android:layout_marginRight="10dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tvEmailOrNickname"
+                android:labelFor="@id/etEmailOrNickname"
+                android:text="@string/tvEmailOrNickname"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="10dp"
+                />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/etEmailOrNickname"
+                android:layout_below="@+id/tvEmailOrNickname"
+                android:inputType="textEmailAddress"
+                android:layout_marginEnd="10dp"
+                android:importantForAutofill="no" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvPassword"
-            android:layout_below="@+id/etEmailOrNickname"
-            android:text="@string/tvPassword"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginRight="10dp"
-            />
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etPassword"
-            android:hint="@string/etPassword"
-            android:inputType="textPassword"
-            android:layout_below="@+id/tvPassword"
-            android:layout_marginRight="10dp"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_login"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/etPassword"
-            android:text="@string/login"
-            android:onClick="login"
-            />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_login_reset_password"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/bt_login"
-            android:text="@string/bt_mydata_reset_password"
-            android:onClick="resetPassword"
-            />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_register"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/bt_login_reset_password"
-            android:text="@string/bt_new_register"
-            android:onClick="newRegister"
-            />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tvPassword"
+                android:layout_below="@+id/etEmailOrNickname"
+                android:text="@string/tvPassword"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="10dp"
+                />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/etPassword"
+                android:hint="@string/etPassword"
+                android:inputType="textPassword"
+                android:layout_below="@+id/tvPassword"
+                android:layout_marginEnd="10dp"
+                android:importantForAutofill="no" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/bt_login"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/etPassword"
+                android:text="@string/login"
+                android:onClick="login"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/bt_login_reset_password"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/bt_login"
+                android:text="@string/bt_mydata_reset_password"
+                android:onClick="resetPassword"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/bt_register"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/bt_login_reset_password"
+                android:text="@string/bt_new_register"
+                android:onClick="newRegister"
+                />
 
         </RelativeLayout>
 
@@ -107,10 +110,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvEmail"
+            android:labelFor="@id/etEmail"
             android:text="@string/tvEmail"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvEmailVerification"
+            android:text="@string/emailUnverified"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/emailUnverified"
+            android:layout_marginEnd="10dp"
+            android:layout_toEndOf="@id/tvEmail"
+            android:layout_alignBottom="@id/tvEmail"
+            android:onClick="requestEmailVerification"
             />
         <EditText
             android:layout_width="match_parent"
@@ -118,12 +135,14 @@
             android:id="@+id/etEmail"
             android:layout_below="@+id/tvEmail"
             android:inputType="textEmailAddress"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginEnd="10dp"
+            android:importantForAutofill="no" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tvNickname"
+            android:labelFor="@id/etNickname"
             android:text="@string/tvNickname"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -133,7 +152,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/etNickname"
-            android:layout_below="@+id/tvNickname"/>
+            android:layout_below="@+id/tvNickname"
+            android:importantForAutofill="no"
+            android:inputType="text" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -147,7 +168,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvLicence"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:id="@+id/cbLicenseCC0"
             android:layout_marginBottom="20dp"
@@ -186,7 +206,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvAnonymous"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:id="@+id/cbAnonymous"
             android:onClick="onAnonymousChecked"
@@ -208,14 +227,49 @@
             android:layout_height="wrap_content"
             android:id="@+id/etLinking"
             android:hint="@string/etLinking"
-            android:layout_below="@+id/tvLinking"/>
+            android:layout_below="@+id/tvLinking"
+            android:importantForAutofill="no"
+            android:inputType="textUri" />
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/initPasswordLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/etLinking"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tvInitPassword"
+                android:text="@string/tvPassword"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="10dp"
+                />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/etInitPassword"
+                android:hint="@string/etPassword"
+                android:inputType="textPassword"
+                android:layout_marginEnd="10dp"
+                android:importantForAutofill="no" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/etInitPasswordRepeat"
+                android:hint="@string/initPasswordRepeat"
+                android:inputType="textPassword"
+                android:layout_marginEnd="10dp"
+                android:importantForAutofill="no" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btProfileSave"
             android:layout_marginTop="10dp"
-            android:layout_below="@+id/etLinking"
+            android:layout_below="@+id/initPasswordLayout"
             android:text="@string/bt_register"
             android:onClick="register"
             />
@@ -225,7 +279,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/bt_logout"
             android:layout_marginTop="10dp"
-            android:layout_toRightOf="@+id/btProfileSave"
+            android:layout_toEndOf="@+id/btProfileSave"
             android:layout_below="@+id/etLinking"
             android:text="@string/bt_logout"
             android:onClick="logout"

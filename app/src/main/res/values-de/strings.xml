@@ -170,7 +170,7 @@
     <string name="provider_android_app">Betreiber App</string>
     <string name="choose_provider_app">Betreiber App auswählen</string>
     <string name="tvPassword">Passwort</string>
-    <string name="etPassword">Bitte trage hier dein Passwort oder den Upload-Token ein</string>
+    <string name="etPassword">Bitte trage hier dein Passwort ein</string>
     <string name="bt_mydata_reset_password">Passwort zurücksetzen</string>
     <string name="bt_change_password">Passwort ändern</string>
     <string name="password_email">Neues Password angefordert, bitte schaue in Deine Email und prüfe den SPAM Ordner.</string>
@@ -189,7 +189,7 @@
     <string name="owner_label">Fotograf:</string>
     <string name="active">aktiv</string>
     <string name="inactive">inaktiv</string>
-    <string name="new_registration">Neues Konto angelegt, ein Initialpasswort wird Dir per Email zugeschickt. Bitte prüfe auch den SPAM Ordner.</string>
+    <string name="new_registration">Registrierung erfolgreich. Wir haben dir eine Email mit Link zum Bestätigen geschickt. Bitte prüfe auch den SPAM Ordner.</string>
     <string name="filter_result">%d von %d Bahnhöfen selektiert</string>
     <string name="menu_title_outbox">Ausgangskorb</string>
     <string name="menu_title_inbox">Eingangskorb</string>
@@ -238,4 +238,10 @@
     <string name="active_flag_choose">Ist der Bahnhof aktiv?</string>
     <string name="active_flag_active">Aktiver Bahnhof</string>
     <string name="active_flag_inactive">Inaktiver Bahnhof</string>
+    <string name="initPasswordRepeat">Password wiederholen</string>
+    <string name="emailVerified">(verifiziert)</string>
+    <string name="emailUnverified">(noch nicht verifiziert)</string>
+    <string name="requestEmailVerification">Neue Email-Verifizierung anfordern?</string>
+    <string name="emailVerificationRequested">Eine neue Bestätigungs-Email wurde angefordert. Bitte prüfe Dein Postfach.</string>
+    <string name="emailVerificationRequestFailed">Beim Anfordern einer neuen Bestätigungs-Email ist ein Fehler aufgetreten.</string>
 </resources>

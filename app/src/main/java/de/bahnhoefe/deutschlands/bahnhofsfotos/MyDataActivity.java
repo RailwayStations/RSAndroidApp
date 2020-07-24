@@ -1,5 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -43,12 +45,16 @@ public class MyDataActivity extends AppCompatActivity {
     private Profile profile;
     private View loginForm;
     private View profileForm;
+    private View initPasswordLayout;
     private EditText etEmailOrNickname;
     private EditText etPassword;
+    private EditText etInitPassword;
+    private EditText etInitPasswordRepeat;
     private Button btProfileSave;
     private Button btLogout;
     private String authorizationHeader;
     private Button btChangePassword;
+    private TextView tvEmailVerification;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -60,9 +66,13 @@ public class MyDataActivity extends AppCompatActivity {
         loginForm = findViewById(R.id.login_form);
         profileForm = findViewById(R.id.profile_form);
         profileForm.setVisibility(View.INVISIBLE);
+        initPasswordLayout = findViewById(R.id.initPasswordLayout);
 
         etNickname = findViewById(R.id.etNickname);
         etPassword = findViewById(R.id.etPassword);
+        etInitPassword = findViewById(R.id.etInitPassword);
+        etInitPasswordRepeat = findViewById(R.id.etInitPasswordRepeat);
+        tvEmailVerification = findViewById(R.id.tvEmailVerification);
         etEmail = findViewById(R.id.etEmail);
         etEmailOrNickname = findViewById(R.id.etEmailOrNickname);
         etLink = findViewById(R.id.etLinking);
@@ -98,6 +108,13 @@ public class MyDataActivity extends AppCompatActivity {
         cbAnonymous.setChecked(profile.isAnonymous());
         onAnonymousChecked(null);
 
+        if (profile.isEmailVerified()) {
+            tvEmailVerification.setText(R.string.emailVerified);
+            tvEmailVerification.setTextColor(getResources().getColor(R.color.emailVerified));
+        } else {
+            tvEmailVerification.setText(R.string.emailUnverified);
+            tvEmailVerification.setTextColor(getResources().getColor(R.color.emailUnverified));
+        }
         this.profile = profile;
     }
 
@@ -115,12 +132,7 @@ public class MyDataActivity extends AppCompatActivity {
                             final Profile remoteProfile = response.body();
                             remoteProfile.setPassword(etPassword.getText().toString());
                             saveLocalProfile(remoteProfile);
-                            loginForm.setVisibility(View.GONE);
-                            profileForm.setVisibility(View.VISIBLE);
-                            getSupportActionBar().setTitle(R.string.tvProfile);
-                            btProfileSave.setText(R.string.bt_mydata_commit);
-                            btLogout.setVisibility(View.VISIBLE);
-                            btChangePassword.setVisibility(View.VISIBLE);
+                            showProfileView();
                             break;
                         case 401 :
                             authorizationHeader = null;
@@ -139,6 +151,16 @@ public class MyDataActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void showProfileView() {
+        loginForm.setVisibility(View.GONE);
+        profileForm.setVisibility(View.VISIBLE);
+        getSupportActionBar().setTitle(R.string.tvProfile);
+        btProfileSave.setText(R.string.bt_mydata_commit);
+        btLogout.setVisibility(View.VISIBLE);
+        btChangePassword.setVisibility(View.VISIBLE);
+        initPasswordLayout.setVisibility(View.GONE);
     }
 
     private void receiveInitialPassword(final Intent intent) {
@@ -175,16 +197,20 @@ public class MyDataActivity extends AppCompatActivity {
         if (btProfileSave.getText().equals(getResources().getText(R.string.bt_register))) {
             authorizationHeader = null;
         }
-        if (!saveProfile(view)) {
+        if (!saveProfile(view, true)) {
             return;
         }
         if (authorizationHeader == null) {
-            rsapi.registration(createProfileFromUI()).enqueue(new Callback<Void>() {
+            profile = createProfileFromUI(true);
+            rsapi.registration(profile).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(final Call<Void> call, final Response<Void> response) {
                     switch (response.code()) {
                         case 202:
+                            authorizationHeader = RSAPI.Helper.getAuthorizationHeader(profile.getEmail(), profile.getNewPassword());
                             new SimpleDialogs().confirm(MyDataActivity.this, R.string.new_registration);
+                            showProfileView();
+                            saveLocalProfile(profile);
                             break;
                         case 400:
                             new SimpleDialogs().confirm(MyDataActivity.this, R.string.profile_wrong_data);
@@ -211,7 +237,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    private Profile createProfileFromUI() {
+    private Profile createProfileFromUI(final boolean register) {
         final Profile profile = new Profile();
         profile.setNickname(etNickname.getText().toString().trim());
         profile.setEmail(etEmail.getText().toString().trim());
@@ -219,13 +245,18 @@ public class MyDataActivity extends AppCompatActivity {
         profile.setPhotoOwner(cbPhotoOwner.isChecked());
         profile.setAnonymous(cbAnonymous.isChecked());
         profile.setLink(etLink.getText().toString().trim());
-        profile.setPassword(etPassword.getText().toString().trim());
+        if (register) {
+            profile.setPassword(etInitPassword.getText().toString().trim());
+            profile.setNewPassword(etInitPassword.getText().toString().trim());
+        } else {
+            profile.setPassword(etPassword.getText().toString().trim());
+        }
         return profile;
     }
 
-    public boolean saveProfile(final View view) {
-        profile = createProfileFromUI();
-        if (!isValid()) {
+    public boolean saveProfile(final View view, final boolean registration) {
+        profile = createProfileFromUI(false);
+        if (!isValid(registration)) {
             return false;
         }
         if (authorizationHeader != null) {
@@ -267,7 +298,9 @@ public class MyDataActivity extends AppCompatActivity {
         }
 
         saveLocalProfile(profile);
-        Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
+        if (!registration) {
+            Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
+        }
         return true;
     }
 
@@ -286,7 +319,7 @@ public class MyDataActivity extends AppCompatActivity {
         finish();
     }
 
-    public boolean isValid() {
+    public boolean isValid(final boolean register) {
         if (license == License.UNKNOWN) {
             new SimpleDialogs().confirm(this, R.string.cc0_needed);
             return false;
@@ -307,6 +340,11 @@ public class MyDataActivity extends AppCompatActivity {
         if (StringUtils.isNotBlank(url)&& !isValidHTTPURL(url)) {
             new SimpleDialogs().confirm(this, R.string.missing_link);
             return false;
+        }
+
+        if (register) {
+            final String newPassword = getValidPassword(etInitPassword, etInitPasswordRepeat);
+            return newPassword != null;
         }
 
         return true;
@@ -343,6 +381,7 @@ public class MyDataActivity extends AppCompatActivity {
         authorizationHeader = null;
         etEmail.setText(etEmailOrNickname.getText());
         profileForm.setVisibility(View.VISIBLE);
+        initPasswordLayout.setVisibility(View.VISIBLE);
         loginForm.setVisibility(View.GONE);
         getSupportActionBar().setTitle(R.string.tvRegistration);
         btProfileSave.setText(R.string.bt_register);
@@ -432,21 +471,14 @@ public class MyDataActivity extends AppCompatActivity {
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String newPassword = etNewPassword.getText().toString();
-
-            if (newPassword.length() < 8) {
-                Toast.makeText(MyDataActivity.this, R.string.password_too_short, Toast.LENGTH_LONG).show();
+            String newPassword = getValidPassword(etNewPassword, etPasswordRepeat);
+            if (newPassword == null) {
                 return;
             }
-            if (!newPassword.equals(etPasswordRepeat.getText().toString())) {
-                Toast.makeText(MyDataActivity.this, R.string.password_repeat_fail, Toast.LENGTH_LONG).show();
-                return;
-            }
-
             alertDialog.dismiss();
 
             try {
-                newPassword = URLEncoder.encode(etNewPassword.getText().toString(), "UTF-8");
+                newPassword = URLEncoder.encode(newPassword, "UTF-8");
             } catch (final UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding new password", e);
             }
@@ -482,4 +514,46 @@ public class MyDataActivity extends AppCompatActivity {
         });
 
     }
+
+    private String getValidPassword(final EditText etNewPassword, final EditText etPasswordRepeat) {
+        final String newPassword = etNewPassword.getText().toString().trim();
+
+        if (newPassword.length() < 8) {
+            Toast.makeText(MyDataActivity.this, R.string.password_too_short, Toast.LENGTH_LONG).show();
+            return null;
+        }
+        if (!newPassword.equals(etPasswordRepeat.getText().toString().trim())) {
+            Toast.makeText(MyDataActivity.this, R.string.password_repeat_fail, Toast.LENGTH_LONG).show();
+            return null;
+        }
+        return newPassword;
+    }
+
+    public void requestEmailVerification(final View view) {
+        new SimpleDialogs().confirm(this, R.string.requestEmailVerification, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialogInterface, final int i) {
+                rsapi.resendEmailVerification(authorizationHeader).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(final Call<Void> call, final Response<Void> response) {
+                        switch (response.code()) {
+                            case 200:
+                                Log.i(TAG, "Successfully requested email verification");
+                                Toast.makeText(MyDataActivity.this, R.string.emailVerificationRequested, Toast.LENGTH_LONG).show();
+                                break;
+                            default:
+                                Toast.makeText(MyDataActivity.this, R.string.emailVerificationRequestFailed, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(final Call<Void> call, final Throwable t) {
+                        Log.e(TAG, "Error requesting email verification", t);
+                        Toast.makeText(MyDataActivity.this, R.string.emailVerificationRequestFailed, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+    }
+
 }

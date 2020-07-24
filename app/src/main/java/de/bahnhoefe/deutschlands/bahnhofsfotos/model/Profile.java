@@ -7,6 +7,8 @@ public class Profile {
     private boolean photoOwner;
     private boolean anonymous;
     private String link;
+    private String newPassword;
+    private boolean emailVerified;
 
     private transient String password;
 
@@ -64,5 +66,21 @@ public class Profile {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(final String newPassword) {
+        this.newPassword = newPassword;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(final boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 }

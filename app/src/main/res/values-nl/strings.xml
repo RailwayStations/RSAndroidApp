@@ -157,7 +157,7 @@
     <string name="provider_android_app">Provider-app</string>
     <string name="choose_provider_app">Kies een provider-app</string>
     <string name="tvPassword">Wachtwoord</string>
-    <string name="etPassword">Voer een wachtwoord of upload-toegangssleutel in</string>
+    <string name="etPassword">Voer een wachtwoord in</string>
     <string name="bt_mydata_reset_password">Wachtwoord herstellen</string>
     <string name="bt_change_password">Wachtwoord wijzigen</string>
     <string name="password_email">Nieuw wachtwoord aangevraagd. Controleer je Postvak IN, en evt. je ongewensteberichtenmap.</string>

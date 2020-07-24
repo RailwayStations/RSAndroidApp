@@ -90,6 +90,9 @@ public interface RSAPI {
     @GET("/publicInbox")
     Call<List<PublicInbox>> getPublicInbox();
 
+    @POST("/resendEmailVerification")
+    Call<Void> resendEmailVerification(@Header("Authorization") String authorization);
+
     class Helper {
         static String getAuthorizationHeader(final String email, final String password) {
             final byte[] data = (email + ":" + password).getBytes(StandardCharsets.UTF_8);
