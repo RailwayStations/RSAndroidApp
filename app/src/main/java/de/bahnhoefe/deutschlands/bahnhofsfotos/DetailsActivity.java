@@ -82,6 +82,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.KeyValueSpinnerItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
 import okhttp3.MediaType;
@@ -712,11 +713,28 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         final Spinner activeFlag = dialogView.findViewById(R.id.sp_active);
-        activeFlag.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.active_flag_options)));
+        activeFlag.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.active_flag_options)));
         if (station != null) {
             activeFlag.setVisibility(View.GONE);
         } else {
             activeFlag.setSelection(0);
+        }
+
+        final Spinner countrySpinner = dialogView.findViewById(R.id.sp_countries);
+        if (station != null) {
+            countrySpinner.setVisibility(View.GONE);
+        } else {
+            final List<Country> countryList = baseApplication.getDbAdapter().getAllCountries();
+            final KeyValueSpinnerItem[] items = new KeyValueSpinnerItem[countryList.size() + 1];
+            items[0] = new KeyValueSpinnerItem(getString(R.string.chooseCountry), "");
+
+            for (int i = 0; i < countryList.size(); i++) {
+                final Country country = countryList.get(i);
+                items[i+1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
+            }
+            final ArrayAdapter<KeyValueSpinnerItem> countryAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, items);
+            countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            countrySpinner.setAdapter(countryAdapter);
         }
 
         final TextView panorama = dialogView.findViewById(R.id.txt_panorama);
@@ -727,7 +745,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
         panorama.setMovementMethod(LinkMovementMethod.getInstance());
         panorama.setLinkTextColor(Color.parseColor("#c71c4d"));
-
 
         final CheckBox cbSpecialLicense = dialogView.findViewById(R.id.cb_special_license);
         String overrideLicense = null;
@@ -754,9 +771,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show();
                 return;
             }
-            if (station == null && activeFlag.getSelectedItemPosition() == 0) {
-                Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show();
-                return;
+            if (station == null) {
+                if (activeFlag.getSelectedItemPosition() == 0) {
+                    Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                final KeyValueSpinnerItem selectedCountry = (KeyValueSpinnerItem) countrySpinner.getSelectedItem();
+                upload.setCountry(selectedCountry.getValue());
             }
             alertDialog.dismiss();
 
@@ -782,7 +803,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             final File mediaFile = getStoredMediaFile(upload);
             final RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
-            rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, station != null ? station.getCountry() : null,
+            rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
                     stationTitle, latitude, longitude, comment, active, file).enqueue(new Callback<InboxResponse>() {
                 @Override
                 public void onResponse(final Call<InboxResponse> call, final Response<InboxResponse> response) {

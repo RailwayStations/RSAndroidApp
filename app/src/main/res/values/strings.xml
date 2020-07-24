@@ -243,6 +243,7 @@
     <string name="requestEmailVerification">Request new email verification?</string>
     <string name="emailVerificationRequested">A new verification e-mail has been sent, please check.</string>
     <string name="emailVerificationRequestFailed">An error occured when requesting a new verification e-mail.</string>
+    <string name="chooseCountry">Choose Country</string>
 
     <string-array name="active_flag_options">
         <item>@string/active_flag_choose</item>
