@@ -36,7 +36,7 @@ public class AppInfoFragment extends DialogFragment {
         }
         textView.setLinkTextColor(Color.parseColor("#c71c4d"));
 
-        builder.setIcon(BuildConfig.DEBUG ? R.mipmap.ic_launcher_debug : R.mipmap.ic_launcher)
+        builder.setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.app_info_title)
                 .setPositiveButton(R.string.app_info_ok, (dialog, id) -> {
                     // it is okay, that the dialog closes if clicked the ok-button
