@@ -18,19 +18,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
@@ -38,6 +33,7 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMainBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
@@ -59,44 +55,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DbAdapter dbAdapter;
     private MenuItem photoFilterMenuItem;
 
+    private ActivityMainBinding binding;
+
     private StationListAdapter stationListAdapter;
     private String searchString;
-    private ProgressBar progressBar;
 
     private NearbyNotificationService.StatusBinder statusBinder;
     private RSAPI rsapi;
-    private NavigationView navigationView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        setSupportActionBar(binding.appBarMain.toolbar);
 
         baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
         rsapi = baseApplication.getRSAPI();
 
-        final FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> {
+        binding.appBarMain.fab.setOnClickListener(view -> {
             final Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
             startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
         });
 
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
         final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
+                this, binding.drawerLayout, binding.appBarMain.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        binding.drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        binding.navView.setNavigationItemSelectedListener(this);
 
-        progressBar = findViewById(R.id.progressBar);
-
-        final View header = navigationView.getHeaderView(0);
+        final View header = binding.navView.getHeaderView(0);
         final TextView tvUpdate = header.findViewById(R.id.tvUpdate);
 
         if (!baseApplication.getFirstAppStart()) {
@@ -122,9 +113,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -179,18 +169,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
                 stationListAdapter = new StationListAdapter(this, cursor, 0);
-                final ListView listView = findViewById(R.id.lstStations);
-                assert listView != null;
-                listView.setAdapter(stationListAdapter);
+                binding.appBarMain.main.lstStations.setAdapter(stationListAdapter);
 
-                listView.setOnItemClickListener((listview, view, position, id) -> {
+                binding.appBarMain.main.lstStations.setOnItemClickListener((listview, view, position, id) -> {
                     final Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
                     intentDetails.putExtra(DetailsActivity.EXTRA_STATION, dbAdapter.fetchStationByRowId(id));
                     startActivityForResult(intentDetails, 0);
                 });
             }
-            final TextView filterResult = findViewById(R.id.filter_result);
-            filterResult.setText(getString(R.string.filter_result, stationListAdapter.getCount(), stationCount));
+            binding.appBarMain.main.filterResult.setText(getString(R.string.filter_result, stationListAdapter.getCount(), stationCount));
         } catch (final Exception e) {
             Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e);
         }
@@ -283,42 +270,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         final int id = item.getItemId();
         if (id == R.id.nav_slideshow) {
-            final Intent intent = new Intent(MainActivity.this, IntroSliderActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, IntroSliderActivity.class));
         } else if (id == R.id.nav_your_data) {
-            final Intent intent = new Intent(MainActivity.this, MyDataActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, MyDataActivity.class));
         } else if (id == R.id.nav_update_photos) {
             runUpdateCountriesAndStations();
         } else if (id == R.id.nav_highscore) {
-            final Intent intent = new Intent(MainActivity.this, HighScoreActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, HighScoreActivity.class));
         } else if (id == R.id.nav_outbox) {
-            final Intent intent = new Intent(this, OutboxActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, OutboxActivity.class));
         } else if (id == R.id.nav_inbox) {
-            final Intent intent = new Intent(this, InboxActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, InboxActivity.class));
         } else if (id == R.id.nav_stations_map) {
-            final Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, MapsActivity.class));
         } else if (id == R.id.nav_web_site) {
-            final Uri mapUri = Uri.parse("https://railway-stations.org");
-            final Intent intent = new Intent(Intent.ACTION_VIEW, mapUri);
-            startActivity(intent);
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://railway-stations.org")));
         } else if (id == R.id.nav_app_info) {
             final AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(), DIALOG_TAG);
         }
 
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        assert drawer != null;
-        drawer.closeDrawer(GravityCompat.START);
+        binding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
     private void runUpdateCountriesAndStations() {
-        progressBar.setVisibility(View.VISIBLE);
+        binding.appBarMain.main.progressBar.setVisibility(View.VISIBLE);
 
         rsapi.getCountries().enqueue(new Callback<List<Country>>() {
             @Override
@@ -346,13 +323,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
                     updateStationList();
                 }
-                progressBar.setVisibility(View.GONE);
+                binding.appBarMain.main.progressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void onFailure(final Call<List<Station>> call, final Throwable t) {
                 Log.e(TAG, "Error refreshing stations", t);
-                progressBar.setVisibility(View.GONE);
+                binding.appBarMain.main.progressBar.setVisibility(View.GONE);
                 Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
@@ -364,8 +341,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onResume() {
         super.onResume();
 
-        for (int i = 0; i < navigationView.getMenu().size(); i++) {
-            navigationView.getMenu().getItem(i).setChecked(false);
+        for (int i = 0; i < binding.navView.getMenu().size(); i++) {
+            binding.navView.getMenu().getItem(i).setChecked(false);
         }
 
         if (baseApplication.getLastUpdate() == 0) {

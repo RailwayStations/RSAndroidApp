@@ -6,10 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemStationBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 /**
@@ -26,12 +25,9 @@ public class StationListAdapter extends CursorAdapter {
 
     @Override
     public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-        final View view = mInflater.inflate(R.layout.item_station, parent, false);
-        final ViewHolder holder = new ViewHolder();
-        holder.txtId = (TextView) view.findViewById(R.id.txtState);
-        holder.txtStationName = (TextView) view.findViewById(R.id.txtStationName);
-        holder.hasPhoto = (ImageView) view.findViewById(R.id.hasPhoto);
-        view.setTag(holder);
+        final ItemStationBinding binding = ItemStationBinding.inflate(mInflater, parent, false);
+        final View view = binding.getRoot();
+        view.setTag(binding);
         return view;
     }
 
@@ -44,15 +40,10 @@ public class StationListAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        final ViewHolder holder = (ViewHolder) view.getTag();
-        holder.txtId.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.COUNTRY)).concat(": ").concat(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.ID))));
-        holder.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.TITLE)));
-        holder.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
+        final ItemStationBinding binding = (ItemStationBinding) view.getTag();
+        binding.txtState.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.COUNTRY)).concat(": ").concat(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.ID))));
+        binding.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.TITLE)));
+        binding.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
     }
 
-    static class ViewHolder {
-        TextView txtId;
-        TextView txtStationName;
-        ImageView hasPhoto;
-    }
 }

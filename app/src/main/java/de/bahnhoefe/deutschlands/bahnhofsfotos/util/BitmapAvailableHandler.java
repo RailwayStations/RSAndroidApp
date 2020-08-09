@@ -1,6 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 import android.graphics.Bitmap;
+
 import androidx.annotation.Nullable;
 
 /**

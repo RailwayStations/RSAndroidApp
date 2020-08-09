@@ -23,14 +23,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.graphics.Paint;
 import org.mapsforge.core.model.Point;
 import org.mapsforge.map.model.DisplayModel;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 /**
  * Utility Class to handle MarkerBitmap

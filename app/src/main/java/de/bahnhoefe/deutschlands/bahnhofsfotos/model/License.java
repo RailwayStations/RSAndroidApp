@@ -1,12 +1,13 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+
 import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Type;
 
 public enum License {
     UNKNOWN(null),

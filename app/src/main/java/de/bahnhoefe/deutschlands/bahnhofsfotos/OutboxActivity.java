@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -18,11 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityOutboxBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.OutboxAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -41,22 +41,22 @@ public class OutboxActivity extends AppCompatActivity {
         final BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
 
-        setContentView(R.layout.activity_outbox);
-        final ListView list = findViewById(R.id.lstUploads);
+        ActivityOutboxBinding binding = ActivityOutboxBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         final Cursor uploadsCursor = dbAdapter.getOutbox();
         adapter = new OutboxAdapter(OutboxActivity.this, uploadsCursor);
-        list.setAdapter(adapter);
+        binding.lstUploads.setAdapter(adapter);
 
         // item click
-        list.setOnItemClickListener((parent, view, position, id) -> {
+        binding.lstUploads.setOnItemClickListener((parent, view, position, id) -> {
             final Upload upload = dbAdapter.getUploadById(id);
             final Intent detailIntent = new Intent(OutboxActivity.this, DetailsActivity.class);
             detailIntent.putExtra(DetailsActivity.EXTRA_UPLOAD, upload);
             startActivityForResult(detailIntent, 0);
         });
 
-        list.setOnItemLongClickListener((parent, view, position, id) -> {
+        binding.lstUploads.setOnItemLongClickListener((parent, view, position, id) -> {
             final String uploadId = String.valueOf(id);
             new SimpleDialogs().confirm(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
                 dbAdapter.deleteUpload(id);

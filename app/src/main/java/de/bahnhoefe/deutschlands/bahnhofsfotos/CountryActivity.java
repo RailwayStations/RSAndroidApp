@@ -2,16 +2,15 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Set;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityCountryBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CountryAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 
 public class CountryActivity extends AppCompatActivity {
 
@@ -20,30 +19,25 @@ public class CountryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_country);
+        final ActivityCountryBinding binding = ActivityCountryBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         final BaseApplication baseApplication = (BaseApplication) getApplication();
         final DbAdapter dbAdapter = baseApplication.getDbAdapter();
 
         final Cursor cursor = dbAdapter.getCountryList();
         countryAdapter = new CountryAdapter(this, cursor, 0);
-        final ListView listView = findViewById(R.id.lstCountries);
-
-        assert listView != null;
-        listView.setAdapter(countryAdapter);
-
-        listView.setOnItemClickListener((listview, view, position, id) -> countryAdapter.getView(position, view, listView, cursor));
+        binding.lstCountries.setAdapter(countryAdapter);
+        binding.lstCountries.setOnItemClickListener((listview, view, position, id) -> countryAdapter.getView(position, view, binding.lstCountries, cursor));
     }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return false;
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
+        return false;
     }
 
     @Override

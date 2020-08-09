@@ -1,8 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
-import java.io.Serializable;
-
 import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 
 public class Station implements Serializable {
 

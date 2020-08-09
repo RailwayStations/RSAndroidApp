@@ -4,8 +4,8 @@ import android.content.Context;
 
 import java.util.Set;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 
 public class NearbyBahnhofNotificationManagerFactory {
 

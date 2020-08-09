@@ -14,13 +14,15 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
-        android:paddingRight="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:elevation="4dp"
         app:popupTheme="@style/AppTheme.PopupOverlay" />
 
 </com.google.android.material.appbar.AppBarLayout>
 
 <include
+    android:id="@+id/map"
     layout="@layout/mapviewer"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />

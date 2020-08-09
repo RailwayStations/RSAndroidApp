@@ -5,10 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import androidx.annotation.NonNull;
-
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,11 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState;

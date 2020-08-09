@@ -2,8 +2,9 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 import android.content.Context;
 import android.os.Environment;
-import androidx.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;

@@ -3,13 +3,13 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityInboxBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.InboxAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import retrofit2.Call;
@@ -25,18 +25,17 @@ public class InboxActivity extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_inbox);
+        final ActivityInboxBinding binding = ActivityInboxBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         final Call<List<PublicInbox>> inboxCall = ((BaseApplication)getApplication()).getRSAPI().getPublicInbox();
         inboxCall.enqueue(new Callback<List<PublicInbox>>() {
             @Override
             public void onResponse(final Call<List<PublicInbox>> call, final Response<List<PublicInbox>> response) {
                 if (response.isSuccessful()) {
-                    final ListView listView = findViewById(R.id.inbox_list);
-                    assert listView != null;
                     adapter = new InboxAdapter(InboxActivity.this, response.body());
-                    listView.setAdapter(adapter);
-                    listView.setOnItemClickListener((parent, view, position, id) -> {
+                    binding.inboxList.setAdapter(adapter);
+                    binding.inboxList.setOnItemClickListener((parent, view, position, id) -> {
                         final PublicInbox inboxItem = response.body().get(position);
                         final Intent intent = new Intent(InboxActivity.this, MapsActivity.class);
                         intent.putExtra(MapsActivity.EXTRAS_LATITUDE, inboxItem.getLat());

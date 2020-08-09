@@ -6,19 +6,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 
 import java.util.List;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityHighScoreBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
@@ -32,11 +32,13 @@ public class HighScoreActivity extends AppCompatActivity {
 
     private static final String TAG = "HighScoreActivity";
     private HighScoreAdapter adapter;
+    private ActivityHighScoreBinding binding;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_high_score);
+        binding = ActivityHighScoreBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         final BaseApplication baseApplication = (BaseApplication) getApplication();
         final String firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
@@ -49,11 +51,10 @@ public class HighScoreActivity extends AppCompatActivity {
             }
         }
 
-        final Spinner countrySpinner = findViewById(R.id.countries);
         final ArrayAdapter<Country> countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, countries.toArray(new Country[0]));
-        countrySpinner.setAdapter(countryAdapter);
-        countrySpinner.setSelection(selectedItem);
-        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        binding.countries.setAdapter(countryAdapter);
+        binding.countries.setSelection(selectedItem);
+        binding.countries.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
                 loadHighScore(baseApplication, (Country)parent.getSelectedItem());
@@ -72,11 +73,9 @@ public class HighScoreActivity extends AppCompatActivity {
             @Override
             public void onResponse(final Call<HighScore> call, final Response<HighScore> response) {
                 if (response.isSuccessful()) {
-                    final ListView listView = findViewById(R.id.highscore_list);
-                    assert listView != null;
                     adapter = new HighScoreAdapter(HighScoreActivity.this, response.body().getItems());
-                    listView.setAdapter(adapter);
-                    listView.setOnItemClickListener((adapter, v, position, arg3) -> {
+                    binding.highscoreList.setAdapter(adapter);
+                    binding.highscoreList.setOnItemClickListener((adapter, v, position, arg3) -> {
                         final HighScoreItem highScoreItem = (HighScoreItem) adapter.getItemAtPosition(position);
                         final BaseApplication baseApplication1 = (BaseApplication) getApplication();
                         baseApplication1.setPhotoFilter(PhotoFilter.NICKNAME);

@@ -2,19 +2,18 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.util.Base64;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;

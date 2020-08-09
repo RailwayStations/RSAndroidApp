@@ -2,11 +2,13 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 import android.content.Intent;
 import android.net.Uri;
+
 import androidx.annotation.Nullable;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import org.apache.commons.lang3.StringUtils;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 
 public class Timetable {
 

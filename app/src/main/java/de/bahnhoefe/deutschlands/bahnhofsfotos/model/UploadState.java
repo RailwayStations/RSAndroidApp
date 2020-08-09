@@ -3,8 +3,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.JsonAdapter;
 
 import java.lang.reflect.Type;

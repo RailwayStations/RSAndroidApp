@@ -7,7 +7,7 @@
     tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity">
 
 
-    <include layout="@layout/content_details" />
+    <include layout="@layout/content_details" android:id="@+id/details" />
 
 
 

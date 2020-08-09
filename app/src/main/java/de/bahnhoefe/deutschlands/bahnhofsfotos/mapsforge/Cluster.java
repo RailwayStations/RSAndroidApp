@@ -16,12 +16,12 @@
  */
 package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 
+import org.mapsforge.core.model.LatLong;
+import org.mapsforge.map.layer.Layers;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.mapsforge.core.model.LatLong;
-import org.mapsforge.map.layer.Layers;
 
 /**
  * Cluster class.

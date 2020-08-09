@@ -13,7 +13,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -29,7 +28,6 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -67,6 +65,7 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MapInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMapsBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.ClusterManager;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.GeoItem;
@@ -94,7 +93,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private static final int REQUEST_MAP_DIRECTORY = 2;
     private static final int REQUEST_THEME_DIRECTORY = 3;
 
-    protected MapsforgeMapView mapView;
     protected Layer layer;
     protected ClusterManager<GeoItem> clusterer = null;
     protected List<TileCache> tileCaches = new ArrayList<>();
@@ -111,20 +109,20 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private Marker missingMarker;
     private AlertDialog progress;
 
+    private ActivityMapsBinding binding;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AndroidGraphicFactory.createInstance(this.getApplication());
 
-        setContentView(R.layout.activity_maps_activity);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            final Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.parseColor("#c71c4d"));
-        }
+        binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        final Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.parseColor("#c71c4d"));
 
-        final Toolbar myToolbar = findViewById(R.id.maps_toolbar);
-        setSupportActionBar(myToolbar);
+        setSupportActionBar(binding.mapsToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         baseApplication = (BaseApplication) getApplication();
@@ -148,8 +146,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     protected void createTileCaches() {
         this.tileCaches.add(AndroidUtil.createTileCache(this, getPersistableId(),
-                this.mapView.getModel().displayModel.getTileSize(), this.getScreenRatio(),
-                this.mapView.getModel().frameBufferModel.getOverdrawFactor(), true));
+                this.binding.map.mapView.getModel().displayModel.getTileSize(), this.getScreenRatio(),
+                this.binding.map.mapView.getModel().frameBufferModel.getOverdrawFactor(), true));
     }
 
     /**
@@ -187,7 +185,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      * You can add more controls.
      */
     protected void createControls() {
-        initializePosition(mapView.getModel().mapViewPosition);
+        initializePosition(binding.map.mapView.getModel().mapViewPosition);
     }
 
     /**
@@ -211,37 +209,32 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      * Template method to create the map views.
      */
     protected void createMapViews() {
-        mapView = findViewById(getMapViewId());
-        mapView.setClickable(true);
-        mapView.setOnMapDragListener(new MapsforgeMapView.MapDragListener() {
+        binding.map.mapView.setClickable(true);
+        binding.map.mapView.setOnMapDragListener(new MapsforgeMapView.MapDragListener() {
             @Override
             public void onDrag() {
                 myLocSwitch.setChecked(false);
             }
         });
-        mapView.getMapScaleBar().setVisible(true);
-        mapView.setBuiltInZoomControls(true);
-        mapView.getMapZoomControls().setAutoHide(true);
-        mapView.getMapZoomControls().setZoomLevelMin(getZoomLevelMin());
-        mapView.getMapZoomControls().setZoomLevelMax(getZoomLevelMax());
+        binding.map.mapView.getMapScaleBar().setVisible(true);
+        binding.map.mapView.setBuiltInZoomControls(true);
+        binding.map.mapView.getMapZoomControls().setAutoHide(true);
+        binding.map.mapView.getMapZoomControls().setZoomLevelMin(getZoomLevelMin());
+        binding.map.mapView.getMapZoomControls().setZoomLevelMax(getZoomLevelMax());
 
-        mapView.getMapZoomControls().setZoomControlsOrientation(MapZoomControls.Orientation.VERTICAL_IN_OUT);
-        mapView.getMapZoomControls().setZoomInResource(R.drawable.zoom_control_in);
-        mapView.getMapZoomControls().setZoomOutResource(R.drawable.zoom_control_out);
-        mapView.getMapZoomControls().setMarginHorizontal(getResources().getDimensionPixelOffset(R.dimen.controls_margin));
-        mapView.getMapZoomControls().setMarginVertical(getResources().getDimensionPixelOffset(R.dimen.controls_margin));
-    }
-
-    protected int getMapViewId() {
-        return R.id.mapView;
+        binding.map.mapView.getMapZoomControls().setZoomControlsOrientation(MapZoomControls.Orientation.VERTICAL_IN_OUT);
+        binding.map.mapView.getMapZoomControls().setZoomInResource(R.drawable.zoom_control_in);
+        binding.map.mapView.getMapZoomControls().setZoomOutResource(R.drawable.zoom_control_out);
+        binding.map.mapView.getMapZoomControls().setMarginHorizontal(getResources().getDimensionPixelOffset(R.dimen.controls_margin));
+        binding.map.mapView.getMapZoomControls().setMarginVertical(getResources().getDimensionPixelOffset(R.dimen.controls_margin));
     }
 
     protected byte getZoomLevelMax() {
-        return mapView.getModel().mapViewPosition.getZoomLevelMax();
+        return binding.map.mapView.getModel().mapViewPosition.getZoomLevelMax();
     }
 
     protected byte getZoomLevelMin() {
-        return mapView.getModel().mapViewPosition.getZoomLevelMin();
+        return binding.map.mapView.getModel().mapViewPosition.getZoomLevelMin();
     }
 
     /**
@@ -288,7 +281,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         if (mapFile != null) {
             final TileRendererLayer tileRendererLayer1 = new TileRendererLayer(this.tileCaches.get(0), mapFile,
-                    this.mapView.getModel().mapViewPosition, false, true, false, AndroidGraphicFactory.INSTANCE) {
+                    this.binding.map.mapView.getModel().mapViewPosition, false, true, false, AndroidGraphicFactory.INSTANCE) {
                 @Override
                 public boolean onLongPress(final LatLong tapLatLong, final Point thisXY,
                                            final Point tapXY) {
@@ -298,12 +291,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             };
             tileRendererLayer1.setXmlRenderTheme(getRenderTheme());
             this.layer = tileRendererLayer1;
-            mapView.getLayerManager().getLayers().add(this.layer);
+            binding.map.mapView.getLayerManager().getLayers().add(this.layer);
         } else {
             final OpenStreetMapMapnik tileSource = OpenStreetMapMapnik.INSTANCE;
             tileSource.setUserAgent("railway-stations.org-android");
             this.layer = new TileDownloadLayer(this.tileCaches.get(0),
-                    this.mapView.getModel().mapViewPosition, tileSource,
+                    this.binding.map.mapView.getModel().mapViewPosition, tileSource,
                     AndroidGraphicFactory.INSTANCE) {
                 @Override
                 public boolean onLongPress(final LatLong tapLatLong, final Point thisXY,
@@ -312,10 +305,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                     return true;
                 }
             };
-            mapView.getLayerManager().getLayers().add(this.layer);
+            binding.map.mapView.getLayerManager().getLayers().add(this.layer);
 
-            mapView.setZoomLevelMin(tileSource.getZoomLevelMin());
-            mapView.setZoomLevelMax(tileSource.getZoomLevelMax());
+            binding.map.mapView.setZoomLevelMin(tileSource.getZoomLevelMin());
+            binding.map.mapView.setZoomLevelMax(tileSource.getZoomLevelMax());
         }
 
     }
@@ -337,7 +330,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                     return false;
                 }
             };
-            mapView.getLayerManager().getLayers().add(missingMarker);
+            binding.map.mapView.getLayerManager().getLayers().add(missingMarker);
         } else {
             missingMarker.setLatLong(tapLatLong);
             missingMarker.requestRedraw();
@@ -497,7 +490,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      */
     @Override
     protected void onDestroy() {
-        mapView.destroyAll();
+        binding.map.mapView.destroyAll();
         AndroidGraphicFactory.clearResourceMemoryCache();
         purgeTileCaches();
         super.onDestroy();
@@ -698,13 +691,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private void createClusterManager() {
         // create clusterer instance
         clusterer = new ClusterManager(
-                mapView,
+                binding.map.mapView,
                 getMarkerBitmap(),
                 getZoomLevelMax(),
                 this);
         // this uses the framebuffer position, the mapview position can be out of sync with
         // what the user sees on the screen if an animation is in progress
-        this.mapView.getModel().frameBufferModel.addObserver(clusterer);
+        this.binding.map.mapView.getModel().frameBufferModel.addObserver(clusterer);
     }
 
     @Override
@@ -713,7 +706,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             ((TileDownloadLayer)this.layer).onPause();
         }
         unregisterLocationManager();
-        final MapPosition mapPosition = mapView.getModel().mapViewPosition.getMapPosition();
+        final MapPosition mapPosition = binding.map.mapView.getModel().mapViewPosition.getMapPosition();
         baseApplication.setLastMapPosition(mapPosition);
         destroyClusterManager();
         super.onPause();
@@ -722,7 +715,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private void destroyClusterManager() {
         if (clusterer != null) {
             clusterer.destroyGeoClusterer();
-            this.mapView.getModel().frameBufferModel.removeObserver(clusterer);
+            this.binding.map.mapView.getModel().frameBufferModel.removeObserver(clusterer);
             clusterer = null;
         }
     }
@@ -843,8 +836,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private void updatePosition() {
         if (myLocSwitch != null && myLocSwitch.isChecked()) {
-            mapView.setCenter(myPos);
-            mapView.repaint();
+            binding.map.mapView.setCenter(myPos);
+            binding.map.mapView.repaint();
         }
     }
 

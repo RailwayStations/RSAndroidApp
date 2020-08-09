@@ -1,19 +1,19 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
-import android.widget.ImageView;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemHighscoreBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
 
 public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
@@ -31,45 +31,40 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
     public View getView(final int position, final View convertView, @NonNull final ViewGroup parent) {
         View rowView = convertView;
         // reuse views
+        final ItemHighscoreBinding binding;
         if (rowView == null) {
             final LayoutInflater inflater = context.getLayoutInflater();
-            rowView = inflater.inflate(R.layout.item_highscore, parent, false);
-
-            // configure view holder
-            final ViewHolder viewHolder = new ViewHolder();
-            viewHolder.photos = (TextView) rowView.findViewById(R.id.highscore_photos);
-            viewHolder.name = (TextView) rowView.findViewById(R.id.highscore_name);
-            viewHolder.award = (ImageView) rowView.findViewById(R.id.highscore_award);
-            viewHolder.position = (TextView) rowView.findViewById(R.id.highscore_position);
-            rowView.setTag(viewHolder);
+            binding = ItemHighscoreBinding.inflate(inflater, parent, false);
+            rowView = binding.getRoot();
+            rowView.setTag(binding);
+        } else {
+            binding = (ItemHighscoreBinding) rowView.getTag();
         }
 
-        // fill data
-        final ViewHolder holder = (ViewHolder) rowView.getTag();
         final HighScoreItem item = highScore.get(position);
-        holder.name.setText(item.getName());
-        holder.photos.setText(String.valueOf(item.getPhotos()));
-        holder.position.setText(String.valueOf(item.getPosition()).concat("."));
+        binding.highscoreName.setText(item.getName());
+        binding.highscorePhotos.setText(String.valueOf(item.getPhotos()));
+        binding.highscorePosition.setText(String.valueOf(item.getPosition()).concat("."));
 
         switch (item.getPosition()) {
             case 1:
-                holder.award.setImageResource(R.drawable.ic_crown_gold);
-                holder.award.setVisibility(View.VISIBLE);
-                holder.position.setVisibility(View.INVISIBLE);
+                binding.highscoreAward.setImageResource(R.drawable.ic_crown_gold);
+                binding.highscoreAward.setVisibility(View.VISIBLE);
+                binding.highscorePosition.setVisibility(View.INVISIBLE);
                 break;
             case 2:
-                holder.award.setImageResource(R.drawable.ic_crown_silver);
-                holder.award.setVisibility(View.VISIBLE);
-                holder.position.setVisibility(View.INVISIBLE);
+                binding.highscoreAward.setImageResource(R.drawable.ic_crown_silver);
+                binding.highscoreAward.setVisibility(View.VISIBLE);
+                binding.highscorePosition.setVisibility(View.INVISIBLE);
                 break;
             case 3:
-                holder.award.setImageResource(R.drawable.ic_crown_bronze);
-                holder.award.setVisibility(View.VISIBLE);
-                holder.position.setVisibility(View.INVISIBLE);
+                binding.highscoreAward.setImageResource(R.drawable.ic_crown_bronze);
+                binding.highscoreAward.setVisibility(View.VISIBLE);
+                binding.highscorePosition.setVisibility(View.INVISIBLE);
                 break;
             default:
-                holder.award.setVisibility(View.INVISIBLE);
-                holder.position.setVisibility(View.VISIBLE);
+                binding.highscoreAward.setVisibility(View.INVISIBLE);
+                binding.highscorePosition.setVisibility(View.VISIBLE);
                 break;
         }
 
@@ -80,13 +75,6 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
         }
 
         return rowView;
-    }
-
-    private static class ViewHolder {
-        public TextView name;
-        public TextView photos;
-        public ImageView award;
-        public TextView position;
     }
 
     @NonNull

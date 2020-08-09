@@ -16,22 +16,15 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.View;
 import android.view.View.MeasureSpec;
-import android.widget.Toast;
 
 import org.mapsforge.core.graphics.Bitmap;
-import org.mapsforge.core.graphics.Paint;
-import org.mapsforge.core.graphics.Style;
-import org.mapsforge.core.model.LatLong;
-import org.mapsforge.core.model.Point;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
-import org.mapsforge.map.layer.overlay.Marker;
 
 /**
  * Utility functions that can be used across different mapsforge based

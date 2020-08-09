@@ -1,9 +1,10 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
 import android.graphics.Bitmap;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -5,61 +5,54 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityIntroSliderBinding;
 
 public class IntroSliderActivity extends AppCompatActivity {
 
-    private ViewPager viewPager;
+    private ActivityIntroSliderBinding binding;
     private int[] layouts;
-    private LinearLayout dotsLayout;
-    private Button next, skip;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final BaseApplication baseApplication = (BaseApplication) getApplication();
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
-        setContentView(R.layout.activity_intro_slider);
-
-        viewPager = findViewById(R.id.view_pager);
-        dotsLayout = findViewById(R.id.layoutDots);
-        skip = findViewById(R.id.btn_slider_skip);
-        next = findViewById(R.id.btn_slider_next);
+        binding = ActivityIntroSliderBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         layouts = new int[]{R.layout.intro_slider1, R.layout.intro_slider2};
 
         addBottomDots(0);
         changeStatusBarColor();
         final ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter();
-        viewPager.setAdapter(viewPagerAdapter);
-        viewPager.addOnPageChangeListener(viewListener);
+        binding.viewPager.setAdapter(viewPagerAdapter);
+        binding.viewPager.addOnPageChangeListener(viewListener);
 
-        skip.setOnClickListener(v -> {
+        binding.btnSliderSkip.setOnClickListener(v -> {
             baseApplication.setFirstAppStart(true);
             final Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         });
 
-        next.setOnClickListener(v -> {
-            final int current = getItem(+1);
+        binding.btnSliderNext.setOnClickListener(v -> {
+            final int current = getNextItem();
             if (current < layouts.length) {
-                viewPager.setCurrentItem(current);
+                binding.viewPager.setCurrentItem(current);
             } else {
                 final Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
                 startActivity(intent);
@@ -72,14 +65,14 @@ public class IntroSliderActivity extends AppCompatActivity {
         final TextView[] dots = new TextView[layouts.length];
         final int[] colorActive = getResources().getIntArray(R.array.dot_active);
         final int[] colorInactive = getResources().getIntArray(R.array.dot_inactive);
-        dotsLayout.removeAllViews();
+        binding.layoutDots.removeAllViews();
 
         for (int i = 0; i < dots.length; i++) {
             dots[i] = new TextView(this);
             dots[i].setText(Html.fromHtml("&#8226;"));
             dots[i].setTextSize(35);
             dots[i].setTextColor(colorInactive[position]);
-            dotsLayout.addView(dots[i]);
+            binding.layoutDots.addView(dots[i]);
         }
 
         if (dots.length > 0) {
@@ -87,8 +80,8 @@ public class IntroSliderActivity extends AppCompatActivity {
         }
     }
 
-    private int getItem(final int i) {
-        return viewPager.getCurrentItem() + i;
+    private int getNextItem() {
+        return binding.viewPager.getCurrentItem() + 1;
     }
 
     ViewPager.OnPageChangeListener viewListener = new ViewPager.OnPageChangeListener() {
@@ -104,12 +97,12 @@ public class IntroSliderActivity extends AppCompatActivity {
             addBottomDots(position);
 
             if (position == layouts.length - 1) {
-                next.setText(R.string.proceed);
-                skip.setVisibility(View.GONE);
+                binding.btnSliderNext.setText(R.string.proceed);
+                binding.btnSliderSkip.setVisibility(View.GONE);
                 baseApplication.setFirstAppStart(true);
             } else {
-                next.setText(R.string.next);
-                skip.setVisibility(View.VISIBLE);
+                binding.btnSliderNext.setText(R.string.next);
+                binding.btnSliderSkip.setVisibility(View.VISIBLE);
             }
         }
 
