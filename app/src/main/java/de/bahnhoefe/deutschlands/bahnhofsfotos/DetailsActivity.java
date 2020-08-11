@@ -1055,13 +1055,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         @Override
         public void onAnimationUpdate(final ValueAnimator animation) {
             final float alpha = (float) animation.getAnimatedValue();
-            if (binding.details.header == null) {
-                binding.details.etbahnhofname.setAlpha(alpha);
-            } else {
-                binding.details.header.setAlpha(alpha);
-            }
+            binding.details.header.setAlpha(alpha);
             binding.details.licenseTag.setAlpha(alpha);
             binding.details.buttons.setAlpha(alpha);
+            if (binding.details.rotateInfo != null) {
+                binding.details.rotateInfo.setAlpha(alpha);
+            }
         }
     }
 
@@ -1092,8 +1091,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void onPictureClicked() {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
-                !fullscreen) {
+        if (!fullscreen) {
             final ValueAnimator animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
@@ -1112,7 +1110,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
             fullscreen = true;
         } else {
-            final ValueAnimator animation = ValueAnimator.ofFloat(binding.details.header == null? binding.details.etbahnhofname.getAlpha() : binding.details.header.getAlpha(), 1.0f);
+            final ValueAnimator animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 1.0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();

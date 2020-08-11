@@ -88,6 +88,8 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.10'
     implementation group: 'commons-io', name: 'commons-io', version: '20030203.000550'
 
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
