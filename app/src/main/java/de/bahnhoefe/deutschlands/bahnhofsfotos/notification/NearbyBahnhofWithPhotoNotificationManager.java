@@ -93,20 +93,16 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      * @param id the resource ID denoting a drawable resource
      * @return the Bitmap. May be null.
      */
-    @Nullable
     private Bitmap getBitmapFromResource(final int id) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            final Drawable vectorDrawable = context.getDrawable(id);
-            final int h = 400;
-            final int w = 400;
-            vectorDrawable.setBounds(0, 0, w, h);
-            final Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            final Canvas canvas = new Canvas(bm);
-            canvas.drawColor(Color.WHITE);
-            vectorDrawable.draw(canvas);
-            return bm;
-        }
-        return null;
+        final Drawable vectorDrawable = context.getDrawable(id);
+        final int h = 400;
+        final int w = 400;
+        vectorDrawable.setBounds(0, 0, w, h);
+        final Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bm);
+        canvas.drawColor(Color.WHITE);
+        vectorDrawable.draw(canvas);
+        return bm;
     }
 
 

@@ -113,19 +113,17 @@ public abstract class NearbyBahnhofNotificationManager {
         final NotificationCompat.BigTextStyle bigStyle = textCreator.getBigStyle();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_logotrain_found)
-                .setContentTitle(context.getString(R.string.station_is_near))
-                .setContentText(shortText)
-                .setContentIntent(detailPendingIntent)
-                .addAction(R.drawable.ic_directions_white_24dp,
-                        context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
-                .setStyle(bigStyle)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true);
+            .setSmallIcon(R.drawable.ic_logotrain_found)
+            .setContentTitle(context.getString(R.string.station_is_near))
+            .setContentText(shortText)
+            .setContentIntent(detailPendingIntent)
+            .addAction(R.drawable.ic_directions_white_24dp,
+                    context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
+            .setStyle(bigStyle)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOnlyAlertOnce(true);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-        }
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         if (timetablePendingIntent != null) {
             builder.addAction(R.drawable.ic_timetable,
@@ -149,9 +147,7 @@ public abstract class NearbyBahnhofNotificationManager {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setOnlyAlertOnce(true);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-        }
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         return builder;
     }

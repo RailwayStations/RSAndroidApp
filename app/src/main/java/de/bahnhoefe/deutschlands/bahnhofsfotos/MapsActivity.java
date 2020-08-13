@@ -316,7 +316,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private void onLongPress(final LatLong tapLatLong) {
         if (missingMarker == null) {
             // marker to show at the location
-            final Drawable drawable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? getDrawable(R.drawable.marker_missing) : getResources().getDrawable(R.drawable.marker_missing);
+            final Drawable drawable = getDrawable(R.drawable.marker_missing);
             final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
             missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth()/2), -bitmap.getHeight()) {
                 @Override
@@ -337,7 +337,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
 
         // feedback for long click
-        if (Build.VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE));
         } else {
             ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(150);
