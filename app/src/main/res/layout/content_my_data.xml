@@ -271,7 +271,7 @@
             android:layout_marginTop="10dp"
             android:layout_below="@+id/initPasswordLayout"
             android:text="@string/bt_register"
-            android:onClick="register"
+            android:onClick="registerOrSave"
             />
 
         <Button

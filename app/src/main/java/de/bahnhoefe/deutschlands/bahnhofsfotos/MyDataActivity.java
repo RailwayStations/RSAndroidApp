@@ -159,15 +159,17 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    public void register(final View view) {
+    public void registerOrSave(final View view) {
+        boolean register = false;
         if (binding.myData.btProfileSave.getText().equals(getResources().getText(R.string.bt_register))) {
             authorizationHeader = null;
+            register = true;
         }
-        if (!saveProfile(view, true)) {
+        if (!saveProfile(view, register)) {
             return;
         }
         if (authorizationHeader == null) {
-            profile = createProfileFromUI(true);
+            profile = createProfileFromUI(register);
             rsapi.registration(profile).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(final Call<Void> call, final Response<Void> response) {
@@ -215,6 +217,9 @@ public class MyDataActivity extends AppCompatActivity {
             profile.setPassword(binding.myData.etInitPassword.getText().toString().trim());
             profile.setNewPassword(binding.myData.etInitPassword.getText().toString().trim());
         } else {
+            if (this.profile != null) {
+                profile.setEmailVerified(this.profile.isEmailVerified());
+            }
             profile.setPassword(binding.myData.etPassword.getText().toString().trim());
         }
         return profile;
