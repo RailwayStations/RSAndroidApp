@@ -1,0 +1,1 @@
+- Country and active selection for missing stations is now stored

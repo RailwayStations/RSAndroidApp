@@ -17,6 +17,7 @@ public class Upload implements Serializable {
     private String rejectReason;
     private UploadState uploadState = UploadState.NOT_YET_SENT;
     private Long createdAt = System.currentTimeMillis();
+    private Boolean active = null;
 
     public Upload() {
     }
@@ -147,5 +148,13 @@ public class Upload implements Serializable {
 
     public boolean isUploaded() {
         return remoteId != null;
+    }
+
+    public void setActive(final boolean active) {
+        this.active = active;
+    }
+
+    public Boolean getActive() {
+        return active;
     }
 }

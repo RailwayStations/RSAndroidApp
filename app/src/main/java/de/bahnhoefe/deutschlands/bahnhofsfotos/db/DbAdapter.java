@@ -37,7 +37,7 @@ public class DbAdapter {
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
     private static final String DATABASE_TABLE_UPLOADS = "uploads";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 17;
 
     private static final String CREATE_STATEMENT_STATIONS = "CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
             + Constants.STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -81,7 +81,8 @@ public class DbAdapter {
             + Constants.UPLOADS.PROBLEM_TYPE + " TEXT, "
             + Constants.UPLOADS.REJECTED_REASON + " TEXT, "
             + Constants.UPLOADS.UPLOAD_STATE + " TEXT, "
-            + Constants.UPLOADS.CREATED_AT + " INTEGER)";
+            + Constants.UPLOADS.CREATED_AT + " INTEGER, "
+            + Constants.UPLOADS.ACTIVE + " INTEGER)";
 
     private static final String DROP_STATEMENT_STATIONS_IDX = "DROP INDEX IF EXISTS " + DATABASE_TABLE_STATIONS + "_IDX";
     private static final String DROP_STATEMENT_STATIONS = "DROP TABLE IF EXISTS " + DATABASE_TABLE_STATIONS;
@@ -185,6 +186,7 @@ public class DbAdapter {
         values.put(Constants.UPLOADS.STATION_ID, upload.getStationId());
         values.put(Constants.UPLOADS.TITLE, upload.getTitle());
         values.put(Constants.UPLOADS.UPLOAD_STATE, upload.getUploadState().name());
+        values.put(Constants.UPLOADS.ACTIVE, upload.getActive());
 
         upload.setId(db.insert(DATABASE_TABLE_UPLOADS, null, values));
         return upload;
@@ -215,7 +217,7 @@ public class DbAdapter {
         }
 
         selectQuery += " ORDER BY " + Constants.STATIONS.TITLE + " ASC";
-        Log.d(TAG, selectQuery.toString());
+        Log.d(TAG, selectQuery);
 
         final Cursor cursor;
         if (photoFilter == PhotoFilter.NICKNAME) {
@@ -234,18 +236,14 @@ public class DbAdapter {
     }
 
     public Cursor getCountryList() {
-        //Open connection to read only
-        final SQLiteDatabase db = dbHelper.getReadableDatabase();
         final String selectQueryCountries = "SELECT " + Constants.COUNTRIES.ROWID_COUNTRIES + " AS " + Constants.CURSOR_ADAPTER_ID + ", " +
                 Constants.COUNTRIES.COUNTRYSHORTCODE + ", " + Constants.COUNTRIES.COUNTRYNAME +
                 " FROM " + DATABASE_TABLE_COUNTRIES + " ORDER BY " + Constants.COUNTRIES.COUNTRYNAME + " ASC";
-        Log.d(TAG, selectQueryCountries.toString());
+        Log.d(TAG, selectQueryCountries);
 
         final Cursor cursor = db.rawQuery(selectQueryCountries, null);
 
-        if (cursor == null) {
-            return null;
-        } else if (!cursor.moveToFirst()) {
+        if (!cursor.moveToFirst()) {
             cursor.close();
             return null;
         }
@@ -256,9 +254,9 @@ public class DbAdapter {
     /**
      * Return a cursor on station ids where the station's title matches the given string
      *
-     * @param search
+     * @param search the search keyword
      * @param photoFilter if stations need to be filtered by photo available or not
-     * @param countryCodes
+     * @param countryCodes countries to search for
      * @return a Cursor representing the matching results
      */
     public Cursor getStationsListByKeyword(final String search, final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes) {
@@ -281,19 +279,17 @@ public class DbAdapter {
         }
 
         final Cursor cursor = db.query(DATABASE_TABLE_STATIONS,
-                new String[]{
-                        Constants.STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID,
-                        Constants.STATIONS.ID,
-                        Constants.STATIONS.TITLE,
-                        Constants.STATIONS.PHOTO_URL,
-                        Constants.STATIONS.COUNTRY
-                },
-                selectQuery,
-                queryArgs.toArray(new String[0]), null, null, Constants.STATIONS.TITLE + " ASC");
+            new String[]{
+                Constants.STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID,
+                Constants.STATIONS.ID,
+                Constants.STATIONS.TITLE,
+                Constants.STATIONS.PHOTO_URL,
+                Constants.STATIONS.COUNTRY
+            },
+            selectQuery,
+            queryArgs.toArray(new String[0]), null, null, Constants.STATIONS.TITLE + " ASC");
 
-        if (cursor == null) {
-            return null;
-        } else if (!cursor.moveToFirst()) {
+        if (!cursor.moveToFirst()) {
             Log.w(TAG, String.format("Query '%s' returned no result", search));
             cursor.close();
             return null;
@@ -302,27 +298,25 @@ public class DbAdapter {
     }
 
     private String whereCountryCodeIn(final Set<String> countryCodes) {
-        String selectQuery = Constants.STATIONS.COUNTRY + " IN (";
+        StringBuilder selectQuery = new StringBuilder(Constants.STATIONS.COUNTRY).append(" IN (");
         for (final String country : countryCodes) {
-            selectQuery += "'" + country + "',";
+            selectQuery.append("'").append(country).append("',");
         }
-        selectQuery = selectQuery.substring(0, selectQuery.length() - 1) + ')';
-        return selectQuery;
+        selectQuery = new StringBuilder(selectQuery.substring(0, selectQuery.length() - 1)).append(')');
+        return selectQuery.toString();
     }
 
     public Statistic getStatistic(final String country) {
-        final SQLiteDatabase db = dbHelper.getReadableDatabase();
-
         final Cursor cursor = db.rawQuery("SELECT COUNT(*), COUNT(" + Constants.STATIONS.PHOTO_URL + "), COUNT(DISTINCT(" + Constants.STATIONS.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.COUNTRY + " = ?", new String[]{country});
-        if (!cursor.moveToNext()) {
-            return null;
+        Statistic statistic = null;
+        if (cursor.moveToNext()) {
+            statistic = new Statistic(cursor.getInt(0), cursor.getInt(1), cursor.getInt(0) - cursor.getInt(1), cursor.getInt(2));
         }
-        return new Statistic(cursor.getInt(0), cursor.getInt(1), cursor.getInt(0) - cursor.getInt(1), cursor.getInt(2));
+        cursor.close();
+        return statistic;
     }
 
     public String[] getPhotographerNicknames() {
-        final SQLiteDatabase db = dbHelper.getReadableDatabase();
-
         final List<String> photographers = new ArrayList<>();
         final Cursor cursor = db.rawQuery("SELECT distinct " + Constants.STATIONS.PHOTOGRAPHER + " FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.PHOTOGRAPHER + " IS NOT NULL ORDER BY " + Constants.STATIONS.PHOTOGRAPHER, null);
         while (cursor.moveToNext()) {
@@ -334,9 +328,10 @@ public class DbAdapter {
 
     public int countBahnhoefe(final Set<String> countryCodes) {
         final Cursor query = db.rawQuery("SELECT COUNT(*) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes), null);
-        if (query != null && query.moveToFirst()) {
+        if (query.moveToFirst()) {
             return query.getInt(0);
         }
+        query.close();
         return 0;
     }
 
@@ -356,6 +351,7 @@ public class DbAdapter {
             values.put(Constants.UPLOADS.STATION_ID, upload.getStationId());
             values.put(Constants.UPLOADS.TITLE, upload.getTitle());
             values.put(Constants.UPLOADS.UPLOAD_STATE, upload.getUploadState().name());
+            values.put(Constants.UPLOADS.ACTIVE, upload.getActive());
             db.update(DATABASE_TABLE_UPLOADS, values, Constants.UPLOADS.ID + " = ?", new String[]{String.valueOf(upload.getId())});
             db.setTransactionSuccessful();
         } finally {
@@ -388,20 +384,20 @@ public class DbAdapter {
     }
 
     private String getPendingUploadWhereClause() {
-        String where = Constants.UPLOADS.UPLOAD_STATE + " IN (";
+        final StringBuilder where = new StringBuilder(Constants.UPLOADS.UPLOAD_STATE + " IN (");
         for (final UploadState state : UploadState.values()) {
             if (state.isPending()) {
-                where += "'" + state.name() + "',";
+                where.append("'").append(state.name()).append("',");
             }
         }
         return where.substring(0, where.length() - 1) + ')';
     }
 
     private String getCompletedUploadWhereClause() {
-        String where = Constants.UPLOADS.UPLOAD_STATE + " IN (";
+        final StringBuilder where = new StringBuilder(Constants.UPLOADS.UPLOAD_STATE + " IN (");
         for (final UploadState state : UploadState.values()) {
             if (!state.isPending()) {
-                where += "'" + state.name() + "',";
+                where.append("'").append(state.name()).append("',");
             }
         }
         return where.substring(0, where.length() - 1) + ')';
@@ -538,6 +534,10 @@ public class DbAdapter {
                 if (oldVersion < 16) {
                     db.execSQL("ALTER TABLE " + DATABASE_TABLE_COUNTRIES + " ADD COLUMN " + Constants.COUNTRIES.OVERRIDE_LICENSE + " TEXT");
                 }
+
+                if (oldVersion < 17) {
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_UPLOADS + " ADD COLUMN " + Constants.UPLOADS.ACTIVE + " INTEGER");
+                }
             }
 
             db.setTransactionSuccessful();
@@ -612,6 +612,9 @@ public class DbAdapter {
         final String uploadState = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
         if (uploadState != null) {
             upload.setUploadState(UploadState.valueOf(uploadState));
+        }
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ACTIVE))) {
+            upload.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ACTIVE)) == 1);
         }
         return upload;
     }
@@ -747,7 +750,7 @@ public class DbAdapter {
     }
 
     public List<Country> getAllCountries() {
-        final List<Country> countryList = new ArrayList<Country>();
+        final List<Country> countryList = new ArrayList<>();
         // Select All Query without any baseLocationValues (myCurrentLocation)
         final String query = "SELECT * FROM " + DATABASE_TABLE_COUNTRIES;
 

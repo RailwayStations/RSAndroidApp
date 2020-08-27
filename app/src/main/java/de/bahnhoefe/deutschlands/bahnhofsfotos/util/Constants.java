@@ -66,6 +66,7 @@ public class Constants {
         public static final String CREATED_AT = "createdAt";
         public static final String COMMENT = "comment";
         public static final String JOIN_STATION_TITLE = "stationTitle"; // only for join with station
+        public static final String ACTIVE = "active";
     }
 
 }

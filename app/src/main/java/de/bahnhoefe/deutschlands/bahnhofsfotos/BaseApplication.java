@@ -88,7 +88,12 @@ public class BaseApplication extends Application {
     }
 
     public String getApiUrl() {
-        return preferences.getString(getString(R.string.API_URL), "https://api.railway-stations.org");
+        final Uri apiUri = getUri(getString(R.string.API_URL));
+        if (apiUri != null) {
+            final String apiUrl = apiUri.toString();
+            return apiUrl + (apiUrl.endsWith("/") ? "" : "/");
+        }
+        return "https://api.railway-stations.org/";
     }
 
     public void setApiUrl(final String apiUrl) {

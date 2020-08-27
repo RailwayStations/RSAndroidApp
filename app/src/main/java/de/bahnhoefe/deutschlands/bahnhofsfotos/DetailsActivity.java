@@ -8,7 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -671,15 +670,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private void uploadPhoto() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         final UploadBinding uploadBinding = UploadBinding.inflate(getLayoutInflater());
-        if (upload != null) {
-            uploadBinding.etComment.setText(upload.getComment());
-        }
+        uploadBinding.etComment.setText(upload.getComment());
 
         uploadBinding.spActive.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.active_flag_options)));
         if (station != null) {
             uploadBinding.spActive.setVisibility(View.GONE);
         } else {
-            uploadBinding.spActive.setSelection(0);
+            if (upload.getActive() == null) {
+                uploadBinding.spActive.setSelection(0);
+            } else if (upload.getActive()) {
+                uploadBinding.spActive.setSelection(1);
+            } else {
+                uploadBinding.spActive.setSelection(2);
+            }
         }
 
         if (station != null) {
@@ -688,14 +691,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             final List<Country> countryList = baseApplication.getDbAdapter().getAllCountries();
             final KeyValueSpinnerItem[] items = new KeyValueSpinnerItem[countryList.size() + 1];
             items[0] = new KeyValueSpinnerItem(getString(R.string.chooseCountry), "");
+            int selected = 0;
 
             for (int i = 0; i < countryList.size(); i++) {
                 final Country country = countryList.get(i);
                 items[i+1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
+                if (country.getCode().equals(upload.getCountry())) {
+                    selected = i+1;
+                }
             }
             final ArrayAdapter<KeyValueSpinnerItem> countryAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, items);
             countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             uploadBinding.spCountries.setAdapter(countryAdapter);
+            uploadBinding.spCountries.setSelection(selected);
         }
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -757,13 +765,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             } catch (final UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
+            upload.setActive(uploadBinding.spActive.getSelectedItemPosition() == 1);
             baseApplication.getDbAdapter().updateUpload(upload);
-            final Boolean active = uploadBinding.spActive.getSelectedItemPosition() == 1;
 
             final File mediaFile = getStoredMediaFile(upload);
             final RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
             rsapi.photoUpload(RSAPI.Helper.getAuthorizationHeader(email, password), bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
-                    stationTitle, latitude, longitude, comment, active, file).enqueue(new Callback<InboxResponse>() {
+                    stationTitle, latitude, longitude, comment, upload.getActive(), file).enqueue(new Callback<InboxResponse>() {
                 @Override
                 public void onResponse(final Call<InboxResponse> call, final Response<InboxResponse> response) {
                     progress.dismiss();

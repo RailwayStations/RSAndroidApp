@@ -44,6 +44,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.Url;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -251,6 +252,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             baseApplication.setUpdatePolicy(UpdatePolicy.NOTIFY);
         } else if (id == R.id.apiUrl) {
             new SimpleDialogs().prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
+                try {
+                    if (!Uri.parse(v).getScheme().matches("https\\?")) {
+                        throw new IllegalArgumentException("Only http(s) URIs are allowed");
+                    }
+                } catch (final Exception e) {
+                    Toast.makeText(getBaseContext(), getString(R.string.invalid_api_url), Toast.LENGTH_LONG).show();
+                }
                 baseApplication.setApiUrl(v);
                 baseApplication.setLastUpdate(0);
                 recreate();
