@@ -1,0 +1,1 @@
+- Bugfix release für F-Droid build
