@@ -257,8 +257,7 @@ public class BaseApplication extends Application {
 
     public MapPosition getLastMapPosition() {
         final LatLong latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT, 0.0), getDouble(R.string.LAST_POSITION_LON, 0.0));
-        final MapPosition mapPosition = new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
-        return mapPosition;
+        return new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
     }
 
     /**
@@ -327,12 +326,12 @@ public class BaseApplication extends Application {
         return api;
     }
 
-    public Uri getMapUri() {
-        return getUri(getString(R.string.MAP_FILE));
+    public String getMap() {
+        return preferences.getString(getString(R.string.MAP_FILE), null);
     }
 
-    public void setMapUri(final Uri map) {
-        putUri(R.string.MAP_FILE, map);
+    public void setMap(final String map) {
+        putString(R.string.MAP_FILE, map);
     }
 
     private void putUri(final int key, final Uri uri) {
@@ -344,11 +343,14 @@ public class BaseApplication extends Application {
     }
 
     private Uri getUri(final String key) {
-        final String value = preferences.getString(key, null);
+        return toUri(preferences.getString(key, null));
+    }
+
+    public Uri toUri(final String uriString) {
         try {
-            return Uri.parse(value);
+            return Uri.parse(uriString);
         } catch (final Exception ignored) {
-            Log.e(TAG, "can't read Uri string " + value);
+            Log.e(TAG, "can't read Uri string " + uriString);
         }
         return null;
     }

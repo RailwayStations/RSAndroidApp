@@ -40,5 +40,8 @@
     <string name="navHeaderUpdate" translatable="false">navHeaderUpdate</string>
     <string name="coordinates" translatable="false">%.10f,%.10f</string>
 
+    <string name="osm_mapnik" translatable="false">OSM: Mapnik</string>
+    <string name="dbs_osm_railway" translatable="false">DBS OSM Railway</string>
+    <string name="dbs_osm_basic" translatable="false">DBS OSM Basic</string>
     <string name="copyright_osm" translatable="false">Map data © OpenStreetMap contributors</string>
 </resources>

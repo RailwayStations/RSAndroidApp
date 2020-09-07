@@ -132,7 +132,6 @@
     <string name="error_loading_highscore">Kan topscore niet laden:</string>
     <string name="update_policy">Beleid bijwerken</string>
     <string name="tvEmail">E-mailadres</string>
-    <string name="osm_mapnik">OSM: Mapnik</string>
     <string name="map_folder">Offline-kaartenmap</string>
     <string name="theme_folder">Themakaartenmap</string>
     <string name="default_theme">Standaardthema</string>

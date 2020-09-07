@@ -145,7 +145,6 @@
     <string name="error_loading_highscore">Error loading highscore:</string>
     <string name="update_policy">Update policy</string>
     <string name="tvEmail">Email</string>
-    <string name="osm_mapnik">OSM: Mapnik</string>
     <string name="map_folder">Offline Map Directory</string>
     <string name="theme_folder">Map Theme Directory</string>
     <string name="default_theme">Default Theme</string>

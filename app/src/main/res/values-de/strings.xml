@@ -135,7 +135,6 @@
     <string name="error_loading_highscore">Fehler beim Laden der Rangliste: </string>
     <string name="update_policy">Aktualisierung</string>
     <string name="tvEmail">Email</string>
-    <string name="osm_mapnik">OSM: Mapnik</string>
     <string name="map_folder">Offlinekarten Verzeichnis</string>
     <string name="theme_folder">Kartendesign Verzeichnis</string>
     <string name="default_theme">Standard Design</string>

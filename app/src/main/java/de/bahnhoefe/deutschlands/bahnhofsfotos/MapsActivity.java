@@ -48,6 +48,8 @@ import org.mapsforge.map.datastore.MapDataStore;
 import org.mapsforge.map.layer.Layer;
 import org.mapsforge.map.layer.cache.TileCache;
 import org.mapsforge.map.layer.download.TileDownloadLayer;
+import org.mapsforge.map.layer.download.tilesource.AbstractTileSource;
+import org.mapsforge.map.layer.download.tilesource.OnlineTileSource;
 import org.mapsforge.map.layer.download.tilesource.OpenStreetMapMapnik;
 import org.mapsforge.map.layer.overlay.Marker;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
@@ -61,13 +63,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MapInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMapsBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.ClusterManager;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.DbsTileSource;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.GeoItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MapsforgeMapView;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
@@ -92,6 +97,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private static final int REQUEST_FINE_LOCATION = 1;
     private static final int REQUEST_MAP_DIRECTORY = 2;
     private static final int REQUEST_THEME_DIRECTORY = 3;
+    private static final String USER_AGENT = "railway-stations.org-android";
+
+    private final Map<String, OnlineTileSource> onlineTileSources = new HashMap<>();
 
     protected Layer layer;
     protected ClusterManager<GeoItem> clusterer = null;
@@ -138,6 +146,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 myPos = new LatLong(latitude, longitude);
             }
         }
+
+        final DbsTileSource dbsBasic = new DbsTileSource(getString(R.string.dbs_osm_basic), "/styles/dbs-osm-basic/");
+        onlineTileSources.put(dbsBasic.getName(), dbsBasic);
+        final DbsTileSource dbsRailway = new DbsTileSource(getString(R.string.dbs_osm_railway), "/styles/dbs-osm-railway/");
+        onlineTileSources.put(dbsRailway.getName(), dbsRailway);
 
         createMapViews();
         createTileCaches();
@@ -262,13 +275,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
     }
 
-    protected MapDataStore getMapFile() {
-        final Uri mapFile = baseApplication.getMapUri();
-        if (mapFile == null || !DocumentFile.isDocumentUri(this, mapFile)) {
+    protected MapDataStore getMapFile(final Uri mapUri) {
+        if (mapUri == null || !DocumentFile.isDocumentUri(this, mapUri)) {
             return null;
         }
         try {
-            final FileInputStream inputStream = (FileInputStream) getContentResolver().openInputStream(mapFile);
+            final FileInputStream inputStream = (FileInputStream) getContentResolver().openInputStream(mapUri);
             return new MapFile(inputStream, 0, null);
         } catch (final FileNotFoundException ignored) {
             Log.e(TAG, "Can't open mapFile", ignored);
@@ -277,10 +289,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     protected void createLayers() {
-        final MapDataStore mapFile = getMapFile();
+        final String map = baseApplication.getMap();
+        final Uri mapUri = baseApplication.toUri(map);
+        final MapDataStore mapFile = getMapFile(mapUri);
 
         if (mapFile != null) {
-            final TileRendererLayer tileRendererLayer1 = new TileRendererLayer(this.tileCaches.get(0), mapFile,
+            final TileRendererLayer rendererLayer = new TileRendererLayer(this.tileCaches.get(0), mapFile,
                     this.binding.map.mapView.getModel().mapViewPosition, false, true, false, AndroidGraphicFactory.INSTANCE) {
                 @Override
                 public boolean onLongPress(final LatLong tapLatLong, final Point thisXY,
@@ -289,12 +303,17 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                     return true;
                 }
             };
-            tileRendererLayer1.setXmlRenderTheme(getRenderTheme());
-            this.layer = tileRendererLayer1;
+            rendererLayer.setXmlRenderTheme(getRenderTheme());
+            this.layer = rendererLayer;
             binding.map.mapView.getLayerManager().getLayers().add(this.layer);
         } else {
-            final OpenStreetMapMapnik tileSource = OpenStreetMapMapnik.INSTANCE;
-            tileSource.setUserAgent("railway-stations.org-android");
+            AbstractTileSource tileSource = onlineTileSources.get(map);
+
+            if (tileSource == null) {
+                tileSource = OpenStreetMapMapnik.INSTANCE;
+            }
+
+            tileSource.setUserAgent(USER_AGENT);
             this.layer = new TileDownloadLayer(this.tileCaches.get(0),
                     this.binding.map.mapView.getModel().mapViewPosition, tileSource,
                     AndroidGraphicFactory.INSTANCE) {
@@ -371,13 +390,18 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         menu.findItem(R.id.menu_toggle_photo).setIcon(baseApplication.getPhotoFilter().getIcon());
 
-        final Uri mapUri = baseApplication.getMapUri();
+        final String map = baseApplication.getMap();
 
         final MenuItem osmMapnick = menu.findItem(R.id.osm_mapnik);
-        osmMapnick.setChecked(mapUri == null);
+        osmMapnick.setChecked(map == null);
         osmMapnick.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, null));
 
         final SubMenu mapSubmenu = menu.findItem(R.id.maps_submenu).getSubMenu();
+        for (final OnlineTileSource tileSource : onlineTileSources.values()) {
+            final MenuItem mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, tileSource.getName());
+            mapItem.setChecked(tileSource.getName().equals(map));
+            mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, tileSource.getName()));
+        }
 
         final Uri mapDirectory = baseApplication.getMapDirectoryUri();
         if (mapDirectory != null) {
@@ -386,8 +410,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 for (final DocumentFile file : documentsTree.listFiles()) {
                     if (file.isFile() && file.getName().endsWith(".map")) {
                         final MenuItem mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, file.getName());
-                        mapItem.setChecked(file.getUri().equals(mapUri));
-                        mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, file.getUri()));
+                        mapItem.setChecked(file.getUri().equals(baseApplication.toUri(map)));
+                        mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, file.getUri().toString()));
                     }
                 }
             }
@@ -886,21 +910,21 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         private final BaseApplication baseApplication;
 
-        private final Uri mapUri;
+        private final String map;
 
-        private MapMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final Uri mapUri) {
+        private MapMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final String map) {
             this.mapsActivityRef = new WeakReference<>(mapsActivity);
             this.baseApplication = baseApplication;
-            this.mapUri = mapUri;
+            this.map = map;
         }
 
         @Override
         public boolean onMenuItemClick(final MenuItem item) {
             item.setChecked(true);
             if (item.getItemId() == R.id.osm_mapnik) { // default Mapnik online tiles
-                baseApplication.setMapUri(null);
+                baseApplication.setMap(null);
             } else {
-                baseApplication.setMapUri(mapUri);
+                baseApplication.setMap(map);
             }
 
             final MapsActivity mapsActivity = mapsActivityRef.get();
