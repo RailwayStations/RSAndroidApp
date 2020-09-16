@@ -7,7 +7,7 @@
     <string name="menu_title_update_photos">Mettre à jour</string>
     <string name="maps_activity">Les cartes des gares</string>
     <string name="title_activity_details">Les détails des stations</string>
-    <string name="no_stations_in_database">La mise à jour n'a pas encore eu lieu </string>
+    <string name="no_stations_in_database">La mise à jour n\'a pas encore eu lieu </string>
     <string name="take_photo">Prendre une photo</string>
     <string name="share_photo">Partager</string>
     <string name="nav_to_station">Itinéraire vers la gare</string>
@@ -67,7 +67,7 @@
     <string name="missing_nickname">Veuillez fournir votre surnom</string>
     <string name="missing_email_address">Veuillez entrer une adresse e-mail valide</string>
     <string name="missing_link">Veuillez fournir une URL valide si vous souhaitez être lié</string>
-    <string name="upload_conflict">Votre photo est téléchargée, mais il pourrait y avoir un conflit. Soit vous l'avez téléchargée deux fois ou un autre utilisateur a téléchargé une photo pour la même gare.</string>
+    <string name="upload_conflict">Votre photo est téléchargée, mais il pourrait y avoir un conflit. Soit vous l\'avez téléchargée deux fois ou un autre utilisateur a téléchargé une photo pour la même gare.</string>
     <string name="select_photo">Sélection d\'une photo</string>
     <string name="station_photo">La photo de la gare</string>
     <string name="menu_title_stations_map">Carte des stations</string>
