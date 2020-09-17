@@ -189,7 +189,7 @@
     <string name="active">aktiv</string>
     <string name="inactive">inaktiv</string>
     <string name="new_registration">Registrierung erfolgreich. Wir haben dir eine Email mit Link zum Bestätigen geschickt. Bitte prüfe auch den SPAM Ordner.</string>
-    <string name="filter_result">%d von %d Bahnhöfen selektiert</string>
+    <string name="filter_result">%1$d von %2$d Bahnhöfen selektiert</string>
     <string name="menu_title_outbox">Ausgangskorb</string>
     <string name="menu_title_inbox">Eingangskorb</string>
     <string name="error_retrieving_upload_state">Fehler beim Lesen des Bearbeitungsstatus</string>

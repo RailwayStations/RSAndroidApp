@@ -168,7 +168,7 @@
     <string name="active">active</string>
     <string name="inactive">inactive</string>
     <string name="new_registration">Your registration was successfully. We\'ve sent you an e-mail with a verification link. Please also check you SPAM folder.</string>
-    <string name="filter_result">Selected %d of %d stations</string>
+    <string name="filter_result">Selected %1$d of %2$d stations</string>
     <string name="menu_title_outbox">Outbox</string>
     <string name="menu_title_inbox">Inbox</string>
     <string name="error_retrieving_upload_state">Error retrieving upload state</string>
