@@ -13,6 +13,7 @@ public class Constants {
         public static final String ROWID = "rowid";
         public static final String ID = "id";
         public static final String TITLE = "title";
+        public static final String NORMALIZED_TITLE = "normalizedTitle";
         public static final String COUNTRY = "country";
         public static final String LAT = "lat";
         public static final String LON = "lon";

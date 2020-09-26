@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,13 +38,14 @@ public class DbAdapter {
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
     private static final String DATABASE_TABLE_UPLOADS = "uploads";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 17;
+    private static final int DATABASE_VERSION = 18;
 
     private static final String CREATE_STATEMENT_STATIONS = "CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
             + Constants.STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + Constants.STATIONS.COUNTRY + " TEXT, "
             + Constants.STATIONS.ID + " TEXT, "
             + Constants.STATIONS.TITLE + " TEXT, "
+            + Constants.STATIONS.NORMALIZED_TITLE + " TEXT, "
             + Constants.STATIONS.LAT + " REAL, "
             + Constants.STATIONS.LON + " REAL, "
             + Constants.STATIONS.PHOTO_URL + " TEXT, "
@@ -107,19 +109,20 @@ public class DbAdapter {
         dbHelper.close();
     }
 
-    public void insertBahnhoefe(final List<Station> bahnhoefe, final Set<String> countryCodes) {
-        if (bahnhoefe.isEmpty()) {
-            return; // nothing todo
+    public void insertStations(final List<Station> stations, final Set<String> countryCodes) {
+        if (stations.isEmpty()) {
+            return;
         }
 
-        db.beginTransaction(); // soll die Performance verbessern, heißt's.
+        db.beginTransaction();
         try {
-            deleteBahnhoefe(countryCodes);
-            for (final Station station : bahnhoefe) {
+            deleteStations(countryCodes);
+            for (final Station station : stations) {
                 final ContentValues values = new ContentValues();
                 values.put(Constants.STATIONS.ID, station.getId());
                 values.put(Constants.STATIONS.COUNTRY, station.getCountry());
                 values.put(Constants.STATIONS.TITLE, station.getTitle());
+                values.put(Constants.STATIONS.NORMALIZED_TITLE, StringUtils.replaceChars(StringUtils.deleteWhitespace(StringUtils.stripAccents(Normalizer.normalize(station.getTitle(), Normalizer.Form.NFC))), "-_()", null));
                 values.put(Constants.STATIONS.LAT, station.getLat());
                 values.put(Constants.STATIONS.LON, station.getLon());
                 values.put(Constants.STATIONS.PHOTO_URL, station.getPhotoUrl());
@@ -192,7 +195,7 @@ public class DbAdapter {
         return upload;
     }
 
-    public void deleteBahnhoefe(final Set<String> countryCodes) {
+    public void deleteStations(final Set<String> countryCodes) {
         db.delete(DATABASE_TABLE_STATIONS, whereCountryCodeIn(countryCodes), null);
     }
 
@@ -264,8 +267,8 @@ public class DbAdapter {
         final List<String> queryArgs = new ArrayList<>();
 
         if (StringUtils.isNotBlank(search)) {
-            selectQuery += String.format(" AND %s LIKE ?", Constants.STATIONS.TITLE);
-            queryArgs.add("%" + StringUtils.trimToEmpty(search) + "%");
+            selectQuery += String.format(" AND %s LIKE ?", Constants.STATIONS.NORMALIZED_TITLE);
+            queryArgs.add("%" + StringUtils.replaceChars(StringUtils.stripAccents(StringUtils.trimToEmpty(search)), " -_()", "%%%%%") + "%");
         }
 
         if (photoFilter == PhotoFilter.NICKNAME) {
@@ -326,7 +329,7 @@ public class DbAdapter {
         return photographers.toArray(new String[0]);
     }
 
-    public int countBahnhoefe(final Set<String> countryCodes) {
+    public int countStations(final Set<String> countryCodes) {
         final Cursor query = db.rawQuery("SELECT COUNT(*) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes), null);
         if (query.moveToFirst()) {
             return query.getInt(0);
@@ -537,6 +540,11 @@ public class DbAdapter {
 
                 if (oldVersion < 17) {
                     db.execSQL("ALTER TABLE " + DATABASE_TABLE_UPLOADS + " ADD COLUMN " + Constants.UPLOADS.ACTIVE + " INTEGER");
+                }
+
+                if (oldVersion < 18) {
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Constants.STATIONS.NORMALIZED_TITLE + " TEXT");
+                    db.execSQL("UPDATE " + DATABASE_TABLE_STATIONS + " SET " + Constants.STATIONS.NORMALIZED_TITLE + " = " + Constants.STATIONS.TITLE);
                 }
             }
 

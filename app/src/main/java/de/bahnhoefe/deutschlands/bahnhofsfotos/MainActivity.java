@@ -44,7 +44,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Url;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -163,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void updateStationList() {
         try {
-            final int stationCount = dbAdapter.countBahnhoefe(baseApplication.getCountryCodes());
+            final int stationCount = dbAdapter.countStations(baseApplication.getCountryCodes());
             Cursor cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
             if (stationListAdapter != null) {
                 stationListAdapter.swapCursor(cursor);
@@ -324,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onResponse(final Call<List<Station>> call, final Response<List<Station>> response) {
                 if (response.isSuccessful()) {
-                    dbAdapter.insertBahnhoefe(response.body(), baseApplication.getCountryCodes());
+                    dbAdapter.insertStations(response.body(), baseApplication.getCountryCodes());
 
                     baseApplication.setLastUpdate(System.currentTimeMillis());
                     final TextView tvUpdate = findViewById(R.id.tvUpdate);
