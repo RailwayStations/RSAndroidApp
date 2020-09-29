@@ -17,3 +17,5 @@ is a java-application on https://github.com/RailwayStations/RSAPI.
 The project - website you will find on https://railway-stations.org and http://www.deutschlands-bahnhoefe.de.
 
 The code is public under MIT-Licence: http://choosealicense.com/licenses/mit/
+
+Help to translate the project via Crowdin: https://crowdin.com/project/railwaystationsandroidapp
