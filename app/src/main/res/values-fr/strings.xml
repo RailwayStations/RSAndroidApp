@@ -31,7 +31,7 @@
     <string name="activitynotfound">Vous n\'avez pas d\'application de navigation sur votre Smartphone</string>
     <string name="search_hint">Chercher la gare</string>
     <string name="app_info_title">A propos de l\'application</string>
-    <string name="app_info_ok">OK</string>
+    <string name="app_info_ok">Ok</string>
     <string name="app_info_text"><![CDATA[<p>Version: <b>%s</b></p>
         <p>&nbsp;</p>
         <p>Application Android pour le projet d\'Open Data <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> sous licence <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
@@ -142,7 +142,7 @@
     <string name="read_profile_failed">La lecture des informations de profil a échoué : %1s</string>
     <string name="error_loading_highscore">Erreur durant le chargement du classement :</string>
     <string name="update_policy">MAJ du règlement</string>
-    <string name="tvEmail">Email</string>
+    <string name="tvEmail">Courriel</string>
     <string name="map_folder">Répertoire des cartes (tuiles)</string>
     <string name="theme_folder">Répertoire des thèmes</string>
     <string name="default_theme">Thème par défaut</string>
