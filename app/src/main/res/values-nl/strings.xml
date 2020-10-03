@@ -187,17 +187,17 @@
     <string name="owner_label">Fotograaf:</string>
     <string name="active">actief</string>
     <string name="inactive">inactief</string>
-    <string name="new_registration">Your registration was successfully. We\'ve sent you an e-mail with a verification link. Please also check you SPAM folder.</string>
+    <string name="new_registration">Uw registratie was succesvol. We hebben u een e-mail gestuurd met een verificatielink. Controleer ook uw SPAM-map.</string>
     <string name="filter_result">Selected %1$d of %2$d stations</string>
     <string name="menu_title_outbox">Outbox</string>
     <string name="menu_title_inbox">Inbox</string>
-    <string name="error_retrieving_upload_state">Error retrieving upload state</string>
+    <string name="error_retrieving_upload_state">Fout bij het ophalen van de uploadstatus</string>
     <string name="upload_state">State: %s</string>
-    <string name="upload_state_unknown">unknown</string>
-    <string name="upload_state_in_review">in review</string>
+    <string name="upload_state_unknown">onbekende</string>
+    <string name="upload_state_in_review">ter beoordeling</string>
     <string name="upload_state_conflict">conflict</string>
-    <string name="upload_state_accepted">accepted</string>
-    <string name="upload_state_rejected">rejected</string>
+    <string name="upload_state_accepted">geaccepteerd</string>
+    <string name="upload_state_rejected">afgekeurd</string>
     <string name="upload_state_other_user">other user</string>
     <string name="upload_lat_lon_out_of_range">Invalid coordinates</string>
     <string name="upload_unsupported_content_type">Unsupported image file format</string>
@@ -237,7 +237,7 @@
     <string name="requestEmailVerification">Request new email verification?</string>
     <string name="emailVerificationRequested">A new verification e-mail has been sent, please check.</string>
     <string name="emailVerificationRequestFailed">An error occured when requesting a new verification e-mail.</string>
-    <string name="chooseCountry">Choose Country</string>
+    <string name="chooseCountry">Kies een land</string>
     <string name="invalid_api_url">Invalid API URL</string>
     <string-array name="active_flag_options">
         <item>@string/active_flag_choose</item>
