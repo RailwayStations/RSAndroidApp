@@ -239,6 +239,8 @@
     <string name="emailVerificationRequestFailed">Er is een fout opgetreden bij het aanvragen van een nieuwe verificatiemail.</string>
     <string name="chooseCountry">Kies een land</string>
     <string name="invalid_api_url">Ongeldige API URL</string>
+    <string name="menu_email">Contact us by email</string>
+    <string name="sort_order">Sort order</string>
     <string-array name="active_flag_options">
         <item>@string/active_flag_choose</item>
         <item>@string/active_flag_active</item>
