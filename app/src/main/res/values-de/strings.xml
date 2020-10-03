@@ -242,6 +242,8 @@
     <string name="emailVerificationRequestFailed">Beim Anfordern einer neuen Bestätigungs-Email ist ein Fehler aufgetreten.</string>
     <string name="chooseCountry">Länderauswahl</string>
     <string name="invalid_api_url">Ungültige API URL</string>
+    <string name="menu_email">Contact us by email</string>
+    <string name="sort_order">Sort order</string>
     <string-array name="active_flag_options">
         <item>@string/active_flag_choose</item>
         <item>@string/active_flag_active</item>
