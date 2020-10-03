@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -260,6 +261,18 @@ public class BaseApplication extends Application {
         return new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
     }
 
+    public Location getLastLocation() {
+        final Location location = new Location("");
+        location.setLatitude(getDouble(R.string.LAST_POSITION_LAT, 0.0));
+        location.setLongitude(getDouble(R.string.LAST_POSITION_LON, 0.0));
+        return null;
+    }
+
+    public void setLastLocation(final Location location) {
+        putDouble(R.string.LAST_POSITION_LAT, location.getLatitude());
+        putDouble(R.string.LAST_POSITION_LON, location.getLongitude());
+    }
+
     /**
      * @return the default starting zoom level if nothing is encoded in the map file.
      */
@@ -373,6 +386,14 @@ public class BaseApplication extends Application {
 
     public void setMapThemeUri(final Uri mapTheme) {
         putUri(R.string.MAP_THEME, mapTheme);
+    }
+
+    public boolean getSortByDistance() {
+        return preferences.getBoolean(getString(R.string.SORT_BY_DISTANCE), false);
+    }
+
+    public void setSortByDistance(final boolean sortByDistance) {
+        putBoolean(R.string.SORT_BY_DISTANCE, sortByDistance);
     }
 
     /* This interceptor adds a custom User-Agent. */

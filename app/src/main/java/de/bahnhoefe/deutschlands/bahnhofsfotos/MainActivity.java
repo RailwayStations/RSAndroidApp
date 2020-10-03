@@ -1,5 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.SearchManager;
@@ -7,7 +8,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,12 +26,17 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 
 import com.google.android.material.navigation.NavigationView;
+
+import org.mapsforge.core.model.LatLong;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -45,15 +55,20 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements LocationListener, NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DIALOG_TAG = "App Info Dialog";
     private static final long CHECK_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_FINE_LOCATION = 1;
+
+    // The minimum distance to change Updates in meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1000;
+    // The minimum time between updates in milliseconds
+    private static final long MIN_TIME_BW_UPDATES = 500; // minute
 
     private BaseApplication baseApplication;
     private DbAdapter dbAdapter;
-    private MenuItem photoFilterMenuItem;
 
     private ActivityMainBinding binding;
 
@@ -62,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private NearbyNotificationService.StatusBinder statusBinder;
     private RSAPI rsapi;
+    private Location myPos;
+    private LocationManager locationManager;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -73,12 +90,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
         rsapi = baseApplication.getRSAPI();
-
-        binding.appBarMain.fab.setOnClickListener(view -> {
-            final Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
-            startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
-        });
 
         final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, binding.drawerLayout, binding.appBarMain.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -106,6 +117,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
             searchString = searchIntent.getStringExtra(SearchManager.QUERY);
         }
+
+        myPos = baseApplication.getLastLocation();
 
         updateStationList();
         bindToStatus();
@@ -149,10 +162,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         });
 
-        photoFilterMenuItem = menu.findItem(R.id.menu_toggle_photo);
-        photoFilterMenuItem.setIcon(baseApplication.getPhotoFilter().getIcon());
+        binding.appBarMain.main.togglePhoto.setImageDrawable(getDrawable(baseApplication.getPhotoFilter().getIcon()));
+        setSortIcon(baseApplication.getSortByDistance());
 
-        initNotificationMenuItem(menu.findItem(R.id.notify), false);
+        initNotificationMenuItem(false);
 
         final UpdatePolicy updatePolicy = baseApplication.getUpdatePolicy();
         menu.findItem(updatePolicy.getId()).setChecked(true);
@@ -162,12 +175,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void updateStationList() {
         try {
+            boolean sortByDistance = baseApplication.getSortByDistance() && myPos != null;
             final int stationCount = dbAdapter.countStations(baseApplication.getCountryCodes());
-            Cursor cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
+            Cursor cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes(), sortByDistance, myPos);
             if (stationListAdapter != null) {
                 stationListAdapter.swapCursor(cursor);
             } else {
-                cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
+                cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes(), sortByDistance, myPos);
                 stationListAdapter = new StationListAdapter(this, cursor, 0);
                 binding.appBarMain.main.lstStations.setAdapter(stationListAdapter);
 
@@ -186,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
         final MenuItem item = menu.findItem(R.id.notify);
-        initNotificationMenuItem(item, statusBinder != null);
+        initNotificationMenuItem(statusBinder != null);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -202,40 +216,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.countrySelection) {
-            final Intent intent = new Intent(MainActivity.this, CountryActivity.class);
-            startActivity(intent);
-            item.setIcon(R.drawable.ic_language_white_24px);
-        } else if (id == R.id.menu_toggle_photo) {
-            final PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
-            item.setIcon(photoFilter.getIcon());
-            baseApplication.setPhotoFilter(photoFilter);
-            updateStationList();
-        } else if (id == R.id.nicknameFilter) {
-            int selectedNickname = -1;
-            final String[] nicknames = dbAdapter.getPhotographerNicknames();
-            final String selectedNick = baseApplication.getNicknameFilter();
-            if (nicknames.length == 0) {
-                Toast.makeText(getBaseContext(), getString(R.string.no_nicknames_found), Toast.LENGTH_LONG).show();
-                return true;
-            }
-            for (int i = 0; i < nicknames.length; i++) {
-                if (nicknames[i].equals(selectedNick)) {
-                    selectedNickname = i;
-                }
-            }
-            new SimpleDialogs().select(this, getString(R.string.select_nickname), nicknames, selectedNickname, (dialog, whichButton) -> {
-                dialog.dismiss();
-                final int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-                if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
-                    baseApplication.setNicknameFilter(nicknames[selectedPosition]);
-                    final PhotoFilter photoFilter = PhotoFilter.NICKNAME;
-                    baseApplication.setPhotoFilter(photoFilter);
-                    item.setIcon(photoFilter.getIcon());
-                    updateStationList();
-                }
-            });
-        } else if (id == R.id.notify) {
+        if (id == R.id.notify) {
             final Intent intent = new Intent(MainActivity.this, NearbyNotificationService.class);
             if (statusBinder == null) {
                 startService(intent);
@@ -267,9 +248,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
-    private void initNotificationMenuItem(final MenuItem item, final boolean active) {
-        item.setChecked(active);
-        item.setIcon(active ? R.drawable.ic_notifications_active_white_24px : R.drawable.ic_notifications_off_white_24px);
+    private void initNotificationMenuItem(final boolean active) {
+        binding.appBarMain.main.notify.setImageDrawable(getDrawable(active ? R.drawable.ic_notifications_active_white_24px : R.drawable.ic_notifications_off_white_24px));
     }
 
     @Override
@@ -292,6 +272,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(this, MapsActivity.class));
         } else if (id == R.id.nav_web_site) {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://railway-stations.org")));
+        } else if (id == R.id.nav_email) {
+            final Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
+            startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
         } else if (id == R.id.nav_app_info) {
             final AppInfoFragment appInfoFragment = new AppInfoFragment();
             appInfoFragment.show(getSupportFragmentManager(), DIALOG_TAG);
@@ -343,6 +327,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterLocationManager();
+    }
 
     @Override
     public void onResume() {
@@ -375,8 +364,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-        if (photoFilterMenuItem != null) {
-            photoFilterMenuItem.setIcon(baseApplication.getPhotoFilter().getIcon());
+        binding.appBarMain.main.togglePhoto.setImageDrawable(getDrawable(baseApplication.getPhotoFilter().getIcon()));
+        if (baseApplication.getSortByDistance()) {
+            registerLocationManager();
         }
         updateStationList();
     }
@@ -427,6 +417,158 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, 0))
 
         Log.e(TAG, "Bind request to statistics interface failed");
+    }
+
+    public void togglePhotoFilter(final View view) {
+        final PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
+        binding.appBarMain.main.togglePhoto.setImageDrawable(getDrawable(photoFilter.getIcon()));
+        baseApplication.setPhotoFilter(photoFilter);
+        updateStationList();
+    }
+
+    public void selectCountry(final View view) {
+        final Intent intent = new Intent(MainActivity.this, CountryActivity.class);
+        startActivity(intent);
+    }
+
+    public void selectNicknameFilter(final View view) {
+        int selectedNickname = -1;
+        final String[] nicknames = dbAdapter.getPhotographerNicknames();
+        final String selectedNick = baseApplication.getNicknameFilter();
+        if (nicknames.length == 0) {
+            Toast.makeText(getBaseContext(), getString(R.string.no_nicknames_found), Toast.LENGTH_LONG).show();
+            return;
+        }
+        for (int i = 0; i < nicknames.length; i++) {
+            if (nicknames[i].equals(selectedNick)) {
+                selectedNickname = i;
+            }
+        }
+        new SimpleDialogs().select(this, getString(R.string.select_nickname), nicknames, selectedNickname, (dialog, whichButton) -> {
+            dialog.dismiss();
+            final int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+            if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
+                baseApplication.setNicknameFilter(nicknames[selectedPosition]);
+                final PhotoFilter photoFilter = PhotoFilter.NICKNAME;
+                baseApplication.setPhotoFilter(photoFilter);
+                updateStationList();
+            }
+        });
+    }
+
+    public void toggleNotification(final View view) {
+        final Intent intent = new Intent(MainActivity.this, NearbyNotificationService.class);
+        if (statusBinder == null) {
+            startService(intent);
+            bindToStatus();
+        } else {
+            stopService(intent);
+        }
+    }
+
+    public void toggleSort(final View view) {
+        boolean sortByDistance = baseApplication.getSortByDistance();
+        sortByDistance = !sortByDistance;
+        setSortIcon(sortByDistance);
+        baseApplication.setSortByDistance(sortByDistance);
+        if (sortByDistance) {
+            registerLocationManager();
+        }
+        updateStationList();
+    }
+
+    private void setSortIcon(final boolean sortByDistance) {
+        binding.appBarMain.main.toggleSort.setImageDrawable(getDrawable(sortByDistance ? R.drawable.ic_sort_by_distance_white_24px : R.drawable.ic_sort_by_alpha_white_24px));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
+        if (requestCode == REQUEST_FINE_LOCATION) {
+            Log.i(TAG, "Received response for location permission request.");
+
+            // Check if the required permission has been granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Location permission has been granted
+                registerLocationManager();
+            } else {
+                //Permission not granted
+                baseApplication.setSortByDistance(false);
+                setSortIcon(false);
+            }
+        }
+    }
+
+    public void registerLocationManager() {
+        try {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
+                return;
+            }
+
+            locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+
+            // getting GPS status
+            final boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            // if GPS Enabled get lat/long using GPS Services
+            if (isGPSEnabled) {
+                locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                Log.d(TAG, "GPS Enabled");
+                if (locationManager != null) {
+                    myPos = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                }
+            } else {
+                // getting network status
+                final boolean isNetworkEnabled = locationManager
+                        .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+                // First get location from Network Provider
+                if (isNetworkEnabled) {
+                    locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    Log.d(TAG, "Network Location enabled");
+                    if (locationManager != null) {
+                        myPos = locationManager
+                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            Log.e(TAG, "Error registering LocationManager", e);
+            final Bundle b = new Bundle();
+            b.putString("error", "Error registering LocationManager: " + e.toString());
+            locationManager = null;
+            baseApplication.setSortByDistance(false);
+            setSortIcon(false);
+            return;
+        }
+        Log.i(TAG, "LocationManager registered");
+        onLocationChanged(myPos);
+    }
+
+    private void unregisterLocationManager() {
+        if (locationManager != null) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // if we don't have location permission we cannot remove updates (should not happen, but the API requires this check
+                // so we just set it to null
+                locationManager = null;
+            } else {
+                locationManager.removeUpdates(this);
+            }
+            locationManager = null;
+        }
+        Log.i(TAG, "LocationManager unregistered");
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull final Location location) {
+        myPos = location;
+        updateStationList();
     }
 
 }

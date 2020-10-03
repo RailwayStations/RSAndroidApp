@@ -15,6 +15,7 @@
     <string name="MAP_THEME_DIRECTORY" translatable="false">APP_PREF_MAP_THEME_DIRECTORY</string>
     <string name="MAP_THEME" translatable="false">APP_PREF_MAP_THEME</string>
     <string name="API_URL" translatable="false">APP_PREF_API_URL</string>
+    <string name="SORT_BY_DISTANCE" translatable="false">APP_PREF_SORT_BY_DISTANCE</string>
 
     <string name="FIRSTAPPSTART" translatable="false">FirstAppStart</string>
     <string name="fab_email" translatable="false">bahnhofsfotos@deutschlands-bahnhoefe.de</string>

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -204,7 +205,7 @@ public class DbAdapter {
         db.delete(DATABASE_TABLE_COUNTRIES, null, null);
     }
 
-    public Cursor getStationsList(final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes) {
+    public Cursor getStationsList(final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes, final boolean sortByDistance, final Location myPos) {
         String selectQuery = "SELECT " + Constants.STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID + ", " +
                 Constants.STATIONS.ID + ", " +
                 Constants.STATIONS.TITLE + ", " +
@@ -219,7 +220,7 @@ public class DbAdapter {
             selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
         }
 
-        selectQuery += " ORDER BY " + Constants.STATIONS.TITLE + " ASC";
+        selectQuery += " ORDER BY " + getStationOrderBy(sortByDistance, myPos);
         Log.d(TAG, selectQuery);
 
         final Cursor cursor;
@@ -236,6 +237,18 @@ public class DbAdapter {
             return null;
         }
         return cursor;
+    }
+
+    private String getStationOrderBy(final boolean sortByDistance, final Location myPos) {
+        String orderBy = Constants.STATIONS.TITLE + " ASC";
+
+        if (sortByDistance) {
+            final double fudge = Math.pow(Math.cos(Math.toRadians(myPos.getLatitude())), 2);
+            orderBy = "((" + myPos.getLatitude() + " - " + Constants.STATIONS.LAT + ") * (" + myPos.getLatitude() + " - " + Constants.STATIONS.LAT + ") + " +
+                    "(" + myPos.getLongitude() + " - " + Constants.STATIONS.LON + ") * (" + myPos.getLongitude() + " - " + Constants.STATIONS.LON + ") * " + fudge + ")";
+        }
+
+        return orderBy;
     }
 
     public Cursor getCountryList() {
@@ -260,9 +273,11 @@ public class DbAdapter {
      * @param search the search keyword
      * @param photoFilter if stations need to be filtered by photo available or not
      * @param countryCodes countries to search for
+     * @param sortByDistance
+     * @param myPos
      * @return a Cursor representing the matching results
      */
-    public Cursor getStationsListByKeyword(final String search, final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes) {
+    public Cursor getStationsListByKeyword(final String search, final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes, final boolean sortByDistance, final Location myPos) {
         String selectQuery = whereCountryCodeIn(countryCodes);
         final List<String> queryArgs = new ArrayList<>();
 
@@ -290,7 +305,7 @@ public class DbAdapter {
                 Constants.STATIONS.COUNTRY
             },
             selectQuery,
-            queryArgs.toArray(new String[0]), null, null, Constants.STATIONS.TITLE + " ASC");
+            queryArgs.toArray(new String[0]), null, null, getStationOrderBy(sortByDistance, myPos));
 
         if (!cursor.moveToFirst()) {
             Log.w(TAG, String.format("Query '%s' returned no result", search));

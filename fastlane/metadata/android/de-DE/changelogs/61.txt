@@ -1,1 +1,2 @@
 - Suche mit Umlauten verbessert
+- Redesign der Bahnhofsliste mit Sortieroption nach Distanz

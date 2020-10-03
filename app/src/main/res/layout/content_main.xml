@@ -45,6 +45,67 @@
           android:layout_alignParentStart="true"
           android:layout_below="@+id/filter_result"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:paddingTop="15sp"
+            android:paddingBottom="15sp"
+            android:background="@color/colorPrimary">
+
+            <ImageButton
+                android:id="@+id/notify"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:onClick="toggleNotification"
+                android:src="@drawable/ic_notifications_off_white_24px"
+                android:background="@null"
+                android:contentDescription="@string/benachrichtigen" />
+
+            <ImageButton
+                android:id="@+id/toggle_sort"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:onClick="toggleSort"
+                android:src="@drawable/ic_sort_by_alpha_white_24px"
+                android:background="@null"
+                android:contentDescription="@string/sort_order"/>
+
+            <ImageButton
+                android:id="@+id/toggle_photo"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:onClick="togglePhotoFilter"
+                android:src="@drawable/ic_station_filter_without_photo_24px"
+                android:background="@null"
+                android:contentDescription="@string/menu_photo_filter"/>
+
+            <ImageButton
+                android:id="@+id/nicknameFilter"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:onClick="selectNicknameFilter"
+                android:contentDescription="@string/nicknameFilter"
+                android:src="@drawable/ic_person_24px"
+                android:background="@null"/>
+
+            <ImageButton
+                android:id="@+id/countrySelection"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:onClick="selectCountry"
+                android:contentDescription="@string/countrySelection"
+                android:src="@drawable/ic_language_white_24px"
+                android:background="@null"/>
+
+        </LinearLayout>
+
    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

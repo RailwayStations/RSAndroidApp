@@ -1,1 +1,2 @@
 - Improved search with accent characters
+- Redesign station list with sort by distance option
