@@ -237,11 +237,11 @@
     <string name="initPasswordRepeat">Repeat password</string>
     <string name="emailVerified">(verified)</string>
     <string name="emailUnverified">(not yet verified)</string>
-    <string name="requestEmailVerification">Request new email verification?</string>
-    <string name="emailVerificationRequested">A new verification e-mail has been sent, please check.</string>
-    <string name="emailVerificationRequestFailed">An error occured when requesting a new verification e-mail.</string>
-    <string name="chooseCountry">Choose Country</string>
-    <string name="invalid_api_url">Invalid API URL</string>
+    <string name="requestEmailVerification">Poprosić o nową weryfikację e-maila?</string>
+    <string name="emailVerificationRequested">Został wysłany nowy e-mail weryfikacyjny, proszę sprawdzić.</string>
+    <string name="emailVerificationRequestFailed">Podczas wysyłania prośby o nową wiadomość weryfikacyjną pojawił się błąd.</string>
+    <string name="chooseCountry">Wybierz kraj</string>
+    <string name="invalid_api_url">Nieważny URL API</string>
     <string-array name="active_flag_options">
         <item>@string/active_flag_choose</item>
         <item>@string/active_flag_active</item>
