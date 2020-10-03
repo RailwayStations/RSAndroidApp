@@ -4,4 +4,11 @@
         <item>@string/local_photo_delete_accepted</item>
         <item>@string/local_photo_delete_other_user</item>
     </string-array>
+
+    <string-array name="active_flag_options">
+        <item>@string/active_flag_choose</item>
+        <item>@string/active_flag_active</item>
+        <item>@string/active_flag_inactive</item>
+    </string-array>
+
 </resources>

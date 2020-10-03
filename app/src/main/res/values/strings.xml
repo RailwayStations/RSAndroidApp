@@ -246,9 +246,4 @@
     <string name="menu_email">Contact us by email</string>
     <string name="sort_order">Sort order</string>
 
-    <string-array name="active_flag_options">
-        <item>@string/active_flag_choose</item>
-        <item>@string/active_flag_active</item>
-        <item>@string/active_flag_inactive</item>
-    </string-array>
 </resources>
