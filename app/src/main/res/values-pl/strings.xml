@@ -244,4 +244,10 @@
     <string name="invalid_api_url">Nieważny URL API</string>
     <string name="menu_email">Contact us by email</string>
     <string name="sort_order">Sort order</string>
+    <string name="problem_wrong_name">Station has a wrong name</string>
+    <string name="problem_station_active">Station is active</string>
+    <string name="menu_nearby_notification">Nearby notification</string>
+    <string name="menu_active_filter">Station active/inactive filter</string>
+    <string name="button_remove_text">Remove</string>
+    <string name="button_myself_text">Myself</string>
 </resources>
