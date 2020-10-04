@@ -58,7 +58,7 @@ android {
 
 ext {
     mapsforgeVersion = '0.14.0'
-    retrofitVersion = '2.7.2'
+    retrofitVersion = '2.9.0'
 }
 
 dependencies {
