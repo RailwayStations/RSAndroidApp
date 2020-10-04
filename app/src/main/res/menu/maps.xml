@@ -2,11 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_toggle_photo"
-        android:icon="@drawable/ic_station_filter_without_photo_24px"
-        android:title="@string/menu_photo_filter"
-        app:showAsAction="ifRoom"/>
-    <item
         android:id="@+id/menu_toggle_mypos"
         android:icon="@drawable/ic_gps_fix_selector"
         android:title="@string/menu_follow_my_location"

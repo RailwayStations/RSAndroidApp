@@ -323,7 +323,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     private void readStations() {
         try {
             Log.i(TAG, "Lade nahegelegene Bahnhoefe");
-            nearStations = dbAdapter.getStationByLatLngRectangle(myPos.getLatitude(), myPos.getLongitude(), baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter());
+            nearStations = dbAdapter.getStationByLatLngRectangle(myPos.getLatitude(), myPos.getLongitude(), baseApplication.getStationFilter());
         } catch (final Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         }

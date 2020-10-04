@@ -28,7 +28,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 
 public class DbAdapter {
 
@@ -205,40 +205,6 @@ public class DbAdapter {
         db.delete(DATABASE_TABLE_COUNTRIES, null, null);
     }
 
-    public Cursor getStationsList(final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes, final boolean sortByDistance, final Location myPos) {
-        String selectQuery = "SELECT " + Constants.STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID + ", " +
-                Constants.STATIONS.ID + ", " +
-                Constants.STATIONS.TITLE + ", " +
-                Constants.STATIONS.PHOTO_URL + ", " +
-                Constants.STATIONS.COUNTRY +
-                " FROM " + DATABASE_TABLE_STATIONS + " WHERE " +
-                whereCountryCodeIn(countryCodes);
-
-        if (photoFilter == PhotoFilter.NICKNAME) {
-            selectQuery += " AND " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
-        } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
-            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
-        }
-
-        selectQuery += " ORDER BY " + getStationOrderBy(sortByDistance, myPos);
-        Log.d(TAG, selectQuery);
-
-        final Cursor cursor;
-        if (photoFilter == PhotoFilter.NICKNAME) {
-            cursor = db.rawQuery(selectQuery, new String[]{nickname});
-        } else {
-            cursor = db.rawQuery(selectQuery, null);
-        }
-
-        if (cursor == null) {
-            return null;
-        } else if (!cursor.moveToFirst()) {
-            cursor.close();
-            return null;
-        }
-        return cursor;
-    }
-
     private String getStationOrderBy(final boolean sortByDistance, final Location myPos) {
         String orderBy = Constants.STATIONS.TITLE + " ASC";
 
@@ -271,13 +237,13 @@ public class DbAdapter {
      * Return a cursor on station ids where the station's title matches the given string
      *
      * @param search the search keyword
-     * @param photoFilter if stations need to be filtered by photo available or not
+     * @param stationFilter if stations need to be filtered by photo available or not
      * @param countryCodes countries to search for
-     * @param sortByDistance
-     * @param myPos
+     * @param sortByDistance sort by distance or by alphabet
+     * @param myPos current location
      * @return a Cursor representing the matching results
      */
-    public Cursor getStationsListByKeyword(final String search, final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes, final boolean sortByDistance, final Location myPos) {
+    public Cursor getStationsListByKeyword(final String search, final StationFilter stationFilter, final Set<String> countryCodes, final boolean sortByDistance, final Location myPos) {
         String selectQuery = whereCountryCodeIn(countryCodes);
         final List<String> queryArgs = new ArrayList<>();
 
@@ -286,15 +252,19 @@ public class DbAdapter {
             queryArgs.add("%" + StringUtils.replaceChars(StringUtils.stripAccents(StringUtils.trimToEmpty(search)), " -_()", "%%%%%") + "%");
         }
 
-        if (photoFilter == PhotoFilter.NICKNAME) {
+        if (stationFilter.getNickname() != null) {
             selectQuery += " AND " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
-        } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
-            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+            queryArgs.add(stationFilter.getNickname());
+        }
+        if (stationFilter.hasPhoto() != null) {
+            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (stationFilter.hasPhoto() ? "NOT" : "") + " NULL";
+        }
+        if (stationFilter.isActive() != null) {
+            selectQuery += " AND " + Constants.STATIONS.ACTIVE + " = ?";
+            queryArgs.add(stationFilter.isActive() ? "1" : "0");
         }
 
-        if (photoFilter == PhotoFilter.NICKNAME) {
-            queryArgs.add(nickname);
-        }
+        Log.w(TAG, selectQuery);
 
         final Cursor cursor = db.query(DATABASE_TABLE_STATIONS,
             new String[]{
@@ -710,22 +680,23 @@ public class DbAdapter {
         return countries;
     }
 
-    public List<Station> getAllStations(final PhotoFilter photoFilter, final String nickname, final Set<String> countryCodes) {
+    public List<Station> getAllStations(final StationFilter stationFilter, final Set<String> countryCodes) {
         final List<Station> stationList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes);
-        if (photoFilter == PhotoFilter.NICKNAME) {
+        final List<String> queryArgs = new ArrayList<>();
+        if (stationFilter.getNickname() != null) {
             selectQuery += " AND " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
-        } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
-            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+            queryArgs.add(stationFilter.getNickname());
         }
-        Log.d(TAG, selectQuery);
+        if (stationFilter.hasPhoto() != null) {
+            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (stationFilter.hasPhoto() ? "NOT" : "") + " NULL";
+        }
+        if (stationFilter.isActive() != null) {
+            selectQuery += " AND " + Constants.STATIONS.ACTIVE + " = ?";
+            queryArgs.add(stationFilter.isActive() ? "1" : "0");
+        }
 
-        final Cursor cursor;
-        if (photoFilter == PhotoFilter.NICKNAME) {
-            cursor = db.rawQuery(selectQuery, new String[]{nickname});
-        } else {
-            cursor = db.rawQuery(selectQuery, null);
-        }
+        final Cursor cursor = db.rawQuery(selectQuery, queryArgs.toArray(new String[]{}));
 
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -742,23 +713,26 @@ public class DbAdapter {
         return stationList;
     }
 
-    public List<Station> getStationByLatLngRectangle(final double lat, final double lng, final PhotoFilter photoFilter, final String nickname) {
+    public List<Station> getStationByLatLngRectangle(final double lat, final double lng, final StationFilter stationFilter) {
         final List<Station> stationList = new ArrayList<>();
         // Select All Query with rectangle - might be later change with it
         String selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS + " where " + Constants.STATIONS.LAT + " < " + (lat + 0.5) + " AND " + Constants.STATIONS.LAT + " > " + (lat - 0.5)
                 + " AND " + Constants.STATIONS.LON + " < " + (lng + 0.5) + " AND " + Constants.STATIONS.LON + " > " + (lng - 0.5);
-        if (photoFilter == PhotoFilter.NICKNAME) {
+
+        final List<String> queryArgs = new ArrayList<>();
+        if (stationFilter.getNickname() != null) {
             selectQuery += " AND " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
-        } else if (photoFilter != PhotoFilter.ALL_STATIONS) {
-            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (photoFilter == PhotoFilter.STATIONS_WITH_PHOTO ? "NOT" : "") + " NULL";
+            queryArgs.add(stationFilter.getNickname());
+        }
+        if (stationFilter.hasPhoto() != null) {
+            selectQuery += " AND " + Constants.STATIONS.PHOTO_URL + " IS " + (stationFilter.hasPhoto() ? "NOT" : "") + " NULL";
+        }
+        if (stationFilter.isActive() != null) {
+            selectQuery += " AND " + Constants.STATIONS.ACTIVE + " = ?";
+            queryArgs.add(stationFilter.isActive() ? "1" : "0");
         }
 
-        final Cursor cursor;
-        if (photoFilter == PhotoFilter.NICKNAME) {
-            cursor = db.rawQuery(selectQuery, new String[]{nickname});
-        } else {
-            cursor = db.rawQuery(selectQuery, null);
-        }
+        final Cursor cursor = db.rawQuery(selectQuery, queryArgs.toArray(new String[]{}));
 
         if (cursor.moveToFirst()) {
             do {

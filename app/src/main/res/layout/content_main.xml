@@ -43,9 +43,12 @@
           android:id="@+id/lstStations"
           android:layout_margin="10dp"
           android:layout_alignParentStart="true"
-          android:layout_below="@+id/filter_result"/>
+          android:layout_below="@+id/filter_result"
+          android:layout_above="@+id/button_bar"
+           />
 
         <LinearLayout
+            android:id="@+id/button_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -65,14 +68,24 @@
                 android:contentDescription="@string/sort_order"/>
 
             <ImageButton
-                android:id="@+id/toggle_photo"
+                android:id="@+id/photoFilter"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="togglePhotoFilter"
-                android:src="@drawable/ic_station_filter_without_photo_24px"
+                android:src="@drawable/ic_photo_white_24px"
                 android:background="@null"
                 android:contentDescription="@string/menu_photo_filter"/>
+
+            <ImageButton
+                android:id="@+id/activeFilter"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:onClick="toggleActiveFilter"
+                android:src="@drawable/ic_station_active_white_24px"
+                android:background="@null"
+                android:contentDescription="@string/menu_active_filter"/>
 
             <ImageButton
                 android:id="@+id/nicknameFilter"
@@ -81,7 +94,7 @@
                 android:layout_height="match_parent"
                 android:onClick="selectNicknameFilter"
                 android:contentDescription="@string/nicknameFilter"
-                android:src="@drawable/ic_person_24px"
+                android:src="@drawable/ic_person_white_24px"
                 android:background="@null"/>
 
             <ImageButton

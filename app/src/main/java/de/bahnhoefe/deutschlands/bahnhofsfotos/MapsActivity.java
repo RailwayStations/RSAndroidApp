@@ -24,7 +24,6 @@ import android.view.SubMenu;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -78,7 +77,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MapsforgeMapView;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.TapHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
 
 import static android.view.Menu.NONE;
 
@@ -374,21 +372,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector);
         myLocSwitch.setChecked(baseApplication.isLocationUpdates());
         item.setActionView(myLocSwitch);
-        myLocSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-               @Override
-               public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
-                   baseApplication.setLocationUpdates(isChecked);
-                   if (isChecked) {
-                       askedForPermission = false;
-                       registerLocationManager();
-                   } else {
-                       unregisterLocationManager();
-                   }
-               }
-           }
+        myLocSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            baseApplication.setLocationUpdates(isChecked);
+            if (isChecked) {
+                askedForPermission = false;
+                registerLocationManager();
+            } else {
+                unregisterLocationManager();
+            }
+        }
         );
-
-        menu.findItem(R.id.menu_toggle_photo).setIcon(baseApplication.getPhotoFilter().getIcon());
 
         final String map = baseApplication.getMap();
 
@@ -523,12 +516,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_toggle_photo:
-                final PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
-                item.setIcon(photoFilter.getIcon());
-                baseApplication.setPhotoFilter(photoFilter);
-                reloadMap();
-                break;
             case R.id.map_info:
                 final MapInfoFragment mapInfoFragment = new MapInfoFragment();
                 mapInfoFragment.show(getSupportFragmentManager(), "Map Info Dialog");
@@ -601,7 +588,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private List<Station> readBahnhoefe() {
         try {
-            return dbAdapter.getAllStations(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes());
+            return dbAdapter.getAllStations(baseApplication.getStationFilter(), baseApplication.getCountryCodes());
         } catch (final Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }

@@ -248,5 +248,8 @@
     <string name="problem_wrong_name">Station has a wrong name</string>
     <string name="problem_station_active">Station is active</string>
     <string name="menu_nearby_notification">Nearby notification</string>
+    <string name="menu_active_filter">Station active/inactive filter</string>
+    <string name="button_remove_text">Remove</string>
+    <string name="button_myself_text">Myself</string>
 
 </resources>

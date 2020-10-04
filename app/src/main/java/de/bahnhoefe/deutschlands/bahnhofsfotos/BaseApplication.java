@@ -27,7 +27,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -218,20 +218,25 @@ public class BaseApplication extends Application {
         putString(R.string.PASSWORD, password);
     }
 
-    public PhotoFilter getPhotoFilter() {
-        return PhotoFilter.valueOf(preferences.getString(getString(R.string.PHOTO_FILTER), PhotoFilter.ALL_STATIONS.toString()));
+    public StationFilter getStationFilter() {
+        final Boolean photoFilter = getOptionalBoolean(R.string.STATION_FILTER_PHOTO);
+        final Boolean activeFilter = getOptionalBoolean(R.string.STATION_FILTER_ACTIVE);
+        final String nicknameFilter = preferences.getString(getString(R.string.STATION_FILTER_NICKNAME), null);
+        return new StationFilter(photoFilter, activeFilter, nicknameFilter);
     }
 
-    public void setPhotoFilter(final PhotoFilter photoFilter) {
-        putString(R.string.PHOTO_FILTER, photoFilter.toString());
+    private Boolean getOptionalBoolean(final int key) {
+        if (preferences.contains(getString(key))) {
+            final String stringValue = preferences.getString(getString(key), "false");
+            return Boolean.valueOf(stringValue);
+        }
+        return null;
     }
 
-    public String getNicknameFilter() {
-        return preferences.getString(getString(R.string.NICKNAME_FILTER), getNickname());
-    }
-
-    public void setNicknameFilter(final String nicknameFilter) {
-        putString(R.string.NICKNAME_FILTER, nicknameFilter);
+    public void setStationFilter(final StationFilter stationFilter) {
+        putString(R.string.STATION_FILTER_PHOTO, stationFilter.hasPhoto() == null ? null : stationFilter.hasPhoto().toString());
+        putString(R.string.STATION_FILTER_ACTIVE, stationFilter.isActive() == null ? null : stationFilter.isActive().toString());
+        putString(R.string.STATION_FILTER_NICKNAME, stationFilter.getNickname());
     }
 
     public long getLastUpdate() {

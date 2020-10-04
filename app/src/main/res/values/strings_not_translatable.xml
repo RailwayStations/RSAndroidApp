@@ -25,8 +25,9 @@
     <string name="LAST_POSITION_LAT" translatable="false">LAST_POSITION_LAT</string>
     <string name="LAST_POSITION_LON" translatable="false">LAST_POSITION_LON</string>
     <string name="LAST_POSITION_ZOOM" translatable="false">LAST_POSITION_ZOOM</string>
-    <string name="PHOTO_FILTER" translatable="false">APP_PREF_PHOTO_FILTER</string>
-    <string name="NICKNAME_FILTER" translatable="false">APP_PREF_NICKNAME_FILTER</string>
+    <string name="STATION_FILTER_PHOTO" translatable="false">APP_PREF_STATION_FILTER_PHOTO</string>
+    <string name="STATION_FILTER_ACTIVE" translatable="false">APP_PREF_STATION_FILTER_ACTIVE</string>
+    <string name="STATION_FILTER_NICKNAME" translatable="false">APP_PREF_STATION_FILTER_NICKNAME</string>
     <string name="LAST_UPDATE" translatable="false">APP_PREF_LAST_UPDATE</string>
 
     <!-- placeholder -->

@@ -48,7 +48,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -116,6 +116,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             searchString = searchIntent.getStringExtra(SearchManager.QUERY);
         }
 
+        binding.appBarMain.main.photoFilter.setImageDrawable(getDrawable(baseApplication.getStationFilter().getPhotoIcon()));
+        binding.appBarMain.main.nicknameFilter.setImageDrawable(getDrawable(baseApplication.getStationFilter().getNicknameIcon()));
+        binding.appBarMain.main.activeFilter.setImageDrawable(getDrawable(baseApplication.getStationFilter().getActiveIcon()));
+        setSortIcon(baseApplication.getSortByDistance());
+
         myPos = baseApplication.getLastLocation();
 
         updateStationList();
@@ -160,9 +165,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         });
 
-        binding.appBarMain.main.togglePhoto.setImageDrawable(getDrawable(baseApplication.getPhotoFilter().getIcon()));
-        setSortIcon(baseApplication.getSortByDistance());
-
         final UpdatePolicy updatePolicy = baseApplication.getUpdatePolicy();
         menu.findItem(updatePolicy.getId()).setChecked(true);
 
@@ -171,13 +173,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     private void updateStationList() {
         try {
-            boolean sortByDistance = baseApplication.getSortByDistance() && myPos != null;
+            final boolean sortByDistance = baseApplication.getSortByDistance() && myPos != null;
             final int stationCount = dbAdapter.countStations(baseApplication.getCountryCodes());
-            Cursor cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes(), sortByDistance, myPos);
+            final Cursor cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getStationFilter(), baseApplication.getCountryCodes(), sortByDistance, myPos);
             if (stationListAdapter != null) {
                 stationListAdapter.swapCursor(cursor);
             } else {
-                cursor = dbAdapter.getStationsList(baseApplication.getPhotoFilter(), baseApplication.getNicknameFilter(), baseApplication.getCountryCodes(), sortByDistance, myPos);
                 stationListAdapter = new StationListAdapter(this, cursor, 0);
                 binding.appBarMain.main.lstStations.setAdapter(stationListAdapter);
 
@@ -348,10 +349,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             }
         }
 
-        binding.appBarMain.main.togglePhoto.setImageDrawable(getDrawable(baseApplication.getPhotoFilter().getIcon()));
         if (baseApplication.getSortByDistance()) {
             registerLocationManager();
         }
+        final StationFilter stationFilter = baseApplication.getStationFilter();
+        binding.appBarMain.main.activeFilter.setImageDrawable(getDrawable(stationFilter.getActiveIcon()));
+        binding.appBarMain.main.photoFilter.setImageDrawable(getDrawable(stationFilter.getPhotoIcon()));
+        binding.appBarMain.main.nicknameFilter.setImageDrawable(getDrawable(stationFilter.getNicknameIcon()));
+
         updateStationList();
     }
 
@@ -404,9 +409,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     public void togglePhotoFilter(final View view) {
-        final PhotoFilter photoFilter = baseApplication.getPhotoFilter().getNextFilter();
-        binding.appBarMain.main.togglePhoto.setImageDrawable(getDrawable(photoFilter.getIcon()));
-        baseApplication.setPhotoFilter(photoFilter);
+        final StationFilter stationFilter = baseApplication.getStationFilter();
+        stationFilter.togglePhoto();
+        binding.appBarMain.main.photoFilter.setImageDrawable(getDrawable(stationFilter.getPhotoIcon()));
+        baseApplication.setStationFilter(stationFilter);
         updateStationList();
     }
 
@@ -418,26 +424,46 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public void selectNicknameFilter(final View view) {
         int selectedNickname = -1;
         final String[] nicknames = dbAdapter.getPhotographerNicknames();
-        final String selectedNick = baseApplication.getNicknameFilter();
+        final StationFilter stationFilter = baseApplication.getStationFilter();
         if (nicknames.length == 0) {
             Toast.makeText(getBaseContext(), getString(R.string.no_nicknames_found), Toast.LENGTH_LONG).show();
             return;
         }
         for (int i = 0; i < nicknames.length; i++) {
-            if (nicknames[i].equals(selectedNick)) {
+            if (nicknames[i].equals(stationFilter.getNickname())) {
                 selectedNickname = i;
             }
         }
-        new SimpleDialogs().select(this, getString(R.string.select_nickname), nicknames, selectedNickname, (dialog, whichButton) -> {
-            dialog.dismiss();
-            final int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-            if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
-                baseApplication.setNicknameFilter(nicknames[selectedPosition]);
-                final PhotoFilter photoFilter = PhotoFilter.NICKNAME;
-                baseApplication.setPhotoFilter(photoFilter);
-                updateStationList();
-            }
-        });
+
+        new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.select_nickname)
+                .setSingleChoiceItems(nicknames, selectedNickname, null)
+                .setPositiveButton(R.string.button_ok_text, (dialog, whichButton) -> {
+                    dialog.dismiss();
+                    final int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                    if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
+                        stationFilter.setNickname(nicknames[selectedPosition]);
+                        baseApplication.setStationFilter(stationFilter);
+                        binding.appBarMain.main.nicknameFilter.setImageDrawable(getDrawable(stationFilter.getNicknameIcon()));
+                        updateStationList();
+                    }
+                })
+                .setNeutralButton(R.string.button_remove_text, (dialog, whichButton) -> {
+                    dialog.dismiss();
+                    stationFilter.setNickname(null);
+                    baseApplication.setStationFilter(stationFilter);
+                    binding.appBarMain.main.nicknameFilter.setImageDrawable(getDrawable(stationFilter.getNicknameIcon()));
+                    updateStationList();
+                })
+                .setNegativeButton(R.string.button_myself_text, (dialog, whichButton) -> {
+                    dialog.dismiss();
+                    stationFilter.setNickname(baseApplication.getNickname());
+                    baseApplication.setStationFilter(stationFilter);
+                    binding.appBarMain.main.nicknameFilter.setImageDrawable(getDrawable(stationFilter.getNicknameIcon()));
+                    updateStationList();
+                })
+                .create().show();
     }
 
     public void toggleNotification() {
@@ -554,6 +580,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     @Override
     public void onLocationChanged(@NonNull final Location location) {
         myPos = location;
+        updateStationList();
+    }
+
+    public void toggleActiveFilter(final View view) {
+        final StationFilter stationFilter = baseApplication.getStationFilter();
+        stationFilter.toggleActive();
+        binding.appBarMain.main.activeFilter.setImageDrawable(getDrawable(stationFilter.getActiveIcon()));
+        baseApplication.setStationFilter(stationFilter);
         updateStationList();
     }
 

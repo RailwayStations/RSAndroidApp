@@ -23,7 +23,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PhotoFilter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -62,7 +62,6 @@ public class HighScoreActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(final AdapterView<?> parent) {
-                // nothing todo
             }
         });
     }
@@ -77,9 +76,9 @@ public class HighScoreActivity extends AppCompatActivity {
                     binding.highscoreList.setAdapter(adapter);
                     binding.highscoreList.setOnItemClickListener((adapter, v, position, arg3) -> {
                         final HighScoreItem highScoreItem = (HighScoreItem) adapter.getItemAtPosition(position);
-                        final BaseApplication baseApplication1 = (BaseApplication) getApplication();
-                        baseApplication1.setPhotoFilter(PhotoFilter.NICKNAME);
-                        baseApplication1.setNicknameFilter(highScoreItem.getName());
+                        final StationFilter stationFilter = baseApplication.getStationFilter();
+                        stationFilter.setNickname(highScoreItem.getName());
+                        baseApplication.setStationFilter(stationFilter);
                         final Intent intent = new Intent(HighScoreActivity.this, MapsActivity.class);
                         startActivity(intent);
                     });
