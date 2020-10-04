@@ -245,5 +245,7 @@
     <string name="invalid_api_url">Invalid API URL</string>
     <string name="menu_email">Contact us by email</string>
     <string name="sort_order">Sort order</string>
+    <string name="problem_wrong_name">Station has a wrong name</string>
+    <string name="problem_station_active">Station is active</string>
 
 </resources>

@@ -1,3 +1,4 @@
 - Improved search with accent characters
 - Redesign station list with sort by distance option
 - Improved French, Dutch, German and Polish translation
+- Added more problem types

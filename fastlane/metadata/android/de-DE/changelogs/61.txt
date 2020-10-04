@@ -1,3 +1,4 @@
 - Suche mit Umlauten verbessert
 - Redesign der Bahnhofsliste mit Sortieroption nach Distanz
 - Verbesserte Übersetzung für Französisch, Niederländisch, Deutsch und Polnisch
+- Weitere Problemtypen hinzugefügt
