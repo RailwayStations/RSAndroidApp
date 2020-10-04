@@ -56,6 +56,10 @@ android {
     }
 }
 
+ext {
+    mapsforgeVersion = '0.14.0'
+    retrofitVersion = '2.7.2'
+}
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -66,24 +70,23 @@ dependencies {
     }
 
     // Desugaring
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
 
-    implementation 'com.squareup.retrofit2:retrofit:2.7.2'
-    implementation 'com.squareup.retrofit2:converter-gson:2.7.2'
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     //Logging Network Calls
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
+    implementation "com.squareup.okhttp3:logging-interceptor:4.4.0"
 
-    def mapsforgeVersion = '0.13.0'
-    implementation 'org.mapsforge:mapsforge-map-reader:0.13.0'
+    implementation "org.mapsforge:mapsforge-map-reader:$mapsforgeVersion"
     implementation "org.mapsforge:mapsforge-core:$mapsforgeVersion"
-    implementation 'org.mapsforge:mapsforge-themes:0.13.0'
+    implementation "org.mapsforge:mapsforge-themes:$mapsforgeVersion"
     implementation "org.mapsforge:mapsforge-map:$mapsforgeVersion"
-    implementation 'org.mapsforge:mapsforge-map-android:0.13.0'
+    implementation "org.mapsforge:mapsforge-map-android:$mapsforgeVersion"
     implementation "org.mapsforge:mapsforge-map-android:$mapsforgeVersion"
     implementation "org.mapsforge:mapsforge-map-reader:$mapsforgeVersion"
     implementation "org.mapsforge:mapsforge-themes:$mapsforgeVersion"
-    implementation 'net.sf.kxml:kxml2:2.3.0'
-    implementation 'com.caverock:androidsvg:1.4'
+    implementation "net.sf.kxml:kxml2:2.3.0"
+    implementation "com.caverock:androidsvg:1.4"
 
     implementation 'org.apache.commons:commons-lang3:3.10'
     implementation group: 'commons-io', name: 'commons-io', version: '20030203.000550'
