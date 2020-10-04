@@ -55,16 +55,6 @@
             android:background="@color/colorPrimary">
 
             <ImageButton
-                android:id="@+id/notify"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:onClick="toggleNotification"
-                android:src="@drawable/ic_notifications_off_white_24px"
-                android:background="@null"
-                android:contentDescription="@string/benachrichtigen" />
-
-            <ImageButton
                 android:id="@+id/toggle_sort"
                 android:layout_width="0dp"
                 android:layout_weight="1"

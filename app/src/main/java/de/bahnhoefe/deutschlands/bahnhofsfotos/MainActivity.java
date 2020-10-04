@@ -36,8 +36,6 @@ import androidx.core.view.GravityCompat;
 
 import com.google.android.material.navigation.NavigationView;
 
-import org.mapsforge.core.model.LatLong;
-
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -165,8 +163,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         binding.appBarMain.main.togglePhoto.setImageDrawable(getDrawable(baseApplication.getPhotoFilter().getIcon()));
         setSortIcon(baseApplication.getSortByDistance());
 
-        initNotificationMenuItem(false);
-
         final UpdatePolicy updatePolicy = baseApplication.getUpdatePolicy();
         menu.findItem(updatePolicy.getId()).setChecked(true);
 
@@ -198,13 +194,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(final Menu menu) {
-        final MenuItem item = menu.findItem(R.id.notify);
-        initNotificationMenuItem(statusBinder != null);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         final int id = item.getItemId();
 
@@ -216,15 +205,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.notify) {
-            final Intent intent = new Intent(MainActivity.this, NearbyNotificationService.class);
-            if (statusBinder == null) {
-                startService(intent);
-                bindToStatus();
-            } else {
-                stopService(intent);
-            }
-        } else if (id == R.id.rb_update_manual) {
+        if (id == R.id.rb_update_manual) {
             baseApplication.setUpdatePolicy(UpdatePolicy.MANUAL);
         } else if (id == R.id.rb_update_automatic) {
             baseApplication.setUpdatePolicy(UpdatePolicy.AUTOMATIC);
@@ -248,8 +229,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         return super.onOptionsItemSelected(item);
     }
 
-    private void initNotificationMenuItem(final boolean active) {
-        binding.appBarMain.main.notify.setImageDrawable(getDrawable(active ? R.drawable.ic_notifications_active_white_24px : R.drawable.ic_notifications_off_white_24px));
+    private void setNotificationIcon(final boolean active) {
+        final MenuItem item = binding.navView.getMenu().findItem(R.id.nav_notification);
+        item.setIcon(getDrawable(active ? R.drawable.ic_notifications_active_gray_24px : R.drawable.ic_notifications_off_gray_24px));
     }
 
     @Override
@@ -262,6 +244,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             startActivity(new Intent(this, MyDataActivity.class));
         } else if (id == R.id.nav_update_photos) {
             runUpdateCountriesAndStations();
+        } else if (id == R.id.nav_notification) {
+            toggleNotification();
         } else if (id == R.id.nav_highscore) {
             startActivity(new Intent(this, HighScoreActivity.class));
         } else if (id == R.id.nav_outbox) {
@@ -456,13 +440,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         });
     }
 
-    public void toggleNotification(final View view) {
+    public void toggleNotification() {
         final Intent intent = new Intent(MainActivity.this, NearbyNotificationService.class);
         if (statusBinder == null) {
             startService(intent);
             bindToStatus();
+            setNotificationIcon(true);
         } else {
             stopService(intent);
+            setNotificationIcon(false);
         }
     }
 

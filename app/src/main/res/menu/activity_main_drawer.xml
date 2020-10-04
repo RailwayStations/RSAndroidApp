@@ -3,17 +3,9 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_help_gray_24px"
-            android:title="@string/menu_title_introslider" />
-        <item
             android:id="@+id/nav_your_data"
             android:icon="@drawable/ic_account_box_gray_24px"
             android:title="@string/menu_title_your_data" />
-        <item
-            android:id="@+id/nav_update_photos"
-            android:icon="@drawable/ic_cached_gray_24px"
-            android:title="@string/menu_title_update_photos" />
         <item
             android:id="@+id/nav_stations_map"
             android:icon="@drawable/ic_map_gray_24px"
@@ -30,10 +22,24 @@
             android:id="@+id/nav_inbox"
             android:icon="@drawable/ic_inbox_gray_24px"
             android:title="@string/menu_title_inbox" />
+        <item
+            android:id="@+id/nav_update_photos"
+            android:checkable="false"
+            android:icon="@drawable/ic_cached_gray_24px"
+            android:title="@string/menu_title_update_photos" />
+        <item
+            android:id="@+id/nav_notification"
+            android:checkable="false"
+            android:icon="@drawable/ic_notifications_off_gray_24px"
+            android:title="@string/menu_nearby_notification" />
     </group>
 
     <item android:title="@string/information">
         <menu>
+            <item
+                android:id="@+id/nav_slideshow"
+                android:icon="@drawable/ic_help_gray_24px"
+                android:title="@string/menu_title_introslider" />
             <item
                 android:id="@+id/nav_web_site"
                 android:icon="@drawable/ic_public_gray_24px"

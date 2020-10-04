@@ -247,5 +247,6 @@
     <string name="sort_order">Sort order</string>
     <string name="problem_wrong_name">Station has a wrong name</string>
     <string name="problem_station_active">Station is active</string>
+    <string name="menu_nearby_notification">Nearby notification</string>
 
 </resources>
