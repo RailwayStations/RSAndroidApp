@@ -242,12 +242,12 @@
     <string name="emailVerificationRequestFailed">Une erreur est survenue lors de la vérification de l\'adresse de mail.</string>
     <string name="chooseCountry">Choisir nu pays</string>
     <string name="invalid_api_url">URL d\'API incorrecte</string>
-    <string name="menu_email">Contact us by email</string>
-    <string name="sort_order">Sort order</string>
-    <string name="problem_wrong_name">Station has a wrong name</string>
-    <string name="problem_station_active">Station is active</string>
-    <string name="menu_nearby_notification">Nearby notification</string>
-    <string name="menu_active_filter">Station active/inactive filter</string>
-    <string name="button_remove_text">Remove</string>
-    <string name="button_myself_text">Myself</string>
+    <string name="menu_email">Contactez-nous par e-mail</string>
+    <string name="sort_order">Ordre de tri</string>
+    <string name="problem_wrong_name">La station a un mauvais nom</string>
+    <string name="problem_station_active">La station est active</string>
+    <string name="menu_nearby_notification">Notification à proximité</string>
+    <string name="menu_active_filter">Filtre actif/inactif de la station</string>
+    <string name="button_remove_text">Supprimer</string>
+    <string name="button_myself_text">Moi-même</string>
 </resources>

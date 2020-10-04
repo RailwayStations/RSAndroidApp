@@ -239,12 +239,12 @@
     <string name="emailVerificationRequestFailed">Er is een fout opgetreden bij het aanvragen van een nieuwe verificatiemail.</string>
     <string name="chooseCountry">Kies een land</string>
     <string name="invalid_api_url">Ongeldige API URL</string>
-    <string name="menu_email">Contact us by email</string>
-    <string name="sort_order">Sort order</string>
-    <string name="problem_wrong_name">Station has a wrong name</string>
-    <string name="problem_station_active">Station is active</string>
-    <string name="menu_nearby_notification">Nearby notification</string>
-    <string name="menu_active_filter">Station active/inactive filter</string>
-    <string name="button_remove_text">Remove</string>
-    <string name="button_myself_text">Myself</string>
+    <string name="menu_email">Contacteer ons via e-mail</string>
+    <string name="sort_order">Sorteervolgorde</string>
+    <string name="problem_wrong_name">Station heeft een verkeerde naam</string>
+    <string name="problem_station_active">Station is actief</string>
+    <string name="menu_nearby_notification">Kennisgeving in de buurt</string>
+    <string name="menu_active_filter">Station actief/inactief filter</string>
+    <string name="button_remove_text">Verwijder</string>
+    <string name="button_myself_text">Ikzelf</string>
 </resources>
