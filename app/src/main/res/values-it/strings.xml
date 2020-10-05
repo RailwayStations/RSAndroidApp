@@ -228,7 +228,7 @@
             <p>- from the platforms only if they are freely accessible</p>
             ]]></string>
     <string name="special_license">This country requires the special license:\n%s</string>
-    <string name="special_license_confirm">Please confirm the special license for this country</string>
+    <string name="special_license_confirm">Si prega di confermare la licenza speciale per questo paese</string>
     <string name="nav_delete_processed_uploads">Delete processed uploads</string>
     <string name="error_loading_inbox">"Error loading inbox: "</string>
     <string name="missing_station">Missing station</string>
