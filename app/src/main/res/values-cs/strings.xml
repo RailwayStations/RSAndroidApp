@@ -26,15 +26,15 @@
     <string name="nav_walk">procházka</string>
     <string name="nav_show">pouze umístění</string>
     <string name="navMethod">Ukažte cestu…</string>
-    <string name="title_activity_outbox">Outbox</string>
-    <string name="title_activity_inbox">Inbox</string>
+    <string name="title_activity_outbox">K odeslání</string>
+    <string name="title_activity_inbox">Doručená pošta</string>
     <string name="activitynotfound">Na svém smartphonu nemáte žádnou navigační aplikaci</string>
     <string name="search_hint">Hledat stanici</string>
     <string name="app_info_title">O aplikaci</string>
     <string name="app_info_ok">OK</string>
     <string name="app_info_text"><![CDATA[<p>Verze: <b>%s</b></p>
         <p>&nbsp;</p>
-        <p>Toto je aplikace Android pro OpenData projekt <b><a href="https://map.railway-stations.org/">železničních stanic. rg</a></b> licencován pod <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
+        <p>Toto je aplikace Android pro OpenData projekt <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> licencován pod <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
         <br/>Vývoj aplikací a problémy na GitHub: <b><a href="https://github.com/RailwayStations/RSAndroidApp">RailwayStations/RSAndroidApp</a></b>.</p>
         <p>&nbsp;</p>
         <p>Data stanice pro germany poskytla Deutsche Bahn v kontextu lokálního <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData projektu</a></b>.
@@ -52,7 +52,7 @@
         \n<b>- . .</b>
         \n\nNěkteré mapy vyžadují speciální motivy pro správné zobrazení! Ty je třeba podle toho stáhnout a nakonfigurovat.
     </string>
-    <string name="information">Information</string>
+    <string name="information">Informace</string>
     <string name="menu_title_info">O aplikaci</string>
     <string name="benachrichtigen">Oznámení</string>
     <string name="nahe_gelegenen_bahnhof_melden">Hlášení stanic v okolí</string>
@@ -61,8 +61,8 @@
     <string name="template_long_text" formatted="false">Stanice: %s$1\nvzdálenost: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Foto: otevřeno pro informace o licenci</string>
     <string name="nearby_notification_active">Oznámení o blízkých stanicích je aktivní</string>
-    <string name="license_tag" formatted="false">Owner: %s, %s</string>
-    <string name="picture_landscape_only">Please use landscape orientation</string>
+    <string name="license_tag" formatted="false">Vlastník: %s, %s</string>
+    <string name="picture_landscape_only">Použijte prosím orientaci na šířku</string>
     <string name="country_activity">Výběr země</string>
     <string name="countrySelection">Výběr země</string>
     <string name="nicknameFilter">Filtrovat podle fotografa</string>
@@ -74,8 +74,8 @@
     <string name="menu_follow_my_location">Sledujte moji pozici</string>
     <string name="text_intro_slider1">Sbíráme fotografie stanic od uživatelů, které můžeme poskytnout dalším vývojářům na základě bezplatné licence. Naše oblíbená licence je CC0.</string>
     <string name="text_intro_slider2">Vyplňte požadované údaje v části „Moje údaje“, abychom mohli vašim souborům fotografií dát správné jméno. Bez registrace nemůžete nahrávat fotografie.\n\n<b>Při registraci získáte počáteční heslo, zkontrolujte prosím složku SPAM.</b></string>
-    <string name="next">NEXT</string>
-    <string name="skip">CANCEL</string>
+    <string name="next">DALŠÍ</string>
+    <string name="skip">ZRUŠENÍ</string>
     <string name="proceed">START</string>
     <string name="title_activity_high_score">Vysoké skóre</string>
     <string name="menu_title_highscore">Vysoké skóre</string>
@@ -89,24 +89,24 @@
     <string name="missing_photoOwner">Potvrďte prosím, že se jedná o vaše vlastní fotografie</string>
     <string name="missing_nickname">Uveďte svou přezdívku</string>
     <string name="missing_email_address">Prosím zadejte platnou emailovou adresu</string>
-    <string name="missing_link">Please provide a valid URL if you like to be linked</string>
-    <string name="upload_conflict">Your photo is uploaded, but there might be a conflict. Either you have uploaded twice or another user uploaded a photo for the same station.</string>
-    <string name="select_photo">Photo selection</string>
-    <string name="station_photo">Station photo</string>
-    <string name="menu_title_stations_map">Station map</string>
-    <string name="menu_photo_filter">Filter with/without photo</string>
-    <string name="loading_stations">Load stations</string>
-    <string name="search_nickname_hint">Search photographer</string>
-    <string name="cc0_needed">Please accept CC0, so that we can use your photos without any problems.</string>
-    <string name="update_available">New station photos are available. Update?</string>
-    <string name="button_cancel_text">Cancel</string>
-    <string name="update_manual">Manual</string>
-    <string name="update_notify">Ask</string>
-    <string name="update_automatic">Automatically</string>
-    <string name="send">SEND</string>
-    <string name="logo_train">small locomotive logo</string>
-    <string name="license_info_not_readable">License info currently not readable</string>
-    <string name="last_update_at">Last updated on: </string>
+    <string name="missing_link">Pokud chcete být propojeni, uveďte platnou adresu URL</string>
+    <string name="upload_conflict">Vaše fotka je nahrána, ale mohlo dojít ke konfliktu. Buď jste nahráli dvakrát, nebo jiný uživatel nahrál fotografii pro stejnou stanici.</string>
+    <string name="select_photo">Výběr fotografií</string>
+    <string name="station_photo">Foto stanice</string>
+    <string name="menu_title_stations_map">Mapa stanice</string>
+    <string name="menu_photo_filter">Filtrovat s/bez fotografie</string>
+    <string name="loading_stations">Načíst stanice</string>
+    <string name="search_nickname_hint">Hledat fotografa</string>
+    <string name="cc0_needed">Přijměte CC0, abychom mohli vaše fotografie bez problémů používat.</string>
+    <string name="update_available">K dispozici jsou nové fotografie stanic. Aktualizace?</string>
+    <string name="button_cancel_text">Zrušit</string>
+    <string name="update_manual">Manuál</string>
+    <string name="update_notify">Zeptat se</string>
+    <string name="update_automatic">Automaticky</string>
+    <string name="send">POSLAT</string>
+    <string name="logo_train">malé logo lokomotivy</string>
+    <string name="license_info_not_readable">Informace o licenci aktuálně nejsou čitelné</string>
+    <string name="last_update_at">Poslední aktualizace: </string>
     <string name="station_update_failed">Aktualizace stanic se nezdařila:</string>
     <string name="select_picture">Vyberte fotografii</string>
     <string name="grant_location_permission">Bez povolení polohy nemůžeme zobrazit vaši aktuální polohu</string>
@@ -159,11 +159,11 @@
     <string name="station_name">Název stanice</string>
     <string name="station_title_needed">Zadejte název stanice</string>
     <string name="nav_show_on_map">na mapě stanice</string>
-    <string name="login">Login</string>
+    <string name="login">Přihlásit se</string>
     <string name="bt_new_register">Zaregistrujte si nový účet</string>
     <string name="tvEmailOrNickname">E-mail nebo přezdívka</string>
     <string name="missing_login_data">Uveďte e-mail / přezdívku a heslo (nebo nahrajte token) pro přihlášení</string>
-    <string name="bt_logout">Logout</string>
+    <string name="bt_logout">Odhlásit se</string>
     <string name="profile_not_found">Neznámý e-mail nebo přezdívka</string>
     <string name="missing_email_or_nickname">Uveďte e-mail nebo přezdívku</string>
     <string name="bt_register">Registrovat</string>
@@ -193,8 +193,8 @@
     <string name="inactive">neaktivní</string>
     <string name="new_registration">Vaše registrace proběhla úspěšně. Poslali jsme vám e-mail s ověřovacím odkazem. Zkontrolujte také složku SPAM.</string>
     <string name="filter_result">Vybrány %1$d z %2$d stanic</string>
-    <string name="menu_title_outbox">Outbox</string>
-    <string name="menu_title_inbox">Inbox</string>
+    <string name="menu_title_outbox">K odeslání</string>
+    <string name="menu_title_inbox">Doručená pošta</string>
     <string name="error_retrieving_upload_state">Chyba při načítání stavu nahrávání</string>
     <string name="upload_state">Stav: %s</string>
     <string name="upload_state_unknown">neznámý</string>
