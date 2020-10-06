@@ -40,7 +40,7 @@
         <p>I dati della stazione per il germany sono stati forniti da Deutsche Bahn nel contesto del progetto locale <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData</a></b>.
         <br/>Altri dati del paese sono stati forniti da varie fonti OpenData come <b><a href="https://public.opendatasoft.com/explore/dataset/european-train-stations/table/">OpenDataSoft</a></b>.</p>
         <p>&nbsp;</p>
-        <p>L'app utilizza le <b><a href="https://design.google.com/icons/">icone materiale-design utilizzate da Google</a></b>, sotto licenza Apache versione 2.</p>]]></string>
+        <p>L\'app utilizza le <b><a href="https://design.google.com/icons/">icone materiale-design utilizzate da Google</a></b>, sotto licenza Apache versione 2.</p>]]></string>
     <string name="map_info_title">Informazioni sulle mappe</string>
     <string name="map_info_text">La mappa predefinita è fornita da <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
         \nUnisciti alla community e aiuta a migliorare la mappa, vedere <b><a href="https://www.openstreetmap.org/fixthemap">www. penstreetmap. rg/fixthemap</a></b>
