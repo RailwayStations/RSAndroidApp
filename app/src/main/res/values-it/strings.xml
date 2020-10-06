@@ -34,7 +34,7 @@
     <string name="app_info_ok">OK</string>
     <string name="app_info_text"><![CDATA[<p>Versione: <b>%s</b></p>
         <p>&nbsp;</p>
-        <p>Questa è l'App Android per il progetto OpenData <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> con licenza <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
+        <p>Questa è l\'App Android per il progetto OpenData <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> con licenza <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
         <br/>Sviluppo di app e Problemi su GitHub: <b><a href="https://github.com/RailwayStations/RSAndroidApp">RailwayStations/RSAndroidApp</a></b>.</p>
         <p>&nbsp;</p>
         <p>I dati della stazione per il germany sono stati forniti da Deutsche Bahn nel contesto del progetto locale <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData</a></b>.
@@ -223,8 +223,8 @@
     <string name="confirm_delete_processed_uploads">Cancellare tutti gli upload elaborati?</string>
     <string name="upload_not_yet_sent">Non ancora inviato</string>
     <string name="panorama_info"><![CDATA[<b>Si prega di considerare <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Libertà di panorama</a></b>:
-            <p>- non all'interno del treno</p>
-            <p>- non all'interno di una stazione</p>
+            <p>- non all\'interno del treno</p>
+            <p>- non all\'interno di una stazione</p>
             <p>- dai marciapiedi solo se sono liberamente accessibili</p>
             ]]></string>
     <string name="special_license">Questo paese richiede la licenza speciale:\n%s</string>
