@@ -34,7 +34,7 @@
     <string name="app_info_ok">Oké</string>
     <string name="app_info_text"><![CDATA[<p>Versie: <b>%s</b></p>
         <p>&nbsp;</p>
-        <p>Dit is de Android app voor het OpenData project <b><a href="https://map.railway-stations.org/">spoorwegen. rg</a></b> gelicentieerd onder <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
+        <p>Dit is de Android app voor het OpenData project <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> gelicentieerd onder <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
         <br/>ontwikkeling van de app en problemen op GitHub: <b><a href="https://github.com/RailwayStations/RSAndroidApp">RailwayStations/RSAndroidApp</a></b>.</p>
         <p>&nbsp;</p>
         <p>De station gegevens werden verstrekt door Deutsche Bahn in de context van het lokale <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData project</a></b>.
