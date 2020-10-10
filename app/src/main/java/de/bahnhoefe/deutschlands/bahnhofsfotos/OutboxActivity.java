@@ -41,7 +41,7 @@ public class OutboxActivity extends AppCompatActivity {
         final BaseApplication baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
 
-        ActivityOutboxBinding binding = ActivityOutboxBinding.inflate(getLayoutInflater());
+        final ActivityOutboxBinding binding = ActivityOutboxBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         final Cursor uploadsCursor = dbAdapter.getOutbox();

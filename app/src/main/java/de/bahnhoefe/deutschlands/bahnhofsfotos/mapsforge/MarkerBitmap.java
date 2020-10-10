@@ -23,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.graphics.Paint;
 import org.mapsforge.core.model.Point;
@@ -140,7 +142,7 @@ public class MarkerBitmap {
         if (!captionViews.containsKey(title)) {
             final TextView bubbleView = new TextView(context);
             bubbleView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            Utils.setBackground(bubbleView, context.getResources().getDrawable(R.drawable.caption_background));
+            Utils.setBackground(bubbleView, ResourcesCompat.getDrawable(context.getResources(), R.drawable.caption_background, null));
             bubbleView.setGravity(Gravity.CENTER);
             bubbleView.setMaxEms(20);
             bubbleView.setTextSize(10);

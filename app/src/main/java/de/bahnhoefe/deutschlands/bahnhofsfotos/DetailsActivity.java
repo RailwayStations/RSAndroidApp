@@ -40,6 +40,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NavUtils;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.google.gson.Gson;
@@ -241,7 +242,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     markerRes = station.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
                     setLocalBitmap(upload);
                 }
-                binding.details.marker.setImageDrawable(getDrawable(markerRes));
+                binding.details.marker.setImageDrawable(ContextCompat.getDrawable(this, markerRes));
             } else {
                 if (upload == null) {
                     upload = baseApplication.getDbAdapter().getPendingUploadForCoordinates(latitude, longitude);
@@ -331,7 +332,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        ReportProblemBinding reportProblemBinding = ReportProblemBinding.inflate(getLayoutInflater());
+        final ReportProblemBinding reportProblemBinding = ReportProblemBinding.inflate(getLayoutInflater());
         if (upload != null && upload.isProblemReport()) {
             reportProblemBinding.etProblemComment.setText(upload.getComment());
         }
@@ -649,7 +650,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     public void showStationInfo(final View view) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        final LayoutInflater inflater = this.getLayoutInflater();
         final StationInfoBinding stationInfoBinding = StationInfoBinding.inflate(getLayoutInflater());
         stationInfoBinding.id.setText(station != null ? station.getId() : "");
 
