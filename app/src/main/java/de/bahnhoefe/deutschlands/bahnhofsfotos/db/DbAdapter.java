@@ -434,9 +434,12 @@ public class DbAdapter {
         db.delete(DATABASE_TABLE_UPLOADS, Constants.UPLOADS.ID + "=?", new String[]{ String.valueOf(id)});
     }
 
-    public List<Upload> getPendingUploads() {
-        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null,
-                Constants.UPLOADS.REMOTE_ID + " IS NOT NULL AND " + getPendingUploadWhereClause(),
+    public List<Upload> getPendingUploads(final boolean withRemoteId) {
+        String selection = getPendingUploadWhereClause();
+        if (withRemoteId) {
+            selection += " AND " + Constants.UPLOADS.REMOTE_ID + " IS NOT NULL";
+        }
+        final Cursor cursor = db.query(DATABASE_TABLE_UPLOADS, null, selection,
                 null,null, null, null);
         final List<Upload> uploads = new ArrayList<>();
         while (cursor.moveToNext()) {

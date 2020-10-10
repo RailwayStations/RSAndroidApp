@@ -67,7 +67,7 @@ public class OutboxActivity extends AppCompatActivity {
         });
 
         final List<InboxStateQuery> query = new ArrayList<>();
-        for (final Upload upload : dbAdapter.getPendingUploads()) {
+        for (final Upload upload : dbAdapter.getPendingUploads(true)) {
             query.add(new InboxStateQuery(upload.getRemoteId()));
         }
 

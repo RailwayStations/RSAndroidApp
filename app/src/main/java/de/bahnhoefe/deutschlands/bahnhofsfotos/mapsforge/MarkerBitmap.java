@@ -73,6 +73,11 @@ public class MarkerBitmap {
     private final Bitmap iconBmpOwnPhotoInactive;
 
     /**
+     * bitmap object for stations with photo from user with pending upload
+     */
+    private final Bitmap iconBmpPendingUpload;
+
+    /**
      * Paint object for drawing icon
      */
     private final Paint paint;
@@ -103,12 +108,14 @@ public class MarkerBitmap {
      * @param srcWithoutPhotoInactive  source Bitmap object for inactive stations without photo
      * @param srcWithPhotoInactive  source Bitmap object for inactive stations with photo
      * @param srcOwnPhotoInactive source Bitmap object for inactive stations with photo from user
+     * @param srcPendingUpload source Bitmap object for stations with photo from user with pending upload
      * @param grid     grid point to be offset
      * @param textSize text size for icon
      * @param maxSize  icon size threshold
      */
     public MarkerBitmap(final Context context, final Bitmap srcWithoutPhoto, final Bitmap srcWithPhoto, final Bitmap srcOwnPhoto,
                         final Bitmap srcWithoutPhotoInactive, final Bitmap srcWithPhotoInactive, final Bitmap srcOwnPhotoInactive,
+                        final Bitmap srcPendingUpload,
                         final Point grid, final float textSize, final int maxSize, final Paint paint) {
         MarkerBitmap.context = context;
         iconBmpWithoutPhoto = srcWithoutPhoto;
@@ -117,6 +124,7 @@ public class MarkerBitmap {
         iconBmpWithPhotoInactive = srcWithPhotoInactive;
         iconBmpWithoutPhotoInactive = srcWithoutPhotoInactive;
         iconBmpOwnPhotoInactive = srcOwnPhotoInactive;
+        iconBmpPendingUpload = srcPendingUpload;
         iconOffset = grid;
         this.textSize = textSize * DisplayModel.getDeviceScaleFactor();
         itemSizeMax = maxSize;
@@ -125,7 +133,7 @@ public class MarkerBitmap {
     }
 
     public MarkerBitmap(final Context context, final Bitmap bitmap, final Point grid, final float textSize, final int maxSize, final Paint paint) {
-        this(context, bitmap, bitmap, bitmap, bitmap, bitmap, bitmap, grid, textSize, maxSize, paint);
+        this(context, bitmap, bitmap, bitmap, bitmap, bitmap, bitmap, bitmap, grid, textSize, maxSize, paint);
     }
 
     public static Bitmap getBitmapFromTitle(final String title, final Paint paint) {
@@ -163,7 +171,11 @@ public class MarkerBitmap {
     /**
      * @return bitmap object according to the state of the stations
      */
-    public final Bitmap getBitmap(final boolean hasPhoto, final boolean ownPhoto, final boolean stationActive) {
+    public final Bitmap getBitmap(final boolean hasPhoto, final boolean ownPhoto, final boolean stationActive, final boolean inbox) {
+        if (inbox) {
+            return iconBmpPendingUpload;
+        }
+
         if (ownPhoto) {
             if (stationActive) {
                 return iconBmpOwnPhoto;
@@ -175,9 +187,11 @@ public class MarkerBitmap {
             }
             return iconBmpWithPhotoInactive;
         }
+
         if (stationActive) {
             return iconBmpWithoutPhoto;
         }
+
         return iconBmpWithoutPhotoInactive;
     }
 

@@ -235,6 +235,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                             setLocalBitmap(upload);
                         });
                     }
+                } else if (upload != null && upload.isPendingPhotoUpload()) {
+                    markerRes = R.drawable.marker_yellow;
                 } else {
                     markerRes = station.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
                     setLocalBitmap(upload);

@@ -69,9 +69,6 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     @Override
     public synchronized void draw(final BoundingBox boundingBox, final byte zoomLevel
             , final org.mapsforge.core.graphics.Canvas canvas, final Point topLeftPoint) {
-        final boolean hasPhoto = hasPhoto();
-        final boolean ownPhoto = ownPhoto();
-        final Boolean stationActive = stationActive();
         if (cluster.getClusterManager() == null ||
                 this.getLatLong() == null) {
             return;
@@ -83,7 +80,7 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         final double halfBitmapWidth;
         final double halfBitmapHeight;
         final MarkerBitmap markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
-        final Bitmap bitmap = markerBitmap.getBitmap(hasPhoto, ownPhoto, stationActive);
+        final Bitmap bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
         try {
             halfBitmapWidth = bitmap.getWidth() / 2f;
             halfBitmapHeight = bitmap.getHeight() / 2f;
@@ -110,7 +107,7 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
                     markerBitmap.getPaint());
             canvas.drawBitmap(bubble,
                     (int) (left + halfBitmapWidth - bubble.getWidth() / 2),
-                    (int) (top - bubble.getHeight()));
+                    (top - bubble.getHeight()));
         } else {
             final int x = (int) (left + bitmap.getWidth() * 1.3);
             final int y = (int) (top + bitmap.getHeight() * 1.3
@@ -170,12 +167,8 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     }
 
     private Rectangle getBitmapRectangle(final Point center) {
-        final boolean hasPhoto = hasPhoto();
-        final boolean ownPhoto = ownPhoto();
-        final boolean stationActive = stationActive();
-
         final MarkerBitmap markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
-        final Bitmap bitmap = markerBitmap.getBitmap(hasPhoto, ownPhoto, stationActive);
+        final Bitmap bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
         return new Rectangle(
                 center.x - (float) bitmap.getWidth() + markerBitmap.getIconOffset().x,
                 center.y - (float) bitmap.getHeight() + markerBitmap.getIconOffset().y,
@@ -196,6 +189,11 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     public Boolean stationActive() {
         return (cluster.getItems().size() == 1 &&
                 cluster.getItems().get(0).stationActive());
+    }
+
+    private boolean isPendingUpload() {
+        return (cluster.getItems().size() == 1 &&
+                cluster.getItems().get(0).isPendingUpload());
     }
 
 }

@@ -77,6 +77,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MapsforgeMapView;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.TapHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 
 import static android.view.Menu.NONE;
 
@@ -534,10 +535,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         new LoadMapMarkerTask(this).start();
     }
 
-    private void onStationsLoaded(final List<Station> stationList) {
+    private void onStationsLoaded(final List<Station> stationList, final List<Upload> uploadList) {
         try {
             createClusterManager();
-            addMarkers(stationList);
+            addMarkers(stationList, uploadList);
             progress.dismiss();
             Toast.makeText(this, getResources().getQuantityString(R.plurals.stations_loaded, stationList.size(), stationList.size()), Toast.LENGTH_LONG).show();
         } catch (final Exception e) {
@@ -575,20 +576,30 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         @Override
         public void run() {
-            final List<Station> stationList = activityRef.get().readBahnhoefe();
+            final List<Station> stationList = activityRef.get().readStations();
+            final List<Upload> uploadList = activityRef.get().readPendingUploads();
             final MapsActivity mapsActivity = activityRef.get();
             if (mapsActivity != null) {
                 mapsActivity.runOnUiThread(()-> {
-                    mapsActivity.onStationsLoaded(stationList);
+                    mapsActivity.onStationsLoaded(stationList, uploadList);
                 });
             }
         }
 
     }
 
-    private List<Station> readBahnhoefe() {
+    private List<Station> readStations() {
         try {
             return dbAdapter.getAllStations(baseApplication.getStationFilter(), baseApplication.getCountryCodes());
+        } catch (final Exception e) {
+            Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
+        }
+        return null;
+    }
+
+    private List<Upload> readPendingUploads() {
+        try {
+            return dbAdapter.getPendingUploads(false);
         } catch (final Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
@@ -603,6 +614,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         final Bitmap bitmapWithPhoto = loadBitmap(R.drawable.marker_green);
         final Bitmap markerWithoutPhoto = loadBitmap(R.drawable.marker_red);
         final Bitmap markerOwnPhoto = loadBitmap(R.drawable.marker_violet);
+        final Bitmap markerPendingUpload = loadBitmap(R.drawable.marker_yellow);
 
         final Bitmap markerWithPhotoInactive = loadBitmap(R.drawable.marker_green_inactive);
         final Bitmap markerWithoutPhotoInactive = loadBitmap(R.drawable.marker_red_inactive);
@@ -616,7 +628,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         paint1.setTypeface(fontFamily, fontStyle);
         paint1.setColor(Color.RED);
         markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), markerWithoutPhoto, bitmapWithPhoto, markerOwnPhoto,
-                markerWithoutPhotoInactive, markerWithPhotoInactive, markerOwnPhotoInactive,
+                markerWithoutPhotoInactive, markerWithPhotoInactive, markerOwnPhotoInactive, markerPendingUpload,
                 new Point(0, -(markerWithoutPhoto.getHeight()/2)), 10f, 1, paint1));
 
         // small cluster icon. for 10 or less items.
@@ -651,13 +663,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         return bitmap;
     }
 
-    private void addMarkers(final List<Station> stationMarker) {
+    private void addMarkers(final List<Station> stationMarker, final List<Upload> uploadList) {
         double minLat = 0;
         double maxLat = 0;
         double minLon = 0;
         double maxLon = 0;
         for (final Station station : stationMarker) {
-            final BahnhofGeoItem geoItem = new BahnhofGeoItem(station);
+            final boolean isPendingUpload = isPendingUpload(station, uploadList);
+            final BahnhofGeoItem geoItem = new BahnhofGeoItem(station, isPendingUpload);
             final LatLong bahnhofPos = geoItem.getLatLong();
             if (minLat == 0.0) {
                 minLat = bahnhofPos.latitude;
@@ -680,6 +693,15 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             myPos = new LatLong((minLat + maxLat) / 2, (minLon + maxLon) / 2);
         }
         updatePosition();
+    }
+
+    private boolean isPendingUpload(final Station station, final List<Upload> uploadList) {
+        for (final Upload upload : uploadList) {
+            if (upload.isPendingPhotoUpload() && station.getId().equals(upload.getStationId()) && station.getCountry().equals(upload.getCountry())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -855,9 +877,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     protected class BahnhofGeoItem implements GeoItem {
         public Station station;
         public LatLong latLong;
+        public boolean pendingUpload;
 
-        public BahnhofGeoItem(final Station station) {
+        public BahnhofGeoItem(final Station station, final boolean pendingUpload) {
             this.station = station;
+            this.pendingUpload = pendingUpload;
             this.latLong = new LatLong(station.getLat(), station.getLon());
         }
 
@@ -883,6 +907,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         @Override
         public boolean stationActive() {
             return station.isActive();
+        }
+
+        @Override
+        public boolean isPendingUpload() {
+            return pendingUpload;
         }
 
         public Station getStation() {
