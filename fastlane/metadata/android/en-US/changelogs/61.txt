@@ -3,3 +3,4 @@
 - Improved French, Dutch, German and Polish translation
 - Added more problem types
 - Active/inactive filter added
+- Yellow marker for stations with foto from the user under review

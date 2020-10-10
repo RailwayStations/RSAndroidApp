@@ -3,3 +3,4 @@
 - Verbesserte Übersetzung für Französisch, Niederländisch, Deutsch und Polnisch
 - Weitere Problemtypen hinzugefügt
 - Aktiv/Inaktiv Filter hinzugefügt
+- Gelbe Markierung für Bahnhöfe mit Foto des Benutzers im Review
