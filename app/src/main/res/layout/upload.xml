@@ -40,6 +40,18 @@
         android:layout_below="@+id/cb_special_license">
     </Spinner>
 
+    <CheckBox
+        android:id="@+id/cb_checksum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/photo_checksum"
+        android:textColor="@color/gridItemError"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_below="@+id/sp_active"/>
+
     <TextView
         android:id="@+id/txt_panorama"
         android:linksClickable="true"
@@ -49,6 +61,6 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:layout_below="@+id/sp_active" />
+        android:layout_below="@+id/cb_checksum" />
 
 </RelativeLayout>

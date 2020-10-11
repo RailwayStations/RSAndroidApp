@@ -18,6 +18,7 @@ public class Upload implements Serializable {
     private UploadState uploadState = UploadState.NOT_YET_SENT;
     private Long createdAt = System.currentTimeMillis();
     private Boolean active = null;
+    private Long crc32 = null;
 
     public Upload() {
     }
@@ -156,5 +157,13 @@ public class Upload implements Serializable {
 
     public Boolean getActive() {
         return active;
+    }
+
+    public Long getCrc32() {
+        return crc32;
+    }
+
+    public void setCrc32(final Long crc32) {
+        this.crc32 = crc32;
     }
 }

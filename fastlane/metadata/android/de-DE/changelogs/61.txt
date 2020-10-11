@@ -4,3 +4,4 @@
 - Weitere Problemtypen hinzugefügt
 - Aktiv/Inaktiv Filter hinzugefügt
 - Gelbe Markierung für Bahnhöfe mit Foto des Benutzers im Review
+- Checksummenprüfung für Fotouploads

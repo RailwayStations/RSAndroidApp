@@ -23,7 +23,6 @@ import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,6 +59,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedInputStream;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityDetailsBinding;
@@ -125,6 +127,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Double latitude;
     private Double longitude;
     private String bahnhofId;
+    private Long crc32 = null;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -238,6 +241,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     }
                 } else if (upload != null && upload.isPendingPhotoUpload()) {
                     markerRes = R.drawable.marker_yellow;
+                    setLocalBitmap(upload);
                 } else {
                     markerRes = station.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
                     setLocalBitmap(upload);
@@ -670,7 +674,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void uploadPhoto() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         final UploadBinding uploadBinding = UploadBinding.inflate(getLayoutInflater());
         uploadBinding.etComment.setText(upload.getComment());
 
@@ -686,6 +689,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 uploadBinding.spActive.setSelection(2);
             }
         }
+
+        final boolean sameChecksum = crc32 != null && crc32.equals(upload.getCrc32());
+        uploadBinding.cbChecksum.setVisibility(sameChecksum ? View.VISIBLE : View.GONE);
 
         if (station != null) {
             uploadBinding.spCountries.setVisibility(View.GONE);
@@ -726,6 +732,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
         uploadBinding.cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
 
+        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         builder.setTitle(R.string.photo_upload)
                 .setView(uploadBinding.getRoot())
                 .setIcon(R.drawable.ic_bullhorn_48px)
@@ -738,6 +745,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             if (uploadBinding.cbSpecialLicense.getText().length() > 0 && !uploadBinding.cbSpecialLicense.isChecked()) {
                 Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (sameChecksum && !uploadBinding.cbChecksum.isChecked()) {
+                Toast.makeText(this, R.string.photo_checksum, Toast.LENGTH_LONG).show();
                 return;
             }
             if (station == null) {
@@ -786,13 +797,23 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     } else {
                         final Gson gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
+                        if (inboxResponse.getState() == null) {
+                            inboxResponse.setState(InboxResponse.InboxResponseState.ERROR);
+                        }
                     }
 
                     upload.setRemoteId(inboxResponse.getId());
                     upload.setInboxUrl(inboxResponse.getInboxUrl());
                     upload.setUploadState(inboxResponse.getState().getUploadState());
+                    upload.setCrc32(inboxResponse.getCrc32());
                     baseApplication.getDbAdapter().updateUpload(upload);
-                    new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
+                    if (inboxResponse.getState() == InboxResponse.InboxResponseState.ERROR) {
+                        new SimpleDialogs().confirm(DetailsActivity.this,
+                                String.format(getText(InboxResponse.InboxResponseState.ERROR.getMessageId()).toString(), response.message()));
+                        fetchUploadStatus(upload); // try to get the upload state again
+                    } else {
+                        new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
+                    }
                 }
 
                 @Override
@@ -802,7 +823,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         progress.dismiss();
                     }
                     new SimpleDialogs().confirm(DetailsActivity.this,
-                            String.format(getText(R.string.upload_failed).toString(), t.getMessage()));
+                            String.format(getText(InboxResponse.InboxResponseState.ERROR.getMessageId()).toString(), t.getMessage()));
+                    fetchUploadStatus(upload); // try to get the upload state again
                 }
             });
         });
@@ -1000,11 +1022,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             return;
         }
         setButtonEnabled(binding.details.buttonUpload, true);
-        if (!upload.isUploaded()) {
-            return;
-        }
         final List<InboxStateQuery> stateQueries = new ArrayList<>();
-        stateQueries.add(new InboxStateQuery(upload.getRemoteId()));
+        stateQueries.add(new InboxStateQuery(upload.getRemoteId(), upload.getCountry(), upload.getStationId()));
 
         baseApplication.getRSAPI().queryUploadState(RSAPI.Helper.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), stateQueries).enqueue(new Callback<List<InboxStateQuery>>() {
             @Override
@@ -1015,7 +1034,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     binding.details.licenseTag.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
                     binding.details.licenseTag.setTextColor(getResources().getColor(stateQuery.getState().getColorId()));
                     binding.details.licenseTag.setVisibility(View.VISIBLE);
-                    baseApplication.getDbAdapter().updateUploadStates(stateQueries);
+                    upload.setUploadState(stateQuery.getState());
+                    upload.setRejectReason(stateQuery.getRejectedReason());
+                    upload.setCrc32(stateQuery.getCrc32());
+                    upload.setRemoteId(stateQuery.getId());
+                    baseApplication.getDbAdapter().updateUpload(upload);
                 } else {
                     Log.w(TAG, "Upload states not processable");
                 }
@@ -1084,20 +1107,25 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // show the image
         final File localFile = getStoredMediaFile(upload);
         Log.d(TAG, "File: " + localFile);
+        crc32 = null;
         if (localFile != null && localFile.canRead()) {
             Log.d(TAG, "FileGetPath: " + localFile.getPath());
-            final Bitmap scaledScreen = BitmapFactory.decodeFile(localFile.getPath());
-            Log.d(TAG, "img width " + scaledScreen.getWidth());
-            Log.d(TAG, "img height " + scaledScreen.getHeight());
-            localFotoUsed = true;
-            setButtonEnabled(binding.details.buttonUpload, true);
-            return scaledScreen;
+            try (final CheckedInputStream cis = new CheckedInputStream(new FileInputStream(localFile), new CRC32())){
+                final Bitmap scaledScreen = BitmapFactory.decodeStream(cis);
+                crc32 = cis.getChecksum().getValue();
+                Log.d(TAG, "img width " + scaledScreen.getWidth() + ", height " + scaledScreen.getHeight() + ", crc32 " + crc32);
+                localFotoUsed = true;
+                setButtonEnabled(binding.details.buttonUpload, true);
+                return scaledScreen;
+            } catch (final Exception e) {
+                Log.e(TAG, String.format("Error reading media file for station %s", bahnhofId), e);
+            }
         } else {
             localFotoUsed = false;
             setButtonEnabled(binding.details.buttonUpload, false);
             Log.e(TAG, String.format("Media file not available for station %s", bahnhofId));
-            return null;
         }
+        return null;
     }
 
     public void onPictureClicked() {

@@ -68,6 +68,7 @@ public class Constants {
         public static final String COMMENT = "comment";
         public static final String JOIN_STATION_TITLE = "stationTitle"; // only for join with station
         public static final String ACTIVE = "active";
+        public static final String CRC32 = "crc32";
     }
 
 }

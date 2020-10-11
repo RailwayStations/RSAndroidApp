@@ -13,9 +13,10 @@ public class InboxResponse {
 
     private InboxResponseState state;
     private String message;
-    private long id;
+    private Long id;
     private String filename;
     private String inboxUrl;
+    private Long crc32;
 
     public InboxResponseState getState() {
         return state;
@@ -33,11 +34,11 @@ public class InboxResponse {
         this.message = message;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -55,6 +56,14 @@ public class InboxResponse {
 
     public void setInboxUrl(final String inboxUrl) {
         this.inboxUrl = inboxUrl;
+    }
+
+    public Long getCrc32() {
+        return crc32;
+    }
+
+    public void setCrc32(final Long crc32) {
+        this.crc32 = crc32;
     }
 
     @JsonAdapter(InboxResponseState.Serializer.class)

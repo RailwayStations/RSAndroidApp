@@ -2,7 +2,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 public class InboxStateQuery {
 
-    private long id;
+    private Long id;
 
     private String countryCode;
 
@@ -16,15 +16,20 @@ public class InboxStateQuery {
 
     private String rejectedReason;
 
-    public InboxStateQuery() {
+    private Long crc32;
+
+    public InboxStateQuery(final Long id, final String countryCode, final String stationId) {
+        this(id);
+        this.countryCode = countryCode;
+        this.stationId = stationId;
     }
 
-    public InboxStateQuery(final long id) {
+    public InboxStateQuery(final Long id) {
         super();
         this.id = id;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -78,5 +83,13 @@ public class InboxStateQuery {
 
     public void setRejectedReason(final String rejectedReason) {
         this.rejectedReason = rejectedReason;
+    }
+
+    public Long getCrc32() {
+        return crc32;
+    }
+
+    public void setCrc32(final Long crc32) {
+        this.crc32 = crc32;
     }
 }

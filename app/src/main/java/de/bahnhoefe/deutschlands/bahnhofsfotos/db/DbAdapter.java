@@ -39,7 +39,7 @@ public class DbAdapter {
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
     private static final String DATABASE_TABLE_UPLOADS = "uploads";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 18;
+    private static final int DATABASE_VERSION = 19;
 
     private static final String CREATE_STATEMENT_STATIONS = "CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
             + Constants.STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -85,7 +85,8 @@ public class DbAdapter {
             + Constants.UPLOADS.REJECTED_REASON + " TEXT, "
             + Constants.UPLOADS.UPLOAD_STATE + " TEXT, "
             + Constants.UPLOADS.CREATED_AT + " INTEGER, "
-            + Constants.UPLOADS.ACTIVE + " INTEGER)";
+            + Constants.UPLOADS.ACTIVE + " INTEGER, "
+            + Constants.UPLOADS.CRC32 + " INTEGER)";
 
     private static final String DROP_STATEMENT_STATIONS_IDX = "DROP INDEX IF EXISTS " + DATABASE_TABLE_STATIONS + "_IDX";
     private static final String DROP_STATEMENT_STATIONS = "DROP TABLE IF EXISTS " + DATABASE_TABLE_STATIONS;
@@ -191,6 +192,7 @@ public class DbAdapter {
         values.put(Constants.UPLOADS.TITLE, upload.getTitle());
         values.put(Constants.UPLOADS.UPLOAD_STATE, upload.getUploadState().name());
         values.put(Constants.UPLOADS.ACTIVE, upload.getActive());
+        values.put(Constants.UPLOADS.CRC32, upload.getCrc32());
 
         upload.setId(db.insert(DATABASE_TABLE_UPLOADS, null, values));
         return upload;
@@ -340,6 +342,8 @@ public class DbAdapter {
             values.put(Constants.UPLOADS.TITLE, upload.getTitle());
             values.put(Constants.UPLOADS.UPLOAD_STATE, upload.getUploadState().name());
             values.put(Constants.UPLOADS.ACTIVE, upload.getActive());
+            values.put(Constants.UPLOADS.CRC32, upload.getCrc32());
+            values.put(Constants.UPLOADS.REMOTE_ID, upload.getRemoteId());
             db.update(DATABASE_TABLE_UPLOADS, values, Constants.UPLOADS.ID + " = ?", new String[]{String.valueOf(upload.getId())});
             db.setTransactionSuccessful();
         } finally {
@@ -458,6 +462,7 @@ public class DbAdapter {
                 final ContentValues values = new ContentValues();
                 values.put(Constants.UPLOADS.UPLOAD_STATE, state.getState().name());
                 values.put(Constants.UPLOADS.REJECTED_REASON, state.getRejectedReason());
+                values.put(Constants.UPLOADS.CRC32, state.getCrc32());
                 db.update(DATABASE_TABLE_UPLOADS, values, Constants.UPLOADS.REMOTE_ID + " = ?", new String[]{String.valueOf(state.getId())});
             }
             db.setTransactionSuccessful();
@@ -533,6 +538,10 @@ public class DbAdapter {
                 if (oldVersion < 18) {
                     db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Constants.STATIONS.NORMALIZED_TITLE + " TEXT");
                     db.execSQL("UPDATE " + DATABASE_TABLE_STATIONS + " SET " + Constants.STATIONS.NORMALIZED_TITLE + " = " + Constants.STATIONS.TITLE);
+                }
+
+                if (oldVersion < 19) {
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_UPLOADS + " ADD COLUMN " + Constants.UPLOADS.CRC32 + " INTEGER");
                 }
             }
 
@@ -611,6 +620,9 @@ public class DbAdapter {
         }
         if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ACTIVE))) {
             upload.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ACTIVE)) == 1);
+        }
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.CRC32))) {
+            upload.setCrc32(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.CRC32)));
         }
         return upload;
     }
