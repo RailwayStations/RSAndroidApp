@@ -251,4 +251,11 @@
     <string name="menu_active_filter">Filtro attivo/inattivo della stazione</string>
     <string name="button_remove_text">Rimuovere</string>
     <string name="button_myself_text">Io stesso</string>
+    <string name="filter_photo">Photo</string>
+    <string name="filter_no_photo">No Photo</string>
+    <string name="filter_nickname">Nickname</string>
+    <string name="filter_active">Active</string>
+    <string name="filter_inactive">Inactive</string>
+    <string name="countries">Countries</string>
+    <string name="photo_checksum">Photo with this checksum is already uploaded. Upload again?</string>
 </resources>
