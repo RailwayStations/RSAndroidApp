@@ -9,6 +9,8 @@
     <dimen name="app_bar_height">180dp</dimen>
     <dimen name="text_margin">16dp</dimen>
 
+    <dimen name="filter_bar_text_size">12sp</dimen>
+
     <!-- mapsforge dimensions -->
     <dimen name="attribution_margin">1dp</dimen>
     <dimen name="attribution_size">4pt</dimen>

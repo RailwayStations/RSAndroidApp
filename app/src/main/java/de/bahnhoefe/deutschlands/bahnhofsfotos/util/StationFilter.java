@@ -42,24 +42,24 @@ public class StationFilter {
 
     public int getPhotoIcon() {
         if (photo == null) {
-            return R.drawable.ic_photo_white_24px;
+            return R.drawable.ic_photo_gray_24px;
         } else if (photo) {
-            return R.drawable.ic_photo_green_24px;
+            return R.drawable.ic_photo_white_24px;
         }
-        return R.drawable.ic_photo_missing_green_24px;
+        return R.drawable.ic_photo_missing_white_24px;
     }
 
     public int getNicknameIcon() {
-        return nickname == null ? R.drawable.ic_person_white_24px : R.drawable.ic_person_green_24px;
+        return nickname == null ? R.drawable.ic_person_gray_24px : R.drawable.ic_person_white_24px;
     }
 
     public int getActiveIcon() {
         if (active == null) {
-            return R.drawable.ic_station_active_white_24px;
+            return R.drawable.ic_station_active_gray_24px;
         } else if (active) {
-            return R.drawable.ic_station_active_green_24px;
+            return R.drawable.ic_station_active_white_24px;
         }
-        return R.drawable.ic_station_inactive_green_24px;
+        return R.drawable.ic_station_inactive_white_24px;
     }
 
     public void togglePhoto() {
@@ -82,4 +82,27 @@ public class StationFilter {
         }
     }
 
+    public int getActiveColor() {
+        return active == null ? R.color.filterInactive : R.color.filterActive;
+    }
+
+    public int getPhotoColor() {
+        return photo == null ? R.color.filterInactive : R.color.filterActive;
+    }
+
+    public int getNicknameColor() {
+        return nickname == null ? R.color.filterInactive : R.color.filterActive;
+    }
+
+    public int getPhotoText() {
+        return photo == null || photo ? R.string.filter_photo : R.string.filter_no_photo;
+    }
+
+    public int getNicknameText() {
+        return R.string.filter_nickname;
+    }
+
+    public int getActiveText() {
+        return active == null || active ? R.string.filter_active : R.string.filter_inactive;
+    }
 }

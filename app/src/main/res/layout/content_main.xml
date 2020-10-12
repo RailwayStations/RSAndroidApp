@@ -55,56 +55,77 @@
             android:layout_alignParentStart="true"
             android:paddingTop="15sp"
             android:paddingBottom="15sp"
+            style="?android:attr/buttonBarStyle"
             android:background="@color/colorPrimary">
 
-            <ImageButton
+            <Button
                 android:id="@+id/toggle_sort"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="toggleSort"
-                android:src="@drawable/ic_sort_by_alpha_white_24px"
-                android:background="@null"
-                android:contentDescription="@string/sort_order"/>
+                android:drawableTop="@drawable/ic_sort_by_alpha_white_24px"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/sort_order"
+                android:textColor="@color/filterActive"
+                android:textAllCaps="false"
+                android:textSize="@dimen/filter_bar_text_size"
+                android:background="@null"/>
 
-            <ImageButton
+            <Button
                 android:id="@+id/photoFilter"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="togglePhotoFilter"
-                android:src="@drawable/ic_photo_white_24px"
+                android:drawableTop="@drawable/ic_photo_gray_24px"
                 android:background="@null"
-                android:contentDescription="@string/menu_photo_filter"/>
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/filter_photo"
+                android:textColor="@color/filterInactive"
+                android:textAllCaps="false"
+                android:textSize="@dimen/filter_bar_text_size"/>
 
-            <ImageButton
+            <Button
                 android:id="@+id/activeFilter"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="toggleActiveFilter"
-                android:src="@drawable/ic_station_active_white_24px"
+                android:drawableTop="@drawable/ic_station_active_gray_24px"
                 android:background="@null"
-                android:contentDescription="@string/menu_active_filter"/>
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/filter_active"
+                android:textColor="@color/filterInactive"
+                android:textAllCaps="false"
+                android:textSize="@dimen/filter_bar_text_size"/>
 
-            <ImageButton
+            <Button
                 android:id="@+id/nicknameFilter"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="selectNicknameFilter"
-                android:contentDescription="@string/nicknameFilter"
-                android:src="@drawable/ic_person_white_24px"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/filter_nickname"
+                android:textColor="@color/filterInactive"
+                android:textAllCaps="false"
+                android:textSize="@dimen/filter_bar_text_size"
+                android:drawableTop="@drawable/ic_person_gray_24px"
                 android:background="@null"/>
 
-            <ImageButton
+            <Button
                 android:id="@+id/countrySelection"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="selectCountry"
-                android:contentDescription="@string/countrySelection"
-                android:src="@drawable/ic_language_white_24px"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/countries"
+                android:textColor="@color/filterActive"
+                android:textAllCaps="false"
+                android:textSize="@dimen/filter_bar_text_size"
+                android:drawableTop="@drawable/ic_language_white_24px"
                 android:background="@null"/>
 
         </LinearLayout>
