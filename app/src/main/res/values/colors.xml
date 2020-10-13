@@ -15,7 +15,7 @@
     <color name="navigationViewText">#666666</color>
 
     <color name="filterActive">#ffffff</color>
-    <color name="filterInactive">#a3a3a3</color>
+    <color name="filterInactive">#b0b0b0</color>
 
     <color name="emailUnverified">#ff0000</color>
     <color name="emailVerified">#00ff00</color>

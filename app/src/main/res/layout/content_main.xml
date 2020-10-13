@@ -64,7 +64,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="toggleSort"
-                android:drawableTop="@drawable/ic_sort_by_alpha_white_24px"
+                android:drawableTop="@drawable/ic_sort_by_alpha_active_24px"
                 style="?android:attr/buttonBarButtonStyle"
                 android:text="@string/sort_order"
                 android:textColor="@color/filterActive"
@@ -78,7 +78,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="togglePhotoFilter"
-                android:drawableTop="@drawable/ic_photo_gray_24px"
+                android:drawableTop="@drawable/ic_photo_inactive_24px"
                 android:background="@null"
                 style="?android:attr/buttonBarButtonStyle"
                 android:text="@string/filter_photo"
@@ -92,7 +92,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:onClick="toggleActiveFilter"
-                android:drawableTop="@drawable/ic_station_active_gray_24px"
+                android:drawableTop="@drawable/ic_station_active_inactive_24px"
                 android:background="@null"
                 style="?android:attr/buttonBarButtonStyle"
                 android:text="@string/filter_active"
@@ -111,7 +111,7 @@
                 android:textColor="@color/filterInactive"
                 android:textAllCaps="false"
                 android:textSize="@dimen/filter_bar_text_size"
-                android:drawableTop="@drawable/ic_person_gray_24px"
+                android:drawableTop="@drawable/ic_person_inactive_24px"
                 android:background="@null"/>
 
             <Button
@@ -125,7 +125,7 @@
                 android:textColor="@color/filterActive"
                 android:textAllCaps="false"
                 android:textSize="@dimen/filter_bar_text_size"
-                android:drawableTop="@drawable/ic_language_white_24px"
+                android:drawableTop="@drawable/ic_countries_active_24px"
                 android:background="@null"/>
 
         </LinearLayout>

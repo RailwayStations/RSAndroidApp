@@ -42,24 +42,24 @@ public class StationFilter {
 
     public int getPhotoIcon() {
         if (photo == null) {
-            return R.drawable.ic_photo_gray_24px;
+            return R.drawable.ic_photo_inactive_24px;
         } else if (photo) {
-            return R.drawable.ic_photo_white_24px;
+            return R.drawable.ic_photo_active_24px;
         }
-        return R.drawable.ic_photo_missing_white_24px;
+        return R.drawable.ic_photo_missing_active_24px;
     }
 
     public int getNicknameIcon() {
-        return nickname == null ? R.drawable.ic_person_gray_24px : R.drawable.ic_person_white_24px;
+        return nickname == null ? R.drawable.ic_person_inactive_24px : R.drawable.ic_person_active_24px;
     }
 
     public int getActiveIcon() {
         if (active == null) {
-            return R.drawable.ic_station_active_gray_24px;
+            return R.drawable.ic_station_active_inactive_24px;
         } else if (active) {
-            return R.drawable.ic_station_active_white_24px;
+            return R.drawable.ic_station_active_active_24px;
         }
-        return R.drawable.ic_station_inactive_white_24px;
+        return R.drawable.ic_station_inactive_active_24px;
     }
 
     public void togglePhoto() {

@@ -492,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void setSortIcon(final boolean sortByDistance) {
-        setFilterButton(binding.appBarMain.main.toggleSort, sortByDistance ? R.drawable.ic_sort_by_distance_white_24px : R.drawable.ic_sort_by_alpha_white_24px, R.string.sort_order, R.color.filterActive);
+        setFilterButton(binding.appBarMain.main.toggleSort, sortByDistance ? R.drawable.ic_sort_by_distance_active_24px : R.drawable.ic_sort_by_alpha_active_24px, R.string.sort_order, R.color.filterActive);
     }
 
     @Override
