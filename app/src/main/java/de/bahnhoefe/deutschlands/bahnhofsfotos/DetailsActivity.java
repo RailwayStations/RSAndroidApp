@@ -405,12 +405,22 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     } else {
                         final Gson gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(),InboxResponse.class);
+                        if (inboxResponse.getState() == null) {
+                            inboxResponse.setState(InboxResponse.InboxResponseState.ERROR);
+                        }
                     }
 
                     upload.setRemoteId(inboxResponse.getId());
                     upload.setUploadState(inboxResponse.getState().getUploadState());
                     baseApplication.getDbAdapter().updateUpload(upload);
-                    new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
+                    if (inboxResponse.getState() == InboxResponse.InboxResponseState.ERROR) {
+                        new SimpleDialogs().confirm(DetailsActivity.this,
+                                String.format(getText(R.string.problem_report_failed).toString(), response.message()));
+                        fetchUploadStatus(upload); // try to get the upload state again
+                    } else {
+                        new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
+                    }
+
                 }
 
                 @Override
