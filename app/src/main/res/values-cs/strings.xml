@@ -221,7 +221,7 @@
     <string name="problem_other">Další problém, podrobnosti v komentáři</string>
     <string name="problem_please_specify">Uveďte typ problému</string>
     <string name="problem_please_comment">Prosím komentujte problém</string>
-    <string name="problem_report_failed">Chyba při hlášení problému</string>
+    <string name="problem_report_failed">Error reporting the problem: %1s</string>
     <string name="please_login">Prosím přihlašte se</string>
     <string name="delete_upload">Smazat prvek #%s</string>
     <string name="confirm_delete_processed_uploads">Smazat všechna zpracovaná nahrání?</string>
