@@ -217,7 +217,7 @@
     <string name="problem_other">Altro problema, dettagli nel commento</string>
     <string name="problem_please_specify">Specificare il tipo di problema</string>
     <string name="problem_please_comment">Si prega di commentare il problema</string>
-    <string name="problem_report_failed">Segnalazione di errori</string>
+    <string name="problem_report_failed">Error reporting the problem: %1s</string>
     <string name="please_login">Effettua il login</string>
     <string name="delete_upload">Cancella l\'elemento #%s</string>
     <string name="confirm_delete_processed_uploads">Cancellare tutti gli upload elaborati?</string>
