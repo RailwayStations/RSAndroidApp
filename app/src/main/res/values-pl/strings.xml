@@ -220,7 +220,7 @@
     <string name="problem_other">Inny problem, szczegóły w komentarzu</string>
     <string name="problem_please_specify">Proszę określić rodzaj problemu</string>
     <string name="problem_please_comment">Proszę o komentarz do problemu</string>
-    <string name="problem_report_failed">Error reporting the problem: %1s</string>
+    <string name="problem_report_failed">Błąd zgłaszający problem: %1s</string>
     <string name="please_login">Proszę się zalogować</string>
     <string name="delete_upload">Usuń element #%s</string>
     <string name="confirm_delete_processed_uploads">Skasować wszystkie przetworzone wpłaty?</string>
