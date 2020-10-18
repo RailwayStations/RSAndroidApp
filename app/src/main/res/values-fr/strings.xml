@@ -216,7 +216,7 @@
     <string name="problem_other">Autre problème, voir dans les commentaires</string>
     <string name="problem_please_specify">Merci de préciser le type de problème</string>
     <string name="problem_please_comment">Merci de commenter le problème</string>
-    <string name="problem_report_failed">Echec lors de la remontée du problème</string>
+    <string name="problem_report_failed">Error reporting the problem: %1s</string>
     <string name="please_login">Merci de vous connecter</string>
     <string name="delete_upload">Suppresion de l\'élément #%s</string>
     <string name="confirm_delete_processed_uploads">Désirez-vous annuler tous les téléchargements ?</string>
