@@ -217,7 +217,7 @@
     <string name="problem_other">Ander probleem, details in de opmerking</string>
     <string name="problem_please_specify">Geef het type probleem aan</string>
     <string name="problem_please_comment">Gelieve commentaar te geven op het probleem</string>
-    <string name="problem_report_failed">Fout in de melding van het probleem</string>
+    <string name="problem_report_failed">Fout in de melding van het probleem: %1s</string>
     <string name="please_login">Inloggen</string>
     <string name="delete_upload">Verwijder element #%s</string>
     <string name="confirm_delete_processed_uploads">Alle verwerkte uploads verwijderen?</string>
