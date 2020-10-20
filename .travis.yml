@@ -17,7 +17,7 @@ env:
     - ANDROID_ABI=armeabi-v7a
     - ANDROID_TAG=google_apis
     - ADB_INSTALL_TIMEOUT=20 # minutes (2 minutes by default)
-    - GRADLE_OPTS="-Xms128m"
+#    - GRADLE_OPTS="-Xms128m"
 
 android:
   components:
