@@ -22,8 +22,8 @@ public class ExampleInstrumentationTest {
     @Test
     public void useAppContext() throws Exception {
         // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
+        final Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("de.bahnhoefe.deutschlands.bahnhofsfotos", appContext.getPackageName());
+        assertEquals("de.bahnhoefe.deutschlands.bahnhofsfotos.debug", appContext.getPackageName());
     }
 }

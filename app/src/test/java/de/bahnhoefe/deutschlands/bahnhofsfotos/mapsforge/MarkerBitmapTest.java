@@ -21,40 +21,49 @@ public class MarkerBitmapTest {
     private Bitmap srcWithoutPhotoInactive = mock(Bitmap.class);
     private Bitmap srcWithPhotoInactive = mock(Bitmap.class);
     private Bitmap srcOwnPhotoInactive = mock(Bitmap.class);
+    private Bitmap srcPendingUpload = mock(Bitmap.class);
     private MarkerBitmap markerBitmap = new MarkerBitmap(mock(Context.class),
-            srcWithoutPhoto, srcWithPhoto, srcOwnPhoto, srcWithoutPhotoInactive, srcWithPhotoInactive, srcOwnPhotoInactive,
+            srcWithoutPhoto, srcWithPhoto, srcOwnPhoto, srcWithoutPhotoInactive, srcWithPhotoInactive, srcOwnPhotoInactive, srcPendingUpload,
             mock(Point.class), 0, 0, mock(Paint.class));
 
     @Test
     public void getBitmap_OwnPhotoActive() {
-        Bitmap bitmap = markerBitmap.getBitmap(true, true, true);
+        final Bitmap bitmap = markerBitmap.getBitmap(true, true, true, false);
         assertEquals(srcOwnPhoto, bitmap);
     }
     @Test
     public void getBitmap_OwnPhotoInactive() {
-        Bitmap bitmap = markerBitmap.getBitmap(true, true, false);
+        final Bitmap bitmap = markerBitmap.getBitmap(true, true, false, false);
         assertEquals(srcOwnPhotoInactive, bitmap);
     }
 
     @Test
     public void getBitmap_PhotoActive() {
-        Bitmap bitmap = markerBitmap.getBitmap(true, false, true);
+        final Bitmap bitmap = markerBitmap.getBitmap(true, false, true, false);
         assertEquals(srcWithPhoto, bitmap);
     }
     @Test
     public void getBitmap_PhotoInactive() {
-        Bitmap bitmap = markerBitmap.getBitmap(true, false, false);
+        final Bitmap bitmap = markerBitmap.getBitmap(true, false, false, false);
         assertEquals(srcWithPhotoInactive, bitmap);
     }
 
     @Test
     public void getBitmap_WithoutPhotoActive() {
-        Bitmap bitmap = markerBitmap.getBitmap(false, false, true);
+        final Bitmap bitmap = markerBitmap.getBitmap(false, false, true, false);
         assertEquals(srcWithoutPhoto, bitmap);
     }
+
     @Test
     public void getBitmap_WithoutPhotoInactive() {
-        Bitmap bitmap = markerBitmap.getBitmap(false, false, false);
+        final Bitmap bitmap = markerBitmap.getBitmap(false, false, false, false);
         assertEquals(srcWithoutPhotoInactive, bitmap);
     }
+
+    @Test
+    public void getBitmap_PendingUpload() {
+        final Bitmap bitmap = markerBitmap.getBitmap(false, false, false, true);
+        assertEquals(srcPendingUpload, bitmap);
+    }
+
 }
