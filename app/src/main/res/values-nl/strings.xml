@@ -247,11 +247,11 @@
     <string name="menu_active_filter">Station actief/inactief filter</string>
     <string name="button_remove_text">Verwijder</string>
     <string name="button_myself_text">Ikzelf</string>
-    <string name="filter_photo">Photo</string>
-    <string name="filter_no_photo">No Photo</string>
-    <string name="filter_nickname">Nickname</string>
-    <string name="filter_active">Active</string>
-    <string name="filter_inactive">Inactive</string>
-    <string name="countries">Countries</string>
-    <string name="photo_checksum">Photo with this checksum is already uploaded. Upload again?</string>
+    <string name="filter_photo">Foto</string>
+    <string name="filter_no_photo">Geen foto</string>
+    <string name="filter_nickname">Bijnaam</string>
+    <string name="filter_active">Actief</string>
+    <string name="filter_inactive">Inactief</string>
+    <string name="countries">Landen</string>
+    <string name="photo_checksum">Foto met deze checksum is al geupload. Opnieuw uploaden?</string>
 </resources>
