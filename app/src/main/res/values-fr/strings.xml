@@ -251,10 +251,10 @@
     <string name="button_remove_text">Supprimer</string>
     <string name="button_myself_text">Moi-même</string>
     <string name="filter_photo">Photo</string>
-    <string name="filter_no_photo">No Photo</string>
-    <string name="filter_nickname">Nickname</string>
-    <string name="filter_active">Active</string>
-    <string name="filter_inactive">Inactive</string>
-    <string name="countries">Countries</string>
-    <string name="photo_checksum">Photo with this checksum is already uploaded. Upload again?</string>
+    <string name="filter_no_photo">Pas de photo</string>
+    <string name="filter_nickname">Surnom</string>
+    <string name="filter_active">Actif</string>
+    <string name="filter_inactive">Inactif</string>
+    <string name="countries">Pays</string>
+    <string name="photo_checksum">La photo avec cette somme de contrôle est déjà téléchargée. Télécharger à nouveau ?</string>
 </resources>
