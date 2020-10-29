@@ -374,7 +374,7 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void logout(final View view) {
-        profile.setNickname(null);;
+        profile.setNickname(null);
         profile.setEmail(null);
         profile.setPassword(null);
         saveLocalProfile(profile);

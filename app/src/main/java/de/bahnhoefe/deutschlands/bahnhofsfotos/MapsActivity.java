@@ -29,6 +29,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import org.mapsforge.core.graphics.Align;
@@ -101,7 +102,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private final Map<String, OnlineTileSource> onlineTileSources = new HashMap<>();
 
     protected Layer layer;
-    protected ClusterManager<GeoItem> clusterer = null;
+    protected ClusterManager<BahnhofGeoItem> clusterer = null;
     protected List<TileCache> tileCaches = new ArrayList<>();
 
     private LatLong myPos = null;
@@ -281,8 +282,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         try {
             final FileInputStream inputStream = (FileInputStream) getContentResolver().openInputStream(mapUri);
             return new MapFile(inputStream, 0, null);
-        } catch (final FileNotFoundException ignored) {
-            Log.e(TAG, "Can't open mapFile", ignored);
+        } catch (final FileNotFoundException e) {
+            Log.e(TAG, "Can't open mapFile", e);
         }
         return null;
     }
@@ -334,7 +335,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private void onLongPress(final LatLong tapLatLong) {
         if (missingMarker == null) {
             // marker to show at the location
-            final Drawable drawable = getDrawable(R.drawable.marker_missing);
+            final Drawable drawable = ContextCompat.getDrawable(this, R.drawable.marker_missing);
             final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
             missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth()/2), -bitmap.getHeight()) {
                 @Override
@@ -516,14 +517,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.map_info:
-                final MapInfoFragment mapInfoFragment = new MapInfoFragment();
-                mapInfoFragment.show(getSupportFragmentManager(), "Map Info Dialog");
-
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.map_info) {
+            final MapInfoFragment mapInfoFragment = new MapInfoFragment();
+            mapInfoFragment.show(getSupportFragmentManager(), "Map Info Dialog");
+        } else {
+            return super.onOptionsItemSelected(item);
         }
         return true;
     }
@@ -568,7 +566,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private static class LoadMapMarkerTask extends Thread {
-        private WeakReference<MapsActivity> activityRef;
+        private final WeakReference<MapsActivity> activityRef;
 
         public LoadMapMarkerTask(final MapsActivity activity) {
             this.activityRef = new WeakReference<>(activity);
@@ -658,7 +656,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private Bitmap loadBitmap(final int resourceId){
-        final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(getResources().getDrawable(resourceId));
+        final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(ResourcesCompat.getDrawable(getResources(), resourceId, null));
         bitmap.incrementRefCount();
         return bitmap;
     }
@@ -723,7 +721,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private void createClusterManager() {
         // create clusterer instance
-        clusterer = new ClusterManager(
+        clusterer = new ClusterManager<>(
                 binding.map.mapView,
                 getMarkerBitmap(),
                 getZoomLevelMax(),

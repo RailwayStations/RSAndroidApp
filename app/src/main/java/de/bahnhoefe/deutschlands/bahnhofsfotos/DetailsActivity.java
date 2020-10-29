@@ -592,52 +592,45 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.nav_to_station:
-                startNavigation(DetailsActivity.this);
-                break;
-            case R.id.timetable:
-                final Intent timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, station.getCountry()), station);
-                if (timetableIntent != null) {
-                    startActivity(timetableIntent);
-                } else {
-                    Toast.makeText(this, R.string.timetable_missing, Toast.LENGTH_LONG).show();
+        final int itemId = item.getItemId();
+        if (itemId == R.id.nav_to_station) {
+            startNavigation(DetailsActivity.this);
+        } else if (itemId == R.id.timetable) {
+            final Intent timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, station.getCountry()), station);
+            if (timetableIntent != null) {
+                startActivity(timetableIntent);
+            } else {
+                Toast.makeText(this, R.string.timetable_missing, Toast.LENGTH_LONG).show();
+            }
+        } else if (itemId == R.id.share_photo) {
+            final Intent shareIntent = createFotoSendIntent();
+            shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, station != null ? station.getCountry() : null).getTwitterTags() + " " + binding.details.etbahnhofname.getText());
+            shareIntent.setType("image/jpeg");
+            startActivity(createChooser(shareIntent, "send"));
+        } else if (itemId == R.id.station_info) {
+            showStationInfo(null);
+        } else if (itemId == R.id.provider_android_app) {
+            final Country country = Country.getCountryByCode(countries, station.getCountry());
+            final List<ProviderApp> providerApps = country.getCompatibleProviderApps();
+            if (providerApps.size() == 1) {
+                providerApps.get(0).openAppOrPlayStore(this);
+            } else if (providerApps.size() > 1) {
+                final CharSequence[] appNames = new CharSequence[providerApps.size()];
+                for (int i = 0; i < providerApps.size(); i++) {
+                    appNames[i] = providerApps.get(i).getName();
                 }
-                break;
-            case R.id.share_photo:
-                final Intent shareIntent = createFotoSendIntent();
-                shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, station != null ? station.getCountry() : null).getTwitterTags() + " " + binding.details.etbahnhofname.getText());
-                shareIntent.setType("image/jpeg");
-                startActivity(createChooser(shareIntent, "send"));
-                break;
-            case R.id.station_info:
-                showStationInfo(null);
-                break;
-            case R.id.provider_android_app:
-                final Country country = Country.getCountryByCode(countries, station.getCountry());
-                final List<ProviderApp> providerApps = country.getCompatibleProviderApps();
-                if (providerApps.size() == 1) {
-                    providerApps.get(0).openAppOrPlayStore(this);
-                } else if (providerApps.size() > 1) {
-                    final CharSequence[] appNames = new CharSequence[providerApps.size()];
-                    for (int i = 0; i < providerApps.size(); i++) {
-                        appNames[i] = providerApps.get(i).getName();
+                new SimpleDialogs().simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, -1, (dialog, which) -> {
+                    if (which >= 0 && providerApps.size() > which) {
+                        providerApps.get(which).openAppOrPlayStore(DetailsActivity.this);
                     }
-                    new SimpleDialogs().simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, -1, (dialog, which) -> {
-                        if (which >= 0 && providerApps.size() > which) {
-                            providerApps.get(which).openAppOrPlayStore(DetailsActivity.this);
-                        }
-                    });
-                } else {
-                    Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG).show();
-                }
-
-                break;
-            case android.R.id.home:
-                navigateUp();
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
+                });
+            } else {
+                Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG).show();
+            }
+        } else if (itemId == android.R.id.home) {
+            navigateUp();
+        } else {
+            return super.onOptionsItemSelected(item);
         }
 
         return true;

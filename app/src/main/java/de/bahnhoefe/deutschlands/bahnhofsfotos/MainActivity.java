@@ -201,11 +201,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         final int id = item.getItemId();
 
         // necessary for the update policy submenu
-        if(item.isChecked()) {
-            item.setChecked(false);
-        } else {
-            item.setChecked(true);
-        }
+        item.setChecked(!item.isChecked());
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.rb_update_manual) {
@@ -234,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     private void setNotificationIcon(final boolean active) {
         final MenuItem item = binding.navView.getMenu().findItem(R.id.nav_notification);
-        item.setIcon(getDrawable(active ? R.drawable.ic_notifications_active_gray_24px : R.drawable.ic_notifications_off_gray_24px));
+        item.setIcon(ContextCompat.getDrawable(this, active ? R.drawable.ic_notifications_active_gray_24px : R.drawable.ic_notifications_off_gray_24px));
     }
 
     @Override
