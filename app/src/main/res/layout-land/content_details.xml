@@ -57,6 +57,7 @@
                 android:layout_toEndOf="@id/marker"
                 android:textSize="25sp"
                 android:textStyle="bold"
+                android:textIsSelectable="true"
                 android:inputType="none"
                 android:background="#80ffffff"
                 android:padding="8dp"

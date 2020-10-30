@@ -1,0 +1,2 @@
+- Bahnhofsname in Detailansicht selektierbar
+- Verbesserte Übersetzungen

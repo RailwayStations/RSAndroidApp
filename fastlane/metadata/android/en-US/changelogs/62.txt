@@ -1,0 +1,2 @@
+- Stationname in Detailview selectable
+- Improved translations
