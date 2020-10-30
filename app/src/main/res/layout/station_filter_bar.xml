@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10sp"
+    android:paddingBottom="10sp"
+    style="?android:attr/buttonBarStyle"
+    android:background="@color/colorPrimary">
+
+    <Button
+        android:id="@+id/toggleSort"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:drawableTop="@drawable/ic_sort_by_alpha_active_24px"
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/sort_order"
+        android:textColor="@color/filterActive"
+        android:textAllCaps="false"
+        android:textSize="@dimen/filter_bar_text_size"
+        android:background="@null"/>
+
+    <Button
+        android:id="@+id/photoFilter"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:drawableTop="@drawable/ic_photo_inactive_24px"
+        android:background="@null"
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/filter_photo"
+        android:textColor="@color/filterInactive"
+        android:textAllCaps="false"
+        android:textSize="@dimen/filter_bar_text_size"/>
+
+    <Button
+        android:id="@+id/activeFilter"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:drawableTop="@drawable/ic_station_active_inactive_24px"
+        android:background="@null"
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/filter_active"
+        android:textColor="@color/filterInactive"
+        android:textAllCaps="false"
+        android:textSize="@dimen/filter_bar_text_size"/>
+
+    <Button
+        android:id="@+id/nicknameFilter"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/filter_nickname"
+        android:textColor="@color/filterInactive"
+        android:textAllCaps="false"
+        android:textSize="@dimen/filter_bar_text_size"
+        android:drawableTop="@drawable/ic_person_inactive_24px"
+        android:background="@null"/>
+
+    <Button
+        android:id="@+id/countrySelection"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/countries"
+        android:textColor="@color/filterActive"
+        android:textAllCaps="false"
+        android:textSize="@dimen/filter_bar_text_size"
+        android:drawableTop="@drawable/ic_countries_active_24px"
+        android:background="@null"/>
+
+</LinearLayout>

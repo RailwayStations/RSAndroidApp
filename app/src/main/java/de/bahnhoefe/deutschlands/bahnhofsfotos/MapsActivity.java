@@ -21,9 +21,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -62,6 +64,7 @@ import org.mapsforge.map.rendertheme.XmlRenderTheme;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +72,7 @@ import java.util.Map;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MapInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.StationFilterBar;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMapsBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.ClusterManager;
@@ -79,10 +83,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.TapHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 
 import static android.view.Menu.NONE;
 
-public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem> {
+public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem>, StationFilterBar.OnChangeListener {
 
     public static final String EXTRAS_LATITUDE = "Extras_Latitude";
     public static final String EXTRAS_LONGITUDE = "Extras_Longitude";
@@ -115,7 +120,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private LocationManager locationManager;
     private boolean askedForPermission = false;
     private Marker missingMarker;
-    private AlertDialog progress;
 
     private ActivityMapsBinding binding;
 
@@ -527,17 +531,26 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void reloadMap() {
-        progress = ProgressDialog.show(this, "", getResources().getString(R.string.loading_stations));
+        binding.map.progressBar.setVisibility(View.VISIBLE);
         destroyClusterManager();
-
         new LoadMapMarkerTask(this).start();
     }
+
+    private void runUpdateCountriesAndStations() {
+        binding.map.progressBar.setVisibility(View.VISIBLE);
+
+        RSAPI.Helper.runUpdateCountriesAndStations(this, baseApplication, success -> {
+            reloadMap();
+        });
+
+    }
+
 
     private void onStationsLoaded(final List<Station> stationList, final List<Upload> uploadList) {
         try {
             createClusterManager();
             addMarkers(stationList, uploadList);
-            progress.dismiss();
+            binding.map.progressBar.setVisibility(View.GONE);
             Toast.makeText(this, getResources().getQuantityString(R.plurals.stations_loaded, stationList.size(), stationList.size()), Toast.LENGTH_LONG).show();
         } catch (final Exception e) {
             Log.e(TAG, "Error loading markers", e);
@@ -563,6 +576,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             myLocSwitch.setChecked(checked);
         }
         baseApplication.setLocationUpdates(checked);
+    }
+
+    @Override
+    public void stationFilterChanged(final StationFilter stationFilter) {
+        reloadMap();
+    }
+
+    @Override
+    public void sortOrderChanged(final boolean sortByDistance) {
+        // unused
     }
 
     private static class LoadMapMarkerTask extends Thread {
@@ -713,10 +736,17 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         if (this.layer instanceof TileDownloadLayer) {
             ((TileDownloadLayer)this.layer).onResume();
         }
-        reloadMap();
+        if (baseApplication.getLastUpdate() == 0) {
+            runUpdateCountriesAndStations();
+        } else {
+            reloadMap();
+        }
         if (baseApplication.isLocationUpdates()) {
             registerLocationManager();
         }
+        binding.map.stationFilterBar.setBaseApplication(baseApplication);
+        binding.map.stationFilterBar.setOnChangeListener(this);
+        binding.map.stationFilterBar.setSortOrderEnabled(false);
     }
 
     private void createClusterManager() {

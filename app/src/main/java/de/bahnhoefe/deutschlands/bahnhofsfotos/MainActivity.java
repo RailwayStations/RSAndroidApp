@@ -23,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +41,7 @@ import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.StationFilterBar;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMainBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter;
@@ -54,7 +54,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements LocationListener, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements LocationListener, NavigationView.OnNavigationItemSelectedListener, StationFilterBar.OnChangeListener {
 
     private static final String DIALOG_TAG = "App Info Dialog";
     private static final long CHECK_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes
@@ -117,15 +117,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             searchString = searchIntent.getStringExtra(SearchManager.QUERY);
         }
 
-        final StationFilter stationFilter = baseApplication.getStationFilter();
-        setFilterButton(binding.appBarMain.main.photoFilter, stationFilter.getPhotoIcon(), stationFilter.getPhotoText(), stationFilter.getPhotoColor());
-        setFilterButton(binding.appBarMain.main.nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.getNicknameText(), stationFilter.getNicknameColor());
-        setFilterButton(binding.appBarMain.main.activeFilter, stationFilter.getActiveIcon(), stationFilter.getActiveText(), stationFilter.getActiveColor());
-        setSortIcon(baseApplication.getSortByDistance());
-
         myPos = baseApplication.getLastLocation();
-
-        updateStationList();
         bindToStatus();
     }
 
@@ -271,41 +263,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private void runUpdateCountriesAndStations() {
         binding.appBarMain.main.progressBar.setVisibility(View.VISIBLE);
 
-        rsapi.getCountries().enqueue(new Callback<List<Country>>() {
-            @Override
-            public void onResponse(final Call<List<Country>> call, final Response<List<Country>> response) {
-                if (response.isSuccessful()) {
-                    dbAdapter.insertCountries(response.body());
-                }
+        RSAPI.Helper.runUpdateCountriesAndStations(this, baseApplication, success -> {
+            if (success) {
+                final TextView tvUpdate = findViewById(R.id.tvUpdate);
+                tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
+                updateStationList();
             }
-
-            @Override
-            public void onFailure(final Call<List<Country>> call, final Throwable t) {
-                Log.e(TAG, "Error refreshing countries", t);
-                Toast.makeText(getBaseContext(), getString(R.string.error_updating_countries) + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-
-        rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<List<Station>>() {
-            @Override
-            public void onResponse(final Call<List<Station>> call, final Response<List<Station>> response) {
-                if (response.isSuccessful()) {
-                    dbAdapter.insertStations(response.body(), baseApplication.getCountryCodes());
-
-                    baseApplication.setLastUpdate(System.currentTimeMillis());
-                    final TextView tvUpdate = findViewById(R.id.tvUpdate);
-                    tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
-                    updateStationList();
-                }
-                binding.appBarMain.main.progressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onFailure(final Call<List<Station>> call, final Throwable t) {
-                Log.e(TAG, "Error refreshing stations", t);
-                binding.appBarMain.main.progressBar.setVisibility(View.GONE);
-                Toast.makeText(getBaseContext(), getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
+            binding.appBarMain.main.progressBar.setVisibility(View.GONE);
         });
 
     }
@@ -350,11 +314,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         if (baseApplication.getSortByDistance()) {
             registerLocationManager();
         }
-        final StationFilter stationFilter = baseApplication.getStationFilter();
-        setFilterButton(binding.appBarMain.main.photoFilter, stationFilter.getPhotoIcon(), stationFilter.getPhotoText(), stationFilter.getPhotoColor());
-        setFilterButton(binding.appBarMain.main.nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.getNicknameText(), stationFilter.getNicknameColor());
-        setFilterButton(binding.appBarMain.main.activeFilter, stationFilter.getActiveIcon(), stationFilter.getActiveText(), stationFilter.getActiveColor());
 
+        binding.appBarMain.main.stationFilterBar.setBaseApplication(baseApplication);
+        binding.appBarMain.main.stationFilterBar.setOnChangeListener(this);
         updateStationList();
     }
 
@@ -406,64 +368,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         Log.e(TAG, "Bind request to statistics interface failed");
     }
 
-    public void togglePhotoFilter(final View view) {
-        final StationFilter stationFilter = baseApplication.getStationFilter();
-        stationFilter.togglePhoto();
-        setFilterButton(binding.appBarMain.main.photoFilter, stationFilter.getPhotoIcon(), stationFilter.getPhotoText(), stationFilter.getPhotoColor());
-        baseApplication.setStationFilter(stationFilter);
-        updateStationList();
-    }
-
-    public void selectCountry(final View view) {
-        final Intent intent = new Intent(MainActivity.this, CountryActivity.class);
-        startActivity(intent);
-    }
-
-    public void selectNicknameFilter(final View view) {
-        int selectedNickname = -1;
-        final String[] nicknames = dbAdapter.getPhotographerNicknames();
-        final StationFilter stationFilter = baseApplication.getStationFilter();
-        if (nicknames.length == 0) {
-            Toast.makeText(getBaseContext(), getString(R.string.no_nicknames_found), Toast.LENGTH_LONG).show();
-            return;
-        }
-        for (int i = 0; i < nicknames.length; i++) {
-            if (nicknames[i].equals(stationFilter.getNickname())) {
-                selectedNickname = i;
-            }
-        }
-
-        new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
-                .setIcon(R.mipmap.ic_launcher)
-                .setTitle(R.string.select_nickname)
-                .setSingleChoiceItems(nicknames, selectedNickname, null)
-                .setPositiveButton(R.string.button_ok_text, (dialog, whichButton) -> {
-                    dialog.dismiss();
-                    final int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-                    if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
-                        stationFilter.setNickname(nicknames[selectedPosition]);
-                        baseApplication.setStationFilter(stationFilter);
-                        setFilterButton(binding.appBarMain.main.nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.getNicknameText(), stationFilter.getNicknameColor());
-                        updateStationList();
-                    }
-                })
-                .setNeutralButton(R.string.button_remove_text, (dialog, whichButton) -> {
-                    dialog.dismiss();
-                    stationFilter.setNickname(null);
-                    baseApplication.setStationFilter(stationFilter);
-                    setFilterButton(binding.appBarMain.main.nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.getNicknameText(), stationFilter.getNicknameColor());
-                    updateStationList();
-                })
-                .setNegativeButton(R.string.button_myself_text, (dialog, whichButton) -> {
-                    dialog.dismiss();
-                    stationFilter.setNickname(baseApplication.getNickname());
-                    baseApplication.setStationFilter(stationFilter);
-                    setFilterButton(binding.appBarMain.main.nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.getNicknameText(), stationFilter.getNicknameColor());
-                    updateStationList();
-                })
-                .create().show();
-    }
-
     public void toggleNotification() {
         final Intent intent = new Intent(MainActivity.this, NearbyNotificationService.class);
         if (statusBinder == null) {
@@ -474,21 +378,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             stopService(intent);
             setNotificationIcon(false);
         }
-    }
-
-    public void toggleSort(final View view) {
-        boolean sortByDistance = baseApplication.getSortByDistance();
-        sortByDistance = !sortByDistance;
-        setSortIcon(sortByDistance);
-        baseApplication.setSortByDistance(sortByDistance);
-        if (sortByDistance) {
-            registerLocationManager();
-        }
-        updateStationList();
-    }
-
-    private void setSortIcon(final boolean sortByDistance) {
-        setFilterButton(binding.appBarMain.main.toggleSort, sortByDistance ? R.drawable.ic_sort_by_distance_active_24px : R.drawable.ic_sort_by_alpha_active_24px, R.string.sort_order, R.color.filterActive);
     }
 
     @Override
@@ -503,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             } else {
                 //Permission not granted
                 baseApplication.setSortByDistance(false);
-                setSortIcon(false);
+                binding.appBarMain.main.stationFilterBar.setSortOrder(false);
             }
         }
     }
@@ -554,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             b.putString("error", "Error registering LocationManager: " + e.toString());
             locationManager = null;
             baseApplication.setSortByDistance(false);
-            setSortIcon(false);
+            binding.appBarMain.main.stationFilterBar.setSortOrder(false);
             return;
         }
         Log.i(TAG, "LocationManager registered");
@@ -581,18 +470,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         updateStationList();
     }
 
-    public void toggleActiveFilter(final View view) {
-        final StationFilter stationFilter = baseApplication.getStationFilter();
-        stationFilter.toggleActive();
-        setFilterButton(binding.appBarMain.main.activeFilter, stationFilter.getActiveIcon(), stationFilter.getActiveText(), stationFilter.getActiveColor());
+    @Override
+    public void stationFilterChanged(final StationFilter stationFilter) {
         baseApplication.setStationFilter(stationFilter);
         updateStationList();
     }
 
-    private void setFilterButton(final Button button, final int iconRes, final int textRes, final int textColorRes) {
-        button.setCompoundDrawablesWithIntrinsicBounds(null, ContextCompat.getDrawable(this, iconRes), null, null);
-        button.setTextColor(getResources().getColor(textColorRes));
-        button.setText(textRes);
+    @Override
+    public void sortOrderChanged(final boolean sortByDistance) {
+        if (sortByDistance) {
+            registerLocationManager();
+        }
+        updateStationList();
     }
 
 }

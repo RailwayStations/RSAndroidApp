@@ -1,2 +1,3 @@
 - Bahnhofsname in Detailansicht selektierbar
 - Verbesserte Übersetzungen
+- Filterleiste auch auf der Karte

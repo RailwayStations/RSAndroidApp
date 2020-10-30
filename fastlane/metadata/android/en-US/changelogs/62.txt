@@ -1,2 +1,3 @@
 - Stationname in Detailview selectable
 - Improved translations
+- Show station filters also on the map

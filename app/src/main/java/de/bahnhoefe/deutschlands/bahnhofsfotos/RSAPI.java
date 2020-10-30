@@ -1,8 +1,14 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.content.Context;
 import android.util.Base64;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
@@ -16,6 +22,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import okhttp3.RequestBody;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
@@ -93,10 +101,54 @@ public interface RSAPI {
     Call<Void> resendEmailVerification(@Header("Authorization") String authorization);
 
     class Helper {
+        private static final String TAG = Helper.class.getSimpleName();
+
         static String getAuthorizationHeader(final String email, final String password) {
             final byte[] data = (email + ":" + password).getBytes(StandardCharsets.UTF_8);
             return "Basic " + Base64.encodeToString(data, Base64.NO_WRAP);
         }
+
+        static void runUpdateCountriesAndStations(final Context context, final BaseApplication baseApplication, final ResultListener listener) {
+            final RSAPI rsapi = baseApplication.getRSAPI();
+            rsapi.getCountries().enqueue(new Callback<List<Country>>() {
+                @Override
+                public void onResponse(final Call<List<Country>> call, final Response<List<Country>> response) {
+                    if (response.isSuccessful()) {
+                        baseApplication.getDbAdapter().insertCountries(response.body());
+                    }
+                }
+
+                @Override
+                public void onFailure(final Call<List<Country>> call, final Throwable t) {
+                    Log.e(TAG, "Error refreshing countries", t);
+                    Toast.makeText(context, context.getString(R.string.error_updating_countries) + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+
+            rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<List<Station>>() {
+                @Override
+                public void onResponse(final Call<List<Station>> call, final Response<List<Station>> response) {
+                    if (response.isSuccessful()) {
+                        baseApplication.getDbAdapter().insertStations(response.body(), baseApplication.getCountryCodes());
+                        baseApplication.setLastUpdate(System.currentTimeMillis());
+                    }
+                    listener.onResult(response.isSuccessful());
+                }
+
+                @Override
+                public void onFailure(final Call<List<Station>> call, final Throwable t) {
+                    Log.e(TAG, "Error refreshing stations", t);
+                    Toast.makeText(context, context.getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
+                    listener.onResult(false);
+                }
+            });
+
+        }
+
+    }
+
+    interface ResultListener {
+        void onResult(final boolean success);
     }
 
 }
