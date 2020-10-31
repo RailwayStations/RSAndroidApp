@@ -1,3 +1,4 @@
 - Bahnhofsname in Detailansicht selektierbar
 - Verbesserte Übersetzungen
 - Filterleiste auch auf der Karte
+- Marker Cluster bis maximal Zoomstufe 9

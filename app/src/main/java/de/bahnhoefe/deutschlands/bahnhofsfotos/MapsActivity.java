@@ -754,7 +754,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         clusterer = new ClusterManager<>(
                 binding.map.mapView,
                 getMarkerBitmap(),
-                getZoomLevelMax(),
+                (byte)9,
                 this);
         // this uses the framebuffer position, the mapview position can be out of sync with
         // what the user sees on the screen if an animation is in progress

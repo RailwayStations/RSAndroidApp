@@ -1,3 +1,4 @@
 - Stationname in Detailview selectable
 - Improved translations
 - Show station filters also on the map
+- Marker clustering up to max zoomlevel 9
