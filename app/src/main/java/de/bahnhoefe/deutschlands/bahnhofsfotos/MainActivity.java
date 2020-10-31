@@ -36,6 +36,8 @@ import androidx.core.view.GravityCompat;
 
 import com.google.android.material.navigation.NavigationView;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -205,15 +207,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         } else if (id == R.id.apiUrl) {
             new SimpleDialogs().prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
                 try {
-                    if (!Uri.parse(v).getScheme().matches("https\\?")) {
-                        throw new IllegalArgumentException("Only http(s) URIs are allowed");
+                    if (StringUtils.isEmpty(v)) {
+                        baseApplication.setApiUrl(null); // set to default
+                        baseApplication.setLastUpdate(0);
+                        recreate();
+                    } else {
+                        if (!Uri.parse(v).getScheme().matches("https?")) {
+                            throw new IllegalArgumentException("Only http(s) URIs are allowed");
+                        }
+                        baseApplication.setApiUrl(v);
+                        baseApplication.setLastUpdate(0);
+                        recreate();
                     }
                 } catch (final Exception e) {
                     Toast.makeText(getBaseContext(), getString(R.string.invalid_api_url), Toast.LENGTH_LONG).show();
                 }
-                baseApplication.setApiUrl(v);
-                baseApplication.setLastUpdate(0);
-                recreate();
             });
         }
 

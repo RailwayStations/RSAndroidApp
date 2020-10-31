@@ -90,7 +90,7 @@ public class BaseApplication extends Application {
 
     public String getApiUrl() {
         final Uri apiUri = getUri(getString(R.string.API_URL));
-        if (apiUri != null) {
+        if (apiUri != null && apiUri.getScheme().matches("https?")) {
             final String apiUrl = apiUri.toString();
             return apiUrl + (apiUrl.endsWith("/") ? "" : "/");
         }
