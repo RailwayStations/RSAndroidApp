@@ -531,7 +531,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void reloadMap() {
-        binding.map.progressBar.setVisibility(View.VISIBLE);
         destroyClusterManager();
         new LoadMapMarkerTask(this).start();
     }
