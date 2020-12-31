@@ -2,3 +2,4 @@
 - Improved translations
 - Show station filters also on the map
 - Marker clustering up to max zoomlevel 9
+- Fix display issue in highscore list

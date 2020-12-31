@@ -2,3 +2,4 @@
 - Verbesserte Übersetzungen
 - Filterleiste auch auf der Karte
 - Marker Cluster bis maximal Zoomstufe 9
+- Darstellungsfehler in Highscore-Liste behoben

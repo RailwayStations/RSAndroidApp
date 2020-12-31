@@ -50,20 +50,20 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
             case 1:
                 binding.highscoreAward.setImageResource(R.drawable.ic_crown_gold);
                 binding.highscoreAward.setVisibility(View.VISIBLE);
-                binding.highscorePosition.setVisibility(View.INVISIBLE);
+                binding.highscorePosition.setVisibility(View.GONE);
                 break;
             case 2:
                 binding.highscoreAward.setImageResource(R.drawable.ic_crown_silver);
                 binding.highscoreAward.setVisibility(View.VISIBLE);
-                binding.highscorePosition.setVisibility(View.INVISIBLE);
+                binding.highscorePosition.setVisibility(View.GONE);
                 break;
             case 3:
                 binding.highscoreAward.setImageResource(R.drawable.ic_crown_bronze);
                 binding.highscoreAward.setVisibility(View.VISIBLE);
-                binding.highscorePosition.setVisibility(View.INVISIBLE);
+                binding.highscorePosition.setVisibility(View.GONE);
                 break;
             default:
-                binding.highscoreAward.setVisibility(View.INVISIBLE);
+                binding.highscoreAward.setVisibility(View.GONE);
                 binding.highscorePosition.setVisibility(View.VISIBLE);
                 break;
         }

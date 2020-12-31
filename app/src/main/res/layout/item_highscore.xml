@@ -12,33 +12,29 @@
     <ImageView
         android:id="@+id/highscore_award"
         android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:adjustViewBounds="false"
         android:cropToPadding="false"
-        android:gravity="center_vertical"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_crown_gold">
+        android:src="@drawable/ic_crown_gold"
+        android:contentDescription="@string/highscore_crown">
     </ImageView>
 
     <TextView
         android:id="@+id/highscore_position"
         android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:textAlignment="center"
         android:maxLines="1"
-        android:layout_alignParentTop="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_toEndOf="@+id/highscore_award"
         android:text="@string/highscorePosition"/>
-
 
     <TextView
         android:id="@+id/highscore_photos"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:gravity="center_vertical"
-        android:paddingStart="20dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:textStyle="bold"
         android:maxLines="1"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -47,13 +43,12 @@
     <TextView
         android:id="@+id/highscore_name"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:gravity="center_vertical"
-        android:paddingStart="20dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:text="@string/highscoreName"
         android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/highscore_photos"/>
 
 
