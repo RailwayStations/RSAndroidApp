@@ -258,4 +258,5 @@
     <string name="filter_inactive">Inactive</string>
     <string name="countries">Countries</string>
     <string name="photo_checksum">Photo with this checksum is already uploaded. Upload again?</string>
+    <string name="highscore_crown">Highscore crown</string>
 </resources>
