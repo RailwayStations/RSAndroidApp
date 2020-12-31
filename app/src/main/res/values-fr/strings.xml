@@ -257,4 +257,5 @@
     <string name="filter_inactive">Inactif</string>
     <string name="countries">Pays</string>
     <string name="photo_checksum">La photo avec cette somme de contrôle est déjà téléchargée. Télécharger à nouveau ?</string>
+    <string name="highscore_crown">Highscore crown</string>
 </resources>
