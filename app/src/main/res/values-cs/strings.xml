@@ -262,4 +262,5 @@
     <string name="filter_inactive">Aktivní</string>
     <string name="countries">Zem</string>
     <string name="photo_checksum">Fotografie s tímto kontrolním součtem je již nahrána. Nahrát znovu?</string>
+    <string name="highscore_crown">Highscore crown</string>
 </resources>
