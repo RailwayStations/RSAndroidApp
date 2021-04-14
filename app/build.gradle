@@ -18,8 +18,8 @@ android {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 62
-        versionName "12.8.0"
+        versionCode 63
+        versionName "12.9.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 

@@ -3,7 +3,7 @@
 buildscript {
     System.properties['com.android.build.gradle.overrideVersionCheck'] = 'true'
     repositories {
-        jcenter()
+        gradlePluginPortal()
         google()
     }
     dependencies {
@@ -19,7 +19,7 @@ ext.minSdkVersion = 21
 
 allprojects {
     repositories {
-        jcenter()
+        gradlePluginPortal()
         mavenCentral()
         google()
     }
