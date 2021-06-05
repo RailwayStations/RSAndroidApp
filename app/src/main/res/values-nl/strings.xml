@@ -254,5 +254,5 @@
     <string name="filter_inactive">Inactief</string>
     <string name="countries">Landen</string>
     <string name="photo_checksum">Foto met deze checksum is al geupload. Opnieuw uploaden?</string>
-    <string name="highscore_crown">Highscore crown</string>
+    <string name="highscore_crown">Markeren</string>
 </resources>
