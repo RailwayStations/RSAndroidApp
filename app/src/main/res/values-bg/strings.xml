@@ -9,15 +9,15 @@
     <string name="maps_activity">Карта на гарата</string>
     <string name="title_activity_details">Данни за гарата</string>
     <string name="no_stations_in_database">Все още не е извършена актуализация</string>
-    <string name="take_photo">Take a photo</string>
-    <string name="share_photo">Share</string>
-    <string name="nav_to_station">Navigate to the station</string>
+    <string name="take_photo">Направете снимка</string>
+    <string name="share_photo">Сподели</string>
+    <string name="nav_to_station">Навигация към списък</string>
     <string name="CC0">CC0 - without attribution</string>
-    <string name="tvLicense">Photo license</string>
+    <string name="tvLicense">Лиценз на снимка</string>
     <string name="tvLinking">Would you like to be linked from our photo database?</string>
-    <string name="etLinking">Please enter the URL to your account</string>
-    <string name="tvNickname">Nickname</string>
-    <string name="bt_mydata_commit">Save</string>
+    <string name="etLinking">Моля въведете адреса на вашия сайт достъпен от интернет</string>
+    <string name="tvNickname">Псевдоним</string>
+    <string name="bt_mydata_commit">Запиши</string>
     <string name="preferences_saved">Your data is stored. </string>
     <string name="tvOwnPhotos">Are these your own photos…</string>
     <string name="nav_oepnv">by bus and train</string>
@@ -258,5 +258,5 @@
     <string name="filter_inactive">Inactive</string>
     <string name="countries">Countries</string>
     <string name="photo_checksum">Photo with this checksum is already uploaded. Upload again?</string>
-    <string name="highscore_crown">Highscore crown</string>
+    <string name="highscore_crown">Подчертайте</string>
 </resources>
