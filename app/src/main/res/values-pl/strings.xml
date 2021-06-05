@@ -257,5 +257,5 @@
     <string name="filter_inactive">Nieaktywny</string>
     <string name="countries">Kraje</string>
     <string name="photo_checksum">Zdjęcie z tą sumą kontrolną jest już przesłane. Wgrać ponownie?</string>
-    <string name="highscore_crown">Highscore crown</string>
+    <string name="highscore_crown">Podkreślenie</string>
 </resources>
