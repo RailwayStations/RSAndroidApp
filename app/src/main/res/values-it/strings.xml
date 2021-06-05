@@ -258,5 +258,5 @@
     <string name="filter_inactive">Inattivo</string>
     <string name="countries">Paese</string>
     <string name="photo_checksum">Foto con questo checksum è già caricato. Carica di nuovo?</string>
-    <string name="highscore_crown">Highscore crown</string>
+    <string name="highscore_crown">Evidenziare</string>
 </resources>
