@@ -66,11 +66,11 @@
     <string name="country_activity">Izbira države</string>
     <string name="countrySelection">Izbira države</string>
     <string name="nicknameFilter">Filtriranje po fotografu</string>
-    <string name="label_map">Map</string>
-    <string name="label_timetable">Departures</string>
-    <string name="fab_subject">Message to the station photo app</string>
-    <string name="fab_chooser_title">Send mail</string>
-    <string name="menu_title_introslider">Manual</string>
+    <string name="label_map">Zemljevid</string>
+    <string name="label_timetable">Odhodi</string>
+    <string name="fab_subject">Sporočilo fotografski aplikaciji postaje</string>
+    <string name="fab_chooser_title">Pošlji pošto</string>
+    <string name="menu_title_introslider">Priročnik</string>
     <string name="menu_follow_my_location">Follow my position</string>
     <string name="text_intro_slider1">We collect station photos from users, which we can provide to other developers under a free license. Our favorite license is CC0.</string>
     <string name="text_intro_slider2">Please fill in the required data under \'My data\', so that we can give your photo files a correct name. Without registration you can not upload photos.\n\n<b>With your registration you will get an initial password, please check your SPAM folder.</b></string>
@@ -238,8 +238,8 @@
     <string name="missing_station">Missing station</string>
     <string name="active_flag_choose">Is this station active?</string>
     <string name="active_flag_active">Active station</string>
-    <string name="active_flag_inactive">Inactive station</string>
-    <string name="initPasswordRepeat">Repeat password</string>
+    <string name="active_flag_inactive">Neaktivna postaja</string>
+    <string name="initPasswordRepeat">Ponovite geslo</string>
     <string name="emailVerified">(verified)</string>
     <string name="emailUnverified">(not yet verified)</string>
     <string name="requestEmailVerification">Request new email verification?</string>
