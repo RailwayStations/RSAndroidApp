@@ -32,25 +32,25 @@
     <string name="search_hint">Iskalna postaja</string>
     <string name="app_info_title">O aplikaciji</string>
     <string name="app_info_ok">OK</string>
-    <string name="app_info_text"><![CDATA[<p>Version: <b>%s</b></p>
+    <string name="app_info_text"><![CDATA[<p>Verzija: <b>%s</b></p>
         <p>&nbsp;</p>
-        <p>This is the Android App for the OpenData project <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> licensed under <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
-        <br/>App development and Issues on GitHub: <b><a href="https://github.com/RailwayStations/RSAndroidApp">RailwayStations/RSAndroidApp</a></b>.</p>
+        <p>To je aplikacija za Android za projekt OpenData <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> z licenco <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
+        <br/>Razvoj aplikacije in vprašanja na GitHubu: <b><a href="https://github.com/RailwayStations/RSAndroidApp">RailwayStations/RSAndroidApp</a></b>.</p>
         <p>&nbsp;</p>
-        <p>The station data for germany was provided by Deutsche Bahn in the context of the local <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData project</a></b>.
-        <br/>Other country data was provided by various OpenData sources like <b><a href="https://public.opendatasoft.com/explore/dataset/european-train-stations/table/">OpenDataSoft</a></b>.</p>
+        <p>Podatke o postajah za Nemčijo je zagotovila družba Deutsche Bahn v okviru lokalnega projekta <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData</a></b>.
+        <br/>Druge podatke o državah so zagotovili različni viri OpenData, kot je <b><a href="https://public.opendatasoft.com/explore/dataset/european-train-stations/table/">OpenDataSoft</a></b>.</p>
         <p>&nbsp;</p>
-        <p>The app uses the <b><a href="https://design.google.com/icons/">material-design-icons used by Google</a></b>, under Apache license version 2.0</p>]]></string>
+        <p>Aplikacija uporablja <b><a href="https://design.google.com/icons/">material-design-icons, ki ga uporablja Google</a></b>, pod Apache licenco različice 2.0</p>]]></string>
     <string name="map_info_title">O zemljevidih</string>
-    <string name="map_info_text">The default map is provided by <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
-        \nJoin the community and help to improve the map, see <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
-        \n\nPlease consider downloading an offline map to decrease the server load and save your mobile data plan.
-        \nSome offline maps can be found here:
+    <string name="map_info_text">Privzet zemljevid zagotavlja <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
+        \nPridruži se skupnosti in pomagaj izboljšati zemljevid, glej <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
+        \n\nProsimo, razmislite o prenosu zemljevida brez povezave, da zmanjšate obremenitev strežnika in prihranite svoj mobilni podatkovni načrt.
+        \nNekatere zemljevide brez povezave lahko najdeš tukaj:
         \n<b>- <a href="https://download.mapsforge.org/">Mapsforge</a></b>
         \n<b>- <a href="https://www.freizeitkarte-osm.de/android/en/">Freizeitkarte Android</a></b>
         \n<b>- <a href="https://www.openandromaps.org/en">OpenAndroMaps</a></b>
         \n<b>- ...</b>
-        \n\nSome maps require special themes to render correctly! These need to be downloaded and configured accordingly.
+        \n\nNekatere karte za pravilno prikazovanje potrebujejo posebne teme! Te je treba prenesti in ustrezno konfigurirati.
     </string>
     <string name="information">Informacije</string>
     <string name="menu_title_info">O aplikaciji</string>
@@ -65,7 +65,7 @@
     <string name="picture_landscape_only">Uporabite krajinsko orientacijo</string>
     <string name="country_activity">Izbira države</string>
     <string name="countrySelection">Izbira države</string>
-    <string name="nicknameFilter">Filter by photographer</string>
+    <string name="nicknameFilter">Filtriranje po fotografu</string>
     <string name="label_map">Map</string>
     <string name="label_timetable">Departures</string>
     <string name="fab_subject">Message to the station photo app</string>
@@ -226,13 +226,13 @@
     <string name="delete_upload">Delete element #%s</string>
     <string name="confirm_delete_processed_uploads">Delete all processed uploads?</string>
     <string name="upload_not_yet_sent">Not yet sent</string>
-    <string name="panorama_info"><![CDATA[<b>Please consider <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Freedom of panorama</a></b>:
-            <p>- not from within the train</p>
-            <p>- not inside a station</p>
-            <p>- from the platforms only if they are freely accessible</p>
+    <string name="panorama_info"><![CDATA[<b>Prosimo, upoštevajte <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Svobodo panorame</a></b>:
+            <p>- ne iz notranjosti vlaka</p>
+            <p>- ne znotraj postaje</p>
+            <p>- s peronov samo, če so prosto dostopni</p>
             ]]></string>
     <string name="special_license">This country requires the special license:\n%s</string>
-    <string name="special_license_confirm">Please confirm the special license for this country</string>
+    <string name="special_license_confirm">Prosimo, potrdite posebno dovoljenje za to državo</string>
     <string name="nav_delete_processed_uploads">Delete processed uploads</string>
     <string name="error_loading_inbox">"Error loading inbox: "</string>
     <string name="missing_station">Missing station</string>
