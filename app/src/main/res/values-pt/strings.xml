@@ -42,15 +42,15 @@
         <p>&nbsp;</p>
         <p>A aplicação usa os <b><a href="https://design.google.com/icons/">icons de design usados pelo Google</a></b>, sob a licença Apache versão 2.</p>]]></string>
     <string name="map_info_title">Sobre mapas</string>
-    <string name="map_info_text">The default map is provided by <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
-        \nJoin the community and help to improve the map, see <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
-        \n\nPlease consider downloading an offline map to decrease the server load and save your mobile data plan.
-        \nSome offline maps can be found here:
+    <string name="map_info_text">O mapa padrão é fornecido por <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
+        \nJunte-se à comunidade e ajude a melhorar o mapa, ver <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
+        \n\nPor favor, considere descarregar um mapa offline para diminuir a carga do servidor e guardar o seu plano de dados móvel.
+        \nAlguns mapas off-line podem ser encontrados aqui:
         \n<b>- <a href="https://download.mapsforge.org/">Mapsforge</a></b>
         \n<b>- <a href="https://www.freizeitkarte-osm.de/android/en/">Freizeitkarte Android</a></b>
         \n<b>- <a href="https://www.openandromaps.org/en">OpenAndroMaps</a></b>
         \n<b>- ...</b>
-        \n\nSome maps require special themes to render correctly! These need to be downloaded and configured accordingly.
+        \n\nAlguns mapas requerem temas especiais para serem renderizados correctamente! Estes precisam de ser descarregados e configurados em conformidade.
     </string>
     <string name="information">Informacao</string>
     <string name="menu_title_info">Sobre o app</string>
