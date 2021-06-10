@@ -3,21 +3,21 @@
 <resources>
     <string name="app_name">Railway station photos</string>
     <string name="navigation_drawer_open">Ava navigatsiooni riba</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_close">Sulge navigeerimissahtel</string>
     <string name="menu_title_your_data">Minu andmed</string>
-    <string name="menu_title_update_photos">Update</string>
+    <string name="menu_title_update_photos">Uuendus</string>
     <string name="maps_activity">Station map</string>
     <string name="title_activity_details">Station details</string>
     <string name="no_stations_in_database">An update has not yet occurred</string>
-    <string name="take_photo">Take a photo</string>
-    <string name="share_photo">Share</string>
-    <string name="nav_to_station">Navigate to the station</string>
+    <string name="take_photo">Tee foto</string>
+    <string name="share_photo">Saada</string>
+    <string name="nav_to_station">Navigeeri listi juurde</string>
     <string name="CC0">CC0 - without attribution</string>
-    <string name="tvLicense">Photo license</string>
+    <string name="tvLicense">Foto litsenseerimine</string>
     <string name="tvLinking">Would you like to be linked from our photo database?</string>
     <string name="etLinking">Please enter the URL to your account</string>
-    <string name="tvNickname">Nickname</string>
-    <string name="bt_mydata_commit">Save</string>
+    <string name="tvNickname">Hüüdnimi</string>
+    <string name="bt_mydata_commit">Seaded</string>
     <string name="preferences_saved">Your data is stored. </string>
     <string name="tvOwnPhotos">Are these your own photos…</string>
     <string name="nav_oepnv">by bus and train</string>
@@ -26,12 +26,12 @@
     <string name="nav_walk">walk</string>
     <string name="nav_show">only the location</string>
     <string name="navMethod">Show the way…</string>
-    <string name="title_activity_outbox">Outbox</string>
-    <string name="title_activity_inbox">Inbox</string>
+    <string name="title_activity_outbox">Saadetud</string>
+    <string name="title_activity_inbox">Sisendkast</string>
     <string name="activitynotfound">You have no navigation app on your Smartphone</string>
     <string name="search_hint">Search station</string>
     <string name="app_info_title">About the app</string>
-    <string name="app_info_ok">OK</string>
+    <string name="app_info_ok">Olgu</string>
     <string name="app_info_text"><![CDATA[<p>Version: <b>%s</b></p>
         <p>&nbsp;</p>
         <p>This is the Android App for the OpenData project <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> licensed under <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
@@ -52,7 +52,7 @@
         \n<b>- ...</b>
         \n\nSome maps require special themes to render correctly! These need to be downloaded and configured accordingly.
     </string>
-    <string name="information">Information</string>
+    <string name="information">Teave</string>
     <string name="menu_title_info">About the app</string>
     <string name="benachrichtigen">Notifications</string>
     <string name="nahe_gelegenen_bahnhof_melden">Report nearby stations</string>
@@ -235,15 +235,15 @@
     <string name="active_flag_choose">Is this station active?</string>
     <string name="active_flag_active">Active station</string>
     <string name="active_flag_inactive">Inactive station</string>
-    <string name="initPasswordRepeat">Repeat password</string>
-    <string name="emailVerified">(verified)</string>
+    <string name="initPasswordRepeat">Korrake salasõna</string>
+    <string name="emailVerified">(kinnitatud)</string>
     <string name="emailUnverified">(not yet verified)</string>
     <string name="requestEmailVerification">Request new email verification?</string>
-    <string name="emailVerificationRequested">A new verification e-mail has been sent, please check.</string>
+    <string name="emailVerificationRequested">Aadressile %1$s saadeti uus kinnituskiri.</string>
     <string name="emailVerificationRequestFailed">An error occured when requesting a new verification e-mail.</string>
-    <string name="chooseCountry">Choose Country</string>
-    <string name="invalid_api_url">Invalid API URL</string>
-    <string name="menu_email">Contact us by email</string>
+    <string name="chooseCountry">Vali riik</string>
+    <string name="invalid_api_url">Vigane URL</string>
+    <string name="menu_email">Võtke meiega ühendust e-posti teel</string>
     <string name="sort_order">Sort order</string>
     <string name="problem_wrong_name">Station has a wrong name</string>
     <string name="problem_station_active">Station is active</string>
