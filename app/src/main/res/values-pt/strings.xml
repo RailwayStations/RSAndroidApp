@@ -3,7 +3,7 @@
 <resources>
     <string name="app_name">Fotos da estação ferroviária</string>
     <string name="navigation_drawer_open">Abrir gaveta de navegação</string>
-    <string name="navigation_drawer_close">Gaveta de navegação fechada</string>
+    <string name="navigation_drawer_close">Fechar gaveta de navegação</string>
     <string name="menu_title_your_data">Meus dados</string>
     <string name="menu_title_update_photos">Atualização</string>
     <string name="maps_activity">Mapa da estação</string>
@@ -34,7 +34,7 @@
     <string name="app_info_ok">Certo</string>
     <string name="app_info_text"><![CDATA[<p>Versão: <b>%s</b></p>
         <p>&nbsp;</p>
-        <p>Este é o aplicativo Android para o projeto OpenData <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> licenciados sob <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
+        <p>Este é o aplicativo Android para o projeto OpenData <b><a href="https://map.railway-stations.org/">estações ferroviárias. rg</a></b> licenciados sob <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
         <br/>desenvolvimento de aplicativos e problemas no GitHub: <b><a href="https://github.com/RailwayStations/RSAndroidApp">RailwayStations/RSAndroidApp</a></b>.</p>
         <p>&nbsp;</p>
         <p>Os dados da estação para germany foram fornecidos pelo Deutsche Bahn no contexto do projeto local <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData</a></b>.
@@ -43,18 +43,18 @@
         <p>A aplicação usa os <b><a href="https://design.google.com/icons/">icons de design usados pelo Google</a></b>, sob a licença Apache versão 2.</p>]]></string>
     <string name="map_info_title">Sobre mapas</string>
     <string name="map_info_text">O mapa padrão é fornecido por <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
-        \nJunte-se à comunidade e ajude a melhorar o mapa, ver <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
-        \n\nPor favor, considere descarregar um mapa offline para diminuir a carga do servidor e guardar o seu plano de dados móvel.
-        \nAlguns mapas off-line podem ser encontrados aqui:
+       \nJunte-se à comunidade e ajude a melhorar o mapa, veja <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
+        \n\nPor favor, considere o download de um mapa offline para diminuir a carga do servidor e salvar seu plano de dados móvel.
+       \nAlguns mapas off-line podem ser encontrados aqui:
         \n<b>- <a href="https://download.mapsforge.org/">Mapsforge</a></b>
         \n<b>- <a href="https://www.freizeitkarte-osm.de/android/en/">Freizeitkarte Android</a></b>
         \n<b>- <a href="https://www.openandromaps.org/en">OpenAndroMaps</a></b>
         \n<b>- ...</b>
-        \n\nAlguns mapas requerem temas especiais para serem renderizados correctamente! Estes precisam de ser descarregados e configurados em conformidade.
+        \n\nAlguns mapas requerem temas especiais para serem renderizados corretamente! Estes precisam ser baixados e configurados de acordo.
     </string>
     <string name="information">Informacao</string>
-    <string name="menu_title_info">Sobre o app</string>
-    <string name="benachrichtigen">Notificação</string>
+    <string name="menu_title_info">Sobre o aplicativo</string>
+    <string name="benachrichtigen">Notificações</string>
     <string name="nahe_gelegenen_bahnhof_melden">Relatar estações nas proximidades</string>
     <string name="station_is_near">Estações nas proximidades</string>
     <string name="template_short_text" formatted="false">Estação %1$s em %2$.2f km</string>
@@ -80,7 +80,7 @@
     <string name="title_activity_high_score">Recorde</string>
     <string name="menu_title_highscore">Recorde</string>
     <string name="photo_upload">Carregar foto</string>
-    <string name="upload_completed">Atualização Bem-sucedida</string>
+    <string name="upload_completed">Enviado com sucesso</string>
     <string name="upload_failed">Falha ao enviar a foto: %1s</string>
     <string name="registration_failed">Falha ao registrar conta: %1s</string>
     <string name="registration_data_incomplete">Registro incompleto</string>
@@ -99,7 +99,7 @@
     <string name="search_nickname_hint">Pesquisar fotógrafo</string>
     <string name="cc0_needed">Por favor, aceite CC0, para que possamos usar suas fotos sem qualquer problema.</string>
     <string name="update_available">Novas fotos da estação estão disponíveis. Atualizar?</string>
-    <string name="button_cancel_text">Cancelado</string>
+    <string name="button_cancel_text">Cancele</string>
     <string name="update_manual">Manualmente</string>
     <string name="update_notify">Perguntar</string>
     <string name="update_automatic">Automaticamente</string>
@@ -131,7 +131,7 @@
         <item quantity="one">%d entrada encontrada</item>
         <item quantity="other">%d entradas encontradas</item>
     </plurals>
-    <string name="button_ok_text">Okey</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Foto muito grande (máximo de 20 Mz)</string>
     <string name="anonymous">Anônimo</string>
     <string name="profile_wrong_data">Solicitação errada: algo está errado com seus dados, entre em contato com nosso suporte.</string>
@@ -143,7 +143,7 @@
     <string name="read_profile_failed">Falha ao ler perfil remoto: %1s</string>
     <string name="error_loading_highscore">Erro ao carregar highscore:</string>
     <string name="update_policy">Atualizar política</string>
-    <string name="tvEmail">O email</string>
+    <string name="tvEmail">E-mail</string>
     <string name="map_folder">Diretório de Mapa Offline</string>
     <string name="theme_folder">Mapa do Diretório do Tema</string>
     <string name="default_theme">Tema Padrão</string>
@@ -185,8 +185,8 @@
     <string name="id_label">ID:</string>
     <string name="active_label">Estado:</string>
     <string name="owner_label">Fotógrafo:</string>
-    <string name="active">ativa</string>
-    <string name="inactive">inativo</string>
+    <string name="active">ativo</string>
+    <string name="inactive">ativo</string>
     <string name="new_registration">Seu registro foi efetuado com sucesso. Enviamos um e-mail para você com um link de verificação. Por favor, verifique também a sua pasta de SPAM.</string>
     <string name="filter_result">Selecionadas %1$d de %2$d estações</string>
     <string name="menu_title_outbox">Saída</string>
@@ -222,7 +222,7 @@
     <string name="delete_upload">Excluir elemento #%s</string>
     <string name="confirm_delete_processed_uploads">Excluir todos os envios processados?</string>
     <string name="upload_not_yet_sent">Ainda não enviado</string>
-    <string name="panorama_info"><![CDATA[<b>Por favor, considere <a href="https://pt.wikipedia.org/wiki/Liberdade_de_panorama">a liberdade do panorama</a></b>:
+    <string name="panorama_info"><![CDATA[<b>Por favor, considere <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">a liberdade do panorama</a></b>:
             <p>- não de dentro do trem</p>
             <p>- não dentro de uma estação</p>
             <p>- das plataformas apenas se elas estiverem de livre acesso</p>
@@ -240,7 +240,7 @@
     <string name="emailUnverified">(ainda não verificado)</string>
     <string name="requestEmailVerification">Solicitar nova verificação por email?</string>
     <string name="emailVerificationRequested">Um novo e-mail de verificação foi enviado, por favor verifique.</string>
-    <string name="emailVerificationRequestFailed">Ocorreu um erro ao solicitar um novo e-mail de verificação.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Escolha o país</string>
     <string name="invalid_api_url">URL de API inválida</string>
     <string name="menu_email">Contate-nos por e-mail</string>
@@ -254,7 +254,7 @@
     <string name="filter_photo">Fotografia</string>
     <string name="filter_no_photo">Sem Foto</string>
     <string name="filter_nickname">Apelido</string>
-    <string name="filter_active">Ativa</string>
+    <string name="filter_active">Ativado</string>
     <string name="filter_inactive">Inativo</string>
     <string name="countries">Países</string>
     <string name="photo_checksum">Foto com esta soma de verificação já foi enviada. Enviar novamente?</string>
