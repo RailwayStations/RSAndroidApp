@@ -244,7 +244,7 @@
     <string name="emailUnverified">(zatiaľ neoverené)</string>
     <string name="requestEmailVerification">Požiadať o nové overenie e-mailu?</string>
     <string name="emailVerificationRequested">Bol odoslaný nový overovací e-mail, skontrolujte ho.</string>
-    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
+    <string name="emailVerificationRequestFailed">Pri vyžiadaní nového overovacieho e-mailu došlo k chybe.</string>
     <string name="chooseCountry">Vyberte si krajinu</string>
     <string name="invalid_api_url">Neplatná adresa URL API</string>
     <string name="menu_email">Kontaktujte nás e-mailom</string>
