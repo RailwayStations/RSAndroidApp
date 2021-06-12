@@ -240,7 +240,7 @@
     <string name="emailUnverified">(все още не е проверен)</string>
     <string name="requestEmailVerification">Да поискате нова проверка на имейл?</string>
     <string name="emailVerificationRequested">Изпратен е нов имейл за проверка, моля, проверете го.</string>
-    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
+    <string name="emailVerificationRequestFailed">При заявяването на нов имейл за проверка е възникнала грешка.</string>
     <string name="chooseCountry">Изберете държава</string>
     <string name="invalid_api_url">Невалиден URL на API</string>
     <string name="menu_email">Свържете се с нас чрез имейл</string>
