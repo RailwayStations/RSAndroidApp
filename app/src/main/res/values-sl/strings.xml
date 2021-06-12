@@ -135,7 +135,7 @@
         <item quantity="few">%d nekdo je našel vnos</item>
         <item quantity="other">%d najdenih vnosov</item>
     </plurals>
-    <string name="button_ok_text">Ok</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Prevelika fotografija (največ 20 MB)</string>
     <string name="anonymous">Anonimni</string>
     <string name="profile_wrong_data">Slaba zahteva: z vašimi podatki je nekaj narobe, obrnite se na našo podporo.</string>
@@ -244,7 +244,7 @@
     <string name="emailUnverified">(še ni potrjeno)</string>
     <string name="requestEmailVerification">Zahtevate novo preverjanje e-pošte?</string>
     <string name="emailVerificationRequested">Poslano je bilo novo potrditveno e-poštno sporočilo, ki ga preverite.</string>
-    <string name="emailVerificationRequestFailed">Pri zahtevi za novo e-poštno sporočilo za preverjanje je prišlo do napake.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Izberite državo</string>
     <string name="invalid_api_url">Nepravilen API URL</string>
     <string name="menu_email">Pišite nam po e-pošti</string>
