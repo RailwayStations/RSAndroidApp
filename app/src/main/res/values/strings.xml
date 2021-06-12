@@ -131,7 +131,7 @@
         <item quantity="one">%d entry found</item>
         <item quantity="other">%d entries found</item>
     </plurals>
-    <string name="button_ok_text">Ok</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Photo too big (20 MB max)</string>
     <string name="anonymous">Anonymous</string>
     <string name="profile_wrong_data">Bad request: something is wrong with your data, please contact our support.</string>
@@ -240,7 +240,7 @@
     <string name="emailUnverified">(not yet verified)</string>
     <string name="requestEmailVerification">Request new email verification?</string>
     <string name="emailVerificationRequested">A new verification e-mail has been sent, please check.</string>
-    <string name="emailVerificationRequestFailed">An error occured when requesting a new verification e-mail.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Choose Country</string>
     <string name="invalid_api_url">Invalid API URL</string>
     <string name="menu_email">Contact us by email</string>
