@@ -222,7 +222,7 @@
     <string name="delete_upload">Slet element #%s</string>
     <string name="confirm_delete_processed_uploads">Slet alle behandlede uploads?</string>
     <string name="upload_not_yet_sent">Endnu ikke sendt</string>
-    <string name="panorama_info"><![CDATA[<b>Overvej <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Panoramefrihed</a></b>:
+    <string name="panorama_info"><![CDATA[<b>Overvej <a href="https://da.wikipedia.org/wiki/Panoramafrihed">Panoramefrihed</a></b>:
             <p>- ikke inde i toget</p>
             <p>- ikke inde i en station</p>
             <p>- kun fra platformene, hvis de er frit tilgængelige</p>
