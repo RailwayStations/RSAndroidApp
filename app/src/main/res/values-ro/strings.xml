@@ -34,7 +34,7 @@
     <string name="app_info_ok">OK</string>
     <string name="app_info_text"><![CDATA[<p>Versiunea: <b>%s</b></p>
         <p>&nbsp;</p>
-        <p>Aceasta este Aplicația Android pentru proiectul OpenData <b><a href="https://map.railway-stations.org/">de stații feroviare. rg</a></b> licență sub <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
+        <p>Aceasta este Aplicația Android pentru proiectul OpenData <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> licență sub <b><a href="http://choosealicense.com/licenses/mit/">MIT-License</a></b>.
         <br/>Dezvoltarea aplicației și probleme pe GitHub: <b><a href="https://github.com/RailwayStations/RSAndroidApp">Căi FerateStations/RSAndroidApp</a></b>.</p>
         <p>&nbsp;</p>
         <p>Datele stației pentru germany au fost furnizate de Deutsche Bahn în contextul proiectului local <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData proiect</a></b>.
