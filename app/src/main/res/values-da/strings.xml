@@ -34,7 +34,7 @@
     <string name="app_info_ok">Ok</string>
     <string name="app_info_text"><![CDATA[<p>Version: <b>%s</b></p>
         <p>&nbsp;</p>
-        <p>Dette er Android-appen til OpenData projektet <b><a href="https://map.railway-stations.org/">jernbanestationer. rg</a></b> licenseret under <b><a href="http://choosealicense.com/licenses/mit/">MIT-Licens</a></b>.
+        <p>Dette er Android-appen til OpenData projektet <b><a href="https://map.railway-stations.org/">railway-stations.org</a></b> licenseret under <b><a href="http://choosealicense.com/licenses/mit/">MIT-Licens</a></b>.
         <br/>Appudvikling og Problemer på GitHub: <b><a href="https://github.com/RailwayStations/RSAndroidApp">RailwayStations/RSAndroidApp</a></b>.</p>
         <p>&nbsp;</p>
         <p>Stationsdataene for tyskere blev fremlagt af Deutsche Bahn i forbindelse med det lokale <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData projekt</a></b>.
@@ -43,7 +43,7 @@
         <p>Appen bruger de <b><a href="https://design.google.com/icons/">materiale-design-ikoner, som Google</a></b>anvender, under Apache licens version 2.</p>]]></string>
     <string name="map_info_title">Om Kort</string>
     <string name="map_info_text">Standard kortet er leveret af <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
-        \nDeltag i fællesskabet og hjælp til at forbedre kortet, se <b><a href="https://www.openstreetmap.org/fixthemap">www. penstreetmap. rg/fixthemap</a></b>
+        \nDeltag i fællesskabet og hjælp til at forbedre kortet, se <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
         \n\nOvervej venligst at downloade et offline kort for at reducere serverens belastning og gemme dit mobildataabonnement.
         \nNogle offline kort kan findes her:
         \n<b>- <a href="https://download.mapsforge.org/">Mapsforge</a></b>
