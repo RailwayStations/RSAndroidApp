@@ -240,7 +240,7 @@
     <string name="emailUnverified">(endnu ikke bekræftet)</string>
     <string name="requestEmailVerification">Anmod om ny e-mail bekræftelse?</string>
     <string name="emailVerificationRequested">En ny bekræftelses e-mail er sendt, tjek venligst.</string>
-    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
+    <string name="emailVerificationRequestFailed">Der opstod en fejl under anmodning om en ny bekræftelses-e-mail.</string>
     <string name="chooseCountry">Vælg Land</string>
     <string name="invalid_api_url">Ugyldig API-URL</string>
     <string name="menu_email">Kontakt os via e-mail</string>
