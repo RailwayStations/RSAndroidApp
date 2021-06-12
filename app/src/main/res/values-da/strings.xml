@@ -131,7 +131,7 @@
         <item quantity="one">%d post fundet</item>
         <item quantity="other">%d poster fundet</item>
     </plurals>
-    <string name="button_ok_text">Ok</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Foto for stor (20 MB maks)</string>
     <string name="anonymous">Anonym</string>
     <string name="profile_wrong_data">Forkert anmodning: noget er galt med dine data, kontakt venligst vores support.</string>
@@ -240,7 +240,7 @@
     <string name="emailUnverified">(endnu ikke bekræftet)</string>
     <string name="requestEmailVerification">Anmod om ny e-mail bekræftelse?</string>
     <string name="emailVerificationRequested">En ny bekræftelses e-mail er sendt, tjek venligst.</string>
-    <string name="emailVerificationRequestFailed">Der opstod en fejl under anmodning om en ny bekræftelses-e-mail.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Vælg Land</string>
     <string name="invalid_api_url">Ugyldig API-URL</string>
     <string name="menu_email">Kontakt os via e-mail</string>
