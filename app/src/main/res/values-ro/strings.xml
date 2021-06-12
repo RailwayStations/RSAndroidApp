@@ -242,7 +242,7 @@
     <string name="emailUnverified">(nefiind încă verificat)</string>
     <string name="requestEmailVerification">Solicitați o nouă verificare a e-mailului?</string>
     <string name="emailVerificationRequested">A fost trimis un nou e-mail de verificare, vă rugăm să verificați.</string>
-    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
+    <string name="emailVerificationRequestFailed">S-a produs o eroare la solicitarea unui nou e-mail de verificare.</string>
     <string name="chooseCountry">Alegeți țara</string>
     <string name="invalid_api_url">URL nevalid</string>
     <string name="menu_email">Contactaţi-ne prin e-mail</string>
