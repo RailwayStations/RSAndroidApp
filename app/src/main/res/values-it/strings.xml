@@ -131,7 +131,7 @@
         <item quantity="one">%d voce trovata</item>
         <item quantity="other">%d voci trovate</item>
     </plurals>
-    <string name="button_ok_text">Ok</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Foto troppo grande (20 MB max)</string>
     <string name="anonymous">Anonimo</string>
     <string name="profile_wrong_data">Richiesta errata: c\'è qualcosa che non va con i vostri dati, contattate il nostro supporto.</string>
@@ -240,7 +240,7 @@
     <string name="emailUnverified">(non ancora verificato)</string>
     <string name="requestEmailVerification">Richiedi una nuova verifica via e-mail?</string>
     <string name="emailVerificationRequested">È stata inviata una nuova e-mail di verifica, si prega di controllare.</string>
-    <string name="emailVerificationRequestFailed">Si è verificato un errore durante la richiesta di una nuova e-mail di verifica.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Scegliere il paese</string>
     <string name="invalid_api_url">URL API non valido</string>
     <string name="menu_email">Contattateci via e-mail</string>
