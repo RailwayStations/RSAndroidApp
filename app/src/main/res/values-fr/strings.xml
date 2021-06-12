@@ -221,7 +221,7 @@
     <string name="delete_upload">Suppresion de l\'élément #%s</string>
     <string name="confirm_delete_processed_uploads">Désirez-vous annuler tous les téléchargements ?</string>
     <string name="upload_not_yet_sent">Pas encore envoyé</string>
-    <string name="panorama_info"><![CDATA[<b>Prise en compte <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">du droit de panorama</a></b>:
+    <string name="panorama_info"><![CDATA[<b>Prise en compte <a href="https://fr.wikipedia.org/wiki/Libert%C3%A9_de_panorama">du droit de panorama</a></b>:
            <p>- pas de puis un train</p>
            <p>- pas à l\'intérieur d\'une gare</p>
            <p>- depuis les quais, seulement s\'ìls sont librement accessibles</p>
@@ -257,5 +257,5 @@
     <string name="filter_inactive">Inactif</string>
     <string name="countries">Pays</string>
     <string name="photo_checksum">La photo avec cette somme de contrôle est déjà téléchargée. Télécharger à nouveau ?</string>
-    <string name="highscore_crown">Highscore crown</string>
+    <string name="highscore_crown">Mettre en évidence</string>
 </resources>

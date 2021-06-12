@@ -257,5 +257,5 @@
     <string name="filter_inactive">Inaktiv</string>
     <string name="countries">Länder</string>
     <string name="photo_checksum">Foto mit dieser Prüfsumme wurde bereits hochgeladen. Erneut hochladen?</string>
-    <string name="highscore_crown">Highscore crown</string>
+    <string name="highscore_crown">Highscore-Krone</string>
 </resources>
