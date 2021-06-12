@@ -43,7 +43,7 @@
         <p>The app uses the <b><a href="https://design.google.com/icons/">material-design-icons used by Google</a></b>, under Apache license version 2.0</p>]]></string>
     <string name="map_info_title">Tietoja Kartoista</string>
     <string name="map_info_text">Oletuskartan tarjoaa <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
-        \nLiity yhteisöön ja auta parantamaan karttaa, ks. <b><a href="https://www.openstreetmap.org/fixthemap">www. penstreetmap. rg/fixthemap</a></b>
+        \nLiity yhteisöön ja auta parantamaan karttaa, ks. <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
         \n\nHarkitse offline-kartan lataamista pienentääksesi palvelimen kuormaa ja tallentaaksesi mobiilidatasi.
         \nJoitakin offline-karttoja löytyy täältä:
         \n<b>- <a href="https://download.mapsforge.org/">Mapsforge</a></b>
