@@ -131,7 +131,7 @@
         <item quantity="one">%d item gevonden</item>
         <item quantity="other">%d items gevonden</item>
     </plurals>
-    <string name="button_ok_text">Oké</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">De foto is te groot (max. 20 MB)</string>
     <string name="anonymous">Anoniem</string>
     <string name="profile_wrong_data">Onjuist verzoek: er is iets mis met je gegevens. Neem contact op met ons ondersteuningsteam.</string>
@@ -222,7 +222,7 @@
     <string name="delete_upload">Verwijder element #%s</string>
     <string name="confirm_delete_processed_uploads">Alle verwerkte uploads verwijderen?</string>
     <string name="upload_not_yet_sent">Nog niet verstuurd</string>
-    <string name="panorama_info"><![CDATA[<b>Overweeg <a href="https://nl.wikipedia.org/wiki/Panoramavrijheid" target="_blank">panorama vrijheid</a></b>:
+    <string name="panorama_info"><![CDATA[<b>Overweeg <a href='https://nl.wikipedia.org/wiki/Panoramavrijheid' target='_blank'>panorama vrijheid</a></b>:
 <p>- niet in de trein</p>
 <p>- niet in een station</p>
 <p>alleen als ze vrij toegankelijk zijn</p>
@@ -240,7 +240,7 @@
     <string name="emailUnverified">(nog niet geverifieerd)</string>
     <string name="requestEmailVerification">Nieuwe e-mailverificatie aanvragen?</string>
     <string name="emailVerificationRequested">Er is een nieuwe verificatiemail verzonden, controleer dit.</string>
-    <string name="emailVerificationRequestFailed">Er is een fout opgetreden bij het aanvragen van een nieuwe verificatiemail.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Kies een land</string>
     <string name="invalid_api_url">Ongeldige API URL</string>
     <string name="menu_email">Contacteer ons via e-mail</string>
