@@ -131,7 +131,7 @@
         <item quantity="one">%d merkintä löytyi</item>
         <item quantity="other">%d merkintää löytyi</item>
     </plurals>
-    <string name="button_ok_text">Ok</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Kuva liian suuri (20 MB max)</string>
     <string name="anonymous">Anonyymi</string>
     <string name="profile_wrong_data">Virheellinen pyyntö: jotain vikaa tietojesi kanssa, ota yhteyttä tukeemme.</string>
@@ -240,7 +240,7 @@
     <string name="emailUnverified">(ei vielä todennettu)</string>
     <string name="requestEmailVerification">Pyydä uusi sähköpostivahvistus?</string>
     <string name="emailVerificationRequested">Uusi vahvistussähköposti on lähetetty, tarkista se.</string>
-    <string name="emailVerificationRequestFailed">Uutta vahvistussähköpostia pyytäessä tapahtui virhe.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Valitse Maa</string>
     <string name="invalid_api_url">Virheellinen API URL</string>
     <string name="menu_email">Ota meihin yhteyttä sähköpostitse</string>
