@@ -240,7 +240,7 @@
     <string name="emailUnverified">(még nem igazolt)</string>
     <string name="requestEmailVerification">Új e-mail ellenőrzés kérése?</string>
     <string name="emailVerificationRequested">Egy új ellenőrző e-mailt küldtek, kérjük, ellenőrizze.</string>
-    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
+    <string name="emailVerificationRequestFailed">Hiba történt egy új ellenőrző e-mail kérésekor.</string>
     <string name="chooseCountry">Válasszon Országot</string>
     <string name="invalid_api_url">Érvénytelen API URL</string>
     <string name="menu_email">Kapcsolatfelvétel e-mailben</string>
