@@ -239,7 +239,7 @@
     <string name="emailUnverified">(aún no verificado)</string>
     <string name="requestEmailVerification">¿Solicitar una nueva verificación de correo electrónico?</string>
     <string name="emailVerificationRequested">Se ha enviado un nuevo e-mail de verificación, por favor compruébelo.</string>
-    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
+    <string name="emailVerificationRequestFailed">Se produjo un error al solicitar un nuevo correo electrónico de verificación.</string>
     <string name="chooseCountry">Elija el país</string>
     <string name="invalid_api_url">URL de la API inválido</string>
     <string name="menu_email">Contacte con nosotros por correo electrónico</string>
