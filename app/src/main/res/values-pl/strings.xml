@@ -134,7 +134,7 @@
         <item quantity="many">Znaleziono %d wpisów</item>
         <item quantity="other">Znaleziono %d wpisów</item>
     </plurals>
-    <string name="button_ok_text">Ok</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Zdjęcie zbyt duże (maks. 20 MB)</string>
     <string name="anonymous">Anonimowy</string>
     <string name="profile_wrong_data">Złe zapytanie: coś jest nie tak z Państwa danymi, prosimy o kontakt z naszym wsparciem technicznym.</string>
@@ -243,7 +243,7 @@
     <string name="emailUnverified">(jeszcze nie zweryfikowane)</string>
     <string name="requestEmailVerification">Poprosić o nową weryfikację e-maila?</string>
     <string name="emailVerificationRequested">Został wysłany nowy e-mail weryfikacyjny, proszę sprawdzić.</string>
-    <string name="emailVerificationRequestFailed">Podczas wysyłania prośby o nową wiadomość weryfikacyjną pojawił się błąd.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Wybierz kraj</string>
     <string name="invalid_api_url">Nieważny URL API</string>
     <string name="menu_email">Skontaktuj się z nami przez e-mail</string>
