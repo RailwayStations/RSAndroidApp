@@ -222,7 +222,7 @@
     <string name="delete_upload">Verwijder element #%s</string>
     <string name="confirm_delete_processed_uploads">Alle verwerkte uploads verwijderen?</string>
     <string name="upload_not_yet_sent">Nog niet verstuurd</string>
-    <string name="panorama_info"><![CDATA[<b>Overweeg <a href="https://nl.wikipedia.org/wiki/Panoramavrijheid" target="_blank">panorama vrijheid</a></b>:
+    <string name="panorama_info"><![CDATA[<b>Overweeg <a href="https://nl.wikipedia.org/wiki/Panoramavrijheid">panorama vrijheid</a></b>:
 <p>- niet in de trein</p>
 <p>- niet in een station</p>
 <p>alleen als ze vrij toegankelijk zijn</p>

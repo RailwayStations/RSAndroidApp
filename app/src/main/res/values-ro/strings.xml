@@ -133,7 +133,7 @@
         <item quantity="few">%d intrare găsită</item>
         <item quantity="other">%d intrări găsite</item>
     </plurals>
-    <string name="button_ok_text">Ok</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Fotografie prea mare (20 MB max)</string>
     <string name="anonymous">Anonim</string>
     <string name="profile_wrong_data">Solicitare greșită: ceva nu este în regulă cu datele tale, te rugăm să contactezi serviciul nostru de asistență.</string>

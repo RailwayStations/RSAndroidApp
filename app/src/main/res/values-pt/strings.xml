@@ -131,7 +131,7 @@
         <item quantity="one">%d entrada encontrada</item>
         <item quantity="other">%d entradas encontradas</item>
     </plurals>
-    <string name="button_ok_text">Okey</string>
+    <string name="button_ok_text">Certo</string>
     <string name="upload_too_big">Foto muito grande (máximo de 20 Mz)</string>
     <string name="anonymous">Anônimo</string>
     <string name="profile_wrong_data">Solicitação errada: algo está errado com seus dados, entre em contato com nosso suporte.</string>
