@@ -226,7 +226,7 @@
     <string name="delete_upload">Odstránenie prvku #%s</string>
     <string name="confirm_delete_processed_uploads">Odstrániť všetky spracované nahrané súbory?</string>
     <string name="upload_not_yet_sent">Zatiaľ neodoslané</string>
-    <string name="panorama_info"><![CDATA[<b>Prosím, zvážte <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Slobodu panorámy</a></b>:
+    <string name="panorama_info"><![CDATA[<b>Prosím, zvážte <a href="https://sk.wikipedia.org/wiki/Sloboda_panor%C3%A1my">Slobodu panorámy</a></b>:
             <p>- nie z vnútra vlaku</p>
             <p>- nie zvnútra stanice</p>
             <p>- z nástupíšť len vtedy, ak sú voľne prístupné</p>
