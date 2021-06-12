@@ -76,7 +76,7 @@
     <string name="next">SIGUIENTE</string>
     <string name="skip">CANCELAR</string>
     <string name="proceed">INICIAR</string>
-    <string name="title_activity_high_score">Destacar</string>
+    <string name="title_activity_high_score">Puntuación más alta</string>
     <string name="menu_title_highscore">Destacar</string>
     <string name="photo_upload">Subir foto</string>
     <string name="upload_completed">Subida exitosa</string>
@@ -253,5 +253,5 @@
     <string name="filter_inactive">Inactivo</string>
     <string name="countries">Países</string>
     <string name="photo_checksum">La foto con esta suma de comprobación ya está cargada. Subirla de nuevo?</string>
-    <string name="highscore_crown">Destacar</string>
+    <string name="highscore_crown">Puntuación más alta</string>
 </resources>
