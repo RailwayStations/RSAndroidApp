@@ -135,7 +135,7 @@
         <item quantity="many">%d položka nalezena</item>
         <item quantity="other">%d nalezených položek</item>
     </plurals>
-    <string name="button_ok_text">Ok</string>
+    <string name="button_ok_text">OK</string>
     <string name="upload_too_big">Fotografie je příliš velká (max. 20 MB)</string>
     <string name="anonymous">Anonymní</string>
     <string name="profile_wrong_data">Špatný požadavek: s vašimi údaji něco není v pořádku, kontaktujte naši podporu.</string>
@@ -244,7 +244,7 @@
     <string name="emailUnverified">(dosud neověřeno)</string>
     <string name="requestEmailVerification">Požádat o nové ověření e-mailem?</string>
     <string name="emailVerificationRequested">Byl odeslán nový ověřovací e-mail. Zkontrolujte jej.</string>
-    <string name="emailVerificationRequestFailed">Při žádosti o nový ověřovací e-mail došlo k chybě.</string>
+    <string name="emailVerificationRequestFailed">An error occurred when requesting a new verification e-mail.</string>
     <string name="chooseCountry">Vyber zemi</string>
     <string name="invalid_api_url">Neplatná adresa URL API</string>
     <string name="menu_email">Kontaktujte nás e-mailem</string>
