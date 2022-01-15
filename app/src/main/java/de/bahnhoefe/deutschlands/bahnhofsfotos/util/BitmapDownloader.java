@@ -5,14 +5,11 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
  * Helper class to download image in background
- *
- * @Author pelzvieh
  */
 public class BitmapDownloader extends Thread {
 
@@ -35,30 +32,23 @@ public class BitmapDownloader extends Thread {
     @Override
     public void run() {
         Bitmap bitmap = null;
-        InputStream is = null;
         try {
             Log.i(TAG, "Fetching Bitmap from URL: " + url);
-            final HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
-            is = httpConnection.getInputStream();
-            if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final String contentType = httpConnection.getContentType();
-                if (contentType != null && !contentType.startsWith("image"))
-                    Log.w(TAG, "Supplied URL does not appear to be an image resource (type=" + contentType + ")");
-                bitmap = BitmapFactory.decodeStream(is);
-            } else {
-                Log.e(TAG, "Error downloading photo: " + httpConnection.getResponseCode());
+            final var httpConnection = (HttpURLConnection) url.openConnection();
+            try (final var is = httpConnection.getInputStream()) {
+                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    final String contentType = httpConnection.getContentType();
+                    if (contentType != null && !contentType.startsWith("image")) {
+                        Log.w(TAG, "Supplied URL does not appear to be an image resource (type=" + contentType + ")");
+                    }
+                    bitmap = BitmapFactory.decodeStream(is);
+                } else {
+                    Log.e(TAG, "Error downloading photo: " + httpConnection.getResponseCode());
+                }
             }
         } catch (final IOException e) {
             Log.e(TAG, "Could not download photo");
             bitmap = null;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (final IOException e) {
-                    Log.w(TAG, "Could not close channel to photo download");
-                }
-            }
         }
         bitmapAvailableHandler.onBitmapAvailable(bitmap);
     }

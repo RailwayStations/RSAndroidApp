@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -81,11 +83,7 @@ public class Station implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
+    @NonNull
     public String toString() {
         return "Bahnhof [id=" + id + ", title=" + title + ", lat=" + lat + ", lon=" + lon + ", DS100=" + ds100 + "]";
     }

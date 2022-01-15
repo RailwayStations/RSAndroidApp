@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Relatar estações nas proximidades</string>
     <string name="station_is_near">Estações nas proximidades</string>
     <string name="template_short_text" formatted="false">Estação %1$s em %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Estação: %s$1\ndistância: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Estação: %1$s\ndistância: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Foto: abrir informações da licença</string>
     <string name="nearby_notification_active">Notificação de estações próximas está ativa</string>
     <string name="license_tag" formatted="false">Proprietário: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">ENVIAR</string>
     <string name="logo_train">logotipo da locomotiva pequena</string>
     <string name="license_info_not_readable">Informações da licença atualmente não legíveis</string>
-    <string name="last_update_at">Última atualização em: </string>
+    <string name="last_update_at">Última atualização em: %s</string>
     <string name="station_update_failed">Falha ao atualizar as estações:</string>
     <string name="select_picture">Selecionar foto</string>
     <string name="grant_location_permission">Sem permissão de localização, nós não podemos mostrar sua posição atual</string>

@@ -16,8 +16,7 @@
         android:id="@+id/txtStationName"
         android:text="@string/bahnhofname"
         android:textStyle="bold"
-        android:layout_alignParentStart="true"
-        />
+        android:layout_alignParentStart="true"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -25,8 +24,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/txtStationId"
         android:layout_alignParentStart="true"
-        android:layout_below="@id/txtStationName"
-        />
+        android:layout_below="@id/txtStationName"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -34,8 +32,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/txtCoordinates"
         android:layout_alignParentStart="true"
-        android:layout_below="@id/txtStationId"
-        />
+        android:layout_below="@id/txtStationId"/>
 
 </RelativeLayout>
 

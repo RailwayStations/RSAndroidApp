@@ -16,8 +16,7 @@
         android:adjustViewBounds="false"
         android:cropToPadding="false"
         android:src="@drawable/ic_crown_gold"
-        android:contentDescription="@string/highscore_crown">
-    </ImageView>
+        android:contentDescription="@string/highscore_crown"/>
 
     <TextView
         android:id="@+id/highscore_position"
@@ -40,6 +39,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_toEndOf="@+id/highscore_position"
         android:text="@string/highscorePhotos"/>
+
     <TextView
         android:id="@+id/highscore_name"
         android:layout_width="wrap_content"
@@ -50,8 +50,6 @@
         android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_toEndOf="@+id/highscore_photos"/>
-
-
 
 </RelativeLayout>
 

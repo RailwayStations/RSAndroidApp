@@ -2,7 +2,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
 
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -30,7 +29,7 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
         // Build an intent for an action to take a picture
         // actually this launches DetailsActivity with a specific Extra that causes it to launch
         // Photo immediately.
-        final Intent detailFotoIntent = getDetailIntent();
+        final var detailFotoIntent = getDetailIntent();
         detailFotoIntent.putExtra(DetailsActivity.EXTRA_TAKE_FOTO, true);
         return pendifyMe(detailFotoIntent, REQUEST_FOTO);
     }

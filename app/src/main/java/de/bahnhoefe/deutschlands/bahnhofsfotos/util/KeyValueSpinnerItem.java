@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
+import androidx.annotation.NonNull;
+
 public class KeyValueSpinnerItem {
 
     private final String spinnerText;
@@ -19,6 +21,7 @@ public class KeyValueSpinnerItem {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return spinnerText;
     }

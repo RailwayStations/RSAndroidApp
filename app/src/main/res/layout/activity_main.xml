@@ -26,5 +26,4 @@
         app:itemIconTint="@color/navigationViewText"/>
 
 
-
 </androidx.drawerlayout.widget.DrawerLayout>

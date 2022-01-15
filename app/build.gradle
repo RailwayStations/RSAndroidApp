@@ -42,10 +42,10 @@ android {
 
     defaultConfig {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 31
         versionCode 63
-        versionName "12.9.0"
+        versionName "13.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -63,10 +63,6 @@ android {
                 keyPassword System.getProperty("nightly_key_password")
             }
         }
-    }
-    dexOptions {
-        javaMaxHeapSize "4g" //specify the heap size for the dex process
-
     }
     buildTypes {
         release {

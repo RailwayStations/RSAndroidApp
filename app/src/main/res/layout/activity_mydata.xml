@@ -6,9 +6,6 @@
     android:fitsSystemWindows="true"
     tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.MyDataActivity">
 
-
     <include layout="@layout/content_my_data" android:id="@+id/myData" />
-
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

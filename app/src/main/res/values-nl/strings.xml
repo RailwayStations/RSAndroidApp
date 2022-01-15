@@ -106,7 +106,7 @@
     <string name="send">VERSTUREN</string>
     <string name="logo_train">klein locomotieflogo</string>
     <string name="license_info_not_readable">Licentie-informatie is momenteel niet leesbaar</string>
-    <string name="last_update_at">Laatst bijgewerkt op: </string>
+    <string name="last_update_at">Laatst bijgewerkt op: %s</string>
     <string name="station_update_failed">Kan de stations niet bijwerken:</string>
     <string name="select_picture">Foto kiezen</string>
     <string name="grant_location_permission">Zonder toegang tot je locatie kunnen we je huidige positie niet tonen</string>

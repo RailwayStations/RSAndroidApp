@@ -1,12 +1,12 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import static java.util.stream.Collectors.toList;
+
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProviderApp {
@@ -42,11 +42,11 @@ public class ProviderApp {
         if (!isAndroid()) {
             return false;
         }
-        final PackageManager manager = context.getPackageManager();
+        final var manager = context.getPackageManager();
         try {
-            final Uri uri = Uri.parse(url);
-            final String packageName = uri.getQueryParameter("id");
-            final Intent intent = manager.getLaunchIntentForPackage(packageName);
+            final String packageName = Uri.parse(url).getQueryParameter("id");
+            assert packageName != null;
+            final var intent = manager.getLaunchIntentForPackage(packageName);
             if (intent == null) {
                 return false;
             }
@@ -64,10 +64,8 @@ public class ProviderApp {
      * @param context     activity context
      */
     private void openUrl(final Context context) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
-
-        final Uri uri = Uri.parse(url);
-        intent.setData(uri);
+        final var intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
         context.startActivity(intent);
     }
 
@@ -116,22 +114,13 @@ public class ProviderApp {
     }
 
     public static boolean hasCompatibleProviderApps(final List<ProviderApp> providerApps) {
-        for (final ProviderApp pa : providerApps) {
-            if (pa.isCompatible()) {
-                return true;
-            }
-        }
-        return false;
+        return providerApps.stream().anyMatch(ProviderApp::isCompatible);
     }
 
     public static List<ProviderApp> getCompatibleProviderApps(final List<ProviderApp> providerApps) {
-        final List<ProviderApp> compatibleProviderApps = new ArrayList<>();
-        for (final ProviderApp pa : providerApps) {
-            if (pa.isCompatible()) {
-                compatibleProviderApps.add(pa);
-            }
-        }
-        return compatibleProviderApps;
+        return providerApps.stream()
+                .filter(ProviderApp::isCompatible)
+                .collect(toList());
     }
 
 }

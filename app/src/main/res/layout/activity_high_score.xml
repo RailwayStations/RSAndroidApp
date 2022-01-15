@@ -9,9 +9,8 @@
                                              tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.HighScoreActivity"
     >
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:tools="http://schemas.android.com/tools"
-                    android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingBottom="@dimen/activity_vertical_margin"
                     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -24,7 +23,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:background="@android:drawable/btn_dropdown"
             android:spinnerMode="dropdown"/>
@@ -33,7 +31,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/highscore_list"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@id/countries"
             android:descendantFocusability="beforeDescendants"/>

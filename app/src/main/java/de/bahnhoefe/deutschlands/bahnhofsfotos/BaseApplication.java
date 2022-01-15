@@ -20,6 +20,7 @@ import org.mapsforge.core.model.MapPosition;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
@@ -30,7 +31,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -89,9 +89,9 @@ public class BaseApplication extends Application {
     }
 
     public String getApiUrl() {
-        final Uri apiUri = getUri(getString(R.string.API_URL));
-        if (apiUri != null && apiUri.getScheme().matches("https?")) {
-            final String apiUrl = apiUri.toString();
+        final var apiUri = getUri(getString(R.string.API_URL));
+        if (apiUri != null && Objects.requireNonNull(apiUri.getScheme()).matches("https?")) {
+            final var apiUrl = apiUri.toString();
             return apiUrl + (apiUrl.endsWith("/") ? "" : "/");
         }
         return "https://api.railway-stations.org/";
@@ -103,38 +103,39 @@ public class BaseApplication extends Application {
     }
 
     private void putBoolean(final int key, final boolean value) {
-        final SharedPreferences.Editor editor = preferences.edit();
+        final var editor = preferences.edit();
         editor.putBoolean(getString(key), value);
         editor.apply();
     }
 
     private void putString(final int key, final String value) {
-        final SharedPreferences.Editor editor = preferences.edit();
+        final var editor = preferences.edit();
         editor.putString(getString(key), StringUtils.trimToNull(value));
         editor.apply();
     }
 
     private void putStringSet(final int key, final Set<String> value) {
-        final SharedPreferences.Editor editor = preferences.edit();
+        final var editor = preferences.edit();
         editor.putStringSet(getString(key), value);
         editor.apply();
     }
 
     private void putLong(final int key, final long value) {
-        final SharedPreferences.Editor editor = preferences.edit();
+        final var editor = preferences.edit();
         editor.putLong(getString(key), value);
         editor.apply();
     }
 
     private void putDouble(final int key, final double value) {
-        final SharedPreferences.Editor editor = preferences.edit();
+        final var editor = preferences.edit();
         editor.putLong(getString(key), Double.doubleToRawLongBits(value));
         editor.apply();
     }
 
-    private double getDouble(final int key, final double defaultValue) {
-        if ( !preferences.contains(getString(key)))
-            return defaultValue;
+    private double getDouble(final int key) {
+        if ( !preferences.contains(getString(key))) {
+            return 0.0;
+        }
 
         return Double.longBitsToDouble(preferences.getLong(getString(key), 0));
     }
@@ -144,8 +145,9 @@ public class BaseApplication extends Application {
     }
 
     public Set<String> getCountryCodes() {
-        final String oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
-        Set<String> stringSet = preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
+        final var oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
+        var stringSet = preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
+        assert stringSet != null;
         if (stringSet.isEmpty()) {
             stringSet = new HashSet<>(Collections.singleton(DEFAULT_COUNTRY));
         }
@@ -219,16 +221,15 @@ public class BaseApplication extends Application {
     }
 
     public StationFilter getStationFilter() {
-        final Boolean photoFilter = getOptionalBoolean(R.string.STATION_FILTER_PHOTO);
-        final Boolean activeFilter = getOptionalBoolean(R.string.STATION_FILTER_ACTIVE);
-        final String nicknameFilter = preferences.getString(getString(R.string.STATION_FILTER_NICKNAME), null);
+        final var photoFilter = getOptionalBoolean(R.string.STATION_FILTER_PHOTO);
+        final var activeFilter = getOptionalBoolean(R.string.STATION_FILTER_ACTIVE);
+        final var nicknameFilter = preferences.getString(getString(R.string.STATION_FILTER_NICKNAME), null);
         return new StationFilter(photoFilter, activeFilter, nicknameFilter);
     }
 
     private Boolean getOptionalBoolean(final int key) {
         if (preferences.contains(getString(key))) {
-            final String stringValue = preferences.getString(getString(key), "false");
-            return Boolean.valueOf(stringValue);
+            return Boolean.valueOf(preferences.getString(getString(key), "false"));
         }
         return null;
     }
@@ -262,20 +263,15 @@ public class BaseApplication extends Application {
     }
 
     public MapPosition getLastMapPosition() {
-        final LatLong latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT, 0.0), getDouble(R.string.LAST_POSITION_LON, 0.0));
+        final var latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT), getDouble(R.string.LAST_POSITION_LON));
         return new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
     }
 
     public Location getLastLocation() {
-        final Location location = new Location("");
-        location.setLatitude(getDouble(R.string.LAST_POSITION_LAT, 0.0));
-        location.setLongitude(getDouble(R.string.LAST_POSITION_LON, 0.0));
-        return null;
-    }
-
-    public void setLastLocation(final Location location) {
-        putDouble(R.string.LAST_POSITION_LAT, location.getLatitude());
-        putDouble(R.string.LAST_POSITION_LON, location.getLongitude());
+        final var location = new Location("");
+        location.setLatitude(getDouble(R.string.LAST_POSITION_LAT));
+        location.setLongitude(getDouble(R.string.LAST_POSITION_LON));
+        return location;
     }
 
     /**
@@ -304,7 +300,7 @@ public class BaseApplication extends Application {
     }
 
     public Profile getProfile() {
-        final Profile profile = new Profile();
+        final var profile = new Profile();
         profile.setLicense(getLicense());
         profile.setPhotoOwner(getPhotoOwner());
         profile.setAnonymous(getAnonymous());
@@ -317,25 +313,23 @@ public class BaseApplication extends Application {
 
     public RSAPI getRSAPI() {
         if (api == null) {
-            final GsonBuilder gson = new GsonBuilder();
+            final var gson = new GsonBuilder();
             gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
             gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
 
-            final HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            final var loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-            final OkHttpClient.Builder builder = new OkHttpClient.Builder()
+            final var builder = new OkHttpClient.Builder()
                     .addInterceptor(new UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
 
             if (BuildConfig.DEBUG) {
                 builder.addInterceptor(loggingInterceptor);
             }
 
-            final OkHttpClient okHttp = builder.build();
-
             final Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(getApiUrl())
-                    .client(okHttp)
+                    .client(builder.build())
                     .addConverterFactory(GsonConverterFactory.create(gson.create()))
                     .build();
 
@@ -411,12 +405,11 @@ public class BaseApplication extends Application {
         }
 
         @Override
+        @NonNull
         public Response intercept(final Interceptor.Chain chain) throws IOException {
-            final Request originalRequest = chain.request();
-            final Request requestWithUserAgent = originalRequest.newBuilder()
+            return chain.proceed(chain.request().newBuilder()
                     .header("User-Agent", userAgent)
-                    .build();
-            return chain.proceed(requestWithUserAgent);
+                    .build());
         }
     }
 

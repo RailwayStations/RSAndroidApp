@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Rapporter nærliggende stationer</string>
     <string name="station_is_near">Stationer i nærheden</string>
     <string name="template_short_text" formatted="false">Station %1$s i %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Station: %s$1\nafstand: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Station: %1$s\nafstand: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Foto: åben for licensinfo</string>
     <string name="nearby_notification_active">Notifikation af nærliggende stationer er aktiv</string>
     <string name="license_tag" formatted="false">Ejer: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">SEND</string>
     <string name="logo_train">lille lokomotiv logo</string>
     <string name="license_info_not_readable">Licensinfo kan ikke læses i øjeblikket</string>
-    <string name="last_update_at">Sidst opdateret den: </string>
+    <string name="last_update_at">Sidst opdateret den: %s</string>
     <string name="station_update_failed">Kunne ikke opdatere stationerne:</string>
     <string name="select_picture">Vælg Foto</string>
     <string name="grant_location_permission">Uden placeringstilladelse kan vi ikke vise din aktuelle position</string>

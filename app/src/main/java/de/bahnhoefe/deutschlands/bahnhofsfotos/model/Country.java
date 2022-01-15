@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +31,10 @@ public class Country implements Serializable {
     }
 
     public static Country getCountryByCode(final Set<Country> countries, final String countryCode) {
-        for (final Country country : countries) {
-            if (country.getCode().equals(countryCode)) {
-                return country;
-            }
-        }
-        return countries.iterator().next(); // get first country as fallback
+        return countries.stream()
+                .filter(country -> country.getCode().equals(countryCode))
+                .findFirst()
+                .orElse(countries.iterator().next()); // get first country as fallback
     }
 
     public String getName() {
@@ -95,11 +95,13 @@ public class Country implements Serializable {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return name;
     }
 
     public List<ProviderApp> getProviderApps() {
+        providerApps.forEach(a -> a.setCountryCode(code));
         return providerApps;
     }
 

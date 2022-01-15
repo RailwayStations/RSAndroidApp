@@ -98,10 +98,6 @@ public class StationFilter {
         return photo == null || photo ? R.string.filter_photo : R.string.filter_no_photo;
     }
 
-    public int getNicknameText() {
-        return R.string.filter_nickname;
-    }
-
     public int getActiveText() {
         return active == null || active ? R.string.filter_active : R.string.filter_inactive;
     }

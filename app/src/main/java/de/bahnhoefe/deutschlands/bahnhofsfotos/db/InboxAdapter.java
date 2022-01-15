@@ -24,8 +24,9 @@ public class InboxAdapter extends ArrayAdapter<PublicInbox> {
     }
 
     @Override
+    @NonNull
     public View getView(final int position, final View convertView, @NonNull final ViewGroup parent) {
-        View rowView = convertView;
+        var rowView = convertView;
         // reuse views
         final ItemInboxBinding binding;
         if (rowView == null) {
@@ -37,7 +38,7 @@ public class InboxAdapter extends ArrayAdapter<PublicInbox> {
         }
 
         // fill data
-        final PublicInbox item = publicInboxes.get(position);
+        final var item = publicInboxes.get(position);
         binding.txtStationName.setText(item.getTitle());
         if (item.getStationId() != null) {
             binding.txtStationId.setText(item.getCountryCode().concat(":").concat(item.getStationId()));

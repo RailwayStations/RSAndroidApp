@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import androidx.annotation.NonNull;
+
 public class HighScoreItem {
     private final String name;
     private final int photos;
@@ -24,6 +26,7 @@ public class HighScoreItem {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return name;
     }

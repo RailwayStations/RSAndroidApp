@@ -9,8 +9,6 @@
     tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity"
     tools:showIn="@layout/activity_details">
 
-
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -20,11 +18,23 @@
         android:paddingTop="0dp"
         >
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="#f0f0f0"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:indeterminate="true"
+            android:visibility="gone"
+            />
+
         <com.github.chrisbanes.photoview.PhotoView
             android:id="@+id/imageview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
+            android:layout_below="@+id/progressBar"
             android:src="@drawable/ic_stations_with_photo"
             android:scaleType="centerCrop"
             tools:scaleType="centerCrop"
@@ -61,7 +71,8 @@
                 android:inputType="none"
                 android:background="#80ffffff"
                 android:padding="8dp"
-                android:hint="@string/station_name" />
+                android:hint="@string/station_name"
+                android:autofillHints="" />
 
         </RelativeLayout>
 

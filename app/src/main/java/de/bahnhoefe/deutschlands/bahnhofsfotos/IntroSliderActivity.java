@@ -3,7 +3,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -13,6 +12,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -69,7 +69,7 @@ public class IntroSliderActivity extends AppCompatActivity {
 
         for (int i = 0; i < dots.length; i++) {
             dots[i] = new TextView(this);
-            dots[i].setText(Html.fromHtml("&#8226;"));
+            dots[i].setText(Html.fromHtml("&#8226;", Html.FROM_HTML_MODE_LEGACY));
             dots[i].setTextSize(35);
             dots[i].setTextColor(colorInactive[position]);
             binding.layoutDots.addView(dots[i]);
@@ -84,7 +84,7 @@ public class IntroSliderActivity extends AppCompatActivity {
         return binding.viewPager.getCurrentItem() + 1;
     }
 
-    ViewPager.OnPageChangeListener viewListener = new ViewPager.OnPageChangeListener() {
+    final ViewPager.OnPageChangeListener viewListener = new ViewPager.OnPageChangeListener() {
 
         @Override
         public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {
@@ -121,7 +121,8 @@ public class IntroSliderActivity extends AppCompatActivity {
     public class ViewPagerAdapter extends PagerAdapter {
 
         @Override
-        public Object instantiateItem(final ViewGroup container, final int position) {
+        @NonNull
+        public Object instantiateItem(@NonNull final ViewGroup container, final int position) {
             final LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final View view = layoutInflater.inflate(layouts[position], container, false);
             container.addView(view);
@@ -129,7 +130,7 @@ public class IntroSliderActivity extends AppCompatActivity {
         }
 
         @Override
-        public void destroyItem(final ViewGroup container, final int position, final Object object) {
+        public void destroyItem(final ViewGroup container, final int position, @NonNull final Object object) {
             final View view = (View) object;
             container.removeView(view);
         }
@@ -140,7 +141,7 @@ public class IntroSliderActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean isViewFromObject(final View view, final Object object) {
+        public boolean isViewFromObject(@NonNull final View view, @NonNull final Object object) {
             return view == object;
         }
     }

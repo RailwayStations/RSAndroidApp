@@ -30,8 +30,10 @@ import org.mapsforge.core.graphics.Paint;
 import org.mapsforge.core.model.Point;
 import org.mapsforge.map.model.DisplayModel;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
@@ -42,7 +44,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 public class MarkerBitmap {
 
     private static final Map<String, Bitmap> captionViews = new HashMap<>();
-    private static Context context;
+    private static WeakReference<Context> contextRef;
 
     /**
      * bitmap object for stations without photo
@@ -119,7 +121,7 @@ public class MarkerBitmap {
                         final Bitmap srcWithoutPhotoInactive, final Bitmap srcWithPhotoInactive, final Bitmap srcOwnPhotoInactive,
                         final Bitmap srcPendingUpload,
                         final Point grid, final float textSize, final int maxSize, final Paint paint) {
-        MarkerBitmap.context = context;
+        MarkerBitmap.contextRef = new WeakReference<>(context);
         iconBmpWithoutPhoto = srcWithoutPhoto;
         iconBmpWithPhoto = srcWithPhoto;
         iconBmpOwnPhoto = srcOwnPhoto;
@@ -139,8 +141,9 @@ public class MarkerBitmap {
     }
 
     public static Bitmap getBitmapFromTitle(final String title, final Paint paint) {
-        if (!captionViews.containsKey(title)) {
-            final TextView bubbleView = new TextView(context);
+        final Context context = contextRef.get();
+        if (!captionViews.containsKey(title) && context != null) {
+            final var bubbleView = new TextView(context);
             bubbleView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             Utils.setBackground(bubbleView, ResourcesCompat.getDrawable(context.getResources(), R.drawable.caption_background, null));
             bubbleView.setGravity(Gravity.CENTER);
@@ -158,15 +161,13 @@ public class MarkerBitmap {
             bubbleView.layout(0, 0, paint.getTextWidth(title), paint.getTextHeight(title));
 
             captionViews.put(title, Utils.viewToBitmap(context, bubbleView));
-            captionViews.get(title).incrementRefCount(); // FIXME: is never reduced!
+            Objects.requireNonNull(captionViews.get(title)).incrementRefCount(); // FIXME: is never reduced!
         }
         return captionViews.get(title);
     }
 
     protected static void clearCaptionBitmap() {
-        for (final Bitmap bitmap : captionViews.values()) {
-            bitmap.decrementRefCount();
-        }
+        captionViews.values().forEach(Bitmap::decrementRefCount);
         captionViews.clear();
     }
 

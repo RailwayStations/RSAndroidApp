@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Nahlásenie blízkych staníc</string>
     <string name="station_is_near">Stanice v okolí</string>
     <string name="template_short_text" formatted="false">Stanica %1$s v %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Stanica: %s$1\nvzdialenosť: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Stanica: %1$s\nvzdialenosť: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Foto: otvorené pre informácie o licencii</string>
     <string name="nearby_notification_active">Upozornenie blízkych staníc je aktívne</string>
     <string name="license_tag" formatted="false">Vlastník: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">POSLAŤ</string>
     <string name="logo_train">logo malej lokomotívy</string>
     <string name="license_info_not_readable">Informácie o licencii v súčasnosti nie sú čitateľné</string>
-    <string name="last_update_at">Posledná aktualizácia: </string>
+    <string name="last_update_at">Posledná aktualizácia: %s</string>
     <string name="station_update_failed">Nepodarilo sa aktualizovať stanice:</string>
     <string name="select_picture">Vyberte fotografiu</string>
     <string name="grant_location_permission">Bez povolenia polohy nemôžeme zobraziť vašu aktuálnu polohu</string>

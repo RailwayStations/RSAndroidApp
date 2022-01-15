@@ -8,6 +8,7 @@ import com.google.gson.JsonParseException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 public enum License {
     UNKNOWN(null),
@@ -21,13 +22,11 @@ public enum License {
     }
 
     public static License byName(final String name) {
-        for (final License license : values()) {
-            if (license.toString().equals(name)
-                    || StringUtils.equals(license.longName, name)) {
-                return license;
-            }
-        }
-        return UNKNOWN;
+        return Arrays.stream(values())
+                .filter(license -> license.toString().equals(name)
+                        || StringUtils.equals(license.longName, name))
+                .findFirst()
+                .orElse(UNKNOWN);
     }
 
     public String getLongName() {

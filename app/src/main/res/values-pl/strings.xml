@@ -105,7 +105,7 @@
     <string name="send">WYŚLIJ</string>
     <string name="logo_train">logo małej lokomotywki</string>
     <string name="license_info_not_readable">Informacje o licencji obecnie nieczytelne</string>
-    <string name="last_update_at">Ostatnia aktualizacja: </string>
+    <string name="last_update_at">Ostatnia aktualizacja: %s</string>
     <string name="station_update_failed">Nie udało się zaktualizować stacji:</string>
     <string name="select_picture">Wybierz zdjęcie</string>
     <string name="grant_location_permission">Bez pozwolenia na lokalizację nie możemy pokazać twojej obecnej pozycji</string>

@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import androidx.annotation.NonNull;
+
 public class Statistic {
     private final int total;
     private final int withPhoto;
@@ -30,6 +32,7 @@ public class Statistic {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return "Statistic{" +
                 "total=" + total +

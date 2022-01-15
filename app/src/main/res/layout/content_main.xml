@@ -47,7 +47,7 @@
           android:layout_above="@+id/station_filter_bar"
            />
 
-        <de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.StationFilterBar
+        <de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.StationFilterBar
             android:id="@+id/station_filter_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+
 import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -15,6 +17,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -81,7 +84,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                         this,
                         0,
                         resultIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT
+                        PendingIntent.FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE
                 );
 
         NearbyBahnhofNotificationManager.createChannel(this);
@@ -135,7 +138,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     }
 
     @Override
-    public void onLocationChanged(final Location location) {
+    public void onLocationChanged(@NonNull final Location location) {
         Log.i(TAG, "Received new location: " + location);
         try {
             myPos = location;
@@ -162,12 +165,12 @@ public class NearbyNotificationService extends Service implements LocationListen
     }
 
     @Override
-    public void onProviderEnabled(final String provider) {
+    public void onProviderEnabled(@NonNull final String provider) {
 
     }
 
     @Override
-    public void onProviderDisabled(final String provider) {
+    public void onProviderDisabled(@NonNull final String provider) {
 
     }
 
@@ -299,7 +302,7 @@ public class NearbyNotificationService extends Service implements LocationListen
      * Currently, can only be used to query the service state, i.e. if the location tracking
      * is switched off or on with photo or on without photo.
      */
-    public class StatusBinder extends Binder {
+    public static class StatusBinder extends Binder {
     }
 
     /**

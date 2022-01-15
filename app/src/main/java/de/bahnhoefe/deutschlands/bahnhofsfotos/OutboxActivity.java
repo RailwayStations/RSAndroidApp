@@ -2,7 +2,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -10,13 +9,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityOutboxBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.OutboxAdapter;
@@ -44,8 +44,7 @@ public class OutboxActivity extends AppCompatActivity {
         final ActivityOutboxBinding binding = ActivityOutboxBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        final Cursor uploadsCursor = dbAdapter.getOutbox();
-        adapter = new OutboxAdapter(OutboxActivity.this, uploadsCursor);
+        adapter = new OutboxAdapter(OutboxActivity.this, dbAdapter.getOutbox());
         binding.lstUploads.setAdapter(adapter);
 
         // item click
@@ -53,7 +52,7 @@ public class OutboxActivity extends AppCompatActivity {
             final Upload upload = dbAdapter.getUploadById(id);
             final Intent detailIntent = new Intent(OutboxActivity.this, DetailsActivity.class);
             detailIntent.putExtra(DetailsActivity.EXTRA_UPLOAD, upload);
-            startActivityForResult(detailIntent, 0);
+            startActivity(detailIntent);
         });
 
         binding.lstUploads.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -71,9 +70,9 @@ public class OutboxActivity extends AppCompatActivity {
             query.add(new InboxStateQuery(upload.getRemoteId()));
         }
 
-        baseApplication.getRSAPI().queryUploadState(RSAPI.Helper.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), query).enqueue(new Callback<List<InboxStateQuery>>() {
+        baseApplication.getRSAPI().queryUploadState(RSAPI.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), query).enqueue(new Callback<>() {
             @Override
-            public void onResponse(final Call<List<InboxStateQuery>> call, final Response<List<InboxStateQuery>> response) {
+            public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
                 final List<InboxStateQuery> stateQueries = response.body();
                 if (stateQueries != null) {
                     dbAdapter.updateUploadStates(stateQueries);
@@ -84,7 +83,7 @@ public class OutboxActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(final Call<List<InboxStateQuery>> call, final Throwable t) {
+            public void onFailure(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Throwable t) {
                 Log.e(TAG, "Error retrieving upload state", t);
                 Toast.makeText(OutboxActivity.this,
                         R.string.error_retrieving_upload_state,

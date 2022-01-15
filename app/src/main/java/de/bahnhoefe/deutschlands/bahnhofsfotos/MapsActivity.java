@@ -1,9 +1,9 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import static android.view.Menu.NONE;
+
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,7 +13,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -25,9 +24,11 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -64,28 +65,24 @@ import org.mapsforge.map.rendertheme.XmlRenderTheme;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.MapInfoFragment;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.StationFilterBar;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.MapInfoFragment;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.StationFilterBar;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMapsBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.ClusterManager;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.DbsTileSource;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.GeoItem;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MapsforgeMapView;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.TapHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
-
-import static android.view.Menu.NONE;
 
 public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem>, StationFilterBar.OnChangeListener {
 
@@ -108,7 +105,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     protected Layer layer;
     protected ClusterManager<BahnhofGeoItem> clusterer = null;
-    protected List<TileCache> tileCaches = new ArrayList<>();
+    protected final List<TileCache> tileCaches = new ArrayList<>();
 
     private LatLong myPos = null;
 
@@ -209,9 +206,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      * initializes the map view position.
      *
      * @param mvp the map view position to be set
-     * @return the mapviewposition set
      */
-    protected IMapViewPosition initializePosition(final IMapViewPosition mvp) {
+    protected void initializePosition(final IMapViewPosition mvp) {
         if (myPos != null) {
             mvp.setMapPosition(new MapPosition(myPos, baseApplication.getZoomLevelDefault()));
         } else {
@@ -219,7 +215,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
         mvp.setZoomLevelMax(getZoomLevelMax());
         mvp.setZoomLevelMin(getZoomLevelMin());
-        return mvp;
     }
 
     /**
@@ -227,12 +222,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      */
     protected void createMapViews() {
         binding.map.mapView.setClickable(true);
-        binding.map.mapView.setOnMapDragListener(new MapsforgeMapView.MapDragListener() {
-            @Override
-            public void onDrag() {
-                myLocSwitch.setChecked(false);
-            }
-        });
+        binding.map.mapView.setOnMapDragListener(() -> myLocSwitch.setChecked(false));
         binding.map.mapView.getMapScaleBar().setVisible(true);
         binding.map.mapView.setBuiltInZoomControls(true);
         binding.map.mapView.getMapZoomControls().setAutoHide(true);
@@ -348,7 +338,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                         final Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
                         intent.putExtra(DetailsActivity.EXTRA_LATITUDE, getLatLong().latitude);
                         intent.putExtra(DetailsActivity.EXTRA_LONGITUDE, getLatLong().longitude);
-                        startActivityForResult(intent, 0); // workaround to handle backstack correctly in DetailsActivity
+                        startActivity(intent);
                     });
                     return false;
                 }
@@ -360,11 +350,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
 
         // feedback for long click
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE));
-        } else {
-            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(150);
-        }
+        ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE));
 
     }
 
@@ -472,40 +458,49 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         return null;
     }
 
-    public void openDirectory(final int requestCode) {
+    protected final ActivityResultLauncher<Intent> themeDirectoryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    final Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        getContentResolver().takePersistableUriPermission(
+                                uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        );
+                        baseApplication.setMapThemeDirectoryUri(uri);
+                        recreate();
+                    }
+                }
+            });
+
+    protected final ActivityResultLauncher<Intent> mapDirectoryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    final Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        getContentResolver().takePersistableUriPermission(
+                                uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        );
+                        baseApplication.setMapDirectoryUri(uri);
+                        recreate();
+                    }
+                }
+            });
+
+    public void openDirectory(final ActivityResultLauncher<Intent> launcher) {
         final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        startActivityForResult(intent, requestCode);
+        launcher.launch(intent);
     }
 
 
     private void openMapDirectoryChooser() {
-        openDirectory(REQUEST_MAP_DIRECTORY);
+        openDirectory(mapDirectoryLauncher);
     }
 
     private void openThemeDirectoryChooser() {
-        openDirectory(REQUEST_THEME_DIRECTORY);
-    }
-
-    @Override
-    public void onActivityResult(final int requestCode, final int resultCode, final Intent resultData) {
-        super.onActivityResult(requestCode, resultCode, resultData);
-        if (resultCode == Activity.RESULT_OK && resultData != null) {
-            final Uri uri = resultData.getData();
-            if (uri != null) {
-                getContentResolver().takePersistableUriPermission(
-                        resultData.getData(),
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                );
-                if (requestCode == REQUEST_MAP_DIRECTORY) {
-                    baseApplication.setMapDirectoryUri(resultData.getData());
-                    recreate();
-                } else if (requestCode == REQUEST_THEME_DIRECTORY) {
-                    baseApplication.setMapThemeDirectoryUri(resultData.getData());
-                    recreate();
-                }
-            }
-        }
+        openDirectory(themeDirectoryLauncher);
     }
 
     /**
@@ -538,9 +533,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private void runUpdateCountriesAndStations() {
         binding.map.progressBar.setVisibility(View.VISIBLE);
 
-        RSAPI.Helper.runUpdateCountriesAndStations(this, baseApplication, success -> {
-            reloadMap();
-        });
+        RSAPI.runUpdateCountriesAndStations(this, baseApplication, success -> reloadMap());
 
     }
 
@@ -564,7 +557,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         try {
             final Station station = dbAdapter.getStationByKey(country, id);
             intent.putExtra(DetailsActivity.EXTRA_STATION, station);
-            startActivityForResult(intent, 0); // workaround to handle backstack correctly in DetailsActivity
+            startActivity(intent);
         } catch (final RuntimeException e) {
             Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);
         }
@@ -600,9 +593,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             final List<Upload> uploadList = activityRef.get().readPendingUploads();
             final MapsActivity mapsActivity = activityRef.get();
             if (mapsActivity != null) {
-                mapsActivity.runOnUiThread(()-> {
-                    mapsActivity.onStationsLoaded(stationList, uploadList);
-                });
+                mapsActivity.runOnUiThread(()-> mapsActivity.onStationsLoaded(stationList, uploadList));
             }
         }
 
@@ -649,7 +640,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         paint1.setColor(Color.RED);
         markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), markerWithoutPhoto, bitmapWithPhoto, markerOwnPhoto,
                 markerWithoutPhotoInactive, markerWithPhotoInactive, markerOwnPhotoInactive, markerPendingUpload,
-                new Point(0, -(markerWithoutPhoto.getHeight()/2)), 10f, 1, paint1));
+                new Point(0, -(markerWithoutPhoto.getHeight()/2.0)), 10f, 1, paint1));
 
         // small cluster icon. for 10 or less items.
         final Bitmap bitmapBalloonSN = loadBitmap(R.drawable.balloon_s_n);
@@ -707,7 +698,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
 
         clusterer.redraw();
-        setProgressBarIndeterminateVisibility(false);
 
         if (myPos == null || (myPos.latitude == 0.0 && myPos.longitude == 0.0)) {
             myPos = new LatLong((minLat + maxLat) / 2, (minLon + maxLon) / 2);
@@ -722,11 +712,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             }
         }
         return false;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     @Override
@@ -792,17 +777,18 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     @Override
-    public void onProviderEnabled(final String provider) {
+    public void onProviderEnabled(@NonNull final String provider) {
 
     }
 
     @Override
-    public void onProviderDisabled(final String provider) {
+    public void onProviderDisabled(@NonNull final String provider) {
 
     }
 
     @Override
-    public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_FINE_LOCATION) {
             Log.i(TAG, "Received response for location permission request.");
 
@@ -902,9 +888,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     protected class BahnhofGeoItem implements GeoItem {
-        public Station station;
-        public LatLong latLong;
-        public boolean pendingUpload;
+        public final Station station;
+        public final LatLong latLong;
+        public final boolean pendingUpload;
 
         public BahnhofGeoItem(final Station station, final boolean pendingUpload) {
             this.station = station;

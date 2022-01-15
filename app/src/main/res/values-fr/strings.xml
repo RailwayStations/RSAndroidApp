@@ -57,7 +57,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Gares à proximité</string>
     <string name="station_is_near">La gare est proche</string>
     <string name="template_short_text" formatted="false">Gare %1$s dans %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Gare: %s1$\n distance: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Gare: %1$s\n distance: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Photo: ouvrir pour information sur la licence</string>
     <string name="nearby_notification_active">La notification des gares à proximité est activé</string>
     <string name="license_tag" formatted="false">Propriétaire: %s, %s</string>
@@ -105,7 +105,7 @@
     <string name="send">ENVOYER</string>
     <string name="logo_train">Petit logo de la locomotive</string>
     <string name="license_info_not_readable">Informations sur la licence actuellement non lisible</string>
-    <string name="last_update_at">Dernière mise à jour:</string>
+    <string name="last_update_at">Dernière mise à jour: %s</string>
     <string name="station_update_failed">Impossible de mettre à jour les gares :</string>
     <string name="select_picture">Sélectionner la Photo</string>
     <string name="grant_location_permission">Sans autorisation de localisation nous ne pouvons pas montrer votre emplacement actuel</string>

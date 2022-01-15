@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
+import androidx.annotation.NonNull;
+
 public class NavItem {
 
     public final String text;
@@ -11,6 +13,7 @@ public class NavItem {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return text;
     }

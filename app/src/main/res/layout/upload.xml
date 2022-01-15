@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
@@ -20,8 +19,7 @@
         android:id="@+id/sp_countries"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/et_comment">
-    </Spinner>
+        android:layout_below="@+id/et_comment"/>
 
     <CheckBox
         android:id="@+id/cb_special_license"
@@ -37,8 +35,7 @@
         android:id="@+id/sp_active"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/cb_special_license">
-    </Spinner>
+        android:layout_below="@+id/cb_special_license"/>
 
     <CheckBox
         android:id="@+id/cb_checksum"
@@ -61,6 +58,6 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:layout_below="@+id/cb_checksum" />
+        android:layout_below="@+id/cb_checksum"/>
 
 </RelativeLayout>

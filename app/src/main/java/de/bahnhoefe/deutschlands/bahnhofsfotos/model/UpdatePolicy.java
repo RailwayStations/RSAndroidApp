@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import java.util.Arrays;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 public enum UpdatePolicy {
@@ -18,22 +20,17 @@ public enum UpdatePolicy {
     }
 
     public static UpdatePolicy byId(final int id) {
-        for (final UpdatePolicy updatePolicy : values()) {
-            if (updatePolicy.getId() == id) {
-                return updatePolicy;
-            }
-        }
-        return NOTIFY;
+        return Arrays.stream(values())
+                .filter(updatePolicy -> updatePolicy.getId() == id)
+                .findFirst()
+                .orElse(NOTIFY);
     }
 
-
     public static UpdatePolicy byName(final String name) {
-        for (final UpdatePolicy updatePolicy : values()) {
-            if (updatePolicy.toString().equals(name)) {
-                return updatePolicy;
-            }
-        }
-        return NOTIFY;
+        return Arrays.stream(values())
+                .filter(updatePolicy -> updatePolicy.toString().equals(name))
+                .findFirst()
+                .orElse(NOTIFY);
     }
 
 }

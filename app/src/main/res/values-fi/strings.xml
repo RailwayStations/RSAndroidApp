@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Raportoi läheiset asemat</string>
     <string name="station_is_near">Asemat lähistöllä</string>
     <string name="template_short_text" formatted="false">Asema %1$s %2$.2f km päästä</string>
-    <string name="template_long_text" formatted="false">Asema: %s$1\nmatka: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Asema: %1$s\nmatka: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Kuva: avoinna lisenssitiedoille</string>
     <string name="nearby_notification_active">Ilmoitus läheisistä asemista on käytössä</string>
     <string name="license_tag" formatted="false">Omistaja: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">LÄHETÄ</string>
     <string name="logo_train">pieni veturin logo</string>
     <string name="license_info_not_readable">Lisenssitiedot eivät tällä hetkellä ole luettavissa</string>
-    <string name="last_update_at">Viimeksi päivitetty: </string>
+    <string name="last_update_at">Viimeksi päivitetty: %s</string>
     <string name="station_update_failed">Asemien päivittäminen epäonnistui:</string>
     <string name="select_picture">Valitse Kuva</string>
     <string name="grant_location_permission">Ilman sijaintilupaa emme voi näyttää nykyistä sijaintiasi</string>

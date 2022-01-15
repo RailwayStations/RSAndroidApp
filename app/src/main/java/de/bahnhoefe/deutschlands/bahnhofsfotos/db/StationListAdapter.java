@@ -25,8 +25,8 @@ public class StationListAdapter extends CursorAdapter {
 
     @Override
     public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-        final ItemStationBinding binding = ItemStationBinding.inflate(mInflater, parent, false);
-        final View view = binding.getRoot();
+        final var binding = ItemStationBinding.inflate(mInflater, parent, false);
+        final var view = binding.getRoot();
         view.setTag(binding);
         return view;
     }
@@ -40,10 +40,10 @@ public class StationListAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        final ItemStationBinding binding = (ItemStationBinding) view.getTag();
-        binding.txtState.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.COUNTRY)).concat(": ").concat(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.ID))));
-        binding.txtStationName.setText(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.TITLE)));
-        binding.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndex(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
+        final var binding = (ItemStationBinding) view.getTag();
+        binding.txtState.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.COUNTRY)).concat(": ").concat(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID))));
+        binding.txtStationName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.TITLE)));
+        binding.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
     }
 
 }

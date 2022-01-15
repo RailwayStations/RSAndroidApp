@@ -15,11 +15,9 @@
  */
 package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.view.View;
 import android.view.View.MeasureSpec;
 
@@ -38,8 +36,6 @@ public final class Utils {
      * @param view       the view to set the background on
      * @param background the background
      */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @SuppressWarnings("deprecation")
     public static void setBackground(final View view, final Drawable background) {
         view.setBackground(background);
     }
@@ -49,7 +45,7 @@ public final class Utils {
                 MeasureSpec.getSize(view.getMeasuredHeight()));
         view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
         view.setDrawingCacheEnabled(true);
-        final Drawable drawable = new BitmapDrawable(c.getResources(),
+        final var drawable = new BitmapDrawable(c.getResources(),
                 android.graphics.Bitmap.createBitmap(view.getDrawingCache()));
         view.setDrawingCacheEnabled(false);
         return AndroidGraphicFactory.convertToBitmap(drawable);

@@ -9,8 +9,9 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.MyDataActivity"
     tools:showIn="@layout/activity_mydata">
+
     <ScrollView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
@@ -18,288 +19,282 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-        <RelativeLayout
-            android:id="@+id/login_form"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/tvEmailOrNickname"
-                android:labelFor="@id/etEmailOrNickname"
-                android:text="@string/tvEmailOrNickname"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginEnd="10dp"
-                />
-            <EditText
+            <RelativeLayout
+                android:id="@+id/login_form"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/etEmailOrNickname"
-                android:layout_below="@+id/tvEmailOrNickname"
-                android:inputType="textEmailAddress"
-                android:layout_marginEnd="10dp"
-                android:importantForAutofill="no" />
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/tvPassword"
-                android:layout_below="@+id/etEmailOrNickname"
-                android:text="@string/tvPassword"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginEnd="10dp"
-                />
-            <EditText
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvEmailOrNickname"
+                    android:labelFor="@id/etEmailOrNickname"
+                    android:text="@string/tvEmailOrNickname"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="10dp"/>
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etEmailOrNickname"
+                    android:layout_below="@+id/tvEmailOrNickname"
+                    android:inputType="textEmailAddress"
+                    android:layout_marginEnd="10dp"
+                    android:importantForAutofill="no"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvPassword"
+                    android:layout_below="@+id/etEmailOrNickname"
+                    android:text="@string/tvPassword"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="10dp"/>
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etPassword"
+                    android:hint="@string/etPassword"
+                    android:inputType="textPassword"
+                    android:layout_below="@+id/tvPassword"
+                    android:layout_marginEnd="10dp"
+                    android:importantForAutofill="no"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bt_login"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/etPassword"
+                    android:text="@string/login"
+                    android:onClick="login"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bt_login_reset_password"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/bt_login"
+                    android:text="@string/bt_mydata_reset_password"
+                    android:onClick="resetPassword"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bt_register"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/bt_login_reset_password"
+                    android:text="@string/bt_new_register"
+                    android:onClick="newRegister"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/profile_form"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/etPassword"
-                android:hint="@string/etPassword"
-                android:inputType="textPassword"
-                android:layout_below="@+id/tvPassword"
-                android:layout_marginEnd="10dp"
-                android:importantForAutofill="no" />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/bt_login"
-                android:layout_marginTop="10dp"
-                android:layout_below="@+id/etPassword"
-                android:text="@string/login"
-                android:onClick="login"
-                />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/bt_login_reset_password"
-                android:layout_marginTop="10dp"
-                android:layout_below="@+id/bt_login"
-                android:text="@string/bt_mydata_reset_password"
-                android:onClick="resetPassword"
-                />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/bt_register"
-                android:layout_marginTop="10dp"
-                android:layout_below="@+id/bt_login_reset_password"
-                android:text="@string/bt_new_register"
-                android:onClick="newRegister"
-                />
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin">
 
-        </RelativeLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvEmail"
+                    android:labelFor="@id/etEmail"
+                    android:text="@string/tvEmail"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="10dp"/>
 
-    <RelativeLayout
-        android:id="@+id/profile_form"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvEmailVerification"
+                    android:text="@string/emailUnverified"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/emailUnverified"
+                    android:layout_marginEnd="10dp"
+                    android:layout_toEndOf="@id/tvEmail"
+                    android:layout_alignBottom="@id/tvEmail"
+                    android:onClick="requestEmailVerification"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvEmail"
-            android:labelFor="@id/etEmail"
-            android:text="@string/tvEmail"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginEnd="10dp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvEmailVerification"
-            android:text="@string/emailUnverified"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/emailUnverified"
-            android:layout_marginEnd="10dp"
-            android:layout_toEndOf="@id/tvEmail"
-            android:layout_alignBottom="@id/tvEmail"
-            android:onClick="requestEmailVerification"
-            />
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etEmail"
-            android:layout_below="@+id/tvEmail"
-            android:inputType="textEmailAddress"
-            android:layout_marginEnd="10dp"
-            android:importantForAutofill="no" />
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etEmail"
+                    android:layout_below="@+id/tvEmail"
+                    android:inputType="textEmailAddress"
+                    android:layout_marginEnd="10dp"
+                    android:importantForAutofill="no"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvNickname"
-            android:labelFor="@id/etNickname"
-            android:text="@string/tvNickname"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_below="@+id/etEmail"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvNickname"
+                    android:labelFor="@id/etNickname"
+                    android:text="@string/tvNickname"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_below="@+id/etEmail"/>
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etNickname"
-            android:layout_below="@+id/tvNickname"
-            android:importantForAutofill="no"
-            android:inputType="text" />
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etNickname"
+                    android:layout_below="@+id/tvNickname"
+                    android:importantForAutofill="no"
+                    android:inputType="text"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvLicence"
-            android:layout_below="@+id/etNickname"
-            android:text="@string/tvLicense"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvLicence"
-            android:layout_alignParentStart="true"
-            android:id="@+id/cbLicenseCC0"
-            android:layout_marginBottom="20dp"
-            android:text="@string/CC0"
-            android:onClick="selectLicense"
-            >
-        </CheckBox>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvOwnPhoto"
-            android:layout_below="@+id/cbLicenseCC0"
-            android:text="@string/tvOwnPhotos"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            />
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/cbOwnPhoto"
-            android:layout_below="@+id/tvOwnPhoto"
-            android:layout_marginBottom="20dp"
-            android:text="@string/yesPhotoOwner"
-            >
-        </CheckBox>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvAnonymous"
-            android:layout_below="@+id/cbOwnPhoto"
-            android:text="@string/tvAnonymous"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            />
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvAnonymous"
-            android:layout_alignParentStart="true"
-            android:id="@+id/cbAnonymous"
-            android:onClick="onAnonymousChecked"
-            android:layout_marginBottom="20dp"
-            android:text="@string/anonymous"
-            >
-        </CheckBox>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvLinking"
-            android:layout_below="@+id/cbAnonymous"
-            android:text="@string/tvLinking"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            />
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etLinking"
-            android:hint="@string/etLinking"
-            android:layout_below="@+id/tvLinking"
-            android:importantForAutofill="no"
-            android:inputType="textUri" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvLicence"
+                    android:layout_below="@+id/etNickname"
+                    android:text="@string/tvLicense"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/initPasswordLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/etLinking"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/tvInitPassword"
-                android:text="@string/tvPassword"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginEnd="10dp"
-                />
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/etInitPassword"
-                android:hint="@string/etPassword"
-                android:inputType="textPassword"
-                android:layout_marginEnd="10dp"
-                android:importantForAutofill="no" />
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/etInitPasswordRepeat"
-                android:hint="@string/initPasswordRepeat"
-                android:inputType="textPassword"
-                android:layout_marginEnd="10dp"
-                android:importantForAutofill="no" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
+                <CheckBox
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvLicence"
+                    android:layout_alignParentStart="true"
+                    android:id="@+id/cbLicenseCC0"
+                    android:layout_marginBottom="20dp"
+                    android:text="@string/CC0"
+                    android:onClick="selectLicense"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btProfileSave"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/initPasswordLayout"
-            android:text="@string/bt_register"
-            android:onClick="registerOrSave"
-            />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvOwnPhoto"
+                    android:layout_below="@+id/cbLicenseCC0"
+                    android:text="@string/tvOwnPhotos"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_logout"
-            android:layout_marginTop="10dp"
-            android:layout_toEndOf="@+id/btProfileSave"
-            android:layout_below="@+id/etLinking"
-            android:text="@string/bt_logout"
-            android:onClick="logout"
-            />
+                <CheckBox
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/cbOwnPhoto"
+                    android:layout_below="@+id/tvOwnPhoto"
+                    android:layout_marginBottom="20dp"
+                    android:text="@string/yesPhotoOwner"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bt_changePassword"
-            android:layout_marginTop="10dp"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/btProfileSave"
-            android:text="@string/bt_change_password"
-            android:onClick="changePassword"
-            />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvAnonymous"
+                    android:layout_below="@+id/cbOwnPhoto"
+                    android:text="@string/tvAnonymous"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
 
-    </RelativeLayout>
+                <CheckBox
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvAnonymous"
+                    android:layout_alignParentStart="true"
+                    android:id="@+id/cbAnonymous"
+                    android:onClick="onAnonymousChecked"
+                    android:layout_marginBottom="20dp"
+                    android:text="@string/anonymous"/>
 
-    </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvLinking"
+                    android:layout_below="@+id/cbAnonymous"
+                    android:text="@string/tvLinking"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
 
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etLinking"
+                    android:hint="@string/etLinking"
+                    android:layout_below="@+id/tvLinking"
+                    android:importantForAutofill="no"
+                    android:inputType="textUri"/>
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/initPasswordLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/etLinking"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/tvInitPassword"
+                        android:text="@string/tvPassword"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="10dp"/>
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/etInitPassword"
+                        android:hint="@string/etPassword"
+                        android:inputType="textPassword"
+                        android:layout_marginEnd="10dp"
+                        android:importantForAutofill="no"/>
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/etInitPasswordRepeat"
+                        android:hint="@string/initPasswordRepeat"
+                        android:inputType="textPassword"
+                        android:layout_marginEnd="10dp"
+                        android:importantForAutofill="no"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btProfileSave"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/initPasswordLayout"
+                    android:text="@string/bt_register"
+                    android:onClick="registerOrSave"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bt_logout"
+                    android:layout_marginTop="10dp"
+                    android:layout_toEndOf="@+id/btProfileSave"
+                    android:layout_below="@+id/etLinking"
+                    android:text="@string/bt_logout"
+                    android:onClick="logout"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bt_changePassword"
+                    android:layout_marginTop="10dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_below="@+id/btProfileSave"
+                    android:text="@string/bt_change_password"
+                    android:onClick="changePassword"/>
+
+            </RelativeLayout>
+        </LinearLayout>
     </ScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

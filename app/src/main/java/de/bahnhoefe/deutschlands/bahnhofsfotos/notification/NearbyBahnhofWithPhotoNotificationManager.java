@@ -1,15 +1,13 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
 
-import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.NotificationCompat;
 
 import java.util.Set;
@@ -25,6 +23,8 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
 
     private static final long[] VIBRATION_PATTERN = new long[]{300};
     private static final int LED_COLOR = 0x00ff0000;
+    public static final int BITMAP_HEIGHT = 400;
+    public static final int BITMAP_WIDTH = 400;
 
     public NearbyBahnhofWithPhotoNotificationManager(final Context context, final Station station, final double distance, final Set<Country> countries) {
         super(context, station, distance, countries);
@@ -62,28 +62,12 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
             bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(notificationStation.getLicense());
         }
 
-        final Notification fullImagePage = new NotificationCompat.Builder(context)
+        final var notificationBuilder = getBasicNotificationBuilder()
                 .setStyle(bigPictureStyle)
-                .extend(new NotificationCompat.WearableExtender()
-                        .setHintShowBackgroundOnly(true)
-                        .setHintScreenTimeout(NotificationCompat.WearableExtender.SCREEN_TIMEOUT_LONG))
-                .build();
-
-        final NotificationCompat.WearableExtender wearableExtender =
-                new NotificationCompat.WearableExtender()
-                        .setHintHideIcon(true)
-                        .setBackground(bitmap)
-                        .addPage(fullImagePage);
-
-        final NotificationCompat.Builder notificationBuilder = getBasicNotificationBuilder();
-
-        // apply our specifics
-        notificationBuilder
-                .extend(wearableExtender)
+                .extend(new NotificationCompat.WearableExtender())
                 .setVibrate(VIBRATION_PATTERN)
                 .setColor(LED_COLOR);
 
-        // ...and we're done!
         onNotificationReady(notificationBuilder.build());
     }
 
@@ -94,12 +78,11 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      * @return the Bitmap. May be null.
      */
     private Bitmap getBitmapFromResource(final int id) {
-        final Drawable vectorDrawable = context.getDrawable(id);
-        final int h = 400;
-        final int w = 400;
-        vectorDrawable.setBounds(0, 0, w, h);
-        final Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        final Canvas canvas = new Canvas(bm);
+        final var vectorDrawable = AppCompatResources.getDrawable(context, id);
+        assert vectorDrawable != null;
+        vectorDrawable.setBounds(0, 0, BITMAP_WIDTH, BITMAP_HEIGHT);
+        final var bm = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
+        final var canvas = new Canvas(bm);
         canvas.drawColor(Color.WHITE);
         vectorDrawable.draw(canvas);
         return bm;

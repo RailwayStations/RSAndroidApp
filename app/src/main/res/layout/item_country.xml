@@ -16,31 +16,29 @@
         android:focusable="false"
         android:gravity="center_vertical"/>
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/txtCountryShortCode"
         android:gravity="center_vertical"
-        android:text="DE"
-        android:textAlignment="center"
+        android:textAlignment="gravity"
         android:textStyle="bold"
-        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="60dp" />
+        android:layout_marginStart="60dp"
+        tools:text="DE"/>
 
     <TextView
+        android:id="@+id/txtCountryName"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:gravity="center_vertical"
-        android:id="@+id/txtCountryName"
-        android:text="CountryName"
-        android:textStyle="bold"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="20dp"
-        android:layout_toRightOf="@+id/txtCountryShortCode"
-         />
+        android:layout_marginStart="20dp"
+        android:layout_toEndOf="@+id/txtCountryShortCode"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"
+        tools:text="CountryName" />
 
 </RelativeLayout>

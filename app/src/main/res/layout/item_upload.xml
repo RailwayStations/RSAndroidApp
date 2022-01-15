@@ -33,7 +33,7 @@
         android:id="@+id/uploadType"
         android:src="@drawable/ic_photo_gray_48px"
         android:layout_alignParentEnd="true"
-        />
+        android:contentDescription="@string/upload_type" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -41,8 +41,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/txtComment"
         android:layout_alignParentStart="true"
-        android:layout_below="@id/txtStationName"
-        />
+        android:layout_below="@id/txtStationName"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -51,7 +50,6 @@
         android:id="@+id/txtRejectReason"
         android:textColor="@color/gridItemError"
         android:layout_alignParentStart="true"
-        android:layout_below="@id/txtComment"
-        />
+        android:layout_below="@id/txtComment"/>
 
 </RelativeLayout>

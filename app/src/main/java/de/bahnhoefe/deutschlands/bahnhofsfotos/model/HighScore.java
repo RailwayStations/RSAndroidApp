@@ -9,10 +9,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HighScore {
 
-    private List<HighScoreItem> items = new ArrayList<>();
+    private final List<HighScoreItem> items = new ArrayList<>();
 
     public List<HighScoreItem> getItems() {
         return items;
@@ -22,21 +23,24 @@ public class HighScore {
     public static class HighScoreDeserializer implements JsonDeserializer<HighScore> {
         public HighScore deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
                 throws JsonParseException {
-            final HighScore highScore = new HighScore();
+            final var highScore = new HighScore();
 
-            int position = 0;
-            int lastPhotos = 0;
-            for (final Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
-                final String name = entry.getKey();
-                final int photos = entry.getValue().getAsInt();
-                if (lastPhotos == 0 || lastPhotos > photos) {
-                    position++;
-                }
-                lastPhotos = photos;
-                highScore.getItems().add(new HighScoreItem(name, photos, position));
-            }
+            final AtomicInteger position = new AtomicInteger(0);
+            final AtomicInteger lastPhotos = new AtomicInteger(0);
+            json.getAsJsonObject().entrySet().stream()
+                    .map(entry -> toHighScoreItem(position, lastPhotos, entry))
+                    .forEach(highScore.items::add);
 
             return highScore;
+        }
+
+        private HighScoreItem toHighScoreItem(final AtomicInteger position, final AtomicInteger lastPhotos, final Map.Entry<String, JsonElement> entry) {
+            final int photos = entry.getValue().getAsInt();
+            if (lastPhotos.get() == 0 || lastPhotos.get() > photos) {
+                position.incrementAndGet();
+            }
+            lastPhotos.set(photos);
+            return new HighScoreItem(entry.getKey(), photos, position.get());
         }
     }
 

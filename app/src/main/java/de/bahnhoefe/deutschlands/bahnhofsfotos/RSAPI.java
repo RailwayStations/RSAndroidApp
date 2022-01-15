@@ -3,12 +3,11 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
@@ -33,6 +32,8 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface RSAPI {
+
+    String TAG = RSAPI.class.getSimpleName();
 
     @GET("/stations")
     Call<List<Station>> getStations(@Query("country") String... countries);
@@ -100,50 +101,47 @@ public interface RSAPI {
     @POST("/resendEmailVerification")
     Call<Void> resendEmailVerification(@Header("Authorization") String authorization);
 
-    class Helper {
-        private static final String TAG = Helper.class.getSimpleName();
+    static String getAuthorizationHeader(final String email, final String password) {
+        final byte[] data = (email + ":" + password).getBytes(StandardCharsets.UTF_8);
+        return "Basic " + Base64.encodeToString(data, Base64.NO_WRAP);
+    }
 
-        static String getAuthorizationHeader(final String email, final String password) {
-            final byte[] data = (email + ":" + password).getBytes(StandardCharsets.UTF_8);
-            return "Basic " + Base64.encodeToString(data, Base64.NO_WRAP);
-        }
-
-        static void runUpdateCountriesAndStations(final Context context, final BaseApplication baseApplication, final ResultListener listener) {
-            final RSAPI rsapi = baseApplication.getRSAPI();
-            rsapi.getCountries().enqueue(new Callback<List<Country>>() {
-                @Override
-                public void onResponse(final Call<List<Country>> call, final Response<List<Country>> response) {
-                    if (response.isSuccessful()) {
-                        baseApplication.getDbAdapter().insertCountries(response.body());
-                    }
+    static void runUpdateCountriesAndStations(final Context context, final BaseApplication baseApplication, final ResultListener listener) {
+        final RSAPI rsapi = baseApplication.getRSAPI();
+        rsapi.getCountries().enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull final Call<List<Country>> call, @NonNull final Response<List<Country>> response) {
+                final var body = response.body();
+                if (response.isSuccessful() && body != null) {
+                    baseApplication.getDbAdapter().insertCountries(body);
                 }
+            }
 
-                @Override
-                public void onFailure(final Call<List<Country>> call, final Throwable t) {
-                    Log.e(TAG, "Error refreshing countries", t);
-                    Toast.makeText(context, context.getString(R.string.error_updating_countries) + t.getMessage(), Toast.LENGTH_LONG).show();
+            @Override
+            public void onFailure(@NonNull final Call<List<Country>> call, @NonNull final Throwable t) {
+                Log.e(TAG, "Error refreshing countries", t);
+                Toast.makeText(context, context.getString(R.string.error_updating_countries) + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull final Call<List<Station>> call, @NonNull final Response<List<Station>> response) {
+                final List<Station> stationList = response.body();
+                if (response.isSuccessful() && stationList != null) {
+                    baseApplication.getDbAdapter().insertStations(stationList, baseApplication.getCountryCodes());
+                    baseApplication.setLastUpdate(System.currentTimeMillis());
                 }
-            });
+                listener.onResult(response.isSuccessful());
+            }
 
-            rsapi.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<List<Station>>() {
-                @Override
-                public void onResponse(final Call<List<Station>> call, final Response<List<Station>> response) {
-                    if (response.isSuccessful()) {
-                        baseApplication.getDbAdapter().insertStations(response.body(), baseApplication.getCountryCodes());
-                        baseApplication.setLastUpdate(System.currentTimeMillis());
-                    }
-                    listener.onResult(response.isSuccessful());
-                }
-
-                @Override
-                public void onFailure(final Call<List<Station>> call, final Throwable t) {
-                    Log.e(TAG, "Error refreshing stations", t);
-                    Toast.makeText(context, context.getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
-                    listener.onResult(false);
-                }
-            });
-
-        }
+            @Override
+            public void onFailure(@NonNull final Call<List<Station>> call, @NonNull final Throwable t) {
+                Log.e(TAG, "Error refreshing stations", t);
+                Toast.makeText(context, context.getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
+                listener.onResult(false);
+            }
+        });
 
     }
 

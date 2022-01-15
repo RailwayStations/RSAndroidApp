@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 
@@ -68,9 +69,9 @@ public class HighScoreActivity extends AppCompatActivity {
 
     private void loadHighScore(final BaseApplication baseApplication, final Country selectedCountry) {
         final Call<HighScore> highScoreCall = selectedCountry.getCode().isEmpty() ? baseApplication.getRSAPI().getHighScore() : baseApplication.getRSAPI().getHighScore(selectedCountry.getCode());
-        highScoreCall.enqueue(new Callback<HighScore>() {
+        highScoreCall.enqueue(new Callback<>() {
             @Override
-            public void onResponse(final Call<HighScore> call, final Response<HighScore> response) {
+            public void onResponse(@NonNull final Call<HighScore> call, @NonNull final Response<HighScore> response) {
                 if (response.isSuccessful()) {
                     adapter = new HighScoreAdapter(HighScoreActivity.this, response.body().getItems());
                     binding.highscoreList.setAdapter(adapter);
@@ -86,7 +87,7 @@ public class HighScoreActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(final Call<HighScore> call, final Throwable t) {
+            public void onFailure(@NonNull final Call<HighScore> call, @NonNull final Throwable t) {
                 Log.e(TAG, "Error loading highscore", t);
                 Toast.makeText(getBaseContext(), getString(R.string.error_loading_highscore) + t.getMessage(), Toast.LENGTH_LONG).show();
             }

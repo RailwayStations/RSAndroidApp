@@ -1,7 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
 
 import android.app.Activity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -11,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemHighscoreBinding;
@@ -28,20 +28,20 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
     }
 
     @Override
+    @NonNull
     public View getView(final int position, final View convertView, @NonNull final ViewGroup parent) {
-        View rowView = convertView;
+        var rowView = convertView;
         // reuse views
         final ItemHighscoreBinding binding;
         if (rowView == null) {
-            final LayoutInflater inflater = context.getLayoutInflater();
-            binding = ItemHighscoreBinding.inflate(inflater, parent, false);
+            binding = ItemHighscoreBinding.inflate(context.getLayoutInflater(), parent, false);
             rowView = binding.getRoot();
             rowView.setTag(binding);
         } else {
             binding = (ItemHighscoreBinding) rowView.getTag();
         }
 
-        final HighScoreItem item = highScore.get(position);
+        final var item = highScore.get(position);
         binding.highscoreName.setText(item.getName());
         binding.highscorePhotos.setText(String.valueOf(item.getPhotos()));
         binding.highscorePosition.setText(String.valueOf(item.getPosition()).concat("."));
@@ -96,19 +96,14 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
 
         @Override
         protected FilterResults performFiltering(final CharSequence constraint) {
-            final FilterResults filterResults = new FilterResults();
-            final ArrayList<HighScoreItem> tempList = new ArrayList<>();
+            final var filterResults = new FilterResults();
 
             if (constraint != null) {
-                final String search = constraint.toString().toLowerCase();
-                final int length = originalItems.size();
-                int i = 0;
-                while (i<length) {
-                    final HighScoreItem item = originalItems.get(i);
-                    if (item.getName().toLowerCase().contains(search))
-                    tempList.add(item);
-                    i++;
-                }
+                final var search = constraint.toString().toLowerCase();
+                final var tempList = originalItems.stream()
+                        .filter(item -> item.getName().toLowerCase().contains(search))
+                        .collect(Collectors.toList());
+
                 filterResults.values = tempList;
                 filterResults.count = tempList.size();
             }

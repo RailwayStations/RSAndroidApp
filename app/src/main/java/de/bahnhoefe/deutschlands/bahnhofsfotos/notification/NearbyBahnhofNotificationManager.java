@@ -8,7 +8,6 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,7 +44,7 @@ public abstract class NearbyBahnhofNotificationManager {
     /**
      * The distance of the Bahnhof about which a notification is being built.
      */
-    protected double notificationDistance;
+    protected final double notificationDistance;
 
     /**
      * The Android Context for which the notification is generated.
@@ -73,8 +72,6 @@ public abstract class NearbyBahnhofNotificationManager {
 
     /**
      * Called back once the notification was built up ready.
-     *
-     * @param notification
      */
     protected void onNotificationReady(final Notification notification) {
         if (context == null) {
@@ -92,27 +89,23 @@ public abstract class NearbyBahnhofNotificationManager {
     /**
      * Helper method that configures a NotificationBuilder wtih the elements common to both
      * notification types.
-     *
-     * @return
      */
     protected NotificationCompat.Builder getBasicNotificationBuilder() {
         // Build an intent for an action to see station details
-        final PendingIntent detailPendingIntent = getDetailPendingIntent();
+        final var detailPendingIntent = getDetailPendingIntent();
         // Build an intent to see the station on a map
-        final PendingIntent mapPendingIntent = getMapPendingIntent();
+        final var mapPendingIntent = getMapPendingIntent();
         // Build an intent to view the station's timetable
-        final PendingIntent timetablePendingIntent = getTimetablePendingIntent(Country.getCountryByCode(countries, notificationStation.getCountry()), notificationStation);
-        // Build an intent to launch the DB Bahnhöfe Live app
-        final PendingIntent stationPendingIntent = getStationPendingIntent();
+        final var timetablePendingIntent = getTimetablePendingIntent(Country.getCountryByCode(countries, notificationStation.getCountry()), notificationStation);
 
         createChannel(context);
 
         // Texts and bigStyle
-        final TextCreator textCreator = new TextCreator().invoke();
-        final String shortText = textCreator.getShortText();
-        final NotificationCompat.BigTextStyle bigStyle = textCreator.getBigStyle();
+        final var textCreator = new TextCreator().invoke();
+        final var shortText = textCreator.getShortText();
+        final var bigStyle = textCreator.getBigStyle();
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+        var builder = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_logotrain_found)
             .setContentTitle(context.getString(R.string.station_is_near))
             .setContentText(shortText)
@@ -121,19 +114,14 @@ public abstract class NearbyBahnhofNotificationManager {
                     context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
             .setStyle(bigStyle)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOnlyAlertOnce(true);
-
-        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            .setOnlyAlertOnce(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         if (timetablePendingIntent != null) {
             builder.addAction(R.drawable.ic_timetable,
                     context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_timetable),
                     timetablePendingIntent);
         }
-        // @todo aktivieren, sobald ein wirklich funktionierende Intent gefunden ist
-            /*builder.addAction(R.drawable.ic_timetable,
-                    "Bahnhofsinfos",
-                    stationPendingIntent);*/
 
         builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_logotrain_found)
@@ -145,25 +133,20 @@ public abstract class NearbyBahnhofNotificationManager {
                 .addAction(R.drawable.ic_timetable, context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_timetable), timetablePendingIntent)
                 .setStyle(bigStyle)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true);
-
-        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+                .setOnlyAlertOnce(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         return builder;
     }
 
     public static void createChannel(final Context context) {
-        final CharSequence name = context.getString(R.string.channel_name);// The user-visible name of the channel.
-        final NotificationManager mNotificationManager =
+        final var notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            final NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
-            mNotificationManager.createNotificationChannel(mChannel);
-        }
+        notificationManager.createNotificationChannel(new NotificationChannel(CHANNEL_ID, context.getString(R.string.channel_name), NotificationManager.IMPORTANCE_DEFAULT));
     }
 
     protected PendingIntent pendifyMe(final Intent intent, final int requestCode) {
-        final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        final var stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntent(intent);
         try {
             stackBuilder.addNextIntentWithParentStack(intent); // syntesize a back stack from the parent information in manifest
@@ -178,7 +161,7 @@ public abstract class NearbyBahnhofNotificationManager {
     @NonNull
     protected Intent getDetailIntent() {
         // Build an intent for an action to see station details
-        final Intent detailIntent = new Intent(context, DetailsActivity.class);
+        final var detailIntent = new Intent(context, DetailsActivity.class);
         detailIntent.putExtra(DetailsActivity.EXTRA_STATION, notificationStation);
         return detailIntent;
     }
@@ -194,10 +177,8 @@ public abstract class NearbyBahnhofNotificationManager {
      * @return the PendingIntent built.
      */
     protected PendingIntent getMapPendingIntent() {
-        //
-        final Intent mapIntent = new Intent(Intent.ACTION_VIEW);
-        final Uri geoUri = Uri.parse("geo:" + notificationStation.getLat() + "," + notificationStation.getLon());
-        mapIntent.setData(geoUri);
+        final var mapIntent = new Intent(Intent.ACTION_VIEW);
+        mapIntent.setData(Uri.parse("geo:" + notificationStation.getLat() + "," + notificationStation.getLon()));
         return pendifyMe(mapIntent, REQUEST_MAP);
     }
 
@@ -209,7 +190,7 @@ public abstract class NearbyBahnhofNotificationManager {
     protected
     @Nullable
     PendingIntent getTimetablePendingIntent(final Country country, final Station station) {
-        final Intent timetableIntent = new Timetable().createTimetableIntent(country, station);
+        final var timetableIntent = new Timetable().createTimetableIntent(country, station);
         if (timetableIntent != null) {
             return pendifyMe(timetableIntent, NearbyBahnhofNotificationManager.REQUEST_TIMETABLE);
         }
@@ -224,16 +205,14 @@ public abstract class NearbyBahnhofNotificationManager {
     @NonNull
     protected PendingIntent getStationPendingIntent() {
         // Build an intent for an action to see station details
-        final Intent stationIntent = new Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS);
+        final var stationIntent = new Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS);
         stationIntent.putExtra(DetailsActivity.EXTRA_STATION, notificationStation);
         return pendifyMe(stationIntent, REQUEST_STATION);
     }
 
 
     public void destroy() {
-        final NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(context);
-        notificationManager.cancel(NOTIFICATION_ID);
+        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
         notificationStation = null;
         context = null;
     }
@@ -255,11 +234,8 @@ public abstract class NearbyBahnhofNotificationManager {
         }
 
         public TextCreator invoke() {
-            final String shortTextTemplate = context.getString(R.string.template_short_text);
-            final String longTextTemplate = context.getString(R.string.template_long_text);
-
-            shortText = String.format(shortTextTemplate, notificationStation.getTitle(), notificationDistance);
-            final String longText = String.format(longTextTemplate,
+            shortText = context.getString(R.string.template_short_text, notificationStation.getTitle(), notificationDistance);
+            final String longText = context.getString(R.string.template_long_text,
                     notificationStation.getTitle(),
                     notificationDistance,
                     (notificationStation.hasPhoto() ?

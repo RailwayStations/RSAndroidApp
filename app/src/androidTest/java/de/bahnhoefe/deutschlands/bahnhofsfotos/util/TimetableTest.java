@@ -1,6 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
-import android.content.Intent;
 import androidx.test.filters.MediumTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -29,26 +28,23 @@ public class TimetableTest {
 
     @Test
     public void createTimetableIntentWithId() {
-        Country country = new Country();
+        final Country country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{id}/blah");
-        Intent intent = new Timetable().createTimetableIntent( country, station);
-        assertEquals("https://example.com/4711/blah", intent.getData().toString());
+        assertEquals("https://example.com/4711/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
     }
 
     @Test
     public void createTimetableIntentWithTitle() {
-        Country country = new Country();
+        final Country country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{title}/blah");
-        Intent intent = new Timetable().createTimetableIntent( country, station);
-        assertEquals("https://example.com/Some Famous Station/blah", intent.getData().toString());
+        assertEquals("https://example.com/Some Famous Station/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
     }
 
     @Test
     public void createTimetableIntentWithDS100() {
-        Country country = new Country();
+        final Country country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{DS100}/blah");
-        Intent intent = new Timetable().createTimetableIntent( country, station);
-        assertEquals("https://example.com/LOL/blah", intent.getData().toString());
+        assertEquals("https://example.com/LOL/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
     }
 
 }

@@ -20,17 +20,16 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 public class CountryAdapter extends CursorAdapter {
     private final LayoutInflater mInflater;
     private final String TAG = getClass().getSimpleName();
-    private Set<String> selectedCountries = null;
+    private final Set<String> selectedCountries;
 
     public CountryAdapter(final Context context, final Cursor c, final int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final BaseApplication baseApplication = BaseApplication.getInstance();
-        selectedCountries = new HashSet<>(baseApplication.getCountryCodes());
+        selectedCountries = new HashSet<>(BaseApplication.getInstance().getCountryCodes());
     }
 
     // new refactored after https://www.youtube.com/watch?v=wDBM6wVEO70&feature=youtu.be&t=7m
-    public View getView(final int selectedPosition, View convertView, final ViewGroup parent, final Cursor cursor) {
+    public void getView(final int selectedPosition, View convertView, final ViewGroup parent, final Cursor cursor) {
         final ItemCountryBinding binding;
         if (convertView == null) {
             binding = ItemCountryBinding.inflate(mInflater, parent, false);
@@ -48,10 +47,10 @@ public class CountryAdapter extends CursorAdapter {
             binding = (ItemCountryBinding) convertView.getTag();
         }
 
-        binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE)));
-        binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYNAME)));
+        binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)));
+        binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
 
-        final String newCountry = cursor.getString(1);
+        final var newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
         if (selectedCountries.contains(newCountry)) {
             binding.checkCountry.setChecked(false);
@@ -61,13 +60,12 @@ public class CountryAdapter extends CursorAdapter {
             selectedCountries.add(newCountry);
         }
 
-        return convertView;
     }
 
     @Override
     public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-        final ItemCountryBinding binding = ItemCountryBinding.inflate(mInflater, parent, false);
-        final View view = binding.getRoot();
+        final var binding = ItemCountryBinding.inflate(mInflater, parent, false);
+        final var view = binding.getRoot();
         view.setTag(binding);
         return view;
     }
@@ -82,9 +80,9 @@ public class CountryAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        final ItemCountryBinding binding = (ItemCountryBinding) view.getTag();
-        binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE)));
-        binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYNAME)));
+        final var binding = (ItemCountryBinding) view.getTag();
+        binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)));
+        binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
 
         final String newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
@@ -94,8 +92,8 @@ public class CountryAdapter extends CursorAdapter {
 
     private View.OnClickListener onStateChangedListener(final CheckBox checkCountry, final int position) {
         return v -> {
-            final Cursor cursor = (Cursor) getItem(position);
-            final String country = cursor.getString(cursor.getColumnIndex(Constants.COUNTRIES.COUNTRYSHORTCODE));
+            final var cursor = (Cursor) getItem(position);
+            final var country = cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE));
             if (checkCountry.isChecked()) {
                 selectedCountries.add(country);
             } else {

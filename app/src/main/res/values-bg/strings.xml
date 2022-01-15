@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Съобщете за близките станции</string>
     <string name="station_is_near">Станции в близост</string>
     <string name="template_short_text" formatted="false">Станция %1$s на %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Станция: %s$1\nразстояние: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Станция: %1$s\nразстояние: %2$.2f km\n%3$s</string>
     <string name="photo_exists">Снимка: open for license info</string>
     <string name="nearby_notification_active">Известието за близките станции е активно</string>
     <string name="license_tag" formatted="false">Владетел: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">ИЗПРАТИ</string>
     <string name="logo_train">лого на малък локомотив</string>
     <string name="license_info_not_readable">Информация за лиценза в момента не може да се чете</string>
-    <string name="last_update_at">Последна актуализация на: </string>
+    <string name="last_update_at">Последна актуализация на: %s</string>
     <string name="station_update_failed">Не успя да актуализира станциите:</string>
     <string name="select_picture">Изберете снимка</string>
     <string name="grant_location_permission">Без разрешение за местоположение не можем да покажем текущата ви позиция</string>

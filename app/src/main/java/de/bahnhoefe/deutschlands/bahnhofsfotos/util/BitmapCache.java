@@ -31,14 +31,14 @@ public class BitmapCache {
     public static BitmapCache getInstance() {
         synchronized (BitmapCache.class) {
             if (instance == null) {
-                instance = new BitmapCache(10);
+                instance = new BitmapCache();
             }
             return instance;
         }
     }
 
-    private BitmapCache(final int capacity) {
-        cache = new HashMap<>(capacity);
+    private BitmapCache() {
+        cache = new HashMap<>(10);
         requests = new HashMap<>(3);
     }
 
@@ -67,13 +67,11 @@ public class BitmapCache {
 
             // inform all requestors about the available image
             synchronized (requests) {
-                final Collection<BitmapAvailableHandler> handlers = requests.remove(url);
+                final var handlers = requests.remove(url);
                 if (handlers == null) {
                     Log.wtf(TAG, "Request result without a saved requestor. This should never happen.");
                 } else {
-                    for (final BitmapAvailableHandler handler : handlers) {
-                        handler.onBitmapAvailable(bitmap);
-                    }
+                    handlers.forEach(handler -> handler.onBitmapAvailable(bitmap));
                 }
             }
         }
@@ -103,13 +101,11 @@ public class BitmapCache {
      * @param resourceUrl the URL to fetch
      */
     public void getFoto(final BitmapAvailableHandler callback, @NonNull final URL resourceUrl) {
-        final Bitmap bitmap = cache.get(resourceUrl);
+        final var bitmap = cache.get(resourceUrl);
         if (bitmap == null) {
-            final BitmapDownloader downloader = new BitmapDownloader(
-                    new Request(resourceUrl),
-                    resourceUrl);
+            final var downloader = new BitmapDownloader(new Request(resourceUrl), resourceUrl);
             synchronized (requests) {
-                Collection<BitmapAvailableHandler> handlers = requests.get(resourceUrl);
+                var handlers = requests.get(resourceUrl);
                 if (handlers == null) {
                     handlers = new ArrayList<>();
                     handlers.add(callback);

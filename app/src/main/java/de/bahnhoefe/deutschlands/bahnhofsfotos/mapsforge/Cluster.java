@@ -17,7 +17,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 
 import org.mapsforge.core.model.LatLong;
-import org.mapsforge.map.layer.Layers;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +38,7 @@ public class Cluster<T extends GeoItem> {
     /**
      * List of GeoItem within cluster
      */
-    private final List<T> items = Collections.synchronizedList(new ArrayList<T>());
+    private final List<T> items = Collections.synchronizedList(new ArrayList<>());
     /**
      * ClusterMarker object
      */
@@ -50,7 +49,7 @@ public class Cluster<T extends GeoItem> {
      */
     public Cluster(final ClusterManager<T> clusterManager, final T item) {
         this.clusterManager = clusterManager;
-        this.clusterMarker = new ClusterMarker<T>(this);
+        this.clusterMarker = new ClusterMarker<>(this);
         addItem(item);
     }
 
@@ -62,13 +61,7 @@ public class Cluster<T extends GeoItem> {
         if (getItems().size() == 1) {
             return getItems().get(0).getTitle();
         }
-        int photoCount = 0;
-        for (final T item: items) {
-            if (item.hasPhoto()) {
-                photoCount++;
-            }
-        }
-        return photoCount + "/" + getItems().size();
+        return items.stream().filter(GeoItem::hasPhoto).count() + "/" + getItems().size();
     }
 
     /**
@@ -128,7 +121,7 @@ public class Cluster<T extends GeoItem> {
      */
     public void clear() {
         if (clusterMarker != null) {
-            final Layers mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
+            final var mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
             if (mapOverlays.contains(clusterMarker)) {
                 mapOverlays.remove(clusterMarker);
             }
@@ -144,7 +137,7 @@ public class Cluster<T extends GeoItem> {
      * add the ClusterMarker to the Layers if is within Viewport, otherwise remove.
      */
     public void redraw() {
-        final Layers mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
+        final var mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
         if (clusterMarker != null && center != null
                 && clusterManager.getCurBounds() != null
                 && !clusterManager.getCurBounds().contains(center)

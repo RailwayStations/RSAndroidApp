@@ -39,16 +39,13 @@ import com.google.android.material.navigation.NavigationView;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.AppInfoFragment;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.Dialogs.StationFilterBar;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.AppInfoFragment;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.StationFilterBar;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMainBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
@@ -109,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         final long lastUpdateDate = baseApplication.getLastUpdate();
         if (lastUpdateDate > 0) {
-            tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(lastUpdateDate));
+            tvUpdate.setText(getString(R.string.last_update_at, SimpleDateFormat.getDateTimeInstance().format(lastUpdateDate)));
         } else {
             tvUpdate.setText(R.string.no_stations_in_database);
         }
@@ -181,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 binding.appBarMain.main.lstStations.setOnItemClickListener((listview, view, position, id) -> {
                     final Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
                     intentDetails.putExtra(DetailsActivity.EXTRA_STATION, dbAdapter.fetchStationByRowId(id));
-                    startActivityForResult(intentDetails, 0);
+                    startActivity(intentDetails);
                 });
             }
             binding.appBarMain.main.filterResult.setText(getString(R.string.filter_result, stationListAdapter.getCount(), stationCount));
@@ -197,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         // necessary for the update policy submenu
         item.setChecked(!item.isChecked());
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.rb_update_manual) {
             baseApplication.setUpdatePolicy(UpdatePolicy.MANUAL);
         } else if (id == R.id.rb_update_automatic) {
@@ -205,27 +201,29 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         } else if (id == R.id.rb_update_notify) {
             baseApplication.setUpdatePolicy(UpdatePolicy.NOTIFY);
         } else if (id == R.id.apiUrl) {
-            new SimpleDialogs().prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
-                try {
-                    if (StringUtils.isEmpty(v)) {
-                        baseApplication.setApiUrl(null); // set to default
-                        baseApplication.setLastUpdate(0);
-                        recreate();
-                    } else {
-                        if (!Uri.parse(v).getScheme().matches("https?")) {
-                            throw new IllegalArgumentException("Only http(s) URIs are allowed");
-                        }
-                        baseApplication.setApiUrl(v);
-                        baseApplication.setLastUpdate(0);
-                        recreate();
-                    }
-                } catch (final Exception e) {
-                    Toast.makeText(getBaseContext(), getString(R.string.invalid_api_url), Toast.LENGTH_LONG).show();
-                }
-            });
+            showApiUrlDialog();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showApiUrlDialog() {
+        new SimpleDialogs().prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
+            try {
+                if (StringUtils.isEmpty(v)) {
+                    baseApplication.setApiUrl(null); // set to default
+                } else {
+                    if (!Uri.parse(v).getScheme().matches("https?")) {
+                        throw new IllegalArgumentException("Only http(s) URIs are allowed");
+                    }
+                    baseApplication.setApiUrl(v);
+                }
+                baseApplication.setLastUpdate(0);
+                recreate();
+            } catch (final Exception e) {
+                Toast.makeText(getBaseContext(), getString(R.string.invalid_api_url), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void setNotificationIcon(final boolean active) {
@@ -271,10 +269,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private void runUpdateCountriesAndStations() {
         binding.appBarMain.main.progressBar.setVisibility(View.VISIBLE);
 
-        RSAPI.Helper.runUpdateCountriesAndStations(this, baseApplication, success -> {
+        RSAPI.runUpdateCountriesAndStations(this, baseApplication, success -> {
             if (success) {
                 final TextView tvUpdate = findViewById(R.id.tvUpdate);
-                tvUpdate.setText(getString(R.string.last_update_at) + SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate()));
+                tvUpdate.setText(getString(R.string.last_update_at, SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate())));
                 updateStationList();
             }
             binding.appBarMain.main.progressBar.setVisibility(View.GONE);
@@ -302,16 +300,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             baseApplication.setLastUpdate(System.currentTimeMillis());
             if (baseApplication.getUpdatePolicy() != UpdatePolicy.MANUAL) {
                 for (final String country : baseApplication.getCountryCodes()) {
-                    rsapi.getStatistic(country).enqueue(new Callback<Statistic>() {
+                    rsapi.getStatistic(country).enqueue(new Callback<>() {
                         @Override
-                        public void onResponse(final Call<Statistic> call, final Response<Statistic> response) {
+                        public void onResponse(@NonNull final Call<Statistic> call, @NonNull final Response<Statistic> response) {
                             if (response.isSuccessful()) {
                                 checkForUpdates(response.body(), country);
                             }
                         }
 
                         @Override
-                        public void onFailure(final Call<Statistic> call, final Throwable t) {
+                        public void onFailure(@NonNull final Call<Statistic> call, @NonNull final Throwable t) {
                             Log.e(TAG, "Error loading country statistic", t);
                         }
                     });
@@ -328,14 +326,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         updateStationList();
     }
 
-    private void checkForUpdates(final Statistic apiStat, final String country) {
-        if (apiStat == null) {
+    private void checkForUpdates(final Statistic statistic, final String country) {
+        if (statistic == null) {
             return;
         }
 
         final Statistic dbStat = dbAdapter.getStatistic(country);
         Log.d(TAG, "DbStat: " + dbStat);
-        if (apiStat.getTotal() != dbStat.getTotal() || apiStat.getWithPhoto() != dbStat.getWithPhoto() || apiStat.getWithoutPhoto() != dbStat.getWithoutPhoto()) {
+        if (statistic.getTotal() != dbStat.getTotal() || statistic.getWithPhoto() != dbStat.getWithPhoto() || statistic.getWithoutPhoto() != dbStat.getWithoutPhoto()) {
             if (baseApplication.getUpdatePolicy() == UpdatePolicy.AUTOMATIC) {
                 runUpdateCountriesAndStations();
             } else {
@@ -389,7 +387,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     @Override
-    public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_FINE_LOCATION) {
             Log.i(TAG, "Received response for location permission request.");
 

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
@@ -29,14 +30,15 @@ public class InboxActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         final Call<List<PublicInbox>> inboxCall = ((BaseApplication)getApplication()).getRSAPI().getPublicInbox();
-        inboxCall.enqueue(new Callback<List<PublicInbox>>() {
+        inboxCall.enqueue(new Callback<>() {
             @Override
-            public void onResponse(final Call<List<PublicInbox>> call, final Response<List<PublicInbox>> response) {
-                if (response.isSuccessful()) {
-                    adapter = new InboxAdapter(InboxActivity.this, response.body());
+            public void onResponse(@NonNull final Call<List<PublicInbox>> call, @NonNull final Response<List<PublicInbox>> response) {
+                final List<PublicInbox> body = response.body();
+                if (response.isSuccessful() && body != null) {
+                    adapter = new InboxAdapter(InboxActivity.this, body);
                     binding.inboxList.setAdapter(adapter);
                     binding.inboxList.setOnItemClickListener((parent, view, position, id) -> {
-                        final PublicInbox inboxItem = response.body().get(position);
+                        final PublicInbox inboxItem = body.get(position);
                         final Intent intent = new Intent(InboxActivity.this, MapsActivity.class);
                         intent.putExtra(MapsActivity.EXTRAS_LATITUDE, inboxItem.getLat());
                         intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, inboxItem.getLon());
@@ -46,7 +48,7 @@ public class InboxActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(final Call<List<PublicInbox>> call, final Throwable t) {
+            public void onFailure(@NonNull final Call<List<PublicInbox>> call, @NonNull final Throwable t) {
                 Log.e(TAG, "Error loading public inbox", t);
                 Toast.makeText(getBaseContext(), getString(R.string.error_loading_inbox) + t.getMessage(), Toast.LENGTH_LONG).show();
             }

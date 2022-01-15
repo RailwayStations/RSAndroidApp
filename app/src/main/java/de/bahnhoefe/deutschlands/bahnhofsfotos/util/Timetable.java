@@ -19,18 +19,16 @@ public class Timetable {
      */
     @Nullable
     public Intent createTimetableIntent(final Country country, final Station station) {
-        final Intent timetableIntent = new Intent(Intent.ACTION_VIEW);
-
         if (!country.hasTimetableUrlTemplate()) {
             return null;
         }
 
-        String timeTableTemplate = country.getTimetableUrlTemplate();
-
+        var timeTableTemplate = country.getTimetableUrlTemplate();
         timeTableTemplate = timeTableTemplate.replace("{id}", station.getId());
         timeTableTemplate = timeTableTemplate.replace("{title}", station.getTitle());
         timeTableTemplate = timeTableTemplate.replace("{DS100}", StringUtils.trimToEmpty(station.getDs100()));
 
+        final var timetableIntent = new Intent(Intent.ACTION_VIEW);
         timetableIntent.setData(Uri.parse(timeTableTemplate));
         return timetableIntent;
     }

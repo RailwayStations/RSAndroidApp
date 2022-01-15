@@ -18,13 +18,14 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 
 import android.util.Log;
 
-import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.Point;
 import org.mapsforge.core.model.Rectangle;
 import org.mapsforge.core.util.MercatorProjection;
 import org.mapsforge.map.layer.Layer;
+
+import java.util.stream.Collectors;
 
 /**
  * Layer extended class to display Clustered Marker.
@@ -67,8 +68,8 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     }
 
     @Override
-    public synchronized void draw(final BoundingBox boundingBox, final byte zoomLevel
-            , final org.mapsforge.core.graphics.Canvas canvas, final Point topLeftPoint) {
+    public synchronized void draw(final BoundingBox boundingBox, final byte zoomLevel,
+                                  final org.mapsforge.core.graphics.Canvas canvas, final Point topLeftPoint) {
         if (cluster.getClusterManager() == null ||
                 this.getLatLong() == null) {
             return;
@@ -79,8 +80,8 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         final double pixelY = MercatorProjection.latitudeToPixelY(this.getLatLong().latitude, mapSize);
         final double halfBitmapWidth;
         final double halfBitmapHeight;
-        final MarkerBitmap markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
-        final Bitmap bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
+        final var markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
+        final var bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
         try {
             halfBitmapWidth = bitmap.getWidth() / 2f;
             halfBitmapHeight = bitmap.getHeight() / 2f;
@@ -92,9 +93,9 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         final int top = (int) (pixelY - topLeftPoint.y - halfBitmapHeight + markerBitmap.getIconOffset().y);
         final int right = (left + bitmap.getWidth());
         final int bottom = (top + bitmap.getHeight());
-        final Rectangle mBitmapRectangle = new Rectangle(left, top, right, bottom);
-        final Rectangle canvasRectangle = new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight());
-        if (!canvasRectangle.intersects(mBitmapRectangle)) {
+        final var bitmapRectangle = new Rectangle(left, top, right, bottom);
+        final var canvasRectangle = new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight());
+        if (!canvasRectangle.intersects(bitmapRectangle)) {
             return;
         }
         // Draw bitmap
@@ -103,7 +104,7 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         // Draw Text
         if (markerType == 0) {
             // Draw bitmap
-            final Bitmap bubble = MarkerBitmap.getBitmapFromTitle(cluster.getTitle(),
+            final var bubble = MarkerBitmap.getBitmapFromTitle(cluster.getTitle(),
                     markerBitmap.getPaint());
             canvas.drawBitmap(bubble,
                     (int) (left + halfBitmapWidth - bubble.getWidth() / 2),
@@ -145,17 +146,18 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
             requestRedraw();
             return true;
         } else if (contains(viewPosition, tapPoint)) {
-            final StringBuilder mText = new StringBuilder(cluster.getItems().size() + " items:");
-            for (int i = 0; i < cluster.getItems().size(); i++) {
-                mText.append("\n- ");
-                mText.append(cluster.getItems().get(i).getTitle());
-                if (i == 7) {
-                    mText.append("\n...");
-                    break;
-                }
+            final StringBuilder builder = new StringBuilder(cluster.getItems().size() + " items:")
+                    .append(cluster.getItems().stream()
+                    .map(i -> "\n- " + i.getTitle())
+                    .limit(6)
+                    .collect(Collectors.joining()));
+
+            if (cluster.getItems().size() > 6) {
+                builder.append("\n...");
             }
+
             if (ClusterManager.toast != null) {
-                ClusterManager.toast.setText(mText);
+                ClusterManager.toast.setText(builder);
                 ClusterManager.toast.show();
             }
         }
@@ -167,8 +169,8 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     }
 
     private Rectangle getBitmapRectangle(final Point center) {
-        final MarkerBitmap markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
-        final Bitmap bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
+        final var markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
+        final var bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
         return new Rectangle(
                 center.x - (float) bitmap.getWidth() + markerBitmap.getIconOffset().x,
                 center.y - (float) bitmap.getHeight() + markerBitmap.getIconOffset().y,

@@ -34,7 +34,7 @@
         android:src="@drawable/ic_photo_gray_48px"
         android:visibility="invisible"
         android:layout_alignParentEnd="true"
-        />
+        android:contentDescription="@string/photo" />
 
 </RelativeLayout>
 
