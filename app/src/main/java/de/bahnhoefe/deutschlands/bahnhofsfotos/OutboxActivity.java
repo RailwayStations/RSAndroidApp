@@ -16,10 +16,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityOutboxBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.OutboxAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
@@ -70,7 +70,7 @@ public class OutboxActivity extends AppCompatActivity {
             query.add(new InboxStateQuery(upload.getRemoteId()));
         }
 
-        baseApplication.getRSAPI().queryUploadState(RSAPI.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), query).enqueue(new Callback<>() {
+        baseApplication.getRsapiClient().getApi().queryUploadState(query).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
                 final List<InboxStateQuery> stateQueries = response.body();

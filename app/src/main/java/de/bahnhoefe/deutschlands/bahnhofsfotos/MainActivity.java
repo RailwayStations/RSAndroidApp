@@ -40,14 +40,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.text.SimpleDateFormat;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.AppInfoFragment;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.StationFilterBar;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMainBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.AppInfoFragment;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.StationFilterBar;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPI;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private String searchString;
 
     private NearbyNotificationService.StatusBinder statusBinder;
-    private RSAPI rsapi;
+    private RSAPIClient rsapiClient;
     private Location myPos;
     private LocationManager locationManager;
 
@@ -87,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
-        rsapi = baseApplication.getRSAPI();
+        rsapiClient = baseApplication.getRsapiClient();
 
         final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, binding.drawerLayout, binding.appBarMain.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -269,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private void runUpdateCountriesAndStations() {
         binding.appBarMain.main.progressBar.setVisibility(View.VISIBLE);
 
-        RSAPI.runUpdateCountriesAndStations(this, baseApplication, success -> {
+        rsapiClient.runUpdateCountriesAndStations(this, baseApplication, success -> {
             if (success) {
                 final TextView tvUpdate = findViewById(R.id.tvUpdate);
                 tvUpdate.setText(getString(R.string.last_update_at, SimpleDateFormat.getDateTimeInstance().format(baseApplication.getLastUpdate())));
@@ -300,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             baseApplication.setLastUpdate(System.currentTimeMillis());
             if (baseApplication.getUpdatePolicy() != UpdatePolicy.MANUAL) {
                 for (final String country : baseApplication.getCountryCodes()) {
-                    rsapi.getStatistic(country).enqueue(new Callback<>() {
+                    rsapiClient.getApi().getStatistic(country).enqueue(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull final Call<Statistic> call, @NonNull final Response<Statistic> response) {
                             if (response.isSuccessful()) {

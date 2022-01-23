@@ -5,13 +5,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.multidex.MultiDex;
-
-import com.google.gson.GsonBuilder;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mapsforge.core.model.LatLong;
@@ -24,17 +21,13 @@ import java.util.Objects;
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BaseApplication extends Application {
 
@@ -47,7 +40,7 @@ public class BaseApplication extends Application {
     public static final String PREF_FILE = "APP_PREF_FILE";
 
     private DbAdapter dbAdapter;
-    private RSAPI api;
+    private RSAPIClient rsapiClient;
     private SharedPreferences preferences;
 
     public BaseApplication() {
@@ -86,6 +79,7 @@ public class BaseApplication extends Application {
             setPhotoOwner(true);
         }
 
+        rsapiClient = new RSAPIClient(getApiUrl(), getEmail(), getPassword());
     }
 
     public String getApiUrl() {
@@ -99,7 +93,7 @@ public class BaseApplication extends Application {
 
     public void setApiUrl(final String apiUrl) {
         putString(R.string.API_URL, apiUrl);
-        this.api = null;
+        rsapiClient.setBaseUrl(apiUrl);
     }
 
     private void putBoolean(final int key, final boolean value) {
@@ -311,31 +305,8 @@ public class BaseApplication extends Application {
         return profile;
     }
 
-    public RSAPI getRSAPI() {
-        if (api == null) {
-            final var gson = new GsonBuilder();
-            gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
-            gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
-
-            final var loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-            final var builder = new OkHttpClient.Builder()
-                    .addInterceptor(new UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
-
-            if (BuildConfig.DEBUG) {
-                builder.addInterceptor(loggingInterceptor);
-            }
-
-            final Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(getApiUrl())
-                    .client(builder.build())
-                    .addConverterFactory(GsonConverterFactory.create(gson.create()))
-                    .build();
-
-            api = retrofit.create(RSAPI.class);
-        }
-        return api;
+    public RSAPIClient getRsapiClient() {
+        return rsapiClient;
     }
 
     public String getMap() {

@@ -150,9 +150,9 @@ public class DbAdapter {
 
     public void insertCountries(final List<Country> countries) {
         if (countries.isEmpty()) {
-            return; // nothing todo
+            return;
         }
-        db.beginTransaction(); // soll die Performance verbessern, heißt's.
+        db.beginTransaction();
         try {
             deleteCountries();
 

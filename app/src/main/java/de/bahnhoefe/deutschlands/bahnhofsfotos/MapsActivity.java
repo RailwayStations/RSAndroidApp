@@ -70,11 +70,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMapsBinding;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.MapInfoFragment;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.StationFilterBar;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMapsBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.ClusterManager;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.DbsTileSource;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.GeoItem;
@@ -82,6 +82,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.TapHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPI;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 
 public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem>, StationFilterBar.OnChangeListener {
@@ -533,8 +535,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private void runUpdateCountriesAndStations() {
         binding.map.progressBar.setVisibility(View.VISIBLE);
 
-        RSAPI.runUpdateCountriesAndStations(this, baseApplication, success -> reloadMap());
-
+        baseApplication.getRsapiClient().runUpdateCountriesAndStations(this, baseApplication, success -> reloadMap());
     }
 
 

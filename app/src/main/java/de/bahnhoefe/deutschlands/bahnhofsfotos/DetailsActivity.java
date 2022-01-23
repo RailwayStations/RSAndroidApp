@@ -53,7 +53,6 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -70,12 +69,12 @@ import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityDetailsBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ReportProblemBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.StationInfoBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.UploadBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
@@ -84,6 +83,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
@@ -114,7 +114,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final String LINK_FORMAT = "<b><a href=\"%s\">%s</a></b>";
 
     private BaseApplication baseApplication;
-    private RSAPI rsapi;
+    private RSAPIClient rsapiClient;
 
     private ActivityDetailsBinding binding;
 
@@ -123,7 +123,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Set<Country> countries;
     private boolean localFotoUsed = false;
     private String nickname;
-    private String email;
     private String password;
     private boolean fullscreen;
     private Bitmap publicBitmap;
@@ -139,7 +138,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         setContentView(binding.getRoot());
 
         baseApplication = (BaseApplication) getApplication();
-        rsapi = baseApplication.getRSAPI();
+        rsapiClient = baseApplication.getRsapiClient();
         final DbAdapter dbAdapter = baseApplication.getDbAdapter();
         final Set<String> countryCodes = baseApplication.getCountryCodes();
         countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
@@ -278,8 +277,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private void readPreferences() {
         nickname = baseApplication.getNickname();
-        email = baseApplication.getEmail();
-        password = baseApplication.getPassword();
     }
 
     private boolean canSetPhoto() {
@@ -291,7 +288,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private boolean isNotLoggedIn() {
-        return TextUtils.isEmpty(password);
+        return !rsapiClient.hasCredentials();
     }
 
     private final ActivityResultLauncher<Intent> imageCaptureResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -443,7 +440,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 baseApplication.getDbAdapter().updateUpload(upload);
             }
 
-            rsapi.reportProblem(RSAPI.getAuthorizationHeader(email, password), new ProblemReport(station.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<>() {
+            rsapiClient.getApi().reportProblem(new ProblemReport(station.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull final Call<InboxResponse> call, @NonNull final Response<InboxResponse> response) {
                     final InboxResponse inboxResponse;
@@ -514,8 +511,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Bitmap getBitmapFromUri(final Uri uri) throws IOException {
         final Bitmap image;
         try (final ParcelFileDescriptor parcelFileDescriptor = getContentResolver().openFileDescriptor(uri, "r")) {
-            final FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-            image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            image = BitmapFactory.decodeFileDescriptor(parcelFileDescriptor.getFileDescriptor());
         }
         return image;
     }
@@ -753,7 +749,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
             alertDialog.dismiss();
 
-            assert binding.details.progressBar != null;
             binding.details.progressBar.setVisibility(View.VISIBLE);
 
             String stationTitle = binding.details.etbahnhofname.getText().toString();
@@ -773,7 +768,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             final File mediaFile = getStoredMediaFile(upload);
             assert mediaFile != null;
             final RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
-            rsapi.photoUpload(RSAPI.getAuthorizationHeader(email, password), bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
+            rsapiClient.getApi().photoUpload(bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
                     stationTitle, latitude, longitude, comment, upload.getActive(), file).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull final Call<InboxResponse> call, @NonNull final Response<InboxResponse> response) {
@@ -1017,7 +1012,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final List<InboxStateQuery> stateQueries = new ArrayList<>();
         stateQueries.add(new InboxStateQuery(upload.getRemoteId(), upload.getCountry(), upload.getStationId()));
 
-        baseApplication.getRSAPI().queryUploadState(RSAPI.getAuthorizationHeader(baseApplication.getEmail(), baseApplication.getPassword()), stateQueries).enqueue(new Callback<>() {
+        rsapiClient.getApi().queryUploadState(stateQueries).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
                 final List<InboxStateQuery> stateQueries = response.body();

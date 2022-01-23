@@ -74,7 +74,7 @@ public class InboxResponse {
         UNSUPPORTED_CONTENT_TYPE(R.string.upload_unsupported_content_type, UploadState.UNKNOWN),
         PHOTO_TOO_LARGE(R.string.upload_too_big, UploadState.UNKNOWN),
         CONFLICT(R.string.upload_conflict, UploadState.CONFLICT),
-        UNAUTHORIZED(R.string.upload_too_big, UploadState.UNKNOWN),
+        UNAUTHORIZED(R.string.authorization_failed, UploadState.UNKNOWN),
         ERROR(R.string.upload_failed, UploadState.UNKNOWN);
 
         private final int messageId;
