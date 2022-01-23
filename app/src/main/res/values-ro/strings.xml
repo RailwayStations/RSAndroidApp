@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Raportează stațiile din apropiere</string>
     <string name="station_is_near">Stații din apropiere</string>
     <string name="template_short_text" formatted="false">Staţia %1$s în %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Stație: %1$s\ndistanță: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Station: %1$s distance: %2$.2f km %3$s</string>
     <string name="photo_exists">Fotografie: deschis pentru info licență</string>
     <string name="nearby_notification_active">Notificarea stațiilor din apropiere este activă</string>
     <string name="license_tag" formatted="false">Proprietar: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">TRIMITE</string>
     <string name="logo_train">logo locomotivă mic</string>
     <string name="license_info_not_readable">Informațiile licenței nu pot fi citite în prezent</string>
-    <string name="last_update_at">Ultima modificare la: %s</string>
+    <string name="last_update_at">Last updated on: %s</string>
     <string name="station_update_failed">Nu s-a reușit actualizarea stațiilor:</string>
     <string name="select_picture">Selectaţi o imagine</string>
     <string name="grant_location_permission">Fără permisiunea de locație nu putem afișa poziția ta curentă</string>
@@ -261,4 +261,6 @@
     <string name="countries">Țările</string>
     <string name="photo_checksum">Fotografia cu această sumă de control este deja încărcată. Încărcați din nou?</string>
     <string name="highscore_crown">Coroană Highscore</string>
+    <string name="no_image_capture_app_found">No image capture app found</string>
+    <string name="upload_type">Upload type</string>
 </resources>

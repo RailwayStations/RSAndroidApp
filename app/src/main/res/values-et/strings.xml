@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Report nearby stations</string>
     <string name="station_is_near">Stations nearby</string>
     <string name="template_short_text" formatted="false">Station %1$s in %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Station: %1$s\ndistance: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Station: %1$s distance: %2$.2f km %3$s</string>
     <string name="photo_exists">Photo: open for license info</string>
     <string name="nearby_notification_active">Notification of nearby stations is active</string>
     <string name="license_tag" formatted="false">Owner: %s, %s</string>
@@ -259,4 +259,6 @@
     <string name="countries">Countries</string>
     <string name="photo_checksum">Photo with this checksum is already uploaded. Upload again?</string>
     <string name="highscore_crown">Highscore crown</string>
+    <string name="no_image_capture_app_found">No image capture app found</string>
+    <string name="upload_type">Upload type</string>
 </resources>

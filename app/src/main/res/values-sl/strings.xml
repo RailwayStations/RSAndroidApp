@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Prijavite bližnje postaje</string>
     <string name="station_is_near">Postaje v bližini</string>
     <string name="template_short_text" formatted="false">Postaja %1$s v %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Postaja: %1$s\noddaljenost: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Station: %1$s distance: %2$.2f km %3$s</string>
     <string name="photo_exists">Foto: odprto za informacije o licenci</string>
     <string name="nearby_notification_active">Aktivno je obveščanje o bližnjih postajah</string>
     <string name="license_tag" formatted="false">Lastnik: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">POŠLJI</string>
     <string name="logo_train">logotip male lokomotive</string>
     <string name="license_info_not_readable">Informacije o licenci trenutno niso berljive</string>
-    <string name="last_update_at">Nazadnje posodobljeno na: %s</string>
+    <string name="last_update_at">Last updated on: %s</string>
     <string name="station_update_failed">Ni uspelo posodobiti postaj:</string>
     <string name="select_picture">Izberi fotografijo</string>
     <string name="grant_location_permission">Brez dovoljenja za lokacijo ne moremo prikazati vašega trenutnega položaja</string>
@@ -263,4 +263,6 @@
     <string name="countries">Države</string>
     <string name="photo_checksum">Fotografija s to kontrolno vsoto je že naložena. Ali jo lahko naložite še enkrat?</string>
     <string name="highscore_crown">Krona najvišjih dosežkov</string>
+    <string name="no_image_capture_app_found">No image capture app found</string>
+    <string name="upload_type">Upload type</string>
 </resources>

@@ -57,7 +57,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Zgłoś stacje</string>
     <string name="station_is_near">Stacje w pobliżu</string>
     <string name="template_short_text" formatted="false">Stacja %1$s, oddalona o %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Stacja: %1$s\n odległość: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Station: %1$s distance: %2$.2f km %3$s</string>
     <string name="photo_exists">Zdjęcie: otwórz aby zobaczyć licencję</string>
     <string name="nearby_notification_active">Powiadomienia o okolicznych stacjach sa włączone</string>
     <string name="license_tag" formatted="false">Właściciel: %s, %s</string>
@@ -105,7 +105,7 @@
     <string name="send">WYŚLIJ</string>
     <string name="logo_train">logo małej lokomotywki</string>
     <string name="license_info_not_readable">Informacje o licencji obecnie nieczytelne</string>
-    <string name="last_update_at">Ostatnia aktualizacja: %s</string>
+    <string name="last_update_at">Last updated on: %s</string>
     <string name="station_update_failed">Nie udało się zaktualizować stacji:</string>
     <string name="select_picture">Wybierz zdjęcie</string>
     <string name="grant_location_permission">Bez pozwolenia na lokalizację nie możemy pokazać twojej obecnej pozycji</string>
@@ -262,4 +262,6 @@
     <string name="countries">Kraje</string>
     <string name="photo_checksum">Zdjęcie z tą sumą kontrolną jest już przesłane. Wgrać ponownie?</string>
     <string name="highscore_crown">Korona najlepszych wyników</string>
+    <string name="no_image_capture_app_found">No image capture app found</string>
+    <string name="upload_type">Upload type</string>
 </resources>
