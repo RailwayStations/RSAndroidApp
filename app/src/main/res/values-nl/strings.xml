@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Melding tonen als er stations in de buurt zijn</string>
     <string name="station_is_near">Nabije stations</string>
     <string name="template_short_text" formatted="false">Na %2$.2f km vind je statin %1$s</string>
-    <string name="template_long_text" formatted="false">Station: %1$s\nAfstand: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Station: %1$s distance: %2$.2f km %3$s</string>
     <string name="photo_exists">Foto: open om licentie-informatie te tonen</string>
     <string name="nearby_notification_active">Je ontvangt een melding als er stations in de buurt zijn</string>
     <string name="license_tag" formatted="false">Eigenaar: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">VERSTUREN</string>
     <string name="logo_train">klein locomotieflogo</string>
     <string name="license_info_not_readable">Licentie-informatie is momenteel niet leesbaar</string>
-    <string name="last_update_at">Laatst bijgewerkt op: %s</string>
+    <string name="last_update_at">Last updated on: %s</string>
     <string name="station_update_failed">Kan de stations niet bijwerken:</string>
     <string name="select_picture">Foto kiezen</string>
     <string name="grant_location_permission">Zonder toegang tot je locatie kunnen we je huidige positie niet tonen</string>
@@ -259,4 +259,6 @@
     <string name="countries">Landen</string>
     <string name="photo_checksum">Foto met deze checksum is al geupload. Opnieuw uploaden?</string>
     <string name="highscore_crown">Markeren</string>
+    <string name="no_image_capture_app_found">No image capture app found</string>
+    <string name="upload_type">Upload type</string>
 </resources>
