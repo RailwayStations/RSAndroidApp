@@ -58,7 +58,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Hlášení stanic v okolí</string>
     <string name="station_is_near">Stanice v okolíOznamujte stanice v okolí</string>
     <string name="template_short_text" formatted="false">Stanice %1$s na %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Stanice: %1$s\nvzdálenost: %2$.2f km\n%3$s</string>
+    <string name="template_long_text" formatted="false">Station: %1$s distance: %2$.2f km %3$s</string>
     <string name="photo_exists">Foto: otevřeno pro informace o licenci</string>
     <string name="nearby_notification_active">Oznámení o blízkých stanicích je aktivní</string>
     <string name="license_tag" formatted="false">Vlastník: %s, %s</string>
@@ -106,7 +106,7 @@
     <string name="send">POSLAT</string>
     <string name="logo_train">malé logo lokomotivy</string>
     <string name="license_info_not_readable">Informace o licenci aktuálně nejsou čitelné</string>
-    <string name="last_update_at">Poslední aktualizace: %s</string>
+    <string name="last_update_at">Last updated on: %s</string>
     <string name="station_update_failed">Aktualizace stanic se nezdařila:</string>
     <string name="select_picture">Vyberte fotografii</string>
     <string name="grant_location_permission">Bez povolení polohy nemůžeme zobrazit vaši aktuální polohu</string>
@@ -263,4 +263,6 @@
     <string name="countries">Zem</string>
     <string name="photo_checksum">Fotografie s tímto kontrolním součtem je již nahrána. Nahrát znovu?</string>
     <string name="highscore_crown">Zvýraznění</string>
+    <string name="no_image_capture_app_found">No image capture app found</string>
+    <string name="upload_type">Upload type</string>
 </resources>
