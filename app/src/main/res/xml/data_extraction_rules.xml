@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <include
+            domain="database"
+            path="bahnhoefe.db" />
+        <include
+            domain="sharedpref"
+            path="APP_PREF_FILE.xml" />
+    </cloud-backup>
+</data-extraction-rules>
