@@ -61,11 +61,13 @@ public class RSAPIClient {
         final var builder = new OkHttpClient.Builder()
                 .addInterceptor(new BaseApplication.UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT))
                 .addInterceptor(chain -> {
-                    final Request.Builder builder1 = chain.request().newBuilder().header("Authorization",
-                            Credentials.basic(username, password));
-
-                    final Request newRequest = builder1.build();
-                    return chain.proceed(newRequest);
+                    if (username != null && password != null) {
+                        final Request.Builder builder1 = chain.request().newBuilder().header("Authorization",
+                                Credentials.basic(username, password));
+                        final Request newRequest = builder1.build();
+                        return chain.proceed(newRequest);
+                    }
+                    return chain.proceed(chain.request());
                 });
 
         if (BuildConfig.DEBUG) {
