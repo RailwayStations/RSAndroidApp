@@ -42,6 +42,7 @@ public class InboxActivity extends AppCompatActivity {
                         final Intent intent = new Intent(InboxActivity.this, MapsActivity.class);
                         intent.putExtra(MapsActivity.EXTRAS_LATITUDE, inboxItem.getLat());
                         intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, inboxItem.getLon());
+                        intent.putExtra(MapsActivity.EXTRAS_MARKER, inboxItem.getStationId() == null ? R.drawable.marker_missing : R.drawable.marker_red);
                         startActivity(intent);
                     });
                 }
