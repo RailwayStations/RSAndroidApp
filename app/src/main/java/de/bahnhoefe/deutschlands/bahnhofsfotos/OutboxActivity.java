@@ -70,7 +70,7 @@ public class OutboxActivity extends AppCompatActivity {
             query.add(new InboxStateQuery(upload.getRemoteId()));
         }
 
-        baseApplication.getRsapiClient().getApi().queryUploadState(query).enqueue(new Callback<>() {
+        baseApplication.getRsapiClient().queryUploadState(query).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
                 final List<InboxStateQuery> stateQueries = response.body();

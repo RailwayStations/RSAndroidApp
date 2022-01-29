@@ -16,11 +16,18 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,10 +49,6 @@ public class RSAPIClient {
         this.username = username;
         this.password = password;
         api = createRSAPI();
-    }
-
-    public RSAPI getApi() {
-        return api;
     }
 
     public void setBaseUrl(final String baseUrl) {
@@ -135,6 +138,61 @@ public class RSAPIClient {
             }
         });
 
+    }
+
+    public Call<List<PublicInbox>> getPublicInbox() {
+        return api.getPublicInbox();
+    }
+
+    public Call<HighScore> getHighScore() {
+        return api.getHighScore();
+    }
+
+    public Call<HighScore> getHighScore(final String country) {
+        return api.getHighScore(country);
+    }
+
+    public Call<InboxResponse> reportProblem(final ProblemReport problemReport) {
+        return api.reportProblem(problemReport);
+    }
+
+    public Call<InboxResponse> photoUpload(final String stationId, final String countryCode,
+                                           final String stationTitle, final Double latitude,
+                                           final Double longitude, final String comment,
+                                           final Boolean active, final RequestBody file) {
+        return api.photoUpload(stationId, countryCode, stationTitle, latitude, longitude, comment, active, file);
+    }
+
+    public Call<List<InboxStateQuery>> queryUploadState(final List<InboxStateQuery> stateQueries) {
+        return api.queryUploadState(stateQueries);
+    }
+
+    public Call<Profile> getProfile() {
+        return api.getProfile();
+    }
+
+    public Call<Void> registration(final Profile profile) {
+        return api.registration(profile);
+    }
+
+    public Call<Void> saveProfile(final Profile profile) {
+        return api.saveProfile(profile);
+    }
+
+    public Call<Void> resetPassword(final String emailOrNickname) {
+        return api.resetPassword(emailOrNickname);
+    }
+
+    public Call<Void> changePassword(final String newPassword) {
+        return api.changePassword(newPassword);
+    }
+
+    public Call<Void> resendEmailVerification() {
+        return api.resendEmailVerification();
+    }
+
+    public Call<Statistic> getStatistic(final String country) {
+        return api.getStatistic(country);
     }
 
     public interface ResultListener {

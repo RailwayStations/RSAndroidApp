@@ -24,7 +24,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPI;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,7 +69,7 @@ public class HighScoreActivity extends AppCompatActivity {
     }
 
     private void loadHighScore(final BaseApplication baseApplication, final Country selectedCountry) {
-        final RSAPI rsapi = baseApplication.getRsapiClient().getApi();
+        final RSAPIClient rsapi = baseApplication.getRsapiClient();
         final Call<HighScore> highScoreCall = selectedCountry.getCode().isEmpty() ? rsapi.getHighScore() : rsapi.getHighScore(selectedCountry.getCode());
         highScoreCall.enqueue(new Callback<>() {
             @Override

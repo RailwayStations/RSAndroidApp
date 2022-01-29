@@ -89,7 +89,7 @@ public class MyDataActivity extends AppCompatActivity {
         binding.myData.loginForm.setVisibility(View.VISIBLE);
         binding.myData.profileForm.setVisibility(View.GONE);
 
-        rsapiClient.getApi().getProfile().enqueue(new Callback<>() {
+        rsapiClient.getProfile().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<Profile> call, @NonNull final Response<Profile> response) {
                 switch (response.code()) {
@@ -165,7 +165,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
         if (!rsapiClient.hasCredentials()) {
             profile = createProfileFromUI(register);
-            rsapiClient.getApi().registration(profile).enqueue(new Callback<>() {
+            rsapiClient.registration(profile).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
                     switch (response.code()) {
@@ -226,7 +226,7 @@ public class MyDataActivity extends AppCompatActivity {
             return false;
         }
         if (rsapiClient.hasCredentials()) {
-            rsapiClient.getApi().saveProfile(profile).enqueue(new Callback<>() {
+            rsapiClient.saveProfile(profile).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
                     switch (response.code()) {
@@ -386,7 +386,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
         profile.setEmail(emailOrNickname);
         saveLocalProfile(profile);
-        rsapiClient.getApi().resetPassword(emailOrNickname).enqueue(new Callback<>() {
+        rsapiClient.resetPassword(emailOrNickname).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
                 switch (response.code()) {
@@ -440,7 +440,7 @@ public class MyDataActivity extends AppCompatActivity {
                 Log.e(TAG, "Error encoding new password", e);
             }
 
-            rsapiClient.getApi().changePassword(newPassword).enqueue(new Callback<>() {
+            rsapiClient.changePassword(newPassword).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
                     switch (response.code()) {
@@ -487,7 +487,7 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void requestEmailVerification(final View view) {
-        new SimpleDialogs().confirm(this, R.string.requestEmailVerification, (dialogInterface, i) -> rsapiClient.getApi().resendEmailVerification().enqueue(new Callback<>() {
+        new SimpleDialogs().confirm(this, R.string.requestEmailVerification, (dialogInterface, i) -> rsapiClient.resendEmailVerification().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
                 if (response.code() == 200) {

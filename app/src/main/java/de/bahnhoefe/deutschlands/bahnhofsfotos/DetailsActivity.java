@@ -449,7 +449,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 baseApplication.getDbAdapter().updateUpload(upload);
             }
 
-            rsapiClient.getApi().reportProblem(new ProblemReport(station.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<>() {
+            rsapiClient.reportProblem(new ProblemReport(station.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull final Call<InboxResponse> call, @NonNull final Response<InboxResponse> response) {
                     final InboxResponse inboxResponse;
@@ -777,7 +777,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             final File mediaFile = getStoredMediaFile(upload);
             assert mediaFile != null;
             final RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
-            rsapiClient.getApi().photoUpload(bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
+            rsapiClient.photoUpload(bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
                     stationTitle, latitude, longitude, comment, upload.getActive(), file).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull final Call<InboxResponse> call, @NonNull final Response<InboxResponse> response) {
@@ -1019,7 +1019,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         final List<InboxStateQuery> stateQueries = new ArrayList<>();
         stateQueries.add(new InboxStateQuery(upload.getRemoteId(), upload.getCountry(), upload.getStationId()));
 
-        rsapiClient.getApi().queryUploadState(stateQueries).enqueue(new Callback<>() {
+        rsapiClient.queryUploadState(stateQueries).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
                 final List<InboxStateQuery> stateQueries = response.body();

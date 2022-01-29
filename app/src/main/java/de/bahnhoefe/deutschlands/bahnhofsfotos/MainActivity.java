@@ -48,7 +48,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.StationFilterBar;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPI;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import retrofit2.Call;
@@ -302,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             baseApplication.setLastUpdate(System.currentTimeMillis());
             if (baseApplication.getUpdatePolicy() != UpdatePolicy.MANUAL) {
                 for (final String country : baseApplication.getCountryCodes()) {
-                    rsapiClient.getApi().getStatistic(country).enqueue(new Callback<>() {
+                    rsapiClient.getStatistic(country).enqueue(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull final Call<Statistic> call, @NonNull final Response<Statistic> response) {
                             if (response.isSuccessful()) {

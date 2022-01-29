@@ -29,7 +29,7 @@ public class InboxActivity extends AppCompatActivity {
         final ActivityInboxBinding binding = ActivityInboxBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        final Call<List<PublicInbox>> inboxCall = ((BaseApplication)getApplication()).getRsapiClient().getApi().getPublicInbox();
+        final Call<List<PublicInbox>> inboxCall = ((BaseApplication)getApplication()).getRsapiClient().getPublicInbox();
         inboxCall.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<List<PublicInbox>> call, @NonNull final Response<List<PublicInbox>> response) {
