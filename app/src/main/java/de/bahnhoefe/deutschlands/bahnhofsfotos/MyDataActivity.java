@@ -274,8 +274,8 @@ public class MyDataActivity extends AppCompatActivity {
         setProfileToUI(profile);
     }
 
-    private boolean isLoginDataAvailable(final String email, final String password) {
-        return StringUtils.isNotBlank(password) && StringUtils.isNotBlank(email);
+    private boolean isLoginDataAvailable(final String username, final String password) {
+        return StringUtils.isNotBlank(password) && StringUtils.isNotBlank(username);
     }
 
     @Override
@@ -355,11 +355,12 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void login(final View view) {
-        final String email = binding.myData.etEmailOrNickname.getText().toString();
+        final String username = binding.myData.etEmailOrNickname.getText().toString();
         final String password = binding.myData.etPassword.getText().toString();
-        if (isLoginDataAvailable(email, password)) {
-            baseApplication.setEmail(email);
+        if (isLoginDataAvailable(username, password)) {
+            baseApplication.setEmail(username);
             baseApplication.setPassword(password);
+            rsapiClient.setCredentials(username, password);
             loadRemoteProfile();
         } else {
             new SimpleDialogs().confirm(this, R.string.missing_login_data);

@@ -209,6 +209,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
             setButtonEnabled(binding.details.buttonReportProblem, station != null);
 
+            binding.details.marker.setImageDrawable(ContextCompat.getDrawable(this, getMarkerRes()));
+
             directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
             if (station != null) {
                 bahnhofId = station.getId();
@@ -220,18 +222,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     upload = baseApplication.getDbAdapter().getPendingUploadForStation(station);
                 }
 
-                final int markerRes;
                 if (station.hasPhoto()) {
                     if (ConnectionUtil.checkInternetConnection(this)) {
                         BitmapCache.getInstance().getFoto(this, station.getPhotoUrl());
                     }
                     setPictureButtonsEnabled(canSetPhoto());
-
-                    if (isOwner()) {
-                        markerRes = station.isActive() ? R.drawable.marker_violet : R.drawable.marker_violet_inactive;
-                    } else {
-                        markerRes = station.isActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive;
-                    }
 
                     // check for local photo
                     final var localFile = getStoredMediaFile(upload);
@@ -242,13 +237,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         });
                     }
                 } else if (upload != null && upload.isPendingPhotoUpload()) {
-                    markerRes = R.drawable.marker_yellow;
                     setLocalBitmap(upload);
                 } else {
-                    markerRes = station.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
                     setLocalBitmap(upload);
                 }
-                binding.details.marker.setImageDrawable(ContextCompat.getDrawable(this, markerRes));
             } else {
                 if (upload == null) {
                     upload = baseApplication.getDbAdapter().getPendingUploadForCoordinates(latitude, longitude);
@@ -267,6 +259,23 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             takePicture();
         }
 
+    }
+
+    private int getMarkerRes() {
+        if (station == null) {
+            return R.drawable.marker_missing;
+        }
+        if (station.hasPhoto()) {
+            if (isOwner()) {
+                return station.isActive() ? R.drawable.marker_violet : R.drawable.marker_violet_inactive;
+            } else {
+                return station.isActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive;
+            }
+        } else if (upload != null && upload.isPendingPhotoUpload()) {
+            return R.drawable.marker_yellow;
+        } else {
+            return station.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
+        }
     }
 
     @Override
@@ -845,12 +854,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 new NavItem("   " + getString(R.string.nav_show_on_map), R.drawable.ic_map_gray_24px)
         };
 
-
-        final ListAdapter adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.select_dialog_item,
-                android.R.id.text1,
-                items) {
+        final ListAdapter adapter = new ArrayAdapter<>(this, android.R.layout.select_dialog_item,
+                android.R.id.text1, items) {
+            @NonNull
             public View getView(final int position, final View convertView, @NonNull final ViewGroup parent) {
                 //Use super class to create the View
                 final View v = super.getView(position, convertView, parent);
@@ -909,6 +915,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     intent = new Intent(DetailsActivity.this, MapsActivity.class);
                     intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat);
                     intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon);
+                    intent.putExtra(MapsActivity.EXTRAS_MARKER, getMarkerRes());
                     Log.d(TAG,"findnavigation case 5: " + lat + "," + lon);
                     break;
 

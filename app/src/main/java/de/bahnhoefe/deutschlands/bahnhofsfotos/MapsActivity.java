@@ -82,14 +82,13 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.MarkerBitmap;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge.TapHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPI;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 
 public class MapsActivity extends AppCompatActivity implements LocationListener, TapHandler<MapsActivity.BahnhofGeoItem>, StationFilterBar.OnChangeListener {
 
     public static final String EXTRAS_LATITUDE = "Extras_Latitude";
     public static final String EXTRAS_LONGITUDE = "Extras_Longitude";
+    public static final String EXTRAS_MARKER = "Extras_Marker";
 
     // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // meters
@@ -99,20 +98,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int REQUEST_FINE_LOCATION = 1;
-    private static final int REQUEST_MAP_DIRECTORY = 2;
-    private static final int REQUEST_THEME_DIRECTORY = 3;
     private static final String USER_AGENT = "railway-stations.org-android";
 
     private final Map<String, OnlineTileSource> onlineTileSources = new HashMap<>();
-
     protected Layer layer;
     protected ClusterManager<BahnhofGeoItem> clusterer = null;
     protected final List<TileCache> tileCaches = new ArrayList<>();
-
     private LatLong myPos = null;
-
     private CheckBox myLocSwitch = null;
-
     private DbAdapter dbAdapter;
     private String nickname;
     private BaseApplication baseApplication;
@@ -141,6 +134,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         nickname = baseApplication.getNickname();
 
         final Intent intent = getIntent();
+        Marker extraMarker = null;
         if (intent != null) {
             final Double latitude = (Double) intent.getSerializableExtra(EXTRAS_LATITUDE);
             final Double longitude = (Double) intent.getSerializableExtra(EXTRAS_LONGITUDE);
@@ -148,16 +142,28 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             if (latitude != null && longitude != null) {
                 myPos = new LatLong(latitude, longitude);
             }
+
+            final Integer markerRes = (Integer) intent.getSerializableExtra(EXTRAS_MARKER);
+            if (markerRes != null) {
+                extraMarker = createBitmapMarker(myPos, markerRes);
+            }
         }
 
-        final DbsTileSource dbsBasic = new DbsTileSource(getString(R.string.dbs_osm_basic), "/styles/dbs-osm-basic/");
-        onlineTileSources.put(dbsBasic.getName(), dbsBasic);
-        final DbsTileSource dbsRailway = new DbsTileSource(getString(R.string.dbs_osm_railway), "/styles/dbs-osm-railway/");
-        onlineTileSources.put(dbsRailway.getName(), dbsRailway);
+        addDBSTileSource(R.string.dbs_osm_basic, "/styles/dbs-osm-basic/");
+        addDBSTileSource(R.string.dbs_osm_railway, "/styles/dbs-osm-railway/");
 
         createMapViews();
         createTileCaches();
         checkPermissionsAndCreateLayersAndControls();
+
+        if (extraMarker != null) {
+            binding.map.mapView.getLayerManager().getLayers().add(extraMarker);
+        }
+    }
+
+    private void addDBSTileSource(final int nameResId, final String baseUrl) {
+        final DbsTileSource dbsBasic = new DbsTileSource(getString(nameResId), baseUrl);
+        onlineTileSources.put(dbsBasic.getName(), dbsBasic);
     }
 
     protected void createTileCaches() {
@@ -328,10 +334,18 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     }
 
+    private Marker createBitmapMarker(final LatLong latLong, final int markerRes) {
+        final Drawable drawable = ContextCompat.getDrawable(this, markerRes);
+        assert drawable != null;
+        final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
+        return new Marker(latLong, bitmap, -(bitmap.getWidth() / 2), -bitmap.getHeight());
+    }
+
     private void onLongPress(final LatLong tapLatLong) {
         if (missingMarker == null) {
             // marker to show at the location
             final Drawable drawable = ContextCompat.getDrawable(this, R.drawable.marker_missing);
+            assert drawable != null;
             final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
             missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth()/2), -bitmap.getHeight()) {
                 @Override
