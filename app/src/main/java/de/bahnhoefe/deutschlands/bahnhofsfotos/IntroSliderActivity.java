@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -44,9 +45,7 @@ public class IntroSliderActivity extends AppCompatActivity {
 
         binding.btnSliderSkip.setOnClickListener(v -> {
             baseApplication.setFirstAppStart(true);
-            final Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
+            openMainActivity();
         });
 
         binding.btnSliderNext.setOnClickListener(v -> {
@@ -54,11 +53,20 @@ public class IntroSliderActivity extends AppCompatActivity {
             if (current < layouts.length) {
                 binding.viewPager.setCurrentItem(current);
             } else {
-                final Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                openMainActivity();
             }
         });
+    }
+
+    private void openMainActivity() {
+        final Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        openMainActivity();
     }
 
     private void addBottomDots(final int position) {
@@ -98,7 +106,7 @@ public class IntroSliderActivity extends AppCompatActivity {
 
             if (position == layouts.length - 1) {
                 binding.btnSliderNext.setText(R.string.proceed);
-                binding.btnSliderSkip.setVisibility(View.GONE);
+                binding.btnSliderSkip.setVisibility(View.INVISIBLE);
                 baseApplication.setFirstAppStart(true);
             } else {
                 binding.btnSliderNext.setText(R.string.next);

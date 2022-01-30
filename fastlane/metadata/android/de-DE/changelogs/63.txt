@@ -1,0 +1,3 @@
+- Aktualisierung der abhängigen Bibliotheken
+- Neue und aktualisierte Übersetzungen
+- Erhöhung der minimalen Android SDK Version auf 26 (Android 8)

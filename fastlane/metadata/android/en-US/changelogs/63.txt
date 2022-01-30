@@ -1,2 +1,3 @@
 - updated dependencies
-- many new and updated translations by @mondstern
+- many new and updated translations
+- raise Android min SDK version to 26 (Android 8)

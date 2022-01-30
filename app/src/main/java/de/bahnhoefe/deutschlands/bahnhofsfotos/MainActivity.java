@@ -238,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         final int id = item.getItemId();
         if (id == R.id.nav_slideshow) {
             startActivity(new Intent(this, IntroSliderActivity.class));
+            finish();
         } else if (id == R.id.nav_your_data) {
             startActivity(new Intent(this, MyDataActivity.class));
         } else if (id == R.id.nav_update_photos) {
@@ -448,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         } catch (final Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
             final Bundle b = new Bundle();
-            b.putString("error", "Error registering LocationManager: " + e.toString());
+            b.putString("error", "Error registering LocationManager: " + e);
             locationManager = null;
             baseApplication.setSortByDistance(false);
             binding.appBarMain.main.stationFilterBar.setSortOrder(false);
