@@ -1,23 +1,21 @@
 files:
   - source: /app/src/main/res/values/strings.xml
     translation: /app/src/main/res/values-%android_code%/strings.xml
-    "languages_mapping" : {
-      "android_code" : {
-        "bg" : "bg",
-        "cs" : "cs"
-        "da" : "da"
-        "es" : "es"
-        "et" : "et"
-        "fi" : "fi"
-        "fr" : "fr"
-        "hu" : "hu"
-        "it" : "it"
-        "nl" : "nl"
-        "pl" : "pl"
-        "pt-PT" : "pt-PT"
-        "pt-BR" : "pt-BR"
-        "ro" : "ro"
-        "sk" : "sk"
-        "si" : "si"
-      }
-   }
+    languages_mapping:
+      android_code:
+        bg: "bg"
+        cs: "cs"
+        da: "da"
+        es: "es"
+        et: "et"
+        fi: "fi"
+        fr: "fr"
+        hu: "hu"
+        it: "it"
+        nl: "nl"
+        pl: "pl"
+        pt-PT: "pt-PT"
+        pt-BR: "pt-BR"
+        ro: "ro"
+        sk: "sk"
+        si: "si"
