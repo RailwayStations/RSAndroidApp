@@ -123,7 +123,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Set<Country> countries;
     private boolean localFotoUsed = false;
     private String nickname;
-    private String password;
     private boolean fullscreen;
     private Bitmap publicBitmap;
     private Double latitude;

@@ -871,7 +871,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         } catch (final Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
             final Bundle b = new Bundle();
-            b.putString("error", "Error registering LocationManager: " + e.toString());
+            b.putString("error", "Error registering LocationManager: " + e);
             locationManager = null;
             myPos = null;
             setMyLocSwitch(false);

@@ -49,7 +49,7 @@ public class FileUtils {
         }
 
         final var storeMediaFile = new File(mediaStorageDir, String.format(Locale.ENGLISH, "%d.jpg", uploadId));
-        Log.d(TAG, "StoredMediaFile: " + storeMediaFile.toString());
+        Log.d(TAG, "StoredMediaFile: " + storeMediaFile);
 
         return storeMediaFile;
     }
