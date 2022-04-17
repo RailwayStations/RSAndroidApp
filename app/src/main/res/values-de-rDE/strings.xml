@@ -213,6 +213,7 @@
     <string name="problem_station_inactive">Bahnhof ist inaktiv</string>
     <string name="problem_station_nonexistent">Bahnhof existiert nicht</string>
     <string name="problem_wrong_photo">Bahnhof hat ein falsches Foto</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Ein anderes Problem, Details im Kommentar.</string>
     <string name="problem_please_specify">Bitte wähle Art des Problems</string>
     <string name="problem_please_comment">Bitte beschreibe das Problem im Kommentarfeld</string>
