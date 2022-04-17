@@ -213,6 +213,7 @@
     <string name="problem_station_inactive">La gare est désaffectée</string>
     <string name="problem_station_nonexistent">Cette gare n\'existe pas</string>
     <string name="problem_wrong_photo">La photo de cette gare ne convient pas</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Autre problème, voir dans les commentaires</string>
     <string name="problem_please_specify">Merci de préciser le type de problème</string>
     <string name="problem_please_comment">Merci de commenter le problème</string>
