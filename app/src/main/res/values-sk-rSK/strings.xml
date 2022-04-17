@@ -218,6 +218,7 @@
     <string name="problem_station_inactive">Stanica je neaktívna</string>
     <string name="problem_station_nonexistent">Stanica neexistuje</string>
     <string name="problem_wrong_photo">Stanica má zlú fotografiu</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Iný problém, podrobnosti v komentári</string>
     <string name="problem_please_specify">Uveďte typ problému</string>
     <string name="problem_please_comment">Prosím, vyjadrite sa k problému</string>

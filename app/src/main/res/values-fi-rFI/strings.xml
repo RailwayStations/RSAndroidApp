@@ -214,6 +214,7 @@
     <string name="problem_station_inactive">Asema ei ole aktiivinen</string>
     <string name="problem_station_nonexistent">Asemaa ei ole olemassa</string>
     <string name="problem_wrong_photo">Asemalla on väärä kuva</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Muut ongelmat, yksityiskohdat kommentissa</string>
     <string name="problem_please_specify">Ole hyvä ja määrittele ongelma</string>
     <string name="problem_please_comment">Ole hyvä ja kommentoi ongelmaa</string>

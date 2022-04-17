@@ -214,6 +214,7 @@
     <string name="problem_station_inactive">La stazione è inattiva</string>
     <string name="problem_station_nonexistent">Stazione non esiste</string>
     <string name="problem_wrong_photo">La stazione ha una foto sbagliata</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Altro problema, dettagli nel commento</string>
     <string name="problem_please_specify">Specificare il tipo di problema</string>
     <string name="problem_please_comment">Si prega di commentare il problema</string>

@@ -214,6 +214,7 @@
     <string name="problem_station_inactive">Stationen er inaktiv</string>
     <string name="problem_station_nonexistent">Station findes ikke</string>
     <string name="problem_wrong_photo">Stationen har forkert billede</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Andre problemer, detaljer i kommentaren</string>
     <string name="problem_please_specify">Angiv venligst typen af problem</string>
     <string name="problem_please_comment">Kommentér venligst til problemet</string>

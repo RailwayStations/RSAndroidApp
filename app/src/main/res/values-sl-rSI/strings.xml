@@ -218,6 +218,7 @@
     <string name="problem_station_inactive">Postaja je neaktivna</string>
     <string name="problem_station_nonexistent">Postaja ne obstaja</string>
     <string name="problem_wrong_photo">Postaja ima napačno fotografijo</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Druge težave, podrobnosti v komentarju</string>
     <string name="problem_please_specify">Prosimo, navedite vrsto težave</string>
     <string name="problem_please_comment">Prosimo, komentirajte težavo</string>

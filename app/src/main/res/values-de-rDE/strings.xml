@@ -57,7 +57,7 @@
     <string name="nahe_gelegenen_bahnhof_melden">Nahe gelegenen Bahnhof melden</string>
     <string name="station_is_near">Bahnhof in der Nähe</string>
     <string name="template_short_text" formatted="false">Bahnhof %1$s in %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Station: %1$s distance: %2$.2f km %3$s</string>
+    <string name="template_long_text" formatted="false">Bahnhof: %1$s Entfernung: %2$.2f km %3$s</string>
     <string name="photo_exists">Foto: für Lizenzinfos Detailansicht öffnen</string>
     <string name="nearby_notification_active">Bahnhofsortung aktiv</string>
     <string name="license_tag" formatted="false">Urheber: %s, %s</string>
@@ -105,7 +105,7 @@
     <string name="send">SENDEN</string>
     <string name="logo_train">kleines LokLogo</string>
     <string name="license_info_not_readable">Lizenzinfo aktuell nicht lesbar</string>
-    <string name="last_update_at">Last updated on: %s</string>
+    <string name="last_update_at">Letzte Aktualisierung am: %s</string>
     <string name="station_update_failed">Fehler beim Aktualisieren der Bahnhöfe:</string>
     <string name="select_picture">Foto auswählen</string>
     <string name="grant_location_permission">Ohne Zugriff auf den Standort können wir deine Position nicht anzeigen</string>
@@ -186,7 +186,7 @@
     <string name="owner_label">Fotograf:</string>
     <string name="active">aktiv</string>
     <string name="inactive">inaktiv</string>
-    <string name="new_registration">Registrierung erfolgreich. Wir haben dir eine Email mit Link zum Bestätigen geschickt. Bitte prüfe auch den SPAM Ordner.</string>
+    <string name="new_registration">Registrierung erfolgreich. Wir haben dir eine E-Mail mit Link zum Bestätigen geschickt. Bitte prüfe auch den SPAM Ordner.</string>
     <string name="filter_result">%1$d von %2$d Bahnhöfen selektiert</string>
     <string name="menu_title_outbox">Ausgangskorb</string>
     <string name="menu_title_inbox">Eingangskorb</string>
@@ -213,7 +213,8 @@
     <string name="problem_station_inactive">Bahnhof ist inaktiv</string>
     <string name="problem_station_nonexistent">Bahnhof existiert nicht</string>
     <string name="problem_wrong_photo">Bahnhof hat ein falsches Foto</string>
-    <string name="problem_other">Ein anderes Problem, Details im Kommentar.</string>
+    <string name="problem_photo_outdated">Foto ist veraltet (Gebäude entfernt oder ersetzt)</string>
+    <string name="problem_other">Ein anderes Problem, Details im Kommentar</string>
     <string name="problem_please_specify">Bitte wähle Art des Problems</string>
     <string name="problem_please_comment">Bitte beschreibe das Problem im Kommentarfeld</string>
     <string name="problem_report_failed">Fehler beim Senden des Problemberichts: %1s</string>
@@ -239,7 +240,7 @@
     <string name="emailUnverified">(noch nicht verifiziert)</string>
     <string name="requestEmailVerification">Neue Email-Verifizierung anfordern?</string>
     <string name="emailVerificationRequested">Eine neue Bestätigungs-Email wurde angefordert. Bitte prüfe Dein Postfach.</string>
-    <string name="emailVerificationRequestFailed">Beim Anfordern einer neuen Bestätigungs-Email ist ein Fehler aufgetreten.</string>
+    <string name="emailVerificationRequestFailed">Beim Anfordern einer neuen Bestätigungs-E-Mail ist ein Fehler aufgetreten.</string>
     <string name="chooseCountry">Länderauswahl</string>
     <string name="invalid_api_url">Ungültige API URL</string>
     <string name="menu_email">Schreib uns eine E-Mail</string>
@@ -258,6 +259,6 @@
     <string name="countries">Länder</string>
     <string name="photo_checksum">Foto mit dieser Prüfsumme wurde bereits hochgeladen. Erneut hochladen?</string>
     <string name="highscore_crown">Highscore-Krone</string>
-    <string name="no_image_capture_app_found">No image capture app found</string>
-    <string name="upload_type">Upload type</string>
+    <string name="no_image_capture_app_found">Keine Bildaufnahme-App gefunden</string>
+    <string name="upload_type">Upload-Typ</string>
 </resources>
