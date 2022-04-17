@@ -216,6 +216,7 @@
     <string name="problem_station_inactive">Stația este inactivă</string>
     <string name="problem_station_nonexistent">Stația nu există</string>
     <string name="problem_wrong_photo">Stația a greșit fotografia</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Altă problemă, detalii în comentariu</string>
     <string name="problem_please_specify">Vă rugăm să specificați tipul de problemă</string>
     <string name="problem_please_comment">Vă rugăm să comentați problema</string>
