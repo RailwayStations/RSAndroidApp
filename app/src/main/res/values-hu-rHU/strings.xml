@@ -214,6 +214,7 @@
     <string name="problem_station_inactive">Az állomás inaktív</string>
     <string name="problem_station_nonexistent">Az állomás nem létezik</string>
     <string name="problem_wrong_photo">Az állomáson rossz fotó van</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Egyéb probléma, részletek a megjegyzésben</string>
     <string name="problem_please_specify">Kérjük, adja meg a probléma típusát</string>
     <string name="problem_please_comment">Kérem, kommentálja a problémát</string>
