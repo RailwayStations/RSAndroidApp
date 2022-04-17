@@ -3,7 +3,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
 import android.Manifest;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -78,8 +77,8 @@ public class NearbyNotificationService extends Service implements LocationListen
 
         Log.i(TAG, "Received start command");
 
-        final Intent resultIntent = new Intent(this, MainActivity.class);
-        final PendingIntent resultPendingIntent =
+        final var resultIntent = new Intent(this, MainActivity.class);
+        final var resultPendingIntent =
                 PendingIntent.getActivity(
                         this,
                         0,
@@ -90,14 +89,14 @@ public class NearbyNotificationService extends Service implements LocationListen
         NearbyBahnhofNotificationManager.createChannel(this);
 
         // show a permanent notification to indicate that position detection is running
-        final Notification ongoingNotification = new NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.CHANNEL_ID)
+        final var ongoingNotification = new NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(getString(R.string.nearby_notification_active))
                 .setOngoing(true)
                 .setLocalOnly(true)
                 .setContentIntent(resultPendingIntent)
                 .build();
-        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        final var notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
 
         registerLocationManager();
@@ -123,7 +122,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         }
 
         // Cancel the ongoing notification
-        final NotificationManagerCompat notificationManager =
+        final var notificationManager =
                 NotificationManagerCompat.from(this);
         notificationManager.cancel(ONGOING_NOTIFICATION_ID);
 
@@ -177,8 +176,8 @@ public class NearbyNotificationService extends Service implements LocationListen
     private void checkNearestStation() {
         double minDist = 3e3;
         Station nearest = null;
-        for (final Station station : nearStations) {
-            final double dist = calcDistance(station);
+        for (final var station : nearStations) {
+            final var dist = calcDistance(station);
             if (dist < minDist) {
                 nearest = station;
                 minDist = dist;
@@ -221,8 +220,8 @@ public class NearbyNotificationService extends Service implements LocationListen
      */
     private double calcDistance(final Station station) {
         // Wir nähern für glatte Oberflächen, denn wir sind an Abständen kleiner 1km interessiert
-        final double lateralDiff = myPos.getLatitude() - station.getLat();
-        final double longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
+        final var lateralDiff = myPos.getLatitude() - station.getLat();
+        final var longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
                 (myPos.getLongitude() - station.getLon()) * Math.cos(myPos.getLatitude() / 180 * Math.PI) :
                 0.0d; // at the poles, longitude doesn't matter
         // simple Pythagoras now.
@@ -240,7 +239,7 @@ public class NearbyNotificationService extends Service implements LocationListen
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             // getting GPS status
-            final boolean isGPSEnabled = locationManager
+            final var isGPSEnabled = locationManager
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             // if GPS Enabled get lat/long using GPS Services
@@ -256,7 +255,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                 }
             } else {
                 // getting network status
-                final boolean isNetworkEnabled = locationManager
+                final var isNetworkEnabled = locationManager
                         .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
                 // First get location from Network Provider
@@ -274,7 +273,7 @@ public class NearbyNotificationService extends Service implements LocationListen
             }
         } catch (final Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
-            final Bundle b = new Bundle();
+            final var b = new Bundle();
             b.putString("error", "Error registering LocationManager: " + e);
             locationManager = null;
             myPos = null;

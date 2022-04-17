@@ -26,20 +26,20 @@ public class InboxActivity extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final ActivityInboxBinding binding = ActivityInboxBinding.inflate(getLayoutInflater());
+        final var binding = ActivityInboxBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         final Call<List<PublicInbox>> inboxCall = ((BaseApplication)getApplication()).getRsapiClient().getPublicInbox();
         inboxCall.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<List<PublicInbox>> call, @NonNull final Response<List<PublicInbox>> response) {
-                final List<PublicInbox> body = response.body();
+                final var body = response.body();
                 if (response.isSuccessful() && body != null) {
                     adapter = new InboxAdapter(InboxActivity.this, body);
                     binding.inboxList.setAdapter(adapter);
                     binding.inboxList.setOnItemClickListener((parent, view, position, id) -> {
-                        final PublicInbox inboxItem = body.get(position);
-                        final Intent intent = new Intent(InboxActivity.this, MapsActivity.class);
+                        final var inboxItem = body.get(position);
+                        final var intent = new Intent(InboxActivity.this, MapsActivity.class);
                         intent.putExtra(MapsActivity.EXTRAS_LATITUDE, inboxItem.getLat());
                         intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, inboxItem.getLon());
                         intent.putExtra(MapsActivity.EXTRAS_MARKER, inboxItem.getStationId() == null ? R.drawable.marker_missing : R.drawable.marker_red);

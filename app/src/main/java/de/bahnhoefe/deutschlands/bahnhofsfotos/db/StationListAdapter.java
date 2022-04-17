@@ -11,17 +11,13 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemStationBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
-/**
- * Adapter for ListView of stations
- */
 public class StationListAdapter extends CursorAdapter {
     private final LayoutInflater mInflater;
 
-    public StationListAdapter(final Context context, final Cursor c, final int flags) {
-        super(context, c, flags);
+    public StationListAdapter(final Context context, final Cursor cursor, final int flags) {
+        super(context, cursor, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
-
 
     @Override
     public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {

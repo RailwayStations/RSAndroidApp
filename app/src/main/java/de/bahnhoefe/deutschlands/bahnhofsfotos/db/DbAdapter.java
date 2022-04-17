@@ -43,7 +43,7 @@ public class DbAdapter {
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
     private static final String DATABASE_TABLE_UPLOADS = "uploads";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 19;
+    private static final int DATABASE_VERSION = 20;
 
     private static final String CREATE_STATEMENT_STATIONS = "CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
             + Constants.STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -59,7 +59,8 @@ public class DbAdapter {
             + Constants.STATIONS.LICENSE + " TEXT, "
             + Constants.STATIONS.LICENSE_URL + " TEXT, "
             + Constants.STATIONS.DS100 + " TEXT, "
-            + Constants.STATIONS.ACTIVE + " INTEGER)";
+            + Constants.STATIONS.ACTIVE + " INTEGER, "
+            + Constants.STATIONS.OUTDATED + " INTEGER)";
     private static final String CREATE_STATEMENT_STATIONS_IDX = "CREATE INDEX " + DATABASE_TABLE_STATIONS + "_IDX "
             + "ON " + DATABASE_TABLE_STATIONS + "(" + Constants.STATIONS.COUNTRY + ", " + Constants.STATIONS.ID + ")";
     private static final String CREATE_STATEMENT_COUNTRIES = "CREATE TABLE " + DATABASE_TABLE_COUNTRIES + " ("
@@ -145,6 +146,7 @@ public class DbAdapter {
         values.put(Constants.STATIONS.LICENSE_URL, station.getLicenseUrl());
         values.put(Constants.STATIONS.DS100, station.getDs100());
         values.put(Constants.STATIONS.ACTIVE, station.isActive());
+        values.put(Constants.STATIONS.OUTDATED, station.isOutdated());
         return values;
     }
 
@@ -209,7 +211,7 @@ public class DbAdapter {
         var orderBy = Constants.STATIONS.TITLE + " ASC";
 
         if (sortByDistance) {
-            final double fudge = Math.pow(Math.cos(Math.toRadians(myPos.getLatitude())), 2);
+            final var fudge = Math.pow(Math.cos(Math.toRadians(myPos.getLatitude())), 2);
             orderBy = "((" + myPos.getLatitude() + " - " + Constants.STATIONS.LAT + ") * (" + myPos.getLatitude() + " - " + Constants.STATIONS.LAT + ") + " +
                     "(" + myPos.getLongitude() + " - " + Constants.STATIONS.LON + ") * (" + myPos.getLongitude() + " - " + Constants.STATIONS.LON + ") * " + fudge + ")";
         }
@@ -536,6 +538,10 @@ public class DbAdapter {
                 if (oldVersion < 19) {
                     db.execSQL("ALTER TABLE " + DATABASE_TABLE_UPLOADS + " ADD COLUMN " + Constants.UPLOADS.CRC32 + " INTEGER");
                 }
+
+                if (oldVersion < 20) {
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Constants.STATIONS.OUTDATED + " INTEGER");
+                }
             }
 
             db.setTransactionSuccessful();
@@ -558,6 +564,7 @@ public class DbAdapter {
         station.setLicenseUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE_URL)));
         station.setDs100(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.DS100)));
         station.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.STATIONS.ACTIVE)) == 1);
+        station.setOutdated(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.STATIONS.OUTDATED)) == 1);
         return station;
     }
 
@@ -706,7 +713,7 @@ public class DbAdapter {
     public List<Station> getStationByLatLngRectangle(final double lat, final double lng, final StationFilter stationFilter) {
         final var stationList = new ArrayList<Station>();
         // Select All Query with rectangle - might be later change with it
-        var selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS + " where " + Constants.STATIONS.LAT + " < " + (lat + 0.5) + " AND " + Constants.STATIONS.LAT + " > " + (lat - 0.5)
+        var selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.LAT + " < " + (lat + 0.5) + " AND " + Constants.STATIONS.LAT + " > " + (lat - 0.5)
                 + " AND " + Constants.STATIONS.LON + " < " + (lng + 0.5) + " AND " + Constants.STATIONS.LON + " > " + (lng - 0.5);
 
         final var queryArgs = new ArrayList<String>();
@@ -748,6 +755,5 @@ public class DbAdapter {
 
         return countryList;
     }
-
 
 }

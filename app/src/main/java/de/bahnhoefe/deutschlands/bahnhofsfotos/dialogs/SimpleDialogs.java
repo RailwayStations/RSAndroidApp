@@ -12,7 +12,9 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.PromptBinding;
 
 public class SimpleDialogs {
 
-    public void confirm(final Context context, final int message) {
+    private SimpleDialogs(){}
+
+    public static void confirm(final Context context, final int message) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
@@ -20,7 +22,7 @@ public class SimpleDialogs {
             .setNeutralButton(R.string.button_ok_text, null).create().show();
     }
 
-    public void confirm(final Context context, final CharSequence message) {
+    public static void confirm(final Context context, final CharSequence message) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
@@ -28,7 +30,7 @@ public class SimpleDialogs {
             .setNeutralButton(R.string.button_ok_text, null).create().show();
     }
 
-    public void confirm(final Context context, final int message, final DialogInterface.OnClickListener listener) {
+    public static void confirm(final Context context, final int message, final DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
@@ -38,7 +40,7 @@ public class SimpleDialogs {
             .create().show();
     }
 
-    public void confirm(final Context context, final String message, final DialogInterface.OnClickListener listener) {
+    public static void confirm(final Context context, final String message, final DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
@@ -48,7 +50,7 @@ public class SimpleDialogs {
             .create().show();
     }
 
-    public void simpleSelect(final Context context, final CharSequence message, final CharSequence[] items, final DialogInterface.OnClickListener listener) {
+    public static void simpleSelect(final Context context, final CharSequence message, final CharSequence[] items, final DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(message)
@@ -56,7 +58,7 @@ public class SimpleDialogs {
             .create().show();
     }
 
-    public void prompt(final Context context, final int message, final int inputType, final int hint, final String text, final PromptListener listener) {
+    public static void prompt(final Context context, final int message, final int inputType, final int hint, final String text, final PromptListener listener) {
         final var binding = PromptBinding.inflate(LayoutInflater.from(context));
         if (text != null) {
             binding.etPrompt.setText(text);

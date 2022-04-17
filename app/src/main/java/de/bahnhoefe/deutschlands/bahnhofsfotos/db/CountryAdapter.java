@@ -84,7 +84,7 @@ public class CountryAdapter extends CursorAdapter {
         binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)));
         binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
 
-        final String newCountry = cursor.getString(1);
+        final var newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
         binding.checkCountry.setChecked(selectedCountries.contains(newCountry));
         binding.checkCountry.setOnClickListener(onStateChangedListener(binding.checkCountry, cursor.getPosition()));

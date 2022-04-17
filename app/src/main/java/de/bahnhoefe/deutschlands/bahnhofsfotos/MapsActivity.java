@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,9 +18,7 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.Toast;
@@ -39,7 +36,6 @@ import org.mapsforge.core.graphics.Align;
 import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.graphics.FontFamily;
 import org.mapsforge.core.graphics.FontStyle;
-import org.mapsforge.core.graphics.Paint;
 import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
@@ -122,7 +118,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        final Window window = getWindow();
+        final var window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.parseColor("#c71c4d"));
 
@@ -133,17 +129,17 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         dbAdapter = baseApplication.getDbAdapter();
         nickname = baseApplication.getNickname();
 
-        final Intent intent = getIntent();
+        final var intent = getIntent();
         Marker extraMarker = null;
         if (intent != null) {
-            final Double latitude = (Double) intent.getSerializableExtra(EXTRAS_LATITUDE);
-            final Double longitude = (Double) intent.getSerializableExtra(EXTRAS_LONGITUDE);
+            final var latitude = (Double) intent.getSerializableExtra(EXTRAS_LATITUDE);
+            final var longitude = (Double) intent.getSerializableExtra(EXTRAS_LONGITUDE);
             setMyLocSwitch(false);
             if (latitude != null && longitude != null) {
                 myPos = new LatLong(latitude, longitude);
             }
 
-            final Integer markerRes = (Integer) intent.getSerializableExtra(EXTRAS_MARKER);
+            final var markerRes = (Integer) intent.getSerializableExtra(EXTRAS_MARKER);
             if (markerRes != null) {
                 extraMarker = createBitmapMarker(myPos, markerRes);
             }
@@ -162,7 +158,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void addDBSTileSource(final int nameResId, final String baseUrl) {
-        final DbsTileSource dbsBasic = new DbsTileSource(getString(nameResId), baseUrl);
+        final var dbsBasic = new DbsTileSource(getString(nameResId), baseUrl);
         onlineTileSources.put(dbsBasic.getName(), dbsBasic);
     }
 
@@ -264,12 +260,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     protected XmlRenderTheme getRenderTheme() {
-        final Uri mapTheme = baseApplication.getMapThemeUri();
+        final var mapTheme = baseApplication.getMapThemeUri();
         if (mapTheme == null) {
             return InternalRenderTheme.DEFAULT;
         }
         try {
-            final DocumentFile renderThemeFile = DocumentFile.fromSingleUri(getApplication(), mapTheme);
+            final var renderThemeFile = DocumentFile.fromSingleUri(getApplication(), mapTheme);
             return new StreamRenderTheme("/assets/", getContentResolver().openInputStream(renderThemeFile.getUri()));
         } catch (final Exception e) {
             Log.e( TAG,"Error loading theme " + mapTheme, e);
@@ -282,7 +278,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             return null;
         }
         try {
-            final FileInputStream inputStream = (FileInputStream) getContentResolver().openInputStream(mapUri);
+            final var inputStream = (FileInputStream) getContentResolver().openInputStream(mapUri);
             return new MapFile(inputStream, 0, null);
         } catch (final FileNotFoundException e) {
             Log.e(TAG, "Can't open mapFile", e);
@@ -291,12 +287,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     protected void createLayers() {
-        final String map = baseApplication.getMap();
-        final Uri mapUri = baseApplication.toUri(map);
-        final MapDataStore mapFile = getMapFile(mapUri);
+        final var map = baseApplication.getMap();
+        final var mapUri = baseApplication.toUri(map);
+        final var mapFile = getMapFile(mapUri);
 
         if (mapFile != null) {
-            final TileRendererLayer rendererLayer = new TileRendererLayer(this.tileCaches.get(0), mapFile,
+            final var rendererLayer = new TileRendererLayer(this.tileCaches.get(0), mapFile,
                     this.binding.map.mapView.getModel().mapViewPosition, false, true, false, AndroidGraphicFactory.INSTANCE) {
                 @Override
                 public boolean onLongPress(final LatLong tapLatLong, final Point thisXY,
@@ -335,23 +331,23 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private Marker createBitmapMarker(final LatLong latLong, final int markerRes) {
-        final Drawable drawable = ContextCompat.getDrawable(this, markerRes);
+        final var drawable = ContextCompat.getDrawable(this, markerRes);
         assert drawable != null;
-        final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
+        final var bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
         return new Marker(latLong, bitmap, -(bitmap.getWidth() / 2), -bitmap.getHeight());
     }
 
     private void onLongPress(final LatLong tapLatLong) {
         if (missingMarker == null) {
             // marker to show at the location
-            final Drawable drawable = ContextCompat.getDrawable(this, R.drawable.marker_missing);
+            final var drawable = ContextCompat.getDrawable(this, R.drawable.marker_missing);
             assert drawable != null;
-            final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
+            final var bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
             missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth()/2), -bitmap.getHeight()) {
                 @Override
                 public boolean onTap(final LatLong tapLatLong, final Point layerXY, final Point tapXY) {
-                    new SimpleDialogs().confirm(MapsActivity.this, R.string.add_missing_station, (dialogInterface, i) -> {
-                        final Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
+                    SimpleDialogs.confirm(MapsActivity.this, R.string.add_missing_station, (dialogInterface, i) -> {
+                        final var intent = new Intent(MapsActivity.this, DetailsActivity.class);
                         intent.putExtra(DetailsActivity.EXTRA_LATITUDE, getLatLong().latitude);
                         intent.putExtra(DetailsActivity.EXTRA_LONGITUDE, getLatLong().longitude);
                         startActivity(intent);
@@ -375,7 +371,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.maps, menu);
 
-        final MenuItem item = menu.findItem(R.id.menu_toggle_mypos);
+        final var item = menu.findItem(R.id.menu_toggle_mypos);
         myLocSwitch = new CheckBox(this);
         myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector);
         myLocSwitch.setChecked(baseApplication.isLocationUpdates());
@@ -391,26 +387,26 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
         );
 
-        final String map = baseApplication.getMap();
+        final var map = baseApplication.getMap();
 
-        final MenuItem osmMapnick = menu.findItem(R.id.osm_mapnik);
+        final var osmMapnick = menu.findItem(R.id.osm_mapnik);
         osmMapnick.setChecked(map == null);
         osmMapnick.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, null));
 
-        final SubMenu mapSubmenu = menu.findItem(R.id.maps_submenu).getSubMenu();
-        for (final OnlineTileSource tileSource : onlineTileSources.values()) {
-            final MenuItem mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, tileSource.getName());
+        final var mapSubmenu = menu.findItem(R.id.maps_submenu).getSubMenu();
+        for (final var tileSource : onlineTileSources.values()) {
+            final var mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, tileSource.getName());
             mapItem.setChecked(tileSource.getName().equals(map));
             mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, tileSource.getName()));
         }
 
-        final Uri mapDirectory = baseApplication.getMapDirectoryUri();
+        final var mapDirectory = baseApplication.getMapDirectoryUri();
         if (mapDirectory != null) {
-            final DocumentFile documentsTree = getDocumentFileFromTreeUri(mapDirectory);
+            final var documentsTree = getDocumentFileFromTreeUri(mapDirectory);
             if (documentsTree != null) {
-                for (final DocumentFile file : documentsTree.listFiles()) {
+                for (final var file : documentsTree.listFiles()) {
                     if (file.isFile() && file.getName().endsWith(".map")) {
-                        final MenuItem mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, file.getName());
+                        final var mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, file.getName());
                         mapItem.setChecked(file.getUri().equals(baseApplication.toUri(map)));
                         mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, file.getUri().toString()));
                     }
@@ -419,34 +415,34 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
         mapSubmenu.setGroupCheckable(R.id.maps_group, true, true);
 
-        final MenuItem mapFolder = mapSubmenu.add(R.string.map_folder);
+        final var mapFolder = mapSubmenu.add(R.string.map_folder);
         mapFolder.setOnMenuItemClickListener(item1 -> {
             openMapDirectoryChooser();
             return false;
         });
 
-        final Uri mapTheme = baseApplication.getMapThemeUri();
-        final Uri mapThemeDirectory = baseApplication.getMapThemeDirectoryUri();
+        final var mapTheme = baseApplication.getMapThemeUri();
+        final var mapThemeDirectory = baseApplication.getMapThemeDirectoryUri();
 
-        final MenuItem defaultTheme = menu.findItem(R.id.default_theme);
+        final var defaultTheme = menu.findItem(R.id.default_theme);
         defaultTheme.setChecked(mapTheme == null);
         defaultTheme.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, null));
-        final SubMenu themeSubmenu = menu.findItem(R.id.themes_submenu).getSubMenu();
+        final var themeSubmenu = menu.findItem(R.id.themes_submenu).getSubMenu();
 
         if (mapThemeDirectory != null) {
-            final DocumentFile documentsTree = getDocumentFileFromTreeUri(mapThemeDirectory);
+            final var documentsTree = getDocumentFileFromTreeUri(mapThemeDirectory);
             if (documentsTree != null) {
-                for (final DocumentFile file : documentsTree.listFiles()) {
+                for (final var file : documentsTree.listFiles()) {
                     if (file.isFile() && file.getName().endsWith(".xml")) {
-                        final String themeName = file.getName();
-                        final MenuItem themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
+                        final var themeName = file.getName();
+                        final var themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
                         themeItem.setChecked(file.getUri().equals(mapTheme));
                         themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, file.getUri()));
                     } else if (file.isDirectory()) {
-                        final DocumentFile childFile = file.findFile(file.getName() + ".xml");
+                        final var childFile = file.findFile(file.getName() + ".xml");
                         if (childFile != null) {
-                            final String themeName = file.getName();
-                            final MenuItem themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
+                            final var themeName = file.getName();
+                            final var themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
                             themeItem.setChecked(childFile.getUri().equals(mapTheme));
                             themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, childFile.getUri()));
                         }
@@ -456,7 +452,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
         themeSubmenu.setGroupCheckable(R.id.themes_group, true, true);
 
-        final MenuItem themeFolder = themeSubmenu.add(R.string.theme_folder);
+        final var themeFolder = themeSubmenu.add(R.string.theme_folder);
         themeFolder.setOnMenuItemClickListener(item12 -> {
             openThemeDirectoryChooser();
             return false;
@@ -477,7 +473,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     protected final ActivityResultLauncher<Intent> themeDirectoryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    final Uri uri = result.getData().getData();
+                    final var uri = result.getData().getData();
                     if (uri != null) {
                         getContentResolver().takePersistableUriPermission(
                                 uri,
@@ -492,7 +488,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     protected final ActivityResultLauncher<Intent> mapDirectoryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    final Uri uri = result.getData().getData();
+                    final var uri = result.getData().getData();
                     if (uri != null) {
                         getContentResolver().takePersistableUriPermission(
                                 uri,
@@ -505,7 +501,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             });
 
     public void openDirectory(final ActivityResultLauncher<Intent> launcher) {
-        final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        final var intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         launcher.launch(intent);
     }
@@ -533,8 +529,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         if (item.getItemId() == R.id.map_info) {
-            final MapInfoFragment mapInfoFragment = new MapInfoFragment();
-            mapInfoFragment.show(getSupportFragmentManager(), "Map Info Dialog");
+            new MapInfoFragment().show(getSupportFragmentManager(), "Map Info Dialog");
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -548,7 +543,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private void runUpdateCountriesAndStations() {
         binding.map.progressBar.setVisibility(View.VISIBLE);
-
         baseApplication.getRsapiClient().runUpdateCountriesAndStations(this, baseApplication, success -> reloadMap());
     }
 
@@ -566,11 +560,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     @Override
     public void onTap(final BahnhofGeoItem marker) {
-        final Intent intent = new Intent(MapsActivity.this, DetailsActivity.class);
-        final String id = marker.getStation().getId();
-        final String country = marker.getStation().getCountry();
+        final var intent = new Intent(MapsActivity.this, DetailsActivity.class);
+        final var id = marker.getStation().getId();
+        final var country = marker.getStation().getCountry();
         try {
-            final Station station = dbAdapter.getStationByKey(country, id);
+            final var station = dbAdapter.getStationByKey(country, id);
             intent.putExtra(DetailsActivity.EXTRA_STATION, station);
             startActivity(intent);
         } catch (final RuntimeException e) {
@@ -604,9 +598,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         @Override
         public void run() {
-            final List<Station> stationList = activityRef.get().readStations();
-            final List<Upload> uploadList = activityRef.get().readPendingUploads();
-            final MapsActivity mapsActivity = activityRef.get();
+            final var stationList = activityRef.get().readStations();
+            final var uploadList = activityRef.get().readPendingUploads();
+            final var mapsActivity = activityRef.get();
             if (mapsActivity != null) {
                 mapsActivity.runOnUiThread(()-> mapsActivity.onStationsLoaded(stationList, uploadList));
             }
@@ -632,59 +626,65 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         return null;
     }
 
-    private List<MarkerBitmap> getMarkerBitmap() {
-        final List<MarkerBitmap> markerBitmaps = new ArrayList<>();
-        // prepare for marker icons.
-
-        // small icon for maximum single item
-        final Bitmap bitmapWithPhoto = loadBitmap(R.drawable.marker_green);
-        final Bitmap markerWithoutPhoto = loadBitmap(R.drawable.marker_red);
-        final Bitmap markerOwnPhoto = loadBitmap(R.drawable.marker_violet);
-        final Bitmap markerPendingUpload = loadBitmap(R.drawable.marker_yellow);
-
-        final Bitmap markerWithPhotoInactive = loadBitmap(R.drawable.marker_green_inactive);
-        final Bitmap markerWithoutPhotoInactive = loadBitmap(R.drawable.marker_red_inactive);
-        final Bitmap markerOwnPhotoInactive = loadBitmap(R.drawable.marker_violet_inactive);
-
-        final Paint paint1 = AndroidGraphicFactory.INSTANCE.createPaint();
-        paint1.setStyle(Style.FILL);
-        paint1.setTextAlign(Align.CENTER);
-        FontFamily fontFamily = FontFamily.DEFAULT;
-        FontStyle fontStyle = FontStyle.BOLD;
-        paint1.setTypeface(fontFamily, fontStyle);
-        paint1.setColor(Color.RED);
-        markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), markerWithoutPhoto, bitmapWithPhoto, markerOwnPhoto,
-                markerWithoutPhotoInactive, markerWithPhotoInactive, markerOwnPhotoInactive, markerPendingUpload,
-                new Point(0, -(markerWithoutPhoto.getHeight()/2.0)), 10f, 1, paint1));
-
-        // small cluster icon. for 10 or less items.
-        final Bitmap bitmapBalloonSN = loadBitmap(R.drawable.balloon_s_n);
-        final Paint paint2 = AndroidGraphicFactory.INSTANCE.createPaint();
-        paint2.setStyle(Style.FILL);
-        paint2.setTextAlign(Align.CENTER);
-        fontFamily = FontFamily.DEFAULT;
-        fontStyle = FontStyle.BOLD;
-        paint2.setTypeface(fontFamily, fontStyle);
-        paint2.setColor(Color.BLACK);
-        markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), bitmapBalloonSN,
-                new Point(0, 0), 9f, 10, paint2));
-
-        // large cluster icon. 100 will be ignored.
-        final Bitmap bitmapBalloonMN = loadBitmap(R.drawable.balloon_m_n);
-        final Paint paint3 = AndroidGraphicFactory.INSTANCE.createPaint();
-        paint3.setStyle(Style.FILL);
-        paint3.setTextAlign(Align.CENTER);
-        fontFamily = FontFamily.DEFAULT;
-        fontStyle = FontStyle.BOLD;
-        paint3.setTypeface(fontFamily, fontStyle);
-        paint3.setColor(Color.BLACK);
-        markerBitmaps.add(new MarkerBitmap(this.getApplicationContext(), bitmapBalloonMN,
-                new Point(0, 0), 11f, 100, paint3));
+    private List<MarkerBitmap> createMarkerBitmaps() {
+        final var markerBitmaps = new ArrayList<MarkerBitmap>();
+        markerBitmaps.add(createSmallSingleIconMarker());
+        markerBitmaps.add(createSmallClusterIconMarker());
+        markerBitmaps.add(createLargeClusterIconMarker());
         return markerBitmaps;
     }
 
+    /**
+     * large cluster icon. 100 will be ignored.
+     */
+    private MarkerBitmap createLargeClusterIconMarker() {
+        final var bitmapBalloonMN = loadBitmap(R.drawable.balloon_m_n);
+        final var paint = AndroidGraphicFactory.INSTANCE.createPaint();
+        paint.setStyle(Style.FILL);
+        paint.setTextAlign(Align.CENTER);
+        paint.setTypeface(FontFamily.DEFAULT, FontStyle.BOLD);
+        paint.setColor(Color.BLACK);
+        return new MarkerBitmap(this.getApplicationContext(), bitmapBalloonMN,
+                new Point(0, 0), 11f, 100, paint);
+    }
+
+    /**
+     * small cluster icon. for 10 or less items.
+     */
+    private MarkerBitmap createSmallClusterIconMarker() {
+        final var bitmapBalloonSN = loadBitmap(R.drawable.balloon_s_n);
+        final var paint = AndroidGraphicFactory.INSTANCE.createPaint();
+        paint.setStyle(Style.FILL);
+        paint.setTextAlign(Align.CENTER);
+        paint.setTypeface(FontFamily.DEFAULT, FontStyle.BOLD);
+        paint.setColor(Color.BLACK);
+        return new MarkerBitmap(this.getApplicationContext(), bitmapBalloonSN,
+                new Point(0, 0), 9f, 10, paint);
+    }
+
+    private MarkerBitmap createSmallSingleIconMarker() {
+        final var bitmapWithPhoto = loadBitmap(R.drawable.marker_green);
+        final var markerWithoutPhoto = loadBitmap(R.drawable.marker_red);
+        final var markerOwnPhoto = loadBitmap(R.drawable.marker_violet);
+        final var markerPendingUpload = loadBitmap(R.drawable.marker_yellow);
+
+        final var markerWithPhotoInactive = loadBitmap(R.drawable.marker_green_inactive);
+        final var markerWithoutPhotoInactive = loadBitmap(R.drawable.marker_red_inactive);
+        final var markerOwnPhotoInactive = loadBitmap(R.drawable.marker_violet_inactive);
+
+        final var paint = AndroidGraphicFactory.INSTANCE.createPaint();
+        paint.setStyle(Style.FILL);
+        paint.setTextAlign(Align.CENTER);
+        paint.setTypeface(FontFamily.DEFAULT, FontStyle.BOLD);
+        paint.setColor(Color.RED);
+
+        return new MarkerBitmap(this.getApplicationContext(), markerWithoutPhoto, bitmapWithPhoto, markerOwnPhoto,
+                markerWithoutPhotoInactive, markerWithPhotoInactive, markerOwnPhotoInactive, markerPendingUpload,
+                new Point(0, -(markerWithoutPhoto.getHeight()/2.0)), 10f, 1, paint);
+    }
+
     private Bitmap loadBitmap(final int resourceId){
-        final Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(ResourcesCompat.getDrawable(getResources(), resourceId, null));
+        final var bitmap = AndroidGraphicFactory.convertToBitmap(ResourcesCompat.getDrawable(getResources(), resourceId, null));
         bitmap.incrementRefCount();
         return bitmap;
     }
@@ -694,10 +694,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         double maxLat = 0;
         double minLon = 0;
         double maxLon = 0;
-        for (final Station station : stationMarker) {
-            final boolean isPendingUpload = isPendingUpload(station, uploadList);
-            final BahnhofGeoItem geoItem = new BahnhofGeoItem(station, isPendingUpload);
-            final LatLong bahnhofPos = geoItem.getLatLong();
+        for (final var station : stationMarker) {
+            final var isPendingUpload = isPendingUpload(station, uploadList);
+            final var geoItem = new BahnhofGeoItem(station, isPendingUpload);
+            final var bahnhofPos = geoItem.getLatLong();
             if (minLat == 0.0) {
                 minLat = bahnhofPos.latitude;
                 maxLat = bahnhofPos.latitude;
@@ -721,7 +721,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private boolean isPendingUpload(final Station station, final List<Upload> uploadList) {
-        for (final Upload upload : uploadList) {
+        for (final var upload : uploadList) {
             if (upload.isPendingPhotoUpload() && station.getId().equals(upload.getStationId()) && station.getCountry().equals(upload.getCountry())) {
                 return true;
             }
@@ -752,7 +752,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         // create clusterer instance
         clusterer = new ClusterManager<>(
                 binding.map.mapView,
-                getMarkerBitmap(),
+                createMarkerBitmaps(),
                 (byte)9,
                 this);
         // this uses the framebuffer position, the mapview position can be out of sync with
@@ -766,7 +766,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             ((TileDownloadLayer)this.layer).onPause();
         }
         unregisterLocationManager();
-        final MapPosition mapPosition = binding.map.mapView.getModel().mapViewPosition.getMapPosition();
+        final var mapPosition = binding.map.mapView.getModel().mapViewPosition.getMapPosition();
         baseApplication.setLastMapPosition(mapPosition);
         destroyClusterManager();
         super.onPause();
@@ -833,7 +833,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             // getting GPS status
-            final boolean isGPSEnabled = locationManager
+            final var isGPSEnabled = locationManager
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             // if GPS Enabled get lat/long using GPS Services
@@ -844,13 +844,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                         MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                 Log.d(TAG, "GPS Enabled");
                 if (locationManager != null) {
-                    final Location loc = locationManager
+                    final var loc = locationManager
                             .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     myPos = new LatLong(loc.getLatitude(), loc.getLongitude());
                 }
             } else {
                 // getting network status
-                final boolean isNetworkEnabled = locationManager
+                final var isNetworkEnabled = locationManager
                         .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
                 // First get location from Network Provider
@@ -861,7 +861,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                     Log.d(TAG, "Network Location enabled");
                     if (locationManager != null) {
-                        final Location loc = locationManager
+                        final var loc = locationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         myPos = new LatLong(loc.getLatitude(), loc.getLongitude());
                     }
@@ -870,7 +870,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             setMyLocSwitch(true);
         } catch (final Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
-            final Bundle b = new Bundle();
+            final var b = new Bundle();
             b.putString("error", "Error registering LocationManager: " + e);
             locationManager = null;
             myPos = null;
@@ -971,7 +971,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 baseApplication.setMap(map);
             }
 
-            final MapsActivity mapsActivity = mapsActivityRef.get();
+            final var mapsActivity = mapsActivityRef.get();
             if (mapsActivity != null) {
                 mapsActivity.recreate();
             }
@@ -1002,7 +1002,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 baseApplication.setMapThemeUri(mapThemeUri);
             }
 
-            final MapsActivity mapsActivity = mapsActivityRef.get();
+            final var mapsActivity = mapsActivityRef.get();
             if (mapsActivity != null) {
                 mapsActivity.recreate();
             }

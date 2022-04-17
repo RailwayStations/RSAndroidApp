@@ -141,7 +141,7 @@ public class MarkerBitmap {
     }
 
     public static Bitmap getBitmapFromTitle(final String title, final Paint paint) {
-        final Context context = contextRef.get();
+        final var context = contextRef.get();
         if (!captionViews.containsKey(title) && context != null) {
             final var bubbleView = new TextView(context);
             bubbleView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));

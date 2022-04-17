@@ -66,13 +66,27 @@
         android:textIsSelectable="true"/>
 
     <TextView
+        android:id="@+id/outdated_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/problem_photo_outdated"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:layout_below="@id/active_label"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"/>
+
+    <TextView
         android:id="@+id/owner_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/owner_label"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_below="@id/active_label"
+        android:layout_below="@id/outdated_label"
         android:layout_marginTop="4dp"
         android:layout_marginStart="14dp"
         android:layout_marginEnd="4dp"
@@ -84,7 +98,7 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:layout_toEndOf="@id/owner_label"
-        android:layout_below="@id/active_label"
+        android:layout_below="@id/outdated_label"
         android:layout_marginTop="4dp"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"

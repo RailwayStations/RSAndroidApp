@@ -35,14 +35,14 @@ public class OutboxAdapter extends CursorAdapter {
     @Override
     public void bindView(final View view, final Context context, final Cursor cursor) {
         final var binding = (ItemUploadBinding) view.getTag();
-        final long id = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.CURSOR_ADAPTER_ID));
-        final long remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID));
-        final String uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE));
-        final String stationTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.JOIN_STATION_TITLE));
-        final String problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
-        final String uploadStateStr = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
-        final String comment = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COMMENT));
-        final String rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON));
+        final var id = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.CURSOR_ADAPTER_ID));
+        final var remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID));
+        final var uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE));
+        final var stationTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.JOIN_STATION_TITLE));
+        final var problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
+        final var uploadStateStr = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
+        final var comment = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COMMENT));
+        final var rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON));
 
         final var uploadState = UploadState.valueOf(uploadStateStr);
         final var textState = id + (remoteId > 0 ? "/" + remoteId : "" ) + ": " + context.getString(uploadState.getTextId());

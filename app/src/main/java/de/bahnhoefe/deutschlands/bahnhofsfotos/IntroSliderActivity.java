@@ -8,7 +8,6 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -38,7 +37,7 @@ public class IntroSliderActivity extends AppCompatActivity {
 
         addBottomDots(0);
         changeStatusBarColor();
-        final ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter();
+        final var viewPagerAdapter = new ViewPagerAdapter();
         binding.viewPager.setAdapter(viewPagerAdapter);
         binding.viewPager.addOnPageChangeListener(viewListener);
 
@@ -58,7 +57,7 @@ public class IntroSliderActivity extends AppCompatActivity {
     }
 
     private void openMainActivity() {
-        final Intent intent = new Intent(IntroSliderActivity.this, MainActivity.class);
+        final var intent = new Intent(IntroSliderActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }
@@ -69,9 +68,9 @@ public class IntroSliderActivity extends AppCompatActivity {
     }
 
     private void addBottomDots(final int position) {
-        final TextView[] dots = new TextView[layouts.length];
-        final int[] colorActive = getResources().getIntArray(R.array.dot_active);
-        final int[] colorInactive = getResources().getIntArray(R.array.dot_inactive);
+        final var dots = new TextView[layouts.length];
+        final var colorActive = getResources().getIntArray(R.array.dot_active);
+        final var colorInactive = getResources().getIntArray(R.array.dot_inactive);
         binding.layoutDots.removeAllViews();
 
         for (int i = 0; i < dots.length; i++) {
@@ -100,7 +99,7 @@ public class IntroSliderActivity extends AppCompatActivity {
 
         @Override
         public void onPageSelected(final int position) {
-            final BaseApplication baseApplication = (BaseApplication) getApplication();
+            final var baseApplication = (BaseApplication) getApplication();
             addBottomDots(position);
 
             if (position == layouts.length - 1) {
@@ -120,7 +119,7 @@ public class IntroSliderActivity extends AppCompatActivity {
     };
 
     private void changeStatusBarColor() {
-        final Window window = getWindow();
+        final var window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.TRANSPARENT);
     }
@@ -130,15 +129,15 @@ public class IntroSliderActivity extends AppCompatActivity {
         @Override
         @NonNull
         public Object instantiateItem(@NonNull final ViewGroup container, final int position) {
-            final LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            final View view = layoutInflater.inflate(layouts[position], container, false);
+            final var layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final var view = layoutInflater.inflate(layouts[position], container, false);
             container.addView(view);
             return view;
         }
 
         @Override
         public void destroyItem(final ViewGroup container, final int position, @NonNull final Object object) {
-            final View view = (View) object;
+            final var view = (View) object;
             container.removeView(view);
         }
 

@@ -57,7 +57,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
             bitmap = getBitmapFromResource(R.drawable.ic_stations_with_photo);
         }
 
-        final NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
+        final var bigPictureStyle = new NotificationCompat.BigPictureStyle();
         if (bitmap != null) {
             bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(notificationStation.getLicense());
         }
@@ -87,6 +87,5 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
         vectorDrawable.draw(canvas);
         return bm;
     }
-
 
 }

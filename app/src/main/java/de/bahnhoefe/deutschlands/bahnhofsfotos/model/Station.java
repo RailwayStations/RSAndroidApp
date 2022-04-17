@@ -23,6 +23,7 @@ public class Station implements Serializable {
     private String license;
     private String licenseUrl;
     private boolean active;
+    private boolean outdated;
 
     public String getId() {
         return id;
@@ -146,5 +147,13 @@ public class Station implements Serializable {
 
     public void setCountry(final String country) {
         this.country = country;
+    }
+
+    public boolean isOutdated() {
+        return outdated;
+    }
+
+    public void setOutdated(final boolean outdated) {
+        this.outdated = outdated;
     }
 }

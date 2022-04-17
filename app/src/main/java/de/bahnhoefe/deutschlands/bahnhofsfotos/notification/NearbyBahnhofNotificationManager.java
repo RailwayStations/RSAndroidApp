@@ -79,8 +79,7 @@ public abstract class NearbyBahnhofNotificationManager {
         }
 
         // Get an instance of the NotificationManager service
-        final NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(context);
+        final var notificationManager = NotificationManagerCompat.from(context);
 
         // Build the notification and issues it with notification manager.
         notificationManager.notify(NOTIFICATION_ID, notification);
@@ -235,7 +234,7 @@ public abstract class NearbyBahnhofNotificationManager {
 
         public TextCreator invoke() {
             shortText = context.getString(R.string.template_short_text, notificationStation.getTitle(), notificationDistance);
-            final String longText = context.getString(R.string.template_long_text,
+            final var longText = context.getString(R.string.template_long_text,
                     notificationStation.getTitle(),
                     notificationDistance,
                     (notificationStation.hasPhoto() ?

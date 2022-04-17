@@ -24,6 +24,7 @@ public class Constants {
         public static final String LICENSE_URL = "licenseUrl";
         public static final String DS100 = "DS100";
         public static final String ACTIVE = "active";
+        public static final String OUTDATED = "outdated";
     }
 
     /**

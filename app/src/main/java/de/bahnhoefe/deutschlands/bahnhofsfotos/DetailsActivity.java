@@ -4,11 +4,9 @@ import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
 
 import android.animation.ValueAnimator;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -73,7 +71,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityDetailsBindin
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ReportProblemBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.StationInfoBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.UploadBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
@@ -138,8 +135,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         baseApplication = (BaseApplication) getApplication();
         rsapiClient = baseApplication.getRsapiClient();
-        final DbAdapter dbAdapter = baseApplication.getDbAdapter();
-        final Set<String> countryCodes = baseApplication.getCountryCodes();
+        final var dbAdapter = baseApplication.getDbAdapter();
+        final var countryCodes = baseApplication.getCountryCodes();
         countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -230,7 +227,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     // check for local photo
                     final var localFile = getStoredMediaFile(upload);
                     if (localFile != null && localFile.canRead()) {
-                        new SimpleDialogs().confirm(this, R.string.local_photo_exists, (dialog, which) -> {
+                        SimpleDialogs.confirm(this, R.string.local_photo_exists, (dialog, which) -> {
                             setPictureButtonsEnabled(true);
                             setLocalBitmap(upload);
                         });
@@ -395,16 +392,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             reportProblemBinding.etProblemComment.setText(upload.getComment());
         }
 
-        final List<String> problemTypes = new ArrayList<>();
+        final var problemTypes = new ArrayList<String>();
         problemTypes.add(getString(R.string.problem_please_specify));
         int selected = -1;
-        for (final ProblemType type : ProblemType.values()) {
+        for (final var type : ProblemType.values()) {
             problemTypes.add(getString(type.getMessageId()));
             if (upload != null && upload.getProblemType() == type) {
                 selected = problemTypes.size() - 1;
             }
         }
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, problemTypes);
+        final var adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, problemTypes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         reportProblemBinding.problemType.setAdapter(adapter);
         if (selected > -1) {
@@ -418,7 +415,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel());
 
-        final AlertDialog alertDialog = builder.create();
+        final var alertDialog = builder.create();
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -427,8 +424,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Toast.makeText(getApplicationContext(), getString(R.string.problem_please_specify), Toast.LENGTH_LONG).show();
                 return;
             }
-            final ProblemType type = ProblemType.values()[selectedType - 1];
-            final String comment = reportProblemBinding.etProblemComment.getText().toString();
+            final var type = ProblemType.values()[selectedType - 1];
+            final var comment = reportProblemBinding.etProblemComment.getText().toString();
             if (StringUtils.isBlank(comment)) {
                 Toast.makeText(getApplicationContext(), getString(R.string.problem_please_comment), Toast.LENGTH_LONG).show();
                 return;
@@ -455,7 +452,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
                     } else if (response.code() == 401) {
-                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.authorization_failed);
+                        SimpleDialogs.confirm(DetailsActivity.this, R.string.authorization_failed);
                         return;
                     } else {
                         final Gson gson = new Gson();
@@ -469,11 +466,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     upload.setUploadState(inboxResponse.getState().getUploadState());
                     baseApplication.getDbAdapter().updateUpload(upload);
                     if (inboxResponse.getState() == InboxResponse.InboxResponseState.ERROR) {
-                        new SimpleDialogs().confirm(DetailsActivity.this,
+                        SimpleDialogs.confirm(DetailsActivity.this,
                                 String.format(getText(R.string.problem_report_failed).toString(), response.message()));
                         fetchUploadStatus(upload); // try to get the upload state again
                     } else {
-                        new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
+                        SimpleDialogs.confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
                     }
 
                 }
@@ -481,7 +478,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 @Override
                 public void onFailure(@NonNull final Call<InboxResponse> call, @NonNull final Throwable t) {
                     Log.e(TAG, "Error reporting problem", t);
-                    new SimpleDialogs().confirm(DetailsActivity.this,
+                    SimpleDialogs.confirm(DetailsActivity.this,
                             String.format(getText(R.string.problem_report_failed).toString(), t.getMessage()));
                 }
             });
@@ -549,7 +546,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public boolean onPrepareOptionsMenu(final Menu menu) {
         menu.clear();
         getMenuInflater().inflate(R.menu.details, menu);
-        final MenuItem navToStation = menu.findItem(R.id.nav_to_station);
+        final var navToStation = menu.findItem(R.id.nav_to_station);
         navToStation.getIcon().mutate();
         navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
@@ -579,13 +576,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void enableMenuItem(final Menu menu, final int id) {
-        final MenuItem menuItem = menu.findItem(id).setEnabled(true);
+        final var menuItem = menu.findItem(id).setEnabled(true);
         menuItem.getIcon().mutate();
         menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
     }
 
     private void disableMenuItem(final Menu menu, final int id) {
-        final MenuItem menuItem = menu.findItem(id).setEnabled(false);
+        final var menuItem = menu.findItem(id).setEnabled(false);
         menuItem.getIcon().mutate();
         menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
         menuItem.getIcon().setAlpha(ALPHA);
@@ -597,27 +594,27 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (itemId == R.id.nav_to_station) {
             startNavigation(DetailsActivity.this);
         } else if (itemId == R.id.timetable) {
-            final Intent timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, station.getCountry()), station);
+            final var timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, station.getCountry()), station);
             if (timetableIntent != null) {
                 startActivity(timetableIntent);
             } else {
                 Toast.makeText(this, R.string.timetable_missing, Toast.LENGTH_LONG).show();
             }
         } else if (itemId == R.id.share_photo) {
-            final Intent shareIntent = createFotoSendIntent();
+            final var shareIntent = createFotoSendIntent();
             shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, station != null ? station.getCountry() : null).getTwitterTags() + " " + binding.details.etbahnhofname.getText());
             shareIntent.setType("image/jpeg");
             startActivity(createChooser(shareIntent, "send"));
         } else if (itemId == R.id.station_info) {
             showStationInfo(null);
         } else if (itemId == R.id.provider_android_app) {
-            final List<ProviderApp> providerApps = Country.getCountryByCode(countries, station.getCountry()).getCompatibleProviderApps();
+            final var providerApps = Country.getCountryByCode(countries, station.getCountry()).getCompatibleProviderApps();
             if (providerApps.size() == 1) {
                 providerApps.get(0).openAppOrPlayStore(this);
             } else if (providerApps.size() > 1) {
-                final CharSequence[] appNames = providerApps.stream()
+                final var appNames = providerApps.stream()
                         .map(ProviderApp::getName).toArray(CharSequence[]::new);
-                new SimpleDialogs().simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, (dialog, which) -> {
+                SimpleDialogs.simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, (dialog, which) -> {
                     if (which >= 0 && providerApps.size() > which) {
                         providerApps.get(which).openAppOrPlayStore(DetailsActivity.this);
                     }
@@ -640,9 +637,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void navigateUp() {
-        final ComponentName callingActivity = getCallingActivity(); // if MapsActivity was calling, then we don't want to rebuild the Backstack
+        final var callingActivity = getCallingActivity(); // if MapsActivity was calling, then we don't want to rebuild the Backstack
         if (callingActivity == null) {
-            final Intent upIntent = NavUtils.getParentActivityIntent(this);
+            final var upIntent = NavUtils.getParentActivityIntent(this);
             upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot()) {
                 Log.v(TAG, "Recreate back stack");
@@ -654,7 +651,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void showStationInfo(final View view) {
-        final StationInfoBinding stationInfoBinding = StationInfoBinding.inflate(getLayoutInflater());
+        final var stationInfoBinding = StationInfoBinding.inflate(getLayoutInflater());
         stationInfoBinding.id.setText(station != null ? station.getId() : "");
 
         final double lat = station != null ? station.getLat() : latitude;
@@ -663,6 +660,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         stationInfoBinding.active.setText(station != null && station.isActive() ? R.string.active : R.string.inactive);
         stationInfoBinding.owner.setText(station != null && station.getPhotographer() != null ? station.getPhotographer() : "");
+        if (station.isOutdated()) {
+            stationInfoBinding.outdatedLabel.setVisibility(View.VISIBLE);
+        }
 
         new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
                 .setTitle(binding.details.etbahnhofname.getText())
@@ -674,7 +674,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void uploadPhoto() {
-        final UploadBinding uploadBinding = UploadBinding.inflate(getLayoutInflater());
+        final var uploadBinding = UploadBinding.inflate(getLayoutInflater());
         uploadBinding.etComment.setText(upload.getComment());
 
         uploadBinding.spActive.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.active_flag_options)));
@@ -690,25 +690,25 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         }
 
-        final boolean sameChecksum = crc32 != null && crc32.equals(upload.getCrc32());
+        final var sameChecksum = crc32 != null && crc32.equals(upload.getCrc32());
         uploadBinding.cbChecksum.setVisibility(sameChecksum ? View.VISIBLE : View.GONE);
 
         if (station != null) {
             uploadBinding.spCountries.setVisibility(View.GONE);
         } else {
-            final List<Country> countryList = baseApplication.getDbAdapter().getAllCountries();
-            final KeyValueSpinnerItem[] items = new KeyValueSpinnerItem[countryList.size() + 1];
+            final var countryList = baseApplication.getDbAdapter().getAllCountries();
+            final var items = new KeyValueSpinnerItem[countryList.size() + 1];
             items[0] = new KeyValueSpinnerItem(getString(R.string.chooseCountry), "");
             int selected = 0;
 
             for (int i = 0; i < countryList.size(); i++) {
-                final Country country = countryList.get(i);
+                final var country = countryList.get(i);
                 items[i+1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
                 if (country.getCode().equals(upload.getCountry())) {
                     selected = i+1;
                 }
             }
-            final ArrayAdapter<KeyValueSpinnerItem> countryAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, items);
+            final var countryAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, items);
             countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             uploadBinding.spCountries.setAdapter(countryAdapter);
             uploadBinding.spCountries.setSelection(selected);
@@ -720,7 +720,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         String overrideLicense = null;
         if (station != null) {
-            final Country country = Country.getCountryByCode(countries, station.getCountry());
+            final var country = Country.getCountryByCode(countries, station.getCountry());
             overrideLicense = country.getOverrideLicense();
         }
         if (overrideLicense != null) {
@@ -728,14 +728,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
         uploadBinding.cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        final var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         builder.setTitle(R.string.photo_upload)
                 .setView(uploadBinding.getRoot())
                 .setIcon(R.drawable.ic_bullhorn_48px)
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel());
 
-        final AlertDialog alertDialog = builder.create();
+        final var alertDialog = builder.create();
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -752,15 +752,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show();
                     return;
                 }
-                final KeyValueSpinnerItem selectedCountry = (KeyValueSpinnerItem) uploadBinding.spCountries.getSelectedItem();
+                final var selectedCountry = (KeyValueSpinnerItem) uploadBinding.spCountries.getSelectedItem();
                 upload.setCountry(selectedCountry.getValue());
             }
             alertDialog.dismiss();
 
             binding.details.progressBar.setVisibility(View.VISIBLE);
 
-            String stationTitle = binding.details.etbahnhofname.getText().toString();
-            String comment = uploadBinding.etComment.getText().toString();
+            var stationTitle = binding.details.etbahnhofname.getText().toString();
+            var comment = uploadBinding.etComment.getText().toString();
             upload.setTitle(stationTitle);
             upload.setComment(comment);
 
@@ -773,9 +773,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             upload.setActive(uploadBinding.spActive.getSelectedItemPosition() == 1);
             baseApplication.getDbAdapter().updateUpload(upload);
 
-            final File mediaFile = getStoredMediaFile(upload);
+            final var mediaFile = getStoredMediaFile(upload);
             assert mediaFile != null;
-            final RequestBody file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
+            final var file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
             rsapiClient.photoUpload(bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
                     stationTitle, latitude, longitude, comment, upload.getActive(), file).enqueue(new Callback<>() {
                 @Override
@@ -785,11 +785,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
                     } else if (response.code() == 401) {
-                        new SimpleDialogs().confirm(DetailsActivity.this, R.string.authorization_failed);
+                        SimpleDialogs.confirm(DetailsActivity.this, R.string.authorization_failed);
                         return;
                     } else {
                         assert response.errorBody() != null;
-                        final Gson gson = new Gson();
+                        final var gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(), InboxResponse.class);
                         if (inboxResponse.getState() == null) {
                             inboxResponse.setState(InboxResponse.InboxResponseState.ERROR);
@@ -803,11 +803,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     upload.setCrc32(inboxResponse.getCrc32());
                     baseApplication.getDbAdapter().updateUpload(upload);
                     if (inboxResponse.getState() == InboxResponse.InboxResponseState.ERROR) {
-                        new SimpleDialogs().confirm(DetailsActivity.this,
+                        SimpleDialogs.confirm(DetailsActivity.this,
                                 String.format(getText(InboxResponse.InboxResponseState.ERROR.getMessageId()).toString(), response.message()));
                         fetchUploadStatus(upload); // try to get the upload state again
                     } else {
-                        new SimpleDialogs().confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
+                        SimpleDialogs.confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
                     }
                 }
 
@@ -816,7 +816,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     Log.e(TAG, "Error uploading photo", t);
                     binding.details.progressBar.setVisibility(View.GONE);
 
-                    new SimpleDialogs().confirm(DetailsActivity.this,
+                    SimpleDialogs.confirm(DetailsActivity.this,
                             String.format(getText(InboxResponse.InboxResponseState.ERROR.getMessageId()).toString(), t.getMessage()));
                     fetchUploadStatus(upload); // try to get the upload state again
                 }
@@ -825,13 +825,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private Intent createFotoSendIntent() {
-        final Intent sendIntent = new Intent(Intent.ACTION_SEND);
-        final File file = getStoredMediaFile(upload);
+        final var sendIntent = new Intent(Intent.ACTION_SEND);
+        final var file = getStoredMediaFile(upload);
         if (file != null && file.canRead()) {
             sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                     BuildConfig.APPLICATION_ID + ".fileprovider", file));
         } else if (publicBitmap != null) {
-            final File newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
+            final var newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
             try {
                 saveScaledBitmap(newFile, publicBitmap);
                 sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
@@ -858,7 +858,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             @NonNull
             public View getView(final int position, final View convertView, @NonNull final ViewGroup parent) {
                 //Use super class to create the View
-                final View v = super.getView(position, convertView, parent);
+                final var v = super.getView(position, convertView, parent);
                 final TextView tv = v.findViewById(android.R.id.text1);
 
                 //Put the image on the TextView
@@ -876,7 +876,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         final double lat = station != null ? station.getLat() : latitude;
         final double lon = station != null ? station.getLon() : longitude;
-        final AlertDialog.Builder navBuilder = new AlertDialog.Builder(this);
+        final var navBuilder = new AlertDialog.Builder(this);
         navBuilder.setIcon(R.mipmap.ic_launcher);
         navBuilder.setTitle(R.string.navMethod);
         navBuilder.setAdapter(adapter, (dialog, navItem) -> {
@@ -922,8 +922,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             try {
                 startActivity(intent);
             } catch (final Exception e) {
-                final Toast toast = Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG);
-                toast.show();
+                Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG).show();
             }
         }).show();
 
@@ -997,7 +996,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private void setLocalBitmap(final Upload upload) {
         setPictureButtonsEnabled(true);
 
-        final Bitmap showBitmap = checkForLocalPhoto(upload);
+        final var showBitmap = checkForLocalPhoto(upload);
         setButtonEnabled(binding.details.buttonUpload, false);
         if (showBitmap == null) {
             // there is no local bitmap
@@ -1015,15 +1014,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             return;
         }
         setButtonEnabled(binding.details.buttonUpload, true);
-        final List<InboxStateQuery> stateQueries = new ArrayList<>();
+        final var stateQueries = new ArrayList<InboxStateQuery>();
         stateQueries.add(new InboxStateQuery(upload.getRemoteId(), upload.getCountry(), upload.getStationId()));
 
         rsapiClient.queryUploadState(stateQueries).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
-                final List<InboxStateQuery> stateQueries = response.body();
+                final var stateQueries = response.body();
                 if (stateQueries != null && !stateQueries.isEmpty()) {
-                    final InboxStateQuery stateQuery = stateQueries.get(0);
+                    final var stateQuery = stateQueries.get(0);
                     binding.details.licenseTag.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
                     binding.details.licenseTag.setTextColor(getResources().getColor(stateQuery.getState().getColorId(), null));
                     binding.details.licenseTag.setVisibility(View.VISIBLE);
@@ -1059,12 +1058,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void setBitmap(final Bitmap showBitmap) {
-        final Point size = new Point();
+        final var size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
         final int targetWidth = size.x;
 
         if (showBitmap.getWidth() != targetWidth) {
-            final Bitmap scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
+            final var scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
                     targetWidth,
                     (int) (((long) showBitmap.getHeight() * (long) targetWidth) / showBitmap.getWidth()),
                     true);
@@ -1097,13 +1096,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     @Nullable
     private Bitmap checkForLocalPhoto(final Upload upload) {
         // show the image
-        final File localFile = getStoredMediaFile(upload);
+        final var localFile = getStoredMediaFile(upload);
         Log.d(TAG, "File: " + localFile);
         crc32 = null;
         if (localFile != null && localFile.canRead()) {
             Log.d(TAG, "FileGetPath: " + localFile.getPath());
-            try (final CheckedInputStream cis = new CheckedInputStream(new FileInputStream(localFile), new CRC32())){
-                final Bitmap scaledScreen = BitmapFactory.decodeStream(cis);
+            try (final var cis = new CheckedInputStream(new FileInputStream(localFile), new CRC32())){
+                final var scaledScreen = BitmapFactory.decodeStream(cis);
                 crc32 = cis.getChecksum().getValue();
                 Log.d(TAG, "img width " + scaledScreen.getWidth() + ", height " + scaledScreen.getHeight() + ", crc32 " + crc32);
                 localFotoUsed = true;
@@ -1122,7 +1121,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     public void onPictureClicked() {
         if (!fullscreen) {
-            final ValueAnimator animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 0f);
+            final var animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();
@@ -1130,26 +1129,26 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_IMMERSIVE);
-            final ActionBar bar = getActionBar();
+            final var bar = getActionBar();
             if (bar != null) {
                 bar.hide();
             }
-            final androidx.appcompat.app.ActionBar sbar = getSupportActionBar();
+            final var sbar = getSupportActionBar();
             if (sbar != null) {
                 sbar.hide();
             }
             fullscreen = true;
         } else {
-            final ValueAnimator animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 1.0f);
+            final var animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 1.0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();
             binding.details.contentDetails.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            final ActionBar bar = getActionBar();
+            final var bar = getActionBar();
             if (bar != null) {
                 bar.show();
             }
-            final androidx.appcompat.app.ActionBar sbar = getSupportActionBar();
+            final var sbar = getSupportActionBar();
             if (sbar != null) {
                 sbar.show();
             }

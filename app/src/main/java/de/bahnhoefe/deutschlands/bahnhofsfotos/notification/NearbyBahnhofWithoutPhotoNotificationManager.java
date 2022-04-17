@@ -4,8 +4,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.core.app.NotificationCompat;
-
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
@@ -40,15 +38,14 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
      */
     @Override
     public void notifyUser() {
-        final NotificationCompat.Builder notificationBuilder = getBasicNotificationBuilder();
+        final var notificationBuilder = getBasicNotificationBuilder();
 
-        final PendingIntent fotoPendingIntent = getFotoPendingIntent();
+        final var fotoPendingIntent = getFotoPendingIntent();
 
         notificationBuilder
                 .addAction(R.drawable.ic_photo_camera_white_48px, context.getString(R.string.photo), fotoPendingIntent)
                 .setVibrate(VIBRATION_PATTERN)
-                .setColor(LED_COLOR)
-        ;
+                .setColor(LED_COLOR);
 
         onNotificationReady(notificationBuilder.build());
     }

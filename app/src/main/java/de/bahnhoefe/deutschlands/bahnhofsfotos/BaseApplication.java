@@ -74,7 +74,7 @@ public class BaseApplication extends Application {
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
 
         // migrate photo owner preference to boolean
-        final Object photoOwner = preferences.getAll().get(getString(R.string.PHOTO_OWNER));
+        final var photoOwner = preferences.getAll().get(getString(R.string.PHOTO_OWNER));
         if (photoOwner instanceof String && "YES".equals(photoOwner)) {
             setPhotoOwner(true);
         }

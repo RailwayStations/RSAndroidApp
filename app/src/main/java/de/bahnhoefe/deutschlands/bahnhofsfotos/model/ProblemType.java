@@ -9,6 +9,7 @@ public enum ProblemType {
     STATION_ACTIVE(R.string.problem_station_active),
     STATION_NONEXISTENT(R.string.problem_station_nonexistent),
     WRONG_PHOTO(R.string.problem_wrong_photo),
+    PHOTO_OUTDATED(R.string.problem_photo_outdated),
     OTHER(R.string.problem_other);
 
     private final int messageId;

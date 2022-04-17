@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -90,14 +89,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         dbAdapter = baseApplication.getDbAdapter();
         rsapiClient = baseApplication.getRsapiClient();
 
-        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        final var toggle = new ActionBarDrawerToggle(
                 this, binding.drawerLayout, binding.appBarMain.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         binding.drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
         binding.navView.setNavigationItemSelectedListener(this);
 
-        final View header = binding.navView.getHeaderView(0);
+        final var header = binding.navView.getHeaderView(0);
         final TextView tvUpdate = header.findViewById(R.id.tvUpdate);
 
         if (!baseApplication.getFirstAppStart()) {
@@ -105,14 +104,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             finish();
         }
 
-        final long lastUpdateDate = baseApplication.getLastUpdate();
+        final var lastUpdateDate = baseApplication.getLastUpdate();
         if (lastUpdateDate > 0) {
             tvUpdate.setText(getString(R.string.last_update_at, SimpleDateFormat.getDateTimeInstance().format(lastUpdateDate)));
         } else {
             tvUpdate.setText(R.string.no_stations_in_database);
         }
 
-        final Intent searchIntent = getIntent();
+        final var searchIntent = getIntent();
         if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
             searchString = searchIntent.getStringExtra(SearchManager.QUERY);
         }
@@ -135,9 +134,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
 
-        final SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        final MenuItem searchMenu = menu.findItem(R.id.search);
-        final SearchView search = (SearchView) searchMenu.getActionView();
+        final var manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final var searchMenu = menu.findItem(R.id.search);
+        final var search = (SearchView) searchMenu.getActionView();
         search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
@@ -159,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         });
 
-        final UpdatePolicy updatePolicy = baseApplication.getUpdatePolicy();
+        final var updatePolicy = baseApplication.getUpdatePolicy();
         menu.findItem(updatePolicy.getId()).setChecked(true);
 
         return true;
@@ -167,9 +166,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     private void updateStationList() {
         try {
-            final boolean sortByDistance = baseApplication.getSortByDistance() && myPos != null;
-            final int stationCount = dbAdapter.countStations(baseApplication.getCountryCodes());
-            final Cursor cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getStationFilter(), baseApplication.getCountryCodes(), sortByDistance, myPos);
+            final var sortByDistance = baseApplication.getSortByDistance() && myPos != null;
+            final var stationCount = dbAdapter.countStations(baseApplication.getCountryCodes());
+            final var cursor = dbAdapter.getStationsListByKeyword(searchString, baseApplication.getStationFilter(), baseApplication.getCountryCodes(), sortByDistance, myPos);
             if (stationListAdapter != null) {
                 stationListAdapter.swapCursor(cursor);
             } else {
@@ -177,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 binding.appBarMain.main.lstStations.setAdapter(stationListAdapter);
 
                 binding.appBarMain.main.lstStations.setOnItemClickListener((listview, view, position, id) -> {
-                    final Intent intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
+                    final var intentDetails = new Intent(MainActivity.this, DetailsActivity.class);
                     intentDetails.putExtra(DetailsActivity.EXTRA_STATION, dbAdapter.fetchStationByRowId(id));
                     startActivity(intentDetails);
                 });
@@ -209,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void showApiUrlDialog() {
-        new SimpleDialogs().prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
+        SimpleDialogs.prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
             try {
                 if (StringUtils.isEmpty(v)) {
                     baseApplication.setApiUrl(null); // set to default
@@ -228,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void setNotificationIcon(final boolean active) {
-        final MenuItem item = binding.navView.getMenu().findItem(R.id.nav_notification);
+        final var item = binding.navView.getMenu().findItem(R.id.nav_notification);
         item.setIcon(ContextCompat.getDrawable(this, active ? R.drawable.ic_notifications_active_gray_24px : R.drawable.ic_notifications_off_gray_24px));
     }
 
@@ -256,12 +255,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         } else if (id == R.id.nav_web_site) {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://railway-stations.org")));
         } else if (id == R.id.nav_email) {
-            final Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
+            final var emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + getString(R.string.fab_email)));
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.fab_subject));
             startActivity(Intent.createChooser(emailIntent, getString(R.string.fab_chooser_title)));
         } else if (id == R.id.nav_app_info) {
-            final AppInfoFragment appInfoFragment = new AppInfoFragment();
-            appInfoFragment.show(getSupportFragmentManager(), DIALOG_TAG);
+            new AppInfoFragment().show(getSupportFragmentManager(), DIALOG_TAG);
         }
 
         binding.drawerLayout.closeDrawer(GravityCompat.START);
@@ -301,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         } else if (System.currentTimeMillis() - baseApplication.getLastUpdate() > CHECK_UPDATE_INTERVAL) {
             baseApplication.setLastUpdate(System.currentTimeMillis());
             if (baseApplication.getUpdatePolicy() != UpdatePolicy.MANUAL) {
-                for (final String country : baseApplication.getCountryCodes()) {
+                for (final var country : baseApplication.getCountryCodes()) {
                     rsapiClient.getStatistic(country).enqueue(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull final Call<Statistic> call, @NonNull final Response<Statistic> response) {
@@ -333,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             return;
         }
 
-        final Statistic dbStat = dbAdapter.getStatistic(country);
+        final var dbStat = dbAdapter.getStatistic(country);
         Log.d(TAG, "DbStat: " + dbStat);
         if (statistic.getTotal() != dbStat.getTotal() || statistic.getWithPhoto() != dbStat.getWithPhoto() || statistic.getWithoutPhoto() != dbStat.getWithoutPhoto()) {
             if (baseApplication.getUpdatePolicy() == UpdatePolicy.AUTOMATIC) {
@@ -355,7 +353,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void bindToStatus() {
-        final Intent intent = new Intent(this, NearbyNotificationService.class);
+        final var intent = new Intent(this, NearbyNotificationService.class);
         intent.setAction(NearbyNotificationService.STATUS_INTERFACE);
         if (!this.getApplicationContext().bindService(intent, new ServiceConnection() {
             @Override
@@ -377,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     public void toggleNotification() {
-        final Intent intent = new Intent(MainActivity.this, NearbyNotificationService.class);
+        final var intent = new Intent(MainActivity.this, NearbyNotificationService.class);
         if (statusBinder == null) {
             startService(intent);
             bindToStatus();
@@ -416,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             // getting GPS status
-            final boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            final var isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             // if GPS Enabled get lat/long using GPS Services
             if (isGPSEnabled) {
@@ -430,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 }
             } else {
                 // getting network status
-                final boolean isNetworkEnabled = locationManager
+                final var isNetworkEnabled = locationManager
                         .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
                 // First get location from Network Provider
@@ -448,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             }
         } catch (final Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
-            final Bundle b = new Bundle();
+            final var b = new Bundle();
             b.putString("error", "Error registering LocationManager: " + e);
             locationManager = null;
             baseApplication.setSortByDistance(false);

@@ -16,6 +16,8 @@
  */
 package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 
+import static java.util.stream.Collectors.joining;
+
 import android.util.Log;
 
 import org.mapsforge.core.model.BoundingBox;
@@ -24,8 +26,6 @@ import org.mapsforge.core.model.Point;
 import org.mapsforge.core.model.Rectangle;
 import org.mapsforge.core.util.MercatorProjection;
 import org.mapsforge.map.layer.Layer;
-
-import java.util.stream.Collectors;
 
 /**
  * Layer extended class to display Clustered Marker.
@@ -75,9 +75,9 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
             return;
         }
         setMarkerBitmap();
-        final long mapSize = MercatorProjection.getMapSize(zoomLevel, this.displayModel.getTileSize());
-        final double pixelX = MercatorProjection.longitudeToPixelX(this.getLatLong().longitude, mapSize);
-        final double pixelY = MercatorProjection.latitudeToPixelY(this.getLatLong().latitude, mapSize);
+        final var mapSize = MercatorProjection.getMapSize(zoomLevel, this.displayModel.getTileSize());
+        final var pixelX = MercatorProjection.longitudeToPixelX(this.getLatLong().longitude, mapSize);
+        final var pixelY = MercatorProjection.latitudeToPixelY(this.getLatLong().latitude, mapSize);
         final double halfBitmapWidth;
         final double halfBitmapHeight;
         final var markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
@@ -146,11 +146,11 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
             requestRedraw();
             return true;
         } else if (contains(viewPosition, tapPoint)) {
-            final StringBuilder builder = new StringBuilder(cluster.getItems().size() + " items:")
+            final var builder = new StringBuilder(cluster.getItems().size() + " items:")
                     .append(cluster.getItems().stream()
                     .map(i -> "\n- " + i.getTitle())
                     .limit(6)
-                    .collect(Collectors.joining()));
+                    .collect(joining()));
 
             if (cluster.getItems().size() > 6) {
                 builder.append("\n...");

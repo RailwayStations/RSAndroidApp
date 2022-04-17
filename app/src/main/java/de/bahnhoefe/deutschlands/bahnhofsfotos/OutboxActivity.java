@@ -38,10 +38,10 @@ public class OutboxActivity extends AppCompatActivity {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final BaseApplication baseApplication = (BaseApplication) getApplication();
+        final var baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
 
-        final ActivityOutboxBinding binding = ActivityOutboxBinding.inflate(getLayoutInflater());
+        final var binding = ActivityOutboxBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         adapter = new OutboxAdapter(OutboxActivity.this, dbAdapter.getOutbox());
@@ -49,15 +49,15 @@ public class OutboxActivity extends AppCompatActivity {
 
         // item click
         binding.lstUploads.setOnItemClickListener((parent, view, position, id) -> {
-            final Upload upload = dbAdapter.getUploadById(id);
-            final Intent detailIntent = new Intent(OutboxActivity.this, DetailsActivity.class);
+            final var upload = dbAdapter.getUploadById(id);
+            final var detailIntent = new Intent(OutboxActivity.this, DetailsActivity.class);
             detailIntent.putExtra(DetailsActivity.EXTRA_UPLOAD, upload);
             startActivity(detailIntent);
         });
 
         binding.lstUploads.setOnItemLongClickListener((parent, view, position, id) -> {
-            final String uploadId = String.valueOf(id);
-            new SimpleDialogs().confirm(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
+            final var uploadId = String.valueOf(id);
+            SimpleDialogs.confirm(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
                 dbAdapter.deleteUpload(id);
                 FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, id));
                 adapter.changeCursor(dbAdapter.getOutbox());
@@ -65,15 +65,15 @@ public class OutboxActivity extends AppCompatActivity {
             return true;
         });
 
-        final List<InboxStateQuery> query = new ArrayList<>();
-        for (final Upload upload : dbAdapter.getPendingUploads(true)) {
+        final var query = new ArrayList<InboxStateQuery>();
+        for (final var upload : dbAdapter.getPendingUploads(true)) {
             query.add(new InboxStateQuery(upload.getRemoteId()));
         }
 
         baseApplication.getRsapiClient().queryUploadState(query).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
-                final List<InboxStateQuery> stateQueries = response.body();
+                final var stateQueries = response.body();
                 if (stateQueries != null) {
                     dbAdapter.updateUploadStates(stateQueries);
                     adapter.changeCursor(dbAdapter.getOutbox());
@@ -109,7 +109,7 @@ public class OutboxActivity extends AppCompatActivity {
     }
 
     private void deleteCompletedUploads() {
-        final List<Upload> uploads = dbAdapter.getCompletedUploads();
+        final var uploads = dbAdapter.getCompletedUploads();
         if (uploads.isEmpty()) {
             return;
         }
