@@ -214,6 +214,7 @@
     <string name="problem_station_inactive">Гарата е неактивна</string>
     <string name="problem_station_nonexistent">Станцията не съществува</string>
     <string name="problem_wrong_photo">Станцията има грешна снимка</string>
+    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
     <string name="problem_other">Друг проблем, подробности в коментара</string>
     <string name="problem_please_specify">Моля, посочете вида на проблема</string>
     <string name="problem_please_comment">Моля, коментирайте проблема</string>
