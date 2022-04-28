@@ -72,7 +72,7 @@
     <string name="menu_title_introslider">Anleitung</string>
     <string name="menu_follow_my_location">Folge meiner Position</string>
     <string name="text_intro_slider1">Wir sammeln Bahnhofsfotos von Benutzern, die wir unter freier Lizenz anderen Entwicklern zur Verfügung stellen können. Unsere Lieblings-Lizenz ist CC0.\"\n\n\"</string>
-    <string name="text_intro_slider2">Bitte trage im Menüpunkt \'Meine Daten\' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne den Registrierung kannst Du keine Fotos hochladen. \"\n\n\"<b>Mit der Registrierung wird Dir ein Initialpasswort zugesandt, bitte schaue auch in Deinen SPAM Ordner.</b></string>
+    <string name="text_intro_slider2">Bitte trage im Menüpunkt \'Meine Daten\' die benötigten Daten ein, damit wir Deine Fotodateien entsprechend benennen können. Ohne die Registrierung kannst Du keine Fotos hochladen. \"\n\n\"<b>Mit der Registrierung wird Dir ein Initialpasswort zugesandt, bitte schaue auch in Deinen SPAM Ordner.</b></string>
     <string name="next">WEITER</string>
     <string name="skip">ABBRECHEN</string>
     <string name="proceed">STARTEN</string>
