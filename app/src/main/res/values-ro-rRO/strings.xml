@@ -264,4 +264,7 @@
     <string name="highscore_crown">Coroană Highscore</string>
     <string name="no_image_capture_app_found">No image capture app found</string>
     <string name="upload_type">Upload type</string>
+    <string name="error_crash_title">%1$s crashed</string>
+    <string name="share">Share</string>
+    <string name="bug_report">Report bug</string>
 </resources>
