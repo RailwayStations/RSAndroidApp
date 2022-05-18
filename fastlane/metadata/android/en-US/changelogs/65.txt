@@ -1,0 +1,2 @@
+- Add crash reporting activity
+- Upgrade dependencies

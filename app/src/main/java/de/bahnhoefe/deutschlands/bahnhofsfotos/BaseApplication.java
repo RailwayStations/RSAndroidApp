@@ -1,10 +1,12 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -25,6 +27,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ExceptionHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -55,6 +58,34 @@ public class BaseApplication extends Application {
     protected void attachBaseContext(final Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
+
+        // we don't want to handle crashes occurring inside crash reporter activity/process;
+        // let the platform deal with those
+        final var isCrashReportingProcess = getAppProcessName().endsWith(":crash");
+
+        if (!isCrashReportingProcess) {
+            final var defaultPlatformHandler = Thread.getDefaultUncaughtExceptionHandler();
+            final var crashReporter = new ExceptionHandler(this, defaultPlatformHandler);
+            Thread.setDefaultUncaughtExceptionHandler(crashReporter);
+        }
+    }
+
+    private String getAppProcessName() {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            // Using the same technique as Application.getProcessName() for older devices
+            // Using reflection since ActivityThread is an internal API
+            try {
+                @SuppressLint("PrivateApi")
+                final var activityThread = Class.forName("android.app.ActivityThread");
+                @SuppressLint("DiscouragedPrivateApi")
+                final var getProcessName = activityThread.getDeclaredMethod("currentProcessName");
+                return (String) getProcessName.invoke(null);
+            } catch (final Exception ignored) {
+            }
+        } else {
+            return Application.getProcessName();
+        }
+        return "";
     }
 
     private static void setInstance(@NonNull final BaseApplication application) {
@@ -75,7 +106,7 @@ public class BaseApplication extends Application {
 
         // migrate photo owner preference to boolean
         final var photoOwner = preferences.getAll().get(getString(R.string.PHOTO_OWNER));
-        if (photoOwner instanceof String && "YES".equals(photoOwner)) {
+        if ("YES".equals(photoOwner)) {
             setPhotoOwner(true);
         }
 

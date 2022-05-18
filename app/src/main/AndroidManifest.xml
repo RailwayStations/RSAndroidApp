@@ -149,6 +149,14 @@
             android:name=".IntroSliderActivity"
             android:label="IntroSlider"
             android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".ShowErrorActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleInstance"
+            android:process=":crash"/>
 
         <meta-data android:name="com.google.android.backup.api_key"
                    android:value="AEdPqrEAAAAIIrH2HptM5967MTY4piXZ_qtnIjYV-cA3JEIVqA" />
