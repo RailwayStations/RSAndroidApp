@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/RailwayStations/RSAndroidApp.svg?branch=master)](https://travis-ci.org/RailwayStations/RSAndroidApp) <img alt="Railway stations photos version published on F-Droid" src="https://img.shields.io/f-droid/v/de.bahnhoefe.deutschlands.bahnhofsfotos.svg"> 
+[![Build Status](https://travis-ci.org/RailwayStations/RSAndroidApp.svg?branch=main)](https://travis-ci.org/RailwayStations/RSAndroidApp) <img alt="Railway stations photos version published on F-Droid" src="https://img.shields.io/f-droid/v/de.bahnhoefe.deutschlands.bahnhofsfotos.svg"> 
 
 # Railway-Stations Android App
 Android-App for the Project Railway-Stations.org ("Deutschlands-Bahnhoefe")
