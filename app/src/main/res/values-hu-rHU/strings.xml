@@ -223,7 +223,7 @@
     <string name="delete_upload">#%s elem törlése</string>
     <string name="confirm_delete_processed_uploads">Törölje az összes feldolgozott feltöltést?</string>
     <string name="upload_not_yet_sent">Még nem küldött</string>
-    <string name="panorama_info"><![CDATA[<b>Kérem, vegye figyelembe a <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">A panoráma szabadsága</a></b>:
+    <string name="panorama_info"><![CDATA[<b>Kérem, vegye figyelembe a <a href="https://hu.wikipedia.org/wiki/Panor%C3%A1maszabads%C3%A1g">panorámaszabadság</a>ot</b>:
             <p>- nem a vonaton belülről</p>
             <p>- nem az állomáson belülről</p>
             <p>- a peronokról csak akkor, ha azok szabadon hozzáférhetőek</p>
@@ -259,10 +259,10 @@
     <string name="filter_inactive">Inaktív</string>
     <string name="countries">Országok</string>
     <string name="photo_checksum">Ezzel az ellenőrző összeggel rendelkező fénykép már fel van töltve. Újra feltölteni?</string>
-    <string name="highscore_crown">Highscore koronát</string>
-    <string name="no_image_capture_app_found">No image capture app found</string>
-    <string name="upload_type">Upload type</string>
-    <string name="error_crash_title">%1$s crashed</string>
-    <string name="share">Share</string>
-    <string name="bug_report">Report bug</string>
+    <string name="highscore_crown">Ponverseny kitüntetés</string>
+    <string name="no_image_capture_app_found">Fényképező app nem található</string>
+    <string name="upload_type">Feltöltés típus</string>
+    <string name="error_crash_title">%1$s összeomlott</string>
+    <string name="share">Megosztás</string>
+    <string name="bug_report">Hiba jelentése</string>
 </resources>
