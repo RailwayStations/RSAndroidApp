@@ -225,7 +225,7 @@
     <string name="delete_upload">Ștergeți elementul #%s</string>
     <string name="confirm_delete_processed_uploads">Ștergeți toate încărcările procesate?</string>
     <string name="upload_not_yet_sent">Nu a fost încă trimis</string>
-    <string name="panorama_info"><![CDATA[<b>Vă rugăm să luați în considerare <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Libertatea panoramei</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Vă rugăm să luați în considerare <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Libertatea panoramei</a></b>:
             <p>- nu din trenul</p>
             <p>- nu din interiorul unei gări</p>
             <p>- de pe platforme doar dacă sunt accesibile gratuit</p>
