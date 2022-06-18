@@ -223,7 +223,7 @@
     <string name="delete_upload">#%s elem törlése</string>
     <string name="confirm_delete_processed_uploads">Törölje az összes feldolgozott feltöltést?</string>
     <string name="upload_not_yet_sent">Még nem küldött</string>
-    <string name="panorama_info"><![CDATA[<b>Kérem, vegye figyelembe a <a href="https://hu.wikipedia.org/wiki/Panor%C3%A1maszabads%C3%A1g">panorámaszabadság</a>ot</b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Kérem, vegye figyelembe a <a href="https://hu.wikipedia.org/wiki/Panor%C3%A1maszabads%C3%A1g">panorámaszabadság</a>ot</b>:
             <p>- nem a vonaton belülről</p>
             <p>- nem az állomáson belülről</p>
             <p>- a peronokról csak akkor, ha azok szabadon hozzáférhetőek</p>

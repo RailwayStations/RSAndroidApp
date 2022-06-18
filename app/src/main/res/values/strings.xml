@@ -223,7 +223,7 @@
     <string name="delete_upload">Delete element #%s</string>
     <string name="confirm_delete_processed_uploads">Delete all processed uploads?</string>
     <string name="upload_not_yet_sent">Not yet sent</string>
-    <string name="panorama_info"><![CDATA[<b>Please consider <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Freedom of panorama</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Please consider <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Freedom of panorama</a></b>:
             <p>- not from within the train</p>
             <p>- not inside a station</p>
             <p>- from the platforms only if they are freely accessible</p>
