@@ -223,7 +223,7 @@
     <string name="delete_upload">Poista elementti #%s</string>
     <string name="confirm_delete_processed_uploads">Poistetaanko kaikki käsitellyt lataukset?</string>
     <string name="upload_not_yet_sent">Ei vielä lähetetty</string>
-    <string name="panorama_info"><![CDATA[<b>Harkitse <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Panoraaman vapaus</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Harkitse <a href="https://en.wikipedia.org/wiki/Freedom_of_panorama">Panoraaman vapaus</a></b>:
             <p>- ei junan sisällä</p>
             <p>- ei aseman sisällä</p>
             <p>- laitureilta vain, jos ne ovat vapaasti käytettävissä</p>
