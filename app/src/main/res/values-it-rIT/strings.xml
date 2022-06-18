@@ -223,7 +223,7 @@
     <string name="delete_upload">Cancella l\'elemento #%s</string>
     <string name="confirm_delete_processed_uploads">Cancellare tutti gli upload elaborati?</string>
     <string name="upload_not_yet_sent">Non ancora inviato</string>
-    <string name="panorama_info"><![CDATA[<b>Si prega di considerare <a href="https://it.wikipedia.org/wiki/Libert%C3%A0_di_panorama">Libertà di panorama</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Si prega di considerare <a href="https://it.wikipedia.org/wiki/Libert%C3%A0_di_panorama">Libertà di panorama</a></b>:
             <p>- non all\'interno del treno</p>
             <p>- non all\'interno di una stazione</p>
             <p>- dai marciapiedi solo se sono liberamente accessibili</p>
