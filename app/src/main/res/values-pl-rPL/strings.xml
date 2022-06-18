@@ -226,7 +226,7 @@
     <string name="delete_upload">Usuń element #%s</string>
     <string name="confirm_delete_processed_uploads">Skasować wszystkie przetworzone wpłaty?</string>
     <string name="upload_not_yet_sent">Jeszcze nie wysłany</string>
-    <string name="panorama_info"><![CDATA[<b>Proszę rozważyć <a href="https://pl.wikipedia.org/wiki/Wolno%C5%9B%C4%87_panoramy">Swoboda panoramy</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Proszę rozważyć <a href="https://pl.wikipedia.org/wiki/Wolno%C5%9B%C4%87_panoramy">Swoboda panoramy</a></b>:
             <p>- nie z pociągu</p>
             <p>- nie wewnątrz stacji</p>
             <p>- z platform tylko wtedy, gdy są one swobodnie dostępne</p>
