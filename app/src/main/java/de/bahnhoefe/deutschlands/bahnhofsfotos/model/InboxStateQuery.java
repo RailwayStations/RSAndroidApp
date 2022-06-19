@@ -18,13 +18,13 @@ public class InboxStateQuery {
 
     private Long crc32;
 
-    public InboxStateQuery(final Long id, final String countryCode, final String stationId) {
+    public InboxStateQuery(Long id, String countryCode, String stationId) {
         this(id);
         this.countryCode = countryCode;
         this.stationId = stationId;
     }
 
-    public InboxStateQuery(final Long id) {
+    public InboxStateQuery(Long id) {
         super();
         this.id = id;
     }
@@ -33,7 +33,7 @@ public class InboxStateQuery {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -41,7 +41,7 @@ public class InboxStateQuery {
         return countryCode;
     }
 
-    public void setCountryCode(final String countryCode) {
+    public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
 
@@ -49,7 +49,7 @@ public class InboxStateQuery {
         return stationId;
     }
 
-    public void setStationId(final String stationId) {
+    public void setStationId(String stationId) {
         this.stationId = stationId;
     }
 
@@ -57,7 +57,7 @@ public class InboxStateQuery {
         return lat;
     }
 
-    public void setLat(final Double lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
@@ -65,7 +65,7 @@ public class InboxStateQuery {
         return lon;
     }
 
-    public void setLon(final Double lon) {
+    public void setLon(Double lon) {
         this.lon = lon;
     }
 
@@ -73,7 +73,7 @@ public class InboxStateQuery {
         return state;
     }
 
-    public void setState(final UploadState state) {
+    public void setState(UploadState state) {
         this.state = state;
     }
 
@@ -81,7 +81,7 @@ public class InboxStateQuery {
         return rejectedReason;
     }
 
-    public void setRejectedReason(final String rejectedReason) {
+    public void setRejectedReason(String rejectedReason) {
         this.rejectedReason = rejectedReason;
     }
 
@@ -89,7 +89,7 @@ public class InboxStateQuery {
         return crc32;
     }
 
-    public void setCrc32(final Long crc32) {
+    public void setCrc32(Long crc32) {
         this.crc32 = crc32;
     }
 }

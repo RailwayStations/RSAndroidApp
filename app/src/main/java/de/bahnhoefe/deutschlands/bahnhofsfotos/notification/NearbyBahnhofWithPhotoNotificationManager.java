@@ -26,7 +26,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     public static final int BITMAP_HEIGHT = 400;
     public static final int BITMAP_WIDTH = 400;
 
-    public NearbyBahnhofWithPhotoNotificationManager(final Context context, final Station station, final double distance, final Set<Country> countries) {
+    public NearbyBahnhofWithPhotoNotificationManager(Context context, Station station, double distance, Set<Country> countries) {
         super(context, station, distance, countries);
         Log.d(TAG, "Creating " + getClass().getSimpleName());
     }
@@ -57,12 +57,12 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
             bitmap = getBitmapFromResource(R.drawable.ic_stations_with_photo);
         }
 
-        final var bigPictureStyle = new NotificationCompat.BigPictureStyle();
+        var bigPictureStyle = new NotificationCompat.BigPictureStyle();
         if (bitmap != null) {
             bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(notificationStation.getLicense());
         }
 
-        final var notificationBuilder = getBasicNotificationBuilder()
+        var notificationBuilder = getBasicNotificationBuilder()
                 .setStyle(bigPictureStyle)
                 .extend(new NotificationCompat.WearableExtender())
                 .setVibrate(VIBRATION_PATTERN)
@@ -77,12 +77,12 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      * @param id the resource ID denoting a drawable resource
      * @return the Bitmap. May be null.
      */
-    private Bitmap getBitmapFromResource(final int id) {
-        final var vectorDrawable = AppCompatResources.getDrawable(context, id);
+    private Bitmap getBitmapFromResource(int id) {
+        var vectorDrawable = AppCompatResources.getDrawable(context, id);
         assert vectorDrawable != null;
         vectorDrawable.setBounds(0, 0, BITMAP_WIDTH, BITMAP_HEIGHT);
-        final var bm = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
-        final var canvas = new Canvas(bm);
+        var bm = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
+        var canvas = new Canvas(bm);
         canvas.drawColor(Color.WHITE);
         vectorDrawable.draw(canvas);
         return bm;

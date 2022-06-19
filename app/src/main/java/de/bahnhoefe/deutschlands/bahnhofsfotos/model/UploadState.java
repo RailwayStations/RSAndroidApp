@@ -24,7 +24,7 @@ public enum UploadState {
 
     private final boolean pending;
 
-    UploadState(final int textId, final int colorId, final boolean pending) {
+    UploadState(int textId, int colorId, boolean pending) {
         this.textId = textId;
         this.colorId = colorId;
         this.pending = pending;
@@ -44,10 +44,10 @@ public enum UploadState {
 
     static class Serializer implements JsonDeserializer<UploadState> {
         @Override
-        public UploadState deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+        public UploadState deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
             try {
                 return UploadState.valueOf(json.getAsString());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 return UNKNOWN;
             }
         }

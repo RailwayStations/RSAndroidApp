@@ -55,7 +55,7 @@ public class BaseApplication extends Application {
     }
 
     @Override
-    protected void attachBaseContext(final Context base) {
+    protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
 
@@ -73,11 +73,11 @@ public class BaseApplication extends Application {
             // Using reflection since ActivityThread is an internal API
             try {
                 @SuppressLint("PrivateApi")
-                final var activityThread = Class.forName("android.app.ActivityThread");
+                var activityThread = Class.forName("android.app.ActivityThread");
                 @SuppressLint("DiscouragedPrivateApi")
-                final var getProcessName = activityThread.getDeclaredMethod("currentProcessName");
+                var getProcessName = activityThread.getDeclaredMethod("currentProcessName");
                 processName = (String) getProcessName.invoke(null);
-            } catch (final Exception ignored) {
+            } catch (Exception ignored) {
             }
         } else {
             processName = Application.getProcessName();
@@ -85,7 +85,7 @@ public class BaseApplication extends Application {
         return processName != null && processName.endsWith(":crash");
     }
 
-    private static void setInstance(@NonNull final BaseApplication application) {
+    private static void setInstance(@NonNull BaseApplication application) {
         instance = application;
     }
 
@@ -102,7 +102,7 @@ public class BaseApplication extends Application {
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
 
         // migrate photo owner preference to boolean
-        final var photoOwner = preferences.getAll().get(getString(R.string.PHOTO_OWNER));
+        var photoOwner = preferences.getAll().get(getString(R.string.PHOTO_OWNER));
         if ("YES".equals(photoOwner)) {
             setPhotoOwner(true);
         }
@@ -111,50 +111,50 @@ public class BaseApplication extends Application {
     }
 
     public String getApiUrl() {
-        final var apiUri = getUri(getString(R.string.API_URL));
+        var apiUri = getUri(getString(R.string.API_URL));
         if (apiUri != null && Objects.requireNonNull(apiUri.getScheme()).matches("https?")) {
-            final var apiUrl = apiUri.toString();
+            var apiUrl = apiUri.toString();
             return apiUrl + (apiUrl.endsWith("/") ? "" : "/");
         }
         return "https://api.railway-stations.org/";
     }
 
-    public void setApiUrl(final String apiUrl) {
+    public void setApiUrl(String apiUrl) {
         putString(R.string.API_URL, apiUrl);
         rsapiClient.setBaseUrl(apiUrl);
     }
 
-    private void putBoolean(final int key, final boolean value) {
-        final var editor = preferences.edit();
+    private void putBoolean(int key, boolean value) {
+        var editor = preferences.edit();
         editor.putBoolean(getString(key), value);
         editor.apply();
     }
 
-    private void putString(final int key, final String value) {
-        final var editor = preferences.edit();
+    private void putString(int key, String value) {
+        var editor = preferences.edit();
         editor.putString(getString(key), StringUtils.trimToNull(value));
         editor.apply();
     }
 
-    private void putStringSet(final int key, final Set<String> value) {
-        final var editor = preferences.edit();
+    private void putStringSet(int key, Set<String> value) {
+        var editor = preferences.edit();
         editor.putStringSet(getString(key), value);
         editor.apply();
     }
 
-    private void putLong(final int key, final long value) {
-        final var editor = preferences.edit();
+    private void putLong(int key, long value) {
+        var editor = preferences.edit();
         editor.putLong(getString(key), value);
         editor.apply();
     }
 
-    private void putDouble(final int key, final double value) {
-        final var editor = preferences.edit();
+    private void putDouble(int key, double value) {
+        var editor = preferences.edit();
         editor.putLong(getString(key), Double.doubleToRawLongBits(value));
         editor.apply();
     }
 
-    private double getDouble(final int key) {
+    private double getDouble(int key) {
         if ( !preferences.contains(getString(key))) {
             return 0.0;
         }
@@ -162,12 +162,12 @@ public class BaseApplication extends Application {
         return Double.longBitsToDouble(preferences.getLong(getString(key), 0));
     }
 
-    public void setCountryCodes(final Set<String> countryCodes) {
+    public void setCountryCodes(Set<String> countryCodes) {
         putStringSet(R.string.COUNTRIES, countryCodes);
     }
 
     public Set<String> getCountryCodes() {
-        final var oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
+        var oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
         var stringSet = preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
         assert stringSet != null;
         if (stringSet.isEmpty()) {
@@ -176,7 +176,7 @@ public class BaseApplication extends Application {
         return stringSet;
     }
 
-    public void setFirstAppStart(final boolean firstAppStart) {
+    public void setFirstAppStart(boolean firstAppStart) {
         putBoolean(R.string.FIRSTAPPSTART, firstAppStart);
     }
 
@@ -188,7 +188,7 @@ public class BaseApplication extends Application {
         return License.byName(preferences.getString(getString(R.string.LICENCE), License.UNKNOWN.toString()));
     }
 
-    public void setLicense(final License license) {
+    public void setLicense(License license) {
         putString(R.string.LICENCE, license != null ? license.toString() : License.UNKNOWN.toString());
     }
 
@@ -196,7 +196,7 @@ public class BaseApplication extends Application {
         return UpdatePolicy.byName(preferences.getString(getString(R.string.UPDATE_POLICY), License.UNKNOWN.toString()));
     }
 
-    public void setUpdatePolicy(final UpdatePolicy updatePolicy) {
+    public void setUpdatePolicy(UpdatePolicy updatePolicy) {
         putString(R.string.UPDATE_POLICY, updatePolicy.toString());
     }
 
@@ -204,7 +204,7 @@ public class BaseApplication extends Application {
         return preferences.getBoolean(getString(R.string.PHOTO_OWNER), false);
     }
 
-    public void setPhotoOwner(final boolean photoOwner) {
+    public void setPhotoOwner(boolean photoOwner) {
         putBoolean(R.string.PHOTO_OWNER, photoOwner);
     }
 
@@ -212,7 +212,7 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
     }
 
-    public void setPhotographerLink(final String photographerLink) {
+    public void setPhotographerLink(String photographerLink) {
         putString(R.string.LINK_TO_PHOTOGRAPHER, photographerLink);
     }
 
@@ -220,7 +220,7 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.NICKNAME), DEFAULT);
     }
 
-    public void setNickname(final String nickname) {
+    public void setNickname(String nickname) {
         putString(R.string.NICKNAME, nickname);
     }
 
@@ -228,7 +228,7 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.EMAIL), DEFAULT);
     }
 
-    public void setEmail(final String email) {
+    public void setEmail(String email) {
         putString(R.string.EMAIL, email);
     }
 
@@ -237,26 +237,26 @@ public class BaseApplication extends Application {
                 preferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT)); // for backward compatibility
     }
 
-    public void setPassword(final String password) {
+    public void setPassword(String password) {
         putString(R.string.UPLOAD_TOKEN, DEFAULT); // for backward compatibility
         putString(R.string.PASSWORD, password);
     }
 
     public StationFilter getStationFilter() {
-        final var photoFilter = getOptionalBoolean(R.string.STATION_FILTER_PHOTO);
-        final var activeFilter = getOptionalBoolean(R.string.STATION_FILTER_ACTIVE);
-        final var nicknameFilter = preferences.getString(getString(R.string.STATION_FILTER_NICKNAME), null);
+        var photoFilter = getOptionalBoolean(R.string.STATION_FILTER_PHOTO);
+        var activeFilter = getOptionalBoolean(R.string.STATION_FILTER_ACTIVE);
+        var nicknameFilter = preferences.getString(getString(R.string.STATION_FILTER_NICKNAME), null);
         return new StationFilter(photoFilter, activeFilter, nicknameFilter);
     }
 
-    private Boolean getOptionalBoolean(final int key) {
+    private Boolean getOptionalBoolean(int key) {
         if (preferences.contains(getString(key))) {
             return Boolean.valueOf(preferences.getString(getString(key), "false"));
         }
         return null;
     }
 
-    public void setStationFilter(final StationFilter stationFilter) {
+    public void setStationFilter(StationFilter stationFilter) {
         putString(R.string.STATION_FILTER_PHOTO, stationFilter.hasPhoto() == null ? null : stationFilter.hasPhoto().toString());
         putString(R.string.STATION_FILTER_ACTIVE, stationFilter.isActive() == null ? null : stationFilter.isActive().toString());
         putString(R.string.STATION_FILTER_NICKNAME, stationFilter.getNickname());
@@ -266,11 +266,11 @@ public class BaseApplication extends Application {
         return preferences.getLong(getString(R.string.LAST_UPDATE), 0L);
     }
 
-    public void setLastUpdate(final long lastUpdate) {
+    public void setLastUpdate(long lastUpdate) {
         putLong(R.string.LAST_UPDATE, lastUpdate);
     }
 
-    public void setLocationUpdates(final boolean locationUpdates) {
+    public void setLocationUpdates(boolean locationUpdates) {
         putBoolean(R.string.LOCATION_UPDATES, locationUpdates);
     }
 
@@ -278,19 +278,19 @@ public class BaseApplication extends Application {
         return preferences.getBoolean(getString(R.string.LOCATION_UPDATES), true);
     }
 
-    public void setLastMapPosition(final MapPosition lastMapPosition) {
+    public void setLastMapPosition(MapPosition lastMapPosition) {
         putDouble(R.string.LAST_POSITION_LAT, lastMapPosition.latLong.latitude);
         putDouble(R.string.LAST_POSITION_LON, lastMapPosition.latLong.longitude);
         putLong(R.string.LAST_POSITION_ZOOM, lastMapPosition.zoomLevel);
     }
 
     public MapPosition getLastMapPosition() {
-        final var latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT), getDouble(R.string.LAST_POSITION_LON));
+        var latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT), getDouble(R.string.LAST_POSITION_LON));
         return new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
     }
 
     public Location getLastLocation() {
-        final var location = new Location("");
+        var location = new Location("");
         location.setLatitude(getDouble(R.string.LAST_POSITION_LAT));
         location.setLongitude(getDouble(R.string.LAST_POSITION_LON));
         return location;
@@ -307,11 +307,11 @@ public class BaseApplication extends Application {
         return preferences.getBoolean(getString(R.string.ANONYMOUS), false);
     }
 
-    public void setAnonymous(final boolean anonymous) {
+    public void setAnonymous(boolean anonymous) {
         putBoolean(R.string.ANONYMOUS, anonymous);
     }
 
-    public void setProfile(final Profile profile) {
+    public void setProfile(Profile profile) {
         setLicense(profile.getLicense());
         setPhotoOwner(profile.isPhotoOwner());
         setAnonymous(profile.isAnonymous());
@@ -322,7 +322,7 @@ public class BaseApplication extends Application {
     }
 
     public Profile getProfile() {
-        final var profile = new Profile();
+        var profile = new Profile();
         profile.setLicense(getLicense());
         profile.setPhotoOwner(getPhotoOwner());
         profile.setAnonymous(getAnonymous());
@@ -341,11 +341,11 @@ public class BaseApplication extends Application {
         return preferences.getString(getString(R.string.MAP_FILE), null);
     }
 
-    public void setMap(final String map) {
+    public void setMap(String map) {
         putString(R.string.MAP_FILE, map);
     }
 
-    private void putUri(final int key, final Uri uri) {
+    private void putUri(int key, Uri uri) {
         putString(key, uri != null ? uri.toString() : null);
     }
 
@@ -353,20 +353,20 @@ public class BaseApplication extends Application {
         return getUri(getString(R.string.MAP_DIRECTORY));
     }
 
-    private Uri getUri(final String key) {
+    private Uri getUri(String key) {
         return toUri(preferences.getString(key, null));
     }
 
-    public Uri toUri(final String uriString) {
+    public Uri toUri(String uriString) {
         try {
             return Uri.parse(uriString);
-        } catch (final Exception ignored) {
+        } catch (Exception ignored) {
             Log.e(TAG, "can't read Uri string " + uriString);
         }
         return null;
     }
 
-    public void setMapDirectoryUri(final Uri mapDirectory) {
+    public void setMapDirectoryUri(Uri mapDirectory) {
         putUri(R.string.MAP_DIRECTORY, mapDirectory);
     }
 
@@ -374,7 +374,7 @@ public class BaseApplication extends Application {
         return getUri(getString(R.string.MAP_THEME_DIRECTORY));
     }
 
-    public void setMapThemeDirectoryUri(final Uri mapThemeDirectory) {
+    public void setMapThemeDirectoryUri(Uri mapThemeDirectory) {
         putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
     }
 
@@ -382,7 +382,7 @@ public class BaseApplication extends Application {
         return getUri(getString(R.string.MAP_THEME));
     }
 
-    public void setMapThemeUri(final Uri mapTheme) {
+    public void setMapThemeUri(Uri mapTheme) {
         putUri(R.string.MAP_THEME, mapTheme);
     }
 
@@ -390,7 +390,7 @@ public class BaseApplication extends Application {
         return preferences.getBoolean(getString(R.string.SORT_BY_DISTANCE), false);
     }
 
-    public void setSortByDistance(final boolean sortByDistance) {
+    public void setSortByDistance(boolean sortByDistance) {
         putBoolean(R.string.SORT_BY_DISTANCE, sortByDistance);
     }
 
@@ -399,13 +399,13 @@ public class BaseApplication extends Application {
 
         private final String userAgent;
 
-        public UserAgentInterceptor(final String userAgent) {
+        public UserAgentInterceptor(String userAgent) {
             this.userAgent = userAgent;
         }
 
         @Override
         @NonNull
-        public Response intercept(final Interceptor.Chain chain) throws IOException {
+        public Response intercept(Interceptor.Chain chain) throws IOException {
             return chain.proceed(chain.request().newBuilder()
                     .header("User-Agent", userAgent)
                     .build());

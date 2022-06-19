@@ -35,13 +35,13 @@ public class OutboxActivity extends AppCompatActivity {
     private DbAdapter dbAdapter;
 
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final var baseApplication = (BaseApplication) getApplication();
+        var baseApplication = (BaseApplication) getApplication();
         dbAdapter = baseApplication.getDbAdapter();
 
-        final var binding = ActivityOutboxBinding.inflate(getLayoutInflater());
+        var binding = ActivityOutboxBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         adapter = new OutboxAdapter(OutboxActivity.this, dbAdapter.getOutbox());
@@ -49,14 +49,14 @@ public class OutboxActivity extends AppCompatActivity {
 
         // item click
         binding.lstUploads.setOnItemClickListener((parent, view, position, id) -> {
-            final var upload = dbAdapter.getUploadById(id);
-            final var detailIntent = new Intent(OutboxActivity.this, DetailsActivity.class);
+            var upload = dbAdapter.getUploadById(id);
+            var detailIntent = new Intent(OutboxActivity.this, DetailsActivity.class);
             detailIntent.putExtra(DetailsActivity.EXTRA_UPLOAD, upload);
             startActivity(detailIntent);
         });
 
         binding.lstUploads.setOnItemLongClickListener((parent, view, position, id) -> {
-            final var uploadId = String.valueOf(id);
+            var uploadId = String.valueOf(id);
             SimpleDialogs.confirm(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
                 dbAdapter.deleteUpload(id);
                 FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, id));
@@ -65,15 +65,15 @@ public class OutboxActivity extends AppCompatActivity {
             return true;
         });
 
-        final var query = new ArrayList<InboxStateQuery>();
-        for (final var upload : dbAdapter.getPendingUploads(true)) {
+        var query = new ArrayList<InboxStateQuery>();
+        for (var upload : dbAdapter.getPendingUploads(true)) {
             query.add(new InboxStateQuery(upload.getRemoteId()));
         }
 
         baseApplication.getRsapiClient().queryUploadState(query).enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
-                final var stateQueries = response.body();
+            public void onResponse(@NonNull Call<List<InboxStateQuery>> call, @NonNull Response<List<InboxStateQuery>> response) {
+                var stateQueries = response.body();
                 if (stateQueries != null) {
                     dbAdapter.updateUploadStates(stateQueries);
                     adapter.changeCursor(dbAdapter.getOutbox());
@@ -83,7 +83,7 @@ public class OutboxActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<List<InboxStateQuery>> call, @NonNull Throwable t) {
                 Log.e(TAG, "Error retrieving upload state", t);
                 Toast.makeText(OutboxActivity.this,
                         R.string.error_retrieving_upload_state,
@@ -93,14 +93,14 @@ public class OutboxActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(final Menu menu) {
+    public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
         getMenuInflater().inflate(R.menu.outbox, menu);
         return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.nav_delete_processed_uploads) {
             deleteCompletedUploads();
             return true;
@@ -109,7 +109,7 @@ public class OutboxActivity extends AppCompatActivity {
     }
 
     private void deleteCompletedUploads() {
-        final var uploads = dbAdapter.getCompletedUploads();
+        var uploads = dbAdapter.getCompletedUploads();
         if (uploads.isEmpty()) {
             return;
         }
@@ -118,7 +118,7 @@ public class OutboxActivity extends AppCompatActivity {
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.confirm_delete_processed_uploads)
             .setPositiveButton(R.string.button_ok_text, (dialog, which) -> {
-                for (final Upload upload : uploads) {
+                for (Upload upload : uploads) {
                     dbAdapter.deleteUpload(upload.getId());
                     FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, upload.getId()));
                 }
@@ -129,7 +129,7 @@ public class OutboxActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         adapter.changeCursor(dbAdapter.getOutbox());
     }

@@ -44,42 +44,42 @@ public class RSAPIClient {
     private String username;
     private String password;
 
-    public RSAPIClient(final String baseUrl, final String username, final String password) {
+    public RSAPIClient(String baseUrl, String username, String password) {
         this.baseUrl = baseUrl;
         this.username = username;
         this.password = password;
         api = createRSAPI();
     }
 
-    public void setBaseUrl(final String baseUrl) {
+    public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
         this.api = createRSAPI();
     }
 
     private RSAPI createRSAPI() {
-        final var gson = new GsonBuilder();
+        var gson = new GsonBuilder();
         gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
         gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
 
-        final var builder = new OkHttpClient.Builder()
+        var builder = new OkHttpClient.Builder()
                 .addInterceptor(new BaseApplication.UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT))
                 .addInterceptor(chain -> {
                     if (username != null && password != null) {
-                        final Request.Builder builder1 = chain.request().newBuilder().header("Authorization",
+                        Request.Builder builder1 = chain.request().newBuilder().header("Authorization",
                                 Credentials.basic(username, password));
-                        final Request newRequest = builder1.build();
+                        Request newRequest = builder1.build();
                         return chain.proceed(newRequest);
                     }
                     return chain.proceed(chain.request());
                 });
 
         if (BuildConfig.DEBUG) {
-            final var loggingInterceptor = new HttpLoggingInterceptor();
+            var loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             builder.addInterceptor(loggingInterceptor);
         }
 
-        final Retrofit retrofit = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .client(builder.build())
                 .addConverterFactory(GsonConverterFactory.create(gson.create()))
@@ -88,7 +88,7 @@ public class RSAPIClient {
         return retrofit.create(RSAPI.class);
     }
 
-    public void setCredentials(final String  username, final String password) {
+    public void setCredentials(String  username, String password) {
         this.username = username;
         this.password = password;
     }
@@ -102,18 +102,18 @@ public class RSAPIClient {
         this.password = null;
     }
 
-    public void runUpdateCountriesAndStations(final Context context, final BaseApplication baseApplication, final ResultListener listener) {
+    public void runUpdateCountriesAndStations(Context context, BaseApplication baseApplication, ResultListener listener) {
         api.getCountries().enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<List<Country>> call, @NonNull final Response<List<Country>> response) {
-                final var body = response.body();
+            public void onResponse(@NonNull Call<List<Country>> call, @NonNull Response<List<Country>> response) {
+                var body = response.body();
                 if (response.isSuccessful() && body != null) {
                     baseApplication.getDbAdapter().insertCountries(body);
                 }
             }
 
             @Override
-            public void onFailure(@NonNull final Call<List<Country>> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<List<Country>> call, @NonNull Throwable t) {
                 Log.e(TAG, "Error refreshing countries", t);
                 Toast.makeText(context, context.getString(R.string.error_updating_countries) + t.getMessage(), Toast.LENGTH_LONG).show();
             }
@@ -121,8 +121,8 @@ public class RSAPIClient {
 
         api.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<List<Station>> call, @NonNull final Response<List<Station>> response) {
-                final List<Station> stationList = response.body();
+            public void onResponse(@NonNull Call<List<Station>> call, @NonNull Response<List<Station>> response) {
+                List<Station> stationList = response.body();
                 if (response.isSuccessful() && stationList != null) {
                     baseApplication.getDbAdapter().insertStations(stationList, baseApplication.getCountryCodes());
                     baseApplication.setLastUpdate(System.currentTimeMillis());
@@ -131,7 +131,7 @@ public class RSAPIClient {
             }
 
             @Override
-            public void onFailure(@NonNull final Call<List<Station>> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<List<Station>> call, @NonNull Throwable t) {
                 Log.e(TAG, "Error refreshing stations", t);
                 Toast.makeText(context, context.getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
                 listener.onResult(false);
@@ -148,22 +148,22 @@ public class RSAPIClient {
         return api.getHighScore();
     }
 
-    public Call<HighScore> getHighScore(final String country) {
+    public Call<HighScore> getHighScore(String country) {
         return api.getHighScore(country);
     }
 
-    public Call<InboxResponse> reportProblem(final ProblemReport problemReport) {
+    public Call<InboxResponse> reportProblem(ProblemReport problemReport) {
         return api.reportProblem(problemReport);
     }
 
-    public Call<InboxResponse> photoUpload(final String stationId, final String countryCode,
-                                           final String stationTitle, final Double latitude,
-                                           final Double longitude, final String comment,
-                                           final Boolean active, final RequestBody file) {
+    public Call<InboxResponse> photoUpload(String stationId, String countryCode,
+                                           String stationTitle, Double latitude,
+                                           Double longitude, String comment,
+                                           Boolean active, RequestBody file) {
         return api.photoUpload(stationId, countryCode, stationTitle, latitude, longitude, comment, active, file);
     }
 
-    public Call<List<InboxStateQuery>> queryUploadState(final List<InboxStateQuery> stateQueries) {
+    public Call<List<InboxStateQuery>> queryUploadState(List<InboxStateQuery> stateQueries) {
         return api.queryUploadState(stateQueries);
     }
 
@@ -171,19 +171,19 @@ public class RSAPIClient {
         return api.getProfile();
     }
 
-    public Call<Void> registration(final Profile profile) {
+    public Call<Void> registration(Profile profile) {
         return api.registration(profile);
     }
 
-    public Call<Void> saveProfile(final Profile profile) {
+    public Call<Void> saveProfile(Profile profile) {
         return api.saveProfile(profile);
     }
 
-    public Call<Void> resetPassword(final String emailOrNickname) {
+    public Call<Void> resetPassword(String emailOrNickname) {
         return api.resetPassword(emailOrNickname);
     }
 
-    public Call<Void> changePassword(final String newPassword) {
+    public Call<Void> changePassword(String newPassword) {
         return api.changePassword(newPassword);
     }
 
@@ -191,12 +191,12 @@ public class RSAPIClient {
         return api.resendEmailVerification();
     }
 
-    public Call<Statistic> getStatistic(final String country) {
+    public Call<Statistic> getStatistic(String country) {
         return api.getStatistic(country);
     }
 
     public interface ResultListener {
-        void onResult(final boolean success);
+        void onResult(boolean success);
     }
 
 }

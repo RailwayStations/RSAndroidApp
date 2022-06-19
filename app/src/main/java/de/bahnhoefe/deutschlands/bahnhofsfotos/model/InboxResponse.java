@@ -22,7 +22,7 @@ public class InboxResponse {
         return state;
     }
 
-    public void setState(final InboxResponseState state) {
+    public void setState(InboxResponseState state) {
         this.state = state;
     }
 
@@ -30,7 +30,7 @@ public class InboxResponse {
         return message;
     }
 
-    public void setMessage(final String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 
@@ -38,7 +38,7 @@ public class InboxResponse {
         return id;
     }
 
-    public void setId(final Long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -46,7 +46,7 @@ public class InboxResponse {
         return filename;
     }
 
-    public void setFilename(final String filename) {
+    public void setFilename(String filename) {
         this.filename = filename;
     }
 
@@ -54,7 +54,7 @@ public class InboxResponse {
         return inboxUrl;
     }
 
-    public void setInboxUrl(final String inboxUrl) {
+    public void setInboxUrl(String inboxUrl) {
         this.inboxUrl = inboxUrl;
     }
 
@@ -62,7 +62,7 @@ public class InboxResponse {
         return crc32;
     }
 
-    public void setCrc32(final Long crc32) {
+    public void setCrc32(Long crc32) {
         this.crc32 = crc32;
     }
 
@@ -81,7 +81,7 @@ public class InboxResponse {
 
         private final UploadState uploadState;
 
-        InboxResponseState(final int messageId, final UploadState uploadState) {
+        InboxResponseState(int messageId, UploadState uploadState) {
             this.messageId = messageId;
             this.uploadState = uploadState;
         }
@@ -97,10 +97,10 @@ public class InboxResponse {
         static class Serializer implements JsonDeserializer<InboxResponseState> {
 
             @Override
-            public InboxResponseState deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+            public InboxResponseState deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
                 try {
                     return InboxResponseState.valueOf(json.getAsString());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     return ERROR;
                 }
             }

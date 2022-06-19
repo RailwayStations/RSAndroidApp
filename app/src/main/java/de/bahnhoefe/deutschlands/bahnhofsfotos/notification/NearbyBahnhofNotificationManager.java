@@ -58,7 +58,7 @@ public abstract class NearbyBahnhofNotificationManager {
      * @param station  the station to issue a notification for.
      * @param distance a double giving the distance from current location to bahnhof (in km)
      */
-    public NearbyBahnhofNotificationManager(@NonNull final Context context, @NonNull final Station station, final double distance, final Set<Country> countries) {
+    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Station station, double distance, Set<Country> countries) {
         this.context = context;
         notificationDistance = distance;
         this.notificationStation = station;
@@ -73,13 +73,13 @@ public abstract class NearbyBahnhofNotificationManager {
     /**
      * Called back once the notification was built up ready.
      */
-    protected void onNotificationReady(final Notification notification) {
+    protected void onNotificationReady(Notification notification) {
         if (context == null) {
             return; // we're already destroyed
         }
 
         // Get an instance of the NotificationManager service
-        final var notificationManager = NotificationManagerCompat.from(context);
+        var notificationManager = NotificationManagerCompat.from(context);
 
         // Build the notification and issues it with notification manager.
         notificationManager.notify(NOTIFICATION_ID, notification);
@@ -91,18 +91,18 @@ public abstract class NearbyBahnhofNotificationManager {
      */
     protected NotificationCompat.Builder getBasicNotificationBuilder() {
         // Build an intent for an action to see station details
-        final var detailPendingIntent = getDetailPendingIntent();
+        var detailPendingIntent = getDetailPendingIntent();
         // Build an intent to see the station on a map
-        final var mapPendingIntent = getMapPendingIntent();
+        var mapPendingIntent = getMapPendingIntent();
         // Build an intent to view the station's timetable
-        final var timetablePendingIntent = getTimetablePendingIntent(Country.getCountryByCode(countries, notificationStation.getCountry()), notificationStation);
+        var timetablePendingIntent = getTimetablePendingIntent(Country.getCountryByCode(countries, notificationStation.getCountry()), notificationStation);
 
         createChannel(context);
 
         // Texts and bigStyle
-        final var textCreator = new TextCreator().invoke();
-        final var shortText = textCreator.getShortText();
-        final var bigStyle = textCreator.getBigStyle();
+        var textCreator = new TextCreator().invoke();
+        var shortText = textCreator.getShortText();
+        var bigStyle = textCreator.getBigStyle();
 
         var builder = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_logotrain_found)
@@ -138,18 +138,18 @@ public abstract class NearbyBahnhofNotificationManager {
         return builder;
     }
 
-    public static void createChannel(final Context context) {
-        final var notificationManager =
+    public static void createChannel(Context context) {
+        var notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(new NotificationChannel(CHANNEL_ID, context.getString(R.string.channel_name), NotificationManager.IMPORTANCE_DEFAULT));
     }
 
-    protected PendingIntent pendifyMe(final Intent intent, final int requestCode) {
-        final var stackBuilder = TaskStackBuilder.create(context);
+    protected PendingIntent pendifyMe(Intent intent, int requestCode) {
+        var stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntent(intent);
         try {
             stackBuilder.addNextIntentWithParentStack(intent); // syntesize a back stack from the parent information in manifest
-        } catch (final IllegalArgumentException iae) {
+        } catch (IllegalArgumentException iae) {
             // unfortunately, this occurs if the supplied intent is not handled by our app
             // in this case, just add the the intent...
             stackBuilder.addNextIntent(intent);
@@ -160,7 +160,7 @@ public abstract class NearbyBahnhofNotificationManager {
     @NonNull
     protected Intent getDetailIntent() {
         // Build an intent for an action to see station details
-        final var detailIntent = new Intent(context, DetailsActivity.class);
+        var detailIntent = new Intent(context, DetailsActivity.class);
         detailIntent.putExtra(DetailsActivity.EXTRA_STATION, notificationStation);
         return detailIntent;
     }
@@ -176,7 +176,7 @@ public abstract class NearbyBahnhofNotificationManager {
      * @return the PendingIntent built.
      */
     protected PendingIntent getMapPendingIntent() {
-        final var mapIntent = new Intent(Intent.ACTION_VIEW);
+        var mapIntent = new Intent(Intent.ACTION_VIEW);
         mapIntent.setData(Uri.parse("geo:" + notificationStation.getLat() + "," + notificationStation.getLon()));
         return pendifyMe(mapIntent, REQUEST_MAP);
     }
@@ -188,8 +188,8 @@ public abstract class NearbyBahnhofNotificationManager {
      */
     protected
     @Nullable
-    PendingIntent getTimetablePendingIntent(final Country country, final Station station) {
-        final var timetableIntent = new Timetable().createTimetableIntent(country, station);
+    PendingIntent getTimetablePendingIntent(Country country, Station station) {
+        var timetableIntent = new Timetable().createTimetableIntent(country, station);
         if (timetableIntent != null) {
             return pendifyMe(timetableIntent, NearbyBahnhofNotificationManager.REQUEST_TIMETABLE);
         }
@@ -204,7 +204,7 @@ public abstract class NearbyBahnhofNotificationManager {
     @NonNull
     protected PendingIntent getStationPendingIntent() {
         // Build an intent for an action to see station details
-        final var stationIntent = new Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS);
+        var stationIntent = new Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS);
         stationIntent.putExtra(DetailsActivity.EXTRA_STATION, notificationStation);
         return pendifyMe(stationIntent, REQUEST_STATION);
     }
@@ -234,7 +234,7 @@ public abstract class NearbyBahnhofNotificationManager {
 
         public TextCreator invoke() {
             shortText = context.getString(R.string.template_short_text, notificationStation.getTitle(), notificationDistance);
-            final var longText = context.getString(R.string.template_long_text,
+            var longText = context.getString(R.string.template_long_text,
                     notificationStation.getTitle(),
                     notificationDistance,
                     (notificationStation.hasPhoto() ?

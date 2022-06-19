@@ -28,21 +28,21 @@ public class TimetableTest {
 
     @Test
     public void createTimetableIntentWithId() {
-        final Country country = new Country();
+        var country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{id}/blah");
         assertEquals("https://example.com/4711/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
     }
 
     @Test
     public void createTimetableIntentWithTitle() {
-        final Country country = new Country();
+        var country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{title}/blah");
         assertEquals("https://example.com/Some Famous Station/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
     }
 
     @Test
     public void createTimetableIntentWithDS100() {
-        final Country country = new Country();
+        var country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{DS100}/blah");
         assertEquals("https://example.com/LOL/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
     }

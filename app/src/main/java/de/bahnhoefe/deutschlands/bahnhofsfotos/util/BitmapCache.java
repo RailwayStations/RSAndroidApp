@@ -49,7 +49,7 @@ public class BitmapCache {
     private class Request implements BitmapAvailableHandler {
         private final URL url;
 
-        public Request(final URL url) {
+        public Request(URL url) {
             this.url = url;
         }
 
@@ -59,7 +59,7 @@ public class BitmapCache {
          * @param bitmap the fetched Bitmap for the notification. May be null
          */
         @Override
-        public void onBitmapAvailable(@Nullable final Bitmap bitmap) {
+        public void onBitmapAvailable(@Nullable Bitmap bitmap) {
             // save the image in the cache if it was constructed
             if (bitmap != null) {
                 cache.put(url, bitmap);
@@ -67,7 +67,7 @@ public class BitmapCache {
 
             // inform all requestors about the available image
             synchronized (requests) {
-                final var handlers = requests.remove(url);
+                var handlers = requests.remove(url);
                 if (handlers == null) {
                     Log.wtf(TAG, "Request result without a saved requestor. This should never happen.");
                 } else {
@@ -84,10 +84,10 @@ public class BitmapCache {
      * @param callback    the BitmapAvailableHandler to call on completion.
      * @param resourceUrl the URL to fetch
      */
-    public void getFoto(final BitmapAvailableHandler callback, @NonNull final String resourceUrl) {
+    public void getFoto(BitmapAvailableHandler callback, @NonNull String resourceUrl) {
         try {
             getFoto(callback, new URL(resourceUrl));
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             Log.e(TAG, "Couldn't load photo from malformed URL " + resourceUrl);
             callback.onBitmapAvailable(null);
         }
@@ -100,10 +100,10 @@ public class BitmapCache {
      * @param callback    the BitmapAvailableHandler to call on completion.
      * @param resourceUrl the URL to fetch
      */
-    public void getFoto(final BitmapAvailableHandler callback, @NonNull final URL resourceUrl) {
-        final var bitmap = cache.get(resourceUrl);
+    public void getFoto(BitmapAvailableHandler callback, @NonNull URL resourceUrl) {
+        var bitmap = cache.get(resourceUrl);
         if (bitmap == null) {
-            final var downloader = new BitmapDownloader(new Request(resourceUrl), resourceUrl);
+            var downloader = new BitmapDownloader(new Request(resourceUrl), resourceUrl);
             synchronized (requests) {
                 var handlers = requests.get(resourceUrl);
                 if (handlers == null) {

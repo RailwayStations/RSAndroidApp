@@ -18,8 +18,8 @@ public class MapInfoFragment extends DialogFragment {
 
     @Override
     @NonNull
-    public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final var textView = new TextView(getContext());
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        var textView = new TextView(getContext());
         textView.setTextSize((float) 18);
         textView.setPadding(50, 50, 50, 50);
         textView.setMovementMethod(LinkMovementMethod.getInstance());

@@ -117,10 +117,10 @@ public class MarkerBitmap {
      * @param textSize text size for icon
      * @param maxSize  icon size threshold
      */
-    public MarkerBitmap(final Context context, final Bitmap srcWithoutPhoto, final Bitmap srcWithPhoto, final Bitmap srcOwnPhoto,
-                        final Bitmap srcWithoutPhotoInactive, final Bitmap srcWithPhotoInactive, final Bitmap srcOwnPhotoInactive,
-                        final Bitmap srcPendingUpload,
-                        final Point grid, final float textSize, final int maxSize, final Paint paint) {
+    public MarkerBitmap(Context context, Bitmap srcWithoutPhoto, Bitmap srcWithPhoto, Bitmap srcOwnPhoto,
+                        Bitmap srcWithoutPhotoInactive, Bitmap srcWithPhotoInactive, Bitmap srcOwnPhotoInactive,
+                        Bitmap srcPendingUpload,
+                        Point grid, float textSize, int maxSize, Paint paint) {
         MarkerBitmap.contextRef = new WeakReference<>(context);
         iconBmpWithoutPhoto = srcWithoutPhoto;
         iconBmpWithPhoto = srcWithPhoto;
@@ -136,14 +136,14 @@ public class MarkerBitmap {
         this.paint.setTextSize(getTextSize());
     }
 
-    public MarkerBitmap(final Context context, final Bitmap bitmap, final Point grid, final float textSize, final int maxSize, final Paint paint) {
+    public MarkerBitmap(Context context, Bitmap bitmap, Point grid, float textSize, int maxSize, Paint paint) {
         this(context, bitmap, bitmap, bitmap, bitmap, bitmap, bitmap, bitmap, grid, textSize, maxSize, paint);
     }
 
-    public static Bitmap getBitmapFromTitle(final String title, final Paint paint) {
-        final var context = contextRef.get();
+    public static Bitmap getBitmapFromTitle(String title, Paint paint) {
+        var context = contextRef.get();
         if (!captionViews.containsKey(title) && context != null) {
-            final var bubbleView = new TextView(context);
+            var bubbleView = new TextView(context);
             bubbleView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             Utils.setBackground(bubbleView, ResourcesCompat.getDrawable(context.getResources(), R.drawable.caption_background, null));
             bubbleView.setGravity(Gravity.CENTER);
@@ -153,8 +153,8 @@ public class MarkerBitmap {
             bubbleView.setTextColor(android.graphics.Color.BLACK);
             bubbleView.setText(title);
             //Measure the view at the exact dimensions (otherwise the text won't center correctly)
-            final int widthSpec = View.MeasureSpec.makeMeasureSpec(paint.getTextWidth(title), View.MeasureSpec.EXACTLY);
-            final int heightSpec = View.MeasureSpec.makeMeasureSpec(paint.getTextHeight(title), View.MeasureSpec.EXACTLY);
+            int widthSpec = View.MeasureSpec.makeMeasureSpec(paint.getTextWidth(title), View.MeasureSpec.EXACTLY);
+            int heightSpec = View.MeasureSpec.makeMeasureSpec(paint.getTextHeight(title), View.MeasureSpec.EXACTLY);
             bubbleView.measure(widthSpec, heightSpec);
 
             //Layout the view at the width and height
@@ -174,7 +174,7 @@ public class MarkerBitmap {
     /**
      * @return bitmap object according to the state of the stations
      */
-    public final Bitmap getBitmap(final boolean hasPhoto, final boolean ownPhoto, final boolean stationActive, final boolean inbox) {
+    public Bitmap getBitmap(boolean hasPhoto, boolean ownPhoto, boolean stationActive, boolean inbox) {
         if (inbox) {
             return iconBmpPendingUpload;
         }
@@ -201,7 +201,7 @@ public class MarkerBitmap {
     /**
      * @return get offset of the icon
      */
-    public final Point getIconOffset() {
+    public Point getIconOffset() {
         return iconOffset;
     }
 
@@ -209,14 +209,14 @@ public class MarkerBitmap {
      * @return text size already adjusted with DisplayModel.getDeviceScaleFactor(), i.e.
      * the scaling factor for fonts displayed on the display.
      */
-    public final float getTextSize() {
+    public float getTextSize() {
         return textSize;
     }
 
     /**
      * @return icon size threshold
      */
-    public final int getItemMax() {
+    public int getItemMax() {
         return itemSizeMax;
     }
 

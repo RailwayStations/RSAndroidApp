@@ -21,7 +21,7 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
     private List<HighScoreItem> highScore;
     private HighScoreFilter filter;
 
-    public HighScoreAdapter(final Activity context, final List<HighScoreItem> highScore) {
+    public HighScoreAdapter(Activity context, List<HighScoreItem> highScore) {
         super(context, R.layout.item_highscore, highScore);
         this.highScore = highScore;
         this.context = context;
@@ -29,10 +29,10 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
 
     @Override
     @NonNull
-    public View getView(final int position, final View convertView, @NonNull final ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         var rowView = convertView;
         // reuse views
-        final ItemHighscoreBinding binding;
+        ItemHighscoreBinding binding;
         if (rowView == null) {
             binding = ItemHighscoreBinding.inflate(context.getLayoutInflater(), parent, false);
             rowView = binding.getRoot();
@@ -41,7 +41,7 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
             binding = (ItemHighscoreBinding) rowView.getTag();
         }
 
-        final var item = highScore.get(position);
+        var item = highScore.get(position);
         binding.highscoreName.setText(item.getName());
         binding.highscorePhotos.setText(String.valueOf(item.getPhotos()));
         binding.highscorePosition.setText(String.valueOf(item.getPosition()).concat("."));
@@ -88,19 +88,19 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
 
     private class HighScoreFilter extends Filter {
 
-        private final List<HighScoreItem> originalItems = new ArrayList<>();
+        private List<HighScoreItem> originalItems = new ArrayList<>();
 
-        public HighScoreFilter(final List<HighScoreItem> originalItems) {
+        public HighScoreFilter(List<HighScoreItem> originalItems) {
             this.originalItems.addAll(originalItems);
         }
 
         @Override
-        protected FilterResults performFiltering(final CharSequence constraint) {
-            final var filterResults = new FilterResults();
+        protected FilterResults performFiltering(CharSequence constraint) {
+            var filterResults = new FilterResults();
 
             if (constraint != null) {
-                final var search = constraint.toString().toLowerCase();
-                final var tempList = originalItems.stream()
+                var search = constraint.toString().toLowerCase();
+                var tempList = originalItems.stream()
                         .filter(item -> item.getName().toLowerCase().contains(search))
                         .collect(Collectors.toList());
 
@@ -112,7 +112,7 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
 
         @SuppressWarnings("unchecked")
         @Override
-        protected void publishResults(final CharSequence contraint, final FilterResults results) {
+        protected void publishResults(CharSequence contraint, FilterResults results) {
             highScore = (ArrayList<HighScoreItem>) results.values;
             clear();
             addAll(highScore);

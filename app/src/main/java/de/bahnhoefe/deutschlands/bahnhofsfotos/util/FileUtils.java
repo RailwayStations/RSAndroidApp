@@ -22,15 +22,15 @@ public class FileUtils {
      * @return the File denoting the base directory or null, if cannot write to it
      */
     @Nullable
-    public static File getLocalFotoDir(final Context context) {
+    public static File getLocalFotoDir(Context context) {
         return mkdirs(Objects.requireNonNull(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
     }
 
-    private static File mkdirs(final File dir) {
+    private static File mkdirs(File dir) {
         try {
             Files.createDirectories(dir.toPath());
             return dir;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             Log.e(TAG, "Cannot create directory structure " + dir.getAbsolutePath(), e);
         }
         return null;
@@ -42,28 +42,28 @@ public class FileUtils {
      * @return the File
      */
     @Nullable
-    public static File getStoredMediaFile(final Context context, final Long uploadId) {
-        final var mediaStorageDir = FileUtils.getLocalFotoDir(context);
+    public static File getStoredMediaFile(Context context, Long uploadId) {
+        var mediaStorageDir = FileUtils.getLocalFotoDir(context);
         if (mediaStorageDir == null) {
             return null;
         }
 
-        final var storeMediaFile = new File(mediaStorageDir, String.format(Locale.ENGLISH, "%d.jpg", uploadId));
+        var storeMediaFile = new File(mediaStorageDir, String.format(Locale.ENGLISH, "%d.jpg", uploadId));
         Log.d(TAG, "StoredMediaFile: " + storeMediaFile);
 
         return storeMediaFile;
     }
 
-    public static File getImageCacheFile(final Context applicationContext, final String imageId) {
-        final File imagePath = new File(applicationContext.getCacheDir(), "images");
+    public static File getImageCacheFile(Context applicationContext, String imageId) {
+        File imagePath = new File(applicationContext.getCacheDir(), "images");
         mkdirs(imagePath);
         return new File(imagePath, imageId + ".jpg");
     }
 
-    public static void deleteQuietly(final File file) {
+    public static void deleteQuietly(File file) {
         try {
             Files.delete(file.toPath());
-        } catch (final IOException exception) {
+        } catch (IOException exception) {
             Log.w(TAG, "unable to delete file " + file, exception);
         }
     }

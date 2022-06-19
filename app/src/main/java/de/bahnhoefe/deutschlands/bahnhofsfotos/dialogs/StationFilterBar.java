@@ -30,19 +30,19 @@ public class StationFilterBar extends LinearLayout {
     private OnChangeListener listener;
     private BaseApplication baseApplication;
 
-    public StationFilterBar(final Context context) {
+    public StationFilterBar(Context context) {
         this(context, null);
     }
 
-    public StationFilterBar(final Context context, @Nullable final AttributeSet attrs) {
+    public StationFilterBar(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public StationFilterBar(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr) {
+    public StationFilterBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public StationFilterBar(final Context context, final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
+    public StationFilterBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         LayoutInflater.from(context).inflate(R.layout.station_filter_bar, this);
@@ -62,15 +62,15 @@ public class StationFilterBar extends LinearLayout {
         this.<Button>findViewById(R.id.countrySelection).setOnClickListener(this::selectCountry);
     }
 
-    private void setFilterButton(final Button button, final int iconRes, final int textRes, final int textColorRes) {
+    private void setFilterButton(Button button, int iconRes, int textRes, int textColorRes) {
         button.setCompoundDrawablesWithIntrinsicBounds(null, ContextCompat.getDrawable(getContext(), iconRes), null, null);
         button.setTextColor(getResources().getColor(textColorRes, null));
         button.setText(textRes);
     }
 
-    public void setBaseApplication(final BaseApplication baseApplication) {
+    public void setBaseApplication(BaseApplication baseApplication) {
         this.baseApplication = baseApplication;
-        final var stationFilter = baseApplication.getStationFilter();
+        var stationFilter = baseApplication.getStationFilter();
 
         setFilterButton(photoFilter, stationFilter.getPhotoIcon(), stationFilter.getPhotoText(), stationFilter.getPhotoColor());
         setFilterButton(nicknameFilter, stationFilter.getNicknameIcon(), R.string.filter_nickname, stationFilter.getNicknameColor());
@@ -79,25 +79,25 @@ public class StationFilterBar extends LinearLayout {
         setSortOrder(baseApplication.getSortByDistance());
     }
 
-    public void toggleActiveFilter(final View view) {
-        final var stationFilter = baseApplication.getStationFilter();
+    public void toggleActiveFilter(View view) {
+        var stationFilter = baseApplication.getStationFilter();
         stationFilter.toggleActive();
         setFilterButton(activeFilter, stationFilter.getActiveIcon(), stationFilter.getActiveText(), stationFilter.getActiveColor());
         updateStationFilter(stationFilter);
     }
 
-    public void togglePhotoFilter(final View view) {
-        final var stationFilter = baseApplication.getStationFilter();
+    public void togglePhotoFilter(View view) {
+        var stationFilter = baseApplication.getStationFilter();
         stationFilter.togglePhoto();
         setFilterButton(photoFilter, stationFilter.getPhotoIcon(), stationFilter.getPhotoText(), stationFilter.getPhotoColor());
         updateStationFilter(stationFilter);
     }
 
-    public void selectCountry(final View view) {
+    public void selectCountry(View view) {
         getContext().startActivity(new Intent(getContext(), CountryActivity.class));
     }
 
-    public void toggleSort(final View view) {
+    public void toggleSort(View view) {
         boolean sortByDistance = baseApplication.getSortByDistance();
         sortByDistance = !sortByDistance;
         setSortOrder(sortByDistance);
@@ -107,18 +107,18 @@ public class StationFilterBar extends LinearLayout {
         }
     }
 
-    public void setSortOrder(final boolean sortByDistance) {
+    public void setSortOrder(boolean sortByDistance) {
         setFilterButton(toggleSort, sortByDistance ? R.drawable.ic_sort_by_distance_active_24px : R.drawable.ic_sort_by_alpha_active_24px, R.string.sort_order, R.color.filterActive);
     }
 
-    public void selectNicknameFilter(final View view) {
-        final var nicknames = baseApplication.getDbAdapter().getPhotographerNicknames();
-        final var stationFilter = baseApplication.getStationFilter();
+    public void selectNicknameFilter(View view) {
+        var nicknames = baseApplication.getDbAdapter().getPhotographerNicknames();
+        var stationFilter = baseApplication.getStationFilter();
         if (nicknames.length == 0) {
             Toast.makeText(getContext(), getContext().getString(R.string.no_nicknames_found), Toast.LENGTH_LONG).show();
             return;
         }
-        final int selectedNickname = IntStream.range(0, nicknames.length)
+        int selectedNickname = IntStream.range(0, nicknames.length)
                 .filter(i -> nicknames[i].equals(stationFilter.getNickname()))
                 .findFirst().orElse(-1);
 
@@ -128,7 +128,7 @@ public class StationFilterBar extends LinearLayout {
                 .setSingleChoiceItems(nicknames, selectedNickname, null)
                 .setPositiveButton(R.string.button_ok_text, (dialog, whichButton) -> {
                     dialog.dismiss();
-                    final int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                    int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
                     if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
                         stationFilter.setNickname(nicknames[selectedPosition]);
                         setFilterButton(nicknameFilter, stationFilter.getNicknameIcon(), R.string.filter_nickname, stationFilter.getNicknameColor());
@@ -150,24 +150,24 @@ public class StationFilterBar extends LinearLayout {
                 .create().show();
     }
 
-    private void updateStationFilter(final StationFilter stationFilter) {
+    private void updateStationFilter(StationFilter stationFilter) {
         baseApplication.setStationFilter(stationFilter);
         if (listener != null) {
             listener.stationFilterChanged(stationFilter);
         }
     }
 
-    public void setOnChangeListener(final OnChangeListener listener) {
+    public void setOnChangeListener(OnChangeListener listener) {
         this.listener = listener;
     }
 
-    public void setSortOrderEnabled(final boolean enabled) {
+    public void setSortOrderEnabled(boolean enabled) {
         toggleSort.setVisibility(enabled ? VISIBLE : GONE);
     }
 
     public interface OnChangeListener {
-        void stationFilterChanged(final StationFilter stationFilter);
-        void sortOrderChanged(final boolean sortByDistance);
+        void stationFilterChanged(StationFilter stationFilter);
+        void sortOrderChanged(boolean sortByDistance);
     }
 
 }

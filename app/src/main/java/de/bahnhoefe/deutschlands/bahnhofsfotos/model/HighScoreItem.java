@@ -7,7 +7,7 @@ public class HighScoreItem {
     private final int photos;
     private final int position;
 
-    public HighScoreItem(final String name, final int photos, final int position) {
+    public HighScoreItem(String name, int photos, int position) {
         this.name = name;
         this.photos = photos;
         this.position = position;

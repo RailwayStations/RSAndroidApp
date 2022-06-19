@@ -18,7 +18,7 @@ public class Timetable {
      * @return the PendingIntent built.
      */
     @Nullable
-    public Intent createTimetableIntent(final Country country, final Station station) {
+    public Intent createTimetableIntent(Country country, Station station) {
         if (!country.hasTimetableUrlTemplate()) {
             return null;
         }
@@ -28,7 +28,7 @@ public class Timetable {
         timeTableTemplate = timeTableTemplate.replace("{title}", station.getTitle());
         timeTableTemplate = timeTableTemplate.replace("{DS100}", StringUtils.trimToEmpty(station.getDs100()));
 
-        final var timetableIntent = new Intent(Intent.ACTION_VIEW);
+        var timetableIntent = new Intent(Intent.ACTION_VIEW);
         timetableIntent.setData(Uri.parse(timeTableTemplate));
         return timetableIntent;
     }

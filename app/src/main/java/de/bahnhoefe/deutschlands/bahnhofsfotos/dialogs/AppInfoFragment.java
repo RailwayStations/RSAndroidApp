@@ -19,8 +19,8 @@ public class AppInfoFragment extends DialogFragment {
 
     @Override
     @NonNull
-    public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final var textView = new TextView(getContext());
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        var textView = new TextView(getContext());
         textView.setLinksClickable(true);
         textView.setTextSize((float) 18);
         textView.setPadding(50, 50, 50, 50);

@@ -102,7 +102,7 @@ public class DbAdapter {
     private DbOpenHelper dbHelper;
     private SQLiteDatabase db;
 
-    public DbAdapter(final Context context) {
+    public DbAdapter(Context context) {
         this.context = context;
     }
 
@@ -116,7 +116,7 @@ public class DbAdapter {
         dbHelper.close();
     }
 
-    public void insertStations(final List<Station> stations, final Set<String> countryCodes) {
+    public void insertStations(List<Station> stations, Set<String> countryCodes) {
         if (stations.isEmpty()) {
             return;
         }
@@ -131,8 +131,8 @@ public class DbAdapter {
         }
     }
 
-    private ContentValues toContentValues(final Station station) {
-        final var values = new ContentValues();
+    private ContentValues toContentValues(Station station) {
+        var values = new ContentValues();
         values.put(Constants.STATIONS.ID, station.getId());
         values.put(Constants.STATIONS.COUNTRY, station.getCountry());
         values.put(Constants.STATIONS.TITLE, station.getTitle());
@@ -150,7 +150,7 @@ public class DbAdapter {
         return values;
     }
 
-    public void insertCountries(final List<Country> countries) {
+    public void insertCountries(List<Country> countries) {
         if (countries.isEmpty()) {
             return;
         }
@@ -173,8 +173,8 @@ public class DbAdapter {
         }
     }
 
-    private ContentValues toContentValues(final ProviderApp app) {
-        final var values = new ContentValues();
+    private ContentValues toContentValues(ProviderApp app) {
+        var values = new ContentValues();
         values.put(Constants.PROVIDER_APPS.COUNTRYSHORTCODE, app.getCountryCode());
         values.put(Constants.PROVIDER_APPS.PA_TYPE, app.getType());
         values.put(Constants.PROVIDER_APPS.PA_NAME, app.getName());
@@ -182,8 +182,8 @@ public class DbAdapter {
         return values;
     }
 
-    private ContentValues toContentValues(final Country country) {
-        final var values = new ContentValues();
+    private ContentValues toContentValues(Country country) {
+        var values = new ContentValues();
         values.put(Constants.COUNTRIES.COUNTRYSHORTCODE, country.getCode());
         values.put(Constants.COUNTRIES.COUNTRYNAME, country.getName());
         values.put(Constants.COUNTRIES.EMAIL, country.getEmail());
@@ -193,12 +193,12 @@ public class DbAdapter {
         return values;
     }
 
-    public Upload insertUpload(final Upload upload) {
+    public Upload insertUpload(Upload upload) {
         upload.setId(db.insert(DATABASE_TABLE_UPLOADS, null, toContentValues(upload)));
         return upload;
     }
 
-    public void deleteStations(final Set<String> countryCodes) {
+    public void deleteStations(Set<String> countryCodes) {
         db.delete(DATABASE_TABLE_STATIONS, whereCountryCodeIn(countryCodes), null);
     }
 
@@ -207,11 +207,11 @@ public class DbAdapter {
         db.delete(DATABASE_TABLE_COUNTRIES, null, null);
     }
 
-    private String getStationOrderBy(final boolean sortByDistance, final Location myPos) {
+    private String getStationOrderBy(boolean sortByDistance, Location myPos) {
         var orderBy = Constants.STATIONS.TITLE + " ASC";
 
         if (sortByDistance) {
-            final var fudge = Math.pow(Math.cos(Math.toRadians(myPos.getLatitude())), 2);
+            var fudge = Math.pow(Math.cos(Math.toRadians(myPos.getLatitude())), 2);
             orderBy = "((" + myPos.getLatitude() + " - " + Constants.STATIONS.LAT + ") * (" + myPos.getLatitude() + " - " + Constants.STATIONS.LAT + ") + " +
                     "(" + myPos.getLongitude() + " - " + Constants.STATIONS.LON + ") * (" + myPos.getLongitude() + " - " + Constants.STATIONS.LON + ") * " + fudge + ")";
         }
@@ -220,12 +220,12 @@ public class DbAdapter {
     }
 
     public Cursor getCountryList() {
-        final var selectCountries = "SELECT " + Constants.COUNTRIES.ROWID_COUNTRIES + " AS " + Constants.CURSOR_ADAPTER_ID + ", " +
+        var selectCountries = "SELECT " + Constants.COUNTRIES.ROWID_COUNTRIES + " AS " + Constants.CURSOR_ADAPTER_ID + ", " +
                 Constants.COUNTRIES.COUNTRYSHORTCODE + ", " + Constants.COUNTRIES.COUNTRYNAME +
                 " FROM " + DATABASE_TABLE_COUNTRIES + " ORDER BY " + Constants.COUNTRIES.COUNTRYNAME + " ASC";
         Log.d(TAG, selectCountries);
 
-        final var cursor = db.rawQuery(selectCountries, null);
+        var cursor = db.rawQuery(selectCountries, null);
 
         if (!cursor.moveToFirst()) {
             cursor.close();
@@ -245,9 +245,9 @@ public class DbAdapter {
      * @param myPos current location
      * @return a Cursor representing the matching results
      */
-    public Cursor getStationsListByKeyword(final String search, final StationFilter stationFilter, final Set<String> countryCodes, final boolean sortByDistance, final Location myPos) {
+    public Cursor getStationsListByKeyword(String search, StationFilter stationFilter, Set<String> countryCodes, boolean sortByDistance, Location myPos) {
         var selectQuery = whereCountryCodeIn(countryCodes);
-        final var queryArgs = new ArrayList<String>();
+        var queryArgs = new ArrayList<String>();
 
         if (StringUtils.isNotBlank(search)) {
             selectQuery += String.format(" AND %s LIKE ?", Constants.STATIONS.NORMALIZED_TITLE);
@@ -268,7 +268,7 @@ public class DbAdapter {
 
         Log.w(TAG, selectQuery);
 
-        final var cursor = db.query(DATABASE_TABLE_STATIONS,
+        var cursor = db.query(DATABASE_TABLE_STATIONS,
             new String[]{
                 Constants.STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID,
                 Constants.STATIONS.ID,
@@ -287,15 +287,15 @@ public class DbAdapter {
         return cursor;
     }
 
-    private String whereCountryCodeIn(final Set<String> countryCodes) {
+    private String whereCountryCodeIn(Set<String> countryCodes) {
         return Constants.STATIONS.COUNTRY +
                 " IN (" +
                 countryCodes.stream().map(c -> "'" + c + "'").collect(joining(",")) +
                 ")";
     }
 
-    public Statistic getStatistic(final String country) {
-        try (final var cursor = db.rawQuery("SELECT COUNT(*), COUNT(" + Constants.STATIONS.PHOTO_URL + "), COUNT(DISTINCT(" + Constants.STATIONS.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.COUNTRY + " = ?", new String[]{country})) {
+    public Statistic getStatistic(String country) {
+        try (var cursor = db.rawQuery("SELECT COUNT(*), COUNT(" + Constants.STATIONS.PHOTO_URL + "), COUNT(DISTINCT(" + Constants.STATIONS.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.COUNTRY + " = ?", new String[]{country})) {
             if (cursor.moveToNext()) {
                 return new Statistic(cursor.getInt(0), cursor.getInt(1), cursor.getInt(0) - cursor.getInt(1), cursor.getInt(2));
             }
@@ -304,8 +304,8 @@ public class DbAdapter {
     }
 
     public String[] getPhotographerNicknames() {
-        final var photographers = new ArrayList<String>();
-        try (final var cursor = db.rawQuery("SELECT distinct " + Constants.STATIONS.PHOTOGRAPHER + " FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.PHOTOGRAPHER + " IS NOT NULL ORDER BY " + Constants.STATIONS.PHOTOGRAPHER, null)) {
+        var photographers = new ArrayList<String>();
+        try (var cursor = db.rawQuery("SELECT distinct " + Constants.STATIONS.PHOTOGRAPHER + " FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.PHOTOGRAPHER + " IS NOT NULL ORDER BY " + Constants.STATIONS.PHOTOGRAPHER, null)) {
             while (cursor.moveToNext()) {
                 photographers.add(cursor.getString(0));
             }
@@ -313,8 +313,8 @@ public class DbAdapter {
         return photographers.toArray(new String[0]);
     }
 
-    public int countStations(final Set<String> countryCodes) {
-        try (final var query = db.rawQuery("SELECT COUNT(*) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes), null)) {
+    public int countStations(Set<String> countryCodes) {
+        try (var query = db.rawQuery("SELECT COUNT(*) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes), null)) {
             if (query.moveToFirst()) {
                 return query.getInt(0);
             }
@@ -322,7 +322,7 @@ public class DbAdapter {
         return 0;
     }
 
-    public void updateUpload(final Upload upload) {
+    public void updateUpload(Upload upload) {
         db.beginTransaction();
         try {
             db.update(DATABASE_TABLE_UPLOADS, toContentValues(upload), Constants.UPLOADS.ID + " = ?", new String[]{String.valueOf(upload.getId())});
@@ -332,8 +332,8 @@ public class DbAdapter {
         }
     }
 
-    private ContentValues toContentValues(final Upload upload) {
-        final var values = new ContentValues();
+    private ContentValues toContentValues(Upload upload) {
+        var values = new ContentValues();
         values.put(Constants.UPLOADS.COMMENT, upload.getComment());
         values.put(Constants.UPLOADS.COUNTRY, upload.getCountry());
         values.put(Constants.UPLOADS.CREATED_AT, upload.getCreatedAt());
@@ -352,8 +352,8 @@ public class DbAdapter {
         return values;
     }
 
-    public Upload getPendingUploadForStation(final Station station) {
-        try (final var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + "=? AND " + Constants.UPLOADS.STATION_ID + "=? AND " + getPendingUploadWhereClause(),
+    public Upload getPendingUploadForStation(Station station) {
+        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + "=? AND " + Constants.UPLOADS.STATION_ID + "=? AND " + getPendingUploadWhereClause(),
                 new String[]{ station.getCountry(), station.getId()}, null, null, Constants.UPLOADS.CREATED_AT + " DESC")) {
             if (cursor.moveToFirst()) {
                 return createUploadFromCursor(cursor);
@@ -363,8 +363,8 @@ public class DbAdapter {
         return null;
     }
 
-    public Upload getPendingUploadForCoordinates(final double lat, final double lon) {
-        try (final var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.LAT + "=? AND " + Constants.UPLOADS.LON + "=? AND " + getPendingUploadWhereClause(),
+    public Upload getPendingUploadForCoordinates(double lat, double lon) {
+        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.LAT + "=? AND " + Constants.UPLOADS.LON + "=? AND " + getPendingUploadWhereClause(),
                 new String[]{ String.valueOf(lat), String.valueOf(lon)}, null, null, Constants.UPLOADS.CREATED_AT + " DESC")) {
             if (cursor.moveToFirst()) {
                 return createUploadFromCursor(cursor);
@@ -374,7 +374,7 @@ public class DbAdapter {
         return null;
     }
 
-    private String getUploadWhereClause(final Predicate<UploadState> predicate) {
+    private String getUploadWhereClause(Predicate<UploadState> predicate) {
         return Constants.UPLOADS.UPLOAD_STATE + " IN (" +
                 Arrays.stream(UploadState.values())
                         .filter(predicate)
@@ -392,7 +392,7 @@ public class DbAdapter {
     }
 
     public Cursor getOutbox() {
-        final var queryBuilder = new SQLiteQueryBuilder();
+        var queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(DATABASE_TABLE_UPLOADS
                         + " LEFT JOIN "
                         + DATABASE_TABLE_STATIONS
@@ -418,8 +418,8 @@ public class DbAdapter {
         }, null, null, null, null, Constants.UPLOADS.CREATED_AT + " DESC");
     }
 
-    public Upload getUploadById(final long id) {
-        try (final var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.ID + "=?",
+    public Upload getUploadById(long id) {
+        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.ID + "=?",
                 new String[]{ String.valueOf(id)}, null, null, null)) {
             if (cursor.moveToFirst()) {
                 return createUploadFromCursor(cursor);
@@ -429,17 +429,17 @@ public class DbAdapter {
         return null;
     }
 
-    public void deleteUpload(final long id) {
+    public void deleteUpload(long id) {
         db.delete(DATABASE_TABLE_UPLOADS, Constants.UPLOADS.ID + "=?", new String[]{ String.valueOf(id)});
     }
 
-    public List<Upload> getPendingUploads(final boolean withRemoteId) {
+    public List<Upload> getPendingUploads(boolean withRemoteId) {
         var selection = getPendingUploadWhereClause();
         if (withRemoteId) {
             selection += " AND " + Constants.UPLOADS.REMOTE_ID + " IS NOT NULL";
         }
-        final var uploads = new ArrayList<Upload>();
-        try (final var cursor = db.query(DATABASE_TABLE_UPLOADS, null, selection,
+        var uploads = new ArrayList<Upload>();
+        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, selection,
                 null,null, null, null)) {
             while (cursor.moveToNext()) {
                 uploads.add(createUploadFromCursor(cursor));
@@ -449,7 +449,7 @@ public class DbAdapter {
         return uploads;
     }
 
-    public void updateUploadStates(final List<InboxStateQuery> stateQueries) {
+    public void updateUploadStates(List<InboxStateQuery> stateQueries) {
         db.beginTransaction();
         try {
             stateQueries.forEach(state -> db.update(DATABASE_TABLE_UPLOADS, toUploadStatesContentValues(state), Constants.UPLOADS.REMOTE_ID + " = ?", new String[]{String.valueOf(state.getId())}));
@@ -459,8 +459,8 @@ public class DbAdapter {
         }
     }
 
-    private ContentValues toUploadStatesContentValues(final InboxStateQuery state) {
-        final var values = new ContentValues();
+    private ContentValues toUploadStatesContentValues(InboxStateQuery state) {
+        var values = new ContentValues();
         values.put(Constants.UPLOADS.UPLOAD_STATE, state.getState().name());
         values.put(Constants.UPLOADS.REJECTED_REASON, state.getRejectedReason());
         values.put(Constants.UPLOADS.CRC32, state.getCrc32());
@@ -468,8 +468,8 @@ public class DbAdapter {
     }
 
     public List<Upload> getCompletedUploads() {
-        final var uploads = new ArrayList<Upload>();
-        try (final var cursor = db.query(DATABASE_TABLE_UPLOADS, null,
+        var uploads = new ArrayList<Upload>();
+        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null,
                 Constants.UPLOADS.REMOTE_ID + " IS NOT NULL AND " + getCompletedUploadWhereClause(),
                 null,null, null, null)) {
             while (cursor.moveToNext()) {
@@ -482,12 +482,12 @@ public class DbAdapter {
 
     static class DbOpenHelper extends SQLiteOpenHelper {
 
-        DbOpenHelper(final Context context) {
+        DbOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override
-        public void onCreate(final SQLiteDatabase db) {
+        public void onCreate(SQLiteDatabase db) {
             Log.i(TAG, "Creating database");
             db.execSQL(CREATE_STATEMENT_STATIONS);
             db.execSQL(CREATE_STATEMENT_STATIONS_IDX);
@@ -498,7 +498,7 @@ public class DbAdapter {
         }
 
         @Override
-        public void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrade database from version" + oldVersion + " to " + newVersion);
 
             db.beginTransaction();
@@ -550,8 +550,8 @@ public class DbAdapter {
     }
 
     @NonNull
-    private Station createStationFromCursor(@NonNull final Cursor cursor) {
-        final var station = new Station();
+    private Station createStationFromCursor(@NonNull Cursor cursor) {
+        var station = new Station();
         station.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.TITLE)));
         station.setCountry(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.COUNTRY)));
         station.setId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID)));
@@ -569,8 +569,8 @@ public class DbAdapter {
     }
 
     @NonNull
-    private Country createCountryFromCursor(@NonNull final Cursor cursor) {
-        final var country = new Country();
+    private Country createCountryFromCursor(@NonNull Cursor cursor) {
+        var country = new Country();
         country.setCode(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)));
         country.setName(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
         country.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.EMAIL)));
@@ -581,8 +581,8 @@ public class DbAdapter {
     }
 
     @NonNull
-    private ProviderApp createProviderAppFromCursor(@NonNull final Cursor cursor) {
-        final var providerApp = new ProviderApp();
+    private ProviderApp createProviderAppFromCursor(@NonNull Cursor cursor) {
+        var providerApp = new ProviderApp();
         providerApp.setCountryCode(cursor.getString(cursor.getColumnIndexOrThrow(Constants.PROVIDER_APPS.COUNTRYSHORTCODE)));
         providerApp.setName(cursor.getString(cursor.getColumnIndexOrThrow(Constants.PROVIDER_APPS.PA_NAME)));
         providerApp.setType(cursor.getString(cursor.getColumnIndexOrThrow(Constants.PROVIDER_APPS.PA_TYPE)));
@@ -591,8 +591,8 @@ public class DbAdapter {
     }
 
     @NonNull
-    private Upload createUploadFromCursor(@NonNull final Cursor cursor) {
-        final var upload = new Upload();
+    private Upload createUploadFromCursor(@NonNull Cursor cursor) {
+        var upload = new Upload();
         upload.setComment(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COMMENT)));
         upload.setCountry(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COUNTRY)));
         upload.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.CREATED_AT)));
@@ -604,7 +604,7 @@ public class DbAdapter {
         if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LON))) {
             upload.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LON)));
         }
-        final var problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
+        var problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
         if (problemType != null) {
             upload.setProblemType(ProblemType.valueOf(problemType));
         }
@@ -614,7 +614,7 @@ public class DbAdapter {
         }
         upload.setStationId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.STATION_ID)));
         upload.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE)));
-        final var uploadState = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
+        var uploadState = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
         if (uploadState != null) {
             upload.setUploadState(UploadState.valueOf(uploadState));
         }
@@ -627,8 +627,8 @@ public class DbAdapter {
         return upload;
     }
 
-    public Station fetchStationByRowId(final long id) {
-        try (final var cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.ROWID + "=?", new String[]{
+    public Station fetchStationByRowId(long id) {
+        try (var cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.ROWID + "=?", new String[]{
                 id + ""}, null, null, null)) {
             if (cursor.moveToFirst()) {
                 return createStationFromCursor(cursor);
@@ -637,8 +637,8 @@ public class DbAdapter {
         return null;
     }
 
-    public Station getStationByKey(final String country, final String id) {
-        try (final var cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? AND " + Constants.STATIONS.ID + "=?",
+    public Station getStationByKey(String country, String id) {
+        try (var cursor = db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? AND " + Constants.STATIONS.ID + "=?",
                 new String[]{ country, id}, null, null, null)) {
             if (cursor.moveToFirst()) {
                 return createStationFromCursor(cursor);
@@ -647,8 +647,8 @@ public class DbAdapter {
         return null;
     }
 
-    public Station getStationForUpload(final Upload upload) {
-        try (final var cursor =  db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? AND " + Constants.STATIONS.ID + "=?",
+    public Station getStationForUpload(Upload upload) {
+        try (var cursor =  db.query(DATABASE_TABLE_STATIONS, null, Constants.STATIONS.COUNTRY + "=? AND " + Constants.STATIONS.ID + "=?",
                     new String[]{upload.getCountry(), upload.getStationId()}, null, null, null)) {
             if (cursor.moveToFirst()) {
                 return createStationFromCursor(cursor);
@@ -657,18 +657,18 @@ public class DbAdapter {
         return null;
     }
 
-    public Set<Country> fetchCountriesWithProviderApps(final Set<String> countryCodes) {
-        final var countryList = countryCodes.stream()
+    public Set<Country> fetchCountriesWithProviderApps(Set<String> countryCodes) {
+        var countryList = countryCodes.stream()
                 .map(c -> "'" + c + "'")
                 .collect(joining(","));
-        final var countries = new HashSet<Country>();
-        try (final var cursor = db.query(DATABASE_TABLE_COUNTRIES, null, Constants.COUNTRIES.COUNTRYSHORTCODE + " IN (" + countryList + ")",
+        var countries = new HashSet<Country>();
+        try (var cursor = db.query(DATABASE_TABLE_COUNTRIES, null, Constants.COUNTRIES.COUNTRYSHORTCODE + " IN (" + countryList + ")",
                 null, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 do {
-                    final var country = createCountryFromCursor(cursor);
+                    var country = createCountryFromCursor(cursor);
                     countries.add(country);
-                    try (final var cursorPa = db.query(DATABASE_TABLE_PROVIDER_APPS, null, Constants.PROVIDER_APPS.COUNTRYSHORTCODE + " = ?",
+                    try (var cursorPa = db.query(DATABASE_TABLE_PROVIDER_APPS, null, Constants.PROVIDER_APPS.COUNTRYSHORTCODE + " = ?",
                             new String[]{country.getCode()}, null, null, null)) {
                         if (cursorPa != null && cursorPa.moveToFirst()) {
                             do {
@@ -683,10 +683,10 @@ public class DbAdapter {
         return countries;
     }
 
-    public List<Station> getAllStations(final StationFilter stationFilter, final Set<String> countryCodes) {
-        final var stationList = new ArrayList<Station>();
+    public List<Station> getAllStations(StationFilter stationFilter, Set<String> countryCodes) {
+        var stationList = new ArrayList<Station>();
         var selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes);
-        final var queryArgs = new ArrayList<String>();
+        var queryArgs = new ArrayList<String>();
         if (stationFilter.getNickname() != null) {
             selectQuery += " AND " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
             queryArgs.add(stationFilter.getNickname());
@@ -699,7 +699,7 @@ public class DbAdapter {
             queryArgs.add(stationFilter.isActive() ? "1" : "0");
         }
 
-        try (final var cursor = db.rawQuery(selectQuery, queryArgs.toArray(new String[]{}))) {
+        try (var cursor = db.rawQuery(selectQuery, queryArgs.toArray(new String[]{}))) {
             if (cursor.moveToFirst()) {
                 do {
                     stationList.add(createStationFromCursor(cursor));
@@ -710,13 +710,13 @@ public class DbAdapter {
         return stationList;
     }
 
-    public List<Station> getStationByLatLngRectangle(final double lat, final double lng, final StationFilter stationFilter) {
-        final var stationList = new ArrayList<Station>();
+    public List<Station> getStationByLatLngRectangle(double lat, double lng, StationFilter stationFilter) {
+        var stationList = new ArrayList<Station>();
         // Select All Query with rectangle - might be later change with it
         var selectQuery = "SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.LAT + " < " + (lat + 0.5) + " AND " + Constants.STATIONS.LAT + " > " + (lat - 0.5)
                 + " AND " + Constants.STATIONS.LON + " < " + (lng + 0.5) + " AND " + Constants.STATIONS.LON + " > " + (lng - 0.5);
 
-        final var queryArgs = new ArrayList<String>();
+        var queryArgs = new ArrayList<String>();
         if (stationFilter.getNickname() != null) {
             selectQuery += " AND " + Constants.STATIONS.PHOTOGRAPHER + " = ?";
             queryArgs.add(stationFilter.getNickname());
@@ -729,7 +729,7 @@ public class DbAdapter {
             queryArgs.add(stationFilter.isActive() ? "1" : "0");
         }
 
-        try (final var cursor = db.rawQuery(selectQuery, queryArgs.toArray(new String[]{}))) {
+        try (var cursor = db.rawQuery(selectQuery, queryArgs.toArray(new String[]{}))) {
             if (cursor.moveToFirst()) {
                 do {
                     stationList.add(createStationFromCursor(cursor));
@@ -741,11 +741,11 @@ public class DbAdapter {
     }
 
     public List<Country> getAllCountries() {
-        final var countryList = new ArrayList<Country>();
-        final var query = "SELECT * FROM " + DATABASE_TABLE_COUNTRIES;
+        var countryList = new ArrayList<Country>();
+        var query = "SELECT * FROM " + DATABASE_TABLE_COUNTRIES;
 
         Log.d(TAG, query);
-        try (final var cursor = db.rawQuery(query, null)) {
+        try (var cursor = db.rawQuery(query, null)) {
             if (cursor.moveToFirst()) {
                 do {
                     countryList.add(createCountryFromCursor(cursor));

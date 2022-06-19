@@ -109,8 +109,8 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      * @param markerBitmaps     a list of well formed {@link MarkerBitmap}
      * @param maxClusteringZoom The maximum zoom level, beyond this level no clustering is performed.
      */
-    public ClusterManager(final MapView mapView,
-                          final List<MarkerBitmap> markerBitmaps, final byte maxClusteringZoom, final TapHandler<T> tapHandler) {
+    public ClusterManager(MapView mapView,
+                          List<MarkerBitmap> markerBitmaps, byte maxClusteringZoom, TapHandler<T> tapHandler) {
         this.mapView = mapView;
 
         // set to impossible values to trigger clustering at first onChange
@@ -128,7 +128,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      *
      * @param toast A 'Toast' to display information, intended to show information on {@link ClusterMarker}
      */
-    public static void setToast(final Toast toast) {
+    public static void setToast(Toast toast) {
         ClusterManager.toast = toast;
     }
 
@@ -137,7 +137,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
     }
 
     public synchronized List<T> getAllItems() {
-        final List<T> rtnList = Collections.synchronizedList(new ArrayList<>());
+        List<T> rtnList = Collections.synchronizedList(new ArrayList<>());
         synchronized (leftItems) {
             rtnList.addAll(leftItems);
         }
@@ -153,7 +153,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      *
      * @param item GeoItem to be clustered.
      */
-    public synchronized void addItem(final T item) {
+    public synchronized void addItem(T item) {
         if (mapView.getWidth() == 0 || !isItemInViewport(item)) {
             synchronized (leftItems) {
                 if (clusterTask != null && clusterTask.isInterrupted()) {
@@ -164,10 +164,10 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
         } else if (maxClusteringZoom >= mapView.getModel().mapViewPosition
                 .getZoomLevel()) {
             // else add to a cluster;
-            final var pos = mapView.getMapViewProjection().toPixels(item.getLatLong());
+            var pos = mapView.getMapViewProjection().toPixels(item.getLatLong());
             // check existing cluster
             synchronized (clusters) {
-                for (final Cluster<T> mCluster : clusters) {
+                for (Cluster<T> mCluster : clusters) {
                     if (clusterTask != null && clusterTask.isInterrupted()) {
                         return;
                     }
@@ -178,12 +178,12 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
                     // find a cluster which contains the marker.
                     // use 1st element to fix the location, hinder the cluster from
                     // running around and isClustering.
-                    final var gpCenter = mCluster.getItems().get(0).getLatLong();
+                    var gpCenter = mCluster.getItems().get(0).getLatLong();
                     if (gpCenter == null) {
                         throw new IllegalArgumentException();
                     }
 
-                    final var ptCenter = mapView.getMapViewProjection().toPixels(gpCenter);
+                    var ptCenter = mapView.getMapViewProjection().toPixels(gpCenter);
                     // find a cluster which contains the marker.
                     if (pos.distance(ptCenter) <= GRIDSIZE) {
                         mCluster.addItem(item);
@@ -207,7 +207,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      *
      * @param item GeoItem to be set to cluster.
      */
-    public Cluster<T> createCluster(final T item) {
+    public Cluster<T> createCluster(T item) {
         return new Cluster<>(this, item);
     }
 
@@ -217,8 +217,8 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
     public synchronized void redraw() {
         synchronized (clusters) {
             if (!isClustering) {
-                final List<Cluster<T>> removed = new ArrayList<>();
-                final List<Cluster<T>> singles = new ArrayList<>();
+                List<Cluster<T>> removed = new ArrayList<>();
+                List<Cluster<T>> singles = new ArrayList<>();
                 clusters.stream()
                         .filter(mCluster -> mCluster.getSize() < MIN_CLUSTER_SIZE)
                         .forEach(mCluster -> {
@@ -229,7 +229,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
                 clusters.removeAll(removed);
                 clusters.addAll(singles);
 
-                for (final Cluster<T> mCluster : clusters) {
+                for (Cluster<T> mCluster : clusters) {
                     mCluster.redraw();
                 }
             }
@@ -241,8 +241,8 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      *
      * @return true if item is within viewport.
      */
-    protected boolean isItemInViewport(final GeoItem item) {
-        final var curBounds = getCurBounds();
+    protected boolean isItemInViewport(GeoItem item) {
+        var curBounds = getCurBounds();
         return curBounds != null && curBounds.contains(item.getLatLong());
     }
 
@@ -262,9 +262,9 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
                         + mapView.getWidth() + " || " + mapView.getHeight());
             }
             /* North-West geo point of the bound */
-            final var nw_ = mapView.getMapViewProjection().fromPixels(-mapView.getWidth() * 0.5, -mapView.getHeight() * 0.5);
+            var nw_ = mapView.getMapViewProjection().fromPixels(-mapView.getWidth() * 0.5, -mapView.getHeight() * 0.5);
             /* South-East geo point of the bound */
-            final var se_ = mapView.getMapViewProjection().fromPixels(mapView.getWidth() + mapView.getWidth() * 0.5,
+            var se_ = mapView.getMapViewProjection().fromPixels(mapView.getWidth() + mapView.getWidth() * 0.5,
                     mapView.getHeight() + mapView.getHeight() * 0.5);
             if (se_ != null && nw_ != null) {
                 if (se_.latitude > nw_.latitude) {
@@ -286,7 +286,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
         if (leftItems.size() == 0) {
             return;
         }
-        final ArrayList<T> currentLeftItems = new ArrayList<>(leftItems);
+        ArrayList<T> currentLeftItems = new ArrayList<>(leftItems);
 
         synchronized (leftItems) {
             leftItems.clear();
@@ -311,10 +311,10 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
             resetViewport(false);
         } else {
             // react on position changes
-            final var mapViewPosition = mapView.getModel().mapViewPosition;
+            var mapViewPosition = mapView.getModel().mapViewPosition;
 
-            final var posOld = mapView.getMapViewProjection().toPixels(oldCenterLatLong);
-            final var posNew = mapView.getMapViewProjection().toPixels(mapViewPosition.getCenter());
+            var posOld = mapView.getMapViewProjection().toPixels(oldCenterLatLong);
+            var posNew = mapView.getMapViewProjection().toPixels(mapViewPosition.getCenter());
             if (posOld != null && posOld.distance(posNew) > GRIDSIZE / 2) {
                 // Log.d(TAG, "moving...");
                 oldCenterLatLong = mapViewPosition.getCenter();
@@ -327,7 +327,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
      * reset current viewport, re-cluster the items when zoom has changed, else
      * add not clustered items .
      */
-    private synchronized void resetViewport(final boolean isMoving) {
+    private synchronized void resetViewport(boolean isMoving) {
         isClustering = true;
         clusterTask = new ClusterTask(isMoving);
         clusterTask.start();
@@ -355,7 +355,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
     }
 
     @Override
-    public void onTap(final T item) {
+    public void onTap(T item) {
         if (tapHandler != null) {
             tapHandler.onTap(item);
         }
@@ -365,7 +365,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
 
         private final boolean isMoving;
 
-        public ClusterTask(final boolean isMoving) {
+        public ClusterTask(boolean isMoving) {
             this.isMoving = isMoving;
         }
 
@@ -380,7 +380,7 @@ public class ClusterManager<T extends GeoItem> implements Observer, TapHandler<T
             // collect its markers.
             else {
                 synchronized (clusters) {
-                    for (final Cluster<T> mCluster : clusters) {
+                    for (Cluster<T> mCluster : clusters) {
                         synchronized (leftItems) {
                             leftItems.addAll(mCluster.getItems());
                         }

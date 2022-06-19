@@ -19,33 +19,33 @@ public class OutboxAdapter extends CursorAdapter {
 
     private final Activity activity;
 
-    public OutboxAdapter(final Activity activity, final Cursor uploadCursor) {
+    public OutboxAdapter(Activity activity, Cursor uploadCursor) {
         super(activity, uploadCursor, 0);
         this.activity = activity;
     }
 
     @Override
-    public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-        final var binding = ItemUploadBinding.inflate(activity.getLayoutInflater(), parent, false);
-        final var view = binding.getRoot();
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        var binding = ItemUploadBinding.inflate(activity.getLayoutInflater(), parent, false);
+        var view = binding.getRoot();
         view.setTag(binding);
         return view;
     }
 
     @Override
-    public void bindView(final View view, final Context context, final Cursor cursor) {
-        final var binding = (ItemUploadBinding) view.getTag();
-        final var id = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.CURSOR_ADAPTER_ID));
-        final var remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID));
-        final var uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE));
-        final var stationTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.JOIN_STATION_TITLE));
-        final var problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
-        final var uploadStateStr = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
-        final var comment = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COMMENT));
-        final var rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON));
+    public void bindView(View view, Context context, Cursor cursor) {
+        var binding = (ItemUploadBinding) view.getTag();
+        var id = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.CURSOR_ADAPTER_ID));
+        var remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID));
+        var uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE));
+        var stationTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.JOIN_STATION_TITLE));
+        var problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
+        var uploadStateStr = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
+        var comment = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COMMENT));
+        var rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON));
 
-        final var uploadState = UploadState.valueOf(uploadStateStr);
-        final var textState = id + (remoteId > 0 ? "/" + remoteId : "" ) + ": " + context.getString(uploadState.getTextId());
+        var uploadState = UploadState.valueOf(uploadStateStr);
+        var textState = id + (remoteId > 0 ? "/" + remoteId : "" ) + ": " + context.getString(uploadState.getTextId());
         binding.txtState.setText(textState);
         binding.txtState.setTextColor(context.getResources().getColor(uploadState.getColorId(), null));
 

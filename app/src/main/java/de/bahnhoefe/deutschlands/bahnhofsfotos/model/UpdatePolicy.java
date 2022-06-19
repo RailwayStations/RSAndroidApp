@@ -11,7 +11,7 @@ public enum UpdatePolicy {
 
     private final int id;
 
-    UpdatePolicy(final int id) {
+    UpdatePolicy(int id) {
         this.id = id;
     }
 
@@ -19,14 +19,14 @@ public enum UpdatePolicy {
         return id;
     }
 
-    public static UpdatePolicy byId(final int id) {
+    public static UpdatePolicy byId(int id) {
         return Arrays.stream(values())
                 .filter(updatePolicy -> updatePolicy.getId() == id)
                 .findFirst()
                 .orElse(NOTIFY);
     }
 
-    public static UpdatePolicy byName(final String name) {
+    public static UpdatePolicy byName(String name) {
         return Arrays.stream(values())
                 .filter(updatePolicy -> updatePolicy.toString().equals(name))
                 .findFirst()

@@ -8,7 +8,7 @@ public class Statistic {
     private final int withoutPhoto;
     private final int photographers;
 
-    public Statistic(final int total, final int withPhoto, final int withoutPhoto, final int photographers) {
+    public Statistic(int total, int withPhoto, int withoutPhoto, int photographers) {
         this.total = total;
         this.withPhoto = withPhoto;
         this.withoutPhoto = withoutPhoto;

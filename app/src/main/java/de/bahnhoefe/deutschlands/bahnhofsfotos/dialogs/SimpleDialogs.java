@@ -14,7 +14,7 @@ public class SimpleDialogs {
 
     private SimpleDialogs(){}
 
-    public static void confirm(final Context context, final int message) {
+    public static void confirm(Context context, int message) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
@@ -22,7 +22,7 @@ public class SimpleDialogs {
             .setNeutralButton(R.string.button_ok_text, null).create().show();
     }
 
-    public static void confirm(final Context context, final CharSequence message) {
+    public static void confirm(Context context, CharSequence message) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
@@ -30,7 +30,7 @@ public class SimpleDialogs {
             .setNeutralButton(R.string.button_ok_text, null).create().show();
     }
 
-    public static void confirm(final Context context, final int message, final DialogInterface.OnClickListener listener) {
+    public static void confirm(Context context, int message, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
@@ -40,7 +40,7 @@ public class SimpleDialogs {
             .create().show();
     }
 
-    public static void confirm(final Context context, final String message, final DialogInterface.OnClickListener listener) {
+    public static void confirm(Context context, String message, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
@@ -50,7 +50,7 @@ public class SimpleDialogs {
             .create().show();
     }
 
-    public static void simpleSelect(final Context context, final CharSequence message, final CharSequence[] items, final DialogInterface.OnClickListener listener) {
+    public static void simpleSelect(Context context, CharSequence message, CharSequence[] items, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(message)
@@ -58,15 +58,15 @@ public class SimpleDialogs {
             .create().show();
     }
 
-    public static void prompt(final Context context, final int message, final int inputType, final int hint, final String text, final PromptListener listener) {
-        final var binding = PromptBinding.inflate(LayoutInflater.from(context));
+    public static void prompt(Context context, int message, int inputType, int hint, String text, PromptListener listener) {
+        var binding = PromptBinding.inflate(LayoutInflater.from(context));
         if (text != null) {
             binding.etPrompt.setText(text);
         }
         binding.etPrompt.setHint(hint);
         binding.etPrompt.setInputType(inputType);
 
-        final var alertDialog = new androidx.appcompat.app.AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
+        var alertDialog = new androidx.appcompat.app.AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
                 .setTitle(message)
                 .setView(binding.getRoot())
                 .setIcon(R.mipmap.ic_launcher)

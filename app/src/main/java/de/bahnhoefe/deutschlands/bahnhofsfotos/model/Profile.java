@@ -16,7 +16,7 @@ public class Profile {
         return link;
     }
 
-    public void setLink(final String link) {
+    public void setLink(String link) {
         this.link = link;
     }
 
@@ -24,7 +24,7 @@ public class Profile {
         return anonymous;
     }
 
-    public void setAnonymous(final boolean anonymous) {
+    public void setAnonymous(boolean anonymous) {
         this.anonymous = anonymous;
     }
 
@@ -32,7 +32,7 @@ public class Profile {
         return photoOwner;
     }
 
-    public void setPhotoOwner(final boolean photoOwner) {
+    public void setPhotoOwner(boolean photoOwner) {
         this.photoOwner = photoOwner;
     }
 
@@ -40,7 +40,7 @@ public class Profile {
         return license;
     }
 
-    public void setLicense(final License license) {
+    public void setLicense(License license) {
         this.license = license;
     }
 
@@ -48,7 +48,7 @@ public class Profile {
         return email;
     }
 
-    public void setEmail(final String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
@@ -56,11 +56,11 @@ public class Profile {
         return nickname;
     }
 
-    public void setNickname(final String nickname) {
+    public void setNickname(String nickname) {
         this.nickname = nickname;
     }
 
-    public void setPassword(final String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -72,7 +72,7 @@ public class Profile {
         return newPassword;
     }
 
-    public void setNewPassword(final String newPassword) {
+    public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
     }
 
@@ -80,7 +80,7 @@ public class Profile {
         return emailVerified;
     }
 
-    public void setEmailVerified(final boolean emailVerified) {
+    public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
     }
 }

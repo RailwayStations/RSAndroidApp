@@ -21,9 +21,9 @@ public class ProviderApp {
      *
      * @param context     activity context
      */
-    public void openAppOrPlayStore(final Context context) {
+    public void openAppOrPlayStore(Context context) {
         // Try to open App
-        final boolean success = openApp(context);
+        boolean success = openApp(context);
         // Could not open App, open play store instead
         if (!success) {
             openUrl(context);
@@ -38,22 +38,22 @@ public class ProviderApp {
      * @see https://stackoverflow.com/a/7596063/714965
      */
     @SuppressWarnings("JavadocReference")
-    private boolean openApp(final Context context) {
+    private boolean openApp(Context context) {
         if (!isAndroid()) {
             return false;
         }
-        final var manager = context.getPackageManager();
+        var manager = context.getPackageManager();
         try {
-            final String packageName = Uri.parse(url).getQueryParameter("id");
+            String packageName = Uri.parse(url).getQueryParameter("id");
             assert packageName != null;
-            final var intent = manager.getLaunchIntentForPackage(packageName);
+            var intent = manager.getLaunchIntentForPackage(packageName);
             if (intent == null) {
                 return false;
             }
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
             context.startActivity(intent);
             return true;
-        } catch (final ActivityNotFoundException e) {
+        } catch (ActivityNotFoundException e) {
             return false;
         }
     }
@@ -63,8 +63,8 @@ public class ProviderApp {
      *
      * @param context     activity context
      */
-    private void openUrl(final Context context) {
-        final var intent = new Intent(Intent.ACTION_VIEW);
+    private void openUrl(Context context) {
+        var intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
         context.startActivity(intent);
     }
@@ -73,7 +73,7 @@ public class ProviderApp {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -81,7 +81,7 @@ public class ProviderApp {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -89,7 +89,7 @@ public class ProviderApp {
         return url;
     }
 
-    public void setUrl(final String url) {
+    public void setUrl(String url) {
         this.url = url;
     }
 
@@ -97,7 +97,7 @@ public class ProviderApp {
         return countryCode;
     }
 
-    public void setCountryCode(final String countryCode) {
+    public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
 
@@ -113,11 +113,11 @@ public class ProviderApp {
         return isAndroid() || isWeb();
     }
 
-    public static boolean hasCompatibleProviderApps(final List<ProviderApp> providerApps) {
+    public static boolean hasCompatibleProviderApps(List<ProviderApp> providerApps) {
         return providerApps.stream().anyMatch(ProviderApp::isCompatible);
     }
 
-    public static List<ProviderApp> getCompatibleProviderApps(final List<ProviderApp> providerApps) {
+    public static List<ProviderApp> getCompatibleProviderApps(List<ProviderApp> providerApps) {
         return providerApps.stream()
                 .filter(ProviderApp::isCompatible)
                 .collect(toList());

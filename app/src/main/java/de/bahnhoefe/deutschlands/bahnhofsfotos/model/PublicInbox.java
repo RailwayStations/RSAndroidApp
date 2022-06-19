@@ -12,7 +12,7 @@ public class PublicInbox {
         return lon;
     }
 
-    public void setLon(final Double lon) {
+    public void setLon(Double lon) {
         this.lon = lon;
     }
 
@@ -20,7 +20,7 @@ public class PublicInbox {
         return lat;
     }
 
-    public void setLat(final Double lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
@@ -28,7 +28,7 @@ public class PublicInbox {
         return stationId;
     }
 
-    public void setStationId(final String stationId) {
+    public void setStationId(String stationId) {
         this.stationId = stationId;
     }
 
@@ -36,7 +36,7 @@ public class PublicInbox {
         return countryCode;
     }
 
-    public void setCountryCode(final String countryCode) {
+    public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
 
@@ -44,7 +44,7 @@ public class PublicInbox {
         return title;
     }
 
-    public void setTitle(final String title) {
+    public void setTitle(String title) {
         this.title = title;
     }
 }

@@ -72,13 +72,13 @@ public class NearbyNotificationService extends Service implements LocationListen
     }
 
     @Override
-    public int onStartCommand(final Intent intent, final int flags, final int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         cancelNotification();
 
         Log.i(TAG, "Received start command");
 
-        final var resultIntent = new Intent(this, MainActivity.class);
-        final var resultPendingIntent =
+        var resultIntent = new Intent(this, MainActivity.class);
+        var resultPendingIntent =
                 PendingIntent.getActivity(
                         this,
                         0,
@@ -89,14 +89,14 @@ public class NearbyNotificationService extends Service implements LocationListen
         NearbyBahnhofNotificationManager.createChannel(this);
 
         // show a permanent notification to indicate that position detection is running
-        final var ongoingNotification = new NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.CHANNEL_ID)
+        var ongoingNotification = new NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(getString(R.string.nearby_notification_active))
                 .setOngoing(true)
                 .setLocalOnly(true)
                 .setContentIntent(resultPendingIntent)
                 .build();
-        final var notificationManager = NotificationManagerCompat.from(this);
+        var notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
 
         registerLocationManager();
@@ -117,12 +117,12 @@ public class NearbyNotificationService extends Service implements LocationListen
         try {
             cancelNotification();
             unregisterLocationManager();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             Log.wtf(TAG, "Unknown problem when trying to de-register from GPS updates", t);
         }
 
         // Cancel the ongoing notification
-        final var notificationManager =
+        var notificationManager =
                 NotificationManagerCompat.from(this);
         notificationManager.cancel(ONGOING_NOTIFICATION_ID);
 
@@ -137,7 +137,7 @@ public class NearbyNotificationService extends Service implements LocationListen
     }
 
     @Override
-    public void onLocationChanged(@NonNull final Location location) {
+    public void onLocationChanged(@NonNull Location location) {
         Log.i(TAG, "Received new location: " + location);
         try {
             myPos = location;
@@ -153,31 +153,31 @@ public class NearbyNotificationService extends Service implements LocationListen
 
             // check if a user notification is appropriate
             checkNearestStation();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             Log.e(TAG, "Unknown Problem arised during location change handling", t);
         }
     }
 
     @Override
-    public void onStatusChanged(final String provider, final int status, final Bundle extras) {
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
     }
 
     @Override
-    public void onProviderEnabled(@NonNull final String provider) {
+    public void onProviderEnabled(@NonNull String provider) {
 
     }
 
     @Override
-    public void onProviderDisabled(@NonNull final String provider) {
+    public void onProviderDisabled(@NonNull String provider) {
 
     }
 
     private void checkNearestStation() {
         double minDist = 3e3;
         Station nearest = null;
-        for (final var station : nearStations) {
-            final var dist = calcDistance(station);
+        for (var station : nearStations) {
+            var dist = calcDistance(station);
             if (dist < minDist) {
                 nearest = station;
                 minDist = dist;
@@ -199,7 +199,7 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @param nearest  the station nearest to the current position
      * @param distance the distance of the station to the current position
      */
-    private void notifyNearest(final Station nearest, final double distance) {
+    private void notifyNearest(Station nearest, double distance) {
         if (notifiedStationManager != null) {
             if (notifiedStationManager.getStation().equals(nearest)) {
                 return; // Notification für diesen Bahnhof schon angezeigt
@@ -218,10 +218,10 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @param station the station to calculate the distance to
      * @return the distance
      */
-    private double calcDistance(final Station station) {
+    private double calcDistance(Station station) {
         // Wir nähern für glatte Oberflächen, denn wir sind an Abständen kleiner 1km interessiert
-        final var lateralDiff = myPos.getLatitude() - station.getLat();
-        final var longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
+        var lateralDiff = myPos.getLatitude() - station.getLat();
+        var longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
                 (myPos.getLongitude() - station.getLon()) * Math.cos(myPos.getLatitude() / 180 * Math.PI) :
                 0.0d; // at the poles, longitude doesn't matter
         // simple Pythagoras now.
@@ -239,7 +239,7 @@ public class NearbyNotificationService extends Service implements LocationListen
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             // getting GPS status
-            final var isGPSEnabled = locationManager
+            var isGPSEnabled = locationManager
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             // if GPS Enabled get lat/long using GPS Services
@@ -255,7 +255,7 @@ public class NearbyNotificationService extends Service implements LocationListen
                 }
             } else {
                 // getting network status
-                final var isNetworkEnabled = locationManager
+                var isNetworkEnabled = locationManager
                         .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
                 // First get location from Network Provider
@@ -271,9 +271,9 @@ public class NearbyNotificationService extends Service implements LocationListen
                     }
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
-            final var b = new Bundle();
+            var b = new Bundle();
             b.putString("error", "Error registering LocationManager: " + e);
             locationManager = null;
             myPos = null;
@@ -284,11 +284,7 @@ public class NearbyNotificationService extends Service implements LocationListen
 
     private void unregisterLocationManager() {
         if (locationManager != null) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // if we don't have location permission we cannot remove updates (should not happen, but the API requires this check
-                // so we just set it to null
-                locationManager = null;
-            } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationManager.removeUpdates(this);
             }
             locationManager = null;
@@ -314,7 +310,7 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @return a Binder instance suitable for the intent supplied, or null if none matches.
      */
     @Override
-    public IBinder onBind(final Intent intent) {
+    public IBinder onBind(Intent intent) {
         if (STATUS_INTERFACE.equals(intent.getAction())) {
             return new StatusBinder();
         } else {
@@ -326,7 +322,7 @@ public class NearbyNotificationService extends Service implements LocationListen
         try {
             Log.i(TAG, "Lade nahegelegene Bahnhoefe");
             nearStations = dbAdapter.getStationByLatLngRectangle(myPos.getLatitude(), myPos.getLongitude(), baseApplication.getStationFilter());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
         }
     }

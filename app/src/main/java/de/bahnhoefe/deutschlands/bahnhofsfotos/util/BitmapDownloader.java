@@ -23,7 +23,7 @@ public class BitmapDownloader extends Thread {
      * @param handler the BitmapAvailableHandler instance that is called on completion
      * @param url     the URL to fetch the Bitmap from
      */
-    public BitmapDownloader(final BitmapAvailableHandler handler, final URL url) {
+    public BitmapDownloader(BitmapAvailableHandler handler, URL url) {
         super();
         this.bitmapAvailableHandler = handler;
         this.url = url;
@@ -34,10 +34,10 @@ public class BitmapDownloader extends Thread {
         Bitmap bitmap = null;
         try {
             Log.i(TAG, "Fetching Bitmap from URL: " + url);
-            final var httpConnection = (HttpURLConnection) url.openConnection();
-            try (final var is = httpConnection.getInputStream()) {
+            var httpConnection = (HttpURLConnection) url.openConnection();
+            try (var is = httpConnection.getInputStream()) {
                 if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    final String contentType = httpConnection.getContentType();
+                    String contentType = httpConnection.getContentType();
                     if (contentType != null && !contentType.startsWith("image")) {
                         Log.w(TAG, "Supplied URL does not appear to be an image resource (type=" + contentType + ")");
                     }
@@ -46,7 +46,7 @@ public class BitmapDownloader extends Thread {
                     Log.e(TAG, "Error downloading photo: " + httpConnection.getResponseCode());
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             Log.e(TAG, "Could not download photo");
             bitmap = null;
         }

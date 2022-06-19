@@ -48,7 +48,7 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     /**
      * @param cluster a cluster to be rendered for this marker
      */
-    public ClusterMarker(final Cluster<T> cluster) {
+    public ClusterMarker(Cluster<T> cluster) {
         this.cluster = cluster;
     }
 
@@ -68,33 +68,33 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     }
 
     @Override
-    public synchronized void draw(final BoundingBox boundingBox, final byte zoomLevel,
-                                  final org.mapsforge.core.graphics.Canvas canvas, final Point topLeftPoint) {
+    public synchronized void draw(BoundingBox boundingBox, byte zoomLevel,
+                                  org.mapsforge.core.graphics.Canvas canvas, Point topLeftPoint) {
         if (cluster.getClusterManager() == null ||
                 this.getLatLong() == null) {
             return;
         }
         setMarkerBitmap();
-        final var mapSize = MercatorProjection.getMapSize(zoomLevel, this.displayModel.getTileSize());
-        final var pixelX = MercatorProjection.longitudeToPixelX(this.getLatLong().longitude, mapSize);
-        final var pixelY = MercatorProjection.latitudeToPixelY(this.getLatLong().latitude, mapSize);
-        final double halfBitmapWidth;
-        final double halfBitmapHeight;
-        final var markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
-        final var bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
+        var mapSize = MercatorProjection.getMapSize(zoomLevel, this.displayModel.getTileSize());
+        var pixelX = MercatorProjection.longitudeToPixelX(this.getLatLong().longitude, mapSize);
+        var pixelY = MercatorProjection.latitudeToPixelY(this.getLatLong().latitude, mapSize);
+        double halfBitmapWidth;
+        double halfBitmapHeight;
+        var markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
+        var bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
         try {
             halfBitmapWidth = bitmap.getWidth() / 2f;
             halfBitmapHeight = bitmap.getHeight() / 2f;
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             Log.e(ClusterMarker.TAG, e.getMessage(), e);
             return;
         }
-        final int left = (int) (pixelX - topLeftPoint.x - halfBitmapWidth + markerBitmap.getIconOffset().x);
-        final int top = (int) (pixelY - topLeftPoint.y - halfBitmapHeight + markerBitmap.getIconOffset().y);
-        final int right = (left + bitmap.getWidth());
-        final int bottom = (top + bitmap.getHeight());
-        final var bitmapRectangle = new Rectangle(left, top, right, bottom);
-        final var canvasRectangle = new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight());
+        int left = (int) (pixelX - topLeftPoint.x - halfBitmapWidth + markerBitmap.getIconOffset().x);
+        int top = (int) (pixelY - topLeftPoint.y - halfBitmapHeight + markerBitmap.getIconOffset().y);
+        int right = (left + bitmap.getWidth());
+        int bottom = (top + bitmap.getHeight());
+        var bitmapRectangle = new Rectangle(left, top, right, bottom);
+        var canvasRectangle = new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight());
         if (!canvasRectangle.intersects(bitmapRectangle)) {
             return;
         }
@@ -104,14 +104,14 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         // Draw Text
         if (markerType == 0) {
             // Draw bitmap
-            final var bubble = MarkerBitmap.getBitmapFromTitle(cluster.getTitle(),
+            var bubble = MarkerBitmap.getBitmapFromTitle(cluster.getTitle(),
                     markerBitmap.getPaint());
             canvas.drawBitmap(bubble,
                     (int) (left + halfBitmapWidth - bubble.getWidth() / 2),
                     (top - bubble.getHeight()));
         } else {
-            final int x = (int) (left + bitmap.getWidth() * 1.3);
-            final int y = (int) (top + bitmap.getHeight() * 1.3
+            int x = (int) (left + bitmap.getWidth() * 1.3);
+            int y = (int) (top + bitmap.getHeight() * 1.3
                     + markerBitmap.getPaint().getTextHeight(cluster.getTitle()) / 2);
             canvas.drawText(cluster.getTitle(), x, y,
                     markerBitmap.getPaint());
@@ -137,8 +137,8 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
     }
 
     @Override
-    public synchronized boolean onTap(final LatLong geoPoint, final Point viewPosition,
-                                      final Point tapPoint) {
+    public synchronized boolean onTap(LatLong geoPoint, Point viewPosition,
+                                      Point tapPoint) {
         if (cluster.getItems().size() == 1 && contains(viewPosition, tapPoint)) {
             Log.w(ClusterMarker.TAG, "The Marker was touched with onTap: "
                     + this.getPosition().toString());
@@ -146,7 +146,7 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
             requestRedraw();
             return true;
         } else if (contains(viewPosition, tapPoint)) {
-            final var builder = new StringBuilder(cluster.getItems().size() + " items:")
+            var builder = new StringBuilder(cluster.getItems().size() + " items:")
                     .append(cluster.getItems().stream()
                     .map(i -> "\n- " + i.getTitle())
                     .limit(6)
@@ -164,13 +164,13 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         return false;
     }
 
-    public synchronized boolean contains(final Point viewPosition, final Point tapPoint) {
+    public synchronized boolean contains(Point viewPosition, Point tapPoint) {
         return getBitmapRectangle(viewPosition).contains(tapPoint);
     }
 
-    private Rectangle getBitmapRectangle(final Point center) {
-        final var markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
-        final var bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
+    private Rectangle getBitmapRectangle(Point center) {
+        var markerBitmap = cluster.getClusterManager().markerIconBmps.get(markerType);
+        var bitmap = markerBitmap.getBitmap(hasPhoto(), ownPhoto(), stationActive(), isPendingUpload());
         return new Rectangle(
                 center.x - (float) bitmap.getWidth() + markerBitmap.getIconOffset().x,
                 center.y - (float) bitmap.getHeight() + markerBitmap.getIconOffset().y,

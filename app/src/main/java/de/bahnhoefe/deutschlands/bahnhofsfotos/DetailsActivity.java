@@ -128,15 +128,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Long crc32 = null;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         baseApplication = (BaseApplication) getApplication();
         rsapiClient = baseApplication.getRsapiClient();
-        final var dbAdapter = baseApplication.getDbAdapter();
-        final var countryCodes = baseApplication.getCountryCodes();
+        var dbAdapter = baseApplication.getDbAdapter();
+        var countryCodes = baseApplication.getCountryCodes();
         countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -178,7 +178,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     @Override
-    protected void onNewIntent(final Intent intent) {
+    protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
         boolean directPicture = false;
@@ -225,7 +225,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     setPictureButtonsEnabled(canSetPhoto());
 
                     // check for local photo
-                    final var localFile = getStoredMediaFile(upload);
+                    var localFile = getStoredMediaFile(upload);
                     if (localFile != null && localFile.canRead()) {
                         SimpleDialogs.confirm(this, R.string.local_photo_exists, (dialog, which) -> {
                             setPictureButtonsEnabled(true);
@@ -301,15 +301,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     try {
                         verifyCurrentPhotoUploadExists();
-                        final var storagePictureFile = getStoredMediaFile(upload);
+                        var storagePictureFile = getStoredMediaFile(upload);
                         // die Kamera-App sollte auf temporären Cache-Speicher schreiben, wir laden das Bild von
                         // dort und schreiben es in Standard-Größe in den permanenten Speicher
-                        final var cameraRawPictureFile = getCameraTempFile();
-                        final var options = new BitmapFactory.Options();
+                        var cameraRawPictureFile = getCameraTempFile();
+                        var options = new BitmapFactory.Options();
                         options.inJustDecodeBounds = true; // just query the image size in the first step
                         BitmapFactory.decodeFile(cameraRawPictureFile.getPath(), options);
 
-                        final int sampling = options.outWidth / Constants.STORED_PHOTO_WIDTH;
+                        int sampling = options.outWidth / Constants.STORED_PHOTO_WIDTH;
                         if (sampling > 1) {
                             options.inSampleSize = sampling;
                         }
@@ -318,7 +318,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         saveScaledBitmap(storagePictureFile, BitmapFactory.decodeFile(cameraRawPictureFile.getPath(), options));
                         setLocalBitmap(upload);
                         FileUtils.deleteQuietly(cameraRawPictureFile);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         Log.e(TAG, "Error processing photo", e);
                         Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
@@ -335,15 +335,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         verifyCurrentPhotoUploadExists();
-        final var photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", getCameraTempFile());
-        final var intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        var photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", getCameraTempFile());
+        var intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
         intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
         intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, binding.details.etbahnhofname.getText());
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         try {
             imageCaptureResultLauncher.launch(intent);
-        } catch (final ActivityNotFoundException exception) {
+        } catch (ActivityNotFoundException exception) {
             Toast.makeText(this, R.string.no_image_capture_app_found, Toast.LENGTH_LONG).show();
         }
     }
@@ -352,8 +352,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             uri -> {
                 try {
                     verifyCurrentPhotoUploadExists();
-                    final var bitmap = getBitmapFromUri(uri);
-                    final int sampling = bitmap.getWidth() / Constants.STORED_PHOTO_WIDTH;
+                    var bitmap = getBitmapFromUri(uri);
+                    int sampling = bitmap.getWidth() / Constants.STORED_PHOTO_WIDTH;
                     var scaledScreen = bitmap;
                     if (sampling > 1) {
                         scaledScreen = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / sampling, bitmap.getHeight() / sampling, false);
@@ -361,7 +361,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
                     saveScaledBitmap(getStoredMediaFile(upload), scaledScreen);
                     setLocalBitmap(upload);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     Log.e(TAG, "Error processing photo", e);
                     Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
@@ -387,45 +387,45 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             return;
         }
 
-        final var reportProblemBinding = ReportProblemBinding.inflate(getLayoutInflater());
+        var reportProblemBinding = ReportProblemBinding.inflate(getLayoutInflater());
         if (upload != null && upload.isProblemReport()) {
             reportProblemBinding.etProblemComment.setText(upload.getComment());
         }
 
-        final var problemTypes = new ArrayList<String>();
+        var problemTypes = new ArrayList<String>();
         problemTypes.add(getString(R.string.problem_please_specify));
         int selected = -1;
-        for (final var type : ProblemType.values()) {
+        for (var type : ProblemType.values()) {
             problemTypes.add(getString(type.getMessageId()));
             if (upload != null && upload.getProblemType() == type) {
                 selected = problemTypes.size() - 1;
             }
         }
-        final var adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, problemTypes);
+        var adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, problemTypes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         reportProblemBinding.problemType.setAdapter(adapter);
         if (selected > -1) {
             reportProblemBinding.problemType.setSelection(selected);
         }
 
-        final var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         builder.setTitle(R.string.report_problem)
                 .setView(reportProblemBinding.getRoot())
                 .setIcon(R.drawable.ic_bullhorn_48px)
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel());
 
-        final var alertDialog = builder.create();
+        var alertDialog = builder.create();
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            final int selectedType = reportProblemBinding.problemType.getSelectedItemPosition();
+            int selectedType = reportProblemBinding.problemType.getSelectedItemPosition();
             if (selectedType == 0) {
                 Toast.makeText(getApplicationContext(), getString(R.string.problem_please_specify), Toast.LENGTH_LONG).show();
                 return;
             }
-            final var type = ProblemType.values()[selectedType - 1];
-            final var comment = reportProblemBinding.etProblemComment.getText().toString();
+            var type = ProblemType.values()[selectedType - 1];
+            var comment = reportProblemBinding.etProblemComment.getText().toString();
             if (StringUtils.isBlank(comment)) {
                 Toast.makeText(getApplicationContext(), getString(R.string.problem_please_comment), Toast.LENGTH_LONG).show();
                 return;
@@ -447,15 +447,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             rsapiClient.reportProblem(new ProblemReport(station.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<>() {
                 @Override
-                public void onResponse(@NonNull final Call<InboxResponse> call, @NonNull final Response<InboxResponse> response) {
-                    final InboxResponse inboxResponse;
+                public void onResponse(@NonNull Call<InboxResponse> call, @NonNull Response<InboxResponse> response) {
+                    InboxResponse inboxResponse;
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
                     } else if (response.code() == 401) {
                         SimpleDialogs.confirm(DetailsActivity.this, R.string.authorization_failed);
                         return;
                     } else {
-                        final Gson gson = new Gson();
+                        Gson gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(), InboxResponse.class);
                         if (inboxResponse.getState() == null) {
                             inboxResponse.setState(InboxResponse.InboxResponseState.ERROR);
@@ -476,7 +476,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
 
                 @Override
-                public void onFailure(@NonNull final Call<InboxResponse> call, @NonNull final Throwable t) {
+                public void onFailure(@NonNull Call<InboxResponse> call, @NonNull Throwable t) {
                     Log.e(TAG, "Error reporting problem", t);
                     SimpleDialogs.confirm(DetailsActivity.this,
                             String.format(getText(R.string.problem_report_failed).toString(), t.getMessage()));
@@ -498,7 +498,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
-    private void saveScaledBitmap(final File storagePictureFile, final Bitmap scaledScreen) throws FileNotFoundException {
+    private void saveScaledBitmap(File storagePictureFile, Bitmap scaledScreen) throws FileNotFoundException {
         if (scaledScreen == null) {
             throw new RuntimeException(getString(R.string.error_scaling_photo));
         }
@@ -513,9 +513,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         scaledScreen.compress(Bitmap.CompressFormat.JPEG, Constants.STORED_PHOTO_QUALITY, new FileOutputStream(storagePictureFile));
     }
 
-    private Bitmap getBitmapFromUri(final Uri uri) throws IOException {
-        final Bitmap image;
-        try (final ParcelFileDescriptor parcelFileDescriptor = getContentResolver().openFileDescriptor(uri, "r")) {
+    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+        Bitmap image;
+        try (ParcelFileDescriptor parcelFileDescriptor = getContentResolver().openFileDescriptor(uri, "r")) {
             image = BitmapFactory.decodeFileDescriptor(parcelFileDescriptor.getFileDescriptor());
         }
         return image;
@@ -527,7 +527,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * @return the File
      */
     @Nullable
-    public File getStoredMediaFile(final Upload upload) {
+    public File getStoredMediaFile(Upload upload) {
         if (upload == null) {
             return null;
         }
@@ -543,10 +543,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
 
     @Override
-    public boolean onPrepareOptionsMenu(final Menu menu) {
+    public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
         getMenuInflater().inflate(R.menu.details, menu);
-        final var navToStation = menu.findItem(R.id.nav_to_station);
+        var navToStation = menu.findItem(R.id.nav_to_station);
         navToStation.getIcon().mutate();
         navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
@@ -575,44 +575,44 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return super.onPrepareOptionsMenu(menu);
     }
 
-    private void enableMenuItem(final Menu menu, final int id) {
-        final var menuItem = menu.findItem(id).setEnabled(true);
+    private void enableMenuItem(Menu menu, int id) {
+        var menuItem = menu.findItem(id).setEnabled(true);
         menuItem.getIcon().mutate();
         menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
     }
 
-    private void disableMenuItem(final Menu menu, final int id) {
-        final var menuItem = menu.findItem(id).setEnabled(false);
+    private void disableMenuItem(Menu menu, int id) {
+        var menuItem = menu.findItem(id).setEnabled(false);
         menuItem.getIcon().mutate();
         menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
         menuItem.getIcon().setAlpha(ALPHA);
     }
 
     @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        final int itemId = item.getItemId();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
         if (itemId == R.id.nav_to_station) {
             startNavigation(DetailsActivity.this);
         } else if (itemId == R.id.timetable) {
-            final var timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, station.getCountry()), station);
+            var timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, station.getCountry()), station);
             if (timetableIntent != null) {
                 startActivity(timetableIntent);
             } else {
                 Toast.makeText(this, R.string.timetable_missing, Toast.LENGTH_LONG).show();
             }
         } else if (itemId == R.id.share_photo) {
-            final var shareIntent = createFotoSendIntent();
+            var shareIntent = createFotoSendIntent();
             shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, station != null ? station.getCountry() : null).getTwitterTags() + " " + binding.details.etbahnhofname.getText());
             shareIntent.setType("image/jpeg");
             startActivity(createChooser(shareIntent, "send"));
         } else if (itemId == R.id.station_info) {
             showStationInfo(null);
         } else if (itemId == R.id.provider_android_app) {
-            final var providerApps = Country.getCountryByCode(countries, station.getCountry()).getCompatibleProviderApps();
+            var providerApps = Country.getCountryByCode(countries, station.getCountry()).getCompatibleProviderApps();
             if (providerApps.size() == 1) {
                 providerApps.get(0).openAppOrPlayStore(this);
             } else if (providerApps.size() > 1) {
-                final var appNames = providerApps.stream()
+                var appNames = providerApps.stream()
                         .map(ProviderApp::getName).toArray(CharSequence[]::new);
                 SimpleDialogs.simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, (dialog, which) -> {
                     if (which >= 0 && providerApps.size() > which) {
@@ -637,9 +637,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void navigateUp() {
-        final var callingActivity = getCallingActivity(); // if MapsActivity was calling, then we don't want to rebuild the Backstack
+        var callingActivity = getCallingActivity(); // if MapsActivity was calling, then we don't want to rebuild the Backstack
         if (callingActivity == null) {
-            final var upIntent = NavUtils.getParentActivityIntent(this);
+            var upIntent = NavUtils.getParentActivityIntent(this);
             upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot()) {
                 Log.v(TAG, "Recreate back stack");
@@ -650,12 +650,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         finish();
     }
 
-    public void showStationInfo(final View view) {
-        final var stationInfoBinding = StationInfoBinding.inflate(getLayoutInflater());
+    public void showStationInfo(View view) {
+        var stationInfoBinding = StationInfoBinding.inflate(getLayoutInflater());
         stationInfoBinding.id.setText(station != null ? station.getId() : "");
 
-        final double lat = station != null ? station.getLat() : latitude;
-        final double lon = station != null ? station.getLon() : longitude;
+        double lat = station != null ? station.getLat() : latitude;
+        double lon = station != null ? station.getLon() : longitude;
         stationInfoBinding.coordinates.setText(String.format(Locale.US, getResources().getString(R.string.coordinates), lat, lon));
 
         stationInfoBinding.active.setText(station != null && station.isActive() ? R.string.active : R.string.inactive);
@@ -674,7 +674,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void uploadPhoto() {
-        final var uploadBinding = UploadBinding.inflate(getLayoutInflater());
+        var uploadBinding = UploadBinding.inflate(getLayoutInflater());
         uploadBinding.etComment.setText(upload.getComment());
 
         uploadBinding.spActive.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.active_flag_options)));
@@ -690,25 +690,25 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         }
 
-        final var sameChecksum = crc32 != null && crc32.equals(upload.getCrc32());
+        var sameChecksum = crc32 != null && crc32.equals(upload.getCrc32());
         uploadBinding.cbChecksum.setVisibility(sameChecksum ? View.VISIBLE : View.GONE);
 
         if (station != null) {
             uploadBinding.spCountries.setVisibility(View.GONE);
         } else {
-            final var countryList = baseApplication.getDbAdapter().getAllCountries();
-            final var items = new KeyValueSpinnerItem[countryList.size() + 1];
+            var countryList = baseApplication.getDbAdapter().getAllCountries();
+            var items = new KeyValueSpinnerItem[countryList.size() + 1];
             items[0] = new KeyValueSpinnerItem(getString(R.string.chooseCountry), "");
             int selected = 0;
 
             for (int i = 0; i < countryList.size(); i++) {
-                final var country = countryList.get(i);
+                var country = countryList.get(i);
                 items[i+1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
                 if (country.getCode().equals(upload.getCountry())) {
                     selected = i+1;
                 }
             }
-            final var countryAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, items);
+            var countryAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, items);
             countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             uploadBinding.spCountries.setAdapter(countryAdapter);
             uploadBinding.spCountries.setSelection(selected);
@@ -720,7 +720,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         String overrideLicense = null;
         if (station != null) {
-            final var country = Country.getCountryByCode(countries, station.getCountry());
+            var country = Country.getCountryByCode(countries, station.getCountry());
             overrideLicense = country.getOverrideLicense();
         }
         if (overrideLicense != null) {
@@ -728,14 +728,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
         uploadBinding.cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
 
-        final var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         builder.setTitle(R.string.photo_upload)
                 .setView(uploadBinding.getRoot())
                 .setIcon(R.drawable.ic_bullhorn_48px)
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel());
 
-        final var alertDialog = builder.create();
+        var alertDialog = builder.create();
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -752,7 +752,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show();
                     return;
                 }
-                final var selectedCountry = (KeyValueSpinnerItem) uploadBinding.spCountries.getSelectedItem();
+                var selectedCountry = (KeyValueSpinnerItem) uploadBinding.spCountries.getSelectedItem();
                 upload.setCountry(selectedCountry.getValue());
             }
             alertDialog.dismiss();
@@ -767,21 +767,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             try {
                 stationTitle = URLEncoder.encode(binding.details.etbahnhofname.getText().toString(), String.valueOf(StandardCharsets.UTF_8));
                 comment = URLEncoder.encode(comment, String.valueOf(StandardCharsets.UTF_8));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
             upload.setActive(uploadBinding.spActive.getSelectedItemPosition() == 1);
             baseApplication.getDbAdapter().updateUpload(upload);
 
-            final var mediaFile = getStoredMediaFile(upload);
+            var mediaFile = getStoredMediaFile(upload);
             assert mediaFile != null;
-            final var file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
+            var file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
             rsapiClient.photoUpload(bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
                     stationTitle, latitude, longitude, comment, upload.getActive(), file).enqueue(new Callback<>() {
                 @Override
-                public void onResponse(@NonNull final Call<InboxResponse> call, @NonNull final Response<InboxResponse> response) {
+                public void onResponse(@NonNull Call<InboxResponse> call, @NonNull Response<InboxResponse> response) {
                     binding.details.progressBar.setVisibility(View.GONE);
-                    final InboxResponse inboxResponse;
+                    InboxResponse inboxResponse;
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
                     } else if (response.code() == 401) {
@@ -789,7 +789,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         return;
                     } else {
                         assert response.errorBody() != null;
-                        final var gson = new Gson();
+                        var gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(), InboxResponse.class);
                         if (inboxResponse.getState() == null) {
                             inboxResponse.setState(InboxResponse.InboxResponseState.ERROR);
@@ -812,7 +812,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
 
                 @Override
-                public void onFailure(@NonNull final Call<InboxResponse> call, @NonNull final Throwable t) {
+                public void onFailure(@NonNull Call<InboxResponse> call, @NonNull Throwable t) {
                     Log.e(TAG, "Error uploading photo", t);
                     binding.details.progressBar.setVisibility(View.GONE);
 
@@ -825,26 +825,26 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private Intent createFotoSendIntent() {
-        final var sendIntent = new Intent(Intent.ACTION_SEND);
-        final var file = getStoredMediaFile(upload);
+        var sendIntent = new Intent(Intent.ACTION_SEND);
+        var file = getStoredMediaFile(upload);
         if (file != null && file.canRead()) {
             sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                     BuildConfig.APPLICATION_ID + ".fileprovider", file));
         } else if (publicBitmap != null) {
-            final var newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
+            var newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
             try {
                 saveScaledBitmap(newFile, publicBitmap);
                 sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                         BuildConfig.APPLICATION_ID + ".fileprovider", newFile));
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 Log.e(TAG, "Error saving cached bitmap", e);
             }
         }
         return sendIntent;
     }
 
-    private void startNavigation(final Context context) {
-        final NavItem[] items = {
+    private void startNavigation(Context context) {
+        NavItem[] items = {
                 new NavItem("   " + getString(R.string.nav_oepnv), R.drawable.ic_directions_bus_gray_24px),
                 new NavItem("   " + getString(R.string.nav_car), R.drawable.ic_directions_car_gray_24px),
                 new NavItem("   " + getString(R.string.nav_bike), R.drawable.ic_directions_bike_gray_24px),
@@ -853,20 +853,20 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 new NavItem("   " + getString(R.string.nav_show_on_map), R.drawable.ic_map_gray_24px)
         };
 
-        final ListAdapter adapter = new ArrayAdapter<>(this, android.R.layout.select_dialog_item,
+        ListAdapter adapter = new ArrayAdapter<>(this, android.R.layout.select_dialog_item,
                 android.R.id.text1, items) {
             @NonNull
-            public View getView(final int position, final View convertView, @NonNull final ViewGroup parent) {
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 //Use super class to create the View
-                final var v = super.getView(position, convertView, parent);
-                final TextView tv = v.findViewById(android.R.id.text1);
+                var v = super.getView(position, convertView, parent);
+                TextView tv = v.findViewById(android.R.id.text1);
 
                 //Put the image on the TextView
                 tv.setCompoundDrawablesWithIntrinsicBounds(items[position].icon, 0, 0, 0);
 
                 //Add margin between image and text (support various screen densities)
-                final int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
-                final int dp7 = (int) (20 * getResources().getDisplayMetrics().density);
+                int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
+                int dp7 = (int) (20 * getResources().getDisplayMetrics().density);
                 tv.setCompoundDrawablePadding(dp5);
                 tv.setPadding(dp7, 0, 0, 0);
 
@@ -874,13 +874,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         };
 
-        final double lat = station != null ? station.getLat() : latitude;
-        final double lon = station != null ? station.getLon() : longitude;
-        final var navBuilder = new AlertDialog.Builder(this);
+        double lat = station != null ? station.getLat() : latitude;
+        double lon = station != null ? station.getLon() : longitude;
+        var navBuilder = new AlertDialog.Builder(this);
         navBuilder.setIcon(R.mipmap.ic_launcher);
         navBuilder.setTitle(R.string.navMethod);
         navBuilder.setAdapter(adapter, (dialog, navItem) -> {
-            final String dlocation;
+            String dlocation;
             Intent intent = null;
             switch (navItem) {
                 case 0:
@@ -921,7 +921,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
             try {
                 startActivity(intent);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG).show();
             }
         }).show();
@@ -934,7 +934,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * @param bitmapFromCache the fetched Bitmap for the notification. May be null
      */
     @Override
-    public void onBitmapAvailable(final @Nullable Bitmap bitmapFromCache) {
+    public void onBitmapAvailable(@Nullable Bitmap bitmapFromCache) {
         runOnUiThread(()-> {
             localFotoUsed = false;
             binding.details.buttonUpload.setEnabled(false);
@@ -951,10 +951,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             // Lizenzinfo aufbauen und einblenden
             binding.details.licenseTag.setVisibility(View.VISIBLE);
             if (station != null && station.getLicense() != null) {
-                final boolean photographerUrlAvailable = station.getPhotographerUrl() != null && !station.getPhotographerUrl().isEmpty();
-                final boolean licenseUrlAvailable = station.getLicenseUrl() != null && !station.getLicenseUrl().isEmpty();
+                boolean photographerUrlAvailable = station.getPhotographerUrl() != null && !station.getPhotographerUrl().isEmpty();
+                boolean licenseUrlAvailable = station.getLicenseUrl() != null && !station.getLicenseUrl().isEmpty();
 
-                final String photographerText;
+                String photographerText;
                 if (photographerUrlAvailable) {
                     photographerText = String.format(
                             LINK_FORMAT,
@@ -964,7 +964,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     photographerText = station.getPhotographer();
                 }
 
-                final String licenseText;
+                String licenseText;
                 if (licenseUrlAvailable) {
                     licenseText = String.format(
                             LINK_FORMAT,
@@ -993,10 +993,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     /**
      * Fetch bitmap from device local location, if it exists, and set the photo view.
      */
-    private void setLocalBitmap(final Upload upload) {
+    private void setLocalBitmap(Upload upload) {
         setPictureButtonsEnabled(true);
 
-        final var showBitmap = checkForLocalPhoto(upload);
+        var showBitmap = checkForLocalPhoto(upload);
         setButtonEnabled(binding.details.buttonUpload, false);
         if (showBitmap == null) {
             // there is no local bitmap
@@ -1009,20 +1009,20 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
     }
 
-    private void fetchUploadStatus(final Upload upload) {
+    private void fetchUploadStatus(Upload upload) {
         if (upload == null) {
             return;
         }
         setButtonEnabled(binding.details.buttonUpload, true);
-        final var stateQueries = new ArrayList<InboxStateQuery>();
+        var stateQueries = new ArrayList<InboxStateQuery>();
         stateQueries.add(new InboxStateQuery(upload.getRemoteId(), upload.getCountry(), upload.getStationId()));
 
         rsapiClient.queryUploadState(stateQueries).enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Response<List<InboxStateQuery>> response) {
-                final var stateQueries = response.body();
+            public void onResponse(@NonNull Call<List<InboxStateQuery>> call, @NonNull Response<List<InboxStateQuery>> response) {
+                var stateQueries = response.body();
                 if (stateQueries != null && !stateQueries.isEmpty()) {
-                    final var stateQuery = stateQueries.get(0);
+                    var stateQuery = stateQueries.get(0);
                     binding.details.licenseTag.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
                     binding.details.licenseTag.setTextColor(getResources().getColor(stateQuery.getState().getColorId(), null));
                     binding.details.licenseTag.setVisibility(View.VISIBLE);
@@ -1037,7 +1037,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
 
             @Override
-            public void onFailure(@NonNull final Call<List<InboxStateQuery>> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<List<InboxStateQuery>> call, @NonNull Throwable t) {
                 Log.e(TAG, "Error retrieving upload state", t);
                 Toast.makeText(DetailsActivity.this,
                         R.string.error_retrieving_upload_state,
@@ -1047,23 +1047,23 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     }
 
-    private void setPictureButtonsEnabled(final boolean enabled) {
+    private void setPictureButtonsEnabled(boolean enabled) {
         setButtonEnabled(binding.details.buttonTakePicture, enabled);
         setButtonEnabled(binding.details.buttonSelectPicture, enabled);
     }
 
-    private void setButtonEnabled(final ImageButton imageButton, final boolean enabled) {
+    private void setButtonEnabled(ImageButton imageButton, boolean enabled) {
         imageButton.setEnabled(enabled);
         imageButton.setImageAlpha(enabled ? 255 : 125);
     }
 
-    private void setBitmap(final Bitmap showBitmap) {
-        final var size = new Point();
+    private void setBitmap(Bitmap showBitmap) {
+        var size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
-        final int targetWidth = size.x;
+        int targetWidth = size.x;
 
         if (showBitmap.getWidth() != targetWidth) {
-            final var scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
+            var scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
                     targetWidth,
                     (int) (((long) showBitmap.getHeight() * (long) targetWidth) / showBitmap.getWidth()),
                     true);
@@ -1077,8 +1077,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private class AnimationUpdateListener implements ValueAnimator.AnimatorUpdateListener {
         @Override
-        public void onAnimationUpdate(final ValueAnimator animation) {
-            final float alpha = (float) animation.getAnimatedValue();
+        public void onAnimationUpdate(ValueAnimator animation) {
+            float alpha = (float) animation.getAnimatedValue();
             binding.details.header.setAlpha(alpha);
             binding.details.licenseTag.setAlpha(alpha);
             binding.details.buttons.setAlpha(alpha);
@@ -1094,21 +1094,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * @return the Bitmap of the photo, or null if none exists.
      */
     @Nullable
-    private Bitmap checkForLocalPhoto(final Upload upload) {
+    private Bitmap checkForLocalPhoto(Upload upload) {
         // show the image
-        final var localFile = getStoredMediaFile(upload);
+        var localFile = getStoredMediaFile(upload);
         Log.d(TAG, "File: " + localFile);
         crc32 = null;
         if (localFile != null && localFile.canRead()) {
             Log.d(TAG, "FileGetPath: " + localFile.getPath());
-            try (final var cis = new CheckedInputStream(new FileInputStream(localFile), new CRC32())){
-                final var scaledScreen = BitmapFactory.decodeStream(cis);
+            try (var cis = new CheckedInputStream(new FileInputStream(localFile), new CRC32())){
+                var scaledScreen = BitmapFactory.decodeStream(cis);
                 crc32 = cis.getChecksum().getValue();
                 Log.d(TAG, "img width " + scaledScreen.getWidth() + ", height " + scaledScreen.getHeight() + ", crc32 " + crc32);
                 localFotoUsed = true;
                 setButtonEnabled(binding.details.buttonUpload, true);
                 return scaledScreen;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, String.format("Error reading media file for station %s", bahnhofId), e);
             }
         } else {
@@ -1121,7 +1121,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     public void onPictureClicked() {
         if (!fullscreen) {
-            final var animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 0f);
+            var animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();
@@ -1129,26 +1129,26 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_IMMERSIVE);
-            final var bar = getActionBar();
+            var bar = getActionBar();
             if (bar != null) {
                 bar.hide();
             }
-            final var sbar = getSupportActionBar();
+            var sbar = getSupportActionBar();
             if (sbar != null) {
                 sbar.hide();
             }
             fullscreen = true;
         } else {
-            final var animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 1.0f);
+            var animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 1.0f);
             animation.setDuration(500);
             animation.addUpdateListener(new AnimationUpdateListener());
             animation.start();
             binding.details.contentDetails.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            final var bar = getActionBar();
+            var bar = getActionBar();
             if (bar != null) {
                 bar.show();
             }
-            final var sbar = getSupportActionBar();
+            var sbar = getSupportActionBar();
             if (sbar != null) {
                 sbar.show();
             }

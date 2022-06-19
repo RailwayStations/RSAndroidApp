@@ -7,7 +7,7 @@ public class NavItem {
     public final String text;
     public final int icon;
 
-    public NavItem(final String text, final Integer icon) {
+    public NavItem(String text, Integer icon) {
         this.text = text;
         this.icon = icon;
     }

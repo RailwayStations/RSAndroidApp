@@ -36,16 +36,16 @@ public final class Utils {
      * @param view       the view to set the background on
      * @param background the background
      */
-    public static void setBackground(final View view, final Drawable background) {
+    public static void setBackground(View view, Drawable background) {
         view.setBackground(background);
     }
 
-    public static Bitmap viewToBitmap(final Context c, final View view) {
+    public static Bitmap viewToBitmap(Context c, View view) {
         view.measure(MeasureSpec.getSize(view.getMeasuredWidth()),
                 MeasureSpec.getSize(view.getMeasuredHeight()));
         view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
         view.setDrawingCacheEnabled(true);
-        final var drawable = new BitmapDrawable(c.getResources(),
+        var drawable = new BitmapDrawable(c.getResources(),
                 android.graphics.Bitmap.createBitmap(view.getDrawingCache()));
         view.setDrawingCacheEnabled(false);
         return AndroidGraphicFactory.convertToBitmap(drawable);

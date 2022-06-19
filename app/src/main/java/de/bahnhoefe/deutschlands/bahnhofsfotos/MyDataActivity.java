@@ -42,7 +42,7 @@ public class MyDataActivity extends AppCompatActivity {
     private ActivityMydataBinding binding;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMydataBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -62,7 +62,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    private void setProfileToUI(final Profile profile) {
+    private void setProfileToUI(Profile profile) {
         binding.myData.etNickname.setText(profile.getNickname());
         binding.myData.etPassword.setText(profile.getPassword());
         binding.myData.etEmail.setText(profile.getEmail());
@@ -90,11 +90,11 @@ public class MyDataActivity extends AppCompatActivity {
 
         rsapiClient.getProfile().enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<Profile> call, @NonNull final Response<Profile> response) {
+            public void onResponse(@NonNull Call<Profile> call, @NonNull Response<Profile> response) {
                 switch (response.code()) {
                     case 200:
                         Log.i(TAG, "Successfully loaded profile");
-                        final var remoteProfile = response.body();
+                        var remoteProfile = response.body();
                         remoteProfile.setPassword(binding.myData.etPassword.getText().toString());
                         saveLocalProfile(remoteProfile);
                         showProfileView();
@@ -109,7 +109,7 @@ public class MyDataActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(@NonNull final Call<Profile> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<Profile> call, @NonNull Throwable t) {
                 SimpleDialogs.confirm(MyDataActivity.this,
                         String.format(getText(R.string.read_profile_failed).toString(), t.getMessage()));
             }
@@ -126,9 +126,9 @@ public class MyDataActivity extends AppCompatActivity {
         binding.myData.initPasswordLayout.setVisibility(View.GONE);
     }
 
-    private void receiveInitialPassword(final Intent intent) {
+    private void receiveInitialPassword(Intent intent) {
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
-            final var data = intent.getData();
+            var data = intent.getData();
             if (data != null) {
                 profile.setPassword(data.getLastPathSegment());
                 binding.myData.etPassword.setText(profile.getPassword());
@@ -141,19 +141,19 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(final Intent intent) {
+    protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         receiveInitialPassword(intent);
     }
 
-    public void selectLicense(final View view) {
+    public void selectLicense(View view) {
         license = binding.myData.cbLicenseCC0.isChecked() ? License.CC0 : License.UNKNOWN;
         if (license != License.CC0) {
             SimpleDialogs.confirm(this, R.string.cc0_needed);
         }
     }
 
-    public void registerOrSave(final View view) {
+    public void registerOrSave(View view) {
         boolean register = false;
         if (binding.myData.btProfileSave.getText().equals(getResources().getText(R.string.bt_register))) {
             rsapiClient.setCredentials(null, null);
@@ -166,7 +166,7 @@ public class MyDataActivity extends AppCompatActivity {
             profile = createProfileFromUI(register);
             rsapiClient.registration(profile).enqueue(new Callback<>() {
                 @Override
-                public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     switch (response.code()) {
                         case 202:
                             rsapiClient.setCredentials(profile.getEmail(), profile.getNewPassword());
@@ -190,7 +190,7 @@ public class MyDataActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(@NonNull final Call<Void> call, @NonNull final Throwable t) {
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     Log.e(TAG, "Registration failed", t);
                     SimpleDialogs.confirm(MyDataActivity.this,
                             String.format(getText(R.string.registration_failed).toString(), t));
@@ -199,8 +199,8 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    private Profile createProfileFromUI(final boolean register) {
-        final var profile = new Profile();
+    private Profile createProfileFromUI(boolean register) {
+        var profile = new Profile();
         profile.setNickname(binding.myData.etNickname.getText().toString().trim());
         profile.setEmail(binding.myData.etEmail.getText().toString().trim());
         profile.setLicense(license);
@@ -219,7 +219,7 @@ public class MyDataActivity extends AppCompatActivity {
         return profile;
     }
 
-    public boolean saveProfile(final boolean registration) {
+    public boolean saveProfile(boolean registration) {
         profile = createProfileFromUI(false);
         if (!isValid(registration)) {
             return false;
@@ -227,7 +227,7 @@ public class MyDataActivity extends AppCompatActivity {
         if (rsapiClient.hasCredentials()) {
             rsapiClient.saveProfile(profile).enqueue(new Callback<>() {
                 @Override
-                public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     switch (response.code()) {
                         case 200:
                             rsapiClient.setCredentials(profile.getEmail(), profile.getPassword());
@@ -253,7 +253,7 @@ public class MyDataActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(@NonNull final Call<Void> call, @NonNull final Throwable t) {
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     Log.e(TAG, "Error uploading profile", t);
                     SimpleDialogs.confirm(MyDataActivity.this,
                             String.format(getText(R.string.save_profile_failed).toString(), t.getMessage()));
@@ -268,12 +268,12 @@ public class MyDataActivity extends AppCompatActivity {
         return true;
     }
 
-    private void saveLocalProfile(final Profile profile) {
+    private void saveLocalProfile(Profile profile) {
         baseApplication.setProfile(profile);
         setProfileToUI(profile);
     }
 
-    private boolean isLoginDataAvailable(final String username, final String password) {
+    private boolean isLoginDataAvailable(String username, String password) {
         return StringUtils.isNotBlank(password) && StringUtils.isNotBlank(username);
     }
 
@@ -283,7 +283,7 @@ public class MyDataActivity extends AppCompatActivity {
         finish();
     }
 
-    public boolean isValid(final boolean register) {
+    public boolean isValid(boolean register) {
         if (license == License.UNKNOWN) {
             SimpleDialogs.confirm(this, R.string.cc0_needed);
             return false;
@@ -300,38 +300,38 @@ public class MyDataActivity extends AppCompatActivity {
             SimpleDialogs.confirm(this, R.string.missing_email_address);
             return false;
         }
-        final String url = binding.myData.etLinking.getText().toString();
+        String url = binding.myData.etLinking.getText().toString();
         if (StringUtils.isNotBlank(url)&& !isValidHTTPURL(url)) {
             SimpleDialogs.confirm(this, R.string.missing_link);
             return false;
         }
 
         if (register) {
-            final var newPassword = getValidPassword(binding.myData.etInitPassword, binding.myData.etInitPasswordRepeat);
+            var newPassword = getValidPassword(binding.myData.etInitPassword, binding.myData.etInitPasswordRepeat);
             return newPassword != null;
         }
 
         return true;
     }
 
-    private boolean isValidHTTPURL(final String urlString) {
+    private boolean isValidHTTPURL(String urlString) {
         try {
-            final var url = new URL(urlString);
+            var url = new URL(urlString);
             if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
                 return false;
             }
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             return false;
         }
         return true;
     }
 
-    public boolean isValidEmail(final CharSequence target) {
+    public boolean isValidEmail(CharSequence target) {
         return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
 
     }
 
-    public void onAnonymousChecked(final View view) {
+    public void onAnonymousChecked(View view) {
         if (binding.myData.cbAnonymous.isChecked()) {
             binding.myData.etLinking.setVisibility(View.GONE);
             binding.myData.tvLinking.setVisibility(View.GONE);
@@ -341,7 +341,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    public void newRegister(final View view) {
+    public void newRegister(View view) {
         rsapiClient.clearCredentials();
         binding.myData.etEmail.setText(binding.myData.etEmailOrNickname.getText());
         binding.myData.profileForm.setVisibility(View.VISIBLE);
@@ -353,9 +353,9 @@ public class MyDataActivity extends AppCompatActivity {
         binding.myData.btChangePassword.setVisibility(View.GONE);
     }
 
-    public void login(final View view) {
-        final var username = binding.myData.etEmailOrNickname.getText().toString();
-        final var password = binding.myData.etPassword.getText().toString();
+    public void login(View view) {
+        var username = binding.myData.etEmailOrNickname.getText().toString();
+        var password = binding.myData.etPassword.getText().toString();
         if (isLoginDataAvailable(username, password)) {
             baseApplication.setEmail(username);
             baseApplication.setPassword(password);
@@ -366,7 +366,7 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    public void logout(final View view) {
+    public void logout(View view) {
         profile.setNickname(null);
         profile.setEmail(null);
         profile.setPassword(null);
@@ -376,9 +376,9 @@ public class MyDataActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.login);
     }
 
-    public void resetPassword(final View view) {
+    public void resetPassword(View view) {
         rsapiClient.clearCredentials();
-        final var emailOrNickname = binding.myData.etEmailOrNickname.getText().toString();
+        var emailOrNickname = binding.myData.etEmailOrNickname.getText().toString();
         if (StringUtils.isBlank(emailOrNickname)) {
             SimpleDialogs.confirm(this, R.string.missing_email_or_nickname);
             return;
@@ -387,7 +387,7 @@ public class MyDataActivity extends AppCompatActivity {
         saveLocalProfile(profile);
         rsapiClient.resetPassword(emailOrNickname).enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 switch (response.code()) {
                     case 202:
                         SimpleDialogs.confirm(MyDataActivity.this, R.string.password_email);
@@ -405,7 +405,7 @@ public class MyDataActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(@NonNull final Call<Void> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 Log.e(TAG, "Request new password failed", t);
                 SimpleDialogs.confirm(MyDataActivity.this,
                         String.format(getText(R.string.request_password_failed).toString(), t));
@@ -413,9 +413,9 @@ public class MyDataActivity extends AppCompatActivity {
         });
     }
 
-    public void changePassword(final View view) {
-        final var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        final var passwordBinding = ChangePasswordBinding.inflate(getLayoutInflater());
+    public void changePassword(View view) {
+        var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
+        var passwordBinding = ChangePasswordBinding.inflate(getLayoutInflater());
 
         builder.setTitle(R.string.bt_change_password)
                .setView(passwordBinding.getRoot())
@@ -423,7 +423,7 @@ public class MyDataActivity extends AppCompatActivity {
                .setPositiveButton(android.R.string.ok, null)
                .setNegativeButton(android.R.string.cancel, (dialog, id) -> dialog.cancel());
 
-        final var alertDialog = builder.create();
+        var alertDialog = builder.create();
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -435,13 +435,13 @@ public class MyDataActivity extends AppCompatActivity {
 
             try {
                 newPassword = URLEncoder.encode(newPassword, String.valueOf(StandardCharsets.UTF_8));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding new password", e);
             }
 
             rsapiClient.changePassword(newPassword).enqueue(new Callback<>() {
                 @Override
-                public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     switch (response.code()) {
                         case 200:
                             Log.i(TAG, "Successfully changed password");
@@ -461,7 +461,7 @@ public class MyDataActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(@NonNull final Call<Void> call, @NonNull final Throwable t) {
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     Log.e(TAG, "Error changing password", t);
                     SimpleDialogs.confirm(MyDataActivity.this,
                             String.format(getText(R.string.change_password_failed).toString(), t.getMessage()));
@@ -471,8 +471,8 @@ public class MyDataActivity extends AppCompatActivity {
 
     }
 
-    private String getValidPassword(final EditText etNewPassword, final EditText etPasswordRepeat) {
-        final var newPassword = etNewPassword.getText().toString().trim();
+    private String getValidPassword(EditText etNewPassword, EditText etPasswordRepeat) {
+        var newPassword = etNewPassword.getText().toString().trim();
 
         if (newPassword.length() < 8) {
             Toast.makeText(MyDataActivity.this, R.string.password_too_short, Toast.LENGTH_LONG).show();
@@ -485,10 +485,10 @@ public class MyDataActivity extends AppCompatActivity {
         return newPassword;
     }
 
-    public void requestEmailVerification(final View view) {
+    public void requestEmailVerification(View view) {
         SimpleDialogs.confirm(this, R.string.requestEmailVerification, (dialogInterface, i) -> rsapiClient.resendEmailVerification().enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<Void> call, @NonNull final Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.code() == 200) {
                     Log.i(TAG, "Successfully requested email verification");
                     Toast.makeText(MyDataActivity.this, R.string.emailVerificationRequested, Toast.LENGTH_LONG).show();
@@ -498,7 +498,7 @@ public class MyDataActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(@NonNull final Call<Void> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 Log.e(TAG, "Error requesting email verification", t);
                 Toast.makeText(MyDataActivity.this, R.string.emailVerificationRequestFailed, Toast.LENGTH_LONG).show();
             }

@@ -34,59 +34,59 @@ public class HighScoreActivity extends AppCompatActivity {
     private ActivityHighScoreBinding binding;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityHighScoreBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        final var baseApplication = (BaseApplication) getApplication();
-        final var firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
-        final var countries = baseApplication.getDbAdapter().getAllCountries();
+        var baseApplication = (BaseApplication) getApplication();
+        var firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
+        var countries = baseApplication.getDbAdapter().getAllCountries();
         countries.add(0, new Country(getString(R.string.all_countries), "", null, null, null, null));
         int selectedItem = 0;
-        for (final var country : countries) {
+        for (var country : countries) {
             if (country.getCode().equals(firstSelectedCountry)) {
                 selectedItem = countries.indexOf(country);
             }
         }
 
-        final var countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, countries.toArray(new Country[0]));
+        var countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, countries.toArray(new Country[0]));
         binding.countries.setAdapter(countryAdapter);
         binding.countries.setSelection(selectedItem);
         binding.countries.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 loadHighScore(baseApplication, (Country)parent.getSelectedItem());
             }
 
             @Override
-            public void onNothingSelected(final AdapterView<?> parent) {
+            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
     }
 
-    private void loadHighScore(final BaseApplication baseApplication, final Country selectedCountry) {
-        final var rsapi = baseApplication.getRsapiClient();
-        final Call<HighScore> highScoreCall = selectedCountry.getCode().isEmpty() ? rsapi.getHighScore() : rsapi.getHighScore(selectedCountry.getCode());
+    private void loadHighScore(BaseApplication baseApplication, Country selectedCountry) {
+        var rsapi = baseApplication.getRsapiClient();
+        Call<HighScore> highScoreCall = selectedCountry.getCode().isEmpty() ? rsapi.getHighScore() : rsapi.getHighScore(selectedCountry.getCode());
         highScoreCall.enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<HighScore> call, @NonNull final Response<HighScore> response) {
+            public void onResponse(@NonNull Call<HighScore> call, @NonNull Response<HighScore> response) {
                 if (response.isSuccessful()) {
                     adapter = new HighScoreAdapter(HighScoreActivity.this, response.body().getItems());
                     binding.highscoreList.setAdapter(adapter);
                     binding.highscoreList.setOnItemClickListener((adapter, v, position, arg3) -> {
-                        final HighScoreItem highScoreItem = (HighScoreItem) adapter.getItemAtPosition(position);
-                        final StationFilter stationFilter = baseApplication.getStationFilter();
+                        HighScoreItem highScoreItem = (HighScoreItem) adapter.getItemAtPosition(position);
+                        StationFilter stationFilter = baseApplication.getStationFilter();
                         stationFilter.setNickname(highScoreItem.getName());
                         baseApplication.setStationFilter(stationFilter);
-                        final Intent intent = new Intent(HighScoreActivity.this, MapsActivity.class);
+                        Intent intent = new Intent(HighScoreActivity.this, MapsActivity.class);
                         startActivity(intent);
                     });
                 }
             }
 
             @Override
-            public void onFailure(@NonNull final Call<HighScore> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<HighScore> call, @NonNull Throwable t) {
                 Log.e(TAG, "Error loading highscore", t);
                 Toast.makeText(getBaseContext(), getString(R.string.error_loading_highscore) + t.getMessage(), Toast.LENGTH_LONG).show();
             }
@@ -94,17 +94,16 @@ public class HighScoreActivity extends AppCompatActivity {
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public boolean onCreateOptionsMenu(final Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_high_score, menu);
 
-        final var manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        final var search = (SearchView) menu.findItem(R.id.search).getActionView();
+        var manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        var search = (SearchView) menu.findItem(R.id.search).getActionView();
         search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             @Override
-            public boolean onQueryTextSubmit(final String s) {
+            public boolean onQueryTextSubmit(String s) {
                 Log.d(TAG, "onQueryTextSubmit ");
                 if (adapter != null) {
                     adapter.getFilter().filter(s);
@@ -118,7 +117,7 @@ public class HighScoreActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onQueryTextChange(final String s) {
+            public boolean onQueryTextChange(String s) {
                 Log.d(TAG, "onQueryTextChange ");
                 if (adapter != null) {
                     adapter.getFilter().filter(s);

@@ -14,21 +14,21 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 public class StationListAdapter extends CursorAdapter {
     private final LayoutInflater mInflater;
 
-    public StationListAdapter(final Context context, final Cursor cursor, final int flags) {
+    public StationListAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
-    public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-        final var binding = ItemStationBinding.inflate(mInflater, parent, false);
-        final var view = binding.getRoot();
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        var binding = ItemStationBinding.inflate(mInflater, parent, false);
+        var view = binding.getRoot();
         view.setTag(binding);
         return view;
     }
 
     @Override
-    public void bindView(final View view, final Context context, final Cursor cursor) {
+    public void bindView(View view, Context context, Cursor cursor) {
         //If you want to have zebra lines color effect uncomment below code
         if (cursor.getPosition() % 2 == 1) {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor);
@@ -36,7 +36,7 @@ public class StationListAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        final var binding = (ItemStationBinding) view.getTag();
+        var binding = (ItemStationBinding) view.getTag();
         binding.txtState.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.COUNTRY)).concat(": ").concat(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID))));
         binding.txtStationName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.TITLE)));
         binding.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);

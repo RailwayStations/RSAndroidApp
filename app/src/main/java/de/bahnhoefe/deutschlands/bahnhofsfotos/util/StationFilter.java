@@ -10,7 +10,7 @@ public class StationFilter {
 
     private String nickname;
 
-    public StationFilter(final Boolean photo, final Boolean active, final String nickname) {
+    public StationFilter(Boolean photo, Boolean active, String nickname) {
         this.photo = photo;
         this.active = active;
         this.nickname = nickname;
@@ -20,7 +20,7 @@ public class StationFilter {
         return photo;
     }
 
-    public void setPhoto(final Boolean photo) {
+    public void setPhoto(Boolean photo) {
         this.photo = photo;
     }
 
@@ -28,7 +28,7 @@ public class StationFilter {
         return active;
     }
 
-    public void setActive(final Boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
@@ -36,7 +36,7 @@ public class StationFilter {
         return nickname;
     }
 
-    public void setNickname(final String nickname) {
+    public void setNickname(String nickname) {
         this.nickname = nickname;
     }
 

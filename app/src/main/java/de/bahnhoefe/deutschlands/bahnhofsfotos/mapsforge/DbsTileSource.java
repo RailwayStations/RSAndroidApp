@@ -4,7 +4,7 @@ import org.mapsforge.map.layer.download.tilesource.OnlineTileSource;
 
 public class DbsTileSource extends OnlineTileSource {
 
-    public DbsTileSource(final String name, final String baseUrl) {
+    public DbsTileSource(String name, String baseUrl) {
         super(new String[]{"osm-prod.noncd.db.de"}, 8100);
 
         setName(name);

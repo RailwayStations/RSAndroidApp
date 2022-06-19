@@ -13,7 +13,7 @@ public class MapsforgeMapView extends MapView {
     private final GestureDetector gestureDetector;
     private MapDragListener onDragListener;
 
-    public MapsforgeMapView(final Context context, final AttributeSet attributeSet) {
+    public MapsforgeMapView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
 
         gestureDetector = new GestureDetector(context, new GestureListener());
@@ -21,18 +21,18 @@ public class MapsforgeMapView extends MapView {
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public boolean onTouchEvent(final MotionEvent ev) {
+    public boolean onTouchEvent(MotionEvent ev) {
         try {
             gestureDetector.onTouchEvent(ev);
             return super.onTouchEvent(ev);
-        } catch (final Exception ignored) {
+        } catch (Exception ignored) {
         }
         return false;
     }
 
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
-        public boolean onDoubleTap(final MotionEvent e) {
+        public boolean onDoubleTap(MotionEvent e) {
             if (onDragListener != null) {
                 onDragListener.onDrag();
             }
@@ -40,8 +40,8 @@ public class MapsforgeMapView extends MapView {
         }
 
         @Override
-        public boolean onScroll(final MotionEvent e1, final MotionEvent e2,
-                                final float distanceX, final float distanceY) {
+        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                                float distanceX, float distanceY) {
             if (onDragListener != null) {
                 onDragListener.onDrag();
             }
@@ -49,7 +49,7 @@ public class MapsforgeMapView extends MapView {
         }
     }
 
-    public void setOnMapDragListener(final MapDragListener onDragListener) {
+    public void setOnMapDragListener(MapDragListener onDragListener) {
         this.onDragListener = onDragListener;
     }
 

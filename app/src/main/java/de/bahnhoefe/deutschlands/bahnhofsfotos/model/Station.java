@@ -29,7 +29,7 @@ public class Station implements Serializable {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -37,7 +37,7 @@ public class Station implements Serializable {
         return title;
     }
 
-    public void setTitle(final String title) {
+    public void setTitle(String title) {
         this.title = title;
     }
 
@@ -45,7 +45,7 @@ public class Station implements Serializable {
         return lat;
     }
 
-    public void setLat(final double lat) {
+    public void setLat(double lat) {
         this.lat = lat;
     }
 
@@ -53,7 +53,7 @@ public class Station implements Serializable {
         return lon;
     }
 
-    public void setLon(final double lon) {
+    public void setLon(double lon) {
         this.lon = lon;
     }
 
@@ -61,7 +61,7 @@ public class Station implements Serializable {
         return datum;
     }
 
-    public void setDatum(final long datum) {
+    public void setDatum(long datum) {
         this.datum = datum;
     }
 
@@ -69,16 +69,16 @@ public class Station implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Station)) return false;
 
-        final Station station = (Station) o;
+        Station station = (Station) o;
 
         return id.equals(station.id);
     }
@@ -93,11 +93,11 @@ public class Station implements Serializable {
         return ds100;
     }
 
-    public void setDs100(final String ds100) {
+    public void setDs100(String ds100) {
         this.ds100 = ds100;
     }
 
-    public void setPhotoUrl(final String photoUrl) {
+    public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
     }
 
@@ -105,7 +105,7 @@ public class Station implements Serializable {
         return photoUrl;
     }
 
-    public void setPhotographer(final String photographer) {
+    public void setPhotographer(String photographer) {
         this.photographer = photographer;
     }
 
@@ -113,7 +113,7 @@ public class Station implements Serializable {
         return photographer;
     }
 
-    public void setPhotographerUrl(final String photographerUrl) {
+    public void setPhotographerUrl(String photographerUrl) {
         this.photographerUrl = photographerUrl;
     }
 
@@ -121,7 +121,7 @@ public class Station implements Serializable {
         return photographerUrl;
     }
 
-    public void setLicense(final String license) {
+    public void setLicense(String license) {
         this.license = license;
     }
 
@@ -133,7 +133,7 @@ public class Station implements Serializable {
         return licenseUrl;
     }
 
-    public void setLicenseUrl(final String licenseUrl) {
+    public void setLicenseUrl(String licenseUrl) {
         this.licenseUrl = licenseUrl;
     }
 
@@ -145,7 +145,7 @@ public class Station implements Serializable {
         return country;
     }
 
-    public void setCountry(final String country) {
+    public void setCountry(String country) {
         this.country = country;
     }
 
@@ -153,7 +153,7 @@ public class Station implements Serializable {
         return outdated;
     }
 
-    public void setOutdated(final boolean outdated) {
+    public void setOutdated(boolean outdated) {
         this.outdated = outdated;
     }
 }

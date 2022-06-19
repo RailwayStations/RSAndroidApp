@@ -17,7 +17,7 @@ public class InboxAdapter extends ArrayAdapter<PublicInbox> {
     private final Activity context;
     private final List<PublicInbox> publicInboxes;
 
-    public InboxAdapter(final Activity context, final List<PublicInbox> publicInboxes) {
+    public InboxAdapter(Activity context, List<PublicInbox> publicInboxes) {
         super(context, R.layout.item_inbox, publicInboxes);
         this.publicInboxes = publicInboxes;
         this.context = context;
@@ -25,10 +25,10 @@ public class InboxAdapter extends ArrayAdapter<PublicInbox> {
 
     @Override
     @NonNull
-    public View getView(final int position, final View convertView, @NonNull final ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         var rowView = convertView;
         // reuse views
-        final ItemInboxBinding binding;
+        ItemInboxBinding binding;
         if (rowView == null) {
             binding = ItemInboxBinding.inflate(context.getLayoutInflater(), parent, false);
             rowView = binding.getRoot();
@@ -38,7 +38,7 @@ public class InboxAdapter extends ArrayAdapter<PublicInbox> {
         }
 
         // fill data
-        final var item = publicInboxes.get(position);
+        var item = publicInboxes.get(position);
         binding.txtStationName.setText(item.getTitle());
         if (item.getStationId() != null) {
             binding.txtStationId.setText(item.getCountryCode().concat(":").concat(item.getStationId()));

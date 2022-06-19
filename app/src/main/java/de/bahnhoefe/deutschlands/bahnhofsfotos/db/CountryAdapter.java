@@ -22,15 +22,15 @@ public class CountryAdapter extends CursorAdapter {
     private final String TAG = getClass().getSimpleName();
     private final Set<String> selectedCountries;
 
-    public CountryAdapter(final Context context, final Cursor c, final int flags) {
+    public CountryAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         selectedCountries = new HashSet<>(BaseApplication.getInstance().getCountryCodes());
     }
 
     // new refactored after https://www.youtube.com/watch?v=wDBM6wVEO70&feature=youtu.be&t=7m
-    public void getView(final int selectedPosition, View convertView, final ViewGroup parent, final Cursor cursor) {
-        final ItemCountryBinding binding;
+    public void getView(int selectedPosition, View convertView, ViewGroup parent, Cursor cursor) {
+        ItemCountryBinding binding;
         if (convertView == null) {
             binding = ItemCountryBinding.inflate(mInflater, parent, false);
             convertView = binding.getRoot();
@@ -50,7 +50,7 @@ public class CountryAdapter extends CursorAdapter {
         binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)));
         binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
 
-        final var newCountry = cursor.getString(1);
+        var newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
         if (selectedCountries.contains(newCountry)) {
             binding.checkCountry.setChecked(false);
@@ -63,16 +63,16 @@ public class CountryAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-        final var binding = ItemCountryBinding.inflate(mInflater, parent, false);
-        final var view = binding.getRoot();
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        var binding = ItemCountryBinding.inflate(mInflater, parent, false);
+        var view = binding.getRoot();
         view.setTag(binding);
         return view;
     }
 
     // wird nicht benutzt, ersetzt durch getView()
     @Override
-    public void bindView(final View view, final Context context, final Cursor cursor) {
+    public void bindView(View view, Context context, Cursor cursor) {
         //If you want to have zebra lines color effect uncomment below code
         if (cursor.getPosition() % 2 == 1) {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor);
@@ -80,20 +80,20 @@ public class CountryAdapter extends CursorAdapter {
             view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
         }
 
-        final var binding = (ItemCountryBinding) view.getTag();
+        var binding = (ItemCountryBinding) view.getTag();
         binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)));
         binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
 
-        final var newCountry = cursor.getString(1);
+        var newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
         binding.checkCountry.setChecked(selectedCountries.contains(newCountry));
         binding.checkCountry.setOnClickListener(onStateChangedListener(binding.checkCountry, cursor.getPosition()));
     }
 
-    private View.OnClickListener onStateChangedListener(final CheckBox checkCountry, final int position) {
+    private View.OnClickListener onStateChangedListener(CheckBox checkCountry, int position) {
         return v -> {
-            final var cursor = (Cursor) getItem(position);
-            final var country = cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE));
+            var cursor = (Cursor) getItem(position);
+            var country = cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE));
             if (checkCountry.isChecked()) {
                 selectedCountries.add(country);
             } else {

@@ -9,12 +9,12 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 public class ConnectionUtil {
 
-    public static boolean checkInternetConnection(final Context context) {
-        final ConnectivityManager cm =
+    public static boolean checkInternetConnection(Context context) {
+        var cm =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        final NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        final boolean isConnected = activeNetwork != null &&
+        var activeNetwork = cm.getActiveNetworkInfo();
+        var isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
 
         if (!isConnected) {

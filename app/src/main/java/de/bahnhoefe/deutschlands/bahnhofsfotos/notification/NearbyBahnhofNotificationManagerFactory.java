@@ -17,7 +17,7 @@ public class NearbyBahnhofNotificationManagerFactory {
      * @param distance the distance of the station from current position of the user
      * @return an instance of NearbyBahnhofNotificationManager
      */
-    static public NearbyBahnhofNotificationManager create(final Context context, final Station station, final double distance, final Set<Country> countries) {
+    static public NearbyBahnhofNotificationManager create(Context context, Station station, double distance, Set<Country> countries) {
         if (station.hasPhoto()) {
             return new NearbyBahnhofWithPhotoNotificationManager(context, station, distance, countries);
         } else {

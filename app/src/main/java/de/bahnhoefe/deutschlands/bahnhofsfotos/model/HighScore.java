@@ -21,12 +21,12 @@ public class HighScore {
 
 
     public static class HighScoreDeserializer implements JsonDeserializer<HighScore> {
-        public HighScore deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+        public HighScore deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            final var highScore = new HighScore();
+            var highScore = new HighScore();
 
-            final AtomicInteger position = new AtomicInteger(0);
-            final AtomicInteger lastPhotos = new AtomicInteger(0);
+            AtomicInteger position = new AtomicInteger(0);
+            AtomicInteger lastPhotos = new AtomicInteger(0);
             json.getAsJsonObject().entrySet().stream()
                     .map(entry -> toHighScoreItem(position, lastPhotos, entry))
                     .forEach(highScore.items::add);
@@ -34,8 +34,8 @@ public class HighScore {
             return highScore;
         }
 
-        private HighScoreItem toHighScoreItem(final AtomicInteger position, final AtomicInteger lastPhotos, final Map.Entry<String, JsonElement> entry) {
-            final int photos = entry.getValue().getAsInt();
+        private HighScoreItem toHighScoreItem(AtomicInteger position, AtomicInteger lastPhotos, Map.Entry<String, JsonElement> entry) {
+            int photos = entry.getValue().getAsInt();
             if (lastPhotos.get() == 0 || lastPhotos.get() > photos) {
                 position.incrementAndGet();
             }

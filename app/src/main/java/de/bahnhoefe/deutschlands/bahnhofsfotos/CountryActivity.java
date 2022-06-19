@@ -13,19 +13,19 @@ public class CountryActivity extends AppCompatActivity {
     private CountryAdapter countryAdapter;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final var binding = ActivityCountryBinding.inflate(getLayoutInflater());
+        var binding = ActivityCountryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        final var cursor = ((BaseApplication) getApplication()).getDbAdapter().getCountryList();
+        var cursor = ((BaseApplication) getApplication()).getDbAdapter().getCountryList();
         countryAdapter = new CountryAdapter(this, cursor, 0);
         binding.lstCountries.setAdapter(countryAdapter);
         binding.lstCountries.setOnItemClickListener((listview, view, position, id) -> countryAdapter.getView(position, view, binding.lstCountries, cursor));
     }
 
     @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
             return true;
@@ -35,8 +35,8 @@ public class CountryActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        final var baseApplication = BaseApplication.getInstance();
-        final var selectedCountries = countryAdapter.getSelectedCountries();
+        var baseApplication = BaseApplication.getInstance();
+        var selectedCountries = countryAdapter.getSelectedCountries();
 
         if (!baseApplication.getCountryCodes().equals(selectedCountries)) {
             baseApplication.setCountryCodes(selectedCountries);

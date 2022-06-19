@@ -112,13 +112,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private ActivityMapsBinding binding;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AndroidGraphicFactory.createInstance(this.getApplication());
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        final var window = getWindow();
+        var window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.parseColor("#c71c4d"));
 
@@ -129,17 +129,17 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         dbAdapter = baseApplication.getDbAdapter();
         nickname = baseApplication.getNickname();
 
-        final var intent = getIntent();
+        var intent = getIntent();
         Marker extraMarker = null;
         if (intent != null) {
-            final var latitude = (Double) intent.getSerializableExtra(EXTRAS_LATITUDE);
-            final var longitude = (Double) intent.getSerializableExtra(EXTRAS_LONGITUDE);
+            var latitude = (Double) intent.getSerializableExtra(EXTRAS_LATITUDE);
+            var longitude = (Double) intent.getSerializableExtra(EXTRAS_LONGITUDE);
             setMyLocSwitch(false);
             if (latitude != null && longitude != null) {
                 myPos = new LatLong(latitude, longitude);
             }
 
-            final var markerRes = (Integer) intent.getSerializableExtra(EXTRAS_MARKER);
+            var markerRes = (Integer) intent.getSerializableExtra(EXTRAS_MARKER);
             if (markerRes != null) {
                 extraMarker = createBitmapMarker(myPos, markerRes);
             }
@@ -157,8 +157,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
     }
 
-    private void addDBSTileSource(final int nameResId, final String baseUrl) {
-        final var dbsBasic = new DbsTileSource(getString(nameResId), baseUrl);
+    private void addDBSTileSource(int nameResId, String baseUrl) {
+        var dbsBasic = new DbsTileSource(getString(nameResId), baseUrl);
         onlineTileSources.put(dbsBasic.getName(), dbsBasic);
     }
 
@@ -211,7 +211,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      *
      * @param mvp the map view position to be set
      */
-    protected void initializePosition(final IMapViewPosition mvp) {
+    protected void initializePosition(IMapViewPosition mvp) {
         if (myPos != null) {
             mvp.setMapPosition(new MapPosition(myPos, baseApplication.getZoomLevelDefault()));
         } else {
@@ -253,50 +253,50 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      * By default we purge every tile cache that has been added to the tileCaches list.
      */
     protected void purgeTileCaches() {
-        for (final TileCache tileCache : tileCaches) {
+        for (TileCache tileCache : tileCaches) {
             tileCache.purge();
         }
         tileCaches.clear();
     }
 
     protected XmlRenderTheme getRenderTheme() {
-        final var mapTheme = baseApplication.getMapThemeUri();
+        var mapTheme = baseApplication.getMapThemeUri();
         if (mapTheme == null) {
             return InternalRenderTheme.DEFAULT;
         }
         try {
-            final var renderThemeFile = DocumentFile.fromSingleUri(getApplication(), mapTheme);
+            var renderThemeFile = DocumentFile.fromSingleUri(getApplication(), mapTheme);
             return new StreamRenderTheme("/assets/", getContentResolver().openInputStream(renderThemeFile.getUri()));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.e( TAG,"Error loading theme " + mapTheme, e);
             return InternalRenderTheme.DEFAULT;
         }
     }
 
-    protected MapDataStore getMapFile(final Uri mapUri) {
+    protected MapDataStore getMapFile(Uri mapUri) {
         if (mapUri == null || !DocumentFile.isDocumentUri(this, mapUri)) {
             return null;
         }
         try {
-            final var inputStream = (FileInputStream) getContentResolver().openInputStream(mapUri);
+            var inputStream = (FileInputStream) getContentResolver().openInputStream(mapUri);
             return new MapFile(inputStream, 0, null);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             Log.e(TAG, "Can't open mapFile", e);
         }
         return null;
     }
 
     protected void createLayers() {
-        final var map = baseApplication.getMap();
-        final var mapUri = baseApplication.toUri(map);
-        final var mapFile = getMapFile(mapUri);
+        var map = baseApplication.getMap();
+        var mapUri = baseApplication.toUri(map);
+        var mapFile = getMapFile(mapUri);
 
         if (mapFile != null) {
-            final var rendererLayer = new TileRendererLayer(this.tileCaches.get(0), mapFile,
+            var rendererLayer = new TileRendererLayer(this.tileCaches.get(0), mapFile,
                     this.binding.map.mapView.getModel().mapViewPosition, false, true, false, AndroidGraphicFactory.INSTANCE) {
                 @Override
-                public boolean onLongPress(final LatLong tapLatLong, final Point thisXY,
-                                           final Point tapXY) {
+                public boolean onLongPress(LatLong tapLatLong, Point thisXY,
+                                           Point tapXY) {
                     MapsActivity.this.onLongPress(tapLatLong);
                     return true;
                 }
@@ -316,8 +316,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                     this.binding.map.mapView.getModel().mapViewPosition, tileSource,
                     AndroidGraphicFactory.INSTANCE) {
                 @Override
-                public boolean onLongPress(final LatLong tapLatLong, final Point thisXY,
-                                           final Point tapXY) {
+                public boolean onLongPress(LatLong tapLatLong, Point thisXY,
+                                           Point tapXY) {
                     MapsActivity.this.onLongPress(tapLatLong);
                     return true;
                 }
@@ -330,24 +330,24 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     }
 
-    private Marker createBitmapMarker(final LatLong latLong, final int markerRes) {
-        final var drawable = ContextCompat.getDrawable(this, markerRes);
+    private Marker createBitmapMarker(LatLong latLong, int markerRes) {
+        var drawable = ContextCompat.getDrawable(this, markerRes);
         assert drawable != null;
-        final var bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
+        var bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
         return new Marker(latLong, bitmap, -(bitmap.getWidth() / 2), -bitmap.getHeight());
     }
 
-    private void onLongPress(final LatLong tapLatLong) {
+    private void onLongPress(LatLong tapLatLong) {
         if (missingMarker == null) {
             // marker to show at the location
-            final var drawable = ContextCompat.getDrawable(this, R.drawable.marker_missing);
+            var drawable = ContextCompat.getDrawable(this, R.drawable.marker_missing);
             assert drawable != null;
-            final var bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
+            var bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
             missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth()/2), -bitmap.getHeight()) {
                 @Override
-                public boolean onTap(final LatLong tapLatLong, final Point layerXY, final Point tapXY) {
+                public boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
                     SimpleDialogs.confirm(MapsActivity.this, R.string.add_missing_station, (dialogInterface, i) -> {
-                        final var intent = new Intent(MapsActivity.this, DetailsActivity.class);
+                        var intent = new Intent(MapsActivity.this, DetailsActivity.class);
                         intent.putExtra(DetailsActivity.EXTRA_LATITUDE, getLatLong().latitude);
                         intent.putExtra(DetailsActivity.EXTRA_LONGITUDE, getLatLong().longitude);
                         startActivity(intent);
@@ -367,11 +367,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.maps, menu);
 
-        final var item = menu.findItem(R.id.menu_toggle_mypos);
+        var item = menu.findItem(R.id.menu_toggle_mypos);
         myLocSwitch = new CheckBox(this);
         myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector);
         myLocSwitch.setChecked(baseApplication.isLocationUpdates());
@@ -387,26 +387,26 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
         );
 
-        final var map = baseApplication.getMap();
+        var map = baseApplication.getMap();
 
-        final var osmMapnick = menu.findItem(R.id.osm_mapnik);
+        var osmMapnick = menu.findItem(R.id.osm_mapnik);
         osmMapnick.setChecked(map == null);
         osmMapnick.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, null));
 
-        final var mapSubmenu = menu.findItem(R.id.maps_submenu).getSubMenu();
-        for (final var tileSource : onlineTileSources.values()) {
-            final var mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, tileSource.getName());
+        var mapSubmenu = menu.findItem(R.id.maps_submenu).getSubMenu();
+        for (var tileSource : onlineTileSources.values()) {
+            var mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, tileSource.getName());
             mapItem.setChecked(tileSource.getName().equals(map));
             mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, tileSource.getName()));
         }
 
-        final var mapDirectory = baseApplication.getMapDirectoryUri();
+        var mapDirectory = baseApplication.getMapDirectoryUri();
         if (mapDirectory != null) {
-            final var documentsTree = getDocumentFileFromTreeUri(mapDirectory);
+            var documentsTree = getDocumentFileFromTreeUri(mapDirectory);
             if (documentsTree != null) {
-                for (final var file : documentsTree.listFiles()) {
+                for (var file : documentsTree.listFiles()) {
                     if (file.isFile() && file.getName().endsWith(".map")) {
-                        final var mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, file.getName());
+                        var mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, file.getName());
                         mapItem.setChecked(file.getUri().equals(baseApplication.toUri(map)));
                         mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, file.getUri().toString()));
                     }
@@ -415,34 +415,34 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
         mapSubmenu.setGroupCheckable(R.id.maps_group, true, true);
 
-        final var mapFolder = mapSubmenu.add(R.string.map_folder);
+        var mapFolder = mapSubmenu.add(R.string.map_folder);
         mapFolder.setOnMenuItemClickListener(item1 -> {
             openMapDirectoryChooser();
             return false;
         });
 
-        final var mapTheme = baseApplication.getMapThemeUri();
-        final var mapThemeDirectory = baseApplication.getMapThemeDirectoryUri();
+        var mapTheme = baseApplication.getMapThemeUri();
+        var mapThemeDirectory = baseApplication.getMapThemeDirectoryUri();
 
-        final var defaultTheme = menu.findItem(R.id.default_theme);
+        var defaultTheme = menu.findItem(R.id.default_theme);
         defaultTheme.setChecked(mapTheme == null);
         defaultTheme.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, null));
-        final var themeSubmenu = menu.findItem(R.id.themes_submenu).getSubMenu();
+        var themeSubmenu = menu.findItem(R.id.themes_submenu).getSubMenu();
 
         if (mapThemeDirectory != null) {
-            final var documentsTree = getDocumentFileFromTreeUri(mapThemeDirectory);
+            var documentsTree = getDocumentFileFromTreeUri(mapThemeDirectory);
             if (documentsTree != null) {
-                for (final var file : documentsTree.listFiles()) {
+                for (var file : documentsTree.listFiles()) {
                     if (file.isFile() && file.getName().endsWith(".xml")) {
-                        final var themeName = file.getName();
-                        final var themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
+                        var themeName = file.getName();
+                        var themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
                         themeItem.setChecked(file.getUri().equals(mapTheme));
                         themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, file.getUri()));
                     } else if (file.isDirectory()) {
-                        final var childFile = file.findFile(file.getName() + ".xml");
+                        var childFile = file.findFile(file.getName() + ".xml");
                         if (childFile != null) {
-                            final var themeName = file.getName();
-                            final var themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
+                            var themeName = file.getName();
+                            var themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
                             themeItem.setChecked(childFile.getUri().equals(mapTheme));
                             themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, childFile.getUri()));
                         }
@@ -452,7 +452,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
         themeSubmenu.setGroupCheckable(R.id.themes_group, true, true);
 
-        final var themeFolder = themeSubmenu.add(R.string.theme_folder);
+        var themeFolder = themeSubmenu.add(R.string.theme_folder);
         themeFolder.setOnMenuItemClickListener(item12 -> {
             openThemeDirectoryChooser();
             return false;
@@ -461,19 +461,19 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         return true;
     }
 
-    private DocumentFile getDocumentFileFromTreeUri(final Uri uri) {
+    private DocumentFile getDocumentFileFromTreeUri(Uri uri) {
         try {
             return DocumentFile.fromTreeUri(getApplication(), uri);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.w(TAG, "Error getting DocumentFile from Uri: " + uri);
         }
         return null;
     }
 
-    protected final ActivityResultLauncher<Intent> themeDirectoryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    protected ActivityResultLauncher<Intent> themeDirectoryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    final var uri = result.getData().getData();
+                    var uri = result.getData().getData();
                     if (uri != null) {
                         getContentResolver().takePersistableUriPermission(
                                 uri,
@@ -485,10 +485,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 }
             });
 
-    protected final ActivityResultLauncher<Intent> mapDirectoryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    protected ActivityResultLauncher<Intent> mapDirectoryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    final var uri = result.getData().getData();
+                    var uri = result.getData().getData();
                     if (uri != null) {
                         getContentResolver().takePersistableUriPermission(
                                 uri,
@@ -500,8 +500,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 }
             });
 
-    public void openDirectory(final ActivityResultLauncher<Intent> launcher) {
-        final var intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+    public void openDirectory(ActivityResultLauncher<Intent> launcher) {
+        var intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         launcher.launch(intent);
     }
@@ -527,7 +527,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.map_info) {
             new MapInfoFragment().show(getSupportFragmentManager(), "Map Info Dialog");
         } else {
@@ -547,32 +547,32 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
 
-    private void onStationsLoaded(final List<Station> stationList, final List<Upload> uploadList) {
+    private void onStationsLoaded(List<Station> stationList, List<Upload> uploadList) {
         try {
             createClusterManager();
             addMarkers(stationList, uploadList);
             binding.map.progressBar.setVisibility(View.GONE);
             Toast.makeText(this, getResources().getQuantityString(R.plurals.stations_loaded, stationList.size(), stationList.size()), Toast.LENGTH_LONG).show();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error loading markers", e);
         }
     }
 
     @Override
-    public void onTap(final BahnhofGeoItem marker) {
-        final var intent = new Intent(MapsActivity.this, DetailsActivity.class);
-        final var id = marker.getStation().getId();
-        final var country = marker.getStation().getCountry();
+    public void onTap(BahnhofGeoItem marker) {
+        var intent = new Intent(MapsActivity.this, DetailsActivity.class);
+        var id = marker.getStation().getId();
+        var country = marker.getStation().getCountry();
         try {
-            final var station = dbAdapter.getStationByKey(country, id);
+            var station = dbAdapter.getStationByKey(country, id);
             intent.putExtra(DetailsActivity.EXTRA_STATION, station);
             startActivity(intent);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, String.format("Could not fetch station id %s that we put onto the map", id), e);
         }
     }
 
-    public void setMyLocSwitch(final boolean checked) {
+    public void setMyLocSwitch(boolean checked) {
         if (myLocSwitch != null) {
             myLocSwitch.setChecked(checked);
         }
@@ -580,27 +580,27 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     @Override
-    public void stationFilterChanged(final StationFilter stationFilter) {
+    public void stationFilterChanged(StationFilter stationFilter) {
         reloadMap();
     }
 
     @Override
-    public void sortOrderChanged(final boolean sortByDistance) {
+    public void sortOrderChanged(boolean sortByDistance) {
         // unused
     }
 
     private static class LoadMapMarkerTask extends Thread {
-        private final WeakReference<MapsActivity> activityRef;
+        private WeakReference<MapsActivity> activityRef;
 
-        public LoadMapMarkerTask(final MapsActivity activity) {
+        public LoadMapMarkerTask(MapsActivity activity) {
             this.activityRef = new WeakReference<>(activity);
         }
 
         @Override
         public void run() {
-            final var stationList = activityRef.get().readStations();
-            final var uploadList = activityRef.get().readPendingUploads();
-            final var mapsActivity = activityRef.get();
+            var stationList = activityRef.get().readStations();
+            var uploadList = activityRef.get().readPendingUploads();
+            var mapsActivity = activityRef.get();
             if (mapsActivity != null) {
                 mapsActivity.runOnUiThread(()-> mapsActivity.onStationsLoaded(stationList, uploadList));
             }
@@ -611,7 +611,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private List<Station> readStations() {
         try {
             return dbAdapter.getAllStations(baseApplication.getStationFilter(), baseApplication.getCountryCodes());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
         return null;
@@ -620,14 +620,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     private List<Upload> readPendingUploads() {
         try {
             return dbAdapter.getPendingUploads(false);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden");
         }
         return null;
     }
 
     private List<MarkerBitmap> createMarkerBitmaps() {
-        final var markerBitmaps = new ArrayList<MarkerBitmap>();
+        var markerBitmaps = new ArrayList<MarkerBitmap>();
         markerBitmaps.add(createSmallSingleIconMarker());
         markerBitmaps.add(createSmallClusterIconMarker());
         markerBitmaps.add(createLargeClusterIconMarker());
@@ -638,8 +638,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      * large cluster icon. 100 will be ignored.
      */
     private MarkerBitmap createLargeClusterIconMarker() {
-        final var bitmapBalloonMN = loadBitmap(R.drawable.balloon_m_n);
-        final var paint = AndroidGraphicFactory.INSTANCE.createPaint();
+        var bitmapBalloonMN = loadBitmap(R.drawable.balloon_m_n);
+        var paint = AndroidGraphicFactory.INSTANCE.createPaint();
         paint.setStyle(Style.FILL);
         paint.setTextAlign(Align.CENTER);
         paint.setTypeface(FontFamily.DEFAULT, FontStyle.BOLD);
@@ -652,8 +652,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
      * small cluster icon. for 10 or less items.
      */
     private MarkerBitmap createSmallClusterIconMarker() {
-        final var bitmapBalloonSN = loadBitmap(R.drawable.balloon_s_n);
-        final var paint = AndroidGraphicFactory.INSTANCE.createPaint();
+        var bitmapBalloonSN = loadBitmap(R.drawable.balloon_s_n);
+        var paint = AndroidGraphicFactory.INSTANCE.createPaint();
         paint.setStyle(Style.FILL);
         paint.setTextAlign(Align.CENTER);
         paint.setTypeface(FontFamily.DEFAULT, FontStyle.BOLD);
@@ -663,16 +663,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private MarkerBitmap createSmallSingleIconMarker() {
-        final var bitmapWithPhoto = loadBitmap(R.drawable.marker_green);
-        final var markerWithoutPhoto = loadBitmap(R.drawable.marker_red);
-        final var markerOwnPhoto = loadBitmap(R.drawable.marker_violet);
-        final var markerPendingUpload = loadBitmap(R.drawable.marker_yellow);
+        var bitmapWithPhoto = loadBitmap(R.drawable.marker_green);
+        var markerWithoutPhoto = loadBitmap(R.drawable.marker_red);
+        var markerOwnPhoto = loadBitmap(R.drawable.marker_violet);
+        var markerPendingUpload = loadBitmap(R.drawable.marker_yellow);
 
-        final var markerWithPhotoInactive = loadBitmap(R.drawable.marker_green_inactive);
-        final var markerWithoutPhotoInactive = loadBitmap(R.drawable.marker_red_inactive);
-        final var markerOwnPhotoInactive = loadBitmap(R.drawable.marker_violet_inactive);
+        var markerWithPhotoInactive = loadBitmap(R.drawable.marker_green_inactive);
+        var markerWithoutPhotoInactive = loadBitmap(R.drawable.marker_red_inactive);
+        var markerOwnPhotoInactive = loadBitmap(R.drawable.marker_violet_inactive);
 
-        final var paint = AndroidGraphicFactory.INSTANCE.createPaint();
+        var paint = AndroidGraphicFactory.INSTANCE.createPaint();
         paint.setStyle(Style.FILL);
         paint.setTextAlign(Align.CENTER);
         paint.setTypeface(FontFamily.DEFAULT, FontStyle.BOLD);
@@ -683,21 +683,21 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 new Point(0, -(markerWithoutPhoto.getHeight()/2.0)), 10f, 1, paint);
     }
 
-    private Bitmap loadBitmap(final int resourceId){
-        final var bitmap = AndroidGraphicFactory.convertToBitmap(ResourcesCompat.getDrawable(getResources(), resourceId, null));
+    private Bitmap loadBitmap(int resourceId){
+        var bitmap = AndroidGraphicFactory.convertToBitmap(ResourcesCompat.getDrawable(getResources(), resourceId, null));
         bitmap.incrementRefCount();
         return bitmap;
     }
 
-    private void addMarkers(final List<Station> stationMarker, final List<Upload> uploadList) {
+    private void addMarkers(List<Station> stationMarker, List<Upload> uploadList) {
         double minLat = 0;
         double maxLat = 0;
         double minLon = 0;
         double maxLon = 0;
-        for (final var station : stationMarker) {
-            final var isPendingUpload = isPendingUpload(station, uploadList);
-            final var geoItem = new BahnhofGeoItem(station, isPendingUpload);
-            final var bahnhofPos = geoItem.getLatLong();
+        for (var station : stationMarker) {
+            var isPendingUpload = isPendingUpload(station, uploadList);
+            var geoItem = new BahnhofGeoItem(station, isPendingUpload);
+            var bahnhofPos = geoItem.getLatLong();
             if (minLat == 0.0) {
                 minLat = bahnhofPos.latitude;
                 maxLat = bahnhofPos.latitude;
@@ -720,8 +720,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         updatePosition();
     }
 
-    private boolean isPendingUpload(final Station station, final List<Upload> uploadList) {
-        for (final var upload : uploadList) {
+    private boolean isPendingUpload(Station station, List<Upload> uploadList) {
+        for (var upload : uploadList) {
             if (upload.isPendingPhotoUpload() && station.getId().equals(upload.getStationId()) && station.getCountry().equals(upload.getCountry())) {
                 return true;
             }
@@ -766,7 +766,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             ((TileDownloadLayer)this.layer).onPause();
         }
         unregisterLocationManager();
-        final var mapPosition = binding.map.mapView.getModel().mapViewPosition.getMapPosition();
+        var mapPosition = binding.map.mapView.getModel().mapViewPosition.getMapPosition();
         baseApplication.setLastMapPosition(mapPosition);
         destroyClusterManager();
         super.onPause();
@@ -781,28 +781,28 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     @Override
-    public void onLocationChanged(final Location location) {
+    public void onLocationChanged(Location location) {
         myPos = new LatLong(location.getLatitude(), location.getLongitude());
         updatePosition();
     }
 
     @Override
-    public void onStatusChanged(final String provider, final int status, final Bundle extras) {
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
     }
 
     @Override
-    public void onProviderEnabled(@NonNull final String provider) {
+    public void onProviderEnabled(@NonNull String provider) {
 
     }
 
     @Override
-    public void onProviderDisabled(@NonNull final String provider) {
+    public void onProviderDisabled(@NonNull String provider) {
 
     }
 
     @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_FINE_LOCATION) {
             Log.i(TAG, "Received response for location permission request.");
@@ -833,7 +833,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
             // getting GPS status
-            final var isGPSEnabled = locationManager
+            var isGPSEnabled = locationManager
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             // if GPS Enabled get lat/long using GPS Services
@@ -844,13 +844,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                         MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                 Log.d(TAG, "GPS Enabled");
                 if (locationManager != null) {
-                    final var loc = locationManager
+                    var loc = locationManager
                             .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     myPos = new LatLong(loc.getLatitude(), loc.getLongitude());
                 }
             } else {
                 // getting network status
-                final var isNetworkEnabled = locationManager
+                var isNetworkEnabled = locationManager
                         .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
                 // First get location from Network Provider
@@ -861,16 +861,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                     Log.d(TAG, "Network Location enabled");
                     if (locationManager != null) {
-                        final var loc = locationManager
+                        var loc = locationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         myPos = new LatLong(loc.getLatitude(), loc.getLongitude());
                     }
                 }
             }
             setMyLocSwitch(true);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error registering LocationManager", e);
-            final var b = new Bundle();
+            var b = new Bundle();
             b.putString("error", "Error registering LocationManager: " + e);
             locationManager = null;
             myPos = null;
@@ -883,11 +883,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     private void unregisterLocationManager() {
         if (locationManager != null) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // if we don't have location permission we cannot remove updates (should not happen, but the API requires this check
-                // so we just set it to null
-                locationManager = null;
-            } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationManager.removeUpdates(this);
             }
             locationManager = null;
@@ -903,11 +899,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     protected class BahnhofGeoItem implements GeoItem {
-        public final Station station;
+        public Station station;
         public final LatLong latLong;
         public final boolean pendingUpload;
 
-        public BahnhofGeoItem(final Station station, final boolean pendingUpload) {
+        public BahnhofGeoItem(Station station, boolean pendingUpload) {
             this.station = station;
             this.pendingUpload = pendingUpload;
             this.latLong = new LatLong(station.getLat(), station.getLon());
@@ -956,14 +952,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         private final String map;
 
-        private MapMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final String map) {
+        private MapMenuListener(MapsActivity mapsActivity, BaseApplication baseApplication, String map) {
             this.mapsActivityRef = new WeakReference<>(mapsActivity);
             this.baseApplication = baseApplication;
             this.map = map;
         }
 
         @Override
-        public boolean onMenuItemClick(final MenuItem item) {
+        public boolean onMenuItemClick(MenuItem item) {
             item.setChecked(true);
             if (item.getItemId() == R.id.osm_mapnik) { // default Mapnik online tiles
                 baseApplication.setMap(null);
@@ -971,7 +967,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 baseApplication.setMap(map);
             }
 
-            final var mapsActivity = mapsActivityRef.get();
+            var mapsActivity = mapsActivityRef.get();
             if (mapsActivity != null) {
                 mapsActivity.recreate();
             }
@@ -987,14 +983,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         private final Uri mapThemeUri;
 
-        private MapThemeMenuListener(final MapsActivity mapsActivity, final BaseApplication baseApplication, final Uri mapThemeUri) {
+        private MapThemeMenuListener(MapsActivity mapsActivity, BaseApplication baseApplication, Uri mapThemeUri) {
             this.mapsActivityRef = new WeakReference<>(mapsActivity);
             this.baseApplication = baseApplication;
             this.mapThemeUri = mapThemeUri;
         }
 
         @Override
-        public boolean onMenuItemClick(final MenuItem item) {
+        public boolean onMenuItemClick(MenuItem item) {
             item.setChecked(true);
             if (item.getItemId() == R.id.default_theme) { // default theme
                 baseApplication.setMapThemeUri(null);
@@ -1002,7 +998,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                 baseApplication.setMapThemeUri(mapThemeUri);
             }
 
-            final var mapsActivity = mapsActivityRef.get();
+            var mapsActivity = mapsActivityRef.get();
             if (mapsActivity != null) {
                 mapsActivity.recreate();
             }

@@ -17,11 +17,11 @@ public enum License {
 
     private final String longName;
 
-    License(final String longName) {
+    License(String longName) {
         this.longName = longName;
     }
 
-    public static License byName(final String name) {
+    public static License byName(String name) {
         return Arrays.stream(values())
                 .filter(license -> license.toString().equals(name)
                         || StringUtils.equals(license.longName, name))
@@ -34,7 +34,7 @@ public enum License {
     }
 
     public static class LicenseDeserializer implements JsonDeserializer<License> {
-        public License deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+        public License deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             return License.byName(json.getAsString());
         }

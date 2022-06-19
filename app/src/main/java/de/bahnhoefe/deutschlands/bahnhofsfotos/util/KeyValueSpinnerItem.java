@@ -7,7 +7,7 @@ public class KeyValueSpinnerItem {
     private final String spinnerText;
     private final String value;
 
-    public KeyValueSpinnerItem(final String spinnerText, final String value) {
+    public KeyValueSpinnerItem(String spinnerText, String value) {
         this.spinnerText = spinnerText;
         this.value = value;
     }

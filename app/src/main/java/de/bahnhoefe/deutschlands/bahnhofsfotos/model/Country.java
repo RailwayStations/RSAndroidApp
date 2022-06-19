@@ -21,7 +21,7 @@ public class Country implements Serializable {
 
     }
 
-    public Country(final String name, final String code, final String email, final String twitterTags, final String timetableUrlTemplate, final String overrideLicense) {
+    public Country(String name, String code, String email, String twitterTags, String timetableUrlTemplate, String overrideLicense) {
         this.name = name;
         this.code = code;
         this.email = email;
@@ -30,7 +30,7 @@ public class Country implements Serializable {
         this.overrideLicense = overrideLicense;
     }
 
-    public static Country getCountryByCode(final Set<Country> countries, final String countryCode) {
+    public static Country getCountryByCode(Set<Country> countries, String countryCode) {
         return countries.stream()
                 .filter(country -> country.getCode().equals(countryCode))
                 .findFirst()
@@ -41,7 +41,7 @@ public class Country implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -49,7 +49,7 @@ public class Country implements Serializable {
         return code;
     }
 
-    public void setCode(final String code) {
+    public void setCode(String code) {
         this.code = code;
     }
 
@@ -57,7 +57,7 @@ public class Country implements Serializable {
         return email;
     }
 
-    public void setEmail(final String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
@@ -65,7 +65,7 @@ public class Country implements Serializable {
         return twitterTags;
     }
 
-    public void setTwitterTags(final String twitterTags) {
+    public void setTwitterTags(String twitterTags) {
         this.twitterTags = twitterTags;
     }
 
@@ -77,15 +77,15 @@ public class Country implements Serializable {
         return timetableUrlTemplate != null && !timetableUrlTemplate.isEmpty();
     }
 
-    public void setTimetableUrlTemplate(final String timetableUrlTemplate) {
+    public void setTimetableUrlTemplate(String timetableUrlTemplate) {
         this.timetableUrlTemplate = timetableUrlTemplate;
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final Country country = (Country) o;
+        var country = (Country) o;
         return code.equals(country.code);
     }
 
@@ -105,7 +105,7 @@ public class Country implements Serializable {
         return providerApps;
     }
 
-    public void setProviderApps(final List<ProviderApp> providerApps) {
+    public void setProviderApps(List<ProviderApp> providerApps) {
         this.providerApps = providerApps;
     }
 
@@ -121,7 +121,7 @@ public class Country implements Serializable {
         return overrideLicense;
     }
 
-    public void setOverrideLicense(final String overrideLicense) {
+    public void setOverrideLicense(String overrideLicense) {
         this.overrideLicense = overrideLicense;
     }
 }

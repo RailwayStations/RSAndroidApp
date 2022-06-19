@@ -24,22 +24,22 @@ public class InboxActivity extends AppCompatActivity {
     private InboxAdapter adapter;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final var binding = ActivityInboxBinding.inflate(getLayoutInflater());
+        var binding = ActivityInboxBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        final Call<List<PublicInbox>> inboxCall = ((BaseApplication)getApplication()).getRsapiClient().getPublicInbox();
+        Call<List<PublicInbox>> inboxCall = ((BaseApplication)getApplication()).getRsapiClient().getPublicInbox();
         inboxCall.enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull final Call<List<PublicInbox>> call, @NonNull final Response<List<PublicInbox>> response) {
-                final var body = response.body();
+            public void onResponse(@NonNull Call<List<PublicInbox>> call, @NonNull Response<List<PublicInbox>> response) {
+                var body = response.body();
                 if (response.isSuccessful() && body != null) {
                     adapter = new InboxAdapter(InboxActivity.this, body);
                     binding.inboxList.setAdapter(adapter);
                     binding.inboxList.setOnItemClickListener((parent, view, position, id) -> {
-                        final var inboxItem = body.get(position);
-                        final var intent = new Intent(InboxActivity.this, MapsActivity.class);
+                        var inboxItem = body.get(position);
+                        var intent = new Intent(InboxActivity.this, MapsActivity.class);
                         intent.putExtra(MapsActivity.EXTRAS_LATITUDE, inboxItem.getLat());
                         intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, inboxItem.getLon());
                         intent.putExtra(MapsActivity.EXTRAS_MARKER, inboxItem.getStationId() == null ? R.drawable.marker_missing : R.drawable.marker_red);
@@ -49,7 +49,7 @@ public class InboxActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(@NonNull final Call<List<PublicInbox>> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull Call<List<PublicInbox>> call, @NonNull Throwable t) {
                 Log.e(TAG, "Error loading public inbox", t);
                 Toast.makeText(getBaseContext(), getString(R.string.error_loading_inbox) + t.getMessage(), Toast.LENGTH_LONG).show();
             }

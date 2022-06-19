@@ -47,7 +47,7 @@ public class Cluster<T extends GeoItem> {
     /**
      * @param clusterManager ClusterManager object.
      */
-    public Cluster(final ClusterManager<T> clusterManager, final T item) {
+    public Cluster(ClusterManager<T> clusterManager, T item) {
         this.clusterManager = clusterManager;
         this.clusterMarker = new ClusterMarker<>(this);
         addItem(item);
@@ -69,7 +69,7 @@ public class Cluster<T extends GeoItem> {
      *
      * @param item GeoItem object to be added.
      */
-    public synchronized void addItem(final T item) {
+    public synchronized void addItem(T item) {
         synchronized (items) {
             items.add(item);
         }
@@ -80,7 +80,7 @@ public class Cluster<T extends GeoItem> {
             double lat = 0, lon = 0;
             int n = 0;
             synchronized (items) {
-                for (final T object : items) {
+                for (T object : items) {
                     if (object == null) {
                         throw new NullPointerException("object == null");
                     }
@@ -121,7 +121,7 @@ public class Cluster<T extends GeoItem> {
      */
     public void clear() {
         if (clusterMarker != null) {
-            final var mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
+            var mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
             if (mapOverlays.contains(clusterMarker)) {
                 mapOverlays.remove(clusterMarker);
             }
@@ -137,7 +137,7 @@ public class Cluster<T extends GeoItem> {
      * add the ClusterMarker to the Layers if is within Viewport, otherwise remove.
      */
     public void redraw() {
-        final var mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
+        var mapOverlays = clusterManager.getMapView().getLayerManager().getLayers();
         if (clusterMarker != null && center != null
                 && clusterManager.getCurBounds() != null
                 && !clusterManager.getCurBounds().contains(center)
