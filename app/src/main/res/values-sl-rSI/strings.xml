@@ -227,7 +227,7 @@
     <string name="delete_upload">Izbriši element #%s</string>
     <string name="confirm_delete_processed_uploads">Brisanje vseh obdelanih prenosov?</string>
     <string name="upload_not_yet_sent">Še ni bilo poslano</string>
-    <string name="panorama_info"><![CDATA[<b>Prosimo, upoštevajte <a href="https://sl.wikipedia.org/wiki/Svoboda_panorame">Svobodo panorame</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Prosimo, upoštevajte <a href="https://sl.wikipedia.org/wiki/Svoboda_panorame">Svobodo panorame</a></b>:
             <p>- ne iz notranjosti vlaka</p>
             <p>- ne znotraj postaje</p>
             <p>- s peronov samo, če so prosto dostopni</p>

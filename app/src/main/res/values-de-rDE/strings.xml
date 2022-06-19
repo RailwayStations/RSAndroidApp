@@ -222,7 +222,7 @@
     <string name="delete_upload">Lösche Element #%s</string>
     <string name="confirm_delete_processed_uploads">Alle verarbeiteten Uploads löschen?</string>
     <string name="upload_not_yet_sent">Noch nicht gesendet</string>
-    <string name="panorama_info"><![CDATA[<b>Bitte beachte die <a href="https://de.wikipedia.org/wiki/Panoramafreiheit">Panoramafreiheit</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Bitte beachte die <a href="https://de.wikipedia.org/wiki/Panoramafreiheit">Panoramafreiheit</a></b>:
             <p>&nbsp; &nbsp;- nicht aus dem Zug heraus</p>
             <p>&nbsp; &nbsp;- keine Innenaufnahme</p>
             <p>&nbsp; &nbsp;- vom Bahnsteig nur, wenn er von außen öffentlich erreichbar ist</p>

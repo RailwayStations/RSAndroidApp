@@ -222,7 +222,7 @@
     <string name="delete_upload">Eliminar el elemento #%s</string>
     <string name="confirm_delete_processed_uploads">¿Borrar todas las subidas procesadas?</string>
     <string name="upload_not_yet_sent">Aún no se ha enviado</string>
-    <string name="panorama_info"><![CDATA[<b>Considere <a href="https://es.wikipedia.org/wiki/Libertad_de_panorama">Libertad de panorama</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Considere <a href="https://es.wikipedia.org/wiki/Libertad_de_panorama">Libertad de panorama</a></b>:
             <p>- no dentro del tren</p>
             <p>- no dentro de una estación</p>
             <p>- desde las plataformas sólo si son libremente accesibles</p>

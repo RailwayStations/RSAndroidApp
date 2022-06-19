@@ -227,7 +227,7 @@
     <string name="delete_upload">Smazat prvek #%s</string>
     <string name="confirm_delete_processed_uploads">Smazat všechna zpracovaná nahrání?</string>
     <string name="upload_not_yet_sent">Dosud neodesláno</string>
-    <string name="panorama_info"><![CDATA[<b>Zvažte prosím <a href="https://cs.wikipedia.org/wiki/Svoboda_panoramatu">Svoboda panorama</a></b>:
+    <string name="panorama_info" formatted="false"><![CDATA[<b>Zvažte prosím <a href="https://cs.wikipedia.org/wiki/Svoboda_panoramatu">Svoboda panorama</a></b>:
             <p>- ne z vlaku</p>
             <p>- není uvnitř stanice</p>
             <p>- od nástupišť pouze pokud jsou volně přístupné</p>
