@@ -1,1 +1,2 @@
 - Upgrade dependencies
+- Fix #311 ConcurrentModificationException in Cluster.getTitle
