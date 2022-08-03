@@ -61,7 +61,9 @@ public class Cluster<T extends GeoItem> {
         if (getItems().size() == 1) {
             return getItems().get(0).getTitle();
         }
-        return items.stream().filter(GeoItem::hasPhoto).count() + "/" + getItems().size();
+        synchronized (items) {
+            return items.stream().filter(GeoItem::hasPhoto).count() + "/" + getItems().size();
+        }
     }
 
     /**
@@ -111,9 +113,7 @@ public class Cluster<T extends GeoItem> {
      * @return list of GeoItem within cluster.
      */
     public synchronized List<T> getItems() {
-        synchronized (items) {
-            return items;
-        }
+        return items;
     }
 
     /**
