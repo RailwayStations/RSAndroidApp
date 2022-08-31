@@ -31,7 +31,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -152,14 +151,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 v -> reportProblem()
         );
         binding.details.buttonUpload.setOnClickListener(v -> {
-                if (isNotLoggedIn()) {
-                    Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-                } else if (TextUtils.isEmpty(binding.details.etbahnhofname.getText())) {
-                    Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
-                } else {
-                    uploadPhoto();
+                    if (isNotLoggedIn()) {
+                        Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+                    } else if (TextUtils.isEmpty(binding.details.etbahnhofname.getText())) {
+                        Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
+                    } else {
+                        uploadPhoto();
+                    }
                 }
-            }
         );
 
         binding.details.licenseTag.setMovementMethod(LinkMovementMethod.getInstance());
@@ -703,18 +702,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             for (int i = 0; i < countryList.size(); i++) {
                 var country = countryList.get(i);
-                items[i+1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
+                items[i + 1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
                 if (country.getCode().equals(upload.getCountry())) {
-                    selected = i+1;
+                    selected = i + 1;
                 }
             }
-            var countryAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, items);
+            var countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
             countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             uploadBinding.spCountries.setAdapter(countryAdapter);
             uploadBinding.spCountries.setSelection(selected);
         }
 
-        uploadBinding.txtPanorama.setText(Html.fromHtml(getString(R.string.panorama_info),Html.FROM_HTML_MODE_COMPACT));
+        uploadBinding.txtPanorama.setText(Html.fromHtml(getString(R.string.panorama_info), Html.FROM_HTML_MODE_COMPACT));
         uploadBinding.txtPanorama.setMovementMethod(LinkMovementMethod.getInstance());
         uploadBinding.txtPanorama.setLinkTextColor(Color.parseColor("#c71c4d"));
 
@@ -844,28 +843,22 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void startNavigation(Context context) {
-        NavItem[] items = {
-                new NavItem("   " + getString(R.string.nav_oepnv), R.drawable.ic_directions_bus_gray_24px),
-                new NavItem("   " + getString(R.string.nav_car), R.drawable.ic_directions_car_gray_24px),
-                new NavItem("   " + getString(R.string.nav_bike), R.drawable.ic_directions_bike_gray_24px),
-                new NavItem("   " + getString(R.string.nav_walk), R.drawable.ic_directions_walk_gray_24px),
-                new NavItem("   " + getString(R.string.nav_show), R.drawable.ic_info_gray_24px),
-                new NavItem("   " + getString(R.string.nav_show_on_map), R.drawable.ic_map_gray_24px)
-        };
-
-        ListAdapter adapter = new ArrayAdapter<>(this, android.R.layout.select_dialog_item,
-                android.R.id.text1, items) {
+        var adapter = new ArrayAdapter<>(this, android.R.layout.select_dialog_item,
+                android.R.id.text1, NavItem.values()) {
             @NonNull
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                //Use super class to create the View
+                var item = getItem(position);
+                assert item != null;
+
                 var v = super.getView(position, convertView, parent);
                 TextView tv = v.findViewById(android.R.id.text1);
 
                 //Put the image on the TextView
-                tv.setCompoundDrawablesWithIntrinsicBounds(items[position].icon, 0, 0, 0);
+                tv.setCompoundDrawablesWithIntrinsicBounds(item.getIconRes(), 0, 0, 0);
+                tv.setText(getString(item.getTextRes()));
 
                 //Add margin between image and text (support various screen densities)
-                int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
+                int dp5 = (int) (20 * getResources().getDisplayMetrics().density + 0.5f);
                 int dp7 = (int) (20 * getResources().getDisplayMetrics().density);
                 tv.setCompoundDrawablePadding(dp5);
                 tv.setPadding(dp7, 0, 0, 0);
@@ -874,58 +867,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         };
 
-        double lat = station != null ? station.getLat() : latitude;
-        double lon = station != null ? station.getLon() : longitude;
-        var navBuilder = new AlertDialog.Builder(this);
-        navBuilder.setIcon(R.mipmap.ic_launcher);
-        navBuilder.setTitle(R.string.navMethod);
-        navBuilder.setAdapter(adapter, (dialog, navItem) -> {
-            String dlocation;
-            Intent intent = null;
-            switch (navItem) {
-                case 0:
-                    dlocation = String.format("google.navigation:ll=%s,%s&mode=Transit", lat, lon);
-                    Log.d(TAG, "findnavigation case 0: " + dlocation);
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                    break;
-                case 1:
-                    dlocation = String.format("google.navigation:ll=%s,%s&mode=d", lat, lon);
-                    Log.d(TAG,"findnavigation case 1: " + dlocation);
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                    break;
-
-                case 2:
-                    dlocation = String.format("google.navigation:ll=%s,%s&mode=b",
-                            lat, lon);
-                    Log.d(TAG,"findnavigation case 2: " + dlocation);
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                    break;
-                case 3:
-                    dlocation = String.format("google.navigation:ll=%s,%s&mode=w", lat, lon);
-                    Log.d(TAG,"findnavigation case 3: " + dlocation);
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                    break;
-                case 4:
-                    dlocation = String.format("geo:0,0?q=%s,%s(%s)", lat, lon, binding.details.etbahnhofname.getText());
-                    Log.d(TAG,"findnavigation case 4: " + dlocation);
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dlocation));
-                    break;
-                case 5:
-                    intent = new Intent(DetailsActivity.this, MapsActivity.class);
-                    intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat);
-                    intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon);
-                    intent.putExtra(MapsActivity.EXTRAS_MARKER, getMarkerRes());
-                    Log.d(TAG,"findnavigation case 5: " + lat + "," + lon);
-                    break;
-
-            }
-            try {
-                startActivity(intent);
-            } catch (Exception e) {
-                Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG).show();
-            }
-        }).show();
-
+        new AlertDialog.Builder(this)
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.navMethod)
+                .setAdapter(adapter, (dialog, position) -> {
+                    var item = adapter.getItem(position);
+                    assert item != null;
+                    var lat = station != null ? station.getLat() : latitude;
+                    var lon = station != null ? station.getLon() : longitude;
+                    var intent = item.createIntent(DetailsActivity.this, lat, lon, binding.details.etbahnhofname.getText().toString(), getMarkerRes());
+                    try {
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG).show();
+                    }
+                }).show();
     }
 
     /**
@@ -935,7 +891,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      */
     @Override
     public void onBitmapAvailable(@Nullable Bitmap bitmapFromCache) {
-        runOnUiThread(()-> {
+        runOnUiThread(() -> {
             localFotoUsed = false;
             binding.details.buttonUpload.setEnabled(false);
             publicBitmap = bitmapFromCache;
@@ -975,10 +931,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
                 binding.details.licenseTag.setText(
                         Html.fromHtml(
-                            String.format(
-                                    getText(R.string.license_tag).toString(),
-                                    photographerText,
-                                    licenseText), Html.FROM_HTML_MODE_LEGACY
+                                String.format(
+                                        getText(R.string.license_tag).toString(),
+                                        photographerText,
+                                        licenseText), Html.FROM_HTML_MODE_LEGACY
 
                         )
                 );
@@ -1101,7 +1057,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         crc32 = null;
         if (localFile != null && localFile.canRead()) {
             Log.d(TAG, "FileGetPath: " + localFile.getPath());
-            try (var cis = new CheckedInputStream(new FileInputStream(localFile), new CRC32())){
+            try (var cis = new CheckedInputStream(new FileInputStream(localFile), new CRC32())) {
                 var scaledScreen = BitmapFactory.decodeStream(cis);
                 crc32 = cis.getChecksum().getValue();
                 Log.d(TAG, "img width " + scaledScreen.getWidth() + ", height " + scaledScreen.getHeight() + ", crc32 " + crc32);
