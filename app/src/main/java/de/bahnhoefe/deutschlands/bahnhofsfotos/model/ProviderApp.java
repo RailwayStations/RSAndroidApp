@@ -16,10 +16,20 @@ public class ProviderApp {
     private String name;
     private String url;
 
+    public ProviderApp() {
+
+    }
+
+    public ProviderApp(final String type, final String name, final String url) {
+        this.type = type;
+        this.name = name;
+        this.url = url;
+    }
+
     /**
      * Tries to open the provider app if installed. If it is not installed or cannot be opened Google Play Store will be opened instead.
      *
-     * @param context     activity context
+     * @param context activity context
      */
     public void openAppOrPlayStore(Context context) {
         // Try to open App
@@ -33,7 +43,7 @@ public class ProviderApp {
     /**
      * Open another app.
      *
-     * @param context     activity context
+     * @param context activity context
      * @return true if likely successful, false if unsuccessful
      * @see https://stackoverflow.com/a/7596063/714965
      */
@@ -61,7 +71,7 @@ public class ProviderApp {
     /**
      * Build an intent for an action to view a provider app url.
      *
-     * @param context     activity context
+     * @param context activity context
      */
     private void openUrl(Context context) {
         var intent = new Intent(Intent.ACTION_VIEW);

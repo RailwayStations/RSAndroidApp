@@ -88,7 +88,7 @@ public class RSAPIClient {
         return retrofit.create(RSAPI.class);
     }
 
-    public void setCredentials(String  username, String password) {
+    public void setCredentials(String username, String password) {
         this.username = username;
         this.password = password;
     }
@@ -102,8 +102,12 @@ public class RSAPIClient {
         this.password = null;
     }
 
+    public Call<List<Country>> getCountries() {
+        return api.getCountries();
+    }
+
     public void runUpdateCountriesAndStations(Context context, BaseApplication baseApplication, ResultListener listener) {
-        api.getCountries().enqueue(new Callback<>() {
+        getCountries().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<Country>> call, @NonNull Response<List<Country>> response) {
                 var body = response.body();

@@ -1,10 +1,8 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
-import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -22,7 +20,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,7 +39,7 @@ public class HighScoreActivity extends AppCompatActivity {
         var baseApplication = (BaseApplication) getApplication();
         var firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
         var countries = baseApplication.getDbAdapter().getAllCountries();
-        countries.add(0, new Country(getString(R.string.all_countries), "", null, null, null, null));
+        countries.add(0, new Country(getString(R.string.all_countries), ""));
         int selectedItem = 0;
         for (var country : countries) {
             if (country.getCode().equals(firstSelectedCountry)) {
@@ -56,7 +53,7 @@ public class HighScoreActivity extends AppCompatActivity {
         binding.countries.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                loadHighScore(baseApplication, (Country)parent.getSelectedItem());
+                loadHighScore(baseApplication, (Country) parent.getSelectedItem());
             }
 
             @Override
@@ -67,7 +64,7 @@ public class HighScoreActivity extends AppCompatActivity {
 
     private void loadHighScore(BaseApplication baseApplication, Country selectedCountry) {
         var rsapi = baseApplication.getRsapiClient();
-        Call<HighScore> highScoreCall = selectedCountry.getCode().isEmpty() ? rsapi.getHighScore() : rsapi.getHighScore(selectedCountry.getCode());
+        var highScoreCall = selectedCountry.getCode().isEmpty() ? rsapi.getHighScore() : rsapi.getHighScore(selectedCountry.getCode());
         highScoreCall.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<HighScore> call, @NonNull Response<HighScore> response) {
@@ -75,11 +72,11 @@ public class HighScoreActivity extends AppCompatActivity {
                     adapter = new HighScoreAdapter(HighScoreActivity.this, response.body().getItems());
                     binding.highscoreList.setAdapter(adapter);
                     binding.highscoreList.setOnItemClickListener((adapter, v, position, arg3) -> {
-                        HighScoreItem highScoreItem = (HighScoreItem) adapter.getItemAtPosition(position);
-                        StationFilter stationFilter = baseApplication.getStationFilter();
+                        var highScoreItem = (HighScoreItem) adapter.getItemAtPosition(position);
+                        var stationFilter = baseApplication.getStationFilter();
                         stationFilter.setNickname(highScoreItem.getName());
                         baseApplication.setStationFilter(stationFilter);
-                        Intent intent = new Intent(HighScoreActivity.this, MapsActivity.class);
+                        var intent = new Intent(HighScoreActivity.this, MapsActivity.class);
                         startActivity(intent);
                     });
                 }

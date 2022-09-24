@@ -21,13 +21,18 @@ public class Country implements Serializable {
 
     }
 
-    public Country(String name, String code, String email, String twitterTags, String timetableUrlTemplate, String overrideLicense) {
+    public Country(String name, String code) {
         this.name = name;
         this.code = code;
+    }
+
+    public Country(String name, String code, String email, String twitterTags, String timetableUrlTemplate, String overrideLicense, List<ProviderApp> providerApps) {
+        this(name, code);
         this.email = email;
         this.twitterTags = twitterTags;
         this.timetableUrlTemplate = timetableUrlTemplate;
         this.overrideLicense = overrideLicense;
+        this.providerApps = providerApps;
     }
 
     public static Country getCountryByCode(Set<Country> countries, String countryCode) {

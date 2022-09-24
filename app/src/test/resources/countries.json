@@ -1,0 +1,30 @@
+[
+  {
+    "code": "in",
+    "name": "India",
+    "twitterTags": "@Bahnhofsoma, #dbHackathon, #dbOpendata, #Bahnhofsfoto, @khgdrn",
+    "timetableUrlTemplate": "https://enquiry.indianrail.gov.in/ntes/",
+    "active": true,
+    "providerApps": []
+  },
+  {
+    "code": "ch",
+    "name": "Schweiz",
+    "email": "fotos@schweizer-bahnhoefe.ch",
+    "twitterTags": "@BahnhoefeCH, @Bahnhofsoma, #BahnhofsfotoCH",
+    "timetableUrlTemplate": "http://fahrplan.sbb.ch/bin/stboard.exe/dn?input={title}&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes",
+    "active": true,
+    "providerApps": [
+      {
+        "type": "android",
+        "name": "SBB Mobile",
+        "url": "https://play.google.com/store/apps/details?id=ch.sbb.mobile.android.b2c"
+      },
+      {
+        "type": "ios",
+        "name": "SBB Mobile",
+        "url": "https://apps.apple.com/app/sbb-mobile/id294855237"
+      }
+    ]
+  }
+]
