@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="de.bahnhoefe.deutschlands.bahnhofsfotos">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false"/>
+        android:required="false" />
 
     <application
         android:name=".BaseApplication"
@@ -33,16 +32,16 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
 
-                <action android:name="android.intent.action.SEARCH"/>
+                <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
 
             <meta-data
                 android:name="android.app.searchable"
-                android:resource="@xml/searchable"/>
+                android:resource="@xml/searchable" />
         </activity>
         <activity
             android:name=".MapsActivity"
@@ -52,12 +51,12 @@
             android:exported="false">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity"/>
+                android:value=".MainActivity" />
 
             <intent-filter>
-                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.MapsActivity"/>
+                <action android:name=".MapsActivity" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
@@ -68,12 +67,12 @@
             android:exported="false">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity"/>
+                android:value=".MainActivity" />
 
             <intent-filter>
-                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity"/>
+                <action android:name=".DetailsActivity" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
@@ -83,20 +82,22 @@
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity"/>
+                android:value=".MainActivity" />
 
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="railway-stations.org"
                     android:pathPrefix="/uploadToken"
-                    android:scheme="http"/>
+                    android:scheme="http" />
                 <data
                     android:host="railway-stations.org"
                     android:pathPrefix="/uploadToken"
-                    android:scheme="https"/>
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity
@@ -106,12 +107,12 @@
             android:exported="false">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity"/>
+                android:value=".MainActivity" />
 
             <intent-filter>
-                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.GalleryActivity"/>
+                <action android:name=".GalleryActivity" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
@@ -120,7 +121,7 @@
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.InboxActivity"/>
+                android:value=".InboxActivity" />
         </activity>
         <activity
             android:name=".CountryActivity"
@@ -129,12 +130,12 @@
             android:exported="false">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity"/>
+                android:value=".MainActivity" />
 
             <intent-filter>
-                <action android:name="de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity"/>
+                <action android:name=".CountryActivity" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
@@ -143,12 +144,12 @@
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity"/>
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".IntroSliderActivity"
             android:label="IntroSlider"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ShowErrorActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
@@ -156,15 +157,16 @@
             android:exported="false"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleInstance"
-            android:process=":crash"/>
+            android:process=":crash" />
 
-        <meta-data android:name="com.google.android.backup.api_key"
-                   android:value="AEdPqrEAAAAIIrH2HptM5967MTY4piXZ_qtnIjYV-cA3JEIVqA" />
+        <meta-data
+            android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAIIrH2HptM5967MTY4piXZ_qtnIjYV-cA3JEIVqA" />
 
         <service
             android:name=".NearbyNotificationService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -173,7 +175,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/filepaths"/>
+                android:resource="@xml/filepaths" />
         </provider>
 
     </application>
