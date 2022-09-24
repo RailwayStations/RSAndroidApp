@@ -18,7 +18,6 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface RSAPI {
@@ -31,13 +30,13 @@ public interface RSAPI {
     @GET("/countries")
     Call<List<Country>> getCountries();
 
-    @GET("/{country}/stats")
-    Call<Statistic> getStatistic(@Path("country") String country);
+    @GET("/stats")
+    Call<Statistic> getStatistic(@Query("country") String country);
 
-    @GET("/{country}/photographers.json")
-    Call<HighScore> getHighScore(@Path("country") String country);
+    @GET("/photographers")
+    Call<HighScore> getHighScore(@Query("country") String country);
 
-    @GET("/photographers.json")
+    @GET("/photographers")
     Call<HighScore> getHighScore();
 
     @GET("/myProfile")
