@@ -75,7 +75,6 @@
     <string name="text_intro_slider1">We collect station photos from users, which we can provide to other developers under a free license. Our favorite license is CC0.</string>
     <string name="text_intro_slider2">Please fill in the required data under \'My data\', so that we can give your photo files a correct name. Without registration you can not upload photos.\n\n<b>With your registration you will get an initial password, please check your SPAM folder.</b></string>
     <string name="next">NEXT</string>
-    <string name="skip">CANCEL</string>
     <string name="proceed">START</string>
     <string name="title_activity_high_score">Highscore</string>
     <string name="menu_title_highscore">Highscore</string>

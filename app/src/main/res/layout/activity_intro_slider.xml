@@ -30,7 +30,8 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:background="@null"
-            android:text="@string/skip"
+            android:text="@android:string/cancel"
+            android:textAllCaps="true"
             android:textColor="@android:color/white" />
 
         <LinearLayout
@@ -39,7 +40,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="horizontal"/>
+            android:orientation="horizontal" />
 
         <Button
             android:id="@+id/btn_slider_next"
@@ -48,6 +49,7 @@
             android:layout_height="wrap_content"
             android:background="@null"
             android:text="@string/next"
+            android:textAllCaps="true"
             android:textColor="@android:color/white" />
 
     </LinearLayout>
