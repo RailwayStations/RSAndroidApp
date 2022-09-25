@@ -1,0 +1,35 @@
+{
+  "photoBaseUrl": "https://api.railway-stations.org/photos",
+  "licenses": [
+    {
+      "id": "CC0_10",
+      "name": "CC0 1.0 Universell (CC0 1.0)",
+      "url": "https://creativecommons.org/publicdomain/zero/1.0/"
+    }
+  ],
+  "photographers": [
+    {
+      "name": "@User1",
+      "url": "https://example.com/@User1"
+    }
+  ],
+  "stations": [
+    {
+      "country": "de",
+      "id": "1973",
+      "title": "Fulda",
+      "lat": 50.5547372607544,
+      "lon": 9.6843855869764,
+      "shortCode": "FFU",
+      "photos": [
+        {
+          "id": 4430,
+          "photographer": "@User1",
+          "path": "/de/1973.jpg",
+          "createdAt": 1451846273000,
+          "license": "CC0_10"
+        }
+      ]
+    }
+  ]
+}

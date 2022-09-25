@@ -19,6 +19,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
@@ -142,6 +143,10 @@ public class RSAPIClient {
             }
         });
 
+    }
+
+    public Call<PhotoStations> getPhotoStationById(String country, String id) {
+        return api.getPhotoStationById(country, id);
     }
 
     public Call<List<PublicInbox>> getPublicInbox() {

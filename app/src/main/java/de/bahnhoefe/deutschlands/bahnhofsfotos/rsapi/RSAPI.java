@@ -6,6 +6,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
@@ -18,6 +19,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface RSAPI {
@@ -87,5 +89,8 @@ public interface RSAPI {
 
     @POST("/resendEmailVerification")
     Call<Void> resendEmailVerification();
+
+    @GET("/photoStationById/{country}/{id}")
+    Call<PhotoStations> getPhotoStationById(@Path("country") String country, @Path("id") String id);
 
 }

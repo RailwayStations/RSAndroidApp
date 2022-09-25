@@ -1,6 +1,7 @@
 plugins {
-    id("com.android.application")
-    id("de.mannodermaus.android-junit5") version "1.8.2.1"
+    id 'com.android.application'
+    id 'de.mannodermaus.android-junit5' version '1.8.2.1'
+    id 'io.franzbecker.gradle-lombok' version '5.0.0'
 }
 
 def getVersionName = { ->
@@ -124,6 +125,9 @@ dependencies {
 
     // Desugaring
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.0"
+
+    compileOnly "org.projectlombok:lombok:1.18.24"
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
