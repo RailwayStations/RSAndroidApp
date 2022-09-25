@@ -265,4 +265,5 @@
     <string name="error_crash_title">%1$s crashed</string>
     <string name="share">Share</string>
     <string name="bug_report">Report bug</string>
+    <string name="report_missing_station">Report missing station</string>
 </resources>
