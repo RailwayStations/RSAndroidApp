@@ -1,2 +1,4 @@
 - Upgrade dependencies
 - Fix #311 ConcurrentModificationException in Cluster.getTitle
+- New: report missing station now possible without photo
+- New: photo upload for stations which already have a photo is now possible

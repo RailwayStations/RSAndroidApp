@@ -37,6 +37,7 @@ public class OutboxAdapter extends CursorAdapter {
         var binding = (ItemUploadBinding) view.getTag();
         var id = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.CURSOR_ADAPTER_ID));
         var remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID));
+        var stationId = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.STATION_ID));
         var uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE));
         var stationTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.JOIN_STATION_TITLE));
         var problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
@@ -45,13 +46,16 @@ public class OutboxAdapter extends CursorAdapter {
         var rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON));
 
         var uploadState = UploadState.valueOf(uploadStateStr);
-        var textState = id + (remoteId > 0 ? "/" + remoteId : "" ) + ": " + context.getString(uploadState.getTextId());
+        var textState = id + (remoteId > 0 ? "/" + remoteId : "") + ": " + context.getString(uploadState.getTextId());
         binding.txtState.setText(textState);
         binding.txtState.setTextColor(context.getResources().getColor(uploadState.getColorId(), null));
 
         if (problemType != null) {
             binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_bullhorn_48px));
             binding.txtComment.setText(String.format("%s: %s", context.getText(ProblemType.valueOf(problemType).getMessageId()), comment));
+        } else if (stationId == null) {
+            binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_station_red_24px));
+            binding.txtComment.setText(comment);
         } else {
             binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_photo_red_48px));
             binding.txtComment.setText(comment);

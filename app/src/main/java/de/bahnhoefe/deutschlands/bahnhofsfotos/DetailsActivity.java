@@ -166,7 +166,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // switch off image and license view until we actually have a foto
         binding.details.imageview.setVisibility(View.INVISIBLE);
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
-        setPictureButtonsEnabled(false);
+        setButtonEnabled(binding.details.buttonTakePicture, true);
+        setButtonEnabled(binding.details.buttonSelectPicture, true);
         setButtonEnabled(binding.details.buttonReportProblem, false);
         setButtonEnabled(binding.details.buttonUpload, false);
 
@@ -221,15 +222,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     if (ConnectionUtil.checkInternetConnection(this)) {
                         BitmapCache.getInstance().getFoto(this, station.getPhotoUrl());
                     }
-                    setPictureButtonsEnabled(canSetPhoto());
 
                     // check for local photo
                     var localFile = getStoredMediaFile(upload);
                     if (localFile != null && localFile.canRead()) {
-                        SimpleDialogs.confirm(this, R.string.local_photo_exists, (dialog, which) -> {
-                            setPictureButtonsEnabled(true);
-                            setLocalBitmap(upload);
-                        });
+                        SimpleDialogs.confirm(this, R.string.local_photo_exists, (dialog, which) -> setLocalBitmap(upload));
                     }
                 } else if (upload != null && upload.isPendingPhotoUpload()) {
                     setLocalBitmap(upload);
@@ -244,8 +241,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 binding.details.etbahnhofname.setInputType(EditorInfo.TYPE_CLASS_TEXT);
                 if (upload != null) {
                     binding.details.etbahnhofname.setText(upload.getTitle());
+                    setLocalBitmap(upload);
                 }
-                setLocalBitmap(upload);
+                setButtonEnabled(binding.details.buttonUpload, true);
             }
 
         }
@@ -281,10 +279,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     private void readPreferences() {
         nickname = baseApplication.getNickname();
-    }
-
-    private boolean canSetPhoto() {
-        return station == null || !station.hasPhoto() || isOwner();
     }
 
     private boolean isOwner() {
@@ -325,7 +319,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             });
 
     void takePicture() {
-        if (!canSetPhoto() || !getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return;
         }
 
@@ -368,10 +362,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
 
     void selectPicture() {
-        if (!canSetPhoto()) {
-            return;
-        }
-
         if (isNotLoggedIn()) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
             return;
@@ -407,14 +397,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             reportProblemBinding.problemType.setSelection(selected);
         }
 
-        var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        builder.setTitle(R.string.report_problem)
+        var alertDialog = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
+                .setTitle(R.string.report_problem)
                 .setView(reportProblemBinding.getRoot())
                 .setIcon(R.drawable.ic_bullhorn_48px)
                 .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel());
-
-        var alertDialog = builder.create();
+                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel())
+                .create();
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -673,6 +662,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     private void uploadPhoto() {
+        verifyCurrentPhotoUploadExists();
         var uploadBinding = UploadBinding.inflate(getLayoutInflater());
         uploadBinding.etComment.setText(upload.getComment());
 
@@ -727,14 +717,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
         uploadBinding.cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
 
-        var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        builder.setTitle(R.string.photo_upload)
+        var alertDialog = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
+                .setTitle(station != null ? R.string.photo_upload : R.string.report_missing_station)
                 .setView(uploadBinding.getRoot())
                 .setIcon(R.drawable.ic_bullhorn_48px)
                 .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel());
-
-        var alertDialog = builder.create();
+                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel())
+                .create();
         alertDialog.show();
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -774,7 +763,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             var mediaFile = getStoredMediaFile(upload);
             assert mediaFile != null;
-            var file = RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName())));
+            var file = mediaFile.exists() ? RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName()))) : RequestBody.create(new byte[]{}, MediaType.parse("application/octet-stream"));
             rsapiClient.photoUpload(bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
                     stationTitle, latitude, longitude, comment, upload.getActive(), file).enqueue(new Callback<>() {
                 @Override
@@ -950,10 +939,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * Fetch bitmap from device local location, if it exists, and set the photo view.
      */
     private void setLocalBitmap(Upload upload) {
-        setPictureButtonsEnabled(true);
-
         var showBitmap = checkForLocalPhoto(upload);
-        setButtonEnabled(binding.details.buttonUpload, false);
         if (showBitmap == null) {
             // there is no local bitmap
             localFotoUsed = false;
@@ -1001,11 +987,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         });
 
-    }
-
-    private void setPictureButtonsEnabled(boolean enabled) {
-        setButtonEnabled(binding.details.buttonTakePicture, enabled);
-        setButtonEnabled(binding.details.buttonSelectPicture, enabled);
     }
 
     private void setButtonEnabled(ImageButton imageButton, boolean enabled) {
