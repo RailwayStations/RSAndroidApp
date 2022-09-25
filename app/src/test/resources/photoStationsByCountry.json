@@ -16,6 +16,15 @@
   "stations": [
     {
       "country": "de",
+      "id": "Z11",
+      "title": "Bahnhof Zoo",
+      "lat": 51.03745553026876,
+      "lon": 13.757279123256026,
+      "shortCode": "",
+      "photos": []
+    },
+    {
+      "country": "de",
       "id": "1973",
       "title": "Fulda",
       "lat": 50.5547372607544,
@@ -27,13 +36,6 @@
           "photographer": "@User1",
           "path": "/de/1973.jpg",
           "createdAt": 1451846273000,
-          "license": "CC0_10"
-        },
-        {
-          "id": 4431,
-          "photographer": "@User1",
-          "path": "/de/1973_2.jpg",
-          "createdAt": 1451846279000,
           "license": "CC0_10"
         }
       ]

@@ -93,4 +93,7 @@ public interface RSAPI {
     @GET("/photoStationById/{country}/{id}")
     Call<PhotoStations> getPhotoStationById(@Path("country") String country, @Path("id") String id);
 
+    @GET("/photoStationsByCountry/{country}")
+    Call<PhotoStations> getPhotoStationsByCountry(@Path("country") String country);
+
 }

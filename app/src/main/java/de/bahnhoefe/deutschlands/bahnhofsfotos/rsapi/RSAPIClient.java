@@ -149,6 +149,10 @@ public class RSAPIClient {
         return api.getPhotoStationById(country, id);
     }
 
+    public Call<PhotoStations> getPhotoStationsByCountry(String country) {
+        return api.getPhotoStationsByCountry(country);
+    }
+
     public Call<List<PublicInbox>> getPublicInbox() {
         return api.getPublicInbox();
     }

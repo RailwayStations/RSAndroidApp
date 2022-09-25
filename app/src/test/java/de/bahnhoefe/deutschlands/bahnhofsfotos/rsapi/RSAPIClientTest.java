@@ -136,9 +136,64 @@ class RSAPIClientTest {
                                         .path("/de/1973.jpg")
                                         .createdAt(1451846273000L)
                                         .license("CC0_10")
+                                        .build(),
+                                Photo.builder()
+                                        .id(4431L)
+                                        .photographer("@User1")
+                                        .path("/de/1973_2.jpg")
+                                        .createdAt(1451846279000L)
+                                        .license("CC0_10")
                                         .build()
                         ))
                         .build()))
+                .build());
+    }
+
+    @Test
+    void getPhotoStationsByCountry() throws Exception {
+        server.enqueue(new MockResponse().setBody(fromFile("photoStationsByCountry.json")));
+
+        var response = client.getPhotoStationsByCountry("de").execute();
+
+        assertThat(server.takeRequest().getPath()).isEqualTo("/photoStationsByCountry/de");
+        assertThat(response.body()).isNotNull();
+        assertThat(response.body()).isEqualTo(PhotoStations.builder()
+                .photoBaseUrl("https://api.railway-stations.org/photos")
+                .licenses(List.of(PhotoLicense.builder()
+                        .id("CC0_10")
+                        .name("CC0 1.0 Universell (CC0 1.0)")
+                        .url(new URL("https://creativecommons.org/publicdomain/zero/1.0/"))
+                        .build()))
+                .photographers(List.of(Photographer.builder()
+                        .name("@User1")
+                        .url(new URL("https://example.com/@User1"))
+                        .build()))
+                .stations(List.of(PhotoStation.builder()
+                                .country("de")
+                                .id("Z11")
+                                .title("Bahnhof Zoo")
+                                .lat(51.03745553026876)
+                                .lon(13.757279123256026)
+                                .shortCode("")
+                                .photos(List.of())
+                                .build(),
+                        PhotoStation.builder()
+                                .country("de")
+                                .id("1973")
+                                .title("Fulda")
+                                .lat(50.5547372607544)
+                                .lon(9.6843855869764)
+                                .shortCode("FFU")
+                                .photos(List.of(
+                                        Photo.builder()
+                                                .id(4430L)
+                                                .photographer("@User1")
+                                                .path("/de/1973.jpg")
+                                                .createdAt(1451846273000L)
+                                                .license("CC0_10")
+                                                .build()
+                                ))
+                                .build()))
                 .build());
     }
 
