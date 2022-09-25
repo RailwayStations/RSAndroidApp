@@ -1,24 +1,18 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
-import androidx.test.filters.MediumTest;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 
-import static org.junit.Assert.*;
-
-@MediumTest
-@RunWith(AndroidJUnit4.class)
 public class TimetableTest {
 
     private Station station;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         station = new Station();
         station.setId("4711");
@@ -30,21 +24,21 @@ public class TimetableTest {
     public void createTimetableIntentWithId() {
         var country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{id}/blah");
-        assertEquals("https://example.com/4711/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
+        assertThat(new Timetable().createTimetableIntent(country, station).getData().toString()).isEqualTo("https://example.com/4711/blah");
     }
 
     @Test
     public void createTimetableIntentWithTitle() {
         var country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{title}/blah");
-        assertEquals("https://example.com/Some Famous Station/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
+        assertThat(new Timetable().createTimetableIntent(country, station).getData().toString()).isEqualTo("https://example.com/Some Famous Station/blah");
     }
 
     @Test
     public void createTimetableIntentWithDS100() {
         var country = new Country();
         country.setTimetableUrlTemplate("https://example.com/{DS100}/blah");
-        assertEquals("https://example.com/LOL/blah", new Timetable().createTimetableIntent( country, station).getData().toString());
+        assertThat(new Timetable().createTimetableIntent(country, station).getData().toString()).isEqualTo("https://example.com/LOL/blah");
     }
 
 }

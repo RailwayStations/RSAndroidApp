@@ -1,14 +1,14 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
 import android.content.Context;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.graphics.Paint;
 import org.mapsforge.core.model.Point;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link MarkerBitmap}.
@@ -28,35 +28,37 @@ public class MarkerBitmapTest {
 
     @Test
     public void getBitmap_OwnPhotoActive() {
-        assertEquals(srcOwnPhoto, markerBitmap.getBitmap(true, true, true, false));
+        assertThat(markerBitmap.getBitmap(true, true, true, false)).isSameAs(srcOwnPhoto);
     }
+
     @Test
     public void getBitmap_OwnPhotoInactive() {
-        assertEquals(srcOwnPhotoInactive, markerBitmap.getBitmap(true, true, false, false));
+        assertThat(markerBitmap.getBitmap(true, true, false, false)).isSameAs(srcOwnPhotoInactive);
     }
 
     @Test
     public void getBitmap_PhotoActive() {
-        assertEquals(srcWithPhoto, markerBitmap.getBitmap(true, false, true, false));
+        assertThat(markerBitmap.getBitmap(true, false, true, false)).isSameAs(srcWithPhoto);
     }
+
     @Test
     public void getBitmap_PhotoInactive() {
-        assertEquals(srcWithPhotoInactive, markerBitmap.getBitmap(true, false, false, false));
+        assertThat(markerBitmap.getBitmap(true, false, false, false)).isSameAs(srcWithPhotoInactive);
     }
 
     @Test
     public void getBitmap_WithoutPhotoActive() {
-        assertEquals(srcWithoutPhoto, markerBitmap.getBitmap(false, false, true, false));
+        assertThat(markerBitmap.getBitmap(false, false, true, false)).isSameAs(srcWithoutPhoto);
     }
 
     @Test
     public void getBitmap_WithoutPhotoInactive() {
-        assertEquals(srcWithoutPhotoInactive, markerBitmap.getBitmap(false, false, false, false));
+        assertThat(markerBitmap.getBitmap(false, false, false, false)).isSameAs(srcWithoutPhotoInactive);
     }
 
     @Test
     public void getBitmap_PendingUpload() {
-        assertEquals(srcPendingUpload, markerBitmap.getBitmap(false, false, false, true));
+        assertThat(markerBitmap.getBitmap(false, false, false, true)).isSameAs(srcPendingUpload);
     }
 
 }
