@@ -159,7 +159,7 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
     testImplementation 'org.assertj:assertj-core:3.23.1'
     testImplementation 'org.mockito:mockito-core:4.8.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.10.0'
