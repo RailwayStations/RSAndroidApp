@@ -1,1 +1,4 @@
 - Abhängigkeiten aktualisiert
+- Fix #311 ConcurrentModificationException in Cluster.getTitle
+- Neu: melden eines fehlenden Bahnhofs ohne Foto
+- Neu: auch für Bahnhöfe, die schon ein Foto haben, kann man nun zusätzliche Fotos hochladen
