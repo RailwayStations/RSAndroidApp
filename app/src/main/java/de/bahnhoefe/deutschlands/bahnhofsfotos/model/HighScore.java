@@ -19,14 +19,12 @@ public class HighScore {
         return items;
     }
 
-
     public static class HighScoreDeserializer implements JsonDeserializer<HighScore> {
         public HighScore deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             var highScore = new HighScore();
-
-            AtomicInteger position = new AtomicInteger(0);
-            AtomicInteger lastPhotos = new AtomicInteger(0);
+            var position = new AtomicInteger(0);
+            var lastPhotos = new AtomicInteger(0);
             json.getAsJsonObject().entrySet().stream()
                     .map(entry -> toHighScoreItem(position, lastPhotos, entry))
                     .forEach(highScore.items::add);

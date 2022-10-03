@@ -39,7 +39,7 @@ public class HighScoreActivity extends AppCompatActivity {
         var baseApplication = (BaseApplication) getApplication();
         var firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
         var countries = baseApplication.getDbAdapter().getAllCountries();
-        countries.add(0, new Country(getString(R.string.all_countries), ""));
+        countries.add(0, Country.builder().code(getString(R.string.all_countries)).name("").build());
         int selectedItem = 0;
         for (var country : countries) {
             if (country.getCode().equals(firstSelectedCountry)) {

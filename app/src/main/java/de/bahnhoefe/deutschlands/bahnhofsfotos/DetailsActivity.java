@@ -544,7 +544,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             disableMenuItem(menu, R.id.share_photo);
         }
 
-        if (station != null && Country.getCountryByCode(countries, station.getCountry()).hasTimetableUrlTemplate()) {
+        if (station != null && Country.getCountryByCode(countries, station.getCountry()).map(Country::hasTimetableUrlTemplate).orElse(false)) {
             enableMenuItem(menu, R.id.timetable);
         } else {
             disableMenuItem(menu, R.id.timetable);
@@ -552,7 +552,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         boolean hasProviderApps = false;
         if (station != null) {
-            hasProviderApps = Country.getCountryByCode(countries, station.getCountry()).hasCompatibleProviderApps();
+            hasProviderApps = Country.getCountryByCode(countries, station.getCountry()).map(Country::hasCompatibleProviderApps).orElse(false);
         }
         if (hasProviderApps) {
             enableMenuItem(menu, R.id.provider_android_app);
@@ -582,34 +582,41 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (itemId == R.id.nav_to_station) {
             startNavigation(DetailsActivity.this);
         } else if (itemId == R.id.timetable) {
-            var timetableIntent = new Timetable().createTimetableIntent(Country.getCountryByCode(countries, station.getCountry()), station);
-            if (timetableIntent != null) {
-                startActivity(timetableIntent);
-            } else {
-                Toast.makeText(this, R.string.timetable_missing, Toast.LENGTH_LONG).show();
-            }
+            Country.getCountryByCode(countries, station.getCountry()).map(country -> {
+                var timetableIntent = new Timetable().createTimetableIntent(country, station);
+                if (timetableIntent != null) {
+                    startActivity(timetableIntent);
+                }
+                return null;
+            });
         } else if (itemId == R.id.share_photo) {
-            var shareIntent = createFotoSendIntent();
-            shareIntent.putExtra(Intent.EXTRA_TEXT, Country.getCountryByCode(countries, station != null ? station.getCountry() : null).getTwitterTags() + " " + binding.details.etbahnhofname.getText());
-            shareIntent.setType("image/jpeg");
-            startActivity(createChooser(shareIntent, "send"));
+            Country.getCountryByCode(countries, station.getCountry()).map(country -> {
+                var shareIntent = createFotoSendIntent();
+                shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + binding.details.etbahnhofname.getText());
+                shareIntent.setType("image/jpeg");
+                startActivity(createChooser(shareIntent, "send"));
+                return null;
+            });
         } else if (itemId == R.id.station_info) {
             showStationInfo(null);
         } else if (itemId == R.id.provider_android_app) {
-            var providerApps = Country.getCountryByCode(countries, station.getCountry()).getCompatibleProviderApps();
-            if (providerApps.size() == 1) {
-                providerApps.get(0).openAppOrPlayStore(this);
-            } else if (providerApps.size() > 1) {
-                var appNames = providerApps.stream()
-                        .map(ProviderApp::getName).toArray(CharSequence[]::new);
-                SimpleDialogs.simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, (dialog, which) -> {
-                    if (which >= 0 && providerApps.size() > which) {
-                        providerApps.get(which).openAppOrPlayStore(DetailsActivity.this);
-                    }
-                });
-            } else {
-                Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG).show();
-            }
+            Country.getCountryByCode(countries, station.getCountry()).map(country -> {
+                var providerApps = country.getCompatibleProviderApps();
+                if (providerApps.size() == 1) {
+                    openAppOrPlayStore(providerApps.get(0), this);
+                } else if (providerApps.size() > 1) {
+                    var appNames = providerApps.stream()
+                            .map(ProviderApp::getName).toArray(CharSequence[]::new);
+                    SimpleDialogs.simpleSelect(this, getResources().getString(R.string.choose_provider_app), appNames, (dialog, which) -> {
+                        if (which >= 0 && providerApps.size() > which) {
+                            openAppOrPlayStore(providerApps.get(which), DetailsActivity.this);
+                        }
+                    });
+                } else {
+                    Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG).show();
+                }
+                return null;
+            });
         } else if (itemId == android.R.id.home) {
             navigateUp();
         } else {
@@ -617,6 +624,50 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         return true;
+    }
+
+    /**
+     * Tries to open the provider app if installed. If it is not installed or cannot be opened Google Play Store will be opened instead.
+     *
+     * @param context activity context
+     */
+    public void openAppOrPlayStore(ProviderApp providerApp, Context context) {
+        // Try to open App
+        boolean success = openApp(providerApp, context);
+        // Could not open App, open play store instead
+        if (!success) {
+            var intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(providerApp.getUrl()));
+            context.startActivity(intent);
+        }
+    }
+
+    /**
+     * Open another app.
+     *
+     * @param context activity context
+     * @return true if likely successful, false if unsuccessful
+     * @see https://stackoverflow.com/a/7596063/714965
+     */
+    @SuppressWarnings("JavadocReference")
+    private boolean openApp(ProviderApp providerApp, Context context) {
+        if (!providerApp.isAndroid()) {
+            return false;
+        }
+        var manager = context.getPackageManager();
+        try {
+            String packageName = Uri.parse(providerApp.getUrl()).getQueryParameter("id");
+            assert packageName != null;
+            var intent = manager.getLaunchIntentForPackage(packageName);
+            if (intent == null) {
+                return false;
+            }
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            context.startActivity(intent);
+            return true;
+        } catch (ActivityNotFoundException e) {
+            return false;
+        }
     }
 
     @Override
@@ -709,8 +760,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         String overrideLicense = null;
         if (station != null) {
-            var country = Country.getCountryByCode(countries, station.getCountry());
-            overrideLicense = country.getOverrideLicense();
+            overrideLicense = Country.getCountryByCode(countries, station.getCountry()).map(Country::getOverrideLicense).orElse(null);
         }
         if (overrideLicense != null) {
             uploadBinding.cbSpecialLicense.setText(getString(R.string.special_license, overrideLicense));

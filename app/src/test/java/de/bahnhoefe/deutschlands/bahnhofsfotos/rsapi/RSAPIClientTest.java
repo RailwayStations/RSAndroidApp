@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,15 +50,30 @@ class RSAPIClientTest {
         assertThat(server.takeRequest().getPath()).isEqualTo("/countries");
         assertThat(response.body()).isNotNull();
         assertThat(response.body()).containsExactly(
-                new Country("India", "in", null, "@Bahnhofsoma, #dbHackathon, #dbOpendata, #Bahnhofsfoto, @khgdrn",
-                        "https://enquiry.indianrail.gov.in/ntes/", null, Collections.emptyList()),
-                new Country("Schweiz", "ch", "fotos@schweizer-bahnhoefe.ch", "@BahnhoefeCH, @Bahnhofsoma, #BahnhofsfotoCH",
-                        "http://fahrplan.sbb.ch/bin/stboard.exe/dn?input={title}&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes",
-                        null, List.of(
-                        new ProviderApp("android", "SBB Mobile", "https://play.google.com/store/apps/details?id=ch.sbb.mobile.android.b2c"),
-                        new ProviderApp("ios", "SBB Mobile", "https://apps.apple.com/app/sbb-mobile/id294855237")
-                ))
-        );
+                Country.builder()
+                        .name("India")
+                        .code("in")
+                        .twitterTags("@Bahnhofsoma, #dbHackathon, #dbOpendata, #Bahnhofsfoto, @khgdrn")
+                        .timetableUrlTemplate("https://enquiry.indianrail.gov.in/ntes/")
+                        .build(),
+                Country.builder()
+                        .name("Schweiz")
+                        .code("ch")
+                        .email("fotos@schweizer-bahnhoefe.ch")
+                        .twitterTags("@BahnhoefeCH, @Bahnhofsoma, #BahnhofsfotoCH")
+                        .timetableUrlTemplate("http://fahrplan.sbb.ch/bin/stboard.exe/dn?input={title}&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes")
+                        .providerApps(List.of(
+                                ProviderApp.builder()
+                                        .type("android")
+                                        .name("SBB Mobile")
+                                        .url("https://play.google.com/store/apps/details?id=ch.sbb.mobile.android.b2c")
+                                        .build(),
+                                ProviderApp.builder()
+                                        .type("ios")
+                                        .name("SBB Mobile")
+                                        .url("https://apps.apple.com/app/sbb-mobile/id294855237")
+                                        .build()))
+                        .build());
     }
 
     @Test
@@ -71,9 +85,21 @@ class RSAPIClientTest {
         assertThat(server.takeRequest().getPath()).isEqualTo("/photographers");
         assertThat(response.body()).isNotNull();
         assertThat(response.body().getItems()).containsExactly(
-                new HighScoreItem("User1", 2581, 1),
-                new HighScoreItem("User2", 1109, 2),
-                new HighScoreItem("User3", 812, 3)
+                HighScoreItem.builder()
+                        .name("User1")
+                        .photos(2581)
+                        .position(1)
+                        .build(),
+                HighScoreItem.builder()
+                        .name("User2")
+                        .photos(1109)
+                        .position(2)
+                        .build(),
+                HighScoreItem.builder()
+                        .name("User3")
+                        .photos(812)
+                        .position(3)
+                        .build()
         );
     }
 
@@ -86,9 +112,21 @@ class RSAPIClientTest {
         assertThat(server.takeRequest().getPath()).isEqualTo("/photographers?country=de");
         assertThat(response.body()).isNotNull();
         assertThat(response.body().getItems()).containsExactly(
-                new HighScoreItem("User1", 2581, 1),
-                new HighScoreItem("User2", 1109, 2),
-                new HighScoreItem("User3", 812, 3)
+                HighScoreItem.builder()
+                        .name("User1")
+                        .photos(2581)
+                        .position(1)
+                        .build(),
+                HighScoreItem.builder()
+                        .name("User2")
+                        .photos(1109)
+                        .position(2)
+                        .build(),
+                HighScoreItem.builder()
+                        .name("User3")
+                        .photos(812)
+                        .position(3)
+                        .build()
         );
     }
 

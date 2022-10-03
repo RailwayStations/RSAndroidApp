@@ -95,7 +95,8 @@ public abstract class NearbyBahnhofNotificationManager {
         // Build an intent to see the station on a map
         var mapPendingIntent = getMapPendingIntent();
         // Build an intent to view the station's timetable
-        var timetablePendingIntent = getTimetablePendingIntent(Country.getCountryByCode(countries, notificationStation.getCountry()), notificationStation);
+        var countryByCode = Country.getCountryByCode(countries, notificationStation.getCountry());
+        var timetablePendingIntent = countryByCode.map(country -> getTimetablePendingIntent(country, notificationStation)).orElse(null);
 
         createChannel(context);
 
@@ -105,16 +106,16 @@ public abstract class NearbyBahnhofNotificationManager {
         var bigStyle = textCreator.getBigStyle();
 
         var builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_logotrain_found)
-            .setContentTitle(context.getString(R.string.station_is_near))
-            .setContentText(shortText)
-            .setContentIntent(detailPendingIntent)
-            .addAction(R.drawable.ic_directions_white_24dp,
-                    context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
-            .setStyle(bigStyle)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOnlyAlertOnce(true)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+                .setSmallIcon(R.drawable.ic_logotrain_found)
+                .setContentTitle(context.getString(R.string.station_is_near))
+                .setContentText(shortText)
+                .setContentIntent(detailPendingIntent)
+                .addAction(R.drawable.ic_directions_white_24dp,
+                        context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
+                .setStyle(bigStyle)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setOnlyAlertOnce(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         if (timetablePendingIntent != null) {
             builder.addAction(R.drawable.ic_timetable,
