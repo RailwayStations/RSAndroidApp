@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import com.google.gson.GsonBuilder;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig;
@@ -23,7 +25,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
@@ -124,23 +125,41 @@ public class RSAPIClient {
             }
         });
 
-        api.getStations(baseApplication.getCountryCodes().toArray(new String[0])).enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Station>> call, @NonNull Response<List<Station>> response) {
-                List<Station> stationList = response.body();
-                if (response.isSuccessful() && stationList != null) {
-                    baseApplication.getDbAdapter().insertStations(stationList, baseApplication.getCountryCodes());
-                    baseApplication.setLastUpdate(System.currentTimeMillis());
+        var countryCodes = baseApplication.getCountryCodes();
+        var overallSuccess = new AtomicBoolean(true);
+        var runningRequestCount = new AtomicInteger(countryCodes.size());
+        countryCodes.forEach(countryCode -> {
+            api.getPhotoStationsByCountry(countryCode).enqueue(new Callback<PhotoStations>() {
+                @Override
+                public void onResponse(@NonNull Call<PhotoStations> call, @NonNull Response<PhotoStations> response) {
+                    var stationList = response.body();
+                    if (response.isSuccessful() && stationList != null) {
+                        baseApplication.getDbAdapter().insertStations(stationList, countryCode);
+                        baseApplication.setLastUpdate(System.currentTimeMillis());
+                    }
+                    if (!response.isSuccessful()) {
+                        overallSuccess.set(false);
+                    }
+                    onResult(response.isSuccessful());
                 }
-                listener.onResult(response.isSuccessful());
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<List<Station>> call, @NonNull Throwable t) {
-                Log.e(TAG, "Error refreshing stations", t);
-                Toast.makeText(context, context.getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
-                listener.onResult(false);
-            }
+                @Override
+                public void onFailure(@NonNull Call<PhotoStations> call, @NonNull Throwable t) {
+                    Log.e(TAG, "Error refreshing stations", t);
+                    Toast.makeText(context, context.getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
+                    onResult(false);
+                }
+
+                void onResult(boolean success) {
+                    var stillRunningRequests = runningRequestCount.decrementAndGet();
+                    if (!success) {
+                        overallSuccess.set(false);
+                    }
+                    if (stillRunningRequests == 0) {
+                        listener.onResult(overallSuccess.get());
+                    }
+                }
+            });
         });
 
     }

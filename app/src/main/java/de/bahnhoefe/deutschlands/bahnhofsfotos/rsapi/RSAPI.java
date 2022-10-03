@@ -10,7 +10,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -25,9 +24,6 @@ import retrofit2.http.Query;
 public interface RSAPI {
 
     String TAG = RSAPI.class.getSimpleName();
-
-    @GET("/stations")
-    Call<List<Station>> getStations(@Query("country") String... countries);
 
     @GET("/countries")
     Call<List<Country>> getCountries();
