@@ -44,6 +44,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NavUtils;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.gson.Gson;
 
@@ -140,7 +141,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        binding.details.imageview.setOnClickListener(v -> onPictureClicked());
+        // binding.details.imageview.setOnClickListener(v -> onPictureClicked());
+        RSPagerAdapter adapter = new RSPagerAdapter(this);
+        binding.details.viewPager.setAdapter(adapter);
+        binding.details.viewPager.setCurrentItem(0, false);
+        binding.details.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                // TODO: remember selection
+            }
+        });
+
         binding.details.buttonTakePicture.setOnClickListener(
                 v -> takePicture()
         );
@@ -164,7 +175,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         binding.details.licenseTag.setMovementMethod(LinkMovementMethod.getInstance());
 
         // switch off image and license view until we actually have a foto
-        binding.details.imageview.setVisibility(View.INVISIBLE);
+        // TODO: binding.details.imageview.setVisibility(View.INVISIBLE);
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
         setButtonEnabled(binding.details.buttonTakePicture, true);
         setButtonEnabled(binding.details.buttonSelectPicture, true);
@@ -937,8 +948,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             if (publicBitmap == null) {
                 // keine Bitmap ausgelesen
                 // switch off image and license view until we actually have a foto
-                // @todo broken image anzeigen
-                binding.details.imageview.setVisibility(View.INVISIBLE);
+                // todo broken image anzeigen
+
+                // TODO: binding.details.imageview.setVisibility(View.INVISIBLE);
+
                 binding.details.licenseTag.setVisibility(View.INVISIBLE);
                 return;
             }
@@ -993,7 +1006,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (showBitmap == null) {
             // there is no local bitmap
             localFotoUsed = false;
-            binding.details.imageview.setVisibility(View.INVISIBLE);
+            // TODO: binding.details.imageview.setVisibility(View.INVISIBLE);
             binding.details.licenseTag.setVisibility(View.INVISIBLE);
         } else {
             setBitmap(showBitmap);
@@ -1054,11 +1067,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     targetWidth,
                     (int) (((long) showBitmap.getHeight() * (long) targetWidth) / showBitmap.getWidth()),
                     true);
-            binding.details.imageview.setImageBitmap(scaledBitmap);
+            // TODO: binding.details.imageview.setImageBitmap(scaledBitmap);
         } else {
-            binding.details.imageview.setImageBitmap(showBitmap);
+            // TODO: binding.details.imageview.setImageBitmap(showBitmap);
         }
-        binding.details.imageview.setVisibility(View.VISIBLE);
+        // TODO: binding.details.imageview.setVisibility(View.VISIBLE);
         invalidateOptionsMenu();
     }
 

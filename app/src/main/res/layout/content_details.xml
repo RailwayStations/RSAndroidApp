@@ -26,9 +26,16 @@
             android:background="#f0f0f0"
             style="?android:attr/progressBarStyleHorizontal"
             android:indeterminate="true"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
 
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/progressBar" />
+
+        <!--
         <com.github.chrisbanes.photoview.PhotoView
             android:id="@+id/imageview"
             android:layout_width="match_parent"
@@ -38,8 +45,10 @@
             android:src="@drawable/ic_stations_with_photo"
             android:scaleType="fitCenter"
             android:contentDescription="@string/station_photo"/>
+        -->
 
-        <RelativeLayout android:id="@+id/header"
+        <RelativeLayout
+            android:id="@+id/header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -57,7 +66,7 @@
                 android:padding="8dp"
                 tools:scaleType="centerCrop"
                 android:contentDescription="@string/station_info"
-                android:onClick="showStationInfo"/>
+                android:onClick="showStationInfo" />
 
             <EditText
                 android:id="@+id/etbahnhofname"
@@ -79,11 +88,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_alignEnd="@id/imageview"
+            android:layout_alignEnd="@id/viewPager"
             android:text="@string/license_tag"
             android:background="#50ffffff"
             android:padding="8dp"
-            android:textColorLink="@color/colorPrimary"/>
+            android:textColorLink="@color/colorPrimary" />
 
         <LinearLayout
             android:id="@+id/buttons"
@@ -99,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_photo_camera_red_48px"
                 android:background="@null"
-                android:contentDescription="@string/take_photo"/>
+                android:contentDescription="@string/take_photo" />
 
             <ImageButton
                 android:id="@+id/button_select_picture"
@@ -107,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_photo_red_48px"
                 android:background="@null"
-                android:contentDescription="@string/select_photo"/>
+                android:contentDescription="@string/select_photo" />
 
             <ImageButton
                 android:id="@+id/button_report_problem"
@@ -115,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_bullhorn_48px"
                 android:background="@null"
-                android:contentDescription="@string/report_problem"/>
+                android:contentDescription="@string/report_problem" />
 
             <ImageButton
                 android:id="@+id/button_upload"
@@ -123,7 +132,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_file_upload_red_48dp"
                 android:background="@null"
-                android:contentDescription="@string/photo_upload"/>
+                android:contentDescription="@string/photo_upload" />
 
         </LinearLayout>
 
