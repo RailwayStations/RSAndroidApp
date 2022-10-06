@@ -54,7 +54,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -83,7 +82,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
@@ -97,7 +95,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, BitmapAvailableHandler {
+public class DetailsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
@@ -147,7 +145,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         binding.details.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                // TODO: remember selection
+                var pageablePhoto = photoPagerAdapter.getPageablePhotoAtPosition(position);
+                onPageablePhotoSelected(pageablePhoto);
             }
         });
 
@@ -228,7 +227,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (station.hasPhoto()) {
                     if (ConnectionUtil.checkInternetConnection(this)) {
                         photoBitmaps.put(station.getPhotoUrl(), null);
-                        BitmapCache.getInstance().getPhoto(this, station.getPhotoUrl());
+                        BitmapCache.getInstance().getPhoto((bitmap) -> {
+                            PhotoPagerAdapter.PageablePhoto pageablePhoto = PhotoPagerAdapter.PageablePhoto.builder()
+                                    .id(station.getPhotoId())
+                                    .bitmap(bitmap)
+                                    .url(station.getPhotoUrl())
+                                    .photographer(station.getPhotographer())
+                                    .photographerUrl(station.getPhotographerUrl())
+                                    .license(station.getLicense())
+                                    .licenseUrl(station.getLicenseUrl())
+                                    .build();
+                            runOnUiThread(() -> {
+                                photoPagerAdapter.addPageablePhoto(pageablePhoto);
+                                onPageablePhotoSelected(pageablePhoto);
+                            });
+                        }, station.getPhotoUrl());
                     }
 
                     // check for local photo
@@ -271,23 +284,32 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             public void onResponse(@NonNull final Call<PhotoStations> call, @NonNull final Response<PhotoStations> response) {
                 if (response.isSuccessful()) {
                     var photoStations = response.body();
-                    if (photoStations != null) {
-                        photoStations.getStations().stream()
-                                .flatMap(photoStation -> photoStation.getPhotos().stream())
-                                .forEach(photo -> {
-                                    String url = photoStations.getPhotoBaseUrl() + photo.getPath();
-                                    if (!photoBitmaps.containsKey(url)) {
-                                        photoBitmaps.put(url, null);
-                                        BitmapCache.getInstance().getPhoto(DetailsActivity.this, url);
-                                    }
-                                });
+                    if (photoStations == null) {
+                        return;
                     }
+                    photoStations.getStations().stream()
+                            .flatMap(photoStation -> photoStation.getPhotos().stream())
+                            .forEach(photo -> {
+                                var url = photoStations.getPhotoBaseUrl() + photo.getPath();
+                                if (!photoBitmaps.containsKey(url)) {
+                                    photoBitmaps.put(url, null);
+                                    BitmapCache.getInstance().getPhoto((bitmap) -> runOnUiThread(() -> photoPagerAdapter.addPageablePhoto(PhotoPagerAdapter.PageablePhoto.builder()
+                                            .id(photo.getId())
+                                            .url(url)
+                                            .bitmap(bitmap)
+                                            .photographer(photo.getPhotographer())
+                                            .photographerUrl(photoStations.getPhotographerUrl(photo.getPhotographer()))
+                                            .license(photoStations.getLicenseName(photo.getLicense()))
+                                            .licenseUrl(photoStations.getLicenseUrl(photo.getLicense()))
+                                            .build())), url);
+                                }
+                            });
                 }
             }
 
             @Override
             public void onFailure(@NonNull final Call<PhotoStations> call, @NonNull final Throwable t) {
-
+                // TODO: add error handling
             }
         });
     }
@@ -965,60 +987,53 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }).show();
     }
 
-    @Override
-    public void onBitmapAvailable(@Nullable Bitmap bitmapFromCache, URL url) {
-        runOnUiThread(() -> {
-            localPhotoUsed = false;
-            binding.details.buttonUpload.setEnabled(false);
-            photoBitmaps.put(url.toString(), bitmapFromCache);
-            if (bitmapFromCache == null) {
-                // keine Bitmap ausgelesen
-                // switch off image and license view until we actually have a photo
-                // todo broken image anzeigen
-                binding.details.licenseTag.setVisibility(View.INVISIBLE);
-                return;
-            }
+    public void onPageablePhotoSelected(PhotoPagerAdapter.PageablePhoto pageablePhoto) {
+        localPhotoUsed = false;
+        setButtonEnabled(binding.details.buttonUpload, false);
+        binding.details.licenseTag.setVisibility(View.INVISIBLE);
 
-            // Lizenzinfo aufbauen und einblenden
-            binding.details.licenseTag.setVisibility(View.VISIBLE);
-            if (station != null && station.getLicense() != null) {
-                boolean photographerUrlAvailable = station.getPhotographerUrl() != null && !station.getPhotographerUrl().isEmpty();
-                boolean licenseUrlAvailable = station.getLicenseUrl() != null && !station.getLicenseUrl().isEmpty();
+        if (pageablePhoto == null) {
+            return;
+        }
 
-                String photographerText;
-                if (photographerUrlAvailable) {
-                    photographerText = String.format(
-                            LINK_FORMAT,
-                            station.getPhotographerUrl(),
-                            station.getPhotographer());
-                } else {
-                    photographerText = station.getPhotographer();
-                }
+        if (pageablePhoto.getUrl() == null) {
+            setButtonEnabled(binding.details.buttonUpload, true);
+            return;
+        }
 
-                String licenseText;
-                if (licenseUrlAvailable) {
-                    licenseText = String.format(
-                            LINK_FORMAT,
-                            station.getLicenseUrl(),
-                            station.getLicense());
-                } else {
-                    licenseText = station.getLicense();
-                }
-                binding.details.licenseTag.setText(
-                        Html.fromHtml(
-                                String.format(
-                                        getText(R.string.license_tag).toString(),
-                                        photographerText,
-                                        licenseText), Html.FROM_HTML_MODE_LEGACY
+        // Lizenzinfo aufbauen und einblenden
+        binding.details.licenseTag.setVisibility(View.VISIBLE);
+        boolean photographerUrlAvailable = pageablePhoto.getPhotographerUrl() != null && !pageablePhoto.getPhotographerUrl().isEmpty();
+        boolean licenseUrlAvailable = pageablePhoto.getLicenseUrl() != null && !pageablePhoto.getLicenseUrl().isEmpty();
 
-                        )
-                );
-            } else {
-                binding.details.licenseTag.setText(R.string.license_info_not_readable);
-            }
+        String photographerText;
+        if (photographerUrlAvailable) {
+            photographerText = String.format(
+                    LINK_FORMAT,
+                    pageablePhoto.getPhotographerUrl(),
+                    pageablePhoto.getPhotographer());
+        } else {
+            photographerText = pageablePhoto.getPhotographer();
+        }
 
-            setPhotoBitmapToPager(bitmapFromCache);
-        });
+        String licenseText;
+        if (licenseUrlAvailable) {
+            licenseText = String.format(
+                    LINK_FORMAT,
+                    pageablePhoto.getLicenseUrl(),
+                    pageablePhoto.getLicense());
+        } else {
+            licenseText = pageablePhoto.getLicense();
+        }
+
+        binding.details.licenseTag.setText(
+                Html.fromHtml(
+                        String.format(
+                                getText(R.string.license_tag).toString(),
+                                photographerText,
+                                licenseText), Html.FROM_HTML_MODE_LEGACY
+                )
+        );
     }
 
     /**
@@ -1030,7 +1045,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             localPhotoUsed = false;
             binding.details.licenseTag.setVisibility(View.INVISIBLE);
         } else {
-            setPhotoBitmapToPager(localPhoto);
+            var pageablePhoto = PhotoPagerAdapter.PageablePhoto.builder()
+                    .bitmap(localPhoto)
+                    .build();
+            photoPagerAdapter.addPageablePhoto(pageablePhoto);
             fetchUploadStatus(upload);
         }
     }
@@ -1076,11 +1094,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private void setButtonEnabled(ImageButton imageButton, boolean enabled) {
         imageButton.setEnabled(enabled);
         imageButton.setImageAlpha(enabled ? 255 : 125);
-    }
-
-    private void setPhotoBitmapToPager(Bitmap bitmap) {
-        photoPagerAdapter.addPhotoUri(bitmap);
-        invalidateOptionsMenu();
     }
 
     /**

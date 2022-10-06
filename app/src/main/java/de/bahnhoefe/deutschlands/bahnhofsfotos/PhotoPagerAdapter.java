@@ -14,9 +14,12 @@ import com.github.chrisbanes.photoview.PhotoView;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Builder;
+import lombok.Value;
+
 public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.PhotoViewHolder> {
 
-    private List<Bitmap> bitmaps = new ArrayList<>();
+    private final List<PageablePhoto> pageablePhotos = new ArrayList<>();
 
     private final Context context;
 
@@ -24,13 +27,8 @@ public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.Ph
         this.context = context;
     }
 
-    public void setBitmaps(List<Bitmap> bitmaps) {
-        this.bitmaps = bitmaps;
-        notifyDataSetChanged();
-    }
-
-    public void addPhotoUri(final Bitmap bitmap) {
-        bitmaps.add(bitmap);
+    public void addPageablePhoto(final PageablePhoto pageablePhoto) {
+        pageablePhotos.add(pageablePhoto);
         notifyDataSetChanged();
     }
 
@@ -43,16 +41,21 @@ public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.Ph
 
     @Override
     public void onBindViewHolder(@NonNull final PhotoViewHolder holder, final int position) {
-        if (bitmaps.isEmpty()) {
+        var pageablePhoto = getPageablePhotoAtPosition(position);
+        if (pageablePhoto == null) {
             holder.photoView.setImageResource(R.drawable.photo_missing);
         } else {
-            holder.photoView.setImageBitmap(bitmaps.get(position));
+            holder.photoView.setImageBitmap(pageablePhoto.getBitmap());
         }
+    }
+
+    public PageablePhoto getPageablePhotoAtPosition(final int position) {
+        return pageablePhotos.isEmpty() ? null : pageablePhotos.get(position);
     }
 
     @Override
     public int getItemCount() {
-        return bitmaps.isEmpty() ? 1 : bitmaps.size();
+        return pageablePhotos.isEmpty() ? 1 : pageablePhotos.size();
     }
 
     public static class PhotoViewHolder extends RecyclerView.ViewHolder {
@@ -63,6 +66,18 @@ public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.Ph
             super(itemView);
             photoView = itemView.findViewById(R.id.photoView);
         }
+    }
+
+    @Value
+    @Builder
+    public static class PageablePhoto {
+        long id;
+        String url;
+        String photographer;
+        String photographerUrl;
+        String license;
+        String licenseUrl;
+        Bitmap bitmap;
     }
 
 }

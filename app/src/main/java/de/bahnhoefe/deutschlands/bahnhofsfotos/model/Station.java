@@ -2,21 +2,17 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 import androidx.annotation.NonNull;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.io.Serializable;
 
 public class Station implements Serializable {
 
     private String country;
 
-    @SerializedName("idStr") private String id;  //Bahnhofsnummer
-    private String title; //Bahnhofsname
+    private String id;
+    private String title;
     private double lat;
     private double lon;
-    private long datum; // not used in the database
-
-    @SerializedName("DS100") private String ds100;
+    private String ds100;
     private String photoUrl;
     private String photographer;
     private String photographerUrl;
@@ -24,6 +20,7 @@ public class Station implements Serializable {
     private String licenseUrl;
     private boolean active;
     private boolean outdated;
+    private long photoId = -1;
 
     public String getId() {
         return id;
@@ -55,14 +52,6 @@ public class Station implements Serializable {
 
     public void setLon(double lon) {
         this.lon = lon;
-    }
-
-    public long getDatum() {
-        return datum;
-    }
-
-    public void setDatum(long datum) {
-        this.datum = datum;
     }
 
     public boolean isActive() {
@@ -156,4 +145,13 @@ public class Station implements Serializable {
     public void setOutdated(boolean outdated) {
         this.outdated = outdated;
     }
+
+    public void setPhotoId(long photoId) {
+        this.photoId = photoId;
+    }
+
+    public long getPhotoId() {
+        return this.photoId;
+    }
+
 }

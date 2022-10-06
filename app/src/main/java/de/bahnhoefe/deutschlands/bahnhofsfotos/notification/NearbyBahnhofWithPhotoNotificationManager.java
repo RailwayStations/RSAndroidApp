@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.NotificationCompat;
 
-import java.net.URL;
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
@@ -49,7 +48,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      * @param bitmap the fetched Bitmap for the notification. May be null
      */
     @Override
-    public void onBitmapAvailable(@Nullable Bitmap bitmap, URL url) {
+    public void onBitmapAvailable(@Nullable Bitmap bitmap) {
         if (context == null) {
             return; // we're already destroyed
         }

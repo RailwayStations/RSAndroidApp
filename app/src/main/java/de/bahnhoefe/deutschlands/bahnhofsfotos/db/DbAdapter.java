@@ -45,7 +45,7 @@ public class DbAdapter {
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
     private static final String DATABASE_TABLE_UPLOADS = "uploads";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 20;
+    private static final int DATABASE_VERSION = 21;
 
     private static final String CREATE_STATEMENT_STATIONS = "CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
             + Constants.STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -55,6 +55,7 @@ public class DbAdapter {
             + Constants.STATIONS.NORMALIZED_TITLE + " TEXT, "
             + Constants.STATIONS.LAT + " REAL, "
             + Constants.STATIONS.LON + " REAL, "
+            + Constants.STATIONS.PHOTO_ID + " INTEGER, "
             + Constants.STATIONS.PHOTO_URL + " TEXT, "
             + Constants.STATIONS.PHOTOGRAPHER + " TEXT, "
             + Constants.STATIONS.PHOTOGRAPHER_URL + " TEXT, "
@@ -141,24 +142,13 @@ public class DbAdapter {
         values.put(Constants.STATIONS.ACTIVE, !station.isInactive());
         if (station.getPhotos().size() > 0) {
             var photo = station.getPhotos().get(0);
+            values.put(Constants.STATIONS.PHOTO_ID, photo.getId());
             values.put(Constants.STATIONS.PHOTO_URL, photoStations.getPhotoBaseUrl() + photo.getPath());
             values.put(Constants.STATIONS.PHOTOGRAPHER, photo.getPhotographer());
             values.put(Constants.STATIONS.OUTDATED, photo.isOutdated());
-            photoStations.getPhotographers().stream()
-                    .filter(photographer -> photographer.getName().equals(photo.getPhotographer()))
-                    .findAny()
-                    .map(photographer -> {
-                        values.put(Constants.STATIONS.PHOTOGRAPHER_URL, photographer.getUrl().toString());
-                        return null;
-                    });
-            photoStations.getLicenses().stream()
-                    .filter(license -> license.getId().equals(photo.getLicense()))
-                    .findAny()
-                    .map(license -> {
-                        values.put(Constants.STATIONS.LICENSE, license.getName());
-                        values.put(Constants.STATIONS.LICENSE_URL, license.getUrl().toString());
-                        return null;
-                    });
+            values.put(Constants.STATIONS.PHOTOGRAPHER_URL, photoStations.getPhotographerUrl(photo.getPhotographer()));
+            values.put(Constants.STATIONS.LICENSE, photoStations.getLicenseName(photo.getLicense()));
+            values.put(Constants.STATIONS.LICENSE_URL, photoStations.getLicenseUrl(photo.getLicense()));
         }
         return values;
     }
@@ -555,6 +545,10 @@ public class DbAdapter {
                 if (oldVersion < 20) {
                     db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Constants.STATIONS.OUTDATED + " INTEGER");
                 }
+
+                if (oldVersion < 21) {
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Constants.STATIONS.PHOTO_ID + " INTEGER");
+                }
             }
 
             db.setTransactionSuccessful();
@@ -570,6 +564,7 @@ public class DbAdapter {
         station.setId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID)));
         station.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LAT)));
         station.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LON)));
+        station.setPhotoId(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_ID)));
         station.setPhotoUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_URL)));
         station.setPhotographer(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER)));
         station.setPhotographerUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER_URL)));
