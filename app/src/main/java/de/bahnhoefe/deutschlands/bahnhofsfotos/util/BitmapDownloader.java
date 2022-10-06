@@ -50,6 +50,6 @@ public class BitmapDownloader extends Thread {
             Log.e(TAG, "Could not download photo");
             bitmap = null;
         }
-        bitmapAvailableHandler.onBitmapAvailable(bitmap);
+        bitmapAvailableHandler.onBitmapAvailable(bitmap, url);
     }
 }

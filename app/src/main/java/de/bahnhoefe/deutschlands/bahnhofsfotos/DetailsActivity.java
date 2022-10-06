@@ -3,7 +3,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
 
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
@@ -13,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
@@ -56,12 +54,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.zip.CRC32;
@@ -75,6 +76,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
@@ -118,14 +120,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Upload upload;
     private Station station;
     private Set<Country> countries;
-    private boolean localFotoUsed = false;
+    private boolean localPhotoUsed = false;
     private String nickname;
-    private boolean fullscreen;
-    private Bitmap publicBitmap;
     private Double latitude;
     private Double longitude;
     private String bahnhofId;
     private Long crc32 = null;
+    private PhotoPagerAdapter photoPagerAdapter;
+    private final Map<String, Bitmap> photoBitmaps = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,15 +137,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
         baseApplication = (BaseApplication) getApplication();
         rsapiClient = baseApplication.getRsapiClient();
-        var dbAdapter = baseApplication.getDbAdapter();
-        var countryCodes = baseApplication.getCountryCodes();
-        countries = dbAdapter.fetchCountriesWithProviderApps(countryCodes);
+        countries = baseApplication.getDbAdapter().fetchCountriesWithProviderApps(baseApplication.getCountryCodes());
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        // binding.details.imageview.setOnClickListener(v -> onPictureClicked());
-        RSPagerAdapter adapter = new RSPagerAdapter(this);
-        binding.details.viewPager.setAdapter(adapter);
+        photoPagerAdapter = new PhotoPagerAdapter(this);
+        binding.details.viewPager.setAdapter(photoPagerAdapter);
         binding.details.viewPager.setCurrentItem(0, false);
         binding.details.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -175,14 +174,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         binding.details.licenseTag.setMovementMethod(LinkMovementMethod.getInstance());
 
         // switch off image and license view until we actually have a foto
-        // TODO: binding.details.imageview.setVisibility(View.INVISIBLE);
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
         setButtonEnabled(binding.details.buttonTakePicture, true);
         setButtonEnabled(binding.details.buttonSelectPicture, true);
         setButtonEnabled(binding.details.buttonReportProblem, false);
         setButtonEnabled(binding.details.buttonUpload, false);
-
-        fullscreen = false;
 
         readPreferences();
         onNewIntent(getIntent());
@@ -231,7 +227,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
                 if (station.hasPhoto()) {
                     if (ConnectionUtil.checkInternetConnection(this)) {
-                        BitmapCache.getInstance().getFoto(this, station.getPhotoUrl());
+                        photoBitmaps.put(station.getPhotoUrl(), null);
+                        BitmapCache.getInstance().getPhoto(this, station.getPhotoUrl());
                     }
 
                     // check for local photo
@@ -244,6 +241,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 } else {
                     setLocalBitmap(upload);
                 }
+
+                loadAdditionalPhotos(station);
             } else {
                 if (upload == null) {
                     upload = baseApplication.getDbAdapter().getPendingUploadForCoordinates(latitude, longitude);
@@ -263,6 +262,34 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             takePicture();
         }
 
+    }
+
+    private void loadAdditionalPhotos(final Station station) {
+        rsapiClient.getPhotoStationById(station.getCountry(), station.getId()).enqueue(new Callback<>() {
+
+            @Override
+            public void onResponse(@NonNull final Call<PhotoStations> call, @NonNull final Response<PhotoStations> response) {
+                if (response.isSuccessful()) {
+                    var photoStations = response.body();
+                    if (photoStations != null) {
+                        photoStations.getStations().stream()
+                                .flatMap(photoStation -> photoStation.getPhotos().stream())
+                                .forEach(photo -> {
+                                    String url = photoStations.getPhotoBaseUrl() + photo.getPath();
+                                    if (!photoBitmaps.containsKey(url)) {
+                                        photoBitmaps.put(url, null);
+                                        BitmapCache.getInstance().getPhoto(DetailsActivity.this, url);
+                                    }
+                                });
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<PhotoStations> call, @NonNull final Throwable t) {
+
+            }
+        });
     }
 
     private int getMarkerRes() {
@@ -549,7 +576,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         navToStation.getIcon().mutate();
         navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
-        if (localFotoUsed || (station != null && station.hasPhoto())) {
+        if (localPhotoUsed || (station != null && station.hasPhoto())) {
             enableMenuItem(menu, R.id.share_photo);
         } else {
             disableMenuItem(menu, R.id.share_photo);
@@ -879,15 +906,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         if (file != null && file.canRead()) {
             sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
                     BuildConfig.APPLICATION_ID + ".fileprovider", file));
-        } else if (publicBitmap != null) {
-            var newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
-            try {
-                saveScaledBitmap(newFile, publicBitmap);
-                sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
-                        BuildConfig.APPLICATION_ID + ".fileprovider", newFile));
-            } catch (FileNotFoundException e) {
-                Log.e(TAG, "Error saving cached bitmap", e);
-            }
+        } else if (!photoBitmaps.isEmpty()) {
+            // TODO: select the current visible photo
+            photoBitmaps.values().stream().filter(Objects::nonNull).findAny().map(photoBitmap -> {
+                var newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
+                try {
+                    saveScaledBitmap(newFile, photoBitmap);
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
+                            BuildConfig.APPLICATION_ID + ".fileprovider", newFile));
+                } catch (FileNotFoundException e) {
+                    Log.e(TAG, "Error saving cached bitmap", e);
+                }
+                return null;
+            });
         }
         return sendIntent;
     }
@@ -934,24 +965,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }).show();
     }
 
-    /**
-     * This gets called if the requested bitmap is available. Finish and issue the notification.
-     *
-     * @param bitmapFromCache the fetched Bitmap for the notification. May be null
-     */
     @Override
-    public void onBitmapAvailable(@Nullable Bitmap bitmapFromCache) {
+    public void onBitmapAvailable(@Nullable Bitmap bitmapFromCache, URL url) {
         runOnUiThread(() -> {
-            localFotoUsed = false;
+            localPhotoUsed = false;
             binding.details.buttonUpload.setEnabled(false);
-            publicBitmap = bitmapFromCache;
-            if (publicBitmap == null) {
+            photoBitmaps.put(url.toString(), bitmapFromCache);
+            if (bitmapFromCache == null) {
                 // keine Bitmap ausgelesen
-                // switch off image and license view until we actually have a foto
+                // switch off image and license view until we actually have a photo
                 // todo broken image anzeigen
-
-                // TODO: binding.details.imageview.setVisibility(View.INVISIBLE);
-
                 binding.details.licenseTag.setVisibility(View.INVISIBLE);
                 return;
             }
@@ -994,7 +1017,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 binding.details.licenseTag.setText(R.string.license_info_not_readable);
             }
 
-            setBitmap(publicBitmap);
+            setPhotoBitmapToPager(bitmapFromCache);
         });
     }
 
@@ -1002,14 +1025,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
      * Fetch bitmap from device local location, if it exists, and set the photo view.
      */
     private void setLocalBitmap(Upload upload) {
-        var showBitmap = checkForLocalPhoto(upload);
-        if (showBitmap == null) {
-            // there is no local bitmap
-            localFotoUsed = false;
-            // TODO: binding.details.imageview.setVisibility(View.INVISIBLE);
+        var localPhoto = checkForLocalPhoto(upload);
+        if (localPhoto == null) {
+            localPhotoUsed = false;
             binding.details.licenseTag.setVisibility(View.INVISIBLE);
         } else {
-            setBitmap(showBitmap);
+            setPhotoBitmapToPager(localPhoto);
             fetchUploadStatus(upload);
         }
     }
@@ -1057,41 +1078,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         imageButton.setImageAlpha(enabled ? 255 : 125);
     }
 
-    private void setBitmap(Bitmap showBitmap) {
-        var size = new Point();
-        getWindowManager().getDefaultDisplay().getSize(size);
-        int targetWidth = size.x;
-
-        if (showBitmap.getWidth() != targetWidth) {
-            var scaledBitmap = Bitmap.createScaledBitmap(showBitmap,
-                    targetWidth,
-                    (int) (((long) showBitmap.getHeight() * (long) targetWidth) / showBitmap.getWidth()),
-                    true);
-            // TODO: binding.details.imageview.setImageBitmap(scaledBitmap);
-        } else {
-            // TODO: binding.details.imageview.setImageBitmap(showBitmap);
-        }
-        // TODO: binding.details.imageview.setVisibility(View.VISIBLE);
+    private void setPhotoBitmapToPager(Bitmap bitmap) {
+        photoPagerAdapter.addPhotoUri(bitmap);
         invalidateOptionsMenu();
-    }
-
-    private class AnimationUpdateListener implements ValueAnimator.AnimatorUpdateListener {
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            float alpha = (float) animation.getAnimatedValue();
-            binding.details.header.setAlpha(alpha);
-            binding.details.licenseTag.setAlpha(alpha);
-            binding.details.buttons.setAlpha(alpha);
-            if (binding.details.rotateInfo != null) {
-                binding.details.rotateInfo.setAlpha(alpha);
-            }
-        }
     }
 
     /**
      * Check if there's a local photo file for this station.
-     *
-     * @return the Bitmap of the photo, or null if none exists.
      */
     @Nullable
     private Bitmap checkForLocalPhoto(Upload upload) {
@@ -1105,56 +1098,18 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 var scaledScreen = BitmapFactory.decodeStream(cis);
                 crc32 = cis.getChecksum().getValue();
                 Log.d(TAG, "img width " + scaledScreen.getWidth() + ", height " + scaledScreen.getHeight() + ", crc32 " + crc32);
-                localFotoUsed = true;
+                localPhotoUsed = true;
                 setButtonEnabled(binding.details.buttonUpload, true);
                 return scaledScreen;
             } catch (Exception e) {
                 Log.e(TAG, String.format("Error reading media file for station %s", bahnhofId), e);
             }
         } else {
-            localFotoUsed = false;
+            localPhotoUsed = false;
             setButtonEnabled(binding.details.buttonUpload, false);
             Log.e(TAG, String.format("Media file not available for station %s", bahnhofId));
         }
         return null;
-    }
-
-    public void onPictureClicked() {
-        if (!fullscreen) {
-            var animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 0f);
-            animation.setDuration(500);
-            animation.addUpdateListener(new AnimationUpdateListener());
-            animation.start();
-            binding.details.contentDetails.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE);
-            var bar = getActionBar();
-            if (bar != null) {
-                bar.hide();
-            }
-            var sbar = getSupportActionBar();
-            if (sbar != null) {
-                sbar.hide();
-            }
-            fullscreen = true;
-        } else {
-            var animation = ValueAnimator.ofFloat(binding.details.header.getAlpha(), 1.0f);
-            animation.setDuration(500);
-            animation.addUpdateListener(new AnimationUpdateListener());
-            animation.start();
-            binding.details.contentDetails.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            var bar = getActionBar();
-            if (bar != null) {
-                bar.show();
-            }
-            var sbar = getSupportActionBar();
-            if (sbar != null) {
-                sbar.show();
-            }
-            fullscreen = false;
-        }
-
     }
 
 }

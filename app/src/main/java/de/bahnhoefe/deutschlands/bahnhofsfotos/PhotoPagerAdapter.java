@@ -1,6 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,14 +11,27 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.chrisbanes.photoview.PhotoView;
 
-public class RSPagerAdapter extends RecyclerView.Adapter<RSPagerAdapter.PhotoViewHolder> {
+import java.util.ArrayList;
+import java.util.List;
 
-    private static final int[] drawables = {R.drawable.ghost_station};
+public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.PhotoViewHolder> {
 
-    private Context context;
+    private List<Bitmap> bitmaps = new ArrayList<>();
 
-    public RSPagerAdapter(final Context context) {
+    private final Context context;
+
+    public PhotoPagerAdapter(final Context context) {
         this.context = context;
+    }
+
+    public void setBitmaps(List<Bitmap> bitmaps) {
+        this.bitmaps = bitmaps;
+        notifyDataSetChanged();
+    }
+
+    public void addPhotoUri(final Bitmap bitmap) {
+        bitmaps.add(bitmap);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -29,14 +43,17 @@ public class RSPagerAdapter extends RecyclerView.Adapter<RSPagerAdapter.PhotoVie
 
     @Override
     public void onBindViewHolder(@NonNull final PhotoViewHolder holder, final int position) {
-        holder.photoView.setImageResource(drawables[position]);
+        if (bitmaps.isEmpty()) {
+            holder.photoView.setImageResource(R.drawable.photo_missing);
+        } else {
+            holder.photoView.setImageBitmap(bitmaps.get(position));
+        }
     }
 
     @Override
     public int getItemCount() {
-        return drawables.length;
+        return bitmaps.isEmpty() ? 1 : bitmaps.size();
     }
-
 
     public static class PhotoViewHolder extends RecyclerView.ViewHolder {
 
