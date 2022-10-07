@@ -202,6 +202,9 @@ public class ProblemReportActivity extends AppCompatActivity {
                         upload.setUploadState(inboxResponse.getState().getUploadState());
                         baseApplication.getDbAdapter().updateUpload(upload);
                         SimpleDialogs.confirm(ProblemReportActivity.this, inboxResponse.getState().getMessageId());
+                        if (response.isSuccessful()) {
+                            finish();
+                        }
                     }
 
                     @Override
