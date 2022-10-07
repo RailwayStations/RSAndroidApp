@@ -8,63 +8,19 @@ import com.google.gson.annotations.JsonAdapter;
 import java.lang.reflect.Type;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+import lombok.Builder;
+import lombok.Value;
 
+@Value
+@Builder
 public class InboxResponse {
 
-    private InboxResponseState state;
-    private String message;
-    private Long id;
-    private String filename;
-    private String inboxUrl;
-    private Long crc32;
-
-    public InboxResponseState getState() {
-        return state;
-    }
-
-    public void setState(InboxResponseState state) {
-        this.state = state;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getInboxUrl() {
-        return inboxUrl;
-    }
-
-    public void setInboxUrl(String inboxUrl) {
-        this.inboxUrl = inboxUrl;
-    }
-
-    public Long getCrc32() {
-        return crc32;
-    }
-
-    public void setCrc32(Long crc32) {
-        this.crc32 = crc32;
-    }
+    InboxResponseState state;
+    String message;
+    Long id;
+    String filename;
+    String inboxUrl;
+    Long crc32;
 
     @JsonAdapter(InboxResponseState.Serializer.class)
     public enum InboxResponseState {

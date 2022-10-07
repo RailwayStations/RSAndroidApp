@@ -46,8 +46,6 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.gson.Gson;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -57,7 +55,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -68,7 +65,6 @@ import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityDetailsBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ReportProblemBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.StationInfoBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.UploadBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
@@ -76,8 +72,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
@@ -126,6 +120,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private Long crc32 = null;
     private PhotoPagerAdapter photoPagerAdapter;
     private final Map<String, Bitmap> photoBitmaps = new HashMap<>();
+    private PhotoPagerAdapter.PageablePhoto selectedPhoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,7 +152,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 v -> selectPicture()
         );
         binding.details.buttonReportProblem.setOnClickListener(
-                v -> reportProblem()
+                v -> {
+                    var intent = new Intent(DetailsActivity.this, ProblemReportActivity.class);
+                    intent.putExtra(ProblemReportActivity.EXTRA_STATION, station);
+                    intent.putExtra(ProblemReportActivity.EXTRA_PHOTO_ID, selectedPhoto != null ? selectedPhoto.getId() : null);
+                    startActivity(intent);
+                }
         );
         binding.details.buttonUpload.setOnClickListener(v -> {
                     if (isNotLoggedIn()) {
@@ -309,7 +309,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
             @Override
             public void onFailure(@NonNull final Call<PhotoStations> call, @NonNull final Throwable t) {
-                // TODO: add error handling
+                Log.e(TAG, "Failed to load additional photos", t);
             }
         });
     }
@@ -428,109 +428,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         selectPictureResultLauncher.launch("image/*");
-    }
-
-    void reportProblem() {
-        if (isNotLoggedIn()) {
-            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        var reportProblemBinding = ReportProblemBinding.inflate(getLayoutInflater());
-        if (upload != null && upload.isProblemReport()) {
-            reportProblemBinding.etProblemComment.setText(upload.getComment());
-        }
-
-        var problemTypes = new ArrayList<String>();
-        problemTypes.add(getString(R.string.problem_please_specify));
-        int selected = -1;
-        for (var type : ProblemType.values()) {
-            problemTypes.add(getString(type.getMessageId()));
-            if (upload != null && upload.getProblemType() == type) {
-                selected = problemTypes.size() - 1;
-            }
-        }
-        var adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, problemTypes);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        reportProblemBinding.problemType.setAdapter(adapter);
-        if (selected > -1) {
-            reportProblemBinding.problemType.setSelection(selected);
-        }
-
-        var alertDialog = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
-                .setTitle(R.string.report_problem)
-                .setView(reportProblemBinding.getRoot())
-                .setIcon(R.drawable.ic_bullhorn_48px)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel())
-                .create();
-        alertDialog.show();
-
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            int selectedType = reportProblemBinding.problemType.getSelectedItemPosition();
-            if (selectedType == 0) {
-                Toast.makeText(getApplicationContext(), getString(R.string.problem_please_specify), Toast.LENGTH_LONG).show();
-                return;
-            }
-            var type = ProblemType.values()[selectedType - 1];
-            var comment = reportProblemBinding.etProblemComment.getText().toString();
-            if (StringUtils.isBlank(comment)) {
-                Toast.makeText(getApplicationContext(), getString(R.string.problem_please_comment), Toast.LENGTH_LONG).show();
-                return;
-            }
-            alertDialog.dismiss();
-
-            if (upload == null || !upload.isProblemReport() || upload.isUploaded()) {
-                upload = new Upload();
-                upload.setCountry(station.getCountry());
-                upload.setStationId(station.getId());
-                upload.setProblemType(type);
-                upload.setComment(comment);
-                upload = baseApplication.getDbAdapter().insertUpload(upload);
-            } else {
-                upload.setProblemType(type);
-                upload.setComment(comment);
-                baseApplication.getDbAdapter().updateUpload(upload);
-            }
-
-            rsapiClient.reportProblem(new ProblemReport(station.getCountry(), bahnhofId, comment, type)).enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<InboxResponse> call, @NonNull Response<InboxResponse> response) {
-                    InboxResponse inboxResponse;
-                    if (response.isSuccessful()) {
-                        inboxResponse = response.body();
-                    } else if (response.code() == 401) {
-                        SimpleDialogs.confirm(DetailsActivity.this, R.string.authorization_failed);
-                        return;
-                    } else {
-                        Gson gson = new Gson();
-                        inboxResponse = gson.fromJson(response.errorBody().charStream(), InboxResponse.class);
-                        if (inboxResponse.getState() == null) {
-                            inboxResponse.setState(InboxResponse.InboxResponseState.ERROR);
-                        }
-                    }
-
-                    upload.setRemoteId(inboxResponse.getId());
-                    upload.setUploadState(inboxResponse.getState().getUploadState());
-                    baseApplication.getDbAdapter().updateUpload(upload);
-                    if (inboxResponse.getState() == InboxResponse.InboxResponseState.ERROR) {
-                        SimpleDialogs.confirm(DetailsActivity.this,
-                                String.format(getText(R.string.problem_report_failed).toString(), response.message()));
-                        fetchUploadStatus(upload); // try to get the upload state again
-                    } else {
-                        SimpleDialogs.confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
-                    }
-
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<InboxResponse> call, @NonNull Throwable t) {
-                    Log.e(TAG, "Error reporting problem", t);
-                    SimpleDialogs.confirm(DetailsActivity.this,
-                            String.format(getText(R.string.problem_report_failed).toString(), t.getMessage()));
-                }
-            });
-        });
     }
 
     private void verifyCurrentPhotoUploadExists() {
@@ -889,9 +786,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                         assert response.errorBody() != null;
                         var gson = new Gson();
                         inboxResponse = gson.fromJson(response.errorBody().charStream(), InboxResponse.class);
-                        if (inboxResponse.getState() == null) {
-                            inboxResponse.setState(InboxResponse.InboxResponseState.ERROR);
-                        }
                     }
 
                     assert inboxResponse != null;
@@ -900,13 +794,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     upload.setUploadState(inboxResponse.getState().getUploadState());
                     upload.setCrc32(inboxResponse.getCrc32());
                     baseApplication.getDbAdapter().updateUpload(upload);
-                    if (inboxResponse.getState() == InboxResponse.InboxResponseState.ERROR) {
-                        SimpleDialogs.confirm(DetailsActivity.this,
-                                String.format(getText(InboxResponse.InboxResponseState.ERROR.getMessageId()).toString(), response.message()));
-                        fetchUploadStatus(upload); // try to get the upload state again
-                    } else {
-                        SimpleDialogs.confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
-                    }
+                    SimpleDialogs.confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
                 }
 
                 @Override
@@ -988,6 +876,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     public void onPageablePhotoSelected(PhotoPagerAdapter.PageablePhoto pageablePhoto) {
+        selectedPhoto = pageablePhoto;
         localPhotoUsed = false;
         setButtonEnabled(binding.details.buttonUpload, false);
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
@@ -1058,10 +947,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             return;
         }
         setButtonEnabled(binding.details.buttonUpload, true);
-        var stateQueries = new ArrayList<InboxStateQuery>();
-        stateQueries.add(new InboxStateQuery(upload.getRemoteId(), upload.getCountry(), upload.getStationId()));
+        var stateQuery = InboxStateQuery.builder()
+                .id(upload.getRemoteId())
+                .countryCode(upload.getCountry())
+                .stationId(upload.getStationId())
+                .build();
 
-        rsapiClient.queryUploadState(stateQueries).enqueue(new Callback<>() {
+        rsapiClient.queryUploadState(List.of(stateQuery)).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<InboxStateQuery>> call, @NonNull Response<List<InboxStateQuery>> response) {
                 var stateQueries = response.body();

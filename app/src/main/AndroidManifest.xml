@@ -116,12 +116,20 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ProblemReportActivity"
+            android:label="@string/title_activity_problem_report"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
             android:name=".InboxActivity"
             android:label="@string/title_activity_inbox"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".InboxActivity" />
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".CountryActivity"

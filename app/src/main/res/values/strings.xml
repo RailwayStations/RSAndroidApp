@@ -265,5 +265,10 @@
     <string name="share">Share</string>
     <string name="bug_report">Report bug</string>
     <string name="report_missing_station">Report missing station</string>
+    <string name="title_activity_problem_report">Problem Report</string>
+    <string name="send_problem_report">Send problem report?</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="problem_wrong_lat_lon">Please provide proper latitue and longitude values</string>
 
 </resources>
