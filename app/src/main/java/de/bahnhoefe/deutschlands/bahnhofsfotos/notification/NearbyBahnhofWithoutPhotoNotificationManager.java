@@ -6,7 +6,6 @@ import android.util.Log;
 
 import java.util.Set;
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
@@ -25,13 +24,11 @@ public class NearbyBahnhofWithoutPhotoNotificationManager extends NearbyBahnhofN
     // helpers that create notification elements that are common to "with foto" and "without foto"
     private PendingIntent getFotoPendingIntent() {
         // Build an intent for an action to take a picture
-        // actually this launches DetailsActivity with a specific Extra that causes it to launch
+        // actually this launches UploadActivity with a specific Extra that causes it to launch
         // Photo immediately.
-        var detailFotoIntent = getDetailIntent();
-        detailFotoIntent.putExtra(DetailsActivity.EXTRA_TAKE_FOTO, true);
-        return pendifyMe(detailFotoIntent, REQUEST_FOTO);
+        var intent = getUploadActivity();
+        return pendifyMe(intent, REQUEST_FOTO);
     }
-
 
     /**
      * Build a notification for a station without photo. Call onNotificationReady if done.

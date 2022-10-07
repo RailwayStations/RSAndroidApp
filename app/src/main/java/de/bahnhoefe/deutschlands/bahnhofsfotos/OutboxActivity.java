@@ -56,8 +56,8 @@ public class OutboxActivity extends AppCompatActivity {
                 intent = new Intent(OutboxActivity.this, ProblemReportActivity.class);
                 intent.putExtra(ProblemReportActivity.EXTRA_UPLOAD, upload);
             } else {
-                intent = new Intent(OutboxActivity.this, DetailsActivity.class);
-                intent.putExtra(DetailsActivity.EXTRA_UPLOAD, upload);
+                intent = new Intent(OutboxActivity.this, UploadActivity.class);
+                intent.putExtra(UploadActivity.EXTRA_UPLOAD, upload);
             }
             startActivity(intent);
         });

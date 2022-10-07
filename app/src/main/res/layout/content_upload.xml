@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity"
-    tools:showIn="@layout/activity_details">
+    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity"
+    tools:showIn="@layout/activity_upload">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -28,52 +28,38 @@
             android:indeterminate="true"
             android:visibility="gone" />
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
+        <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/imageview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
-            android:layout_below="@+id/progressBar" />
+            android:layout_below="@+id/progressBar"
+            android:src="@drawable/ic_stations_with_photo"
+            android:scaleType="centerCrop"
+            tools:scaleType="centerCrop"
+            android:contentDescription="@string/station_photo" />
 
-        <RelativeLayout
-            android:id="@+id/header"
-            android:layout_width="match_parent"
+        <EditText
+            android:id="@+id/etbahnhofname"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
-            android:layout_alignTop="@id/header">
-
-            <ImageView
-                android:id="@+id/marker"
-                android:layout_width="35sp"
-                android:layout_height="35sp"
-                android:src="@drawable/marker_missing"
-                android:scaleType="centerCrop"
-                android:layout_marginTop="8dp"
-                android:padding="8dp"
-                tools:scaleType="centerCrop"
-                android:contentDescription="@string/station_info"
-                android:onClick="showStationInfo" />
-
-            <TextView
-                android:id="@+id/etbahnhofname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/marker"
-                android:textSize="25sp"
-                android:textIsSelectable="true"
-                android:textStyle="bold"
-                android:background="#50ffffff"
-                android:padding="8dp"
-                android:autofillHints="" />
-        </RelativeLayout>
+            android:textSize="25sp"
+            android:textIsSelectable="true"
+            android:inputType="text"
+            android:textStyle="bold"
+            android:background="#50ffffff"
+            android:padding="8dp"
+            android:hint="@string/station_name"
+            android:autofillHints="" />
 
         <TextView
-            android:id="@+id/license_tag"
+            android:id="@+id/upload_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_alignEnd="@id/viewPager"
+            android:layout_alignEnd="@id/imageview"
             android:text="@string/license_tag"
             android:background="#50ffffff"
             android:padding="8dp"
@@ -81,19 +67,27 @@
 
         <LinearLayout
             android:id="@+id/buttons"
-            android:layout_above="@id/license_tag"
+            android:layout_above="@id/upload_status"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
             <ImageButton
-                android:id="@+id/button_report_problem"
+                android:id="@+id/button_take_picture"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_bullhorn_48px"
+                android:src="@drawable/ic_photo_camera_red_48px"
                 android:background="@null"
-                android:contentDescription="@string/report_problem" />
+                android:contentDescription="@string/take_photo" />
+
+            <ImageButton
+                android:id="@+id/button_select_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_photo_red_48px"
+                android:background="@null"
+                android:contentDescription="@string/select_photo" />
 
             <ImageButton
                 android:id="@+id/button_upload"
@@ -104,6 +98,17 @@
                 android:contentDescription="@string/photo_upload" />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/rotate_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/buttons"
+            android:text="@string/picture_landscape_only"
+            android:textStyle="bold"
+            android:background="#80ffffff"
+            android:padding="8dp" />
 
     </RelativeLayout>
 

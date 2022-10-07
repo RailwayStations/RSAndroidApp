@@ -3,20 +3,14 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos;
 import static android.content.Intent.createChooser;
 import static android.graphics.Color.WHITE;
 
-import android.app.Activity;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -32,10 +26,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -44,47 +35,28 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.gson.Gson;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.zip.CRC32;
-import java.util.zip.CheckedInputStream;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityDetailsBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.StationInfoBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.UploadBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.KeyValueSpinnerItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -94,30 +66,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
     // Names of Extras that this class reacts to
-    public static final String EXTRA_TAKE_FOTO = "DetailsActivityTakeFoto";
-    public static final String EXTRA_UPLOAD = "upload";
-    public static final String EXTRA_STATION = "station";
-    public static final String EXTRA_LATITUDE = "latitude";
-    public static final String EXTRA_LONGITUDE = "longitude";
+    public static final String EXTRA_STATION = "EXTRA_STATION";
 
     private static final int ALPHA = 128;
-
     private static final String LINK_FORMAT = "<b><a href=\"%s\">%s</a></b>";
 
     private BaseApplication baseApplication;
     private RSAPIClient rsapiClient;
-
     private ActivityDetailsBinding binding;
-
-    private Upload upload;
     private Station station;
     private Set<Country> countries;
-    private boolean localPhotoUsed = false;
     private String nickname;
-    private Double latitude;
-    private Double longitude;
-    private String bahnhofId;
-    private Long crc32 = null;
     private PhotoPagerAdapter photoPagerAdapter;
     private final Map<String, Bitmap> photoBitmaps = new HashMap<>();
     private PhotoPagerAdapter.PageablePhoto selectedPhoto;
@@ -145,14 +104,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
         });
 
-        binding.details.buttonTakePicture.setOnClickListener(
-                v -> takePicture()
-        );
-        binding.details.buttonSelectPicture.setOnClickListener(
-                v -> selectPicture()
-        );
-        binding.details.buttonReportProblem.setOnClickListener(
-                v -> {
+        binding.details.buttonReportProblem.setOnClickListener(v -> {
                     var intent = new Intent(DetailsActivity.this, ProblemReportActivity.class);
                     intent.putExtra(ProblemReportActivity.EXTRA_STATION, station);
                     intent.putExtra(ProblemReportActivity.EXTRA_PHOTO_ID, selectedPhoto != null ? selectedPhoto.getId() : null);
@@ -160,24 +112,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
         );
         binding.details.buttonUpload.setOnClickListener(v -> {
-                    if (isNotLoggedIn()) {
-                        Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-                    } else if (TextUtils.isEmpty(binding.details.etbahnhofname.getText())) {
-                        Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
-                    } else {
-                        uploadPhoto();
-                    }
+                    var intent = new Intent(DetailsActivity.this, UploadActivity.class);
+                    intent.putExtra(UploadActivity.EXTRA_STATION, station);
+                    startActivity(intent);
                 }
         );
-
-        binding.details.licenseTag.setMovementMethod(LinkMovementMethod.getInstance());
-
+        
         // switch off image and license view until we actually have a foto
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
-        setButtonEnabled(binding.details.buttonTakePicture, true);
-        setButtonEnabled(binding.details.buttonSelectPicture, true);
-        setButtonEnabled(binding.details.buttonReportProblem, false);
-        setButtonEnabled(binding.details.buttonUpload, false);
+        binding.details.licenseTag.setMovementMethod(LinkMovementMethod.getInstance());
 
         readPreferences();
         onNewIntent(getIntent());
@@ -187,92 +130,44 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        boolean directPicture = false;
         if (intent != null) {
-            upload = (Upload) intent.getSerializableExtra(EXTRA_UPLOAD);
             station = (Station) intent.getSerializableExtra(EXTRA_STATION);
-            latitude = (Double) intent.getSerializableExtra(EXTRA_LATITUDE);
-            longitude = (Double) intent.getSerializableExtra(EXTRA_LONGITUDE);
 
-            if (station == null && upload != null && upload.isUploadForExistingStation()) {
-                station = baseApplication.getDbAdapter().getStationForUpload(upload);
-            }
-
-            if (latitude == null && longitude == null && upload != null && upload.isUploadForMissingStation()) {
-                latitude = upload.getLat();
-                longitude = upload.getLon();
-            }
-
-            if (station == null && (latitude == null || longitude == null)) {
+            if (station == null) {
                 Log.w(TAG, "EXTRA_BAHNHOF and EXTRA_LATITUDE or EXTRA_LONGITUDE in intent data missing");
                 Toast.makeText(this, R.string.station_or_coords_not_found, Toast.LENGTH_LONG).show();
                 finish();
                 return;
             }
-            setButtonEnabled(binding.details.buttonReportProblem, station != null);
 
             binding.details.marker.setImageDrawable(ContextCompat.getDrawable(this, getMarkerRes()));
 
-            directPicture = intent.getBooleanExtra(EXTRA_TAKE_FOTO, false);
-            if (station != null) {
-                bahnhofId = station.getId();
-                binding.details.etbahnhofname.setText(station.getTitle());
-                binding.details.etbahnhofname.setInputType(EditorInfo.TYPE_NULL);
-                binding.details.etbahnhofname.setSingleLine(false);
+            binding.details.etbahnhofname.setText(station.getTitle());
+            binding.details.etbahnhofname.setInputType(EditorInfo.TYPE_NULL);
+            binding.details.etbahnhofname.setSingleLine(false);
 
-                if (upload == null) {
-                    upload = baseApplication.getDbAdapter().getPendingUploadForStation(station);
+            if (station.hasPhoto()) {
+                if (ConnectionUtil.checkInternetConnection(this)) {
+                    photoBitmaps.put(station.getPhotoUrl(), null);
+                    BitmapCache.getInstance().getPhoto((bitmap) -> {
+                        PhotoPagerAdapter.PageablePhoto pageablePhoto = PhotoPagerAdapter.PageablePhoto.builder()
+                                .id(station.getPhotoId())
+                                .bitmap(bitmap)
+                                .url(station.getPhotoUrl())
+                                .photographer(station.getPhotographer())
+                                .photographerUrl(station.getPhotographerUrl())
+                                .license(station.getLicense())
+                                .licenseUrl(station.getLicenseUrl())
+                                .build();
+                        runOnUiThread(() -> {
+                            photoPagerAdapter.addPageablePhoto(pageablePhoto);
+                            onPageablePhotoSelected(pageablePhoto);
+                        });
+                    }, station.getPhotoUrl());
                 }
-
-                if (station.hasPhoto()) {
-                    if (ConnectionUtil.checkInternetConnection(this)) {
-                        photoBitmaps.put(station.getPhotoUrl(), null);
-                        BitmapCache.getInstance().getPhoto((bitmap) -> {
-                            PhotoPagerAdapter.PageablePhoto pageablePhoto = PhotoPagerAdapter.PageablePhoto.builder()
-                                    .id(station.getPhotoId())
-                                    .bitmap(bitmap)
-                                    .url(station.getPhotoUrl())
-                                    .photographer(station.getPhotographer())
-                                    .photographerUrl(station.getPhotographerUrl())
-                                    .license(station.getLicense())
-                                    .licenseUrl(station.getLicenseUrl())
-                                    .build();
-                            runOnUiThread(() -> {
-                                photoPagerAdapter.addPageablePhoto(pageablePhoto);
-                                onPageablePhotoSelected(pageablePhoto);
-                            });
-                        }, station.getPhotoUrl());
-                    }
-
-                    // check for local photo
-                    var localFile = getStoredMediaFile(upload);
-                    if (localFile != null && localFile.canRead()) {
-                        SimpleDialogs.confirm(this, R.string.local_photo_exists, (dialog, which) -> setLocalBitmap(upload));
-                    }
-                } else if (upload != null && upload.isPendingPhotoUpload()) {
-                    setLocalBitmap(upload);
-                } else {
-                    setLocalBitmap(upload);
-                }
-
-                loadAdditionalPhotos(station);
-            } else {
-                if (upload == null) {
-                    upload = baseApplication.getDbAdapter().getPendingUploadForCoordinates(latitude, longitude);
-                }
-
-                binding.details.etbahnhofname.setInputType(EditorInfo.TYPE_CLASS_TEXT);
-                if (upload != null) {
-                    binding.details.etbahnhofname.setText(upload.getTitle());
-                    setLocalBitmap(upload);
-                }
-                setButtonEnabled(binding.details.buttonUpload, true);
             }
 
-        }
-
-        if (directPicture) {
-            takePicture();
+            loadAdditionalPhotos(station);
         }
 
     }
@@ -324,8 +219,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             } else {
                 return station.isActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive;
             }
-        } else if (upload != null && upload.isPendingPhotoUpload()) {
-            return R.drawable.marker_yellow;
         } else {
             return station.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
         }
@@ -345,148 +238,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return station != null && TextUtils.equals(nickname, station.getPhotographer());
     }
 
-    private boolean isNotLoggedIn() {
-        return !rsapiClient.hasCredentials();
-    }
-
-    private final ActivityResultLauncher<Intent> imageCaptureResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    try {
-                        verifyCurrentPhotoUploadExists();
-                        var storagePictureFile = getStoredMediaFile(upload);
-                        // die Kamera-App sollte auf temporären Cache-Speicher schreiben, wir laden das Bild von
-                        // dort und schreiben es in Standard-Größe in den permanenten Speicher
-                        var cameraRawPictureFile = getCameraTempFile();
-                        var options = new BitmapFactory.Options();
-                        options.inJustDecodeBounds = true; // just query the image size in the first step
-                        BitmapFactory.decodeFile(cameraRawPictureFile.getPath(), options);
-
-                        int sampling = options.outWidth / Constants.STORED_PHOTO_WIDTH;
-                        if (sampling > 1) {
-                            options.inSampleSize = sampling;
-                        }
-                        options.inJustDecodeBounds = false;
-
-                        saveScaledBitmap(storagePictureFile, BitmapFactory.decodeFile(cameraRawPictureFile.getPath(), options));
-                        setLocalBitmap(upload);
-                        FileUtils.deleteQuietly(cameraRawPictureFile);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error processing photo", e);
-                        Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-
-    void takePicture() {
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            return;
-        }
-
-        if (isNotLoggedIn()) {
-            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-        }
-
-        verifyCurrentPhotoUploadExists();
-        var photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", getCameraTempFile());
-        var intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-        intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
-        intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, binding.details.etbahnhofname.getText());
-        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        try {
-            imageCaptureResultLauncher.launch(intent);
-        } catch (ActivityNotFoundException exception) {
-            Toast.makeText(this, R.string.no_image_capture_app_found, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private final ActivityResultLauncher<String> selectPictureResultLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
-            uri -> {
-                try {
-                    verifyCurrentPhotoUploadExists();
-                    var bitmap = getBitmapFromUri(uri);
-                    int sampling = bitmap.getWidth() / Constants.STORED_PHOTO_WIDTH;
-                    var scaledScreen = bitmap;
-                    if (sampling > 1) {
-                        scaledScreen = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / sampling, bitmap.getHeight() / sampling, false);
-                    }
-
-                    saveScaledBitmap(getStoredMediaFile(upload), scaledScreen);
-                    setLocalBitmap(upload);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error processing photo", e);
-                    Toast.makeText(getApplicationContext(), getString(R.string.error_processing_photo) + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-
-
-    void selectPicture() {
-        if (isNotLoggedIn()) {
-            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        selectPictureResultLauncher.launch("image/*");
-    }
-
-    private void verifyCurrentPhotoUploadExists() {
-        if (upload == null || upload.isProblemReport() || upload.isUploaded()) {
-            upload = new Upload();
-            if (station != null) {
-                upload.setCountry(station.getCountry());
-                upload.setStationId(station.getId());
-            }
-            upload.setLat(latitude);
-            upload.setLon(longitude);
-            upload = baseApplication.getDbAdapter().insertUpload(upload);
-        }
-    }
-
-    private void saveScaledBitmap(File storagePictureFile, Bitmap scaledScreen) throws FileNotFoundException {
-        if (scaledScreen == null) {
-            throw new RuntimeException(getString(R.string.error_scaling_photo));
-        }
-        Log.d(TAG, "img width " + scaledScreen.getWidth());
-        Log.d(TAG, "img height " + scaledScreen.getHeight());
-        if (scaledScreen.getWidth() < scaledScreen.getHeight()) {
-            Toast.makeText(getApplicationContext(), R.string.photo_need_landscape_orientation, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        Log.d(TAG, "Save photo to: " + storagePictureFile);
-        scaledScreen.compress(Bitmap.CompressFormat.JPEG, Constants.STORED_PHOTO_QUALITY, new FileOutputStream(storagePictureFile));
-    }
-
-    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
-        Bitmap image;
-        try (ParcelFileDescriptor parcelFileDescriptor = getContentResolver().openFileDescriptor(uri, "r")) {
-            image = BitmapFactory.decodeFileDescriptor(parcelFileDescriptor.getFileDescriptor());
-        }
-        return image;
-    }
-
-    /**
-     * Get the file path for storing this stations foto
-     *
-     * @return the File
-     */
-    @Nullable
-    public File getStoredMediaFile(Upload upload) {
-        if (upload == null) {
-            return null;
-        }
-        return FileUtils.getStoredMediaFile(this, upload.getId());
-    }
-
-    /**
-     * Get the file path for the Camera app to store the unprocessed photo to.
-     */
-    private File getCameraTempFile() {
-        return FileUtils.getImageCacheFile(this, String.valueOf(upload.getId()));
-    }
-
-
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
@@ -494,12 +245,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         var navToStation = menu.findItem(R.id.nav_to_station);
         navToStation.getIcon().mutate();
         navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-
-        if (localPhotoUsed || (station != null && station.hasPhoto())) {
-            enableMenuItem(menu, R.id.share_photo);
-        } else {
-            disableMenuItem(menu, R.id.share_photo);
-        }
 
         if (station != null && Country.getCountryByCode(countries, station.getCountry()).map(Country::hasTimetableUrlTemplate).orElse(false)) {
             enableMenuItem(menu, R.id.timetable);
@@ -547,8 +292,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 return null;
             });
         } else if (itemId == R.id.share_photo) {
+            // TODO: share raw picture or link to https://map.railway-stations.org/station.php?countryCode={countryCode}&stationId={stationId}
             Country.getCountryByCode(countries, station.getCountry()).map(country -> {
-                var shareIntent = createFotoSendIntent();
+                var shareIntent = createPhotoSendIntent();
+                if (shareIntent == null) {
+                    return null;
+                }
                 shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + binding.details.etbahnhofname.getText());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
@@ -634,8 +383,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     public void navigateUp() {
         var callingActivity = getCallingActivity(); // if MapsActivity was calling, then we don't want to rebuild the Backstack
-        if (callingActivity == null) {
-            var upIntent = NavUtils.getParentActivityIntent(this);
+        var upIntent = NavUtils.getParentActivityIntent(this);
+        if (callingActivity == null && upIntent != null) {
             upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot()) {
                 Log.v(TAG, "Recreate back stack");
@@ -648,10 +397,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     public void showStationInfo(View view) {
         var stationInfoBinding = StationInfoBinding.inflate(getLayoutInflater());
-        stationInfoBinding.id.setText(station != null ? station.getId() : "");
+        stationInfoBinding.id.setText(station.getId());
 
-        double lat = station != null ? station.getLat() : latitude;
-        double lon = station != null ? station.getLon() : longitude;
+        double lat = station.getLat();
+        double lon = station.getLon();
         stationInfoBinding.coordinates.setText(String.format(Locale.US, getResources().getString(R.string.coordinates), lat, lon));
 
         stationInfoBinding.active.setText(station != null && station.isActive() ? R.string.active : R.string.inactive);
@@ -669,168 +418,21 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 .show();
     }
 
-    private void uploadPhoto() {
-        verifyCurrentPhotoUploadExists();
-        var uploadBinding = UploadBinding.inflate(getLayoutInflater());
-        uploadBinding.etComment.setText(upload.getComment());
-
-        uploadBinding.spActive.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.active_flag_options)));
-        if (station != null) {
-            uploadBinding.spActive.setVisibility(View.GONE);
-        } else {
-            if (upload.getActive() == null) {
-                uploadBinding.spActive.setSelection(0);
-            } else if (upload.getActive()) {
-                uploadBinding.spActive.setSelection(1);
-            } else {
-                uploadBinding.spActive.setSelection(2);
-            }
-        }
-
-        var sameChecksum = crc32 != null && crc32.equals(upload.getCrc32());
-        uploadBinding.cbChecksum.setVisibility(sameChecksum ? View.VISIBLE : View.GONE);
-
-        if (station != null) {
-            uploadBinding.spCountries.setVisibility(View.GONE);
-        } else {
-            var countryList = baseApplication.getDbAdapter().getAllCountries();
-            var items = new KeyValueSpinnerItem[countryList.size() + 1];
-            items[0] = new KeyValueSpinnerItem(getString(R.string.chooseCountry), "");
-            int selected = 0;
-
-            for (int i = 0; i < countryList.size(); i++) {
-                var country = countryList.get(i);
-                items[i + 1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
-                if (country.getCode().equals(upload.getCountry())) {
-                    selected = i + 1;
-                }
-            }
-            var countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
-            countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            uploadBinding.spCountries.setAdapter(countryAdapter);
-            uploadBinding.spCountries.setSelection(selected);
-        }
-
-        uploadBinding.txtPanorama.setText(Html.fromHtml(getString(R.string.panorama_info), Html.FROM_HTML_MODE_COMPACT));
-        uploadBinding.txtPanorama.setMovementMethod(LinkMovementMethod.getInstance());
-        uploadBinding.txtPanorama.setLinkTextColor(Color.parseColor("#c71c4d"));
-
-        String overrideLicense = null;
-        if (station != null) {
-            overrideLicense = Country.getCountryByCode(countries, station.getCountry()).map(Country::getOverrideLicense).orElse(null);
-        }
-        if (overrideLicense != null) {
-            uploadBinding.cbSpecialLicense.setText(getString(R.string.special_license, overrideLicense));
-        }
-        uploadBinding.cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
-
-        var alertDialog = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
-                .setTitle(station != null ? R.string.photo_upload : R.string.report_missing_station)
-                .setView(uploadBinding.getRoot())
-                .setIcon(R.drawable.ic_bullhorn_48px)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel())
-                .create();
-        alertDialog.show();
-
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            if (uploadBinding.cbSpecialLicense.getText().length() > 0 && !uploadBinding.cbSpecialLicense.isChecked()) {
-                Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show();
-                return;
-            }
-            if (sameChecksum && !uploadBinding.cbChecksum.isChecked()) {
-                Toast.makeText(this, R.string.photo_checksum, Toast.LENGTH_LONG).show();
-                return;
-            }
-            if (station == null) {
-                if (uploadBinding.spActive.getSelectedItemPosition() == 0) {
-                    Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                var selectedCountry = (KeyValueSpinnerItem) uploadBinding.spCountries.getSelectedItem();
-                upload.setCountry(selectedCountry.getValue());
-            }
-            alertDialog.dismiss();
-
-            binding.details.progressBar.setVisibility(View.VISIBLE);
-
-            var stationTitle = binding.details.etbahnhofname.getText().toString();
-            var comment = uploadBinding.etComment.getText().toString();
-            upload.setTitle(stationTitle);
-            upload.setComment(comment);
-
+    private Intent createPhotoSendIntent() {
+        if (selectedPhoto != null) {
+            var sendIntent = new Intent(Intent.ACTION_SEND);
+            var newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
             try {
-                stationTitle = URLEncoder.encode(binding.details.etbahnhofname.getText().toString(), String.valueOf(StandardCharsets.UTF_8));
-                comment = URLEncoder.encode(comment, String.valueOf(StandardCharsets.UTF_8));
-            } catch (UnsupportedEncodingException e) {
-                Log.e(TAG, "Error encoding station title or comment", e);
+                Log.i(TAG, "Save photo to: " + newFile);
+                selectedPhoto.getBitmap().compress(Bitmap.CompressFormat.JPEG, Constants.STORED_PHOTO_QUALITY, new FileOutputStream(newFile));
+                sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
+                        BuildConfig.APPLICATION_ID + ".fileprovider", newFile));
+                return sendIntent;
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Error saving cached bitmap", e);
             }
-            upload.setActive(uploadBinding.spActive.getSelectedItemPosition() == 1);
-            baseApplication.getDbAdapter().updateUpload(upload);
-
-            var mediaFile = getStoredMediaFile(upload);
-            assert mediaFile != null;
-            var file = mediaFile.exists() ? RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName()))) : RequestBody.create(new byte[]{}, MediaType.parse("application/octet-stream"));
-            rsapiClient.photoUpload(bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
-                    stationTitle, latitude, longitude, comment, upload.getActive(), file).enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<InboxResponse> call, @NonNull Response<InboxResponse> response) {
-                    binding.details.progressBar.setVisibility(View.GONE);
-                    InboxResponse inboxResponse;
-                    if (response.isSuccessful()) {
-                        inboxResponse = response.body();
-                    } else if (response.code() == 401) {
-                        SimpleDialogs.confirm(DetailsActivity.this, R.string.authorization_failed);
-                        return;
-                    } else {
-                        assert response.errorBody() != null;
-                        var gson = new Gson();
-                        inboxResponse = gson.fromJson(response.errorBody().charStream(), InboxResponse.class);
-                    }
-
-                    assert inboxResponse != null;
-                    upload.setRemoteId(inboxResponse.getId());
-                    upload.setInboxUrl(inboxResponse.getInboxUrl());
-                    upload.setUploadState(inboxResponse.getState().getUploadState());
-                    upload.setCrc32(inboxResponse.getCrc32());
-                    baseApplication.getDbAdapter().updateUpload(upload);
-                    SimpleDialogs.confirm(DetailsActivity.this, inboxResponse.getState().getMessageId());
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<InboxResponse> call, @NonNull Throwable t) {
-                    Log.e(TAG, "Error uploading photo", t);
-                    binding.details.progressBar.setVisibility(View.GONE);
-
-                    SimpleDialogs.confirm(DetailsActivity.this,
-                            String.format(getText(InboxResponse.InboxResponseState.ERROR.getMessageId()).toString(), t.getMessage()));
-                    fetchUploadStatus(upload); // try to get the upload state again
-                }
-            });
-        });
-    }
-
-    private Intent createFotoSendIntent() {
-        var sendIntent = new Intent(Intent.ACTION_SEND);
-        var file = getStoredMediaFile(upload);
-        if (file != null && file.canRead()) {
-            sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
-                    BuildConfig.APPLICATION_ID + ".fileprovider", file));
-        } else if (!photoBitmaps.isEmpty()) {
-            // TODO: select the current visible photo
-            photoBitmaps.values().stream().filter(Objects::nonNull).findAny().map(photoBitmap -> {
-                var newFile = FileUtils.getImageCacheFile(getApplicationContext(), String.valueOf(System.currentTimeMillis()));
-                try {
-                    saveScaledBitmap(newFile, photoBitmap);
-                    sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(DetailsActivity.this,
-                            BuildConfig.APPLICATION_ID + ".fileprovider", newFile));
-                } catch (FileNotFoundException e) {
-                    Log.e(TAG, "Error saving cached bitmap", e);
-                }
-                return null;
-            });
         }
-        return sendIntent;
+        return null;
     }
 
     private void startNavigation(Context context) {
@@ -864,8 +466,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 .setAdapter(adapter, (dialog, position) -> {
                     var item = adapter.getItem(position);
                     assert item != null;
-                    var lat = station != null ? station.getLat() : latitude;
-                    var lon = station != null ? station.getLon() : longitude;
+                    var lat = station.getLat();
+                    var lon = station.getLon();
                     var intent = item.createIntent(DetailsActivity.this, lat, lon, binding.details.etbahnhofname.getText().toString(), getMarkerRes());
                     try {
                         startActivity(intent);
@@ -877,7 +479,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     public void onPageablePhotoSelected(PhotoPagerAdapter.PageablePhoto pageablePhoto) {
         selectedPhoto = pageablePhoto;
-        localPhotoUsed = false;
         setButtonEnabled(binding.details.buttonUpload, false);
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
 
@@ -925,96 +526,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         );
     }
 
-    /**
-     * Fetch bitmap from device local location, if it exists, and set the photo view.
-     */
-    private void setLocalBitmap(Upload upload) {
-        var localPhoto = checkForLocalPhoto(upload);
-        if (localPhoto == null) {
-            localPhotoUsed = false;
-            binding.details.licenseTag.setVisibility(View.INVISIBLE);
-        } else {
-            var pageablePhoto = PhotoPagerAdapter.PageablePhoto.builder()
-                    .bitmap(localPhoto)
-                    .build();
-            photoPagerAdapter.addPageablePhoto(pageablePhoto);
-            fetchUploadStatus(upload);
-        }
-    }
-
-    private void fetchUploadStatus(Upload upload) {
-        if (upload == null) {
-            return;
-        }
-        setButtonEnabled(binding.details.buttonUpload, true);
-        var stateQuery = InboxStateQuery.builder()
-                .id(upload.getRemoteId())
-                .countryCode(upload.getCountry())
-                .stationId(upload.getStationId())
-                .build();
-
-        rsapiClient.queryUploadState(List.of(stateQuery)).enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<List<InboxStateQuery>> call, @NonNull Response<List<InboxStateQuery>> response) {
-                var stateQueries = response.body();
-                if (stateQueries != null && !stateQueries.isEmpty()) {
-                    var stateQuery = stateQueries.get(0);
-                    binding.details.licenseTag.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
-                    binding.details.licenseTag.setTextColor(getResources().getColor(stateQuery.getState().getColorId(), null));
-                    binding.details.licenseTag.setVisibility(View.VISIBLE);
-                    upload.setUploadState(stateQuery.getState());
-                    upload.setRejectReason(stateQuery.getRejectedReason());
-                    upload.setCrc32(stateQuery.getCrc32());
-                    upload.setRemoteId(stateQuery.getId());
-                    baseApplication.getDbAdapter().updateUpload(upload);
-                } else {
-                    Log.w(TAG, "Upload states not processable");
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<InboxStateQuery>> call, @NonNull Throwable t) {
-                Log.e(TAG, "Error retrieving upload state", t);
-                Toast.makeText(DetailsActivity.this,
-                        R.string.error_retrieving_upload_state,
-                        Toast.LENGTH_LONG).show();
-            }
-        });
-
-    }
-
     private void setButtonEnabled(ImageButton imageButton, boolean enabled) {
         imageButton.setEnabled(enabled);
         imageButton.setImageAlpha(enabled ? 255 : 125);
-    }
-
-    /**
-     * Check if there's a local photo file for this station.
-     */
-    @Nullable
-    private Bitmap checkForLocalPhoto(Upload upload) {
-        // show the image
-        var localFile = getStoredMediaFile(upload);
-        Log.d(TAG, "File: " + localFile);
-        crc32 = null;
-        if (localFile != null && localFile.canRead()) {
-            Log.d(TAG, "FileGetPath: " + localFile.getPath());
-            try (var cis = new CheckedInputStream(new FileInputStream(localFile), new CRC32())) {
-                var scaledScreen = BitmapFactory.decodeStream(cis);
-                crc32 = cis.getChecksum().getValue();
-                Log.d(TAG, "img width " + scaledScreen.getWidth() + ", height " + scaledScreen.getHeight() + ", crc32 " + crc32);
-                localPhotoUsed = true;
-                setButtonEnabled(binding.details.buttonUpload, true);
-                return scaledScreen;
-            } catch (Exception e) {
-                Log.e(TAG, String.format("Error reading media file for station %s", bahnhofId), e);
-            }
-        } else {
-            localPhotoUsed = false;
-            setButtonEnabled(binding.details.buttonUpload, false);
-            Log.e(TAG, String.format("Media file not available for station %s", bahnhofId));
-        }
-        return null;
     }
 
 }

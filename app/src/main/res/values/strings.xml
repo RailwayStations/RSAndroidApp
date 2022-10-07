@@ -270,5 +270,6 @@
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <string name="problem_wrong_lat_lon">Please provide proper latitue and longitude values</string>
+    <string name="title_activity_upload">Upload</string>
 
 </resources>

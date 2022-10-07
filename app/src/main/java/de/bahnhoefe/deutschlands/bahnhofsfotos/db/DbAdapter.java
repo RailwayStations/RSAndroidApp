@@ -356,7 +356,7 @@ public class DbAdapter {
     }
 
     public Upload getPendingUploadForStation(Station station) {
-        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + "=? AND " + Constants.UPLOADS.STATION_ID + "=? AND " + getPendingUploadWhereClause(),
+        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + " = ? AND " + Constants.UPLOADS.STATION_ID + " = ? AND " + getPendingUploadWhereClause(),
                 new String[]{station.getCountry(), station.getId()}, null, null, Constants.UPLOADS.CREATED_AT + " DESC")) {
             if (cursor.moveToFirst()) {
                 return createUploadFromCursor(cursor);
@@ -367,7 +367,7 @@ public class DbAdapter {
     }
 
     public Upload getPendingUploadForCoordinates(double lat, double lon) {
-        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.LAT + "=? AND " + Constants.UPLOADS.LON + "=? AND " + getPendingUploadWhereClause(),
+        try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.LAT + " = ? AND " + Constants.UPLOADS.LON + " = ? AND " + getPendingUploadWhereClause(),
                 new String[]{String.valueOf(lat), String.valueOf(lon)}, null, null, Constants.UPLOADS.CREATED_AT + " DESC")) {
             if (cursor.moveToFirst()) {
                 return createUploadFromCursor(cursor);
