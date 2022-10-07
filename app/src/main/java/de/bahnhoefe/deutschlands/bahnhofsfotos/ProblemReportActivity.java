@@ -163,13 +163,14 @@ public class ProblemReportActivity extends AppCompatActivity {
             return;
         }
 
-        upload = new Upload();
-        upload.setCountry(station.getCountry());
-        upload.setStationId(station.getId());
-        upload.setProblemType(type);
-        upload.setComment(comment);
-        upload.setLat(lat);
-        upload.setLon(lon);
+        upload = Upload.builder()
+                .country(station.getCountry())
+                .stationId(station.getId())
+                .problemType(type)
+                .comment(comment)
+                .lat(lat)
+                .lon(lon)
+                .build();
 
         upload = baseApplication.getDbAdapter().insertUpload(upload);
 

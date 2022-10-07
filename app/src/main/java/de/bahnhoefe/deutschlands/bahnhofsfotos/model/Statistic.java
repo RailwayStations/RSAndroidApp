@@ -1,45 +1,15 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
-import androidx.annotation.NonNull;
+import lombok.Builder;
+import lombok.Value;
 
+@Value
+@Builder
 public class Statistic {
-    private final int total;
-    private final int withPhoto;
-    private final int withoutPhoto;
-    private final int photographers;
 
-    public Statistic(int total, int withPhoto, int withoutPhoto, int photographers) {
-        this.total = total;
-        this.withPhoto = withPhoto;
-        this.withoutPhoto = withoutPhoto;
-        this.photographers = photographers;
-    }
-
-    public int getTotal() {
-        return total;
-    }
-
-    public int getWithPhoto() {
-        return withPhoto;
-    }
-
-    public int getWithoutPhoto() {
-        return withoutPhoto;
-    }
-
-    public int getPhotographers() {
-        return photographers;
-    }
-
-    @Override
-    @NonNull
-    public String toString() {
-        return "Statistic{" +
-                "total=" + total +
-                ", withPhoto=" + withPhoto +
-                ", withoutPhoto=" + withoutPhoto +
-                ", photographers=" + photographers +
-                '}';
-    }
+    int total;
+    int withPhoto;
+    int withoutPhoto;
+    int photographers;
 
 }

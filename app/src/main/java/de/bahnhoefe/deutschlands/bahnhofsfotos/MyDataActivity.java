@@ -95,9 +95,11 @@ public class MyDataActivity extends AppCompatActivity {
                     case 200:
                         Log.i(TAG, "Successfully loaded profile");
                         var remoteProfile = response.body();
-                        remoteProfile.setPassword(binding.myData.etPassword.getText().toString());
-                        saveLocalProfile(remoteProfile);
-                        showProfileView();
+                        if (remoteProfile != null) {
+                            remoteProfile.setPassword(binding.myData.etPassword.getText().toString());
+                            saveLocalProfile(remoteProfile);
+                            showProfileView();
+                        }
                         break;
                     case 401:
                         SimpleDialogs.confirm(MyDataActivity.this, R.string.authorization_failed);
@@ -200,23 +202,24 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     private Profile createProfileFromUI(boolean register) {
-        var profile = new Profile();
-        profile.setNickname(binding.myData.etNickname.getText().toString().trim());
-        profile.setEmail(binding.myData.etEmail.getText().toString().trim());
-        profile.setLicense(license);
-        profile.setPhotoOwner(binding.myData.cbOwnPhoto.isChecked());
-        profile.setAnonymous(binding.myData.cbAnonymous.isChecked());
-        profile.setLink(binding.myData.etLinking.getText().toString().trim());
+        var profileBuilder = Profile.builder()
+                .nickname(binding.myData.etNickname.getText().toString().trim())
+                .email(binding.myData.etEmail.getText().toString().trim())
+                .license(license)
+                .photoOwner(binding.myData.cbOwnPhoto.isChecked())
+                .anonymous(binding.myData.cbAnonymous.isChecked())
+                .link(binding.myData.etLinking.getText().toString().trim());
+
         if (register) {
-            profile.setPassword(binding.myData.etInitPassword.getText().toString().trim());
-            profile.setNewPassword(binding.myData.etInitPassword.getText().toString().trim());
+            profileBuilder.password(binding.myData.etInitPassword.getText().toString().trim())
+                    .newPassword(binding.myData.etInitPassword.getText().toString().trim());
         } else {
             if (this.profile != null) {
-                profile.setEmailVerified(this.profile.isEmailVerified());
+                profileBuilder.emailVerified(this.profile.isEmailVerified());
             }
-            profile.setPassword(binding.myData.etPassword.getText().toString().trim());
+            profileBuilder.password(binding.myData.etPassword.getText().toString().trim());
         }
-        return profile;
+        return profileBuilder.build();
     }
 
     public boolean saveProfile(boolean registration) {
@@ -301,7 +304,7 @@ public class MyDataActivity extends AppCompatActivity {
             return false;
         }
         String url = binding.myData.etLinking.getText().toString();
-        if (StringUtils.isNotBlank(url)&& !isValidHTTPURL(url)) {
+        if (StringUtils.isNotBlank(url) && !isValidHTTPURL(url)) {
             SimpleDialogs.confirm(this, R.string.missing_link);
             return false;
         }
@@ -367,9 +370,7 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void logout(View view) {
-        profile.setNickname(null);
-        profile.setEmail(null);
-        profile.setPassword(null);
+        profile = Profile.builder().build();
         saveLocalProfile(profile);
         binding.myData.profileForm.setVisibility(View.GONE);
         binding.myData.loginForm.setVisibility(View.VISIBLE);
@@ -418,10 +419,10 @@ public class MyDataActivity extends AppCompatActivity {
         var passwordBinding = ChangePasswordBinding.inflate(getLayoutInflater());
 
         builder.setTitle(R.string.bt_change_password)
-               .setView(passwordBinding.getRoot())
-               .setIcon(R.mipmap.ic_launcher)
-               .setPositiveButton(android.R.string.ok, null)
-               .setNegativeButton(android.R.string.cancel, (dialog, id) -> dialog.cancel());
+                .setView(passwordBinding.getRoot())
+                .setIcon(R.mipmap.ic_launcher)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, (dialog, id) -> dialog.cancel());
 
         var alertDialog = builder.create();
         alertDialog.show();

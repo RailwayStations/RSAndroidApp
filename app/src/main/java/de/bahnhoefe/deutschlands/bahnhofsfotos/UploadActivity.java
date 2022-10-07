@@ -6,7 +6,6 @@ import static android.graphics.Color.WHITE;
 import android.app.Activity;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -63,7 +62,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
@@ -293,13 +291,12 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
     private void verifyCurrentPhotoUploadExists() {
         if (upload == null || upload.isProblemReport() || upload.isUploaded()) {
-            upload = new Upload();
-            if (station != null) {
-                upload.setCountry(station.getCountry());
-                upload.setStationId(station.getId());
-            }
-            upload.setLat(latitude);
-            upload.setLon(longitude);
+            upload = Upload.builder()
+                    .country(station != null ? station.getCountry() : null)
+                    .stationId(station != null ? station.getId() : null)
+                    .lat(latitude)
+                    .lon(longitude)
+                    .build();
             upload = baseApplication.getDbAdapter().insertUpload(upload);
         }
     }
@@ -351,9 +348,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
         getMenuInflater().inflate(R.menu.upload, menu);
-        var navToStation = menu.findItem(R.id.nav_to_station);
-        navToStation.getIcon().mutate();
-        navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
 
         if (localPhotoUsed) {
             enableMenuItem(menu, R.id.share_photo);
@@ -397,50 +391,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         }
 
         return true;
-    }
-
-    /**
-     * Tries to open the provider app if installed. If it is not installed or cannot be opened Google Play Store will be opened instead.
-     *
-     * @param context activity context
-     */
-    public void openAppOrPlayStore(ProviderApp providerApp, Context context) {
-        // Try to open App
-        boolean success = openApp(providerApp, context);
-        // Could not open App, open play store instead
-        if (!success) {
-            var intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(providerApp.getUrl()));
-            context.startActivity(intent);
-        }
-    }
-
-    /**
-     * Open another app.
-     *
-     * @param context activity context
-     * @return true if likely successful, false if unsuccessful
-     * @see https://stackoverflow.com/a/7596063/714965
-     */
-    @SuppressWarnings("JavadocReference")
-    private boolean openApp(ProviderApp providerApp, Context context) {
-        if (!providerApp.isAndroid()) {
-            return false;
-        }
-        var manager = context.getPackageManager();
-        try {
-            String packageName = Uri.parse(providerApp.getUrl()).getQueryParameter("id");
-            assert packageName != null;
-            var intent = manager.getLaunchIntentForPackage(packageName);
-            if (intent == null) {
-                return false;
-            }
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-            context.startActivity(intent);
-            return true;
-        } catch (ActivityNotFoundException e) {
-            return false;
-        }
     }
 
     @Override

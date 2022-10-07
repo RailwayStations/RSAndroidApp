@@ -300,7 +300,12 @@ public class DbAdapter {
     public Statistic getStatistic(String country) {
         try (var cursor = db.rawQuery("SELECT COUNT(*), COUNT(" + Constants.STATIONS.PHOTO_URL + "), COUNT(DISTINCT(" + Constants.STATIONS.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Constants.STATIONS.COUNTRY + " = ?", new String[]{country})) {
             if (cursor.moveToNext()) {
-                return new Statistic(cursor.getInt(0), cursor.getInt(1), cursor.getInt(0) - cursor.getInt(1), cursor.getInt(2));
+                return Statistic.builder()
+                        .total(cursor.getInt(0))
+                        .withPhoto(cursor.getInt(1))
+                        .withoutPhoto(cursor.getInt(0) - cursor.getInt(1))
+                        .photographers(cursor.getInt(2))
+                        .build();
             }
         }
         return null;
@@ -558,22 +563,22 @@ public class DbAdapter {
 
     @NonNull
     private Station createStationFromCursor(@NonNull Cursor cursor) {
-        var station = new Station();
-        station.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.TITLE)));
-        station.setCountry(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.COUNTRY)));
-        station.setId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID)));
-        station.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LAT)));
-        station.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LON)));
-        station.setPhotoId(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_ID)));
-        station.setPhotoUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_URL)));
-        station.setPhotographer(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER)));
-        station.setPhotographerUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER_URL)));
-        station.setLicense(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE)));
-        station.setLicenseUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE_URL)));
-        station.setDs100(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.DS100)));
-        station.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.STATIONS.ACTIVE)) == 1);
-        station.setOutdated(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.STATIONS.OUTDATED)) == 1);
-        return station;
+        return Station.builder()
+                .title(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.TITLE)))
+                .country(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.COUNTRY)))
+                .id(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID)))
+                .lat(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LAT)))
+                .lon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.STATIONS.LON)))
+                .photoId(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_ID)))
+                .photoUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_URL)))
+                .photographer(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER)))
+                .photographerUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTOGRAPHER_URL)))
+                .license(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE)))
+                .licenseUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.LICENSE_URL)))
+                .ds100(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.DS100)))
+                .active(Boolean.TRUE.equals(getBoolean(cursor, Constants.STATIONS.ACTIVE)))
+                .outdated(Boolean.TRUE.equals(getBoolean(cursor, Constants.STATIONS.OUTDATED)))
+                .build();
     }
 
     @NonNull
@@ -600,39 +605,52 @@ public class DbAdapter {
 
     @NonNull
     private Upload createUploadFromCursor(@NonNull Cursor cursor) {
-        var upload = new Upload();
-        upload.setComment(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COMMENT)));
-        upload.setCountry(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COUNTRY)));
-        upload.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.CREATED_AT)));
-        upload.setId(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ID)));
-        upload.setInboxUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.INBOX_URL)));
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LAT))) {
-            upload.setLat(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LAT)));
-        }
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LON))) {
-            upload.setLon(cursor.getDouble(cursor.getColumnIndexOrThrow(Constants.UPLOADS.LON)));
-        }
+        var uploadBuilder = Upload.builder()
+                .comment(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COMMENT)))
+                .country(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COUNTRY)))
+                .createdAt(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.CREATED_AT)))
+                .id(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ID)))
+                .inboxUrl(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.INBOX_URL)))
+                .lat(getDouble(cursor, Constants.UPLOADS.LAT))
+                .lon(getDouble(cursor, Constants.UPLOADS.LON))
+                .rejectReason(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON)))
+                .remoteId(getLong(cursor, Constants.UPLOADS.REMOTE_ID))
+                .stationId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.STATION_ID)))
+                .title(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE)))
+                .active(getBoolean(cursor, Constants.UPLOADS.ACTIVE))
+                .crc32(getLong(cursor, Constants.UPLOADS.CRC32));
+
         var problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
         if (problemType != null) {
-            upload.setProblemType(ProblemType.valueOf(problemType));
+            uploadBuilder.problemType(ProblemType.valueOf(problemType));
         }
-        upload.setRejectReason(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON)));
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID))) {
-            upload.setRemoteId(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID)));
-        }
-        upload.setStationId(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.STATION_ID)));
-        upload.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE)));
         var uploadState = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
         if (uploadState != null) {
-            upload.setUploadState(UploadState.valueOf(uploadState));
+            uploadBuilder.uploadState(UploadState.valueOf(uploadState));
         }
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ACTIVE))) {
-            upload.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(Constants.UPLOADS.ACTIVE)) == 1);
+
+        return uploadBuilder.build();
+    }
+
+    private Boolean getBoolean(Cursor cursor, String columnName) {
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(columnName))) {
+            return cursor.getInt(cursor.getColumnIndexOrThrow(columnName)) == 1;
         }
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Constants.UPLOADS.CRC32))) {
-            upload.setCrc32(cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.CRC32)));
+        return null;
+    }
+
+    private Double getDouble(final Cursor cursor, final String columnName) {
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(columnName))) {
+            return cursor.getDouble(cursor.getColumnIndexOrThrow(columnName));
         }
-        return upload;
+        return null;
+    }
+
+    private Long getLong(final Cursor cursor, final String columnName) {
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(columnName))) {
+            return cursor.getLong(cursor.getColumnIndexOrThrow(columnName));
+        }
+        return null;
     }
 
     public Station fetchStationByRowId(long id) {

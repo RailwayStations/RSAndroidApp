@@ -321,15 +321,15 @@ public class BaseApplication extends Application {
     }
 
     public Profile getProfile() {
-        var profile = new Profile();
-        profile.setLicense(getLicense());
-        profile.setPhotoOwner(getPhotoOwner());
-        profile.setAnonymous(getAnonymous());
-        profile.setLink(getPhotographerLink());
-        profile.setNickname(getNickname());
-        profile.setEmail(getEmail());
-        profile.setPassword(getPassword());
-        return profile;
+        return Profile.builder()
+                .license(getLicense())
+                .photoOwner(getPhotoOwner())
+                .anonymous(getAnonymous())
+                .link(getPhotographerLink())
+                .nickname(getNickname())
+                .email(getEmail())
+                .password(getPassword())
+                .build();
     }
 
     public RSAPIClient getRsapiClient() {
