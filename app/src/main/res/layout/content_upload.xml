@@ -35,12 +35,11 @@
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/progressBar"
             android:src="@drawable/ic_stations_with_photo"
-            android:scaleType="centerCrop"
-            tools:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             android:contentDescription="@string/station_photo" />
 
         <EditText
-            android:id="@+id/etbahnhofname"
+            android:id="@+id/et_station_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -58,18 +57,16 @@
             android:id="@+id/upload_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
+            android:layout_above="@id/buttons"
             android:layout_alignEnd="@id/imageview"
-            android:text="@string/license_tag"
             android:background="#50ffffff"
             android:padding="8dp"
             android:textColorLink="@color/colorPrimary" />
 
         <LinearLayout
             android:id="@+id/buttons"
-            android:layout_above="@id/upload_status"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
+            android:layout_alignParentBottom="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 

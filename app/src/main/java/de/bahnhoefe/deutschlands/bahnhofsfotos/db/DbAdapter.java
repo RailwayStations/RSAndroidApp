@@ -160,25 +160,24 @@ public class DbAdapter {
         db.beginTransaction();
         try {
             deleteCountries();
-
-            countries.stream()
-                    .map(this::toContentValues)
-                    .forEach(values -> db.insert(DATABASE_TABLE_COUNTRIES, null, values));
-
-            countries.stream()
-                    .flatMap(c -> c.getProviderApps().stream())
-                    .map(this::toContentValues)
-                    .forEach(values -> db.insert(DATABASE_TABLE_PROVIDER_APPS, null, values));
-
+            countries.forEach(this::insertCountry);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
         }
     }
 
-    private ContentValues toContentValues(ProviderApp app) {
+    private void insertCountry(Country country) {
+        db.insert(DATABASE_TABLE_COUNTRIES, null, toContentValues(country));
+
+        country.getProviderApps().stream()
+                .map(p -> toContentValues(country.getCode(), p))
+                .forEach(values -> db.insert(DATABASE_TABLE_PROVIDER_APPS, null, values));
+    }
+
+    private ContentValues toContentValues(String countryCode, ProviderApp app) {
         var values = new ContentValues();
-        values.put(Constants.PROVIDER_APPS.COUNTRYSHORTCODE, app.getCountryCode());
+        values.put(Constants.PROVIDER_APPS.COUNTRYSHORTCODE, countryCode);
         values.put(Constants.PROVIDER_APPS.PA_TYPE, app.getType());
         values.put(Constants.PROVIDER_APPS.PA_NAME, app.getName());
         values.put(Constants.PROVIDER_APPS.PA_URL, app.getUrl());
@@ -596,7 +595,6 @@ public class DbAdapter {
     @NonNull
     private ProviderApp createProviderAppFromCursor(@NonNull Cursor cursor) {
         return ProviderApp.builder()
-                .countryCode(cursor.getString(cursor.getColumnIndexOrThrow(Constants.PROVIDER_APPS.COUNTRYSHORTCODE)))
                 .name(cursor.getString(cursor.getColumnIndexOrThrow(Constants.PROVIDER_APPS.PA_NAME)))
                 .type(cursor.getString(cursor.getColumnIndexOrThrow(Constants.PROVIDER_APPS.PA_TYPE)))
                 .url(cursor.getString(cursor.getColumnIndexOrThrow(Constants.PROVIDER_APPS.PA_URL)))

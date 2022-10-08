@@ -121,7 +121,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         binding.upload.buttonUpload.setOnClickListener(v -> {
                     if (isNotLoggedIn()) {
                         Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-                    } else if (TextUtils.isEmpty(binding.upload.etbahnhofname.getText())) {
+                    } else if (TextUtils.isEmpty(binding.upload.etStationTitle.getText())) {
                         Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
                     } else {
                         uploadPhoto();
@@ -166,9 +166,9 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
             if (station != null) {
                 bahnhofId = station.getId();
-                binding.upload.etbahnhofname.setText(station.getTitle());
-                binding.upload.etbahnhofname.setInputType(EditorInfo.TYPE_NULL);
-                binding.upload.etbahnhofname.setSingleLine(false);
+                binding.upload.etStationTitle.setText(station.getTitle());
+                binding.upload.etStationTitle.setInputType(EditorInfo.TYPE_NULL);
+                binding.upload.etStationTitle.setSingleLine(false);
 
                 if (upload == null) {
                     upload = baseApplication.getDbAdapter().getPendingUploadForStation(station);
@@ -180,9 +180,9 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     upload = baseApplication.getDbAdapter().getPendingUploadForCoordinates(latitude, longitude);
                 }
 
-                binding.upload.etbahnhofname.setInputType(EditorInfo.TYPE_CLASS_TEXT);
+                binding.upload.etStationTitle.setInputType(EditorInfo.TYPE_CLASS_TEXT);
                 if (upload != null) {
-                    binding.upload.etbahnhofname.setText(upload.getTitle());
+                    binding.upload.etStationTitle.setText(upload.getTitle());
                     setLocalBitmap(upload);
                 }
             }
@@ -198,10 +198,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
     private void readPreferences() {
         nickname = baseApplication.getNickname();
-    }
-
-    private boolean isOwner() {
-        return station != null && TextUtils.equals(nickname, station.getPhotographer());
     }
 
     private boolean isNotLoggedIn() {
@@ -251,7 +247,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         var intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
         intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, getResources().getString(R.string.app_name));
-        intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, binding.upload.etbahnhofname.getText());
+        intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, binding.upload.etStationTitle.getText());
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         try {
             imageCaptureResultLauncher.launch(intent);
@@ -378,7 +374,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
             Country.getCountryByCode(countries, station.getCountry()).map(country -> {
                 var shareIntent = createPhotoSendIntent();
                 if (shareIntent != null) {
-                    shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + binding.upload.etbahnhofname.getText());
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + binding.upload.etStationTitle.getText());
                     shareIntent.setType("image/jpeg");
                     startActivity(createChooser(shareIntent, "send"));
                 }
@@ -497,13 +493,13 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
             binding.upload.progressBar.setVisibility(View.VISIBLE);
 
-            var stationTitle = binding.upload.etbahnhofname.getText().toString();
+            var stationTitle = binding.upload.etStationTitle.getText().toString();
             var comment = uploadBinding.etComment.getText().toString();
             upload.setTitle(stationTitle);
             upload.setComment(comment);
 
             try {
-                stationTitle = URLEncoder.encode(binding.upload.etbahnhofname.getText().toString(), String.valueOf(StandardCharsets.UTF_8));
+                stationTitle = URLEncoder.encode(binding.upload.etStationTitle.getText().toString(), String.valueOf(StandardCharsets.UTF_8));
                 comment = URLEncoder.encode(comment, String.valueOf(StandardCharsets.UTF_8));
             } catch (UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);

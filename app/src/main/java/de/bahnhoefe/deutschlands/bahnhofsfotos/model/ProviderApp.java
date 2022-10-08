@@ -11,7 +11,6 @@ import lombok.Value;
 @Builder
 public class ProviderApp {
 
-    String countryCode;
     String type;
     String name;
     String url;

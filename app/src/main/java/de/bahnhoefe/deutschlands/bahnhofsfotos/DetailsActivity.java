@@ -20,9 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -111,13 +109,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     startActivity(intent);
                 }
         );
-        binding.details.buttonUpload.setOnClickListener(v -> {
+        binding.details.buttonAddPhoto.setOnClickListener(v -> {
                     var intent = new Intent(DetailsActivity.this, UploadActivity.class);
                     intent.putExtra(UploadActivity.EXTRA_STATION, station);
                     startActivity(intent);
                 }
         );
-        
+
         // switch off image and license view until we actually have a foto
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
         binding.details.licenseTag.setMovementMethod(LinkMovementMethod.getInstance());
@@ -134,17 +132,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             station = (Station) intent.getSerializableExtra(EXTRA_STATION);
 
             if (station == null) {
-                Log.w(TAG, "EXTRA_BAHNHOF and EXTRA_LATITUDE or EXTRA_LONGITUDE in intent data missing");
-                Toast.makeText(this, R.string.station_or_coords_not_found, Toast.LENGTH_LONG).show();
+                Log.w(TAG, "EXTRA_STATION in intent data missing");
+                Toast.makeText(this, R.string.station_not_found, Toast.LENGTH_LONG).show();
                 finish();
                 return;
             }
 
             binding.details.marker.setImageDrawable(ContextCompat.getDrawable(this, getMarkerRes()));
 
-            binding.details.etbahnhofname.setText(station.getTitle());
-            binding.details.etbahnhofname.setInputType(EditorInfo.TYPE_NULL);
-            binding.details.etbahnhofname.setSingleLine(false);
+            binding.details.tvStationTitle.setText(station.getTitle());
+            binding.details.tvStationTitle.setSingleLine(false);
 
             if (station.hasPhoto()) {
                 if (ConnectionUtil.checkInternetConnection(this)) {
@@ -298,7 +295,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (shareIntent == null) {
                     return null;
                 }
-                shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + binding.details.etbahnhofname.getText());
+                shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + binding.details.tvStationTitle.getText());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 return null;
@@ -410,7 +407,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
 
         new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
-                .setTitle(binding.details.etbahnhofname.getText())
+                .setTitle(binding.details.tvStationTitle.getText())
                 .setView(stationInfoBinding.getRoot())
                 .setIcon(R.mipmap.ic_launcher)
                 .setPositiveButton(android.R.string.ok, null)
@@ -468,7 +465,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                     assert item != null;
                     var lat = station.getLat();
                     var lon = station.getLon();
-                    var intent = item.createIntent(DetailsActivity.this, lat, lon, binding.details.etbahnhofname.getText().toString(), getMarkerRes());
+                    var intent = item.createIntent(DetailsActivity.this, lat, lon, binding.details.tvStationTitle.getText().toString(), getMarkerRes());
                     try {
                         startActivity(intent);
                     } catch (Exception e) {
@@ -479,15 +476,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
 
     public void onPageablePhotoSelected(PhotoPagerAdapter.PageablePhoto pageablePhoto) {
         selectedPhoto = pageablePhoto;
-        setButtonEnabled(binding.details.buttonUpload, false);
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
 
         if (pageablePhoto == null) {
-            return;
-        }
-
-        if (pageablePhoto.getUrl() == null) {
-            setButtonEnabled(binding.details.buttonUpload, true);
             return;
         }
 
@@ -524,11 +515,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                                 licenseText), Html.FROM_HTML_MODE_LEGACY
                 )
         );
-    }
-
-    private void setButtonEnabled(ImageButton imageButton, boolean enabled) {
-        imageButton.setEnabled(enabled);
-        imageButton.setImageAlpha(enabled ? 255 : 125);
     }
 
 }

@@ -271,5 +271,7 @@
     <string name="longitude">Longitude</string>
     <string name="problem_wrong_lat_lon">Please provide proper latitue and longitude values</string>
     <string name="title_activity_upload">Upload</string>
+    <string name="add_a_photo">Add a photo</string>
+    <string name="station_not_found">Station not found</string>
 
 </resources>
