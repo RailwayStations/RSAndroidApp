@@ -1,14 +1,13 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import static android.content.Intent.ACTION_VIEW;
 import static android.content.Intent.createChooser;
-import static android.graphics.Color.WHITE;
 
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
@@ -66,7 +65,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     // Names of Extras that this class reacts to
     public static final String EXTRA_STATION = "EXTRA_STATION";
 
-    private static final int ALPHA = 128;
     private static final String LINK_FORMAT = "<b><a href=\"%s\">%s</a></b>";
 
     private BaseApplication baseApplication;
@@ -101,20 +99,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 onPageablePhotoSelected(pageablePhoto);
             }
         });
-
-        binding.details.buttonReportProblem.setOnClickListener(v -> {
-                    var intent = new Intent(DetailsActivity.this, ProblemReportActivity.class);
-                    intent.putExtra(ProblemReportActivity.EXTRA_STATION, station);
-                    intent.putExtra(ProblemReportActivity.EXTRA_PHOTO_ID, selectedPhoto != null ? selectedPhoto.getId() : null);
-                    startActivity(intent);
-                }
-        );
-        binding.details.buttonAddPhoto.setOnClickListener(v -> {
-                    var intent = new Intent(DetailsActivity.this, UploadActivity.class);
-                    intent.putExtra(UploadActivity.EXTRA_STATION, station);
-                    startActivity(intent);
-                }
-        );
 
         // switch off image and license view until we actually have a foto
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
@@ -236,49 +220,24 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.clear();
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.details, menu);
-        var navToStation = menu.findItem(R.id.nav_to_station);
-        navToStation.getIcon().mutate();
-        navToStation.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-
-        if (station != null && Country.getCountryByCode(countries, station.getCountry()).map(Country::hasTimetableUrlTemplate).orElse(false)) {
-            enableMenuItem(menu, R.id.timetable);
-        } else {
-            disableMenuItem(menu, R.id.timetable);
-        }
-
-        boolean hasProviderApps = false;
-        if (station != null) {
-            hasProviderApps = Country.getCountryByCode(countries, station.getCountry()).map(Country::hasCompatibleProviderApps).orElse(false);
-        }
-        if (hasProviderApps) {
-            enableMenuItem(menu, R.id.provider_android_app);
-        } else {
-            disableMenuItem(menu, R.id.provider_android_app);
-        }
-
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    private void enableMenuItem(Menu menu, int id) {
-        var menuItem = menu.findItem(id).setEnabled(true);
-        menuItem.getIcon().mutate();
-        menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-    }
-
-    private void disableMenuItem(Menu menu, int id) {
-        var menuItem = menu.findItem(id).setEnabled(false);
-        menuItem.getIcon().mutate();
-        menuItem.getIcon().setColorFilter(WHITE, PorterDuff.Mode.SRC_ATOP);
-        menuItem.getIcon().setAlpha(ALPHA);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.nav_to_station) {
+        if (itemId == R.id.add_photo) {
+            var intent = new Intent(DetailsActivity.this, UploadActivity.class);
+            intent.putExtra(UploadActivity.EXTRA_STATION, station);
+            startActivity(intent);
+        } else if (itemId == R.id.report_problem) {
+            var intent = new Intent(DetailsActivity.this, ProblemReportActivity.class);
+            intent.putExtra(ProblemReportActivity.EXTRA_STATION, station);
+            intent.putExtra(ProblemReportActivity.EXTRA_PHOTO_ID, selectedPhoto != null ? selectedPhoto.getId() : null);
+            startActivity(intent);
+        } else if (itemId == R.id.nav_to_station) {
             startNavigation(DetailsActivity.this);
         } else if (itemId == R.id.timetable) {
             Country.getCountryByCode(countries, station.getCountry()).map(country -> {
@@ -288,8 +247,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }
                 return null;
             });
+        } else if (itemId == R.id.share_link) {
+            var stationUri = Uri.parse(String.format("https://map.railway-stations.org/station.php?countryCode=%s&stationId=%s", station.getCountry(), station.getId()));
+            startActivity(new Intent(ACTION_VIEW, stationUri));
         } else if (itemId == R.id.share_photo) {
-            // TODO: share raw picture or link to https://map.railway-stations.org/station.php?countryCode={countryCode}&stationId={stationId}
             Country.getCountryByCode(countries, station.getCountry()).map(country -> {
                 var shareIntent = createPhotoSendIntent();
                 if (shareIntent == null) {
@@ -339,7 +300,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         boolean success = openApp(providerApp, context);
         // Could not open App, open play store instead
         if (!success) {
-            var intent = new Intent(Intent.ACTION_VIEW);
+            var intent = new Intent(ACTION_VIEW);
             intent.setData(Uri.parse(providerApp.getUrl()));
             context.startActivity(intent);
         }
@@ -395,11 +356,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     public void showStationInfo(View view) {
         var stationInfoBinding = StationInfoBinding.inflate(getLayoutInflater());
         stationInfoBinding.id.setText(station.getId());
-
-        double lat = station.getLat();
-        double lon = station.getLon();
-        stationInfoBinding.coordinates.setText(String.format(Locale.US, getResources().getString(R.string.coordinates), lat, lon));
-
+        stationInfoBinding.coordinates.setText(String.format(Locale.US, getResources().getString(R.string.coordinates), station.getLat(), station.getLon()));
         stationInfoBinding.active.setText(station != null && station.isActive() ? R.string.active : R.string.inactive);
         stationInfoBinding.owner.setText(station != null && station.getPhotographer() != null ? station.getPhotographer() : "");
         if (station.isOutdated()) {
@@ -440,8 +397,8 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 var item = getItem(position);
                 assert item != null;
 
-                var v = super.getView(position, convertView, parent);
-                TextView tv = v.findViewById(android.R.id.text1);
+                var view = super.getView(position, convertView, parent);
+                TextView tv = view.findViewById(android.R.id.text1);
 
                 //Put the image on the TextView
                 tv.setCompoundDrawablesWithIntrinsicBounds(item.getIconRes(), 0, 0, 0);
@@ -453,7 +410,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 tv.setCompoundDrawablePadding(dp5);
                 tv.setPadding(dp7, 0, 0, 0);
 
-                return v;
+                return view;
             }
         };
 

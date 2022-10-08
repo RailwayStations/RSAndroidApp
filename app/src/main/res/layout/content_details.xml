@@ -74,37 +74,12 @@
             android:id="@+id/license_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/buttons"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:text="@string/license_tag"
             android:background="#50ffffff"
             android:padding="8dp"
             android:textColorLink="@color/colorPrimary" />
-
-        <LinearLayout
-            android:id="@+id/buttons"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <ImageButton
-                android:id="@+id/button_report_problem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_bullhorn_48px"
-                android:background="@null"
-                android:contentDescription="@string/report_problem" />
-
-            <ImageButton
-                android:id="@+id/button_add_photo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_add_a_photo_48"
-                android:background="@null"
-                android:contentDescription="@string/add_a_photo" />
-
-        </LinearLayout>
 
     </RelativeLayout>
 

@@ -2,49 +2,54 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/add_photo"
+        android:orderInCategory="100"
+        android:title="@string/add_a_photo"
+        android:icon="@drawable/ic_add_a_photo_48"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/report_problem"
+        android:orderInCategory="100"
+        android:title="@string/report_problem"
+        android:icon="@drawable/ic_bullhorn_48px"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/nav_to_station"
         android:orderInCategory="100"
         android:title="@string/nav_to_station"
         android:icon="@drawable/ic_directions_white_24px"
-        app:itemIconTint="@color/colorActions"
-        app:itemTextColor="@color/colorActions"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/timetable"
         android:orderInCategory="100"
         android:title="@string/label_timetable"
         android:icon="@drawable/ic_timetable"
-        app:itemIconTint="@color/colorActions"
-        app:itemTextColor="@color/colorActions"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/provider_android_app"
         android:icon="@drawable/ic_launch_white_24px"
         android:orderInCategory="100"
         android:title="@string/provider_android_app"
-        app:itemTextColor="@color/colorActions"
         app:showAsAction="ifRoom" />
 
-    <!-- menu group -->
-    <group android:id="@+id/group_depencies">
+    <item
+        android:id="@+id/share_link"
+        android:orderInCategory="400"
+        android:icon="@drawable/ic_share_white_24px"
+        android:title="@string/share_link"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/share_photo"
         android:orderInCategory="400"
         android:icon="@drawable/ic_share_white_24px"
-        app:itemIconTint="@color/colorActions"
-        app:itemTextColor="@color/colorActions"
         android:title="@string/share_photo"
         app:showAsAction="ifRoom" />
-
-    </group>
 
     <item
         android:id="@+id/station_info"
         android:orderInCategory="500"
         android:icon="@drawable/ic_info_white_24px"
-        app:itemIconTint="@color/colorActions"
-        app:itemTextColor="@color/colorActions"
         android:title="@string/station_info"
         app:showAsAction="ifRoom" />
 
