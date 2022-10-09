@@ -764,8 +764,8 @@ public class DbAdapter {
         return stationList;
     }
 
-    public List<Country> getAllCountries() {
-        var countryList = new ArrayList<Country>();
+    public Set<Country> getAllCountries() {
+        var countryList = new HashSet<Country>();
         var query = "SELECT * FROM " + DATABASE_TABLE_COUNTRIES;
 
         Log.d(TAG, query);

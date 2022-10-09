@@ -16,20 +16,18 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NavUtils;
@@ -39,20 +37,20 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
+import java.util.zip.CheckedOutputStream;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityUploadBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.UploadBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
@@ -86,7 +84,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
     private Upload upload;
     private Station station;
-    private Set<Country> countries;
+    private List<Country> countries;
     private Double latitude;
     private Double longitude;
     private String bahnhofId;
@@ -100,30 +98,9 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
         baseApplication = (BaseApplication) getApplication();
         rsapiClient = baseApplication.getRsapiClient();
-        countries = baseApplication.getDbAdapter().fetchCountriesWithProviderApps(baseApplication.getCountryCodes());
+        countries = new ArrayList<>(baseApplication.getDbAdapter().getAllCountries());
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-
-        binding.upload.buttonTakePicture.setOnClickListener(
-                v -> takePicture()
-        );
-        binding.upload.buttonSelectPicture.setOnClickListener(
-                v -> selectPicture()
-        );
-        binding.upload.buttonUpload.setOnClickListener(v -> {
-                    if (isNotLoggedIn()) {
-                        Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-                    } else if (TextUtils.isEmpty(binding.upload.etStationTitle.getText())) {
-                        Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
-                    } else {
-                        upload();
-                    }
-                }
-        );
-
-        setButtonEnabled(binding.upload.buttonTakePicture, true);
-        setButtonEnabled(binding.upload.buttonSelectPicture, true);
-        setButtonEnabled(binding.upload.buttonUpload, false);
 
         onNewIntent(getIntent());
     }
@@ -165,21 +142,80 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                 }
 
                 setLocalBitmap(upload);
+
+                binding.upload.spActive.setVisibility(View.GONE);
+                binding.upload.spCountries.setVisibility(View.GONE);
+
+                String country = station.getCountry();
+                updateOverrideLicense(country);
             } else {
                 if (upload == null) {
                     upload = baseApplication.getDbAdapter().getPendingUploadForCoordinates(latitude, longitude);
                 }
 
                 binding.upload.etStationTitle.setInputType(EditorInfo.TYPE_CLASS_TEXT);
+                binding.upload.spActive.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.active_flag_options)));
                 if (upload != null) {
                     binding.upload.etStationTitle.setText(upload.getTitle());
                     setLocalBitmap(upload);
+
+                    if (upload.getActive() == null) {
+                        binding.upload.spActive.setSelection(0);
+                    } else if (upload.getActive()) {
+                        binding.upload.spActive.setSelection(1);
+                    } else {
+                        binding.upload.spActive.setSelection(2);
+                    }
+                } else {
+                    binding.upload.spActive.setSelection(0);
                 }
 
-                setButtonEnabled(binding.upload.buttonUpload, true);
+                var items = new KeyValueSpinnerItem[countries.size() + 1];
+                items[0] = new KeyValueSpinnerItem(getString(R.string.chooseCountry), "");
+                int selected = 0;
+
+                for (int i = 0; i < countries.size(); i++) {
+                    var country = countries.get(i);
+                    items[i + 1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
+                    if (upload != null && country.getCode().equals(upload.getCountry())) {
+                        selected = i + 1;
+                    }
+                }
+                var countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
+                countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                binding.upload.spCountries.setAdapter(countryAdapter);
+                binding.upload.spCountries.setSelection(selected);
+                binding.upload.spCountries.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+                        var selectedCountry = (KeyValueSpinnerItem) parent.getItemAtPosition(position);
+                        updateOverrideLicense(selectedCountry.getValue());
+                    }
+
+                    @Override
+                    public void onNothingSelected(final AdapterView<?> parent) {
+                        updateOverrideLicense(null);
+                    }
+                });
             }
 
+            if (upload != null) {
+                binding.upload.etComment.setText(upload.getComment());
+            }
+
+            binding.upload.txtPanorama.setText(Html.fromHtml(getString(R.string.panorama_info), Html.FROM_HTML_MODE_COMPACT));
+            binding.upload.txtPanorama.setMovementMethod(LinkMovementMethod.getInstance());
+            binding.upload.txtPanorama.setLinkTextColor(Color.parseColor("#c71c4d"));
+
         }
+    }
+
+    private void updateOverrideLicense(final String country) {
+        var overrideLicense = Country.getCountryByCode(countries, country).map(Country::getOverrideLicense).orElse(null);
+        if (overrideLicense != null) {
+            binding.upload.cbSpecialLicense.setText(getString(R.string.special_license, overrideLicense));
+        }
+        binding.upload.cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
     }
 
     private boolean isNotLoggedIn() {
@@ -211,7 +247,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                 }
             });
 
-    void takePicture() {
+    public void takePicture(View view) {
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return;
         }
@@ -257,7 +293,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                 }
             });
 
-    void selectPicture() {
+    public void selectPicture(View view) {
         if (isNotLoggedIn()) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
             return;
@@ -278,13 +314,16 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         }
     }
 
-    private void storeBitmapToLocalFile(File file, Bitmap bitmap) throws FileNotFoundException {
+    private void storeBitmapToLocalFile(File file, Bitmap bitmap) throws IOException {
         if (bitmap == null) {
             throw new RuntimeException(getString(R.string.error_scaling_photo));
         }
         Log.i(TAG, "Save photo with width=" + bitmap.getWidth() + " and height=" + bitmap.getHeight() + " to: " + file);
-        bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.STORED_PHOTO_QUALITY, new FileOutputStream(file));
-        setLocalBitmap(upload);
+        try (var cos = new CheckedOutputStream(new FileOutputStream(file), new CRC32())) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, Constants.STORED_PHOTO_QUALITY, cos);
+            crc32 = cos.getChecksum().getValue();
+            setLocalBitmap(upload);
+        }
     }
 
     /**
@@ -352,89 +391,49 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         finish();
     }
 
-    private void upload() {
-        assertCurrentPhotoUploadExists();
-        var uploadBinding = UploadBinding.inflate(getLayoutInflater());
-        uploadBinding.etComment.setText(upload.getComment());
-
-        if (station != null) {
-            uploadBinding.spActive.setVisibility(View.GONE);
-            uploadBinding.spCountries.setVisibility(View.GONE);
-
-            var overrideLicense = Country.getCountryByCode(countries, station.getCountry()).map(Country::getOverrideLicense).orElse(null);
-            if (overrideLicense != null) {
-                uploadBinding.cbSpecialLicense.setText(getString(R.string.special_license, overrideLicense));
-            }
-            uploadBinding.cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
-        } else {
-            uploadBinding.spActive.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.active_flag_options)));
-            if (upload.getActive() == null) {
-                uploadBinding.spActive.setSelection(0);
-            } else if (upload.getActive()) {
-                uploadBinding.spActive.setSelection(1);
-            } else {
-                uploadBinding.spActive.setSelection(2);
-            }
-
-            var countryList = baseApplication.getDbAdapter().getAllCountries();
-            var items = new KeyValueSpinnerItem[countryList.size() + 1];
-            items[0] = new KeyValueSpinnerItem(getString(R.string.chooseCountry), "");
-            int selected = 0;
-
-            for (int i = 0; i < countryList.size(); i++) {
-                var country = countryList.get(i);
-                items[i + 1] = new KeyValueSpinnerItem(country.getName(), country.getCode());
-                if (country.getCode().equals(upload.getCountry())) {
-                    selected = i + 1;
-                }
-            }
-            var countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
-            countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            uploadBinding.spCountries.setAdapter(countryAdapter);
-            uploadBinding.spCountries.setSelection(selected);
-
-            uploadBinding.cbSpecialLicense.setVisibility(View.GONE);
+    public void upload(View view) {
+        if (isNotLoggedIn()) {
+            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            return;
+        } else if (TextUtils.isEmpty(binding.upload.etStationTitle.getText())) {
+            Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
+            return;
         }
 
-        var sameChecksum = crc32 != null && crc32.equals(upload.getCrc32());
-        uploadBinding.cbChecksum.setVisibility(sameChecksum ? View.VISIBLE : View.GONE);
+        assertCurrentPhotoUploadExists();
 
-        uploadBinding.txtPanorama.setText(Html.fromHtml(getString(R.string.panorama_info), Html.FROM_HTML_MODE_COMPACT));
-        uploadBinding.txtPanorama.setMovementMethod(LinkMovementMethod.getInstance());
-        uploadBinding.txtPanorama.setLinkTextColor(Color.parseColor("#c71c4d"));
+        var mediaFile = getStoredMediaFile(upload);
+        assert mediaFile != null;
 
-        var alertDialog = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
-                .setTitle(station != null ? R.string.photo_upload : R.string.report_missing_station)
-                .setView(uploadBinding.getRoot())
-                .setIcon(R.drawable.ic_file_upload_red_48dp)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, (dialog, id1) -> dialog.cancel())
-                .create();
-        alertDialog.show();
-
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            if (uploadBinding.cbSpecialLicense.getText().length() > 0 && !uploadBinding.cbSpecialLicense.isChecked()) {
-                Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show();
+        if (!mediaFile.exists()) {
+            if (station != null) {
+                Toast.makeText(this, R.string.please_take_photo, Toast.LENGTH_LONG).show();
                 return;
             }
-            if (sameChecksum && !uploadBinding.cbChecksum.isChecked()) {
-                Toast.makeText(this, R.string.photo_checksum, Toast.LENGTH_LONG).show();
+        }
+
+        if (binding.upload.cbSpecialLicense.getText().length() > 0 && !binding.upload.cbSpecialLicense.isChecked()) {
+            Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (crc32 != null && upload != null && crc32.equals(upload.getCrc32()) && !binding.upload.cbChecksum.isChecked()) {
+            Toast.makeText(this, R.string.photo_checksum, Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (station == null) {
+            if (binding.upload.spActive.getSelectedItemPosition() == 0) {
+                Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show();
                 return;
             }
-            if (station == null) {
-                if (uploadBinding.spActive.getSelectedItemPosition() == 0) {
-                    Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                var selectedCountry = (KeyValueSpinnerItem) uploadBinding.spCountries.getSelectedItem();
-                upload.setCountry(selectedCountry.getValue());
-            }
-            alertDialog.dismiss();
+            var selectedCountry = (KeyValueSpinnerItem) binding.upload.spCountries.getSelectedItem();
+            upload.setCountry(selectedCountry.getValue());
+        }
 
+        SimpleDialogs.confirm(this, station != null ? R.string.photo_upload : R.string.report_missing_station, (dialog, which) -> {
             binding.upload.progressBar.setVisibility(View.VISIBLE);
 
             var stationTitle = binding.upload.etStationTitle.getText().toString();
-            var comment = uploadBinding.etComment.getText().toString();
+            var comment = binding.upload.etComment.getText().toString();
             upload.setTitle(stationTitle);
             upload.setComment(comment);
 
@@ -444,11 +443,9 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
             } catch (UnsupportedEncodingException e) {
                 Log.e(TAG, "Error encoding station title or comment", e);
             }
-            upload.setActive(uploadBinding.spActive.getSelectedItemPosition() == 1);
+            upload.setActive(binding.upload.spActive.getSelectedItemPosition() == 1);
             baseApplication.getDbAdapter().updateUpload(upload);
 
-            var mediaFile = getStoredMediaFile(upload);
-            assert mediaFile != null;
             var file = mediaFile.exists() ? RequestBody.create(mediaFile, MediaType.parse(URLConnection.guessContentTypeFromName(mediaFile.getName()))) : RequestBody.create(new byte[]{}, MediaType.parse("application/octet-stream"));
             rsapiClient.photoUpload(bahnhofId, station != null ? station.getCountry() : upload.getCountry(),
                     stationTitle, latitude, longitude, comment, upload.getActive(), file).enqueue(new Callback<>() {
@@ -507,7 +504,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         var localPhoto = checkForLocalPhoto(upload);
         if (localPhoto != null) {
             binding.upload.imageview.setImageBitmap(localPhoto);
-            setButtonEnabled(binding.upload.buttonUpload, true);
             fetchUploadStatus(upload);
         }
     }
@@ -516,7 +512,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         if (upload == null) {
             return;
         }
-        setButtonEnabled(binding.upload.buttonUpload, true);
         var stateQuery = InboxStateQuery.builder()
                 .id(upload.getRemoteId())
                 .countryCode(upload.getCountry())
@@ -537,6 +532,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     upload.setCrc32(stateQuery.getCrc32());
                     upload.setRemoteId(stateQuery.getId());
                     baseApplication.getDbAdapter().updateUpload(upload);
+                    updateCrc32Checkbox();
                 } else {
                     Log.w(TAG, "Upload states not processable");
                 }
@@ -550,9 +546,11 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
     }
 
-    private void setButtonEnabled(ImageButton imageButton, boolean enabled) {
-        imageButton.setEnabled(enabled);
-        imageButton.setImageAlpha(enabled ? 255 : 125);
+    private void updateCrc32Checkbox() {
+        if (crc32 != null && upload != null) {
+            var sameChecksum = crc32.equals(upload.getCrc32());
+            binding.upload.cbChecksum.setVisibility(sameChecksum ? View.VISIBLE : View.GONE);
+        }
     }
 
     /**
@@ -570,7 +568,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                 var scaledScreen = BitmapFactory.decodeStream(cis);
                 crc32 = cis.getChecksum().getValue();
                 Log.d(TAG, "img width " + scaledScreen.getWidth() + ", height " + scaledScreen.getHeight() + ", crc32 " + crc32);
-                setButtonEnabled(binding.upload.buttonUpload, true);
+                updateCrc32Checkbox();
                 return scaledScreen;
             } catch (Exception e) {
                 Log.e(TAG, String.format("Error reading media file for station %s", bahnhofId), e);

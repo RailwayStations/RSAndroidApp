@@ -62,7 +62,7 @@
     <string name="photo_exists">Photo: open for license info</string>
     <string name="nearby_notification_active">Notification of nearby stations is active</string>
     <string name="license_tag" formatted="false">Owner: %s, %s</string>
-    <string name="picture_landscape_only">Please use landscape orientation</string>
+    <string name="picture_landscape_only">Please provide photos in landscape format</string>
     <string name="country_activity">Country selection</string>
     <string name="countrySelection">Country selection</string>
     <string name="nicknameFilter">Filter by photographer</string>
@@ -274,5 +274,6 @@
     <string name="add_a_photo">Add a photo</string>
     <string name="station_not_found">Station not found</string>
     <string name="share_link">Share link</string>
+    <string name="please_take_photo">Please take a photo to upload</string>
 
 </resources>
