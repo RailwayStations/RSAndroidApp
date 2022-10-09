@@ -64,6 +64,7 @@
                 android:layout_height="200dp"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/et_station_title"
+                android:src="@drawable/ic_stations_with_photo"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/station_photo" />
 
