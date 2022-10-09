@@ -138,7 +138,7 @@ class RSAPIClientTest {
 
         assertThat(server.takeRequest().getPath()).isEqualTo("/stats?country=de");
         assertThat(response.body()).isNotNull();
-        assertThat(response.body()).usingRecursiveComparison().isEqualTo(new Statistic(7863, 7861, 2, 249));
+        assertThat(response.body()).usingRecursiveComparison().isEqualTo(Statistic.builder().total(7863).withPhoto(7861).withoutPhoto(2).photographers(249).build());
     }
 
     @Test

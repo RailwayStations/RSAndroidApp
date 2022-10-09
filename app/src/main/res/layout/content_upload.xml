@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_details"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity"
+    tools:showIn="@layout/activity_upload">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="0dp"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        android:paddingTop="0dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:background="#f0f0f0"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/et_station_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:textSize="25sp"
+                android:textIsSelectable="true"
+                android:inputType="text"
+                android:textStyle="bold"
+                android:background="#50ffffff"
+                android:hint="@string/station_name"
+                android:autofillHints="" />
+
+            <TextView
+                android:id="@+id/upload_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@id/et_station_title"
+                android:layout_alignParentEnd="true"
+                android:background="#50ffffff"
+                android:textColorLink="@color/colorPrimary" />
+
+            <com.github.chrisbanes.photoview.PhotoView
+                android:id="@+id/imageview"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/et_station_title"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/station_photo" />
+
+            <LinearLayout
+                android:id="@+id/buttons"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/imageview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/button_take_picture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_photo_camera_red_48px"
+                    android:background="@null"
+                    android:onClick="takePicture"
+                    android:contentDescription="@string/take_photo" />
+
+                <ImageButton
+                    android:id="@+id/button_select_picture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_photo_red_48px"
+                    android:background="@null"
+                    android:contentDescription="@string/select_photo" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/rotate_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/buttons"
+                android:text="@string/picture_landscape_only"
+                android:textStyle="bold"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/et_comment"
+                android:inputType="text"
+                android:hint="@string/comment_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rotate_info"
+                android:layout_marginTop="12dp"
+                android:importantForAutofill="no" />
+
+            <Spinner
+                android:id="@+id/sp_countries"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_below="@+id/et_comment" />
+
+            <CheckBox
+                android:id="@+id/cb_special_license"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"
+                android:layout_below="@+id/sp_countries" />
+
+            <Spinner
+                android:id="@+id/sp_active"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_below="@+id/cb_special_license" />
+
+            <CheckBox
+                android:id="@+id/cb_checksum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/photo_checksum"
+                android:textColor="@color/gridItemError"
+                android:visibility="gone"
+                android:layout_below="@+id/sp_active" />
+
+            <TextView
+                android:id="@+id/txt_panorama"
+                android:linksClickable="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:layout_below="@+id/cb_checksum" />
+
+            <Button
+                android:id="@+id/button_upload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txt_panorama"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:drawableStart="@drawable/ic_file_upload_red_48dp"
+                android:drawableTint="@color/colorActions"
+                android:onClick="upload"
+                android:text="@string/send"
+                android:textColor="@color/colorActions" />
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

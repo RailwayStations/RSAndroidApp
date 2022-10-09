@@ -1,0 +1,2 @@
+- Neu: Nutzung der neuen RSAPI Endpunkte
+- Neu: Überarbeitung der DetailsActivity mit Extrahierung von ProblemReport und Upload

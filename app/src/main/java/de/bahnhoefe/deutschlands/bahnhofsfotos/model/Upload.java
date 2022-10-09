@@ -2,130 +2,30 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
 import java.io.Serializable;
 
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
 public class Upload implements Serializable {
 
-    private Long id;
-    private String country;
-    private String stationId;
-    private Long remoteId;
-    private String title;
-    private Double lat;
-    private Double lon;
-    private String comment;
-    private String inboxUrl;
-    private ProblemType problemType;
-    private String rejectReason;
-    private UploadState uploadState = UploadState.NOT_YET_SENT;
-    private Long createdAt = System.currentTimeMillis();
-    private Boolean active = null;
-    private Long crc32 = null;
-
-    public Upload() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getStationId() {
-        return stationId;
-    }
-
-    public void setStationId(String stationId) {
-        this.stationId = stationId;
-    }
-
-    public Long getRemoteId() {
-        return remoteId;
-    }
-
-    public void setRemoteId(Long remoteId) {
-        this.remoteId = remoteId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Double getLat() {
-        return lat;
-    }
-
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public Double getLon() {
-        return lon;
-    }
-
-    public void setLon(Double lon) {
-        this.lon = lon;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getInboxUrl() {
-        return inboxUrl;
-    }
-
-    public void setInboxUrl(String inboxUrl) {
-        this.inboxUrl = inboxUrl;
-    }
-
-    public ProblemType getProblemType() {
-        return problemType;
-    }
-
-    public void setProblemType(ProblemType problemType) {
-        this.problemType = problemType;
-    }
-
-    public String getRejectReason() {
-        return rejectReason;
-    }
-
-    public void setRejectReason(String rejectReason) {
-        this.rejectReason = rejectReason;
-    }
-
-    public UploadState getUploadState() {
-        return uploadState;
-    }
-
-    public void setUploadState(UploadState uploadState) {
-        this.uploadState = uploadState;
-    }
-
-    public Long getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Long createdAt) {
-        this.createdAt = createdAt;
-    }
+    Long id;
+    String country;
+    String stationId;
+    Long remoteId;
+    String title;
+    Double lat;
+    Double lon;
+    String comment;
+    String inboxUrl;
+    ProblemType problemType;
+    String rejectReason;
+    @Builder.Default
+    UploadState uploadState = UploadState.NOT_YET_SENT;
+    @Builder.Default
+    Long createdAt = System.currentTimeMillis();
+    Boolean active;
+    Long crc32;
 
     public boolean isUploadForExistingStation() {
         return country != null && stationId != null;
@@ -151,19 +51,4 @@ public class Upload implements Serializable {
         return remoteId != null;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public Long getCrc32() {
-        return crc32;
-    }
-
-    public void setCrc32(Long crc32) {
-        this.crc32 = crc32;
-    }
 }

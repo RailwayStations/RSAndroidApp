@@ -18,6 +18,7 @@ import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
@@ -159,16 +160,16 @@ public abstract class NearbyBahnhofNotificationManager {
     }
 
     @NonNull
-    protected Intent getDetailIntent() {
+    protected Intent getUploadActivity() {
         // Build an intent for an action to see station details
-        var detailIntent = new Intent(context, DetailsActivity.class);
-        detailIntent.putExtra(DetailsActivity.EXTRA_STATION, notificationStation);
+        var detailIntent = new Intent(context, UploadActivity.class);
+        detailIntent.putExtra(UploadActivity.EXTRA_STATION, notificationStation);
         return detailIntent;
     }
 
     @NonNull
     protected PendingIntent getDetailPendingIntent() {
-        return pendifyMe(getDetailIntent(), REQUEST_DETAIL);
+        return pendifyMe(getUploadActivity(), REQUEST_DETAIL);
     }
 
     /**

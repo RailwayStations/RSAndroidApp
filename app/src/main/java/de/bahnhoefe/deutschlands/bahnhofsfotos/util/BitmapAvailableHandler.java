@@ -5,9 +5,10 @@ import android.graphics.Bitmap;
 import androidx.annotation.Nullable;
 
 /**
- * Created by pelzi on 11.09.16.
+ * Callback for BitmapDownloader
  */
 public interface BitmapAvailableHandler {
+
     /**
      * This gets called if the requested bitmap is available. Finish and issue the notification.
      *

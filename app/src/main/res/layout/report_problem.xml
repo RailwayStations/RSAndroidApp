@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="4dp"
+    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.ProblemReportActivity">
+
+    <TextView
+        android:id="@+id/et_station_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="16dp"
+        android:textSize="25sp"
+        android:textIsSelectable="true"
+        android:textStyle="bold"
+        android:background="#50ffffff"
+        android:padding="8dp" />
 
     <Spinner
         android:id="@+id/problem_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="4dp"/>
+        android:layout_below="@+id/et_station_title" />
 
     <EditText
         android:id="@+id/et_problem_comment"
@@ -20,9 +34,54 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="4dp"
-        android:importantForAutofill="no"/>
+        android:importantForAutofill="no"
+        android:layout_below="@+id/problem_type" />
 
-</LinearLayout>
+    <EditText
+        android:id="@+id/et_latitude"
+        android:inputType="numberDecimal"
+        android:hint="@string/latitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:importantForAutofill="no"
+        android:visibility="gone"
+        android:layout_below="@+id/et_problem_comment" />
+
+    <EditText
+        android:id="@+id/et_longitude"
+        android:inputType="numberDecimal"
+        android:hint="@string/longitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:importantForAutofill="no"
+        android:visibility="gone"
+        android:layout_below="@+id/et_latitude" />
+
+    <Button
+        android:id="@+id/button_report_problem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_longitude"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:contentDescription="@string/report_problem"
+        android:drawableStart="@drawable/ic_bullhorn_48px"
+        android:drawableTint="@color/colorActions"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:onClick="reportProblem"
+        android:text="@string/report_problem"
+        android:textColor="@color/colorActions" />
+
+    <TextView
+        android:id="@+id/upload_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/button_report_problem"
+        android:layout_alignParentBottom="true"
+        android:padding="8dp" />
+
+</RelativeLayout>

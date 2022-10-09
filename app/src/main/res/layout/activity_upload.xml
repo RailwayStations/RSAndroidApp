@@ -4,12 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
-    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity">
-
+    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity">
 
     <include
-        layout="@layout/content_details"
-        android:id="@+id/details" />
-
+        layout="@layout/content_upload"
+        android:id="@+id/upload" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

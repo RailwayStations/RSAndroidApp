@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,7 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 /**
- * A cache for station fotos.
+ * A cache for station photos.
  */
 public class BitmapCache {
     private final String TAG = BitmapCache.class.getSimpleName();
@@ -46,37 +45,6 @@ public class BitmapCache {
 
     private final HashMap<URL, Bitmap> cache;
 
-    private class Request implements BitmapAvailableHandler {
-        private final URL url;
-
-        public Request(URL url) {
-            this.url = url;
-        }
-
-        /**
-         * This gets called if the requested bitmap is available. Write Bitmap to cache, find the requestor and pass on the result.
-         *
-         * @param bitmap the fetched Bitmap for the notification. May be null
-         */
-        @Override
-        public void onBitmapAvailable(@Nullable Bitmap bitmap) {
-            // save the image in the cache if it was constructed
-            if (bitmap != null) {
-                cache.put(url, bitmap);
-            }
-
-            // inform all requestors about the available image
-            synchronized (requests) {
-                var handlers = requests.remove(url);
-                if (handlers == null) {
-                    Log.wtf(TAG, "Request result without a saved requestor. This should never happen.");
-                } else {
-                    handlers.forEach(handler -> handler.onBitmapAvailable(bitmap));
-                }
-            }
-        }
-    }
-
     /**
      * Get a picture for the given URL, either from cache or by downloading.
      * The fetching happens asynchronously. When finished, the provided callback interface is called.
@@ -84,9 +52,11 @@ public class BitmapCache {
      * @param callback    the BitmapAvailableHandler to call on completion.
      * @param resourceUrl the URL to fetch
      */
-    public void getFoto(BitmapAvailableHandler callback, @NonNull String resourceUrl) {
+    public void getPhoto(BitmapAvailableHandler callback, @NonNull String resourceUrl) {
+        URL url = null;
         try {
-            getFoto(callback, new URL(resourceUrl));
+            url = new URL(resourceUrl);
+            getPhoto(callback, url);
         } catch (MalformedURLException e) {
             Log.e(TAG, "Couldn't load photo from malformed URL " + resourceUrl);
             callback.onBitmapAvailable(null);
@@ -100,10 +70,24 @@ public class BitmapCache {
      * @param callback    the BitmapAvailableHandler to call on completion.
      * @param resourceUrl the URL to fetch
      */
-    public void getFoto(BitmapAvailableHandler callback, @NonNull URL resourceUrl) {
+    public void getPhoto(BitmapAvailableHandler callback, @NonNull URL resourceUrl) {
         var bitmap = cache.get(resourceUrl);
         if (bitmap == null) {
-            var downloader = new BitmapDownloader(new Request(resourceUrl), resourceUrl);
+            var downloader = new BitmapDownloader((bitmap1) -> {
+                if (bitmap1 != null) {
+                    cache.put(resourceUrl, bitmap1);
+                }
+
+                // inform all requestors about the available image
+                synchronized (requests) {
+                    var handlers = requests.remove(resourceUrl);
+                    if (handlers == null) {
+                        Log.wtf(TAG, "Request result without a saved requestor. This should never happen.");
+                    } else {
+                        handlers.forEach(handler -> handler.onBitmapAvailable(bitmap1));
+                    }
+                }
+            }, resourceUrl);
             synchronized (requests) {
                 var handlers = requests.get(resourceUrl);
                 if (handlers == null) {

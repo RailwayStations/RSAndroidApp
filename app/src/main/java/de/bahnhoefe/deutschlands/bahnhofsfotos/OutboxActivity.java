@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
+import static java.util.stream.Collectors.toList;
+
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityOutboxBinding;
@@ -50,9 +51,15 @@ public class OutboxActivity extends AppCompatActivity {
         // item click
         binding.lstUploads.setOnItemClickListener((parent, view, position, id) -> {
             var upload = dbAdapter.getUploadById(id);
-            var detailIntent = new Intent(OutboxActivity.this, DetailsActivity.class);
-            detailIntent.putExtra(DetailsActivity.EXTRA_UPLOAD, upload);
-            startActivity(detailIntent);
+            Intent intent;
+            if (upload.isProblemReport()) {
+                intent = new Intent(OutboxActivity.this, ProblemReportActivity.class);
+                intent.putExtra(ProblemReportActivity.EXTRA_UPLOAD, upload);
+            } else {
+                intent = new Intent(OutboxActivity.this, UploadActivity.class);
+                intent.putExtra(UploadActivity.EXTRA_UPLOAD, upload);
+            }
+            startActivity(intent);
         });
 
         binding.lstUploads.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -65,10 +72,9 @@ public class OutboxActivity extends AppCompatActivity {
             return true;
         });
 
-        var query = new ArrayList<InboxStateQuery>();
-        for (var upload : dbAdapter.getPendingUploads(true)) {
-            query.add(new InboxStateQuery(upload.getRemoteId()));
-        }
+        var query = dbAdapter.getPendingUploads(true).stream()
+                .map(upload -> InboxStateQuery.builder().id(upload.getRemoteId()).build())
+                .collect(toList());
 
         baseApplication.getRsapiClient().queryUploadState(query).enqueue(new Callback<>() {
             @Override
@@ -115,17 +121,17 @@ public class OutboxActivity extends AppCompatActivity {
         }
 
         new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom))
-            .setIcon(R.mipmap.ic_launcher)
-            .setTitle(R.string.confirm_delete_processed_uploads)
-            .setPositiveButton(R.string.button_ok_text, (dialog, which) -> {
-                for (Upload upload : uploads) {
-                    dbAdapter.deleteUpload(upload.getId());
-                    FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, upload.getId()));
-                }
-                adapter.changeCursor(dbAdapter.getOutbox());
-            })
-            .setNegativeButton(R.string.button_cancel_text, null)
-            .create().show();
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.confirm_delete_processed_uploads)
+                .setPositiveButton(R.string.button_ok_text, (dialog, which) -> {
+                    for (Upload upload : uploads) {
+                        dbAdapter.deleteUpload(upload.getId());
+                        FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, upload.getId()));
+                    }
+                    adapter.changeCursor(dbAdapter.getOutbox());
+                })
+                .setNegativeButton(R.string.button_cancel_text, null)
+                .create().show();
     }
 
     @Override

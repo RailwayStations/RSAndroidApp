@@ -268,7 +268,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             var renderThemeFile = DocumentFile.fromSingleUri(getApplication(), mapTheme);
             return new StreamRenderTheme("/assets/", getContentResolver().openInputStream(renderThemeFile.getUri()));
         } catch (Exception e) {
-            Log.e( TAG,"Error loading theme " + mapTheme, e);
+            Log.e(TAG, "Error loading theme " + mapTheme, e);
             return InternalRenderTheme.DEFAULT;
         }
     }
@@ -343,13 +343,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             var drawable = ContextCompat.getDrawable(this, R.drawable.marker_missing);
             assert drawable != null;
             var bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-            missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth()/2), -bitmap.getHeight()) {
+            missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth() / 2), -bitmap.getHeight()) {
                 @Override
                 public boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
                     SimpleDialogs.confirm(MapsActivity.this, R.string.add_missing_station, (dialogInterface, i) -> {
-                        var intent = new Intent(MapsActivity.this, DetailsActivity.class);
-                        intent.putExtra(DetailsActivity.EXTRA_LATITUDE, getLatLong().latitude);
-                        intent.putExtra(DetailsActivity.EXTRA_LONGITUDE, getLatLong().longitude);
+                        var intent = new Intent(MapsActivity.this, UploadActivity.class);
+                        intent.putExtra(UploadActivity.EXTRA_LATITUDE, getLatLong().latitude);
+                        intent.putExtra(UploadActivity.EXTRA_LONGITUDE, getLatLong().longitude);
                         startActivity(intent);
                     });
                     return false;
@@ -377,14 +377,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         myLocSwitch.setChecked(baseApplication.isLocationUpdates());
         item.setActionView(myLocSwitch);
         myLocSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            baseApplication.setLocationUpdates(isChecked);
-            if (isChecked) {
-                askedForPermission = false;
-                registerLocationManager();
-            } else {
-                unregisterLocationManager();
-            }
-        }
+                    baseApplication.setLocationUpdates(isChecked);
+                    if (isChecked) {
+                        askedForPermission = false;
+                        registerLocationManager();
+                    } else {
+                        unregisterLocationManager();
+                    }
+                }
         );
 
         var map = baseApplication.getMap();
@@ -602,7 +602,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             var uploadList = activityRef.get().readPendingUploads();
             var mapsActivity = activityRef.get();
             if (mapsActivity != null) {
-                mapsActivity.runOnUiThread(()-> mapsActivity.onStationsLoaded(stationList, uploadList));
+                mapsActivity.runOnUiThread(() -> mapsActivity.onStationsLoaded(stationList, uploadList));
             }
         }
 
@@ -680,10 +680,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         return new MarkerBitmap(this.getApplicationContext(), markerWithoutPhoto, bitmapWithPhoto, markerOwnPhoto,
                 markerWithoutPhotoInactive, markerWithPhotoInactive, markerOwnPhotoInactive, markerPendingUpload,
-                new Point(0, -(markerWithoutPhoto.getHeight()/2.0)), 10f, 1, paint);
+                new Point(0, -(markerWithoutPhoto.getHeight() / 2.0)), 10f, 1, paint);
     }
 
-    private Bitmap loadBitmap(int resourceId){
+    private Bitmap loadBitmap(int resourceId) {
         var bitmap = AndroidGraphicFactory.convertToBitmap(ResourcesCompat.getDrawable(getResources(), resourceId, null));
         bitmap.incrementRefCount();
         return bitmap;
@@ -733,7 +733,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     public void onResume() {
         super.onResume();
         if (this.layer instanceof TileDownloadLayer) {
-            ((TileDownloadLayer)this.layer).onResume();
+            ((TileDownloadLayer) this.layer).onResume();
         }
         if (baseApplication.getLastUpdate() == 0) {
             runUpdateCountriesAndStations();
@@ -753,7 +753,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         clusterer = new ClusterManager<>(
                 binding.map.mapView,
                 createMarkerBitmaps(),
-                (byte)9,
+                (byte) 9,
                 this);
         // this uses the framebuffer position, the mapview position can be out of sync with
         // what the user sees on the screen if an animation is in progress
@@ -763,7 +763,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     @Override
     protected void onPause() {
         if (this.layer instanceof TileDownloadLayer) {
-            ((TileDownloadLayer)this.layer).onPause();
+            ((TileDownloadLayer) this.layer).onPause();
         }
         unregisterLocationManager();
         var mapPosition = binding.map.mapView.getModel().mapViewPosition.getMapPosition();

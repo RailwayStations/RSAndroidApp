@@ -68,7 +68,7 @@ public class BaseApplication extends Application {
 
     private boolean isCrashReportingProcess() {
         var processName = "";
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             // Using the same technique as Application.getProcessName() for older devices
             // Using reflection since ActivityThread is an internal API
             try {
@@ -155,7 +155,7 @@ public class BaseApplication extends Application {
     }
 
     private double getDouble(int key) {
-        if ( !preferences.contains(getString(key))) {
+        if (!preferences.contains(getString(key))) {
             return 0.0;
         }
 
@@ -169,7 +169,6 @@ public class BaseApplication extends Application {
     public Set<String> getCountryCodes() {
         var oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
         var stringSet = preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
-        assert stringSet != null;
         if (stringSet.isEmpty()) {
             stringSet = new HashSet<>(Collections.singleton(DEFAULT_COUNTRY));
         }
@@ -286,7 +285,7 @@ public class BaseApplication extends Application {
 
     public MapPosition getLastMapPosition() {
         var latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT), getDouble(R.string.LAST_POSITION_LON));
-        return new MapPosition(latLong, (byte)preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
+        return new MapPosition(latLong, (byte) preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
     }
 
     public Location getLastLocation() {
@@ -322,15 +321,15 @@ public class BaseApplication extends Application {
     }
 
     public Profile getProfile() {
-        var profile = new Profile();
-        profile.setLicense(getLicense());
-        profile.setPhotoOwner(getPhotoOwner());
-        profile.setAnonymous(getAnonymous());
-        profile.setLink(getPhotographerLink());
-        profile.setNickname(getNickname());
-        profile.setEmail(getEmail());
-        profile.setPassword(getPassword());
-        return profile;
+        return Profile.builder()
+                .license(getLicense())
+                .photoOwner(getPhotoOwner())
+                .anonymous(getAnonymous())
+                .link(getPhotographerLink())
+                .nickname(getNickname())
+                .email(getEmail())
+                .password(getPassword())
+                .build();
     }
 
     public RSAPIClient getRsapiClient() {

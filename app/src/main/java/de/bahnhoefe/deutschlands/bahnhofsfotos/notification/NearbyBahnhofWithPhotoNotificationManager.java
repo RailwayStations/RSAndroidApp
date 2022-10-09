@@ -37,7 +37,7 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
     @Override
     public void notifyUser() {
         if (ConnectionUtil.checkInternetConnection(context)) {
-            BitmapCache.getInstance().getFoto(this, notificationStation.getPhotoUrl());
+            BitmapCache.getInstance().getPhoto(this, notificationStation.getPhotoUrl());
         }
     }
 

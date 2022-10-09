@@ -17,6 +17,7 @@ public class Constants {
         public static final String COUNTRY = "country";
         public static final String LAT = "lat";
         public static final String LON = "lon";
+        public static final String PHOTO_ID = "photoId";
         public static final String PHOTO_URL = "photoUrl";
         public static final String PHOTOGRAPHER = "photographer";
         public static final String PHOTOGRAPHER_URL = "photographerUrl";

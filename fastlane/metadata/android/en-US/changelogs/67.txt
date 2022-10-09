@@ -1,1 +1,2 @@
 - New: use new RSAPI endpoints
+- New: restructure DetailsActivity, extract ProblemReport and Upload
