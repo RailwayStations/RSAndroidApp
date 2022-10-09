@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +35,9 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -76,6 +79,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private PhotoPagerAdapter photoPagerAdapter;
     private final Map<String, Bitmap> photoBitmaps = new HashMap<>();
     private PhotoPagerAdapter.PageablePhoto selectedPhoto;
+    private final List<ImageView> carouselPageIndicators = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +100,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             @Override
             public void onPageSelected(int position) {
                 var pageablePhoto = photoPagerAdapter.getPageablePhotoAtPosition(position);
-                onPageablePhotoSelected(pageablePhoto);
+                onPageablePhotoSelected(pageablePhoto, position);
             }
         });
 
@@ -131,7 +135,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (ConnectionUtil.checkInternetConnection(this)) {
                     photoBitmaps.put(station.getPhotoUrl(), null);
                     BitmapCache.getInstance().getPhoto((bitmap) -> {
-                        PhotoPagerAdapter.PageablePhoto pageablePhoto = PhotoPagerAdapter.PageablePhoto.builder()
+                        selectedPhoto = PhotoPagerAdapter.PageablePhoto.builder()
                                 .id(station.getPhotoId())
                                 .bitmap(bitmap)
                                 .url(station.getPhotoUrl())
@@ -141,8 +145,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                                 .licenseUrl(station.getLicenseUrl())
                                 .build();
                         runOnUiThread(() -> {
-                            photoPagerAdapter.addPageablePhoto(pageablePhoto);
-                            onPageablePhotoSelected(pageablePhoto);
+                            addIndicator();
+                            photoPagerAdapter.addPageablePhoto(selectedPhoto);
+                            onPageablePhotoSelected(selectedPhoto, 0);
                         });
                     }, station.getPhotoUrl());
                 }
@@ -180,6 +185,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                                             .build())), url);
                                 }
                             });
+
+                    if (photoBitmaps.size() > 1) {
+                        for (int i = 1; i < photoBitmaps.size(); i++) {
+                            addIndicator();
+                        }
+                    }
                 }
             }
 
@@ -188,6 +199,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 Log.e(TAG, "Failed to load additional photos", t);
             }
         });
+    }
+
+    private void addIndicator() {
+        var indicator = new ImageView(DetailsActivity.this);
+        indicator.setImageResource(R.drawable.selector_carousel_page_indicator);
+        indicator.setPadding(0, 0, 5, 0); // left, top, right, bottom
+        binding.details.llPageIndicatorContainer.addView(indicator);
+        carouselPageIndicators.add(indicator);
     }
 
     private int getMarkerRes() {
@@ -431,7 +450,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }).show();
     }
 
-    public void onPageablePhotoSelected(PhotoPagerAdapter.PageablePhoto pageablePhoto) {
+    public void onPageablePhotoSelected(PhotoPagerAdapter.PageablePhoto pageablePhoto, int position) {
         selectedPhoto = pageablePhoto;
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
 
@@ -472,6 +491,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                                 licenseText), Html.FROM_HTML_MODE_LEGACY
                 )
         );
+
+        if (carouselPageIndicators != null) {
+            for (int i = 0; i < carouselPageIndicators.size(); i++) {
+                if (i == position) {
+                    carouselPageIndicators.get(position).setSelected(true);
+                } else {
+                    carouselPageIndicators.get(i).setSelected(false);
+                }
+            }
+        }
     }
 
 }
