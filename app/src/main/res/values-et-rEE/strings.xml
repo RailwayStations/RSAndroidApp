@@ -10,7 +10,7 @@
     <string name="title_activity_details">Station details</string>
     <string name="no_stations_in_database">An update has not yet occurred</string>
     <string name="take_photo">Tee foto</string>
-    <string name="share_photo">Saada</string>
+    <string name="share_photo">Share photo</string>
     <string name="nav_to_station">Navigeeri listi juurde</string>
     <string name="CC0">CC0 - without attribution</string>
     <string name="tvLicense">Foto litsenseerimine</string>
@@ -62,7 +62,7 @@
     <string name="photo_exists">Photo: open for license info</string>
     <string name="nearby_notification_active">Notification of nearby stations is active</string>
     <string name="license_tag" formatted="false">Owner: %s, %s</string>
-    <string name="picture_landscape_only">Please use landscape orientation</string>
+    <string name="picture_landscape_only">Please provide photos in landscape format</string>
     <string name="country_activity">Country selection</string>
     <string name="countrySelection">Country selection</string>
     <string name="nicknameFilter">Filter by photographer</string>
@@ -265,4 +265,14 @@
     <string name="share">Share</string>
     <string name="bug_report">Report bug</string>
     <string name="report_missing_station">Report missing station</string>
+    <string name="title_activity_problem_report">Problem Report</string>
+    <string name="send_problem_report">Send problem report?</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="problem_wrong_lat_lon">Please provide proper latitue and longitude values</string>
+    <string name="title_activity_upload">Upload</string>
+    <string name="add_a_photo">Add a photo</string>
+    <string name="station_not_found">Station not found</string>
+    <string name="share_link">Share link</string>
+    <string name="please_take_photo">Please take a photo to upload</string>
 </resources>
