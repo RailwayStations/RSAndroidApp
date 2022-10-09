@@ -10,7 +10,7 @@
     <string name="title_activity_details">Údaje o stanici</string>
     <string name="no_stations_in_database">Aktualizácia ešte nebola vykonaná</string>
     <string name="take_photo">Odfoťte sa</string>
-    <string name="share_photo">Zdieľať</string>
+    <string name="share_photo">Share photo</string>
     <string name="nav_to_station">Prejdite na stanicu</string>
     <string name="CC0">CC0 - bez uvedenia autora</string>
     <string name="tvLicense">Fotografická licencia</string>
@@ -62,7 +62,7 @@
     <string name="photo_exists">Foto: otvorené pre informácie o licencii</string>
     <string name="nearby_notification_active">Upozornenie blízkych staníc je aktívne</string>
     <string name="license_tag" formatted="false">Vlastník: %s, %s</string>
-    <string name="picture_landscape_only">Použite orientáciu na šírku</string>
+    <string name="picture_landscape_only">Please provide photos in landscape format</string>
     <string name="country_activity">Výber krajiny</string>
     <string name="countrySelection">Výber krajiny</string>
     <string name="nicknameFilter">Filtrovanie podľa fotografa</string>
@@ -269,4 +269,14 @@
     <string name="share">Share</string>
     <string name="bug_report">Report bug</string>
     <string name="report_missing_station">Report missing station</string>
+    <string name="title_activity_problem_report">Problem Report</string>
+    <string name="send_problem_report">Send problem report?</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="problem_wrong_lat_lon">Please provide proper latitue and longitude values</string>
+    <string name="title_activity_upload">Upload</string>
+    <string name="add_a_photo">Add a photo</string>
+    <string name="station_not_found">Station not found</string>
+    <string name="share_link">Share link</string>
+    <string name="please_take_photo">Please take a photo to upload</string>
 </resources>
