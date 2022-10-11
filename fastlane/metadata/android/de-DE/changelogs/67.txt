@@ -1,2 +1,3 @@
 - Neu: Nutzung der neuen RSAPI Endpunkte
+- Neu: Anzeige alternativer Fotos eines Bahnhofs
 - Neu: Überarbeitung der DetailsActivity mit Extrahierung von ProblemReport und Upload

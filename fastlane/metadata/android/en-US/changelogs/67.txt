@@ -1,2 +1,3 @@
 - New: use new RSAPI endpoints
+- New: display of alternative photos of a railway station
 - New: restructure DetailsActivity, extract ProblemReport and Upload
