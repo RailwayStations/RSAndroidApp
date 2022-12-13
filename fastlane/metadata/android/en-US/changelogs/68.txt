@@ -1,1 +1,2 @@
 - Update dependencies
+- fix #342 select photo from device

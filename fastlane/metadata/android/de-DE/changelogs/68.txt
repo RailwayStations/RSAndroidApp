@@ -1,0 +1,2 @@
+- Abhängigkeiten aktualisiert
+- Fix #342 selektiere Foto vom Gerät

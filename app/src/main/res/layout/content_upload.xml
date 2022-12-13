@@ -90,6 +90,7 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_photo_red_48px"
                     android:background="@null"
+                    android:onClick="selectPicture"
                     android:contentDescription="@string/select_photo" />
 
             </LinearLayout>
