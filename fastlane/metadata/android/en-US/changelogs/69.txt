@@ -1,0 +1,2 @@
+- New: forward to "My data" activity if login is required
+- Update dependencies

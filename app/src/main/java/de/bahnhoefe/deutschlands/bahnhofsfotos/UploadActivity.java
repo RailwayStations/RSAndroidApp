@@ -254,6 +254,9 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
         if (isNotLoggedIn()) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
+            finish();
+            return;
         }
 
         assertCurrentPhotoUploadExists();
@@ -296,6 +299,8 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
     public void selectPicture(View view) {
         if (isNotLoggedIn()) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
+            finish();
             return;
         }
 
@@ -394,6 +399,8 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
     public void upload(View view) {
         if (isNotLoggedIn()) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
+            finish();
             return;
         } else if (TextUtils.isEmpty(binding.upload.etStationTitle.getText())) {
             Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
@@ -456,7 +463,8 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
                     } else if (response.code() == 401) {
-                        SimpleDialogs.confirm(UploadActivity.this, R.string.authorization_failed);
+                        Toast.makeText(UploadActivity.this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
                         return;
                     } else {
                         assert response.errorBody() != null;

@@ -135,6 +135,8 @@ public class ProblemReportActivity extends AppCompatActivity {
     public void reportProblem(View view) {
         if (isNotLoggedIn()) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
+            finish();
             return;
         }
 
@@ -192,11 +194,12 @@ public class ProblemReportActivity extends AppCompatActivity {
                         if (response.isSuccessful()) {
                             inboxResponse = response.body();
                         } else if (response.code() == 401) {
-                            SimpleDialogs.confirm(ProblemReportActivity.this, R.string.authorization_failed);
+                            Toast.makeText(ProblemReportActivity.this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
+                            startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
+                            finish();
                             return;
                         } else {
-                            Gson gson = new Gson();
-                            inboxResponse = gson.fromJson(response.errorBody().charStream(), InboxResponse.class);
+                            inboxResponse = new Gson().fromJson(response.errorBody().charStream(), InboxResponse.class);
                         }
 
                         upload.setRemoteId(inboxResponse.getId());
