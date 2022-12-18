@@ -274,4 +274,5 @@
     <string name="station_not_found">Station not found</string>
     <string name="share_link">Share link</string>
     <string name="please_take_photo">Please take a photo to upload</string>
+    <string name="notification_permission_needed">Notification permission is needed to notify on nearby stations!</string>
 </resources>
