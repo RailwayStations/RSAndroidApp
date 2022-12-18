@@ -1,7 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -25,6 +24,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -368,12 +369,30 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 statusBinder = null;
                 invalidateOptionsMenu();
             }
-        }, 0))
-
-        Log.e(TAG, "Bind request to statistics interface failed");
+        }, 0)) {
+            Log.e(TAG, "Bind request to statistics interface failed");
+        }
     }
 
+    private final ActivityResultLauncher<String> requestNotificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (!isGranted) {
+                    Toast.makeText(MainActivity.this, R.string.notification_permission_needed, Toast.LENGTH_SHORT).show();
+                }
+            });
+
     public void toggleNotification() {
+        if (statusBinder == null
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            return;
+        }
+
+        toggleNotificationWithPermissionGranted();
+    }
+
+    private void toggleNotificationWithPermissionGranted() {
         var intent = new Intent(MainActivity.this, NearbyNotificationService.class);
         if (statusBinder == null) {
             startService(intent);
@@ -405,8 +424,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     public void registerLocationManager() {
         try {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
                 return;
             }
 
