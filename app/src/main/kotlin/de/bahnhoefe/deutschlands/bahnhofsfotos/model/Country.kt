@@ -1,61 +1,52 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import androidx.annotation.NonNull;
+import java.io.Serializable
+import java.util.*
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+data class Country @JvmOverloads constructor(
+    val code: String,
+    val name: String,
+    val email: String? = null,
+    val twitterTags: String? = null,
+    val timetableUrlTemplate: String? = null,
+    val overrideLicense: String? = null,
+    val providerApps: List<ProviderApp> = ArrayList()
+) : Serializable, Comparable<Country> {
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-
-@Value
-@Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Country implements Serializable, Comparable<Country> {
-
-    @EqualsAndHashCode.Include
-    String code;
-
-    String name;
-
-    String email;
-
-    String twitterTags;
-
-    String timetableUrlTemplate;
-
-    String overrideLicense;
-
-    @Builder.Default
-    List<ProviderApp> providerApps = new ArrayList<>();
-
-    public static Optional<Country> getCountryByCode(Collection<Country> countries, String countryCode) {
-        return countries.stream()
-                .filter(country -> country.getCode().equals(countryCode))
-                .findAny(); // get first country as fallback
+    fun hasTimetableUrlTemplate(): Boolean {
+        return (timetableUrlTemplate != null) && timetableUrlTemplate.isNotEmpty()
     }
 
-    public boolean hasTimetableUrlTemplate() {
-        return timetableUrlTemplate != null && !timetableUrlTemplate.isEmpty();
+    val compatibleProviderApps: List<ProviderApp>
+        get() = ProviderApp.getCompatibleProviderApps(providerApps)
+
+    override fun toString(): String {
+        return name
     }
 
-    public List<ProviderApp> getCompatibleProviderApps() {
-        return ProviderApp.getCompatibleProviderApps(providerApps);
+    override fun compareTo(other: Country): Int {
+        return name.compareTo(other.name)
     }
 
-    @Override
-    @NonNull
-    public String toString() {
-        return name;
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is Country) return false
+        return Objects.equals(code, other.code)
     }
 
-    @Override
-    public int compareTo(final Country o) {
-        return name.compareTo(o.name);
+    override fun hashCode(): Int {
+        return code.hashCode()
     }
 
+    companion object {
+        @JvmStatic
+        fun getCountryByCode(
+            countries: Collection<Country>,
+            countryCode: String?
+        ): Optional<Country> {
+            return countries.stream()
+                .filter { country: Country -> country.code == countryCode }
+                .findAny()
+        }
+    }
 }

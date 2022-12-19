@@ -582,14 +582,13 @@ public class DbAdapter {
 
     @NonNull
     private Country createCountryFromCursor(@NonNull Cursor cursor) {
-        return Country.builder()
-                .code(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)))
-                .name(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)))
-                .email(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.EMAIL)))
-                .twitterTags(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.TWITTERTAGS)))
-                .timetableUrlTemplate(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE)))
-                .overrideLicense(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.OVERRIDE_LICENSE)))
-                .build();
+        return new Country(
+                cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)),
+                cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)),
+                cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.EMAIL)),
+                cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.TWITTERTAGS)),
+                cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE)),
+                cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.OVERRIDE_LICENSE)));
     }
 
     @NonNull
