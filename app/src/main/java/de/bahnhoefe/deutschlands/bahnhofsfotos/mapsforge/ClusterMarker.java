@@ -102,19 +102,21 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         canvas.drawBitmap(bitmap, left, top);
 
         // Draw Text
-        if (markerType == 0) {
-            // Draw bitmap
-            var bubble = MarkerBitmap.getBitmapFromTitle(cluster.getTitle(),
-                    markerBitmap.getPaint());
-            canvas.drawBitmap(bubble,
-                    (int) (left + halfBitmapWidth - bubble.getWidth() / 2),
-                    (top - bubble.getHeight()));
-        } else {
-            int x = (int) (left + bitmap.getWidth() * 1.3);
-            int y = (int) (top + bitmap.getHeight() * 1.3
-                    + markerBitmap.getPaint().getTextHeight(cluster.getTitle()) / 2);
-            canvas.drawText(cluster.getTitle(), x, y,
-                    markerBitmap.getPaint());
+        if (zoomLevel > 13) {
+            if (markerType == 0) {
+                // Draw bitmap
+                var bubble = MarkerBitmap.getBitmapFromTitle(cluster.getTitle(),
+                        markerBitmap.getPaint());
+                canvas.drawBitmap(bubble,
+                        (int) (left + halfBitmapWidth - bubble.getWidth() / 2),
+                        (top - bubble.getHeight()));
+            } else {
+                int x = (int) (left + bitmap.getWidth() * 1.3);
+                int y = (int) (top + bitmap.getHeight() * 1.3
+                        + markerBitmap.getPaint().getTextHeight(cluster.getTitle()) / 2);
+                canvas.drawText(cluster.getTitle(), x, y,
+                        markerBitmap.getPaint());
+            }
         }
 
     }
@@ -148,9 +150,9 @@ public class ClusterMarker<T extends GeoItem> extends Layer {
         } else if (contains(viewPosition, tapPoint)) {
             var builder = new StringBuilder(cluster.getItems().size() + " items:")
                     .append(cluster.getItems().stream()
-                    .map(i -> "\n- " + i.getTitle())
-                    .limit(6)
-                    .collect(joining()));
+                            .map(i -> "\n- " + i.getTitle())
+                            .limit(6)
+                            .collect(joining()));
 
             if (cluster.getItems().size() > 6) {
                 builder.append("\n...");

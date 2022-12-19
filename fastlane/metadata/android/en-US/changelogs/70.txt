@@ -1,1 +1,2 @@
 - Request notification permission for Android 13
+- Show stations titles on map only on higher zoom levels, fix #348
