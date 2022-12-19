@@ -50,19 +50,11 @@ class RSAPIClientTest {
         assertThat(server.takeRequest().getPath()).isEqualTo("/countries");
         assertThat(response.body()).isNotNull();
         assertThat(response.body()).containsExactly(
-                Country.builder()
-                        .name("India")
-                        .code("in")
-                        .twitterTags("@Bahnhofsoma, #dbHackathon, #dbOpendata, #Bahnhofsfoto, @khgdrn")
-                        .timetableUrlTemplate("https://enquiry.indianrail.gov.in/ntes/")
-                        .build(),
-                Country.builder()
-                        .name("Schweiz")
-                        .code("ch")
-                        .email("fotos@schweizer-bahnhoefe.ch")
-                        .twitterTags("@BahnhoefeCH, @Bahnhofsoma, #BahnhofsfotoCH")
-                        .timetableUrlTemplate("http://fahrplan.sbb.ch/bin/stboard.exe/dn?input={title}&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes")
-                        .providerApps(List.of(
+                new Country("in", "India", null, "@Bahnhofsoma, #dbHackathon, #dbOpendata, #Bahnhofsfoto, @khgdrn", "https://enquiry.indianrail.gov.in/ntes/"),
+                new Country("ch", "Schweiz", "fotos@schweizer-bahnhoefe.ch", "@BahnhoefeCH, @Bahnhofsoma, #BahnhofsfotoCH",
+                        "http://fahrplan.sbb.ch/bin/stboard.exe/dn?input={title}&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes",
+                        null,
+                        List.of(
                                 ProviderApp.builder()
                                         .type("android")
                                         .name("SBB Mobile")
@@ -72,8 +64,7 @@ class RSAPIClientTest {
                                         .type("ios")
                                         .name("SBB Mobile")
                                         .url("https://apps.apple.com/app/sbb-mobile/id294855237")
-                                        .build()))
-                        .build());
+                                        .build())));
     }
 
     @Test

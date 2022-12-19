@@ -13,8 +13,8 @@ class CountryTest {
     @Test
     void getCountryByCode() {
         var country = Country.getCountryByCode(Set.of(
-                Country.builder().code("de").build(),
-                Country.builder().code("at").build()
+                new Country("de", "Deutschland"),
+                new Country("at", "Österreich")
         ), "at");
 
         assertThat(country).isNotEmpty();
@@ -28,7 +28,7 @@ class CountryTest {
             "'blah', true"
     })
     void hasTimetableUrlTemplate(String timetableUrlTemplate, boolean expectedValue) {
-        var country = Country.builder().timetableUrlTemplate(timetableUrlTemplate).build();
+        var country = new Country("de", "Deutschland", null, null, timetableUrlTemplate);
 
         assertThat(country.hasTimetableUrlTemplate()).isEqualTo(expectedValue);
     }
