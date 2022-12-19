@@ -88,7 +88,7 @@ public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
 
     private class HighScoreFilter extends Filter {
 
-        private List<HighScoreItem> originalItems = new ArrayList<>();
+        private final List<HighScoreItem> originalItems = new ArrayList<>();
 
         public HighScoreFilter(List<HighScoreItem> originalItems) {
             this.originalItems.addAll(originalItems);

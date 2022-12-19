@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +15,7 @@ import lombok.Value;
 @Value
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Country implements Serializable {
+public class Country implements Serializable, Comparable<Country> {
 
     @EqualsAndHashCode.Include
     String code;
@@ -43,6 +45,17 @@ public class Country implements Serializable {
 
     public List<ProviderApp> getCompatibleProviderApps() {
         return ProviderApp.getCompatibleProviderApps(providerApps);
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+        return name;
+    }
+
+    @Override
+    public int compareTo(final Country o) {
+        return name.compareTo(o.name);
     }
 
 }

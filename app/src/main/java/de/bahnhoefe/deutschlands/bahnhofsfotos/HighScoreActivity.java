@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityHighScoreBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
@@ -41,7 +42,8 @@ public class HighScoreActivity extends AppCompatActivity {
         var baseApplication = (BaseApplication) getApplication();
         var firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
         var countries = new ArrayList<>(baseApplication.getDbAdapter().getAllCountries());
-        countries.add(0, Country.builder().code(getString(R.string.all_countries)).name("").build());
+        Collections.sort(countries);
+        countries.add(0, Country.builder().code("").name(getString(R.string.all_countries)).build());
         int selectedItem = 0;
         for (var country : countries) {
             if (country.getCode().equals(firstSelectedCountry)) {
