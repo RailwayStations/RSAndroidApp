@@ -1,6 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -26,6 +27,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ChangePasswordBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,7 +58,7 @@ public class MyDataActivity extends AppCompatActivity {
 
         setProfileToUI(baseApplication.getProfile());
 
-        receiveInitialPassword(getIntent());
+        oauthAuthorizationCallback(getIntent());
         if (isLoginDataAvailable(profile.getEmail(), profile.getPassword())) {
             loadRemoteProfile();
         }
@@ -64,9 +66,7 @@ public class MyDataActivity extends AppCompatActivity {
 
     private void setProfileToUI(Profile profile) {
         binding.myData.etNickname.setText(profile.getNickname());
-        binding.myData.etPassword.setText(profile.getPassword());
         binding.myData.etEmail.setText(profile.getEmail());
-        binding.myData.etEmailOrNickname.setText(profile.getEmail());
         binding.myData.etLinking.setText(profile.getLink());
         license = profile.getLicense();
         binding.myData.cbLicenseCC0.setChecked(license == License.CC0);
@@ -96,7 +96,7 @@ public class MyDataActivity extends AppCompatActivity {
                         Log.i(TAG, "Successfully loaded profile");
                         var remoteProfile = response.body();
                         if (remoteProfile != null) {
-                            remoteProfile.setPassword(binding.myData.etPassword.getText().toString());
+                            //TODO: remoteProfile.setPassword(binding.myData.etPassword.getText().toString());
                             saveLocalProfile(remoteProfile);
                             showProfileView();
                         }
@@ -128,15 +128,42 @@ public class MyDataActivity extends AppCompatActivity {
         binding.myData.initPasswordLayout.setVisibility(View.GONE);
     }
 
-    private void receiveInitialPassword(Intent intent) {
+    private void oauthAuthorizationCallback(Intent intent) {
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             var data = intent.getData();
             if (data != null) {
-                profile.setPassword(data.getLastPathSegment());
-                binding.myData.etPassword.setText(profile.getPassword());
-                baseApplication.setPassword(profile.getPassword());
-                if (isLoginDataAvailable(profile.getEmail(), profile.getPassword())) {
-                    loadRemoteProfile();
+                var redirectUri = getString(R.string.redirectUri);
+                if (data.toString().startsWith(redirectUri)) {
+                    var code = data.getQueryParameter("code");
+                    if (code != null) {
+                        var clientId = getString(R.string.clientId);
+                        baseApplication.getRsapiClient().requestAccessToken(code, clientId, redirectUri).enqueue(new Callback<>() {
+                            @Override
+                            public void onResponse(Call<Token> call, Response<Token> response) {
+                                var token = response.body();
+                                Log.d(TAG, String.valueOf(token));
+                                baseApplication.getRsapiClient().setToken(token);
+                                loadRemoteProfile();
+                            }
+
+                            @Override
+                            public void onFailure(final Call<Token> call, final Throwable t) {
+                                Toast.makeText(MyDataActivity.this, getString(R.string.authorization_error, t.getMessage()), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+                        String error = data.getQueryParameter("error");
+                        if (error != null) {
+                            Toast.makeText(this, getString(R.string.authorization_error, error), Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    profile.setPassword(data.getLastPathSegment());
+                    // TODO: binding.myData.etPassword.setText(profile.getPassword());
+                    baseApplication.setPassword(profile.getPassword());
+                    if (isLoginDataAvailable(profile.getEmail(), profile.getPassword())) {
+                        loadRemoteProfile();
+                    }
                 }
             }
         }
@@ -145,7 +172,7 @@ public class MyDataActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        receiveInitialPassword(intent);
+        oauthAuthorizationCallback(intent);
     }
 
     public void selectLicense(View view) {
@@ -217,7 +244,7 @@ public class MyDataActivity extends AppCompatActivity {
             if (this.profile != null) {
                 profileBuilder.emailVerified(this.profile.isEmailVerified());
             }
-            profileBuilder.password(binding.myData.etPassword.getText().toString().trim());
+            // TODO: profileBuilder.password(binding.myData.etPassword.getText().toString().trim());
         }
         return profileBuilder.build();
     }
@@ -346,7 +373,7 @@ public class MyDataActivity extends AppCompatActivity {
 
     public void newRegister(View view) {
         rsapiClient.clearCredentials();
-        binding.myData.etEmail.setText(binding.myData.etEmailOrNickname.getText());
+        // TODO: binding.myData.etEmail.setText(binding.myData.etEmailOrNickname.getText());
         binding.myData.profileForm.setVisibility(View.VISIBLE);
         binding.myData.initPasswordLayout.setVisibility(View.VISIBLE);
         binding.myData.loginForm.setVisibility(View.GONE);
@@ -357,16 +384,10 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void login(View view) {
-        var username = binding.myData.etEmailOrNickname.getText().toString();
-        var password = binding.myData.etPassword.getText().toString();
-        if (isLoginDataAvailable(username, password)) {
-            baseApplication.setEmail(username);
-            baseApplication.setPassword(password);
-            rsapiClient.setCredentials(username, password);
-            loadRemoteProfile();
-        } else {
-            SimpleDialogs.confirm(this, R.string.missing_login_data);
-        }
+        Intent intent = new Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(baseApplication.getApiUrl() + "oauth2/authorize" + "?client_id=" + getString(R.string.clientId) + "&scope=all&response_type=code&redirect_uri=" + getString(R.string.redirectUri)));
+        startActivity(intent);
     }
 
     public void logout(View view) {
@@ -379,7 +400,7 @@ public class MyDataActivity extends AppCompatActivity {
 
     public void resetPassword(View view) {
         rsapiClient.clearCredentials();
-        var emailOrNickname = binding.myData.etEmailOrNickname.getText().toString();
+        /* TODO: var emailOrNickname = binding.myData.etEmailOrNickname.getText().toString();
         if (StringUtils.isBlank(emailOrNickname)) {
             SimpleDialogs.confirm(this, R.string.missing_email_or_nickname);
             return;
@@ -412,6 +433,7 @@ public class MyDataActivity extends AppCompatActivity {
                         String.format(getText(R.string.request_password_failed).toString(), t));
             }
         });
+         */
     }
 
     public void changePassword(View view) {
@@ -446,7 +468,7 @@ public class MyDataActivity extends AppCompatActivity {
                     switch (response.code()) {
                         case 200:
                             Log.i(TAG, "Successfully changed password");
-                            binding.myData.etPassword.setText(passwordBinding.password.getText());
+                            // TODO: binding.myData.etPassword.setText(passwordBinding.password.getText());
                             baseApplication.setPassword(passwordBinding.password.getText().toString());
                             rsapiClient.setCredentials(profile.getEmail(), passwordBinding.password.getText().toString());
                             SimpleDialogs.confirm(MyDataActivity.this, R.string.password_changed);

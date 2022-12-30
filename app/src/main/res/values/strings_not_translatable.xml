@@ -48,5 +48,7 @@
     <string name="copyright_osm" translatable="false">Map data © OpenStreetMap contributors</string>
 
     <string name="report_issue_link" translatable="false">https://github.com/RailwayStations/RSAndroidApp/issues/new?labels=bug&amp;body=%1$s</string>
+    <string name="clientId" translatable="false">rsAndroidDebug</string>
+    <string name="redirectUri" translatable="false">rsandroiddebug://authorized</string>
 
 </resources>

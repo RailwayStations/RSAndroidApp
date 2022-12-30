@@ -28,9 +28,9 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -46,7 +46,14 @@ public class RSAPIClient {
     private RSAPI api;
     private String baseUrl;
     private String username;
+
+    // TODO: replace with accessToken
     private String password;
+
+    // TODO: parameterize
+    private String clientId = "rsAndroidDebug";
+    private String clientSecret = "secret";
+    private Token token;
 
     public RSAPIClient(String baseUrl, String username, String password) {
         this.baseUrl = baseUrl;
@@ -66,16 +73,7 @@ public class RSAPIClient {
         gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
 
         var builder = new OkHttpClient.Builder()
-                .addInterceptor(new BaseApplication.UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT))
-                .addInterceptor(chain -> {
-                    if (username != null && password != null) {
-                        Request.Builder builder1 = chain.request().newBuilder().header("Authorization",
-                                Credentials.basic(username, password));
-                        Request newRequest = builder1.build();
-                        return chain.proceed(newRequest);
-                    }
-                    return chain.proceed(chain.request());
-                });
+                .addInterceptor(new BaseApplication.UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
 
         if (BuildConfig.DEBUG) {
             var loggingInterceptor = new HttpLoggingInterceptor();
@@ -185,22 +183,26 @@ public class RSAPIClient {
     }
 
     public Call<InboxResponse> reportProblem(ProblemReport problemReport) {
-        return api.reportProblem(problemReport);
+        return api.reportProblem(getUserAuthorization(), problemReport);
+    }
+
+    private String getUserAuthorization() {
+        return token.getTokenType() + " " + token.getAccessToken();
     }
 
     public Call<InboxResponse> photoUpload(String stationId, String countryCode,
                                            String stationTitle, Double latitude,
                                            Double longitude, String comment,
                                            Boolean active, RequestBody file) {
-        return api.photoUpload(stationId, countryCode, stationTitle, latitude, longitude, comment, active, file);
+        return api.photoUpload(getUserAuthorization(), stationId, countryCode, stationTitle, latitude, longitude, comment, active, file);
     }
 
     public Call<List<InboxStateQuery>> queryUploadState(List<InboxStateQuery> stateQueries) {
-        return api.queryUploadState(stateQueries);
+        return api.queryUploadState(getUserAuthorization(), stateQueries);
     }
 
     public Call<Profile> getProfile() {
-        return api.getProfile();
+        return api.getProfile(getUserAuthorization());
     }
 
     public Call<Void> registration(Profile profile) {
@@ -208,7 +210,7 @@ public class RSAPIClient {
     }
 
     public Call<Void> saveProfile(Profile profile) {
-        return api.saveProfile(profile);
+        return api.saveProfile(getUserAuthorization(), profile);
     }
 
     public Call<Void> resetPassword(String emailOrNickname) {
@@ -216,7 +218,7 @@ public class RSAPIClient {
     }
 
     public Call<Void> changePassword(String newPassword) {
-        return api.changePassword(newPassword);
+        return api.changePassword(getUserAuthorization(), newPassword);
     }
 
     public Call<Void> resendEmailVerification() {
@@ -225,6 +227,22 @@ public class RSAPIClient {
 
     public Call<Statistic> getStatistic(String country) {
         return api.getStatistic(country);
+    }
+
+    public Call<Token> requestAccessToken(String code, String clientId, String redirectUri) {
+        return api.requestAccessToken(getClientAuthorization(), code, clientId, "authorization_code", redirectUri);
+    }
+
+    private String getClientAuthorization() {
+        return Credentials.basic(clientId, clientSecret);
+    }
+
+    public Call<Token> refreshToken(String code, String clientId, String redirectUri) {
+        return api.refreshToken(getClientAuthorization(), code, clientId, "refresh_token", redirectUri);
+    }
+
+    public void setToken(Token token) {
+        this.token = token;
     }
 
     public interface ResultListener {

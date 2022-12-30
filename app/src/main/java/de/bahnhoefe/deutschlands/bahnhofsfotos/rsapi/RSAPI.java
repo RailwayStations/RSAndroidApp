@@ -11,9 +11,12 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -38,13 +41,13 @@ public interface RSAPI {
     Call<HighScore> getHighScore();
 
     @GET("/myProfile")
-    Call<Profile> getProfile();
+    Call<Profile> getProfile(@Header("Authorization") String authorization);
 
     @Headers({
             "Content-Type: application/json"
     })
     @POST("/myProfile")
-    Call<Void> saveProfile(@Body Profile profile);
+    Call<Void> saveProfile(@Header("Authorization") String authorization, @Body Profile profile);
 
     @Headers({
             "Content-Type: application/json"
@@ -56,10 +59,11 @@ public interface RSAPI {
     Call<Void> resetPassword(@Header("NameOrEmail") String emailOrNickname);
 
     @POST("/changePassword")
-    Call<Void> changePassword(@Header("New-Password") String newPassword);
+    Call<Void> changePassword(@Header("Authorization") String authorization, @Header("New-Password") String newPassword);
 
     @POST("/photoUpload")
-    Call<InboxResponse> photoUpload(@Header("Station-Id") String stationId,
+    Call<InboxResponse> photoUpload(@Header("Authorization") String authorization,
+                                    @Header("Station-Id") String stationId,
                                     @Header("Country") String countryCode,
                                     @Header("Station-Title") String stationTitle,
                                     @Header("Latitude") Double latitude,
@@ -72,13 +76,15 @@ public interface RSAPI {
             "Content-Type: application/json"
     })
     @POST("/userInbox")
-    Call<List<InboxStateQuery>> queryUploadState(@Body List<InboxStateQuery> inboxStateQueries);
+    Call<List<InboxStateQuery>> queryUploadState(@Header("Authorization") String authorization,
+                                                 @Body List<InboxStateQuery> inboxStateQueries);
 
     @Headers({
             "Content-Type: application/json"
     })
     @POST("/reportProblem")
-    Call<InboxResponse> reportProblem(@Body ProblemReport problemReport);
+    Call<InboxResponse> reportProblem(@Header("Authorization") String authorization,
+                                      @Body ProblemReport problemReport);
 
     @GET("/publicInbox")
     Call<List<PublicInbox>> getPublicInbox();
@@ -91,5 +97,13 @@ public interface RSAPI {
 
     @GET("/photoStationsByCountry/{country}")
     Call<PhotoStations> getPhotoStationsByCountry(@Path("country") String country);
+
+    @FormUrlEncoded
+    @POST("/oauth2/token")
+    Call<Token> requestAccessToken(@Header("Authorization") String authorization, @Field("code") String code, @Field("client_id") String clientId, @Field("grant_type") String grantType, @Field("redirect_uri") String redirectUri);
+
+    @FormUrlEncoded
+    @POST("/oauth2/token")
+    Call<Token> refreshToken(@Header("Authorization") String authorization, @Field("refresh_token") String refreshToken, @Field("client_id") String clientId, @Field("grant_type") String grantType, @Field("redirect_uri") String redirectUri);
 
 }
