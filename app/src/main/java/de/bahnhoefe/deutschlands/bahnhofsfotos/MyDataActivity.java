@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMydataBinding;
@@ -132,12 +133,12 @@ public class MyDataActivity extends AppCompatActivity {
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             var data = intent.getData();
             if (data != null) {
-                var redirectUri = getString(R.string.redirectUri);
+                var redirectUri = baseApplication.getRsapiRedirectUri();
                 if (data.toString().startsWith(redirectUri)) {
                     var code = data.getQueryParameter("code");
                     if (code != null) {
-                        var clientId = getString(R.string.clientId);
-                        baseApplication.getRsapiClient().requestAccessToken(code, clientId, redirectUri).enqueue(new Callback<>() {
+                        var clientId = getString(R.string.rsapiClientId);
+                        baseApplication.getRsapiClient().requestAccessToken(code, clientId, redirectUri, baseApplication.getPkceCodeVerifier()).enqueue(new Callback<>() {
                             @Override
                             public void onResponse(Call<Token> call, Response<Token> response) {
                                 var token = response.body();
@@ -383,10 +384,10 @@ public class MyDataActivity extends AppCompatActivity {
         binding.myData.btChangePassword.setVisibility(View.GONE);
     }
 
-    public void login(View view) {
+    public void login(View view) throws NoSuchAlgorithmException {
         Intent intent = new Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse(baseApplication.getApiUrl() + "oauth2/authorize" + "?client_id=" + getString(R.string.clientId) + "&scope=all&response_type=code&redirect_uri=" + getString(R.string.redirectUri)));
+                Uri.parse(baseApplication.getApiUrl() + "oauth2/authorize" + "?client_id=" + baseApplication.getRsapiClientId() + "&code_challenge=" + baseApplication.getPkceCodeChallenge() + "&code_challenge_method=S256&scope=all&response_type=code&redirect_uri=" + baseApplication.getRsapiRedirectUri()));
         startActivity(intent);
     }
 

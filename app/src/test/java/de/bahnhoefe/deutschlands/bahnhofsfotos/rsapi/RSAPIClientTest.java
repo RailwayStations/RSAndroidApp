@@ -33,7 +33,7 @@ class RSAPIClientTest {
         server = new MockWebServer();
         server.start();
         var baseUrl = server.url("/");
-        client = new RSAPIClient(baseUrl.toString(), "", "");
+        client = new RSAPIClient(baseUrl.toString(), "clientId", "", "");
     }
 
     @AfterEach

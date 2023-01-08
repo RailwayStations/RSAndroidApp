@@ -29,7 +29,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
-import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -50,13 +49,12 @@ public class RSAPIClient {
     // TODO: replace with accessToken
     private String password;
 
-    // TODO: parameterize
-    private String clientId = "rsAndroidDebug";
-    private String clientSecret = "secret";
+    private final String clientId;
     private Token token;
 
-    public RSAPIClient(String baseUrl, String username, String password) {
+    public RSAPIClient(String baseUrl, String clientId, String username, String password) {
         this.baseUrl = baseUrl;
+        this.clientId = clientId;
         this.username = username;
         this.password = password;
         api = createRSAPI();
@@ -229,16 +227,8 @@ public class RSAPIClient {
         return api.getStatistic(country);
     }
 
-    public Call<Token> requestAccessToken(String code, String clientId, String redirectUri) {
-        return api.requestAccessToken(getClientAuthorization(), code, clientId, "authorization_code", redirectUri);
-    }
-
-    private String getClientAuthorization() {
-        return Credentials.basic(clientId, clientSecret);
-    }
-
-    public Call<Token> refreshToken(String code, String clientId, String redirectUri) {
-        return api.refreshToken(getClientAuthorization(), code, clientId, "refresh_token", redirectUri);
+    public Call<Token> requestAccessToken(String code, String clientId, String redirectUri, String codeVerifier) {
+        return api.requestAccessToken(code, clientId, "authorization_code", redirectUri, codeVerifier);
     }
 
     public void setToken(Token token) {

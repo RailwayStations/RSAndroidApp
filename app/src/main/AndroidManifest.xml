@@ -93,8 +93,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="authorized"
-                    android:scheme="rsandroiddebug" />
+                    android:host="@string/rsapiRedirectHost"
+                    android:scheme="@string/rsapiRedirectScheme" />
             </intent-filter>
         </activity>
         <activity

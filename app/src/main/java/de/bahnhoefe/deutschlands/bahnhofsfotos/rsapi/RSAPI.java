@@ -100,10 +100,10 @@ public interface RSAPI {
 
     @FormUrlEncoded
     @POST("/oauth2/token")
-    Call<Token> requestAccessToken(@Header("Authorization") String authorization, @Field("code") String code, @Field("client_id") String clientId, @Field("grant_type") String grantType, @Field("redirect_uri") String redirectUri);
+    Call<Token> requestAccessToken(@Field("code") String code, @Field("client_id") String clientId, @Field("grant_type") String grantType, @Field("redirect_uri") String redirectUri, @Field("code_verifier") String codeVerifier);
 
     @FormUrlEncoded
-    @POST("/oauth2/token")
-    Call<Token> refreshToken(@Header("Authorization") String authorization, @Field("refresh_token") String refreshToken, @Field("client_id") String clientId, @Field("grant_type") String grantType, @Field("redirect_uri") String redirectUri);
+    @POST("/oauth2/revoke")
+    Call<Token> revokeToken(@Field("token") String accessToken, @Field("token_type_hint") String tokenTypeHint);
 
 }

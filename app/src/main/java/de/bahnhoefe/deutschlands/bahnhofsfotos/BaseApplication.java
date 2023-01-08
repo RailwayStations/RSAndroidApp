@@ -17,6 +17,7 @@ import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -28,6 +29,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ExceptionHandler;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PKCEUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -45,6 +47,7 @@ public class BaseApplication extends Application {
     private DbAdapter dbAdapter;
     private RSAPIClient rsapiClient;
     private SharedPreferences preferences;
+    private PKCEUtil pkce;
 
     public BaseApplication() {
         setInstance(this);
@@ -107,7 +110,7 @@ public class BaseApplication extends Application {
             setPhotoOwner(true);
         }
 
-        rsapiClient = new RSAPIClient(getApiUrl(), getEmail(), getPassword());
+        rsapiClient = new RSAPIClient(getApiUrl(), getString(R.string.rsapiClientId), getEmail(), getPassword());
     }
 
     public String getApiUrl() {
@@ -391,6 +394,23 @@ public class BaseApplication extends Application {
 
     public void setSortByDistance(boolean sortByDistance) {
         putBoolean(R.string.SORT_BY_DISTANCE, sortByDistance);
+    }
+
+    public String getRsapiClientId() {
+        return getString(R.string.rsapiClientId);
+    }
+
+    public String getRsapiRedirectUri() {
+        return getString(R.string.rsapiRedirectScheme) + "://" + getString(R.string.rsapiRedirectHost);
+    }
+
+    public String getPkceCodeChallenge() throws NoSuchAlgorithmException {
+        pkce = new PKCEUtil();
+        return pkce.getCodeChallenge();
+    }
+
+    public String getPkceCodeVerifier() {
+        return pkce.getCodeVerifier();
     }
 
     /* This interceptor adds a custom User-Agent. */
