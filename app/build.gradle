@@ -98,7 +98,7 @@ android {
 ext {
     mapsforgeVersion = '0.18.0'
     retrofitVersion = '2.9.0'
-    junitVersion = '5.9.1'
+    junitVersion = '5.9.2'
     assertJVersion = '3.24.1'
 }
 
