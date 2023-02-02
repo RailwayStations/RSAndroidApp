@@ -36,8 +36,8 @@ android {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 70
-        versionName "13.7.0"
+        versionCode 71
+        versionName "13.8.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
         multiDexEnabled true
@@ -111,7 +111,7 @@ dependencies {
     }
 
     // Desugaring
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.0"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.1"
 
     compileOnly "org.projectlombok:lombok:1.18.24"
     annotationProcessor 'org.projectlombok:lombok:1.18.24'

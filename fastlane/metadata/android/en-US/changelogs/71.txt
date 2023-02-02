@@ -1,0 +1,2 @@
+- Update dependencies
+- Change support eMail-Address to info@railway-stations.org

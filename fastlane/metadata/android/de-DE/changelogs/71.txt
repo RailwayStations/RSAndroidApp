@@ -1,0 +1,2 @@
+- Abhängigkeiten aktualisiert
+- Support eMail-Adresse auf info@railway-stations.org geändert
