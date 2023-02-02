@@ -18,7 +18,7 @@
     <string name="SORT_BY_DISTANCE" translatable="false">APP_PREF_SORT_BY_DISTANCE</string>
 
     <string name="FIRSTAPPSTART" translatable="false">FirstAppStart</string>
-    <string name="fab_email" translatable="false">bahnhofsfotos@deutschlands-bahnhoefe.de</string>
+    <string name="fab_email" translatable="false">info@railway-stations.org</string>
     <string name="menu_title_website" translatable="false">railway-stations.org</string>
     <string name="railway_stations_activity" translatable="false">https://railway-stations.org</string>
     <string name="LOCATION_UPDATES" translatable="false">LOCATION_UPDATES</string>
