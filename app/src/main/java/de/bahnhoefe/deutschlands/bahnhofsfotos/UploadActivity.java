@@ -463,10 +463,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
                     } else if (response.code() == 401) {
-                        baseApplication.setAccessToken(null);
-                        rsapiClient.clearToken();
-                        Toast.makeText(UploadActivity.this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
-                        startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
+                        onUnauthorized();
                         return;
                     } else {
                         assert response.errorBody() != null;
@@ -531,18 +528,22 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         rsapiClient.queryUploadState(List.of(stateQuery)).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<InboxStateQuery>> call, @NonNull Response<List<InboxStateQuery>> response) {
-                var stateQueries = response.body();
-                if (stateQueries != null && !stateQueries.isEmpty()) {
-                    var stateQuery = stateQueries.get(0);
-                    binding.upload.uploadStatus.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
-                    binding.upload.uploadStatus.setTextColor(getResources().getColor(stateQuery.getState().getColorId(), null));
-                    binding.upload.uploadStatus.setVisibility(View.VISIBLE);
-                    upload.setUploadState(stateQuery.getState());
-                    upload.setRejectReason(stateQuery.getRejectedReason());
-                    upload.setCrc32(stateQuery.getCrc32());
-                    upload.setRemoteId(stateQuery.getId());
-                    baseApplication.getDbAdapter().updateUpload(upload);
-                    updateCrc32Checkbox();
+                if (response.isSuccessful()) {
+                    var stateQueries = response.body();
+                    if (stateQueries != null && !stateQueries.isEmpty()) {
+                        var stateQuery = stateQueries.get(0);
+                        binding.upload.uploadStatus.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
+                        binding.upload.uploadStatus.setTextColor(getResources().getColor(stateQuery.getState().getColorId(), null));
+                        binding.upload.uploadStatus.setVisibility(View.VISIBLE);
+                        upload.setUploadState(stateQuery.getState());
+                        upload.setRejectReason(stateQuery.getRejectedReason());
+                        upload.setCrc32(stateQuery.getCrc32());
+                        upload.setRemoteId(stateQuery.getId());
+                        baseApplication.getDbAdapter().updateUpload(upload);
+                        updateCrc32Checkbox();
+                    }
+                } else if (response.code() == 401) {
+                    onUnauthorized();
                 } else {
                     Log.w(TAG, "Upload states not processable");
                 }
@@ -554,6 +555,14 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
             }
         });
 
+    }
+
+    private void onUnauthorized() {
+        baseApplication.setAccessToken(null);
+        rsapiClient.clearToken();
+        Toast.makeText(this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
+        startActivity(new Intent(this, MyDataActivity.class));
+        finish();
     }
 
     private void updateCrc32Checkbox() {
