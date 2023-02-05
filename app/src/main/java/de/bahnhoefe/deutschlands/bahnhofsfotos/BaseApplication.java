@@ -110,7 +110,7 @@ public class BaseApplication extends Application {
             setPhotoOwner(true);
         }
 
-        rsapiClient = new RSAPIClient(getApiUrl(), getString(R.string.rsapiClientId), getEmail(), getPassword());
+        rsapiClient = new RSAPIClient(getApiUrl(), getString(R.string.rsapiClientId), getAccessToken());
     }
 
     public String getApiUrl() {
@@ -234,14 +234,12 @@ public class BaseApplication extends Application {
         putString(R.string.EMAIL, email);
     }
 
-    public String getPassword() {
-        return preferences.getString(getString(R.string.PASSWORD),
-                preferences.getString(getString(R.string.UPLOAD_TOKEN), DEFAULT)); // for backward compatibility
+    public String getAccessToken() {
+        return preferences.getString(getString(R.string.ACCESS_TOKEN), null);
     }
 
-    public void setPassword(String password) {
-        putString(R.string.UPLOAD_TOKEN, DEFAULT); // for backward compatibility
-        putString(R.string.PASSWORD, password);
+    public void setAccessToken(String apiToken) {
+        putString(R.string.ACCESS_TOKEN, apiToken);
     }
 
     public StationFilter getStationFilter() {
@@ -320,7 +318,6 @@ public class BaseApplication extends Application {
         setPhotographerLink(profile.getLink());
         setNickname(profile.getNickname());
         setEmail(profile.getEmail());
-        setPassword(profile.getPassword());
     }
 
     public Profile getProfile() {
@@ -331,7 +328,6 @@ public class BaseApplication extends Application {
                 .link(getPhotographerLink())
                 .nickname(getNickname())
                 .email(getEmail())
-                .password(getPassword())
                 .build();
     }
 

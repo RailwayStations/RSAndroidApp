@@ -60,7 +60,7 @@ public class MyDataActivity extends AppCompatActivity {
         setProfileToUI(baseApplication.getProfile());
 
         oauthAuthorizationCallback(getIntent());
-        if (isLoginDataAvailable(profile.getEmail(), profile.getPassword())) {
+        if (isLoginDataAvailable()) {
             loadRemoteProfile();
         }
     }
@@ -103,6 +103,7 @@ public class MyDataActivity extends AppCompatActivity {
                         }
                         break;
                     case 401:
+                        logout(null);
                         SimpleDialogs.confirm(MyDataActivity.this, R.string.authorization_failed);
                         break;
                     default:
@@ -143,6 +144,7 @@ public class MyDataActivity extends AppCompatActivity {
                             public void onResponse(Call<Token> call, Response<Token> response) {
                                 var token = response.body();
                                 Log.d(TAG, String.valueOf(token));
+                                baseApplication.setAccessToken(token.getAccessToken());
                                 baseApplication.getRsapiClient().setToken(token);
                                 loadRemoteProfile();
                             }
@@ -159,10 +161,7 @@ public class MyDataActivity extends AppCompatActivity {
                         }
                     }
 
-                    profile.setPassword(data.getLastPathSegment());
-                    // TODO: binding.myData.etPassword.setText(profile.getPassword());
-                    baseApplication.setPassword(profile.getPassword());
-                    if (isLoginDataAvailable(profile.getEmail(), profile.getPassword())) {
+                    if (isLoginDataAvailable()) {
                         loadRemoteProfile();
                     }
                 }
@@ -183,85 +182,17 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    public void registerOrSave(View view) {
-        boolean register = false;
-        if (binding.myData.btProfileSave.getText().equals(getResources().getText(R.string.bt_register))) {
-            rsapiClient.setCredentials(null, null);
-            register = true;
-        }
-        if (!saveProfile(register)) {
+    public void save(View view) {
+        profile = createProfileFromUI();
+        if (!isValid()) {
             return;
         }
-        if (!rsapiClient.hasCredentials()) {
-            profile = createProfileFromUI(register);
-            rsapiClient.registration(profile).enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                    switch (response.code()) {
-                        case 202:
-                            rsapiClient.setCredentials(profile.getEmail(), profile.getNewPassword());
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.new_registration);
-                            showProfileView();
-                            saveLocalProfile(profile);
-                            break;
-                        case 400:
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.profile_wrong_data);
-                            break;
-                        case 409:
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.profile_conflict);
-                            break;
-                        case 422:
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.registration_data_incomplete);
-                            break;
-                        default:
-                            SimpleDialogs.confirm(MyDataActivity.this,
-                                    String.format(getText(R.string.registration_failed).toString(), response.code()));
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                    Log.e(TAG, "Registration failed", t);
-                    SimpleDialogs.confirm(MyDataActivity.this,
-                            String.format(getText(R.string.registration_failed).toString(), t));
-                }
-            });
-        }
-    }
-
-    private Profile createProfileFromUI(boolean register) {
-        var profileBuilder = Profile.builder()
-                .nickname(binding.myData.etNickname.getText().toString().trim())
-                .email(binding.myData.etEmail.getText().toString().trim())
-                .license(license)
-                .photoOwner(binding.myData.cbOwnPhoto.isChecked())
-                .anonymous(binding.myData.cbAnonymous.isChecked())
-                .link(binding.myData.etLinking.getText().toString().trim());
-
-        if (register) {
-            profileBuilder.password(binding.myData.etInitPassword.getText().toString().trim())
-                    .newPassword(binding.myData.etInitPassword.getText().toString().trim());
-        } else {
-            if (this.profile != null) {
-                profileBuilder.emailVerified(this.profile.isEmailVerified());
-            }
-            // TODO: profileBuilder.password(binding.myData.etPassword.getText().toString().trim());
-        }
-        return profileBuilder.build();
-    }
-
-    public boolean saveProfile(boolean registration) {
-        profile = createProfileFromUI(false);
-        if (!isValid(registration)) {
-            return false;
-        }
-        if (rsapiClient.hasCredentials()) {
+        if (rsapiClient.hasToken()) {
             rsapiClient.saveProfile(profile).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     switch (response.code()) {
                         case 200:
-                            rsapiClient.setCredentials(profile.getEmail(), profile.getPassword());
                             Log.i(TAG, "Successfully saved profile");
                             break;
                         case 202:
@@ -271,7 +202,7 @@ public class MyDataActivity extends AppCompatActivity {
                             SimpleDialogs.confirm(MyDataActivity.this, R.string.profile_wrong_data);
                             break;
                         case 401:
-                            rsapiClient.clearCredentials();
+                            logout(view);
                             SimpleDialogs.confirm(MyDataActivity.this, R.string.authorization_failed);
                             break;
                         case 409:
@@ -293,10 +224,24 @@ public class MyDataActivity extends AppCompatActivity {
         }
 
         saveLocalProfile(profile);
-        if (!registration) {
-            Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
+
+    }
+
+    private Profile createProfileFromUI() {
+        var profileBuilder = Profile.builder()
+                .nickname(binding.myData.etNickname.getText().toString().trim())
+                .email(binding.myData.etEmail.getText().toString().trim())
+                .license(license)
+                .photoOwner(binding.myData.cbOwnPhoto.isChecked())
+                .anonymous(binding.myData.cbAnonymous.isChecked())
+                .link(binding.myData.etLinking.getText().toString().trim());
+
+        if (this.profile != null) {
+            profileBuilder.emailVerified(this.profile.isEmailVerified());
         }
-        return true;
+
+        return profileBuilder.build();
     }
 
     private void saveLocalProfile(Profile profile) {
@@ -304,8 +249,8 @@ public class MyDataActivity extends AppCompatActivity {
         setProfileToUI(profile);
     }
 
-    private boolean isLoginDataAvailable(String username, String password) {
-        return StringUtils.isNotBlank(password) && StringUtils.isNotBlank(username);
+    private boolean isLoginDataAvailable() {
+        return baseApplication.getAccessToken() != null;
     }
 
     @Override
@@ -314,7 +259,7 @@ public class MyDataActivity extends AppCompatActivity {
         finish();
     }
 
-    public boolean isValid(boolean register) {
+    public boolean isValid() {
         if (license == License.UNKNOWN) {
             SimpleDialogs.confirm(this, R.string.cc0_needed);
             return false;
@@ -335,11 +280,6 @@ public class MyDataActivity extends AppCompatActivity {
         if (StringUtils.isNotBlank(url) && !isValidHTTPURL(url)) {
             SimpleDialogs.confirm(this, R.string.missing_link);
             return false;
-        }
-
-        if (register) {
-            var newPassword = getValidPassword(binding.myData.etInitPassword, binding.myData.etInitPasswordRepeat);
-            return newPassword != null;
         }
 
         return true;
@@ -372,18 +312,6 @@ public class MyDataActivity extends AppCompatActivity {
         }
     }
 
-    public void newRegister(View view) {
-        rsapiClient.clearCredentials();
-        // TODO: binding.myData.etEmail.setText(binding.myData.etEmailOrNickname.getText());
-        binding.myData.profileForm.setVisibility(View.VISIBLE);
-        binding.myData.initPasswordLayout.setVisibility(View.VISIBLE);
-        binding.myData.loginForm.setVisibility(View.GONE);
-        Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.tvRegistration);
-        binding.myData.btProfileSave.setText(R.string.bt_register);
-        binding.myData.btLogout.setVisibility(View.GONE);
-        binding.myData.btChangePassword.setVisibility(View.GONE);
-    }
-
     public void login(View view) throws NoSuchAlgorithmException {
         Intent intent = new Intent(
                 Intent.ACTION_VIEW,
@@ -392,49 +320,13 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void logout(View view) {
+        baseApplication.setAccessToken(null);
+        rsapiClient.clearToken();
         profile = Profile.builder().build();
         saveLocalProfile(profile);
         binding.myData.profileForm.setVisibility(View.GONE);
         binding.myData.loginForm.setVisibility(View.VISIBLE);
         Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.login);
-    }
-
-    public void resetPassword(View view) {
-        rsapiClient.clearCredentials();
-        /* TODO: var emailOrNickname = binding.myData.etEmailOrNickname.getText().toString();
-        if (StringUtils.isBlank(emailOrNickname)) {
-            SimpleDialogs.confirm(this, R.string.missing_email_or_nickname);
-            return;
-        }
-        profile.setEmail(emailOrNickname);
-        saveLocalProfile(profile);
-        rsapiClient.resetPassword(emailOrNickname).enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                switch (response.code()) {
-                    case 202:
-                        SimpleDialogs.confirm(MyDataActivity.this, R.string.password_email);
-                        break;
-                    case 400:
-                        SimpleDialogs.confirm(MyDataActivity.this, R.string.profile_wrong_data);
-                        break;
-                    case 404:
-                        SimpleDialogs.confirm(MyDataActivity.this, R.string.profile_not_found);
-                        break;
-                    default:
-                        SimpleDialogs.confirm(MyDataActivity.this,
-                                String.format(getText(R.string.request_password_failed).toString(), response.code()));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                Log.e(TAG, "Request new password failed", t);
-                SimpleDialogs.confirm(MyDataActivity.this,
-                        String.format(getText(R.string.request_password_failed).toString(), t));
-            }
-        });
-         */
     }
 
     public void changePassword(View view) {
@@ -469,14 +361,12 @@ public class MyDataActivity extends AppCompatActivity {
                     switch (response.code()) {
                         case 200:
                             Log.i(TAG, "Successfully changed password");
-                            // TODO: binding.myData.etPassword.setText(passwordBinding.password.getText());
-                            baseApplication.setPassword(passwordBinding.password.getText().toString());
-                            rsapiClient.setCredentials(profile.getEmail(), passwordBinding.password.getText().toString());
+                            logout(view);
                             SimpleDialogs.confirm(MyDataActivity.this, R.string.password_changed);
                             break;
                         case 401:
-                            rsapiClient.clearCredentials();
                             SimpleDialogs.confirm(MyDataActivity.this, R.string.authorization_failed);
+                            logout(view);
                             break;
                         default:
                             SimpleDialogs.confirm(MyDataActivity.this,

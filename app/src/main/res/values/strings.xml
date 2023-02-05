@@ -161,7 +161,7 @@
     <string name="bt_logout">Logout</string>
     <string name="profile_not_found">Unknown email or nickname</string>
     <string name="missing_email_or_nickname">Please provide email or nickname</string>
-    <string name="bt_register">Register</string>
+    <string name="bt_save">Register</string>
     <string name="tvRegistration">Registration</string>
     <string name="tvProfile">Userprofile</string>
     <string name="provider_android_app">Provider App</string>
@@ -177,7 +177,7 @@
     <string name="password_repeat">Repeat password</string>
     <string name="password_too_short">Password must be at least 8 characters long</string>
     <string name="password_repeat_fail">Passwords do not match</string>
-    <string name="password_changed">Password successfully changed</string>
+    <string name="password_changed">Password successfully changed, please login again</string>
     <string name="change_password_failed">Change password failed</string>
     <string name="comment_hint">Remarks on this photo for the team</string>
     <string name="station_info">Info</string>

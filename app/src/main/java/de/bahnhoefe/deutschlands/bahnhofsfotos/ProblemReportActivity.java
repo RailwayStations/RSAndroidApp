@@ -129,7 +129,7 @@ public class ProblemReportActivity extends AppCompatActivity {
     }
 
     private boolean isNotLoggedIn() {
-        return !rsapiClient.hasCredentials();
+        return !rsapiClient.hasToken();
     }
 
     public void reportProblem(View view) {
@@ -194,6 +194,8 @@ public class ProblemReportActivity extends AppCompatActivity {
                         if (response.isSuccessful()) {
                             inboxResponse = response.body();
                         } else if (response.code() == 401) {
+                            baseApplication.setAccessToken(null);
+                            rsapiClient.clearToken();
                             Toast.makeText(ProblemReportActivity.this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
                             startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
                             finish();

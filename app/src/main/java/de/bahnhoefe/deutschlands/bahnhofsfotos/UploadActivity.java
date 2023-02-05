@@ -219,7 +219,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
     }
 
     private boolean isNotLoggedIn() {
-        return !rsapiClient.hasCredentials();
+        return !rsapiClient.hasToken();
     }
 
     private final ActivityResultLauncher<Intent> imageCaptureResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -463,6 +463,8 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     if (response.isSuccessful()) {
                         inboxResponse = response.body();
                     } else if (response.code() == 401) {
+                        baseApplication.setAccessToken(null);
+                        rsapiClient.clearToken();
                         Toast.makeText(UploadActivity.this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
                         startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
                         return;

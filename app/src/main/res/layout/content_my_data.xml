@@ -34,25 +34,11 @@
                     android:layout_marginTop="10dp"
                     android:layout_alignParentTop="true"
                     android:text="@string/login"
-                    android:onClick="login" />
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/bt_login_reset_password"
-                    android:layout_marginTop="10dp"
-                    android:layout_below="@+id/bt_login"
-                    android:text="@string/bt_mydata_reset_password"
-                    android:onClick="resetPassword" />
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/bt_register"
-                    android:layout_marginTop="10dp"
-                    android:layout_below="@+id/bt_login_reset_password"
-                    android:text="@string/bt_new_register"
-                    android:onClick="newRegister" />
+                    android:onClick="login"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:drawableStart="@drawable/ic_menu_login"
+                    android:drawableTint="@color/colorActions"
+                    android:textColor="@color/colorActions" />
 
             </RelativeLayout>
 
@@ -230,8 +216,11 @@
                     android:id="@+id/btProfileSave"
                     android:layout_marginTop="10dp"
                     android:layout_below="@+id/initPasswordLayout"
-                    android:text="@string/bt_register"
-                    android:onClick="registerOrSave" />
+                    android:text="@string/bt_save"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:drawableTint="@color/colorActions"
+                    android:textColor="@color/colorActions"
+                    android:onClick="save" />
 
                 <Button
                     android:layout_width="wrap_content"
@@ -240,6 +229,9 @@
                     android:layout_marginTop="10dp"
                     android:layout_toEndOf="@+id/btProfileSave"
                     android:layout_below="@+id/etLinking"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:drawableTint="@color/colorActions"
+                    android:textColor="@color/colorActions"
                     android:text="@string/bt_logout"
                     android:onClick="logout" />
 
@@ -250,6 +242,9 @@
                     android:layout_marginTop="10dp"
                     android:layout_alignParentBottom="true"
                     android:layout_below="@+id/btProfileSave"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:drawableTint="@color/colorActions"
+                    android:textColor="@color/colorActions"
                     android:text="@string/bt_change_password"
                     android:onClick="changePassword" />
 

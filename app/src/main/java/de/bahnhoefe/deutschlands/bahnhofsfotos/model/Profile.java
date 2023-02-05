@@ -15,6 +15,4 @@ public class Profile {
     boolean emailVerified;
     String email;
 
-    transient String password;
-
 }

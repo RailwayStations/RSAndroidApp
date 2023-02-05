@@ -9,8 +9,6 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.GsonBuilder;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
@@ -45,18 +44,18 @@ public class RSAPIClient {
     private RSAPI api;
     private String baseUrl;
     private String username;
-
-    // TODO: replace with accessToken
-    private String password;
-
     private final String clientId;
     private Token token;
 
-    public RSAPIClient(String baseUrl, String clientId, String username, String password) {
+    public RSAPIClient(String baseUrl, String clientId, final String accessToken) {
         this.baseUrl = baseUrl;
         this.clientId = clientId;
-        this.username = username;
-        this.password = password;
+        if (accessToken != null) {
+            this.token = Token.builder()
+                    .accessToken(accessToken)
+                    .tokenType("Bearer")
+                    .build();
+        }
         api = createRSAPI();
     }
 
@@ -86,20 +85,6 @@ public class RSAPIClient {
                 .build();
 
         return retrofit.create(RSAPI.class);
-    }
-
-    public void setCredentials(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
-
-    public boolean hasCredentials() {
-        return StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password);
-    }
-
-    public void clearCredentials() {
-        this.username = null;
-        this.password = null;
     }
 
     public Call<List<Country>> getCountries() {
@@ -185,7 +170,10 @@ public class RSAPIClient {
     }
 
     private String getUserAuthorization() {
-        return token.getTokenType() + " " + token.getAccessToken();
+        if (hasToken()) {
+            return token.getTokenType() + " " + token.getAccessToken();
+        }
+        return null;
     }
 
     public Call<InboxResponse> photoUpload(String stationId, String countryCode,
@@ -203,20 +191,12 @@ public class RSAPIClient {
         return api.getProfile(getUserAuthorization());
     }
 
-    public Call<Void> registration(Profile profile) {
-        return api.registration(profile);
-    }
-
     public Call<Void> saveProfile(Profile profile) {
         return api.saveProfile(getUserAuthorization(), profile);
     }
 
-    public Call<Void> resetPassword(String emailOrNickname) {
-        return api.resetPassword(emailOrNickname);
-    }
-
     public Call<Void> changePassword(String newPassword) {
-        return api.changePassword(getUserAuthorization(), newPassword);
+        return api.changePassword(getUserAuthorization(), new ChangePassword(newPassword));
     }
 
     public Call<Void> resendEmailVerification() {
@@ -233,6 +213,14 @@ public class RSAPIClient {
 
     public void setToken(Token token) {
         this.token = token;
+    }
+
+    public boolean hasToken() {
+        return token != null;
+    }
+
+    public void clearToken() {
+        this.token = null;
     }
 
     public interface ResultListener {

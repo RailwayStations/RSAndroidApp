@@ -2,6 +2,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi;
 
 import java.util.List;
 
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
@@ -52,14 +53,9 @@ public interface RSAPI {
     @Headers({
             "Content-Type: application/json"
     })
-    @POST("/registration")
-    Call<Void> registration(@Body Profile profile);
-
-    @POST("/resetPassword")
-    Call<Void> resetPassword(@Header("NameOrEmail") String emailOrNickname);
 
     @POST("/changePassword")
-    Call<Void> changePassword(@Header("Authorization") String authorization, @Header("New-Password") String newPassword);
+    Call<Void> changePassword(@Header("Authorization") String authorization, @Body ChangePassword changePassword);
 
     @POST("/photoUpload")
     Call<InboxResponse> photoUpload(@Header("Authorization") String authorization,
