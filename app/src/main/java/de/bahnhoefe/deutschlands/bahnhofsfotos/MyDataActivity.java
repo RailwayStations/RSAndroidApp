@@ -97,24 +97,23 @@ public class MyDataActivity extends AppCompatActivity {
                         Log.i(TAG, "Successfully loaded profile");
                         var remoteProfile = response.body();
                         if (remoteProfile != null) {
-                            //TODO: remoteProfile.setPassword(binding.myData.etPassword.getText().toString());
                             saveLocalProfile(remoteProfile);
                             showProfileView();
                         }
                         break;
                     case 401:
                         logout(null);
-                        SimpleDialogs.confirm(MyDataActivity.this, R.string.authorization_failed);
+                        SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
                         break;
                     default:
-                        SimpleDialogs.confirm(MyDataActivity.this,
+                        SimpleDialogs.confirmOk(MyDataActivity.this,
                                 String.format(getText(R.string.read_profile_failed).toString(), response.code()));
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Profile> call, @NonNull Throwable t) {
-                SimpleDialogs.confirm(MyDataActivity.this,
+                SimpleDialogs.confirmOk(MyDataActivity.this,
                         String.format(getText(R.string.read_profile_failed).toString(), t.getMessage()));
             }
         });
@@ -127,7 +126,6 @@ public class MyDataActivity extends AppCompatActivity {
         binding.myData.btProfileSave.setText(R.string.bt_mydata_commit);
         binding.myData.btLogout.setVisibility(View.VISIBLE);
         binding.myData.btChangePassword.setVisibility(View.VISIBLE);
-        binding.myData.initPasswordLayout.setVisibility(View.GONE);
     }
 
     private void oauthAuthorizationCallback(Intent intent) {
@@ -178,13 +176,13 @@ public class MyDataActivity extends AppCompatActivity {
     public void selectLicense(View view) {
         license = binding.myData.cbLicenseCC0.isChecked() ? License.CC0 : License.UNKNOWN;
         if (license != License.CC0) {
-            SimpleDialogs.confirm(this, R.string.cc0_needed);
+            SimpleDialogs.confirmOk(this, R.string.cc0_needed);
         }
     }
 
     public void save(View view) {
         profile = createProfileFromUI();
-        if (!isValid()) {
+        if (!isValid(profile)) {
             return;
         }
         if (rsapiClient.hasToken()) {
@@ -196,20 +194,20 @@ public class MyDataActivity extends AppCompatActivity {
                             Log.i(TAG, "Successfully saved profile");
                             break;
                         case 202:
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.password_email);
+                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.password_email);
                             break;
                         case 400:
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.profile_wrong_data);
+                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.profile_wrong_data);
                             break;
                         case 401:
                             logout(view);
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.authorization_failed);
+                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
                             break;
                         case 409:
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.profile_conflict);
+                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.profile_conflict);
                             break;
                         default:
-                            SimpleDialogs.confirm(MyDataActivity.this,
+                            SimpleDialogs.confirmOk(MyDataActivity.this,
                                     String.format(getText(R.string.save_profile_failed).toString(), response.code()));
                     }
                 }
@@ -217,7 +215,7 @@ public class MyDataActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     Log.e(TAG, "Error uploading profile", t);
-                    SimpleDialogs.confirm(MyDataActivity.this,
+                    SimpleDialogs.confirmOk(MyDataActivity.this,
                             String.format(getText(R.string.save_profile_failed).toString(), t.getMessage()));
                 }
             });
@@ -259,26 +257,18 @@ public class MyDataActivity extends AppCompatActivity {
         finish();
     }
 
-    public boolean isValid() {
-        if (license == License.UNKNOWN) {
-            SimpleDialogs.confirm(this, R.string.cc0_needed);
+    public boolean isValid(Profile profile) {
+        if (StringUtils.isBlank(profile.getNickname())) {
+            SimpleDialogs.confirmOk(this, R.string.missing_nickname);
             return false;
         }
-        if (!binding.myData.cbOwnPhoto.isChecked()) {
-            SimpleDialogs.confirm(this, R.string.missing_photoOwner);
+        if (!isValidEmail(profile.getEmail())) {
+            SimpleDialogs.confirmOk(this, R.string.missing_email_address);
             return false;
         }
-        if (StringUtils.isBlank(binding.myData.etNickname.getText())) {
-            SimpleDialogs.confirm(this, R.string.missing_nickname);
-            return false;
-        }
-        if (!isValidEmail(binding.myData.etEmail.getText())) {
-            SimpleDialogs.confirm(this, R.string.missing_email_address);
-            return false;
-        }
-        String url = binding.myData.etLinking.getText().toString();
+        String url = profile.getLink();
         if (StringUtils.isNotBlank(url) && !isValidHTTPURL(url)) {
-            SimpleDialogs.confirm(this, R.string.missing_link);
+            SimpleDialogs.confirmOk(this, R.string.missing_link);
             return false;
         }
 
@@ -362,14 +352,14 @@ public class MyDataActivity extends AppCompatActivity {
                         case 200:
                             Log.i(TAG, "Successfully changed password");
                             logout(view);
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.password_changed);
+                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.password_changed);
                             break;
                         case 401:
-                            SimpleDialogs.confirm(MyDataActivity.this, R.string.authorization_failed);
+                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
                             logout(view);
                             break;
                         default:
-                            SimpleDialogs.confirm(MyDataActivity.this,
+                            SimpleDialogs.confirmOk(MyDataActivity.this,
                                     String.format(getText(R.string.change_password_failed).toString(), response.code()));
                     }
                 }
@@ -377,7 +367,7 @@ public class MyDataActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     Log.e(TAG, "Error changing password", t);
-                    SimpleDialogs.confirm(MyDataActivity.this,
+                    SimpleDialogs.confirmOk(MyDataActivity.this,
                             String.format(getText(R.string.change_password_failed).toString(), t.getMessage()));
                 }
             });
@@ -400,7 +390,7 @@ public class MyDataActivity extends AppCompatActivity {
     }
 
     public void requestEmailVerification(View view) {
-        SimpleDialogs.confirm(this, R.string.requestEmailVerification, (dialogInterface, i) -> rsapiClient.resendEmailVerification().enqueue(new Callback<>() {
+        SimpleDialogs.confirmOkCancel(this, R.string.requestEmailVerification, (dialogInterface, i) -> rsapiClient.resendEmailVerification().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.code() == 200) {

@@ -88,6 +88,21 @@ public class ProblemReportActivity extends AppCompatActivity {
             }
         });
 
+        if (!baseApplication.isLoggedIn()) {
+            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
+            finish();
+            return;
+        }
+
+        if (!baseApplication.getProfile().isEmailVerified()) {
+            SimpleDialogs.confirmOk(this, R.string.email_unverified_for_problem_report, (dialog, view) -> {
+                startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
+                finish();
+            });
+            return;
+        }
+
         onNewIntent(getIntent());
     }
 
@@ -128,18 +143,7 @@ public class ProblemReportActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isNotLoggedIn() {
-        return !rsapiClient.hasToken();
-    }
-
     public void reportProblem(View view) {
-        if (isNotLoggedIn()) {
-            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-            startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
-            finish();
-            return;
-        }
-
         int selectedType = binding.problemType.getSelectedItemPosition();
         if (selectedType == 0) {
             Toast.makeText(getApplicationContext(), getString(R.string.problem_please_specify), Toast.LENGTH_LONG).show();
@@ -186,7 +190,7 @@ public class ProblemReportActivity extends AppCompatActivity {
                 .lon(lon)
                 .build();
 
-        SimpleDialogs.confirm(ProblemReportActivity.this, R.string.send_problem_report,
+        SimpleDialogs.confirmOkCancel(ProblemReportActivity.this, R.string.send_problem_report,
                 (dialog, which) -> rsapiClient.reportProblem(problemReport).enqueue(new Callback<>() {
                     @Override
                     public void onResponse(@NonNull Call<InboxResponse> call, @NonNull Response<InboxResponse> response) {
@@ -203,7 +207,7 @@ public class ProblemReportActivity extends AppCompatActivity {
                         upload.setRemoteId(inboxResponse.getId());
                         upload.setUploadState(inboxResponse.getState().getUploadState());
                         baseApplication.getDbAdapter().updateUpload(upload);
-                        SimpleDialogs.confirm(ProblemReportActivity.this, inboxResponse.getState().getMessageId());
+                        SimpleDialogs.confirmOk(ProblemReportActivity.this, inboxResponse.getState().getMessageId());
                         if (response.isSuccessful()) {
                             finish();
                         }

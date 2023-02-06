@@ -28,9 +28,9 @@
                 android:paddingTop="@dimen/activity_vertical_margin">
 
                 <Button
+                    android:id="@+id/bt_login"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/bt_login"
                     android:layout_marginTop="10dp"
                     android:layout_alignParentTop="true"
                     android:text="@string/login"
@@ -52,9 +52,9 @@
                 android:paddingTop="@dimen/activity_vertical_margin">
 
                 <TextView
+                    android:id="@+id/tvEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/tvEmail"
                     android:labelFor="@id/etEmail"
                     android:text="@string/tvEmail"
                     android:textSize="20sp"
@@ -62,9 +62,9 @@
                     android:layout_marginEnd="10dp" />
 
                 <TextView
+                    android:id="@+id/tvEmailVerification"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/tvEmailVerification"
                     android:text="@string/emailUnverified"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -75,9 +75,9 @@
                     android:onClick="requestEmailVerification" />
 
                 <EditText
+                    android:id="@+id/etEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/etEmail"
                     android:layout_below="@+id/tvEmail"
                     android:inputType="textEmailAddress"
                     android:layout_marginEnd="10dp"
@@ -94,128 +94,106 @@
                     android:layout_below="@+id/etEmail" />
 
                 <EditText
+                    android:id="@+id/etNickname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/etNickname"
                     android:layout_below="@+id/tvNickname"
                     android:importantForAutofill="no"
                     android:inputType="text" />
 
                 <TextView
+                    android:id="@+id/tvLicense"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/tvLicence"
                     android:layout_below="@+id/etNickname"
                     android:text="@string/tvLicense"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <CheckBox
+                    android:id="@+id/cbLicenseCC0"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/tvLicence"
+                    android:layout_below="@+id/tvLicense"
                     android:layout_alignParentStart="true"
-                    android:id="@+id/cbLicenseCC0"
-                    android:layout_marginBottom="20dp"
                     android:text="@string/CC0"
                     android:onClick="selectLicense" />
 
                 <TextView
+                    android:id="@+id/tvLicenseDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/tvOwnPhoto"
+                    android:layout_marginBottom="20dp"
                     android:layout_below="@+id/cbLicenseCC0"
+                    android:text="@string/tvLicenseDescription" />
+
+                <TextView
+                    android:id="@+id/tvOwnPhoto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvLicenseDescription"
                     android:text="@string/tvOwnPhotos"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <CheckBox
+                    android:id="@+id/cbOwnPhoto"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/cbOwnPhoto"
                     android:layout_below="@+id/tvOwnPhoto"
-                    android:layout_marginBottom="20dp"
                     android:text="@string/yesPhotoOwner" />
 
                 <TextView
+                    android:id="@+id/tvOwnPhotoDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/tvAnonymous"
+                    android:layout_marginBottom="20dp"
                     android:layout_below="@+id/cbOwnPhoto"
+                    android:text="@string/tvOwnPhotoDescription" />
+
+                <TextView
+                    android:id="@+id/tvAnonymous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvOwnPhotoDescription"
                     android:text="@string/tvAnonymous"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <CheckBox
+                    android:id="@+id/cbAnonymous"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/tvAnonymous"
                     android:layout_alignParentStart="true"
-                    android:id="@+id/cbAnonymous"
                     android:onClick="onAnonymousChecked"
                     android:layout_marginBottom="20dp"
                     android:text="@string/anonymous" />
 
                 <TextView
+                    android:id="@+id/tvLinking"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/tvLinking"
                     android:layout_below="@+id/cbAnonymous"
                     android:text="@string/tvLinking"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <EditText
+                    android:id="@+id/etLinking"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/etLinking"
                     android:hint="@string/etLinking"
                     android:layout_below="@+id/tvLinking"
                     android:importantForAutofill="no"
                     android:inputType="textUri" />
 
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:id="@+id/initPasswordLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/etLinking"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/tvInitPassword"
-                        android:text="@string/tvPassword"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:layout_marginEnd="10dp" />
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/etInitPassword"
-                        android:hint="@string/etPassword"
-                        android:inputType="textPassword"
-                        android:layout_marginEnd="10dp"
-                        android:importantForAutofill="no" />
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/etInitPasswordRepeat"
-                        android:hint="@string/initPasswordRepeat"
-                        android:inputType="textPassword"
-                        android:layout_marginEnd="10dp"
-                        android:importantForAutofill="no" />
-
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
                 <Button
+                    android:id="@+id/btProfileSave"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/btProfileSave"
                     android:layout_marginTop="10dp"
-                    android:layout_below="@+id/initPasswordLayout"
+                    android:layout_below="@+id/etLinking"
                     android:text="@string/bt_save"
                     android:backgroundTint="@color/colorPrimary"
                     android:drawableTint="@color/colorActions"
@@ -223,9 +201,9 @@
                     android:onClick="save" />
 
                 <Button
+                    android:id="@+id/bt_logout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/bt_logout"
                     android:layout_marginTop="10dp"
                     android:layout_toEndOf="@+id/btProfileSave"
                     android:layout_below="@+id/etLinking"
@@ -236,9 +214,9 @@
                     android:onClick="logout" />
 
                 <Button
+                    android:id="@+id/bt_changePassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/bt_changePassword"
                     android:layout_marginTop="10dp"
                     android:layout_alignParentBottom="true"
                     android:layout_below="@+id/btProfileSave"

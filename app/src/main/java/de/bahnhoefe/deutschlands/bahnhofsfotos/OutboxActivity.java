@@ -64,7 +64,7 @@ public class OutboxActivity extends AppCompatActivity {
 
         binding.lstUploads.setOnItemLongClickListener((parent, view, position, id) -> {
             var uploadId = String.valueOf(id);
-            SimpleDialogs.confirm(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
+            SimpleDialogs.confirmOkCancel(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
                 dbAdapter.deleteUpload(id);
                 FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, id));
                 adapter.changeCursor(dbAdapter.getOutbox());

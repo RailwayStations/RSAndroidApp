@@ -409,6 +409,10 @@ public class BaseApplication extends Application {
         return pkce.getCodeVerifier();
     }
 
+    public boolean isLoggedIn() {
+        return rsapiClient.hasToken();
+    }
+
     /* This interceptor adds a custom User-Agent. */
     public static class UserAgentInterceptor implements Interceptor {
 

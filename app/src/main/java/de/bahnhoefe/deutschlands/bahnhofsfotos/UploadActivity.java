@@ -102,6 +102,21 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
+        if (!baseApplication.isLoggedIn()) {
+            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(this, MyDataActivity.class));
+            finish();
+            return;
+        }
+
+        if (!baseApplication.getProfile().isAllowedToUploadPhoto()) {
+            SimpleDialogs.confirmOk(this, R.string.no_photo_upload_allowed, (dialog, which) -> {
+                startActivity(new Intent(this, MyDataActivity.class));
+                finish();
+            });
+            return;
+        }
+
         onNewIntent(getIntent());
     }
 
@@ -218,10 +233,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         binding.upload.cbSpecialLicense.setVisibility(overrideLicense == null ? View.GONE : View.VISIBLE);
     }
 
-    private boolean isNotLoggedIn() {
-        return !rsapiClient.hasToken();
-    }
-
     private final ActivityResultLauncher<Intent> imageCaptureResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK) {
@@ -249,13 +260,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
     public void takePicture(View view) {
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            return;
-        }
-
-        if (isNotLoggedIn()) {
-            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-            startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
-            finish();
             return;
         }
 
@@ -297,13 +301,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
             });
 
     public void selectPicture(View view) {
-        if (isNotLoggedIn()) {
-            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-            startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
-            finish();
-            return;
-        }
-
         selectPictureResultLauncher.launch("image/*");
     }
 
@@ -397,12 +394,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
     }
 
     public void upload(View view) {
-        if (isNotLoggedIn()) {
-            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-            startActivity(new Intent(UploadActivity.this, MyDataActivity.class));
-            finish();
-            return;
-        } else if (TextUtils.isEmpty(binding.upload.etStationTitle.getText())) {
+        if (TextUtils.isEmpty(binding.upload.etStationTitle.getText())) {
             Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show();
             return;
         }
@@ -436,7 +428,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
             upload.setCountry(selectedCountry.getValue());
         }
 
-        SimpleDialogs.confirm(this, station != null ? R.string.photo_upload : R.string.report_missing_station, (dialog, which) -> {
+        SimpleDialogs.confirmOkCancel(this, station != null ? R.string.photo_upload : R.string.report_missing_station, (dialog, which) -> {
             binding.upload.progressBar.setVisibility(View.VISIBLE);
 
             var stationTitle = binding.upload.etStationTitle.getText().toString();
@@ -477,7 +469,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     upload.setUploadState(inboxResponse.getState().getUploadState());
                     upload.setCrc32(inboxResponse.getCrc32());
                     baseApplication.getDbAdapter().updateUpload(upload);
-                    SimpleDialogs.confirm(UploadActivity.this, inboxResponse.getState().getMessageId());
+                    SimpleDialogs.confirmOk(UploadActivity.this, inboxResponse.getState().getMessageId());
                 }
 
                 @Override
@@ -485,7 +477,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     Log.e(TAG, "Error uploading photo", t);
                     binding.upload.progressBar.setVisibility(View.GONE);
 
-                    SimpleDialogs.confirm(UploadActivity.this,
+                    SimpleDialogs.confirmOk(UploadActivity.this,
                             String.format(getText(InboxResponse.InboxResponseState.ERROR.getMessageId()).toString(), t.getMessage()));
                     fetchUploadStatus(upload); // try to get the upload state again
                 }

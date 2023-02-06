@@ -15,4 +15,8 @@ public class Profile {
     boolean emailVerified;
     String email;
 
+    public boolean isAllowedToUploadPhoto() {
+        return isEmailVerified() && license == License.CC0 && photoOwner;
+    }
+
 }
