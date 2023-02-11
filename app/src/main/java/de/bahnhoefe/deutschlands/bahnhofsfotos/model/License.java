@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public enum License {
-    UNKNOWN(null),
+    UNKNOWN("Unknown license"),
     CC0("CC0 1.0 Universell (CC0 1.0)"),
     CC4("CC BY-SA 4.0");
 

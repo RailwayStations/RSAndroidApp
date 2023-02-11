@@ -234,6 +234,14 @@ public class BaseApplication extends Application {
         putString(R.string.EMAIL, email);
     }
 
+    public boolean isEmailVerified() {
+        return preferences.getBoolean(getString(R.string.PHOTO_OWNER), false);
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        putBoolean(R.string.PHOTO_OWNER, emailVerified);
+    }
+
     public String getAccessToken() {
         return preferences.getString(getString(R.string.ACCESS_TOKEN), null);
     }
@@ -318,6 +326,7 @@ public class BaseApplication extends Application {
         setPhotographerLink(profile.getLink());
         setNickname(profile.getNickname());
         setEmail(profile.getEmail());
+        setEmailVerified(profile.isEmailVerified());
     }
 
     public Profile getProfile() {
@@ -328,6 +337,7 @@ public class BaseApplication extends Application {
                 .link(getPhotographerLink())
                 .nickname(getNickname())
                 .email(getEmail())
+                .emailVerified(isEmailVerified())
                 .build();
     }
 
