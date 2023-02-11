@@ -1,0 +1,1 @@
+- New: OAuth2 authentication against Railway-Stations.org API
