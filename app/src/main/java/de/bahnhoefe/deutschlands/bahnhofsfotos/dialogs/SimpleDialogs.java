@@ -12,50 +12,59 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.PromptBinding;
 
 public class SimpleDialogs {
 
-    private SimpleDialogs(){}
-
-    public static void confirm(Context context, int message) {
-        new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
-            .setIcon(R.mipmap.ic_launcher)
-            .setTitle(R.string.app_name)
-            .setMessage(message)
-            .setNeutralButton(R.string.button_ok_text, null).create().show();
+    private SimpleDialogs() {
     }
 
-    public static void confirm(Context context, CharSequence message) {
-        new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
-            .setIcon(R.mipmap.ic_launcher)
-            .setTitle(R.string.app_name)
-            .setMessage(message)
-            .setNeutralButton(R.string.button_ok_text, null).create().show();
+    public static void confirmOk(Context context, int message) {
+        confirmOk(context, message, null);
     }
 
-    public static void confirm(Context context, int message, DialogInterface.OnClickListener listener) {
+    public static void confirmOk(Context context, int message, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
-            .setIcon(R.mipmap.ic_launcher)
-            .setTitle(R.string.app_name)
-            .setMessage(message)
-            .setPositiveButton(R.string.button_ok_text, listener)
-            .setNegativeButton(R.string.button_cancel_text, null)
-            .create().show();
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setNeutralButton(R.string.button_ok_text, listener).create().show();
     }
 
-    public static void confirm(Context context, String message, DialogInterface.OnClickListener listener) {
+    public static void confirmOk(Context context, CharSequence message) {
+        confirmOk(context, message, null);
+    }
+
+    public static void confirmOk(Context context, CharSequence message, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
-            .setIcon(R.mipmap.ic_launcher)
-            .setTitle(R.string.app_name)
-            .setMessage(message)
-            .setPositiveButton(R.string.button_ok_text, listener)
-            .setNegativeButton(R.string.button_cancel_text, null)
-            .create().show();
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setNeutralButton(R.string.button_ok_text, listener).create().show();
+    }
+
+    public static void confirmOkCancel(Context context, int message, DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setPositiveButton(R.string.button_ok_text, listener)
+                .setNegativeButton(R.string.button_cancel_text, null)
+                .create().show();
+    }
+
+    public static void confirmOkCancel(Context context, String message, DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(R.string.app_name)
+                .setMessage(message)
+                .setPositiveButton(R.string.button_ok_text, listener)
+                .setNegativeButton(R.string.button_cancel_text, null)
+                .create().show();
     }
 
     public static void simpleSelect(Context context, CharSequence message, CharSequence[] items, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom))
-            .setIcon(R.mipmap.ic_launcher)
-            .setTitle(message)
-            .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, 0, items), listener)
-            .create().show();
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle(message)
+                .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, 0, items), listener)
+                .create().show();
     }
 
     public static void prompt(Context context, int message, int inputType, int hint, String text, PromptListener listener) {

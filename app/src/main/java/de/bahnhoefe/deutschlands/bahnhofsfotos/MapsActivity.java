@@ -346,7 +346,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             missingMarker = new Marker(tapLatLong, bitmap, -(bitmap.getWidth() / 2), -bitmap.getHeight()) {
                 @Override
                 public boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
-                    SimpleDialogs.confirm(MapsActivity.this, R.string.add_missing_station, (dialogInterface, i) -> {
+                    SimpleDialogs.confirmOkCancel(MapsActivity.this, R.string.add_missing_station, (dialogInterface, i) -> {
                         var intent = new Intent(MapsActivity.this, UploadActivity.class);
                         intent.putExtra(UploadActivity.EXTRA_LATITUDE, getLatLong().latitude);
                         intent.putExtra(UploadActivity.EXTRA_LONGITUDE, getLatLong().longitude);

@@ -4,8 +4,9 @@
     <string name="PHOTO_OWNER" translatable="false">APP_PREF_PHOTO_OWNER</string>
     <string name="NICKNAME" translatable="false">APP_PREF_NICKNAME</string>
     <string name="EMAIL" translatable="false">APP_PREF_EMAIL</string>
+    <string name="EMAIL_VERIFIED" translatable="false">APP_PREF_EMAIL_VERIFIED</string>
     <string name="UPLOAD_TOKEN" translatable="false">APP_PREF_UPLOAD_TOKEN</string>
-    <string name="PASSWORD" translatable="false">APP_PREF_PASSWORD</string>
+    <string name="ACCESS_TOKEN" translatable="false">APP_PREF_API_TOKEN</string>
     <string name="LINK_TO_PHOTOGRAPHER" translatable="false">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
     <string name="COUNTRY" translatable="false">APP_PREF_COUNTRY</string>
     <string name="COUNTRIES" translatable="false">APP_PREF_COUNTRIES</string>
@@ -48,5 +49,9 @@
     <string name="copyright_osm" translatable="false">Map data © OpenStreetMap contributors</string>
 
     <string name="report_issue_link" translatable="false">https://github.com/RailwayStations/RSAndroidApp/issues/new?labels=bug&amp;body=%1$s</string>
+
+    <string name="rsapiRedirectScheme" translatable="false">railwaystations</string>
+    <string name="rsapiRedirectHost" translatable="false">de.bahnhoefe.deutschlands.bahnhofsfotos</string>
+    <string name="rsapiClientId" translatable="false">RailwayStationsAndroidApp</string>
 
 </resources>

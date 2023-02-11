@@ -1,0 +1,6 @@
+<resources>
+
+    <string name="rsapiRedirectHost" translatable="false">de.bahnhoefe.deutschlands.bahnhofsfotos.debug</string>
+    <string name="rsapiClientId" translatable="false">RailwayStationsAndroidAppDebug</string>
+
+</resources>

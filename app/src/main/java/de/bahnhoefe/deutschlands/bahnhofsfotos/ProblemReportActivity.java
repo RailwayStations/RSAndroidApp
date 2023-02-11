@@ -88,6 +88,21 @@ public class ProblemReportActivity extends AppCompatActivity {
             }
         });
 
+        if (!baseApplication.isLoggedIn()) {
+            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
+            finish();
+            return;
+        }
+
+        if (!baseApplication.getProfile().isEmailVerified()) {
+            SimpleDialogs.confirmOk(this, R.string.email_unverified_for_problem_report, (dialog, view) -> {
+                startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
+                finish();
+            });
+            return;
+        }
+
         onNewIntent(getIntent());
     }
 
@@ -128,18 +143,7 @@ public class ProblemReportActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isNotLoggedIn() {
-        return !rsapiClient.hasCredentials();
-    }
-
     public void reportProblem(View view) {
-        if (isNotLoggedIn()) {
-            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show();
-            startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
-            finish();
-            return;
-        }
-
         int selectedType = binding.problemType.getSelectedItemPosition();
         if (selectedType == 0) {
             Toast.makeText(getApplicationContext(), getString(R.string.problem_please_specify), Toast.LENGTH_LONG).show();
@@ -186,7 +190,7 @@ public class ProblemReportActivity extends AppCompatActivity {
                 .lon(lon)
                 .build();
 
-        SimpleDialogs.confirm(ProblemReportActivity.this, R.string.send_problem_report,
+        SimpleDialogs.confirmOkCancel(ProblemReportActivity.this, R.string.send_problem_report,
                 (dialog, which) -> rsapiClient.reportProblem(problemReport).enqueue(new Callback<>() {
                     @Override
                     public void onResponse(@NonNull Call<InboxResponse> call, @NonNull Response<InboxResponse> response) {
@@ -194,9 +198,7 @@ public class ProblemReportActivity extends AppCompatActivity {
                         if (response.isSuccessful()) {
                             inboxResponse = response.body();
                         } else if (response.code() == 401) {
-                            Toast.makeText(ProblemReportActivity.this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
-                            finish();
+                            onUnauthorized();
                             return;
                         } else {
                             inboxResponse = new Gson().fromJson(response.errorBody().charStream(), InboxResponse.class);
@@ -205,7 +207,7 @@ public class ProblemReportActivity extends AppCompatActivity {
                         upload.setRemoteId(inboxResponse.getId());
                         upload.setUploadState(inboxResponse.getState().getUploadState());
                         baseApplication.getDbAdapter().updateUpload(upload);
-                        SimpleDialogs.confirm(ProblemReportActivity.this, inboxResponse.getState().getMessageId());
+                        SimpleDialogs.confirmOk(ProblemReportActivity.this, inboxResponse.getState().getMessageId());
                         if (response.isSuccessful()) {
                             finish();
                         }
@@ -216,6 +218,14 @@ public class ProblemReportActivity extends AppCompatActivity {
                         Log.e(TAG, "Error reporting problem", t);
                     }
                 }));
+    }
+
+    private void onUnauthorized() {
+        baseApplication.setAccessToken(null);
+        rsapiClient.clearToken();
+        Toast.makeText(ProblemReportActivity.this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
+        startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
+        finish();
     }
 
     private Double parseDouble(final EditText editText) {
@@ -241,16 +251,20 @@ public class ProblemReportActivity extends AppCompatActivity {
         rsapiClient.queryUploadState(List.of(stateQuery)).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<InboxStateQuery>> call, @NonNull Response<List<InboxStateQuery>> response) {
-                var stateQueries = response.body();
-                if (stateQueries != null && !stateQueries.isEmpty()) {
-                    var stateQuery = stateQueries.get(0);
-                    binding.uploadStatus.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
-                    binding.uploadStatus.setTextColor(getResources().getColor(stateQuery.getState().getColorId(), null));
-                    upload.setUploadState(stateQuery.getState());
-                    upload.setRejectReason(stateQuery.getRejectedReason());
-                    upload.setCrc32(stateQuery.getCrc32());
-                    upload.setRemoteId(stateQuery.getId());
-                    baseApplication.getDbAdapter().updateUpload(upload);
+                if (response.isSuccessful()) {
+                    var stateQueries = response.body();
+                    if (stateQueries != null && !stateQueries.isEmpty()) {
+                        var stateQuery = stateQueries.get(0);
+                        binding.uploadStatus.setText(getString(R.string.upload_state, getString(stateQuery.getState().getTextId())));
+                        binding.uploadStatus.setTextColor(getResources().getColor(stateQuery.getState().getColorId(), null));
+                        upload.setUploadState(stateQuery.getState());
+                        upload.setRejectReason(stateQuery.getRejectedReason());
+                        upload.setCrc32(stateQuery.getCrc32());
+                        upload.setRemoteId(stateQuery.getId());
+                        baseApplication.getDbAdapter().updateUpload(upload);
+                    }
+                } else if (response.code() == 401) {
+                    onUnauthorized();
                 } else {
                     Log.w(TAG, "Upload states not processable");
                 }

@@ -93,13 +93,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="railway-stations.org"
-                    android:pathPrefix="/uploadToken"
-                    android:scheme="http" />
-                <data
-                    android:host="railway-stations.org"
-                    android:pathPrefix="/uploadToken"
-                    android:scheme="https" />
+                    android:host="@string/rsapiRedirectHost"
+                    android:scheme="@string/rsapiRedirectScheme" />
             </intent-filter>
         </activity>
         <activity

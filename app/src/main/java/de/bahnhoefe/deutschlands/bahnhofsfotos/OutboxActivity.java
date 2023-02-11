@@ -64,7 +64,7 @@ public class OutboxActivity extends AppCompatActivity {
 
         binding.lstUploads.setOnItemLongClickListener((parent, view, position, id) -> {
             var uploadId = String.valueOf(id);
-            SimpleDialogs.confirm(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
+            SimpleDialogs.confirmOkCancel(OutboxActivity.this, getResources().getString(R.string.delete_upload, uploadId), (dialog, which) -> {
                 dbAdapter.deleteUpload(id);
                 FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, id));
                 adapter.changeCursor(dbAdapter.getOutbox());
@@ -79,10 +79,18 @@ public class OutboxActivity extends AppCompatActivity {
         baseApplication.getRsapiClient().queryUploadState(query).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<InboxStateQuery>> call, @NonNull Response<List<InboxStateQuery>> response) {
-                var stateQueries = response.body();
-                if (stateQueries != null) {
-                    dbAdapter.updateUploadStates(stateQueries);
-                    adapter.changeCursor(dbAdapter.getOutbox());
+                if (response.isSuccessful()) {
+                    var stateQueries = response.body();
+                    if (stateQueries != null) {
+                        dbAdapter.updateUploadStates(stateQueries);
+                        adapter.changeCursor(dbAdapter.getOutbox());
+                    }
+                } else if (response.code() == 401) {
+                    baseApplication.setAccessToken(null);
+                    baseApplication.getRsapiClient().clearToken();
+                    Toast.makeText(OutboxActivity.this, R.string.authorization_failed, Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(OutboxActivity.this, MyDataActivity.class));
+                    finish();
                 } else {
                     Log.w(TAG, "Upload states not processable");
                 }
