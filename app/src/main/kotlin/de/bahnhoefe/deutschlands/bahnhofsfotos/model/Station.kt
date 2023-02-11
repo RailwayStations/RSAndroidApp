@@ -1,36 +1,44 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import java.io.Serializable;
+import java.io.Serializable
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+data class Station @JvmOverloads constructor(
+    var country: String? = null,
+    var id: String? = null,
+    var title: String? = null,
+    var lat: Double = 0.0,
+    var lon: Double = 0.0,
+    var ds100: String? = null,
+    var photoUrl: String? = null,
+    var photographer: String? = null,
+    var photographerUrl: String? = null,
+    var license: String? = null,
+    var licenseUrl: String? = null,
+    var active: Boolean = false,
+    var outdated: Boolean = false,
+    var photoId: Long = 0
+) : Serializable {
 
-@Value
-@Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Station implements Serializable {
+    fun hasPhoto(): Boolean {
+        return photoUrl != null
+    }
 
-    @EqualsAndHashCode.Include
-    String country;
-    @EqualsAndHashCode.Include
-    String id;
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-    String title;
-    double lat;
-    double lon;
-    String ds100;
-    String photoUrl;
-    String photographer;
-    String photographerUrl;
-    String license;
-    String licenseUrl;
-    boolean active;
-    boolean outdated;
-    long photoId;
+        other as Station
 
-    public boolean hasPhoto() {
-        return photoUrl != null;
+        if (country != other.country) return false
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = country?.hashCode() ?: 0
+        result = 31 * result + (id?.hashCode() ?: 0)
+        return result
     }
 
 }

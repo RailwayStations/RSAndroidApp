@@ -17,16 +17,16 @@ class ProviderAppTest {
             "web, true"
     })
     void hasCompatibleProviderApps(String type, boolean expectedHasCompatibleProviderApps) {
-        var providerApps = List.of(ProviderApp.builder().type(type).build());
+        var providerApps = List.of(new ProviderApp(type));
 
         assertThat(ProviderApp.hasCompatibleProviderApps(providerApps)).isEqualTo(expectedHasCompatibleProviderApps);
     }
 
     @Test
     void getCompatibleProviderApps() {
-        var webProviderApp = ProviderApp.builder().type("web").build();
-        var androidProviderApp = ProviderApp.builder().type("android").build();
-        var providerApps = List.of(webProviderApp, ProviderApp.builder().type("iOS").build(), androidProviderApp);
+        var webProviderApp = new ProviderApp("web");
+        var androidProviderApp = new ProviderApp("android");
+        var providerApps = List.of(webProviderApp, new ProviderApp("iOS"), androidProviderApp);
 
         assertThat(ProviderApp.getCompatibleProviderApps(providerApps)).containsExactlyInAnyOrder(webProviderApp, androidProviderApp);
     }

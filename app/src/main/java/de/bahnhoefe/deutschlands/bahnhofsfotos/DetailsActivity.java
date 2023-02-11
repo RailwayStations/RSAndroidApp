@@ -47,6 +47,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityDetailsBindin
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.StationInfoBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PageablePhoto;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Photo;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
@@ -78,7 +80,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
     private String nickname;
     private PhotoPagerAdapter photoPagerAdapter;
     private final Map<String, Bitmap> photoBitmaps = new HashMap<>();
-    private PhotoPagerAdapter.PageablePhoto selectedPhoto;
+    private PageablePhoto selectedPhoto;
     private final List<ImageView> carouselPageIndicators = new ArrayList<>();
 
     @Override
@@ -135,15 +137,10 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (ConnectionUtil.checkInternetConnection(this)) {
                     photoBitmaps.put(station.getPhotoUrl(), null);
                     BitmapCache.getInstance().getPhoto((bitmap) -> {
-                        selectedPhoto = PhotoPagerAdapter.PageablePhoto.builder()
-                                .id(station.getPhotoId())
-                                .bitmap(bitmap)
-                                .url(station.getPhotoUrl())
-                                .photographer(station.getPhotographer())
-                                .photographerUrl(station.getPhotographerUrl())
-                                .license(station.getLicense())
-                                .licenseUrl(station.getLicenseUrl())
-                                .build();
+                        assert bitmap != null;
+                        selectedPhoto = new PageablePhoto(
+                                station,
+                                bitmap);
                         runOnUiThread(() -> {
                             addIndicator();
                             photoPagerAdapter.addPageablePhoto(selectedPhoto);
@@ -174,15 +171,11 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                                 var url = photoStations.getPhotoBaseUrl() + photo.getPath();
                                 if (!photoBitmaps.containsKey(url)) {
                                     photoBitmaps.put(url, null);
-                                    BitmapCache.getInstance().getPhoto((bitmap) -> runOnUiThread(() -> photoPagerAdapter.addPageablePhoto(PhotoPagerAdapter.PageablePhoto.builder()
-                                            .id(photo.getId())
-                                            .url(url)
-                                            .bitmap(bitmap)
-                                            .photographer(photo.getPhotographer())
-                                            .photographerUrl(photoStations.getPhotographerUrl(photo.getPhotographer()))
-                                            .license(photoStations.getLicenseName(photo.getLicense()))
-                                            .licenseUrl(photoStations.getLicenseUrl(photo.getLicense()))
-                                            .build())), url);
+                                    BitmapCache.getInstance().getPhoto((bitmap) -> runOnUiThread(() -> addPhotoToPagerAdapter(
+                                            photo,
+                                            url,
+                                            photoStations,
+                                            bitmap)), url);
                                 }
                             });
 
@@ -201,6 +194,19 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         });
     }
 
+    private void addPhotoToPagerAdapter(Photo photo, String url, PhotoStations photoStations, Bitmap bitmap) {
+        photoPagerAdapter.addPageablePhoto(
+                new PageablePhoto(
+                        photo.getId(),
+                        url,
+                        photo.getPhotographer(),
+                        photoStations.getPhotographerUrl(photo.getPhotographer()),
+                        photoStations.getLicenseName(photo.getLicense()),
+                        photoStations.getLicenseUrl(photo.getLicense()),
+                        bitmap)
+        );
+    }
+
     private void addIndicator() {
         var indicator = new ImageView(DetailsActivity.this);
         indicator.setImageResource(R.drawable.selector_carousel_page_indicator);
@@ -215,12 +221,12 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         }
         if (station.hasPhoto()) {
             if (isOwner()) {
-                return station.isActive() ? R.drawable.marker_violet : R.drawable.marker_violet_inactive;
+                return station.getActive() ? R.drawable.marker_violet : R.drawable.marker_violet_inactive;
             } else {
-                return station.isActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive;
+                return station.getActive() ? R.drawable.marker_green : R.drawable.marker_green_inactive;
             }
         } else {
-            return station.isActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
+            return station.getActive() ? R.drawable.marker_red : R.drawable.marker_red_inactive;
         }
     }
 
@@ -376,9 +382,9 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         var stationInfoBinding = StationInfoBinding.inflate(getLayoutInflater());
         stationInfoBinding.id.setText(station.getId());
         stationInfoBinding.coordinates.setText(String.format(Locale.US, getResources().getString(R.string.coordinates), station.getLat(), station.getLon()));
-        stationInfoBinding.active.setText(station != null && station.isActive() ? R.string.active : R.string.inactive);
+        stationInfoBinding.active.setText(station != null && station.getActive() ? R.string.active : R.string.inactive);
         stationInfoBinding.owner.setText(station != null && station.getPhotographer() != null ? station.getPhotographer() : "");
-        if (station.isOutdated()) {
+        if (station.getOutdated()) {
             stationInfoBinding.outdatedLabel.setVisibility(View.VISIBLE);
         }
 
@@ -450,7 +456,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 }).show();
     }
 
-    public void onPageablePhotoSelected(PhotoPagerAdapter.PageablePhoto pageablePhoto, int position) {
+    public void onPageablePhotoSelected(PageablePhoto pageablePhoto, int position) {
         selectedPhoto = pageablePhoto;
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
 

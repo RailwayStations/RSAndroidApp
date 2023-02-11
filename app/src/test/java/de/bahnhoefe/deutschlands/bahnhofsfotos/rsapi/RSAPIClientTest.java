@@ -33,7 +33,7 @@ class RSAPIClientTest {
         server = new MockWebServer();
         server.start();
         var baseUrl = server.url("/");
-        client = new RSAPIClient(baseUrl.toString(), "clientId", null);
+        client = new RSAPIClient(baseUrl.toString(), "clientId", null, "rsapiRedirectScheme://rsapiRedirectHost");
     }
 
     @AfterEach
@@ -55,16 +55,14 @@ class RSAPIClientTest {
                         "http://fahrplan.sbb.ch/bin/stboard.exe/dn?input={title}&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes",
                         null,
                         List.of(
-                                ProviderApp.builder()
-                                        .type("android")
-                                        .name("SBB Mobile")
-                                        .url("https://play.google.com/store/apps/details?id=ch.sbb.mobile.android.b2c")
-                                        .build(),
-                                ProviderApp.builder()
-                                        .type("ios")
-                                        .name("SBB Mobile")
-                                        .url("https://apps.apple.com/app/sbb-mobile/id294855237")
-                                        .build())));
+                                new ProviderApp(
+                                        "android",
+                                        "SBB Mobile",
+                                        "https://play.google.com/store/apps/details?id=ch.sbb.mobile.android.b2c"),
+                                new ProviderApp(
+                                        "ios",
+                                        "SBB Mobile",
+                                        "https://apps.apple.com/app/sbb-mobile/id294855237"))));
     }
 
     @Test
@@ -76,21 +74,18 @@ class RSAPIClientTest {
         assertThat(server.takeRequest().getPath()).isEqualTo("/photographers");
         assertThat(response.body()).isNotNull();
         assertThat(response.body().getItems()).containsExactly(
-                HighScoreItem.builder()
-                        .name("User1")
-                        .photos(2581)
-                        .position(1)
-                        .build(),
-                HighScoreItem.builder()
-                        .name("User2")
-                        .photos(1109)
-                        .position(2)
-                        .build(),
-                HighScoreItem.builder()
-                        .name("User3")
-                        .photos(812)
-                        .position(3)
-                        .build()
+                new HighScoreItem(
+                        "User1",
+                        2581,
+                        1),
+                new HighScoreItem(
+                        "User2",
+                        1109,
+                        2),
+                new HighScoreItem(
+                        "User3",
+                        812,
+                        3)
         );
     }
 
@@ -103,21 +98,18 @@ class RSAPIClientTest {
         assertThat(server.takeRequest().getPath()).isEqualTo("/photographers?country=de");
         assertThat(response.body()).isNotNull();
         assertThat(response.body().getItems()).containsExactly(
-                HighScoreItem.builder()
-                        .name("User1")
-                        .photos(2581)
-                        .position(1)
-                        .build(),
-                HighScoreItem.builder()
-                        .name("User2")
-                        .photos(1109)
-                        .position(2)
-                        .build(),
-                HighScoreItem.builder()
-                        .name("User3")
-                        .photos(812)
-                        .position(3)
-                        .build()
+                new HighScoreItem(
+                        "User1",
+                        2581,
+                        1),
+                new HighScoreItem(
+                        "User2",
+                        1109,
+                        2),
+                new HighScoreItem(
+                        "User3",
+                        812,
+                        3)
         );
     }
 
@@ -129,7 +121,7 @@ class RSAPIClientTest {
 
         assertThat(server.takeRequest().getPath()).isEqualTo("/stats?country=de");
         assertThat(response.body()).isNotNull();
-        assertThat(response.body()).usingRecursiveComparison().isEqualTo(Statistic.builder().total(7863).withPhoto(7861).withoutPhoto(2).photographers(249).build());
+        assertThat(response.body()).usingRecursiveComparison().isEqualTo(new Statistic(7863, 7861, 2, 249));
     }
 
     @Test
@@ -140,42 +132,38 @@ class RSAPIClientTest {
 
         assertThat(server.takeRequest().getPath()).isEqualTo("/photoStationById/de/1973");
         assertThat(response.body()).isNotNull();
-        assertThat(response.body()).isEqualTo(PhotoStations.builder()
-                .photoBaseUrl("https://api.railway-stations.org/photos")
-                .licenses(List.of(PhotoLicense.builder()
-                        .id("CC0_10")
-                        .name("CC0 1.0 Universell (CC0 1.0)")
-                        .url(new URL("https://creativecommons.org/publicdomain/zero/1.0/"))
-                        .build()))
-                .photographers(List.of(Photographer.builder()
-                        .name("@User1")
-                        .url(new URL("https://example.com/@User1"))
-                        .build()))
-                .stations(List.of(PhotoStation.builder()
-                        .country("de")
-                        .id("1973")
-                        .title("Fulda")
-                        .lat(50.5547372607544)
-                        .lon(9.6843855869764)
-                        .shortCode("FFU")
-                        .photos(List.of(
-                                Photo.builder()
-                                        .id(4430L)
-                                        .photographer("@User1")
-                                        .path("/de/1973.jpg")
-                                        .createdAt(1451846273000L)
-                                        .license("CC0_10")
-                                        .build(),
-                                Photo.builder()
-                                        .id(4431L)
-                                        .photographer("@User1")
-                                        .path("/de/1973_2.jpg")
-                                        .createdAt(1451846279000L)
-                                        .license("CC0_10")
-                                        .build()
-                        ))
-                        .build()))
-                .build());
+        assertThat(response.body()).isEqualTo(new PhotoStations(
+                "https://api.railway-stations.org/photos",
+                List.of(new PhotoLicense(
+                        "CC0_10",
+                        "CC0 1.0 Universell (CC0 1.0)",
+                        new URL("https://creativecommons.org/publicdomain/zero/1.0/"))),
+                List.of(new Photographer(
+                        "@User1",
+                        new URL("https://example.com/@User1"))),
+                List.of(new PhotoStation(
+                        "de",
+                        "1973",
+                        "Fulda",
+                        50.5547372607544,
+                        9.6843855869764,
+                        "FFU",
+                        false,
+                        List.of(
+                                new Photo(
+                                        4430L,
+                                        "@User1",
+                                        "/de/1973.jpg",
+                                        1451846273000L,
+                                        "CC0_10"),
+                                new Photo(
+                                        4431L,
+                                        "@User1",
+                                        "/de/1973_2.jpg",
+                                        1451846279000L,
+                                        "CC0_10")
+                        )))
+        ));
     }
 
     @Test
@@ -186,44 +174,40 @@ class RSAPIClientTest {
 
         assertThat(server.takeRequest().getPath()).isEqualTo("/photoStationsByCountry/de");
         assertThat(response.body()).isNotNull();
-        assertThat(response.body()).isEqualTo(PhotoStations.builder()
-                .photoBaseUrl("https://api.railway-stations.org/photos")
-                .licenses(List.of(PhotoLicense.builder()
-                        .id("CC0_10")
-                        .name("CC0 1.0 Universell (CC0 1.0)")
-                        .url(new URL("https://creativecommons.org/publicdomain/zero/1.0/"))
-                        .build()))
-                .photographers(List.of(Photographer.builder()
-                        .name("@User1")
-                        .url(new URL("https://example.com/@User1"))
-                        .build()))
-                .stations(List.of(PhotoStation.builder()
-                                .country("de")
-                                .id("Z11")
-                                .title("Bahnhof Zoo")
-                                .lat(51.03745553026876)
-                                .lon(13.757279123256026)
-                                .shortCode("")
-                                .photos(List.of())
-                                .build(),
-                        PhotoStation.builder()
-                                .country("de")
-                                .id("1973")
-                                .title("Fulda")
-                                .lat(50.5547372607544)
-                                .lon(9.6843855869764)
-                                .shortCode("FFU")
-                                .photos(List.of(
-                                        Photo.builder()
-                                                .id(4430L)
-                                                .photographer("@User1")
-                                                .path("/de/1973.jpg")
-                                                .createdAt(1451846273000L)
-                                                .license("CC0_10")
-                                                .build()
-                                ))
-                                .build()))
-                .build());
+        assertThat(response.body()).isEqualTo(new PhotoStations(
+                "https://api.railway-stations.org/photos",
+                List.of(new PhotoLicense(
+                        "CC0_10",
+                        "CC0 1.0 Universell (CC0 1.0)",
+                        new URL("https://creativecommons.org/publicdomain/zero/1.0/"))),
+                List.of(new Photographer(
+                        "@User1",
+                        new URL("https://example.com/@User1"))),
+                List.of(new PhotoStation(
+                                "de",
+                                "Z11",
+                                "Bahnhof Zoo",
+                                51.03745553026876,
+                                13.757279123256026,
+                                "",
+                                false,
+                                List.of()),
+                        new PhotoStation(
+                                "de",
+                                "1973",
+                                "Fulda",
+                                50.5547372607544,
+                                9.6843855869764,
+                                "FFU",
+                                false,
+                                List.of(
+                                        new Photo(
+                                                4430L,
+                                                "@User1",
+                                                "/de/1973.jpg",
+                                                1451846273000L,
+                                                "CC0_10")
+                                )))));
     }
 
     Buffer fromFile(final String filename) throws Exception {

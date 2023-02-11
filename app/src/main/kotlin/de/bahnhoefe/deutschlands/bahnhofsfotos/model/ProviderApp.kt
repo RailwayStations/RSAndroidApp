@@ -1,40 +1,31 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Collectors
 
-import java.util.List;
+data class ProviderApp @JvmOverloads constructor(
+    var type: String? = null,
+    var name: String? = null,
+    var url: String? = null
+) {
 
-import lombok.Builder;
-import lombok.Value;
+    val isAndroid: Boolean
+        get() = "android" == type
+    val isWeb: Boolean
+        get() = "web" == type
+    val isCompatible: Boolean
+        get() = isAndroid || isWeb
 
-@Value
-@Builder
-public class ProviderApp {
+    companion object {
+        @JvmStatic
+        fun hasCompatibleProviderApps(providerApps: List<ProviderApp>): Boolean {
+            return providerApps.stream().anyMatch { obj: ProviderApp -> obj.isCompatible }
+        }
 
-    String type;
-    String name;
-    String url;
-
-    public boolean isAndroid() {
-        return "android".equals(type);
+        @JvmStatic
+        fun getCompatibleProviderApps(providerApps: List<ProviderApp>): List<ProviderApp> {
+            return providerApps.stream()
+                .filter { obj: ProviderApp -> obj.isCompatible }
+                .collect(Collectors.toList())
+        }
     }
-
-    public boolean isWeb() {
-        return "web".equals(type);
-    }
-
-    public boolean isCompatible() {
-        return isAndroid() || isWeb();
-    }
-
-    public static boolean hasCompatibleProviderApps(List<ProviderApp> providerApps) {
-        return providerApps.stream().anyMatch(ProviderApp::isCompatible);
-    }
-
-    public static List<ProviderApp> getCompatibleProviderApps(List<ProviderApp> providerApps) {
-        return providerApps.stream()
-                .filter(ProviderApp::isCompatible)
-                .collect(toList());
-    }
-
 }

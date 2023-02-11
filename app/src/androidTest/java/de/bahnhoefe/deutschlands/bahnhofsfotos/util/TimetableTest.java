@@ -14,10 +14,13 @@ public class TimetableTest {
 
     @BeforeEach
     public void setUp() {
-        station = Station.builder()
-                .id("4711")
-                .title("Some Famous Station")
-                .ds100("LOL").build();
+        station = new Station(
+                "de",
+                "4711",
+                "Some Famous Station",
+                0.0,
+                0.0,
+                "LOL");
     }
 
     @Test

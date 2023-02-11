@@ -1,22 +1,10 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import lombok.Builder;
-import lombok.Value;
-
-@Value
-@Builder
-public class Photo {
-
-    long id;
-
-    String photographer;
-
-    String path;
-
-    long createdAt;
-
-    String license;
-
-    boolean outdated;
-
-}
+data class Photo @JvmOverloads constructor(
+    val id: Long,
+    val photographer: String,
+    val path: String,
+    val createdAt: Long,
+    val license: String,
+    val outdated: Boolean = false
+)

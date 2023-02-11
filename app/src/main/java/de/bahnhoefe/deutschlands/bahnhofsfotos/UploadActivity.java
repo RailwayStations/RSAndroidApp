@@ -306,12 +306,14 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
 
     private void assertCurrentPhotoUploadExists() {
         if (upload == null || upload.isProblemReport() || upload.isUploaded()) {
-            upload = Upload.builder()
-                    .country(station != null ? station.getCountry() : null)
-                    .stationId(station != null ? station.getId() : null)
-                    .lat(latitude)
-                    .lon(longitude)
-                    .build();
+            upload = new Upload(
+                    null,
+                    station != null ? station.getCountry() : null,
+                    station != null ? station.getId() : null,
+                    null,
+                    null,
+                    latitude,
+                    longitude);
             upload = baseApplication.getDbAdapter().insertUpload(upload);
         }
     }
@@ -511,11 +513,10 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         if (upload == null) {
             return;
         }
-        var stateQuery = InboxStateQuery.builder()
-                .id(upload.getRemoteId())
-                .countryCode(upload.getCountry())
-                .stationId(upload.getStationId())
-                .build();
+        var stateQuery = new InboxStateQuery(
+                upload.getRemoteId(),
+                upload.getCountry(),
+                upload.getStationId());
 
         rsapiClient.queryUploadState(List.of(stateQuery)).enqueue(new Callback<>() {
             @Override

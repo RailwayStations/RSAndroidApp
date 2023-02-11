@@ -1,26 +1,12 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import lombok.Builder;
-import lombok.Value;
-
-@Value
-@Builder
-public class InboxStateQuery {
-
-    Long id;
-
-    String countryCode;
-
-    String stationId;
-
-    Double lat;
-
-    Double lon;
-
-    UploadState state = UploadState.UNKNOWN;
-
-    String rejectedReason;
-
-    Long crc32;
-
-}
+class InboxStateQuery @JvmOverloads constructor(
+    var id: Long? = null,
+    var countryCode: String? = null,
+    var stationId: String? = null,
+    var lat: Double? = null,
+    var lon: Double? = null,
+    var state: UploadState = UploadState.UNKNOWN,
+    var rejectedReason: String? = null,
+    var crc32: Long? = null
+)

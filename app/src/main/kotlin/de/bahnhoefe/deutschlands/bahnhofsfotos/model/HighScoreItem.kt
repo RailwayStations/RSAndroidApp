@@ -1,12 +1,7 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import lombok.Builder;
-import lombok.Value;
-
-@Value
-@Builder
-public class HighScoreItem {
-    String name;
-    int photos;
-    int position;
-}
+data class HighScoreItem @JvmOverloads constructor(
+    var name: String? = null,
+    var photos: Int = 0,
+    var position: Int = 0
+)

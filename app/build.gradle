@@ -1,8 +1,6 @@
 plugins {
     id 'com.android.application'
-    id 'de.mannodermaus.android-junit5' version '1.8.2.1'
-    id 'io.franzbecker.gradle-lombok' version '5.0.0'
-    id 'kotlin-android'
+    id 'org.jetbrains.kotlin.android'
 }
 
 def getVersionCode = { ->
@@ -19,8 +17,7 @@ def getVersionCode = { ->
 }
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion project.buildToolsVersion
+    compileSdk 33
     namespace 'de.bahnhoefe.deutschlands.bahnhofsfotos'
 
     compileOptions {
@@ -28,7 +25,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
-
 
     lintOptions {
         abortOnError false
@@ -40,8 +36,8 @@ android {
 
     defaultConfig {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
-        minSdkVersion 26
-        targetSdkVersion 33
+        minSdk 26
+        targetSdk 33
         versionCode 72
         versionName "14.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -111,18 +107,9 @@ ext {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    repositories {
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url 'https://jitpack.io' }
-    }
-
     // Desugaring
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.2"
 
-    compileOnly "org.projectlombok:lombok:1.18.26"
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"

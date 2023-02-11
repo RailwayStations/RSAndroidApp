@@ -1,54 +1,36 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import java.io.Serializable;
+import java.io.Serializable
 
-import lombok.Builder;
-import lombok.Data;
+data class Upload @JvmOverloads constructor(
+    var id: Long? = null,
+    var country: String? = null,
+    var stationId: String? = null,
+    var remoteId: Long? = null,
+    var title: String? = null,
+    var lat: Double? = null,
+    var lon: Double? = null,
+    var comment: String? = null,
+    var inboxUrl: String? = null,
+    var problemType: ProblemType? = null,
+    var rejectReason: String? = null,
+    var uploadState: UploadState = UploadState.NOT_YET_SENT,
+    var createdAt: Long = System.currentTimeMillis(),
+    var active: Boolean? = null,
+    var crc32: Long? = null
+) : Serializable {
 
-@Data
-@Builder
-public class Upload implements Serializable {
-
-    Long id;
-    String country;
-    String stationId;
-    Long remoteId;
-    String title;
-    Double lat;
-    Double lon;
-    String comment;
-    String inboxUrl;
-    ProblemType problemType;
-    String rejectReason;
-    @Builder.Default
-    UploadState uploadState = UploadState.NOT_YET_SENT;
-    @Builder.Default
-    Long createdAt = System.currentTimeMillis();
-    Boolean active;
-    Long crc32;
-
-    public boolean isUploadForExistingStation() {
-        return country != null && stationId != null;
-    }
-
-    public boolean isUploadForMissingStation() {
-        return lat != null && lon != null;
-    }
-
-    public boolean isProblemReport() {
-        return problemType != null;
-    }
-
-    public boolean isPendingPhotoUpload() {
-        return (isUploadForExistingStation() || isUploadForMissingStation()) && isPending() && !isProblemReport();
-    }
-
-    public boolean isPending() {
-        return uploadState.isPending();
-    }
-
-    public boolean isUploaded() {
-        return remoteId != null;
-    }
+    val isUploadForExistingStation: Boolean
+        get() = country != null && stationId != null
+    val isUploadForMissingStation: Boolean
+        get() = lat != null && lon != null
+    val isProblemReport: Boolean
+        get() = problemType != null
+    val isPendingPhotoUpload: Boolean
+        get() = (isUploadForExistingStation || isUploadForMissingStation) && isPending && !isProblemReport
+    val isPending: Boolean
+        get() = uploadState.isPending
+    val isUploaded: Boolean
+        get() = remoteId != null
 
 }

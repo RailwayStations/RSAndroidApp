@@ -1,15 +1,8 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import lombok.Builder;
-import lombok.Value;
-
-@Value
-@Builder
-public class Statistic {
-
-    int total;
-    int withPhoto;
-    int withoutPhoto;
-    int photographers;
-
-}
+data class Statistic @JvmOverloads constructor(
+    var total: Int = 0,
+    var withPhoto: Int = 0,
+    var withoutPhoto: Int = 0,
+    var photographers: Int = 0
+)

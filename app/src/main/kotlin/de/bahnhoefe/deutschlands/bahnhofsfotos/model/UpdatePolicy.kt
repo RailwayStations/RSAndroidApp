@@ -1,36 +1,27 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import java.util.Arrays;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import java.util.*
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-
-public enum UpdatePolicy {
+enum class UpdatePolicy(val id: Int) {
     MANUAL(R.id.rb_update_manual),
     NOTIFY(R.id.rb_update_notify),
     AUTOMATIC(R.id.rb_update_automatic);
 
-    private final int id;
-
-    UpdatePolicy(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public static UpdatePolicy byId(int id) {
-        return Arrays.stream(values())
-                .filter(updatePolicy -> updatePolicy.getId() == id)
+    companion object {
+        fun byId(id: Int): UpdatePolicy {
+            return Arrays.stream(values())
+                .filter { updatePolicy: UpdatePolicy -> updatePolicy.id == id }
                 .findFirst()
-                .orElse(NOTIFY);
-    }
+                .orElse(NOTIFY)
+        }
 
-    public static UpdatePolicy byName(String name) {
-        return Arrays.stream(values())
-                .filter(updatePolicy -> updatePolicy.toString().equals(name))
+        @JvmStatic
+        fun byName(name: String): UpdatePolicy {
+            return Arrays.stream(values())
+                .filter { updatePolicy: UpdatePolicy -> updatePolicy.toString() == name }
                 .findFirst()
-                .orElse(NOTIFY);
+                .orElse(NOTIFY)
+        }
     }
-
 }

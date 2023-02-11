@@ -73,7 +73,7 @@ public class OutboxActivity extends AppCompatActivity {
         });
 
         var query = dbAdapter.getPendingUploads(true).stream()
-                .map(upload -> InboxStateQuery.builder().id(upload.getRemoteId()).build())
+                .map(upload -> new InboxStateQuery(upload.getRemoteId()))
                 .collect(toList());
 
         baseApplication.getRsapiClient().queryUploadState(query).enqueue(new Callback<>() {

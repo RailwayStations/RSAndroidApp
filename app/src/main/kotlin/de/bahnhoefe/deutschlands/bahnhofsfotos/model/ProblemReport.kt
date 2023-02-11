@@ -1,18 +1,11 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import lombok.Builder;
-import lombok.Value;
-
-@Value
-@Builder
-public class ProblemReport {
-
-    String countryCode;
-    String stationId;
-    String comment;
-    ProblemType type;
-    Long photoId;
-    Double lat;
-    Double lon;
-
-}
+data class ProblemReport @JvmOverloads constructor(
+    var countryCode: String? = null,
+    var stationId: String? = null,
+    var comment: String? = null,
+    var type: ProblemType? = null,
+    var photoId: Long? = null,
+    var lat: Double? = null,
+    var lon: Double? = null
+)

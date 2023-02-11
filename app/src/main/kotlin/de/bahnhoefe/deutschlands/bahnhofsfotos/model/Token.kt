@@ -1,23 +1,21 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import com.google.gson.annotations.SerializedName;
+import com.google.gson.annotations.SerializedName
 
-import lombok.Builder;
-import lombok.Data;
-
-@Data
-@Builder
-public class Token {
-
+data class Token @JvmOverloads constructor(
     @SerializedName("access_token")
-    String accessToken;
-    @SerializedName("refresh_token")
-    String refreshToken;
-    @SerializedName("expires_in")
-    long expiresIn;
-    @SerializedName("scope")
-    String scope;
-    @SerializedName("token_type")
-    String tokenType;
+    val accessToken: String,
 
-}
+    @SerializedName("token_type")
+    val tokenType: String,
+
+    @SerializedName("refresh_token")
+    val refreshToken: String? = null,
+
+    @SerializedName("expires_in")
+    val expiresIn: Long = 0,
+
+    @SerializedName("scope")
+    val scope: String? = null
+
+)

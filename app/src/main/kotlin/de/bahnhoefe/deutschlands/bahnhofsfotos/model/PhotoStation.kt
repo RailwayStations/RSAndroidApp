@@ -1,28 +1,12 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import java.util.List;
-
-import lombok.Builder;
-import lombok.Value;
-
-@Value
-@Builder
-public class PhotoStation {
-
-    String country;
-
-    String id;
-
-    String title;
-
-    double lat;
-
-    double lon;
-
-    String shortCode;
-
-    boolean inactive;
-
-    List<Photo> photos;
-
-}
+data class PhotoStation @JvmOverloads constructor(
+    var country: String? = null,
+    var id: String? = null,
+    var title: String? = null,
+    var lat: Double = 0.0,
+    var lon: Double = 0.0,
+    var shortCode: String? = null,
+    var inactive: Boolean = false,
+    var photos: List<Photo>? = null
+)

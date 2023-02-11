@@ -1,53 +1,33 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import java.util.ArrayList;
-import java.util.List;
+data class PhotoStations @JvmOverloads constructor(
+    var photoBaseUrl: String? = null,
+    var licenses: List<PhotoLicense> = ArrayList(),
+    var photographers: List<Photographer> = ArrayList(),
+    var stations: List<PhotoStation> = ArrayList()
+) {
 
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
-
-@Value
-@Builder
-public class PhotoStations {
-
-    @NonNull
-    String photoBaseUrl;
-
-    @NonNull
-    @Builder.Default
-    List<PhotoLicense> licenses = new ArrayList<>();
-
-    @NonNull
-    @Builder.Default
-    List<Photographer> photographers = new ArrayList<>();
-
-    @NonNull
-    @Builder.Default
-    List<PhotoStation> stations = new ArrayList<>();
-
-    public String getPhotographerUrl(final String photographer) {
+    fun getPhotographerUrl(photographer: String): String? {
         return photographers.stream()
-                .filter(p -> p.getName().equals(photographer))
-                .findAny()
-                .map(p -> p.getUrl().toString())
-                .orElse(null);
+            .filter { p: Photographer -> p.name == photographer }
+            .findAny()
+            .map { p: Photographer -> p.url.toString() }
+            .orElse(null)
     }
 
-    public String getLicenseName(final String licenseId) {
+    fun getLicenseName(licenseId: String): String? {
         return licenses.stream()
-                .filter(license -> license.getId().equals(licenseId))
-                .findAny()
-                .map(PhotoLicense::getName)
-                .orElse(null);
+            .filter { license: PhotoLicense -> license.id == licenseId }
+            .findAny()
+            .map(PhotoLicense::name)
+            .orElse(null)
     }
 
-    public String getLicenseUrl(final String licenseId) {
+    fun getLicenseUrl(licenseId: String): String? {
         return licenses.stream()
-                .filter(license -> license.getId().equals(licenseId))
-                .findAny()
-                .map(l -> l.getUrl().toString())
-                .orElse(null);
+            .filter { license: PhotoLicense -> license.id == licenseId }
+            .findAny()
+            .map { l: PhotoLicense -> l.url.toString() }
+            .orElse(null)
     }
-
 }

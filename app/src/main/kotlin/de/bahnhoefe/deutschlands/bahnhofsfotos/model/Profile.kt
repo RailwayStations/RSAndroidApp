@@ -1,22 +1,17 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import lombok.Builder;
-import lombok.Data;
+data class Profile @JvmOverloads constructor(
+    var nickname: String? = null,
+    var license: License? = null,
+    var photoOwner: Boolean = false,
+    var anonymous: Boolean = false,
+    var link: String? = null,
+    var email: String? = null,
+    var emailVerified: Boolean = false
+) {
 
-@Data
-@Builder
-public class Profile {
-    String nickname;
-    License license;
-    boolean photoOwner;
-    boolean anonymous;
-    String link;
-    String newPassword;
-    boolean emailVerified;
-    String email;
-
-    public boolean isAllowedToUploadPhoto() {
-        return isEmailVerified() && license == License.CC0 && photoOwner;
+    fun isAllowedToUploadPhoto(): Boolean {
+        return emailVerified && license === License.CC0 && photoOwner
     }
 
 }

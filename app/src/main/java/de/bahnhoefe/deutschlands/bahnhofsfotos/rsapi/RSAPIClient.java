@@ -1,6 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.GsonBuilder;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +30,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PKCEUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -40,21 +43,21 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RSAPIClient {
 
     private static final String TAG = RSAPIClient.class.getSimpleName();
-
+    private final String redirectUri;
     private RSAPI api;
     private String baseUrl;
-    private String username;
     private final String clientId;
     private Token token;
+    private PKCEUtil pkce;
 
-    public RSAPIClient(String baseUrl, String clientId, final String accessToken) {
+    public RSAPIClient(String baseUrl, String clientId, String accessToken, String redirectUri) {
         this.baseUrl = baseUrl;
         this.clientId = clientId;
+        this.redirectUri = redirectUri;
         if (accessToken != null) {
-            this.token = Token.builder()
-                    .accessToken(accessToken)
-                    .tokenType("Bearer")
-                    .build();
+            this.token = new Token(
+                    accessToken,
+                    "Bearer");
         }
         api = createRSAPI();
     }
@@ -62,6 +65,15 @@ public class RSAPIClient {
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
         this.api = createRSAPI();
+    }
+
+    private String getPkceCodeChallenge() throws NoSuchAlgorithmException {
+        pkce = new PKCEUtil();
+        return pkce.getCodeChallenge();
+    }
+
+    private String getPkceCodeVerifier() {
+        return pkce.getCodeVerifier();
     }
 
     private RSAPI createRSAPI() {
@@ -207,8 +219,8 @@ public class RSAPIClient {
         return api.getStatistic(country);
     }
 
-    public Call<Token> requestAccessToken(String code, String clientId, String redirectUri, String codeVerifier) {
-        return api.requestAccessToken(code, clientId, "authorization_code", redirectUri, codeVerifier);
+    public Call<Token> requestAccessToken(String code) {
+        return api.requestAccessToken(code, clientId, "authorization_code", redirectUri, getPkceCodeVerifier());
     }
 
     public void setToken(Token token) {
@@ -221,6 +233,14 @@ public class RSAPIClient {
 
     public void clearToken() {
         this.token = null;
+    }
+
+    public Uri createAuthorizeUri() throws NoSuchAlgorithmException {
+        return Uri.parse(baseUrl + "oauth2/authorize" + "?client_id=" + clientId + "&code_challenge=" + getPkceCodeChallenge() + "&code_challenge_method=S256&scope=all&response_type=code&redirect_uri=" + redirectUri);
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
     }
 
     public interface ResultListener {

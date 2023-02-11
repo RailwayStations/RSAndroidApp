@@ -1,16 +1,9 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import lombok.Builder;
-import lombok.Value;
-
-@Value
-@Builder
-public class PublicInbox {
-
-    String title;
-    String countryCode;
-    String stationId;
-    Double lat;
-    Double lon;
-
-}
+data class PublicInbox @JvmOverloads constructor(
+    var title: String? = null,
+    var countryCode: String? = null,
+    var stationId: String? = null,
+    var lat: Double? = null,
+    var lon: Double? = null
+)
