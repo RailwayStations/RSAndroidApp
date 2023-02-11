@@ -1,7 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +13,7 @@ import com.github.chrisbanes.photoview.PhotoView;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Builder;
-import lombok.Value;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PageablePhoto;
 
 public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.PhotoViewHolder> {
 
@@ -66,18 +64,6 @@ public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.Ph
             super(itemView);
             photoView = itemView.findViewById(R.id.photoView);
         }
-    }
-
-    @Value
-    @Builder
-    public static class PageablePhoto {
-        long id;
-        String url;
-        String photographer;
-        String photographerUrl;
-        String license;
-        String licenseUrl;
-        Bitmap bitmap;
     }
 
 }

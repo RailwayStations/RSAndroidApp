@@ -17,7 +17,6 @@ import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -29,7 +28,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ExceptionHandler;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PKCEUtil;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -47,7 +45,6 @@ public class BaseApplication extends Application {
     private DbAdapter dbAdapter;
     private RSAPIClient rsapiClient;
     private SharedPreferences preferences;
-    private PKCEUtil pkce;
 
     public BaseApplication() {
         setInstance(this);
@@ -110,7 +107,7 @@ public class BaseApplication extends Application {
             setPhotoOwner(true);
         }
 
-        rsapiClient = new RSAPIClient(getApiUrl(), getString(R.string.rsapiClientId), getAccessToken());
+        rsapiClient = new RSAPIClient(getApiUrl(), getString(R.string.rsapiClientId), getAccessToken(), getString(R.string.rsapiRedirectScheme) + "://" + getString(R.string.rsapiRedirectHost));
     }
 
     public String getApiUrl() {
@@ -321,24 +318,23 @@ public class BaseApplication extends Application {
 
     public void setProfile(Profile profile) {
         setLicense(profile.getLicense());
-        setPhotoOwner(profile.isPhotoOwner());
-        setAnonymous(profile.isAnonymous());
+        setPhotoOwner(profile.getPhotoOwner());
+        setAnonymous(profile.getAnonymous());
         setPhotographerLink(profile.getLink());
         setNickname(profile.getNickname());
         setEmail(profile.getEmail());
-        setEmailVerified(profile.isEmailVerified());
+        setEmailVerified(profile.getEmailVerified());
     }
 
     public Profile getProfile() {
-        return Profile.builder()
-                .license(getLicense())
-                .photoOwner(getPhotoOwner())
-                .anonymous(getAnonymous())
-                .link(getPhotographerLink())
-                .nickname(getNickname())
-                .email(getEmail())
-                .emailVerified(isEmailVerified())
-                .build();
+        return new Profile(
+                getNickname(),
+                getLicense(),
+                getPhotoOwner(),
+                getAnonymous(),
+                getPhotographerLink(),
+                getEmail(),
+                isEmailVerified());
     }
 
     public RSAPIClient getRsapiClient() {
@@ -400,23 +396,6 @@ public class BaseApplication extends Application {
 
     public void setSortByDistance(boolean sortByDistance) {
         putBoolean(R.string.SORT_BY_DISTANCE, sortByDistance);
-    }
-
-    public String getRsapiClientId() {
-        return getString(R.string.rsapiClientId);
-    }
-
-    public String getRsapiRedirectUri() {
-        return getString(R.string.rsapiRedirectScheme) + "://" + getString(R.string.rsapiRedirectHost);
-    }
-
-    public String getPkceCodeChallenge() throws NoSuchAlgorithmException {
-        pkce = new PKCEUtil();
-        return pkce.getCodeChallenge();
-    }
-
-    public String getPkceCodeVerifier() {
-        return pkce.getCodeVerifier();
     }
 
     public boolean isLoggedIn() {

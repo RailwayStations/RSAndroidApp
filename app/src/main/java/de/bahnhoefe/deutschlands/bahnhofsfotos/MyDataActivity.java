@@ -1,7 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -71,11 +70,11 @@ public class MyDataActivity extends AppCompatActivity {
         binding.myData.etLinking.setText(profile.getLink());
         license = profile.getLicense();
         binding.myData.cbLicenseCC0.setChecked(license == License.CC0);
-        binding.myData.cbOwnPhoto.setChecked(profile.isPhotoOwner());
-        binding.myData.cbAnonymous.setChecked(profile.isAnonymous());
+        binding.myData.cbOwnPhoto.setChecked(profile.getPhotoOwner());
+        binding.myData.cbAnonymous.setChecked(profile.getAnonymous());
         onAnonymousChecked(null);
 
-        if (profile.isEmailVerified()) {
+        if (profile.getEmailVerified()) {
             binding.myData.tvEmailVerification.setText(R.string.emailVerified);
             binding.myData.tvEmailVerification.setTextColor(getResources().getColor(R.color.emailVerified, null));
         } else {
@@ -88,10 +87,13 @@ public class MyDataActivity extends AppCompatActivity {
     private void loadRemoteProfile() {
         binding.myData.loginForm.setVisibility(View.VISIBLE);
         binding.myData.profileForm.setVisibility(View.GONE);
+        binding.myData.progressBar.setVisibility(View.VISIBLE);
 
         rsapiClient.getProfile().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Profile> call, @NonNull Response<Profile> response) {
+                binding.myData.progressBar.setVisibility(View.GONE);
+
                 switch (response.code()) {
                     case 200:
                         Log.i(TAG, "Successfully loaded profile");
@@ -113,6 +115,7 @@ public class MyDataActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<Profile> call, @NonNull Throwable t) {
+                binding.myData.progressBar.setVisibility(View.GONE);
                 SimpleDialogs.confirmOk(MyDataActivity.this,
                         String.format(getText(R.string.read_profile_failed).toString(), t.getMessage()));
             }
@@ -132,14 +135,12 @@ public class MyDataActivity extends AppCompatActivity {
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             var data = intent.getData();
             if (data != null) {
-                var redirectUri = baseApplication.getRsapiRedirectUri();
-                if (data.toString().startsWith(redirectUri)) {
+                if (data.toString().startsWith(baseApplication.getRsapiClient().getRedirectUri())) {
                     var code = data.getQueryParameter("code");
                     if (code != null) {
-                        var clientId = getString(R.string.rsapiClientId);
-                        baseApplication.getRsapiClient().requestAccessToken(code, clientId, redirectUri, baseApplication.getPkceCodeVerifier()).enqueue(new Callback<>() {
+                        baseApplication.getRsapiClient().requestAccessToken(code).enqueue(new Callback<>() {
                             @Override
-                            public void onResponse(Call<Token> call, Response<Token> response) {
+                            public void onResponse(@NonNull Call<Token> call, @NonNull Response<Token> response) {
                                 var token = response.body();
                                 Log.d(TAG, String.valueOf(token));
                                 baseApplication.setAccessToken(token.getAccessToken());
@@ -148,7 +149,7 @@ public class MyDataActivity extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onFailure(final Call<Token> call, final Throwable t) {
+                            public void onFailure(@NonNull Call<Token> call, @NonNull Throwable t) {
                                 Toast.makeText(MyDataActivity.this, getString(R.string.authorization_error, t.getMessage()), Toast.LENGTH_LONG).show();
                             }
                         });
@@ -186,9 +187,13 @@ public class MyDataActivity extends AppCompatActivity {
             return;
         }
         if (rsapiClient.hasToken()) {
+            binding.myData.progressBar.setVisibility(View.VISIBLE);
+
             rsapiClient.saveProfile(profile).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    binding.myData.progressBar.setVisibility(View.GONE);
+
                     switch (response.code()) {
                         case 200:
                             Log.i(TAG, "Successfully saved profile");
@@ -214,6 +219,7 @@ public class MyDataActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    binding.myData.progressBar.setVisibility(View.GONE);
                     Log.e(TAG, "Error uploading profile", t);
                     SimpleDialogs.confirmOk(MyDataActivity.this,
                             String.format(getText(R.string.save_profile_failed).toString(), t.getMessage()));
@@ -223,23 +229,23 @@ public class MyDataActivity extends AppCompatActivity {
 
         saveLocalProfile(profile);
         Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
-
     }
 
     private Profile createProfileFromUI() {
-        var profileBuilder = Profile.builder()
-                .nickname(binding.myData.etNickname.getText().toString().trim())
-                .email(binding.myData.etEmail.getText().toString().trim())
-                .license(license)
-                .photoOwner(binding.myData.cbOwnPhoto.isChecked())
-                .anonymous(binding.myData.cbAnonymous.isChecked())
-                .link(binding.myData.etLinking.getText().toString().trim());
+        var newProfile = new Profile(
+                binding.myData.etNickname.getText().toString().trim(),
+                license,
+                binding.myData.cbOwnPhoto.isChecked(),
+                binding.myData.cbAnonymous.isChecked(),
+                binding.myData.etLinking.getText().toString().trim(),
+                binding.myData.etEmail.getText().toString().trim()
+        );
 
         if (this.profile != null) {
-            profileBuilder.emailVerified(this.profile.isEmailVerified());
+            newProfile.setEmailVerified(this.profile.getEmailVerified());
         }
 
-        return profileBuilder.build();
+        return newProfile;
     }
 
     private void saveLocalProfile(Profile profile) {
@@ -305,14 +311,14 @@ public class MyDataActivity extends AppCompatActivity {
     public void login(View view) throws NoSuchAlgorithmException {
         Intent intent = new Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse(baseApplication.getApiUrl() + "oauth2/authorize" + "?client_id=" + baseApplication.getRsapiClientId() + "&code_challenge=" + baseApplication.getPkceCodeChallenge() + "&code_challenge_method=S256&scope=all&response_type=code&redirect_uri=" + baseApplication.getRsapiRedirectUri()));
+                rsapiClient.createAuthorizeUri());
         startActivity(intent);
     }
 
     public void logout(View view) {
         baseApplication.setAccessToken(null);
         rsapiClient.clearToken();
-        profile = Profile.builder().build();
+        profile = new Profile();
         saveLocalProfile(profile);
         binding.myData.profileForm.setVisibility(View.GONE);
         binding.myData.loginForm.setVisibility(View.VISIBLE);

@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
-    id 'de.mannodermaus.android-junit5' version '1.8.2.1'
-    id 'io.franzbecker.gradle-lombok' version '5.0.0'
+    id 'org.jetbrains.kotlin.android'
 }
 
 def getVersionCode = { ->
@@ -18,8 +17,7 @@ def getVersionCode = { ->
 }
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion project.buildToolsVersion
+    compileSdk 33
     namespace 'de.bahnhoefe.deutschlands.bahnhofsfotos'
 
     compileOptions {
@@ -32,10 +30,14 @@ android {
         abortOnError false
     }
 
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
     defaultConfig {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
-        minSdkVersion 26
-        targetSdkVersion 33
+        minSdk 26
+        targetSdk 33
         versionCode 72
         versionName "14.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -105,16 +107,8 @@ ext {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    repositories {
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url 'https://jitpack.io' }
-    }
-
     // Desugaring
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.2"
-
-    compileOnly "org.projectlombok:lombok:1.18.26"
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
@@ -130,7 +124,7 @@ dependencies {
     implementation "net.sf.kxml:kxml2:2.3.0"
     implementation "com.caverock:androidsvg:1.4"
     implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation group: 'commons-io', name: 'commons-io', version: '20030203.000550'
+    implementation 'commons-io:commons-io:20030203.000550'
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'

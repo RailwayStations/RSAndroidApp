@@ -95,7 +95,7 @@ public class ProblemReportActivity extends AppCompatActivity {
             return;
         }
 
-        if (!baseApplication.getProfile().isEmailVerified()) {
+        if (!baseApplication.getProfile().getEmailVerified()) {
             SimpleDialogs.confirmOk(this, R.string.email_unverified_for_problem_report, (dialog, view) -> {
                 startActivity(new Intent(ProblemReportActivity.this, MyDataActivity.class));
                 finish();
@@ -169,26 +169,29 @@ public class ProblemReportActivity extends AppCompatActivity {
             return;
         }
 
-        upload = Upload.builder()
-                .country(station.getCountry())
-                .stationId(station.getId())
-                .problemType(type)
-                .comment(comment)
-                .lat(lat)
-                .lon(lon)
-                .build();
+        upload = new Upload(
+                null,
+                station.getCountry(),
+                station.getId(),
+                null,
+                null,
+                lat,
+                lon,
+                comment,
+                null,
+                type
+        );
 
         upload = baseApplication.getDbAdapter().insertUpload(upload);
 
-        var problemReport = ProblemReport.builder()
-                .countryCode(station.getCountry())
-                .stationId(station.getId())
-                .comment(comment)
-                .type(type)
-                .photoId(photoId)
-                .lat(lat)
-                .lon(lon)
-                .build();
+        var problemReport = new ProblemReport(
+                station.getCountry(),
+                station.getId(),
+                comment,
+                type,
+                photoId,
+                lat,
+                lon);
 
         SimpleDialogs.confirmOkCancel(ProblemReportActivity.this, R.string.send_problem_report,
                 (dialog, which) -> rsapiClient.reportProblem(problemReport).enqueue(new Callback<>() {
@@ -242,11 +245,10 @@ public class ProblemReportActivity extends AppCompatActivity {
             return;
         }
 
-        var stateQuery = InboxStateQuery.builder()
-                .id(upload.getRemoteId())
-                .countryCode(upload.getCountry())
-                .stationId(upload.getStationId())
-                .build();
+        var stateQuery = new InboxStateQuery(
+                upload.getRemoteId(),
+                upload.getCountry(),
+                upload.getStationId());
 
         rsapiClient.queryUploadState(List.of(stateQuery)).enqueue(new Callback<>() {
             @Override

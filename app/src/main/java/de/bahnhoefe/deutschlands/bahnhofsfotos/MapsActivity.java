@@ -590,7 +590,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     private static class LoadMapMarkerTask extends Thread {
-        private WeakReference<MapsActivity> activityRef;
+        private final WeakReference<MapsActivity> activityRef;
 
         public LoadMapMarkerTask(MapsActivity activity) {
             this.activityRef = new WeakReference<>(activity);
@@ -930,7 +930,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
         @Override
         public boolean stationActive() {
-            return station.isActive();
+            return station.getActive();
         }
 
         @Override
