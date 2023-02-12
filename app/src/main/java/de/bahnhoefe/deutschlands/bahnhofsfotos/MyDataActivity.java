@@ -143,9 +143,13 @@ public class MyDataActivity extends AppCompatActivity {
                             public void onResponse(@NonNull Call<Token> call, @NonNull Response<Token> response) {
                                 var token = response.body();
                                 Log.d(TAG, String.valueOf(token));
-                                baseApplication.setAccessToken(token.getAccessToken());
-                                baseApplication.getRsapiClient().setToken(token);
-                                loadRemoteProfile();
+                                if (token != null) {
+                                    baseApplication.setAccessToken(token.getAccessToken());
+                                    baseApplication.getRsapiClient().setToken(token);
+                                    loadRemoteProfile();
+                                } else {
+                                    Toast.makeText(MyDataActivity.this, getString(R.string.authorization_error, "no token"), Toast.LENGTH_LONG).show();
+                                }
                             }
 
                             @Override
