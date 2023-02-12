@@ -11,12 +11,15 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.multidex.MultiDex;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.core.model.MapPosition;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -45,6 +48,7 @@ public class BaseApplication extends Application {
     private DbAdapter dbAdapter;
     private RSAPIClient rsapiClient;
     private SharedPreferences preferences;
+    private SharedPreferences encryptedPreferences;
 
     public BaseApplication() {
         setInstance(this);
@@ -100,6 +104,32 @@ public class BaseApplication extends Application {
         dbAdapter.open();
 
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
+
+        // Creates the instance for the encrypted preferences.
+        encryptedPreferences = null;
+        try {
+            var masterKey = new MasterKey.Builder(this)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+
+            encryptedPreferences = EncryptedSharedPreferences.create(
+                    this,
+                    "secret_shared_prefs",
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            // migrate access token from unencrypted to encrypted preferences
+            if (!encryptedPreferences.contains(getString(R.string.ACCESS_TOKEN))
+                    && preferences.contains(getString(R.string.ACCESS_TOKEN))) {
+                setAccessToken(preferences.getString(getString(R.string.ACCESS_TOKEN), null));
+                preferences.edit().remove(getString(R.string.ACCESS_TOKEN)).apply();
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            Log.w("Unable to create EncryptedSharedPreferences, fallback to unencrypted preferences", e);
+
+        }
 
         // migrate photo owner preference to boolean
         var photoOwner = preferences.getAll().get(getString(R.string.PHOTO_OWNER));
@@ -240,11 +270,13 @@ public class BaseApplication extends Application {
     }
 
     public String getAccessToken() {
-        return preferences.getString(getString(R.string.ACCESS_TOKEN), null);
+        return encryptedPreferences.getString(getString(R.string.ACCESS_TOKEN), null);
     }
 
     public void setAccessToken(String apiToken) {
-        putString(R.string.ACCESS_TOKEN, apiToken);
+        var editor = encryptedPreferences.edit();
+        editor.putString(getString(R.string.ACCESS_TOKEN), StringUtils.trimToNull(apiToken));
+        editor.apply();
     }
 
     public StationFilter getStationFilter() {
