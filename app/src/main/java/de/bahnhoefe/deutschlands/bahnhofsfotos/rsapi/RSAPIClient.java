@@ -73,7 +73,7 @@ public class RSAPIClient {
     }
 
     private String getPkceCodeVerifier() {
-        return pkce.getCodeVerifier();
+        return pkce != null ? pkce.getCodeVerifier() : null;
     }
 
     private RSAPI createRSAPI() {

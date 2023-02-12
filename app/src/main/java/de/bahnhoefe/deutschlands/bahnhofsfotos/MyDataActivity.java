@@ -313,6 +313,7 @@ public class MyDataActivity extends AppCompatActivity {
                 Intent.ACTION_VIEW,
                 rsapiClient.createAuthorizeUri());
         startActivity(intent);
+        finish();
     }
 
     public void logout(View view) {
