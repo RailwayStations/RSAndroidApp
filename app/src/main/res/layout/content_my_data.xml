@@ -43,7 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:layout_alignParentTop="true"
-                    android:text="@string/login"
+                    android:text="@string/login_to_railways_stations_org"
                     android:onClick="login"
                     android:backgroundTint="@color/colorPrimary"
                     android:drawableStart="@drawable/ic_menu_login"
