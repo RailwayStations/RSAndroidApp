@@ -1,0 +1,2 @@
+- Neu: OAuth2 Authentifizierung mit Railway-Stations.org API
+- Neu: Android 13 Monochrom Icon
