@@ -1,5 +1,4 @@
-<img alt="Railway stations photos version published on F-Droid" src="https://img.shields.io/f-droid/v/de.bahnhoefe.deutschlands.bahnhofsfotos.svg"> 
-[![Crowdin](https://badges.crowdin.net/railwaystationsandroidapp/localized.svg)](https://crowdin.com/project/railwaystationsandroidapp)
+<img alt="Railway stations photos version published on F-Droid" src="https://img.shields.io/f-droid/v/de.bahnhoefe.deutschlands.bahnhofsfotos.svg">  [![Crowdin](https://badges.crowdin.net/railwaystationsandroidapp/localized.svg)](https://crowdin.com/project/railwaystationsandroidapp)
 
 # Railway-Stations Android App
 
