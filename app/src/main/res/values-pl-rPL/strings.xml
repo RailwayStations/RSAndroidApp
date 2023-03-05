@@ -12,7 +12,7 @@
     <string name="take_photo">Zrób zdjęcie</string>
     <string name="share_photo">Udostępnij zdjęcie</string>
     <string name="nav_to_station">Pokieruj do stacji</string>
-    <string name="CC0">CC0 - bez przypisania</string>
+    <string name="CC0">CC0 - bez wskazywania autora</string>
     <string name="tvLicense">Licencja zdjęcia</string>
     <string name="tvLinking">Czy chcesz udostępnić swoją stronę w naszej bazie danych?</string>
     <string name="etLinking">Podaj adres twojego konta</string>
@@ -41,7 +41,7 @@
         <br/>Dane innych krajów zostały dostarczone przez różne źródła OpenDat, takie jak <b><a href="https://public.opendatasoft.com/explore/dataset/european-train-stations/table/">OpenDataSoft</a></b>.</p>
         <p>&nbsp;</p>
         <p>Aplikacja używa <b><a href="https://design.google.com/icons/">material-design-ikon używanych przez Google</a></b>, na licencji Apache w wersji 2.</p>]]></string>
-    <string name="map_info_title">O Mapy</string>
+    <string name="map_info_title">O Mapie</string>
     <string name="map_info_text">The default map is provided by <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
         \nJoin the community and help to improve the map, see <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
         \n\nPlease consider downloading an offline map to decrease the server load and save your mobile data plan.
@@ -92,10 +92,10 @@
     <string name="select_photo">Wybór fotografii</string>
     <string name="station_photo">Zdjęcie stacji</string>
     <string name="menu_title_stations_map">Mapa stacji</string>
-    <string name="menu_photo_filter">Filtr z/bez zdjęcia</string>
+    <string name="menu_photo_filter">Filtruj z/bez zdjęcia</string>
     <string name="loading_stations">Stacje przeładunkowe</string>
     <string name="search_nickname_hint">Fotograf poszukiwawczy</string>
-    <string name="cc0_needed">Prosimy o zaakceptowanie CC0, abyśmy mogli bez problemów korzystać z twoich zdjęć.</string>
+    <string name="cc0_needed">Prosimy o zaakceptowanie licencji CC0, abyśmy mogli bez problemów korzystać z twoich zdjęć.</string>
     <string name="update_available">Dostępne są nowe zdjęcia stacji. Aktualizacja?</string>
     <string name="button_cancel_text">Anuluj</string>
     <string name="update_manual">Podręcznik</string>
