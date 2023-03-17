@@ -10,9 +10,9 @@
     <string name="title_activity_details">Szczegóły stacji</string>
     <string name="no_stations_in_database">Brak aktualizacji</string>
     <string name="take_photo">Zrób zdjęcie</string>
-    <string name="share_photo">Share photo</string>
+    <string name="share_photo">Udostępnij zdjęcie</string>
     <string name="nav_to_station">Pokieruj do stacji</string>
-    <string name="CC0">CC0 - bez przypisania</string>
+    <string name="CC0">CC0 - bez wskazywania autora</string>
     <string name="tvLicense">Licencja zdjęcia</string>
     <string name="tvLinking">Czy chcesz udostępnić swoją stronę w naszej bazie danych?</string>
     <string name="etLinking">Podaj adres twojego konta</string>
@@ -41,7 +41,7 @@
         <br/>Dane innych krajów zostały dostarczone przez różne źródła OpenDat, takie jak <b><a href="https://public.opendatasoft.com/explore/dataset/european-train-stations/table/">OpenDataSoft</a></b>.</p>
         <p>&nbsp;</p>
         <p>Aplikacja używa <b><a href="https://design.google.com/icons/">material-design-ikon używanych przez Google</a></b>, na licencji Apache w wersji 2.</p>]]></string>
-    <string name="map_info_title">O Mapy</string>
+    <string name="map_info_title">O Mapie</string>
     <string name="map_info_text">The default map is provided by <b><a href="https://openstreetmap.org">OpenStreetMap.org</a></b>.
         \nJoin the community and help to improve the map, see <b><a href="https://www.openstreetmap.org/fixthemap">www.openstreetmap.org/fixthemap</a></b>
         \n\nPlease consider downloading an offline map to decrease the server load and save your mobile data plan.
@@ -57,11 +57,11 @@
     <string name="nahe_gelegenen_bahnhof_melden">Zgłoś stacje</string>
     <string name="station_is_near">Stacje w pobliżu</string>
     <string name="template_short_text" formatted="false">Stacja %1$s, oddalona o %2$.2f km</string>
-    <string name="template_long_text" formatted="false">Station: %1$s distance: %2$.2f km %3$s</string>
+    <string name="template_long_text" formatted="false">Stacja: %1$s odległość: %2$.2f km %3$s</string>
     <string name="photo_exists">Zdjęcie: otwórz aby zobaczyć licencję</string>
     <string name="nearby_notification_active">Powiadomienia o okolicznych stacjach sa włączone</string>
     <string name="license_tag" formatted="false">Właściciel: %s, %s</string>
-    <string name="picture_landscape_only">Please provide photos in landscape format</string>
+    <string name="picture_landscape_only">Dodaj zdjęcie w formacie poziomym</string>
     <string name="country_activity">Wybór kraju</string>
     <string name="countrySelection">Wybór kraju</string>
     <string name="nicknameFilter">Filtruj według fotografa</string>
@@ -92,10 +92,10 @@
     <string name="select_photo">Wybór fotografii</string>
     <string name="station_photo">Zdjęcie stacji</string>
     <string name="menu_title_stations_map">Mapa stacji</string>
-    <string name="menu_photo_filter">Filtr z/bez zdjęcia</string>
+    <string name="menu_photo_filter">Filtruj z/bez zdjęcia</string>
     <string name="loading_stations">Stacje przeładunkowe</string>
     <string name="search_nickname_hint">Fotograf poszukiwawczy</string>
-    <string name="cc0_needed">Prosimy o zaakceptowanie CC0, abyśmy mogli bez problemów korzystać z twoich zdjęć.</string>
+    <string name="cc0_needed">Prosimy o zaakceptowanie licencji CC0, abyśmy mogli bez problemów korzystać z twoich zdjęć.</string>
     <string name="update_available">Dostępne są nowe zdjęcia stacji. Aktualizacja?</string>
     <string name="button_cancel_text">Anuluj</string>
     <string name="update_manual">Podręcznik</string>
@@ -104,7 +104,7 @@
     <string name="send">WYŚLIJ</string>
     <string name="logo_train">logo małej lokomotywki</string>
     <string name="license_info_not_readable">Informacje o licencji obecnie nieczytelne</string>
-    <string name="last_update_at">Last updated on: %s</string>
+    <string name="last_update_at">Ostatnia aktualizacja: %s</string>
     <string name="station_update_failed">Nie udało się zaktualizować stacji:</string>
     <string name="select_picture">Wybierz zdjęcie</string>
     <string name="grant_location_permission">Bez pozwolenia na lokalizację nie możemy pokazać twojej obecnej pozycji</string>
@@ -164,7 +164,7 @@
     <string name="bt_logout">Wylogowanie</string>
     <string name="profile_not_found">Nieznany e-mail lub pseudonim</string>
     <string name="missing_email_or_nickname">Prosimy o podanie adresu e-mail lub pseudonimu</string>
-    <string name="bt_save">Register</string>
+    <string name="bt_save">Rejestracja</string>
     <string name="tvRegistration">Rejestracja</string>
     <string name="tvProfile">Profil użytkownika</string>
     <string name="provider_android_app">Aplikacja dostawcy</string>
@@ -180,7 +180,7 @@
     <string name="password_repeat">Powtórzyć hasło</string>
     <string name="password_too_short">Hasło musi mieć długość co najmniej 8 znaków</string>
     <string name="password_repeat_fail">Hasła nie pasują do siebie</string>
-    <string name="password_changed">Password successfully changed, please login again</string>
+    <string name="password_changed">Hasło zostało zmienione, zaloguj się ponownie</string>
     <string name="change_password_failed">Zmiana hasła nie powiodła się</string>
     <string name="comment_hint">Uwagi na tym zdjęciu dla zespołu</string>
     <string name="station_info">Info</string>
@@ -216,7 +216,7 @@
     <string name="problem_station_inactive">Stacja jest nieaktywna</string>
     <string name="problem_station_nonexistent">Stacja nie istnieje</string>
     <string name="problem_wrong_photo">Stacja ma złe zdjęcie</string>
-    <string name="problem_photo_outdated">Photo is outdated (building removed or replaced)</string>
+    <string name="problem_photo_outdated">Zdjęcie jest nieaktualne (budynek został usunięty lub zastąpiony)</string>
     <string name="problem_other">Inny problem, szczegóły w komentarzu</string>
     <string name="problem_please_specify">Proszę określić rodzaj problemu</string>
     <string name="problem_please_comment">Proszę o komentarz do problemu</string>
@@ -262,27 +262,27 @@
     <string name="countries">Kraje</string>
     <string name="photo_checksum">Zdjęcie z tą sumą kontrolną jest już przesłane. Wgrać ponownie?</string>
     <string name="highscore_crown">Korona najlepszych wyników</string>
-    <string name="no_image_capture_app_found">No image capture app found</string>
-    <string name="upload_type">Upload type</string>
-    <string name="error_crash_title">%1$s crashed</string>
-    <string name="share">Share</string>
-    <string name="bug_report">Report bug</string>
-    <string name="report_missing_station">Report missing station</string>
-    <string name="title_activity_problem_report">Problem Report</string>
-    <string name="send_problem_report">Send problem report?</string>
-    <string name="latitude">Latitude</string>
-    <string name="longitude">Longitude</string>
-    <string name="problem_wrong_lat_lon">Please provide proper latitue and longitude values</string>
-    <string name="title_activity_upload">Upload</string>
-    <string name="add_a_photo">Add a photo</string>
-    <string name="station_not_found">Station not found</string>
-    <string name="share_link">Share link</string>
-    <string name="please_take_photo">Please take a photo to upload</string>
-    <string name="notification_permission_needed">Notification permission is needed to notify on nearby stations!</string>
-    <string name="authorization_error">Authorization failed: %s</string>
-    <string name="tvLicenseDescription">If you want to upload photos, you need to provide them under CC0 license.</string>
-    <string name="tvOwnPhotoDescription">If you want to upload photos, you need to confirm that these are your own.</string>
-    <string name="email_unverified_for_problem_report">To be able to submit a problem report, your email needs to be verified</string>
-    <string name="no_photo_upload_allowed">To be able to upload photos, your email needs to be verified, you need to agree to CC0 license and you need to confirm that you own the photos.</string>
-    <string name="login_to_railways_stations_org">Login to railway-stations.org</string>
+    <string name="no_image_capture_app_found">Nie znaleziono aplikacji do przechwytywania obrazów</string>
+    <string name="upload_type">Typ wysyłki</string>
+    <string name="error_crash_title">%1$s uległ awarii</string>
+    <string name="share">Udostępnij</string>
+    <string name="bug_report">Zgłoś błąd</string>
+    <string name="report_missing_station">Zgłoś brakującą stację</string>
+    <string name="title_activity_problem_report">Zgłoszenie problemu</string>
+    <string name="send_problem_report">Wysłać ten raport o problemie?</string>
+    <string name="latitude">Szerokość geograficzna</string>
+    <string name="longitude">Długość geograficzna</string>
+    <string name="problem_wrong_lat_lon">Proszę podać prawidłową szerokość i długość geograficzną</string>
+    <string name="title_activity_upload">Wyślij</string>
+    <string name="add_a_photo">Dodaj zdjęcie</string>
+    <string name="station_not_found">Nie znaleziono stacji</string>
+    <string name="share_link">Udostępnij link</string>
+    <string name="please_take_photo">Zrób zdjęcie aby wysłać</string>
+    <string name="notification_permission_needed">Wymagane jest pozwolenie na powiadamianie o pobliskich stacjach!</string>
+    <string name="authorization_error">Autoryzacja nie powiodła się: %s</string>
+    <string name="tvLicenseDescription">Jeśli chcesz przesłać zdjęcia, muszą one być na licencji CC0.</string>
+    <string name="tvOwnPhotoDescription">Jeśli chcesz przesłać zdjęcia, musisz potwierdzić, są wykonane przez Ciebie.</string>
+    <string name="email_unverified_for_problem_report">Aby móc przesłać raport o problemie, należy zweryfikować Twój adres e-mail</string>
+    <string name="no_photo_upload_allowed">Aby móc przesyłać zdjęcia, Twój e-mail musi zostać zweryfikowany, musisz wyrazić zgodę na licencję CC0 i potwierdzić, że posiadasz prawa do tych zdjęć.</string>
+    <string name="login_to_railways_stations_org">Zaloguj się do railway-stations.org</string>
 </resources>
