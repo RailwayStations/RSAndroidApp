@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
@@ -14,6 +15,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemUploadBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
 
 public class OutboxAdapter extends CursorAdapter {
 
@@ -49,16 +51,21 @@ public class OutboxAdapter extends CursorAdapter {
         var textState = id + (remoteId > 0 ? "/" + remoteId : "") + ": " + context.getString(uploadState.getTextId());
         binding.txtState.setText(textState);
         binding.txtState.setTextColor(context.getResources().getColor(uploadState.getColorId(), null));
+        binding.uploadPhoto.setImageBitmap(null);
+        binding.uploadPhoto.setVisibility(View.GONE);
 
         if (problemType != null) {
-            binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_bullhorn_48px));
+            binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_bullhorn_red_48px));
             binding.txtComment.setText(String.format("%s: %s", context.getText(ProblemType.valueOf(problemType).getMessageId()), comment));
-        } else if (stationId == null) {
-            binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_station_red_24px));
-            binding.txtComment.setText(comment);
         } else {
-            binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_photo_red_48px));
+            binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, stationId == null ? R.drawable.ic_station_red_24px : R.drawable.ic_photo_red_48px));
             binding.txtComment.setText(comment);
+            var file = FileUtils.getStoredMediaFile(context, id);
+            if (file != null) {
+                var bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                binding.uploadPhoto.setImageBitmap(bitmap);
+                binding.uploadPhoto.setVisibility(View.VISIBLE);
+            }
         }
         binding.txtComment.setVisibility(comment == null ? View.GONE : View.VISIBLE);
 
