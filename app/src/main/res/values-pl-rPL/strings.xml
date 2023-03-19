@@ -285,4 +285,5 @@
     <string name="email_unverified_for_problem_report">Aby móc przesłać raport o problemie, należy zweryfikować Twój adres e-mail</string>
     <string name="no_photo_upload_allowed">Aby móc przesyłać zdjęcia, Twój e-mail musi zostać zweryfikowany, musisz wyrazić zgodę na licencję CC0 i potwierdzić, że posiadasz prawa do tych zdjęć.</string>
     <string name="login_to_railways_stations_org">Zaloguj się do railway-stations.org</string>
+    <string name="pending_photo_upload">A pending photo upload exists for this station. Show it?</string>
 </resources>
