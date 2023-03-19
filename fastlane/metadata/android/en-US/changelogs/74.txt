@@ -3,3 +3,4 @@
 - Fix: upload error message
 - New: show hint for pending photo upload when viewing a station
 - New: show thumbnails of your uploaded photos in the outbox
+- New: translate country names

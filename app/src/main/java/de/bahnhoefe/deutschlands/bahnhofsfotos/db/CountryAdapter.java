@@ -18,24 +18,25 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemCountryBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
 
 public class CountryAdapter extends CursorAdapter {
-    private final LayoutInflater mInflater;
+    private final LayoutInflater layoutInflater;
     private final String TAG = getClass().getSimpleName();
     private final Set<String> selectedCountries;
 
+    private final Context context;
+
     public CountryAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
-        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         selectedCountries = new HashSet<>(BaseApplication.getInstance().getCountryCodes());
+        this.context = context;
     }
 
-    // new refactored after https://www.youtube.com/watch?v=wDBM6wVEO70&feature=youtu.be&t=7m
     public void getView(int selectedPosition, View convertView, ViewGroup parent, Cursor cursor) {
         ItemCountryBinding binding;
         if (convertView == null) {
-            binding = ItemCountryBinding.inflate(mInflater, parent, false);
+            binding = ItemCountryBinding.inflate(layoutInflater, parent, false);
             convertView = binding.getRoot();
 
-            //If you want to have zebra lines color effect uncomment below code
             if (selectedPosition % 2 == 1) {
                 convertView.setBackgroundResource(R.drawable.item_list_backgroundcolor);
             } else {
@@ -47,8 +48,10 @@ public class CountryAdapter extends CursorAdapter {
             binding = (ItemCountryBinding) convertView.getTag();
         }
 
-        binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)));
-        binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
+        var countryCode = cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE));
+        binding.txtCountryShortCode.setText(countryCode);
+        var countryName = getCountryName(countryCode, cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
+        binding.txtCountryName.setText(countryName);
 
         var newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
@@ -62,15 +65,22 @@ public class CountryAdapter extends CursorAdapter {
 
     }
 
+    private String getCountryName(final String countryCode, final String defaultName) {
+        int strId = context.getResources().getIdentifier("country_" + countryCode, "string", context.getPackageName());
+        if (strId != 0) {
+            return context.getString(strId);
+        }
+        return defaultName;
+    }
+
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        var binding = ItemCountryBinding.inflate(mInflater, parent, false);
+        var binding = ItemCountryBinding.inflate(layoutInflater, parent, false);
         var view = binding.getRoot();
         view.setTag(binding);
         return view;
     }
 
-    // wird nicht benutzt, ersetzt durch getView()
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         //If you want to have zebra lines color effect uncomment below code
@@ -81,8 +91,11 @@ public class CountryAdapter extends CursorAdapter {
         }
 
         var binding = (ItemCountryBinding) view.getTag();
-        binding.txtCountryShortCode.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)));
-        binding.txtCountryName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
+
+        var countryCode = cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE));
+        binding.txtCountryShortCode.setText(countryCode);
+        var countryName = getCountryName(countryCode, cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)));
+        binding.txtCountryName.setText(countryName);
 
         var newCountry = cursor.getString(1);
         Log.i(TAG, newCountry);
