@@ -471,7 +471,12 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     upload.setUploadState(inboxResponse.getState().getUploadState());
                     upload.setCrc32(inboxResponse.getCrc32());
                     baseApplication.getDbAdapter().updateUpload(upload);
-                    SimpleDialogs.confirmOk(UploadActivity.this, inboxResponse.getState().getMessageId());
+                    if (inboxResponse.getState() == InboxResponse.InboxResponseState.ERROR) {
+                        SimpleDialogs.confirmOk(UploadActivity.this,
+                                getString(InboxResponse.InboxResponseState.ERROR.getMessageId(), inboxResponse.getMessage()));
+                    } else {
+                        SimpleDialogs.confirmOk(UploadActivity.this, inboxResponse.getState().getMessageId());
+                    }
                 }
 
                 @Override
@@ -480,7 +485,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                     binding.upload.progressBar.setVisibility(View.GONE);
 
                     SimpleDialogs.confirmOk(UploadActivity.this,
-                            String.format(getText(InboxResponse.InboxResponseState.ERROR.getMessageId()).toString(), t.getMessage()));
+                            getString(InboxResponse.InboxResponseState.ERROR.getMessageId(), t.getMessage()));
                     fetchUploadStatus(upload); // try to get the upload state again
                 }
             });

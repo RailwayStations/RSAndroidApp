@@ -151,6 +151,15 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
             }
 
             loadAdditionalPhotos(station);
+
+            var upload = baseApplication.getDbAdapter().getPendingUploadForStation(station);
+            if (upload != null && upload.isPendingPhotoUpload()) {
+                SimpleDialogs.confirmOkCancel(this, R.string.pending_photo_upload, (dialog, which) -> {
+                    var uploadIntent = new Intent(DetailsActivity.this, UploadActivity.class);
+                    uploadIntent.putExtra(UploadActivity.EXTRA_STATION, station);
+                    startActivity(uploadIntent);
+                });
+            }
         }
 
     }

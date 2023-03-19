@@ -1,0 +1,4 @@
+- Updated dependencies
+- Updated translations
+- Fix: upload error message
+- New: show hint for pending photo upload when viewing a station
