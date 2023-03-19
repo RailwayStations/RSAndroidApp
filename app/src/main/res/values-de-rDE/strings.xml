@@ -281,5 +281,5 @@
     <string name="email_unverified_for_problem_report">Um einen Problembericht senden zu können, muss deine E-Mail verifiziert werden</string>
     <string name="no_photo_upload_allowed">Um Fotos hochladen zu können, muss deine E-Mail verifiziert werden, du musst der CC0-Lizenz zustimmen und bestätigen, dass die Fotos von dir sind.</string>
     <string name="login_to_railways_stations_org">Anmelden bei Railway-Stations.org</string>
-    <string name="pending_photo_upload">A pending photo upload exists for this station. Show it?</string>
+    <string name="pending_photo_upload">Für diesen Bahnhof existiert ein noch unverarbeitetes hochgeladenes Foto. Soll es angezeigt werden?</string>
 </resources>
