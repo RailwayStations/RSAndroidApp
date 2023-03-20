@@ -1,0 +1,6 @@
+- Abhängigkeiten aktualisiert
+- Übersetzungen aktualisiert
+- Upload-Fehlermeldung korrigiert
+- Neu: Hinweis auf unverarbeitetes Foto auf der Bahnhofsdetailseite
+- Neu: Bildvorschau im Ausgangskorb
+- Neu: Übersetzung der Ländernamen
