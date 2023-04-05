@@ -317,4 +317,5 @@
     <string name="country_tw">Taiwan</string>
     <string name="country_uk">United Kingdom</string>
     <string name="country_us">USA (United States)</string>
+    <string name="new_local_photo">New local photo</string>
 </resources>
