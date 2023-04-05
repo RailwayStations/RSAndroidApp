@@ -1,2 +1,3 @@
 - New: pull to refresh
+- New: add local photos to DetailsActivity
 - Updated dependencies

@@ -153,7 +153,10 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
                 binding.upload.etStationTitle.setSingleLine(false);
 
                 if (upload == null) {
-                    upload = baseApplication.getDbAdapter().getPendingUploadForStation(station);
+                    upload = baseApplication.getDbAdapter().getPendingUploadsForStation(station).stream()
+                            .filter(Upload::isPendingPhotoUpload)
+                            .findFirst()
+                            .orElse(null);
                 }
 
                 setLocalBitmap(upload);
