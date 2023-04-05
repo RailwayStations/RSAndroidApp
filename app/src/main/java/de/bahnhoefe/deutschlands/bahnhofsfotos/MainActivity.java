@@ -119,6 +119,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         myPos = baseApplication.getLastLocation();
         bindToStatus();
+
+        binding.appBarMain.main.pullToRefresh.setOnRefreshListener(() -> {
+            runUpdateCountriesAndStations();
+            binding.appBarMain.main.pullToRefresh.setRefreshing(false);
+        });
     }
 
     @Override

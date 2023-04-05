@@ -10,9 +10,9 @@
     tools:showIn="@layout/app_bar_main">
 
     <RelativeLayout
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.MainActivity">
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -22,39 +22,49 @@
             android:background="#f0f0f0"
             style="?android:attr/progressBarStyleHorizontal"
             android:indeterminate="true"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
 
-       <TextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:gravity="center"
-          android:textSize="16sp"
-          android:background="#f0f0f0"
-          android:layout_centerHorizontal="true"
-          android:paddingTop="16dp"
-          android:paddingBottom="16dp"
-          android:layout_below="@+id/progressBar"
-          android:id="@+id/filter_result"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:background="#f0f0f0"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:layout_below="@+id/progressBar"
+            android:id="@+id/filter_result" />
 
-       <ListView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:id="@+id/lstStations"
-          android:layout_margin="10dp"
-          android:layout_alignParentStart="true"
-          android:layout_below="@+id/filter_result"
-          android:layout_above="@+id/station_filter_bar"
-           />
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/pullToRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/filter_result"
+            android:layout_above="@+id/station_filter_bar">
+
+            <ListView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/lstStations"
+                android:scrollX="0px"
+                android:scrollY="0px"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:scrollbarSize="15dp"
+                android:scrollbarStyle="outsideOverlay"
+                android:scrollbars="vertical" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.StationFilterBar
             android:id="@+id/station_filter_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
-            />
+            android:layout_alignParentStart="true" />
 
-   </RelativeLayout>
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -38,8 +38,8 @@ android {
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
         minSdk 26
         targetSdk 33
-        versionCode 74
-        versionName "14.1.0"
+        versionCode 75
+        versionName "14.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
         multiDexEnabled true
@@ -108,7 +108,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Desugaring
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.2"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.3"
 
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
@@ -132,6 +132,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.browser:browser:1.5.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation 'com.mcxiaoke.volley:library:1.0.19'
     implementation 'com.google.code.gson:gson:2.10.1'
