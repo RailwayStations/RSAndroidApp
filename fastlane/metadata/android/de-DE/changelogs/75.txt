@@ -1,0 +1,3 @@
+- Neu: Ziehen zum aktualisieren
+- Neu: lokale Fotos werden auch auf der Bahnhofsdetailseite angezeigt
+- Abhängigkeiten Aktualisiert
