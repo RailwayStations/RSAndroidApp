@@ -181,7 +181,7 @@
     <string name="password_too_short">Hasło musi mieć długość co najmniej 8 znaków</string>
     <string name="password_repeat_fail">Hasła nie pasują do siebie</string>
     <string name="password_changed">Hasło zostało zmienione, zaloguj się ponownie</string>
-    <string name="change_password_failed">Change password failed: %s</string>
+    <string name="change_password_failed">Zmiana hasła nie powiodła się: %s</string>
     <string name="comment_hint">Uwagi na tym zdjęciu dla zespołu</string>
     <string name="station_info">Info</string>
     <string name="id_label">ID:</string>

@@ -178,7 +178,7 @@
     <string name="password_too_short">Дължината на паролата трябва да е поне 8 символа</string>
     <string name="password_repeat_fail">Паролите не съвпадат</string>
     <string name="password_changed">Password successfully changed, please login again</string>
-    <string name="change_password_failed">Change password failed: %s</string>
+    <string name="change_password_failed">Промяната на паролата е неуспешна: %s</string>
     <string name="comment_hint">Забележки към тази снимка за екипа</string>
     <string name="station_info">Инфо</string>
     <string name="id_label">ИД:</string>

@@ -178,7 +178,7 @@
     <string name="password_too_short">La password deve essere lunga almeno 8 caratteri</string>
     <string name="password_repeat_fail">Le password non corrispondono</string>
     <string name="password_changed">Password successfully changed, please login again</string>
-    <string name="change_password_failed">Change password failed: %s</string>
+    <string name="change_password_failed">Modifica password non riuscita: %s</string>
     <string name="comment_hint">Osservazioni su questa foto per la squadra</string>
     <string name="station_info">Info</string>
     <string name="id_label">ID:</string>
