@@ -182,7 +182,7 @@
     <string name="password_too_short">Geslo mora biti dolgo vsaj 8 znakov</string>
     <string name="password_repeat_fail">Password must be at least 8 characters long</string>
     <string name="password_changed">Password successfully changed, please login again</string>
-    <string name="change_password_failed">Sprememba gesla ni uspela</string>
+    <string name="change_password_failed">Change password failed: %s</string>
     <string name="comment_hint">Opombe o tej fotografiji za ekipo</string>
     <string name="station_info">Informacije</string>
     <string name="id_label">ID:</string>
