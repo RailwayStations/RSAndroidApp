@@ -141,17 +141,16 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (ConnectionUtil.checkInternetConnection(this)) {
                     photoBitmaps.put(station.getPhotoUrl(), null);
                     BitmapCache.getInstance().getPhoto((bitmap) -> {
-                        assert bitmap != null;
-                        var pageablePhoto = new PageablePhoto(
-                                station,
-                                bitmap);
-                        runOnUiThread(() -> {
-                            addIndicator();
-                            var position = photoPagerAdapter.addPageablePhoto(pageablePhoto);
-                            if (position == 0) {
-                                onPageablePhotoSelected(pageablePhoto, position);
-                            }
-                        });
+                        if (bitmap != null) {
+                            var pageablePhoto = new PageablePhoto(station, bitmap);
+                            runOnUiThread(() -> {
+                                addIndicator();
+                                var position = photoPagerAdapter.addPageablePhoto(pageablePhoto);
+                                if (position == 0) {
+                                    onPageablePhotoSelected(pageablePhoto, position);
+                                }
+                            });
+                        }
                     }, station.getPhotoUrl());
                 }
             }
