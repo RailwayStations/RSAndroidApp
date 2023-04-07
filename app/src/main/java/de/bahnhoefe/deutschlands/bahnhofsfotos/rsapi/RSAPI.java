@@ -87,7 +87,7 @@ public interface RSAPI {
     Call<List<PublicInbox>> getPublicInbox();
 
     @POST("/resendEmailVerification")
-    Call<Void> resendEmailVerification();
+    Call<Void> resendEmailVerification(@Header("Authorization") String authorization);
 
     @GET("/photoStationById/{country}/{id}")
     Call<PhotoStations> getPhotoStationById(@Path("country") String country, @Path("id") String id);
@@ -105,5 +105,5 @@ public interface RSAPI {
 
     @DELETE("/myProfile")
     Call<Void> deleteAccount(@Header("Authorization") String authorization);
-    
+
 }

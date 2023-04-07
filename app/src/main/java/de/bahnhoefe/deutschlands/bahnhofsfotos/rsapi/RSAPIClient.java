@@ -216,7 +216,7 @@ public class RSAPIClient {
     }
 
     public Call<Void> resendEmailVerification() {
-        return api.resendEmailVerification();
+        return api.resendEmailVerification(getUserAuthorization());
     }
 
     public Call<Statistic> getStatistic(String country) {
