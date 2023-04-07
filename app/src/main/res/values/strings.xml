@@ -178,7 +178,7 @@
     <string name="password_too_short">Password must be at least 8 characters long</string>
     <string name="password_repeat_fail">Passwords do not match</string>
     <string name="password_changed">Password successfully changed, please login again</string>
-    <string name="change_password_failed">Change password failed</string>
+    <string name="change_password_failed">Change password failed: %s</string>
     <string name="comment_hint">Remarks on this photo for the team</string>
     <string name="station_info">Info</string>
     <string name="id_label">ID:</string>
