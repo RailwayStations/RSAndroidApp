@@ -25,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -281,13 +283,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return super.onCreateOptionsMenu(menu);
     }
 
+    ActivityResultLauncher<Intent> activityForResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> recreate());
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.add_photo) {
             var intent = new Intent(DetailsActivity.this, UploadActivity.class);
             intent.putExtra(UploadActivity.EXTRA_STATION, station);
-            startActivity(intent);
+            activityForResultLauncher.launch(intent);
         } else if (itemId == R.id.report_problem) {
             var intent = new Intent(DetailsActivity.this, ProblemReportActivity.class);
             intent.putExtra(ProblemReportActivity.EXTRA_STATION, station);

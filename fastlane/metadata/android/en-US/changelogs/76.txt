@@ -1,0 +1,1 @@
+- Fix: reload DetailsActivity after photo upload
