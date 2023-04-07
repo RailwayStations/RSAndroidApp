@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
@@ -24,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,6 +55,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Photo;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
@@ -137,31 +141,55 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (ConnectionUtil.checkInternetConnection(this)) {
                     photoBitmaps.put(station.getPhotoUrl(), null);
                     BitmapCache.getInstance().getPhoto((bitmap) -> {
-                        assert bitmap != null;
-                        selectedPhoto = new PageablePhoto(
-                                station,
-                                bitmap);
-                        runOnUiThread(() -> {
-                            addIndicator();
-                            photoPagerAdapter.addPageablePhoto(selectedPhoto);
-                            onPageablePhotoSelected(selectedPhoto, 0);
-                        });
+                        if (bitmap != null) {
+                            var pageablePhoto = new PageablePhoto(station, bitmap);
+                            runOnUiThread(() -> {
+                                addIndicator();
+                                var position = photoPagerAdapter.addPageablePhoto(pageablePhoto);
+                                if (position == 0) {
+                                    onPageablePhotoSelected(pageablePhoto, position);
+                                }
+                            });
+                        }
                     }, station.getPhotoUrl());
                 }
             }
 
             loadAdditionalPhotos(station);
 
-            var upload = baseApplication.getDbAdapter().getPendingUploadForStation(station);
-            if (upload != null && upload.isPendingPhotoUpload()) {
-                SimpleDialogs.confirmOkCancel(this, R.string.pending_photo_upload, (dialog, which) -> {
-                    var uploadIntent = new Intent(DetailsActivity.this, UploadActivity.class);
-                    uploadIntent.putExtra(UploadActivity.EXTRA_STATION, station);
-                    startActivity(uploadIntent);
+            baseApplication.getDbAdapter()
+                    .getPendingUploadsForStation(station)
+                    .forEach(this::addUploadPhoto);
+        }
+
+    }
+
+    private void addUploadPhoto(final Upload upload) {
+        if (!upload.isPendingPhotoUpload()) {
+            return;
+        }
+        var profile = baseApplication.getProfile();
+        var file = FileUtils.getStoredMediaFile(this, upload.getId());
+        if (file != null && file.canRead()) {
+            var bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+            if (bitmap != null) {
+                var pageablePhoto = new PageablePhoto(
+                        upload.getId(),
+                        file.toURI().toString(),
+                        getString(R.string.new_local_photo),
+                        "",
+                        profile.getLicense() != null ? profile.getLicense().getLongName() : "",
+                        "",
+                        bitmap);
+                runOnUiThread(() -> {
+                    addIndicator();
+                    var position = photoPagerAdapter.addPageablePhoto(pageablePhoto);
+                    if (position == 0) {
+                        onPageablePhotoSelected(pageablePhoto, position);
+                    }
                 });
             }
         }
-
     }
 
     private void loadAdditionalPhotos(final Station station) {
@@ -180,19 +208,14 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                                 var url = photoStations.getPhotoBaseUrl() + photo.getPath();
                                 if (!photoBitmaps.containsKey(url)) {
                                     photoBitmaps.put(url, null);
-                                    BitmapCache.getInstance().getPhoto((bitmap) -> runOnUiThread(() -> addPhotoToPagerAdapter(
+                                    addIndicator();
+                                    BitmapCache.getInstance().getPhoto((bitmap) -> runOnUiThread(() -> addAdditionalPhotoToPagerAdapter(
                                             photo,
                                             url,
                                             photoStations,
                                             bitmap)), url);
                                 }
                             });
-
-                    if (photoBitmaps.size() > 1) {
-                        for (int i = 1; i < photoBitmaps.size(); i++) {
-                            addIndicator();
-                        }
-                    }
                 }
             }
 
@@ -203,7 +226,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         });
     }
 
-    private void addPhotoToPagerAdapter(Photo photo, String url, PhotoStations photoStations, Bitmap bitmap) {
+    private void addAdditionalPhotoToPagerAdapter(Photo photo, String url, PhotoStations photoStations, Bitmap bitmap) {
         photoPagerAdapter.addPageablePhoto(
                 new PageablePhoto(
                         photo.getId(),
@@ -259,13 +282,17 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         return super.onCreateOptionsMenu(menu);
     }
 
+    ActivityResultLauncher<Intent> activityForResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> recreate());
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.add_photo) {
             var intent = new Intent(DetailsActivity.this, UploadActivity.class);
             intent.putExtra(UploadActivity.EXTRA_STATION, station);
-            startActivity(intent);
+            activityForResultLauncher.launch(intent);
         } else if (itemId == R.id.report_problem) {
             var intent = new Intent(DetailsActivity.this, ProblemReportActivity.class);
             intent.putExtra(ProblemReportActivity.EXTRA_STATION, station);

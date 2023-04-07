@@ -109,7 +109,7 @@ public class MyDataActivity extends AppCompatActivity {
                         break;
                     default:
                         SimpleDialogs.confirmOk(MyDataActivity.this,
-                                String.format(getText(R.string.read_profile_failed).toString(), response.code()));
+                                getString(R.string.read_profile_failed, String.valueOf(response.code())));
                 }
             }
 
@@ -117,7 +117,7 @@ public class MyDataActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<Profile> call, @NonNull Throwable t) {
                 binding.myData.progressBar.setVisibility(View.GONE);
                 SimpleDialogs.confirmOk(MyDataActivity.this,
-                        String.format(getText(R.string.read_profile_failed).toString(), t.getMessage()));
+                        getString(R.string.read_profile_failed, t.getMessage()));
             }
         });
     }
@@ -217,7 +217,7 @@ public class MyDataActivity extends AppCompatActivity {
                             break;
                         default:
                             SimpleDialogs.confirmOk(MyDataActivity.this,
-                                    String.format(getText(R.string.save_profile_failed).toString(), response.code()));
+                                    getString(R.string.save_profile_failed, String.valueOf(response.code())));
                     }
                 }
 
@@ -226,7 +226,7 @@ public class MyDataActivity extends AppCompatActivity {
                     binding.myData.progressBar.setVisibility(View.GONE);
                     Log.e(TAG, "Error uploading profile", t);
                     SimpleDialogs.confirmOk(MyDataActivity.this,
-                            String.format(getText(R.string.save_profile_failed).toString(), t.getMessage()));
+                            getString(R.string.save_profile_failed, t.getMessage()));
                 }
             });
         }
@@ -330,6 +330,35 @@ public class MyDataActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.login);
     }
 
+    public void deleteAccount(View view) {
+        SimpleDialogs.confirmOkCancel(this, R.string.deleteAccountConfirmation, (d, i) -> rsapiClient.deleteAccount().enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                switch (response.code()) {
+                    case 204:
+                        Log.i(TAG, "Successfully deleted account");
+                        logout(view);
+                        SimpleDialogs.confirmOk(MyDataActivity.this, R.string.account_deleted);
+                        break;
+                    case 401:
+                        SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
+                        logout(view);
+                        break;
+                    default:
+                        SimpleDialogs.confirmOk(MyDataActivity.this,
+                                getString(R.string.account_deletion_failed, String.valueOf(response.code())));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                Log.e(TAG, "Error deleting account", t);
+                SimpleDialogs.confirmOk(MyDataActivity.this,
+                        getString(R.string.account_deletion_failed, t.getMessage()));
+            }
+        }));
+    }
+
     public void changePassword(View view) {
         var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         var passwordBinding = ChangePasswordBinding.inflate(getLayoutInflater());
@@ -371,7 +400,7 @@ public class MyDataActivity extends AppCompatActivity {
                             break;
                         default:
                             SimpleDialogs.confirmOk(MyDataActivity.this,
-                                    String.format(getText(R.string.change_password_failed).toString(), response.code()));
+                                    getString(R.string.change_password_failed, String.valueOf(response.code())));
                     }
                 }
 
@@ -379,7 +408,7 @@ public class MyDataActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     Log.e(TAG, "Error changing password", t);
                     SimpleDialogs.confirmOk(MyDataActivity.this,
-                            String.format(getText(R.string.change_password_failed).toString(), t.getMessage()));
+                            getString(R.string.change_password_failed, t.getMessage()));
                 }
             });
         });

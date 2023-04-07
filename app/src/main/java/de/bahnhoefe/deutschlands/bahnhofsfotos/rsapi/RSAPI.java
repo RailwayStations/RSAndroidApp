@@ -16,6 +16,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -86,7 +87,7 @@ public interface RSAPI {
     Call<List<PublicInbox>> getPublicInbox();
 
     @POST("/resendEmailVerification")
-    Call<Void> resendEmailVerification();
+    Call<Void> resendEmailVerification(@Header("Authorization") String authorization);
 
     @GET("/photoStationById/{country}/{id}")
     Call<PhotoStations> getPhotoStationById(@Path("country") String country, @Path("id") String id);
@@ -101,5 +102,8 @@ public interface RSAPI {
     @FormUrlEncoded
     @POST("/oauth2/revoke")
     Call<Token> revokeToken(@Field("token") String accessToken, @Field("token_type_hint") String tokenTypeHint);
+
+    @DELETE("/myProfile")
+    Call<Void> deleteAccount(@Header("Authorization") String authorization);
 
 }

@@ -21,24 +21,25 @@ public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.Ph
 
     private final Context context;
 
-    public PhotoPagerAdapter(final Context context) {
+    public PhotoPagerAdapter(Context context) {
         this.context = context;
     }
 
-    public void addPageablePhoto(final PageablePhoto pageablePhoto) {
+    public int addPageablePhoto(PageablePhoto pageablePhoto) {
         pageablePhotos.add(pageablePhoto);
         notifyDataSetChanged();
+        return pageablePhotos.size() - 1;
     }
 
     @NonNull
     @Override
-    public PhotoViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.photo_view_item, parent, false);
+    public PhotoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        var view = LayoutInflater.from(context).inflate(R.layout.photo_view_item, parent, false);
         return new PhotoViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final PhotoViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull PhotoViewHolder holder, int position) {
         var pageablePhoto = getPageablePhotoAtPosition(position);
         if (pageablePhoto == null) {
             holder.photoView.setImageResource(R.drawable.photo_missing);
@@ -47,7 +48,7 @@ public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.Ph
         }
     }
 
-    public PageablePhoto getPageablePhotoAtPosition(final int position) {
+    public PageablePhoto getPageablePhotoAtPosition(int position) {
         return pageablePhotos.isEmpty() ? null : pageablePhotos.get(position);
     }
 

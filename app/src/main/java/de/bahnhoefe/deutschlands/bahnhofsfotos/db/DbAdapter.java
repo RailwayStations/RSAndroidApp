@@ -357,15 +357,16 @@ public class DbAdapter {
         return values;
     }
 
-    public Upload getPendingUploadForStation(Station station) {
+    public List<Upload> getPendingUploadsForStation(Station station) {
+        var uploads = new ArrayList<Upload>();
         try (var cursor = db.query(DATABASE_TABLE_UPLOADS, null, Constants.UPLOADS.COUNTRY + " = ? AND " + Constants.UPLOADS.STATION_ID + " = ? AND " + getPendingUploadWhereClause(),
                 new String[]{station.getCountry(), station.getId()}, null, null, Constants.UPLOADS.CREATED_AT + " DESC")) {
-            if (cursor.moveToFirst()) {
-                return createUploadFromCursor(cursor);
+            while (cursor.moveToNext()) {
+                uploads.add(createUploadFromCursor(cursor));
             }
         }
 
-        return null;
+        return uploads;
     }
 
     public Upload getPendingUploadForCoordinates(double lat, double lon) {
