@@ -178,7 +178,7 @@
     <string name="password_too_short">Het wachtwoord moet minimaal 8 tekens bevatten</string>
     <string name="password_repeat_fail">De wachtwoorden komen niet overeen</string>
     <string name="password_changed">Password successfully changed, please login again</string>
-    <string name="change_password_failed">Change password failed: %s</string>
+    <string name="change_password_failed">Kan wachtwoord niet wijzigen: %s</string>
     <string name="comment_hint">Aantekeningen bij deze foto</string>
     <string name="station_info">Informatie</string>
     <string name="id_label">ID:</string>
