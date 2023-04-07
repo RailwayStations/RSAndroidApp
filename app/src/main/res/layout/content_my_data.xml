@@ -228,13 +228,33 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_below="@+id/btProfileSave"
+                    android:layout_below="@+id/etLinking"
+                    android:layout_toEndOf="@+id/bt_logout"
                     android:backgroundTint="@color/colorPrimary"
                     android:drawableTint="@color/colorActions"
                     android:textColor="@color/colorActions"
                     android:text="@string/bt_change_password"
                     android:onClick="changePassword" />
+
+                <View
+                    android:id="@+id/dangerZone"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_below="@+id/bt_changePassword"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/colorDanger" />
+
+                <Button
+                    android:id="@+id/bt_deleteAccount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/dangerZone"
+                    android:backgroundTint="@color/colorDanger"
+                    android:drawableTint="@color/colorDanger"
+                    android:textColor="@color/colorOnDanger"
+                    android:text="@string/bt_deleteAccount"
+                    android:onClick="deleteAccount" />
 
             </RelativeLayout>
         </LinearLayout>

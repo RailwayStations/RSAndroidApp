@@ -330,6 +330,35 @@ public class MyDataActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.login);
     }
 
+    public void deleteAccount(View view) {
+        SimpleDialogs.confirmOkCancel(this, R.string.deleteAccountConfirmation, (d, i) -> rsapiClient.deleteAccount().enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                switch (response.code()) {
+                    case 204:
+                        Log.i(TAG, "Successfully deleted account");
+                        logout(view);
+                        SimpleDialogs.confirmOk(MyDataActivity.this, R.string.account_deleted);
+                        break;
+                    case 401:
+                        SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
+                        logout(view);
+                        break;
+                    default:
+                        SimpleDialogs.confirmOk(MyDataActivity.this,
+                                String.format(getText(R.string.account_deletion_failed).toString(), response.code()));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                Log.e(TAG, "Error deleting account", t);
+                SimpleDialogs.confirmOk(MyDataActivity.this,
+                        String.format(getText(R.string.account_deletion_failed).toString(), t.getMessage()));
+            }
+        }));
+    }
+
     public void changePassword(View view) {
         var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         var passwordBinding = ChangePasswordBinding.inflate(getLayoutInflater());

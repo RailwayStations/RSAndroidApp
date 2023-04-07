@@ -211,6 +211,10 @@ public class RSAPIClient {
         return api.changePassword(getUserAuthorization(), new ChangePassword(newPassword));
     }
 
+    public Call<Void> deleteAccount() {
+        return api.deleteAccount(getUserAuthorization());
+    }
+
     public Call<Void> resendEmailVerification() {
         return api.resendEmailVerification();
     }
