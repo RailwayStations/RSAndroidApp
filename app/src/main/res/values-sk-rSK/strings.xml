@@ -182,7 +182,7 @@
     <string name="password_too_short">Heslo musí mať aspoň 8 znakov</string>
     <string name="password_repeat_fail">Heslá sa nezhodujú</string>
     <string name="password_changed">Password successfully changed, please login again</string>
-    <string name="change_password_failed">Change password failed: %s</string>
+    <string name="change_password_failed">Zmena hesla zlyhala: %s</string>
     <string name="comment_hint">Poznámky k tejto fotografii pre tím</string>
     <string name="station_info">Informácie</string>
     <string name="id_label">ID:</string>
