@@ -1,2 +1,3 @@
 - New: it's now possible to delete your account
 - Fix: reload DetailsActivity after photo upload
+- Fix: request new email verification
