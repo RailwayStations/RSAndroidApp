@@ -316,4 +316,8 @@
     <string name="country_uk">United Kingdom</string>
     <string name="country_us">USA (United States)</string>
     <string name="new_local_photo">New local photo</string>
+    <string name="bt_deleteAccount">Delete Account</string>
+    <string name="deleteAccountConfirmation">DANGER! Your account will be closed, all personal data and access credentials be removed. Uploaded photos will be kept under an anonymous user. The username will be blocked, so that no other user can register a new account under this name.</string>
+    <string name="account_deleted">Your account has been closed</string>
+    <string name="account_deletion_failed">Failed to close your account: %s</string>
 </resources>
