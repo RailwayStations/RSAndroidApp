@@ -1,0 +1,3 @@
+- Neu: Konto kann nun selbstständig gelöscht werden
+- Fix: Aktualiserierung der Bahnhofsdetailseite nach Foto-Upload
+- Fix: Anforderung einer neuen Email Verifizierung
