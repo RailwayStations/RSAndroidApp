@@ -316,5 +316,5 @@
     <string name="bt_deleteAccount">Konto löschen</string>
     <string name="deleteAccountConfirmation">ACHTUNG! Dein Konto wird geschlossen, alle persönlichen Daten und Zugangsdaten werden entfernt. Hochgeladene Fotos werden unter einem anonymen Benutzer gespeichert. Der Benutzername wird gesperrt, sodass kein anderer Benutzer ein neues Konto unter diesem Namen registrieren kann.</string>
     <string name="account_deleted">Dein Konto wurde geschlossen</string>
-    <string name="account_deletion_failed">Failed to close your account: %s</string>
+    <string name="account_deletion_failed">Fehler beim Schließen des Kontos: %s</string>
 </resources>
