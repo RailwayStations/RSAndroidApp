@@ -312,9 +312,9 @@
     <string name="country_tw">Taiwan</string>
     <string name="country_uk">Vereinigtes Königreich</string>
     <string name="country_us">USA (Vereinigte Staaten)</string>
-    <string name="new_local_photo">New local photo</string>
-    <string name="bt_deleteAccount">Delete Account</string>
-    <string name="deleteAccountConfirmation">DANGER! Your account will be closed, all personal data and access credentials be removed. Uploaded photos will be kept under an anonymous user. The username will be blocked, so that no other user can register a new account under this name.</string>
-    <string name="account_deleted">Your account has been closed</string>
-    <string name="account_deletion_failed">Failed to close your account: %s</string>
+    <string name="new_local_photo">Neues lokales Foto</string>
+    <string name="bt_deleteAccount">Konto löschen</string>
+    <string name="deleteAccountConfirmation">ACHTUNG! Dein Konto wird geschlossen, alle persönlichen Daten und Zugangsdaten werden entfernt. Hochgeladene Fotos werden unter einem anonymen Benutzer gespeichert. Der Benutzername wird gesperrt, sodass kein anderer Benutzer ein neues Konto unter diesem Namen registrieren kann.</string>
+    <string name="account_deleted">Dein Konto wurde geschlossen</string>
+    <string name="account_deletion_failed">Fehler beim Schließen des Kontos: %s</string>
 </resources>
