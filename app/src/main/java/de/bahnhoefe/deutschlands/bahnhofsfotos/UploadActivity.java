@@ -518,7 +518,7 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
     }
 
     private void fetchUploadStatus(Upload upload) {
-        if (upload == null) {
+        if (upload == null || upload.getRemoteId() == null) {
             return;
         }
         var stateQuery = new InboxStateQuery(

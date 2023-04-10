@@ -241,7 +241,7 @@ public class ProblemReportActivity extends AppCompatActivity {
     }
 
     private void fetchUploadStatus(Upload upload) {
-        if (upload == null) {
+        if (upload == null || upload.getRemoteId() == null) {
             return;
         }
 

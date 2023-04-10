@@ -1,0 +1,1 @@
+- Fix: query upload state only when remoteId is not null
