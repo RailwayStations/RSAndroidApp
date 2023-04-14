@@ -26,22 +26,19 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
     defaultConfig {
+        testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
         minSdk 26
         targetSdk 33
         versionCode 77
         versionName "14.3.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
         multiDexEnabled true
 
         // by convention, the folder name "app" is used for the APK file name. we want bahnhofsfotos instead
@@ -78,10 +75,14 @@ android {
     buildFeatures {
         viewBinding true
     }
-
     packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
+        resources {
+            excludes += ['META-INF/LICENSE', 'META-INF/NOTICE']
+        }
+    }
+
+    lint {
+        abortOnError false
     }
 
     applicationVariants.all { variant ->
