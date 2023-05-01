@@ -36,8 +36,6 @@ import androidx.core.view.GravityCompat;
 
 import com.google.android.material.navigation.NavigationView;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.text.SimpleDateFormat;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMainBinding;
@@ -214,20 +212,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     private void showApiUrlDialog() {
         SimpleDialogs.prompt(this, R.string.apiUrl, EditorInfo.TYPE_TEXT_VARIATION_URI, R.string.api_url_hint, baseApplication.getApiUrl(), v -> {
-            try {
-                if (StringUtils.isEmpty(v)) {
-                    baseApplication.setApiUrl(null); // set to default
-                } else {
-                    if (!Uri.parse(v).getScheme().matches("https?")) {
-                        throw new IllegalArgumentException("Only http(s) URIs are allowed");
-                    }
-                    baseApplication.setApiUrl(v);
-                }
-                baseApplication.setLastUpdate(0);
-                recreate();
-            } catch (Exception e) {
-                Toast.makeText(getBaseContext(), getString(R.string.invalid_api_url), Toast.LENGTH_LONG).show();
-            }
+            baseApplication.setApiUrl(v);
+            baseApplication.setLastUpdate(0);
+            recreate();
         });
     }
 

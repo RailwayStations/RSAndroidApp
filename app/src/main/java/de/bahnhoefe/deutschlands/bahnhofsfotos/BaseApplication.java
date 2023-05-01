@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
@@ -139,17 +139,26 @@ public class BaseApplication extends Application {
     }
 
     public String getApiUrl() {
-        var apiUri = getUri(getString(R.string.API_URL));
-        if (apiUri != null && Objects.requireNonNull(apiUri.getScheme()).matches("https?")) {
-            var apiUrl = apiUri.toString();
-            return apiUrl + (apiUrl.endsWith("/") ? "" : "/");
+        var apiUri = preferences.getString(getString(R.string.API_URL), null);
+        return getValidatedApiUrlString(apiUri);
+    }
+
+    private static String getValidatedApiUrlString(final String apiUrl) {
+        var uri = toUri(apiUrl);
+        if (uri.isPresent()) {
+            var scheme = uri.get().getScheme();
+            if (scheme != null && scheme.matches("https?")) {
+                return apiUrl + (apiUrl.endsWith("/") ? "" : "/");
+            }
         }
+
         return "https://api.railway-stations.org/";
     }
 
     public void setApiUrl(String apiUrl) {
-        putString(R.string.API_URL, apiUrl);
-        rsapiClient.setBaseUrl(apiUrl);
+        var validatedUrl = getValidatedApiUrlString(apiUrl);
+        putString(R.string.API_URL, validatedUrl);
+        rsapiClient.setBaseUrl(validatedUrl);
     }
 
     private void putBoolean(int key, boolean value) {
@@ -383,28 +392,28 @@ public class BaseApplication extends Application {
         putString(key, uri != null ? uri.toString() : null);
     }
 
-    public Uri getMapDirectoryUri() {
+    public Optional<Uri> getMapDirectoryUri() {
         return getUri(getString(R.string.MAP_DIRECTORY));
     }
 
-    private Uri getUri(String key) {
+    private Optional<Uri> getUri(String key) {
         return toUri(preferences.getString(key, null));
     }
 
-    public Uri toUri(String uriString) {
+    public static Optional<Uri> toUri(String uriString) {
         try {
-            return Uri.parse(uriString);
+            return Optional.ofNullable(Uri.parse(uriString));
         } catch (Exception ignored) {
             Log.e(TAG, "can't read Uri string " + uriString);
         }
-        return null;
+        return Optional.empty();
     }
 
     public void setMapDirectoryUri(Uri mapDirectory) {
         putUri(R.string.MAP_DIRECTORY, mapDirectory);
     }
 
-    public Uri getMapThemeDirectoryUri() {
+    public Optional<Uri> getMapThemeDirectoryUri() {
         return getUri(getString(R.string.MAP_THEME_DIRECTORY));
     }
 
@@ -412,7 +421,7 @@ public class BaseApplication extends Application {
         putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
     }
 
-    public Uri getMapThemeUri() {
+    public Optional<Uri> getMapThemeUri() {
         return getUri(getString(R.string.MAP_THEME));
     }
 

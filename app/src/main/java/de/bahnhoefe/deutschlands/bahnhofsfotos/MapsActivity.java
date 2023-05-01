@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMapsBinding;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
@@ -261,38 +262,38 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
 
     protected XmlRenderTheme getRenderTheme() {
         var mapTheme = baseApplication.getMapThemeUri();
-        if (mapTheme == null) {
-            return InternalRenderTheme.DEFAULT;
-        }
-        try {
-            var renderThemeFile = DocumentFile.fromSingleUri(getApplication(), mapTheme);
-            return new StreamRenderTheme("/assets/", getContentResolver().openInputStream(renderThemeFile.getUri()));
-        } catch (Exception e) {
-            Log.e(TAG, "Error loading theme " + mapTheme, e);
-            return InternalRenderTheme.DEFAULT;
-        }
+        return mapTheme.map(m -> {
+            try {
+                var renderThemeFile = DocumentFile.fromSingleUri(getApplication(), m);
+                return new StreamRenderTheme("/assets/", getContentResolver().openInputStream(renderThemeFile.getUri()));
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading theme " + mapTheme, e);
+                return InternalRenderTheme.DEFAULT;
+            }
+        }).orElse(InternalRenderTheme.DEFAULT);
     }
 
-    protected MapDataStore getMapFile(Uri mapUri) {
-        if (mapUri == null || !DocumentFile.isDocumentUri(this, mapUri)) {
+    protected Optional<MapDataStore> getMapFile() {
+        var mapUri = BaseApplication.toUri(baseApplication.getMap());
+        return mapUri.map(map -> {
+            if (!DocumentFile.isDocumentUri(this, map)) {
+                return null;
+            }
+            try {
+                var inputStream = (FileInputStream) getContentResolver().openInputStream(map);
+                return new MapFile(inputStream, 0, null);
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Can't open mapFile", e);
+            }
             return null;
-        }
-        try {
-            var inputStream = (FileInputStream) getContentResolver().openInputStream(mapUri);
-            return new MapFile(inputStream, 0, null);
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "Can't open mapFile", e);
-        }
-        return null;
+        });
     }
 
     protected void createLayers() {
-        var map = baseApplication.getMap();
-        var mapUri = baseApplication.toUri(map);
-        var mapFile = getMapFile(mapUri);
+        var mapFile = getMapFile();
 
-        if (mapFile != null) {
-            var rendererLayer = new TileRendererLayer(this.tileCaches.get(0), mapFile,
+        if (mapFile.isPresent()) {
+            var rendererLayer = new TileRendererLayer(this.tileCaches.get(0), mapFile.get(),
                     this.binding.map.mapView.getModel().mapViewPosition, false, true, false, AndroidGraphicFactory.INSTANCE) {
                 @Override
                 public boolean onLongPress(LatLong tapLatLong, Point thisXY,
@@ -305,7 +306,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
             this.layer = rendererLayer;
             binding.map.mapView.getLayerManager().getLayers().add(this.layer);
         } else {
-            AbstractTileSource tileSource = onlineTileSources.get(map);
+            AbstractTileSource tileSource = onlineTileSources.get(baseApplication.getMap());
 
             if (tileSource == null) {
                 tileSource = OpenStreetMapMapnik.INSTANCE;
@@ -394,6 +395,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         osmMapnick.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, null));
 
         var mapSubmenu = menu.findItem(R.id.maps_submenu).getSubMenu();
+        assert mapSubmenu != null;
         for (var tileSource : onlineTileSources.values()) {
             var mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, tileSource.getName());
             mapItem.setChecked(tileSource.getName().equals(map));
@@ -401,13 +403,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         }
 
         var mapDirectory = baseApplication.getMapDirectoryUri();
-        if (mapDirectory != null) {
-            var documentsTree = getDocumentFileFromTreeUri(mapDirectory);
+        if (mapDirectory.isPresent()) {
+            var documentsTree = getDocumentFileFromTreeUri(mapDirectory.get());
             if (documentsTree != null) {
                 for (var file : documentsTree.listFiles()) {
                     if (file.isFile() && file.getName().endsWith(".map")) {
                         var mapItem = mapSubmenu.add(R.id.maps_group, NONE, NONE, file.getName());
-                        mapItem.setChecked(file.getUri().equals(baseApplication.toUri(map)));
+                        mapItem.setChecked(BaseApplication.toUri(map).map(uri -> file.getUri().equals(uri)).orElse(false));
                         mapItem.setOnMenuItemClickListener(new MapMenuListener(this, baseApplication, file.getUri().toString()));
                     }
                 }
@@ -425,25 +427,26 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         var mapThemeDirectory = baseApplication.getMapThemeDirectoryUri();
 
         var defaultTheme = menu.findItem(R.id.default_theme);
-        defaultTheme.setChecked(mapTheme == null);
+        defaultTheme.setChecked(!mapTheme.isPresent());
         defaultTheme.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, null));
         var themeSubmenu = menu.findItem(R.id.themes_submenu).getSubMenu();
+        assert themeSubmenu != null;
 
-        if (mapThemeDirectory != null) {
-            var documentsTree = getDocumentFileFromTreeUri(mapThemeDirectory);
+        if (mapThemeDirectory.isPresent()) {
+            var documentsTree = getDocumentFileFromTreeUri(mapThemeDirectory.get());
             if (documentsTree != null) {
                 for (var file : documentsTree.listFiles()) {
                     if (file.isFile() && file.getName().endsWith(".xml")) {
                         var themeName = file.getName();
                         var themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
-                        themeItem.setChecked(file.getUri().equals(mapTheme));
+                        themeItem.setChecked(mapTheme.map(uri -> file.getUri().equals(uri)).orElse(false));
                         themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, file.getUri()));
                     } else if (file.isDirectory()) {
                         var childFile = file.findFile(file.getName() + ".xml");
                         if (childFile != null) {
                             var themeName = file.getName();
                             var themeItem = themeSubmenu.add(R.id.themes_group, NONE, NONE, themeName);
-                            themeItem.setChecked(childFile.getUri().equals(mapTheme));
+                            themeItem.setChecked(mapTheme.map(uri -> childFile.getUri().equals(uri)).orElse(false));
                             themeItem.setOnMenuItemClickListener(new MapThemeMenuListener(this, baseApplication, childFile.getUri()));
                         }
                     }
