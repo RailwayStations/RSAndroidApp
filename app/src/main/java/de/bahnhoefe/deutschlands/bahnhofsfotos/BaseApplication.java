@@ -32,8 +32,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ExceptionHandler;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
-import okhttp3.Interceptor;
-import okhttp3.Response;
 
 public class BaseApplication extends Application {
 
@@ -432,24 +430,6 @@ public class BaseApplication extends Application {
 
     public boolean isLoggedIn() {
         return rsapiClient.hasToken();
-    }
-
-    /* This interceptor adds a custom User-Agent. */
-    public static class UserAgentInterceptor implements Interceptor {
-
-        private final String userAgent;
-
-        public UserAgentInterceptor(String userAgent) {
-            this.userAgent = userAgent;
-        }
-
-        @Override
-        @NonNull
-        public Response intercept(Interceptor.Chain chain) throws IOException {
-            return chain.proceed(chain.request().newBuilder()
-                    .header("User-Agent", userAgent)
-                    .build());
-        }
     }
 
 }

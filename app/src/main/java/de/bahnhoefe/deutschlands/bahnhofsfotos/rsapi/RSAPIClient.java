@@ -10,8 +10,10 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,6 +33,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PKCEUtil;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -82,7 +85,8 @@ public class RSAPIClient {
         gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
 
         var builder = new OkHttpClient.Builder()
-                .addInterceptor(new BaseApplication.UserAgentInterceptor(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT));
+                .addInterceptor(new UserAgentInterceptor())
+                .addInterceptor(new AcceptLanguageInterceptor());
 
         if (BuildConfig.DEBUG) {
             var loggingInterceptor = new HttpLoggingInterceptor();
@@ -97,6 +101,34 @@ public class RSAPIClient {
                 .build();
 
         return retrofit.create(RSAPI.class);
+    }
+
+    private static class AcceptLanguageInterceptor implements Interceptor {
+
+        @NonNull
+        @Override
+        public okhttp3.Response intercept(@NonNull final Chain chain) throws IOException {
+            return chain.proceed(chain.request().newBuilder()
+                    .header("Accept-Language", Locale.getDefault().toLanguageTag())
+                    .build());
+        }
+
+    }
+
+    /**
+     * This interceptor adds a custom User-Agent.
+     */
+    public static class UserAgentInterceptor implements Interceptor {
+
+        private final String USER_AGENT = BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT;
+
+        @Override
+        @NonNull
+        public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
+            return chain.proceed(chain.request().newBuilder()
+                    .header("User-Agent", USER_AGENT)
+                    .build());
+        }
     }
 
     public Call<List<Country>> getCountries() {
