@@ -8,13 +8,19 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import java.lang.reflect.Type
 
 data class InboxResponse @JvmOverloads constructor(
-    var state: InboxResponseState? = null,
+    var _state: InboxResponseState? = InboxResponseState.ERROR,
     var message: String? = null,
     var id: Long? = null,
     var filename: String? = null,
     var inboxUrl: String? = null,
     var crc32: Long? = null
 ) {
+
+    var state: InboxResponseState
+        get() = _state ?: InboxResponseState.ERROR
+        set(value) {
+            _state = value
+        }
 
     @JsonAdapter(InboxResponseState.Serializer::class)
     enum class InboxResponseState(val messageId: Int, val uploadState: UploadState) {
