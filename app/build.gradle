@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'de.mannodermaus.android-junit5'
 }
 
 def getVersionCode = { ->
@@ -25,7 +26,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -75,9 +75,10 @@ android {
     buildFeatures {
         viewBinding true
     }
+
     packagingOptions {
         resources {
-            excludes += ['META-INF/LICENSE', 'META-INF/NOTICE']
+            excludes += ['META-INF/*']
         }
     }
 
