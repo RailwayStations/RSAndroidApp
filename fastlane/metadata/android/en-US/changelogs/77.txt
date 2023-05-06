@@ -1,3 +1,4 @@
 - Fix: query upload state only when remoteId is not null
 - New: set Accept-Language header to backend API calls
 - Upgrade AGP and Java language level
+- Catch null of InboxResponse.state
