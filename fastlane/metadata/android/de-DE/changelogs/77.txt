@@ -1,0 +1,4 @@
+- Fix: Abfrage des Uploadstatus nur, wenn die remoteId nicht null ist
+- New: setze Accept-Language Header beim Aufruf der Backend API
+- Upgrade AGP und Java Language Level
+- Fix: Behandlung von Nullpointer in InboxResponse.state
