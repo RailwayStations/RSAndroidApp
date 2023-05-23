@@ -210,9 +210,11 @@ public class ProblemReportActivity extends AppCompatActivity {
                         upload.setRemoteId(inboxResponse.getId());
                         upload.setUploadState(inboxResponse.getState().getUploadState());
                         baseApplication.getDbAdapter().updateUpload(upload);
-                        SimpleDialogs.confirmOk(ProblemReportActivity.this, inboxResponse.getState().getMessageId());
-                        if (response.isSuccessful()) {
-                            finish();
+                        if (inboxResponse.getState() == InboxResponse.InboxResponseState.ERROR) {
+                            SimpleDialogs.confirmOk(ProblemReportActivity.this,
+                                    getString(InboxResponse.InboxResponseState.ERROR.getMessageId(), inboxResponse.getMessage()));
+                        } else {
+                            SimpleDialogs.confirmOk(ProblemReportActivity.this, inboxResponse.getState().getMessageId());
                         }
                     }
 
