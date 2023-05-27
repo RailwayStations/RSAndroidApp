@@ -1,0 +1,8 @@
+{
+  "state": "REVIEW",
+  "message": "message",
+  "id": 123456,
+  "filename": "123456.png",
+  "inboxUrl": "https://localhost:8080/inbox/123456.png",
+  "crc32": 4711
+}
