@@ -171,9 +171,9 @@ public class StationFilterBar extends LinearLayout {
         });
 
         setPopupMenuIcons(popup);
-        popup.setOnDismissListener(menu -> setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_up_24));
+        popup.setOnDismissListener(menu -> setCloseIcon(activeFilter, R.drawable.ic_baseline_arrow_drop_up_24));
         popup.show();
-        setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_down_24);
+        setCloseIcon(activeFilter, R.drawable.ic_baseline_arrow_drop_down_24);
     }
 
     private void showPhotoFilter(View v) {
@@ -195,9 +195,9 @@ public class StationFilterBar extends LinearLayout {
         });
 
         setPopupMenuIcons(popup);
-        popup.setOnDismissListener(menu -> setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_up_24));
+        popup.setOnDismissListener(menu -> setCloseIcon(photoFilter, R.drawable.ic_baseline_arrow_drop_up_24));
         popup.show();
-        setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_down_24);
+        setCloseIcon(photoFilter, R.drawable.ic_baseline_arrow_drop_down_24);
     }
 
     public void selectCountry(View view) {
