@@ -320,4 +320,7 @@
     <string name="deleteAccountConfirmation">DANGER! Your account will be closed, all personal data and access credentials be removed. Uploaded photos will be kept under an anonymous user. The username will be blocked, so that no other user can register a new account under this name.</string>
     <string name="account_deleted">Your account has been closed</string>
     <string name="account_deletion_failed">Failed to close your account: %s</string>
+    <string name="sort_order_by_distance">sort by distance</string>
+    <string name="sort_order_by_alphabet">sort by alphabet</string>
+    <string name="filter_clear">clear</string>
 </resources>
