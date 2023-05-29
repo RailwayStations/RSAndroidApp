@@ -1,0 +1,2 @@
+- Redesign station filter bar
+- Updated translations
