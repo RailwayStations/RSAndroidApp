@@ -317,4 +317,7 @@
     <string name="deleteAccountConfirmation">ACHTUNG! Dein Konto wird geschlossen, alle persönlichen Daten und Zugangsdaten werden entfernt. Hochgeladene Fotos werden unter einem anonymen Benutzer gespeichert. Der Benutzername wird gesperrt, sodass kein anderer Benutzer ein neues Konto unter diesem Namen registrieren kann.</string>
     <string name="account_deleted">Dein Konto wurde geschlossen</string>
     <string name="account_deletion_failed">Fehler beim Schließen des Kontos: %s</string>
+    <string name="sort_order_by_distance">sort by distance</string>
+    <string name="sort_order_by_alphabet">sort by alphabet</string>
+    <string name="filter_clear">clear</string>
 </resources>
