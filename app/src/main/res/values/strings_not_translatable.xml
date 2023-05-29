@@ -54,4 +54,6 @@
     <string name="rsapiRedirectHost" translatable="false">de.bahnhoefe.deutschlands.bahnhofsfotos</string>
     <string name="rsapiClientId" translatable="false">RailwayStationsAndroidApp</string>
 
+    <string name="no_text" translatable="false" />
+
 </resources>

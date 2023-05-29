@@ -1,5 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
 
+import android.content.Context;
+
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
 
 public class StationFilter {
@@ -62,43 +64,24 @@ public class StationFilter {
         return R.drawable.ic_station_inactive_active_24px;
     }
 
-    public void togglePhoto() {
-        if (photo == null) {
-            photo = Boolean.TRUE;
-        } else if (photo) {
-            photo = Boolean.FALSE;
-        } else {
-            photo = null;
-        }
-    }
-
-    public void toggleActive() {
-        if (active == null) {
-            active = Boolean.TRUE;
-        } else if (active) {
-            active = Boolean.FALSE;
-        } else {
-            active = null;
-        }
-    }
-
-    public int getActiveColor() {
-        return active == null ? R.color.filterInactive : R.color.filterActive;
-    }
-
-    public int getPhotoColor() {
-        return photo == null ? R.color.filterInactive : R.color.filterActive;
-    }
-
-    public int getNicknameColor() {
-        return nickname == null ? R.color.filterInactive : R.color.filterActive;
-    }
-
-    public int getPhotoText() {
-        return photo == null || photo ? R.string.filter_photo : R.string.filter_no_photo;
-    }
-
     public int getActiveText() {
-        return active == null || active ? R.string.filter_active : R.string.filter_inactive;
+        return active == null ? R.string.no_text : active ? R.string.filter_active : R.string.filter_inactive;
     }
+
+    public boolean isPhotoFilterActive() {
+        return photo != null;
+    }
+
+    public boolean isActiveFilterActive() {
+        return active != null;
+    }
+
+    public boolean isNicknameFilterActive() {
+        return nickname != null;
+    }
+
+    public String getNicknameText(Context context) {
+        return isNicknameFilterActive() ? nickname : context.getString(R.string.no_text);
+    }
+
 }

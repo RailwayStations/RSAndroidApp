@@ -313,8 +313,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             registerLocationManager();
         }
 
-        binding.appBarMain.main.stationFilterBar.setBaseApplication(baseApplication);
-        binding.appBarMain.main.stationFilterBar.setOnChangeListener(this);
+        binding.appBarMain.main.stationFilterBar.init(baseApplication, this);
         updateStationList();
     }
 

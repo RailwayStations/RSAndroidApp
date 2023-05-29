@@ -1,76 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chipScrollView"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingTop="10sp"
-    android:paddingBottom="10sp"
-    style="?android:attr/buttonBarStyle"
-    android:background="@color/colorPrimary">
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true">
 
-    <Button
-        android:id="@+id/toggleSort"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:drawableTop="@drawable/ic_sort_by_alpha_active_24px"
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/sort_order"
-        android:textColor="@color/filterActive"
-        android:textAllCaps="false"
-        android:textSize="@dimen/filter_bar_text_size"
-        android:background="@null"/>
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:singleLine="true"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="10dp">
 
-    <Button
-        android:id="@+id/photoFilter"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:drawableTop="@drawable/ic_photo_inactive_24px"
-        android:background="@null"
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/filter_photo"
-        android:textColor="@color/filterInactive"
-        android:textAllCaps="false"
-        android:textSize="@dimen/filter_bar_text_size"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/toggleSort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.MaterialComponents"
+            app:chipSurfaceColor="@color/fullTransparent"
+            app:chipStrokeColor="@color/chipForeground"
+            app:chipStrokeWidth="1dp"
+            app:closeIcon="@drawable/ic_baseline_arrow_drop_up_24"
+            app:closeIconEnabled="true" />
 
-    <Button
-        android:id="@+id/activeFilter"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:drawableTop="@drawable/ic_station_active_inactive_24px"
-        android:background="@null"
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/filter_active"
-        android:textColor="@color/filterInactive"
-        android:textAllCaps="false"
-        android:textSize="@dimen/filter_bar_text_size"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/photoFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.MaterialComponents"
+            app:chipSurfaceColor="@color/fullTransparent"
+            app:chipStrokeColor="@color/chipForeground"
+            app:chipStrokeWidth="1dp"
+            app:closeIcon="@drawable/ic_baseline_arrow_drop_up_24"
+            app:closeIconEnabled="true" />
 
-    <Button
-        android:id="@+id/nicknameFilter"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/filter_nickname"
-        android:textColor="@color/filterInactive"
-        android:textAllCaps="false"
-        android:textSize="@dimen/filter_bar_text_size"
-        android:drawableTop="@drawable/ic_person_inactive_24px"
-        android:background="@null"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/activeFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.MaterialComponents"
+            app:chipSurfaceColor="@color/fullTransparent"
+            app:chipStrokeColor="@color/chipForeground"
+            app:chipStrokeWidth="1dp"
+            app:closeIcon="@drawable/ic_baseline_arrow_drop_up_24"
+            app:closeIconEnabled="true" />
 
-    <Button
-        android:id="@+id/countrySelection"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/countries"
-        android:textColor="@color/filterActive"
-        android:textAllCaps="false"
-        android:textSize="@dimen/filter_bar_text_size"
-        android:drawableTop="@drawable/ic_countries_active_24px"
-        android:background="@null"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/nicknameFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.MaterialComponents"
+            app:chipSurfaceColor="@color/fullTransparent"
+            app:chipStrokeColor="@color/chipForeground"
+            app:chipStrokeWidth="1dp"
+            app:closeIcon="@drawable/ic_baseline_arrow_drop_up_24"
+            app:closeIconEnabled="true" />
 
-</LinearLayout>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/countrySelection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.MaterialComponents"
+            app:chipSurfaceColor="@color/fullTransparent"
+            app:chipStrokeColor="@color/chipForeground"
+            app:chipStrokeWidth="1dp"
+            app:closeIcon="@drawable/ic_baseline_arrow_drop_up_24"
+            app:closeIconEnabled="true" />
+
+    </com.google.android.material.chip.ChipGroup>
+</HorizontalScrollView>

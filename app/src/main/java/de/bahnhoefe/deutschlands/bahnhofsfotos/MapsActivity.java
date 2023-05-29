@@ -746,8 +746,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
         if (baseApplication.isLocationUpdates()) {
             registerLocationManager();
         }
-        binding.map.stationFilterBar.setBaseApplication(baseApplication);
-        binding.map.stationFilterBar.setOnChangeListener(this);
+        binding.map.stationFilterBar.init(baseApplication, this);
         binding.map.stationFilterBar.setSortOrderEnabled(false);
     }
 

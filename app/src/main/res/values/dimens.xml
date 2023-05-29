@@ -17,4 +17,6 @@
     <dimen name="controls_margin">8dp</dimen>
     <dimen name="standard_padding">16dp</dimen>
     <dimen name="standard_list_item_size">72dp</dimen>
+
+    <dimen name="chip_textStartPadding">4dp</dimen>
 </resources>

@@ -1,18 +1,30 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+
+import com.google.android.material.chip.Chip;
 
 import java.util.stream.IntStream;
 
@@ -23,12 +35,16 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
 
 public class StationFilterBar extends LinearLayout {
 
-    private final Button toggleSort;
-    private final Button photoFilter;
-    private final Button activeFilter;
-    private final Button nicknameFilter;
+    private static final String TAG = StationFilterBar.class.getSimpleName();
+
+    private final Chip toggleSort;
+    private final Chip photoFilter;
+    private final Chip activeFilter;
+    private final Chip nicknameFilter;
+    private final Chip countrySelection;
     private OnChangeListener listener;
     private BaseApplication baseApplication;
+    private Activity activity;
 
     public StationFilterBar(Context context) {
         this(context, null);
@@ -48,67 +64,189 @@ public class StationFilterBar extends LinearLayout {
         LayoutInflater.from(context).inflate(R.layout.station_filter_bar, this);
 
         toggleSort = findViewById(R.id.toggleSort);
-        toggleSort.setOnClickListener(this::toggleSort);
+        toggleSort.setOnClickListener(this::showSortMenu);
 
         photoFilter = findViewById(R.id.photoFilter);
-        photoFilter.setOnClickListener(this::togglePhotoFilter);
+        photoFilter.setOnClickListener(this::showPhotoFilter);
 
         activeFilter = findViewById(R.id.activeFilter);
-        activeFilter.setOnClickListener(this::toggleActiveFilter);
+        activeFilter.setOnClickListener(this::showActiveFilter);
 
         nicknameFilter = findViewById(R.id.nicknameFilter);
         nicknameFilter.setOnClickListener(this::selectNicknameFilter);
 
-        this.<Button>findViewById(R.id.countrySelection).setOnClickListener(this::selectCountry);
+        countrySelection = findViewById(R.id.countrySelection);
+        countrySelection.setOnClickListener(this::selectCountry);
     }
 
-    private void setFilterButton(Button button, int iconRes, int textRes, int textColorRes) {
-        button.setCompoundDrawablesWithIntrinsicBounds(null, ContextCompat.getDrawable(getContext(), iconRes), null, null);
-        button.setTextColor(getResources().getColor(textColorRes, null));
-        button.setText(textRes);
+    private void setCloseIcon(final Chip chip, final int icon) {
+        chip.setCloseIcon(AppCompatResources.getDrawable(this.baseApplication, icon));
     }
 
-    public void setBaseApplication(BaseApplication baseApplication) {
+    private void setChipStatus(Chip chip, int iconRes, boolean active, int textRes) {
+        setChipStatus(chip, iconRes, active, baseApplication.getString(textRes));
+    }
+
+    private void setChipStatus(Chip chip, int iconRes, boolean active, String text) {
+        if (iconRes != 0) {
+            chip.setChipIcon(getTintedDrawable(this.baseApplication, iconRes, getChipForegroundColor(active)));
+        } else {
+            chip.setChipIcon(null);
+        }
+        chip.setChipBackgroundColorResource(active ? R.color.colorPrimary : R.color.fullTransparent);
+        chip.setTextColor(getChipForegroundColor(active));
+        chip.setCloseIconTintResource(getChipForegroundColorRes(active));
+        chip.setChipStrokeColorResource(active ? R.color.colorPrimary : R.color.chipForeground);
+        chip.setText(text);
+        chip.setTextEndPadding(0);
+        if (TextUtils.isEmpty(text)) {
+            chip.setTextStartPadding(0);
+        } else {
+            chip.setTextStartPadding(activity.getResources().getDimension(R.dimen.chip_textStartPadding));
+        }
+    }
+
+    private Drawable getTintedDrawable(Context context, int imageId, int color) {
+        if (imageId > 0) {
+            var unwrappedDrawable = ContextCompat.getDrawable(context, imageId);
+            return getTintedDrawable(unwrappedDrawable, color);
+        }
+        return null;
+    }
+
+    @Nullable
+    private static Drawable getTintedDrawable(Drawable unwrappedDrawable, int color) {
+        if (unwrappedDrawable != null) {
+            var wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable);
+            DrawableCompat.setTint(wrappedDrawable, color);
+            return wrappedDrawable;
+        }
+        return null;
+    }
+
+    private int getChipForegroundColor(final boolean active) {
+        return this.baseApplication.getColor(getChipForegroundColorRes(active));
+    }
+
+    private int getChipForegroundColorRes(final boolean active) {
+        return active ? R.color.colorOnPrimary : R.color.chipForeground;
+    }
+
+    public void init(BaseApplication baseApplication, Activity activity) {
         this.baseApplication = baseApplication;
+        this.activity = activity;
+        if (activity instanceof OnChangeListener onChangeListener) {
+            listener = onChangeListener;
+        }
         var stationFilter = baseApplication.getStationFilter();
 
-        setFilterButton(photoFilter, stationFilter.getPhotoIcon(), stationFilter.getPhotoText(), stationFilter.getPhotoColor());
-        setFilterButton(nicknameFilter, stationFilter.getNicknameIcon(), R.string.filter_nickname, stationFilter.getNicknameColor());
-        setFilterButton(activeFilter, stationFilter.getActiveIcon(), stationFilter.getActiveText(), stationFilter.getActiveColor());
+        setChipStatus(photoFilter, stationFilter.getPhotoIcon(), stationFilter.isPhotoFilterActive(), R.string.no_text);
+        setChipStatus(nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.isNicknameFilterActive(), stationFilter.getNicknameText(this.baseApplication));
+        setChipStatus(activeFilter, stationFilter.getActiveIcon(), stationFilter.isActiveFilterActive(), stationFilter.getActiveText());
+        setChipStatus(countrySelection, R.drawable.ic_countries_active_24px, true, getCountryText(baseApplication));
 
         setSortOrder(baseApplication.getSortByDistance());
     }
 
-    public void toggleActiveFilter(View view) {
-        var stationFilter = baseApplication.getStationFilter();
-        stationFilter.toggleActive();
-        setFilterButton(activeFilter, stationFilter.getActiveIcon(), stationFilter.getActiveText(), stationFilter.getActiveColor());
-        updateStationFilter(stationFilter);
+    private static String getCountryText(final BaseApplication baseApplication) {
+        return String.join(",", baseApplication.getCountryCodes());
     }
 
-    public void togglePhotoFilter(View view) {
-        var stationFilter = baseApplication.getStationFilter();
-        stationFilter.togglePhoto();
-        setFilterButton(photoFilter, stationFilter.getPhotoIcon(), stationFilter.getPhotoText(), stationFilter.getPhotoColor());
-        updateStationFilter(stationFilter);
+    private void showActiveFilter(View v) {
+        var popup = new PopupMenu(activity, v);
+        popup.getMenuInflater().inflate(R.menu.active_filter, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(menuItem -> {
+            var stationFilter = baseApplication.getStationFilter();
+            if (menuItem.getItemId() == R.id.active_filter_active) {
+                stationFilter.setActive(Boolean.TRUE);
+            } else if (menuItem.getItemId() == R.id.active_filter_inactive) {
+                stationFilter.setActive(Boolean.FALSE);
+            } else {
+                stationFilter.setActive(null);
+            }
+            setChipStatus(activeFilter, stationFilter.getActiveIcon(), stationFilter.isActiveFilterActive(), R.string.no_text);
+            updateStationFilter(stationFilter);
+            return false;
+        });
+
+        setPopupMenuIcons(popup);
+        popup.setOnDismissListener(menu -> setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_up_24));
+        popup.show();
+        setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_down_24);
+    }
+
+    private void showPhotoFilter(View v) {
+        var popup = new PopupMenu(activity, v);
+        popup.getMenuInflater().inflate(R.menu.photo_filter, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(menuItem -> {
+            var stationFilter = baseApplication.getStationFilter();
+            if (menuItem.getItemId() == R.id.photo_filter_has_photo) {
+                stationFilter.setPhoto(Boolean.TRUE);
+            } else if (menuItem.getItemId() == R.id.photo_filter_without_photo) {
+                stationFilter.setPhoto(Boolean.FALSE);
+            } else {
+                stationFilter.setPhoto(null);
+            }
+            setChipStatus(photoFilter, stationFilter.getPhotoIcon(), stationFilter.isPhotoFilterActive(), R.string.no_text);
+            updateStationFilter(stationFilter);
+            return false;
+        });
+
+        setPopupMenuIcons(popup);
+        popup.setOnDismissListener(menu -> setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_up_24));
+        popup.show();
+        setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_down_24);
     }
 
     public void selectCountry(View view) {
         getContext().startActivity(new Intent(getContext(), CountryActivity.class));
     }
 
-    public void toggleSort(View view) {
-        boolean sortByDistance = baseApplication.getSortByDistance();
-        sortByDistance = !sortByDistance;
-        setSortOrder(sortByDistance);
-        baseApplication.setSortByDistance(sortByDistance);
-        if (listener != null) {
-            listener.sortOrderChanged(sortByDistance);
+    private void showSortMenu(View v) {
+        var popup = new PopupMenu(activity, v);
+        popup.getMenuInflater().inflate(R.menu.sort_order, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(menuItem -> {
+            boolean sortByDistance = menuItem.getItemId() == R.id.sort_order_by_distance;
+            setSortOrder(sortByDistance);
+            baseApplication.setSortByDistance(sortByDistance);
+            if (listener != null) {
+                listener.sortOrderChanged(sortByDistance);
+            }
+            return false;
+        });
+
+        setPopupMenuIcons(popup);
+        popup.setOnDismissListener(menu -> setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_up_24));
+        popup.show();
+        setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_down_24);
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void setPopupMenuIcons(final PopupMenu popup) {
+        try {
+            if (popup.getMenu() instanceof MenuBuilder menuBuilder) {
+                menuBuilder.setOptionalIconsVisible(true);
+                for (var item : menuBuilder.getVisibleItems()) {
+                    var iconMarginPx =
+                            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 0, getResources().getDisplayMetrics());
+                    if (item.getIcon() != null) {
+                        InsetDrawable icon;
+                        icon = new InsetDrawable(item.getIcon(), iconMarginPx, 0, iconMarginPx, 0);
+                        icon.setTint(getResources().getColor(R.color.colorSurface, null));
+                        item.setIcon(icon);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Error setting popupMenuIcons: ", e);
         }
     }
 
     public void setSortOrder(boolean sortByDistance) {
-        setFilterButton(toggleSort, sortByDistance ? R.drawable.ic_sort_by_distance_active_24px : R.drawable.ic_sort_by_alpha_active_24px, R.string.sort_order, R.color.filterActive);
+        setChipStatus(toggleSort, sortByDistance ? R.drawable.ic_sort_by_distance_active_24px : R.drawable.ic_sort_by_alpha_active_24px, true, R.string.no_text);
     }
 
     public void selectNicknameFilter(View view) {
@@ -128,23 +266,23 @@ public class StationFilterBar extends LinearLayout {
                 .setSingleChoiceItems(nicknames, selectedNickname, null)
                 .setPositiveButton(R.string.button_ok_text, (dialog, whichButton) -> {
                     dialog.dismiss();
-                    int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                    int selectedPosition = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                     if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
                         stationFilter.setNickname(nicknames[selectedPosition]);
-                        setFilterButton(nicknameFilter, stationFilter.getNicknameIcon(), R.string.filter_nickname, stationFilter.getNicknameColor());
+                        setChipStatus(nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.isNicknameFilterActive(), stationFilter.getNicknameText(baseApplication));
                         updateStationFilter(stationFilter);
                     }
                 })
                 .setNeutralButton(R.string.button_remove_text, (dialog, whichButton) -> {
                     dialog.dismiss();
                     stationFilter.setNickname(null);
-                    setFilterButton(nicknameFilter, stationFilter.getNicknameIcon(), R.string.filter_nickname, stationFilter.getNicknameColor());
+                    setChipStatus(nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.isNicknameFilterActive(), stationFilter.getNicknameText(baseApplication));
                     updateStationFilter(stationFilter);
                 })
                 .setNegativeButton(R.string.button_myself_text, (dialog, whichButton) -> {
                     dialog.dismiss();
                     stationFilter.setNickname(baseApplication.getNickname());
-                    setFilterButton(nicknameFilter, stationFilter.getNicknameIcon(), R.string.filter_nickname, stationFilter.getNicknameColor());
+                    setChipStatus(nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.isNicknameFilterActive(), stationFilter.getNicknameText(baseApplication));
                     updateStationFilter(stationFilter);
                 })
                 .create().show();
@@ -157,16 +295,13 @@ public class StationFilterBar extends LinearLayout {
         }
     }
 
-    public void setOnChangeListener(OnChangeListener listener) {
-        this.listener = listener;
-    }
-
     public void setSortOrderEnabled(boolean enabled) {
         toggleSort.setVisibility(enabled ? VISIBLE : GONE);
     }
 
     public interface OnChangeListener {
         void stationFilterChanged(StationFilter stationFilter);
+
         void sortOrderChanged(boolean sortByDistance);
     }
 

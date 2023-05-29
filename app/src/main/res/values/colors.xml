@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#c71c4d</color>
+    <color name="colorOnPrimary">#ffffff</color>
     <color name="colorPrimaryDark">#C71C4D</color>
     <color name="colorAccent">#D0C332</color>
     <color name="colorActions">#ffffff</color>
@@ -18,6 +19,11 @@
 
     <color name="filterActive">#ffffff</color>
     <color name="filterInactive">#b0b0b0</color>
+
+    <color name="chipBackground">#fafafa</color>
+    <color name="chipForeground">#737373</color>
+    <color name="fullTransparent">#00FFFFFF</color>
+    <color name="colorSurface">#000000</color>
 
     <color name="emailUnverified">#ff0000</color>
     <color name="emailVerified">#00ff00</color>
