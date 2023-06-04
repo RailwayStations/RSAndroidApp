@@ -8,7 +8,7 @@
     tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.ProblemReportActivity">
 
     <TextView
-        android:id="@+id/et_station_title"
+        android:id="@+id/tv_station_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_below="@+id/et_station_title" />
+        android:layout_below="@+id/tv_station_title" />
 
     <EditText
         android:id="@+id/et_problem_comment"
@@ -37,8 +37,39 @@
         android:importantForAutofill="no"
         android:layout_below="@+id/problem_type" />
 
+    <TextView
+        android:id="@+id/tv_new_title"
+        android:visibility="gone"
+        android:text="@string/corrected_station_title"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_problem_comment" />
+
     <EditText
-        android:id="@+id/et_latitude"
+        android:id="@+id/et_new_title"
+        android:inputType="text"
+        android:hint="@string/corrected_station_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:importantForAutofill="no"
+        android:visibility="gone"
+        android:layout_below="@+id/tv_new_title" />
+
+    <TextView
+        android:id="@+id/tv_new_coords"
+        android:visibility="gone"
+        android:text="@string/corrected_station_coords"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_new_title" />
+
+    <EditText
+        android:id="@+id/et_new_latitude"
         android:inputType="numberDecimal"
         android:hint="@string/latitude"
         android:layout_width="match_parent"
@@ -46,10 +77,10 @@
         android:layout_marginTop="16dp"
         android:importantForAutofill="no"
         android:visibility="gone"
-        android:layout_below="@+id/et_problem_comment" />
+        android:layout_below="@+id/tv_new_coords" />
 
     <EditText
-        android:id="@+id/et_longitude"
+        android:id="@+id/et_new_longitude"
         android:inputType="numberDecimal"
         android:hint="@string/longitude"
         android:layout_width="match_parent"
@@ -57,13 +88,13 @@
         android:layout_marginTop="16dp"
         android:importantForAutofill="no"
         android:visibility="gone"
-        android:layout_below="@+id/et_latitude" />
+        android:layout_below="@+id/et_new_latitude" />
 
     <Button
         android:id="@+id/button_report_problem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/et_longitude"
+        android:layout_below="@+id/et_new_longitude"
         android:layout_marginTop="16dp"
         android:backgroundTint="@color/colorPrimary"
         android:contentDescription="@string/report_problem"

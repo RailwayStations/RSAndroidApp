@@ -77,14 +77,17 @@ public class ProblemReportActivity extends AppCompatActivity {
                 if (position > 0) {
                     var type = ProblemType.values()[position - 1];
                     setCoordsVisible(type == ProblemType.WRONG_LOCATION);
+                    setTitleVisible(type == ProblemType.WRONG_NAME);
                 } else {
                     setCoordsVisible(false);
+                    setTitleVisible(false);
                 }
             }
 
             @Override
             public void onNothingSelected(final AdapterView<?> parent) {
                 setCoordsVisible(false);
+                setTitleVisible(false);
             }
         });
 
@@ -107,8 +110,14 @@ public class ProblemReportActivity extends AppCompatActivity {
     }
 
     private void setCoordsVisible(boolean visible) {
-        binding.etLatitude.setVisibility(visible ? View.VISIBLE : View.GONE);
-        binding.etLongitude.setVisibility(visible ? View.VISIBLE : View.GONE);
+        binding.tvNewCoords.setVisibility(visible ? View.VISIBLE : View.GONE);
+        binding.etNewLatitude.setVisibility(visible ? View.VISIBLE : View.GONE);
+        binding.etNewLongitude.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    private void setTitleVisible(boolean visible) {
+        binding.tvNewTitle.setVisibility(visible ? View.VISIBLE : View.GONE);
+        binding.etNewTitle.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -122,8 +131,8 @@ public class ProblemReportActivity extends AppCompatActivity {
 
             if (upload != null && upload.isProblemReport()) {
                 binding.etProblemComment.setText(upload.getComment());
-                binding.etLatitude.setText(upload.getLat() != null ? upload.getLat().toString() : "");
-                binding.etLongitude.setText(upload.getLon() != null ? upload.getLon().toString() : "");
+                binding.etNewLatitude.setText(upload.getLat() != null ? upload.getLat().toString() : "");
+                binding.etNewLongitude.setText(upload.getLon() != null ? upload.getLon().toString() : "");
 
                 int selected = upload.getProblemType().ordinal() + 1;
                 binding.problemType.setSelection(selected);
@@ -136,9 +145,10 @@ public class ProblemReportActivity extends AppCompatActivity {
             }
 
             if (station != null) {
-                binding.etStationTitle.setText(station.getTitle());
-                binding.etLatitude.setText(String.valueOf(station.getLat()));
-                binding.etLongitude.setText(String.valueOf(station.getLon()));
+                binding.tvStationTitle.setText(station.getTitle());
+                binding.etNewTitle.setText(station.getTitle());
+                binding.etNewLatitude.setText(String.valueOf(station.getLat()));
+                binding.etNewLongitude.setText(String.valueOf(station.getLon()));
             }
         }
     }
@@ -158,14 +168,19 @@ public class ProblemReportActivity extends AppCompatActivity {
 
         Double lat = null;
         Double lon = null;
-        if (binding.etLatitude.getVisibility() == View.VISIBLE) {
-            lat = parseDouble(binding.etLatitude);
+        if (binding.etNewLatitude.getVisibility() == View.VISIBLE) {
+            lat = parseDouble(binding.etNewLatitude);
         }
-        if (binding.etLongitude.getVisibility() == View.VISIBLE) {
-            lon = parseDouble(binding.etLongitude);
+        if (binding.etNewLongitude.getVisibility() == View.VISIBLE) {
+            lon = parseDouble(binding.etNewLongitude);
         }
         if (type == ProblemType.WRONG_LOCATION && (lat == null || lon == null)) {
             Toast.makeText(getApplicationContext(), getString(R.string.problem_wrong_lat_lon), Toast.LENGTH_LONG).show();
+            return;
+        }
+        var title = binding.etNewTitle.getText().toString();
+        if (type == ProblemType.WRONG_NAME && StringUtils.isBlank(title)) {
+            Toast.makeText(getApplicationContext(), getString(R.string.problem_please_provide_corrected_title), Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -174,7 +189,7 @@ public class ProblemReportActivity extends AppCompatActivity {
                 station.getCountry(),
                 station.getId(),
                 null,
-                null,
+                title,
                 lat,
                 lon,
                 comment,

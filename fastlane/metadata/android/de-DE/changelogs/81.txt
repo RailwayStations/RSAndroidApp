@@ -1,0 +1,1 @@
+- Verbesserung beim Melden von falschen Bahnhofsnamen und Koordinaten
