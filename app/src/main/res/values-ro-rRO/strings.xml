@@ -323,4 +323,7 @@
     <string name="sort_order_by_distance">sort by distance</string>
     <string name="sort_order_by_alphabet">sort by alphabet</string>
     <string name="filter_clear">clear</string>
+    <string name="problem_please_provide_corrected_title">Please provide a corrected station title</string>
+    <string name="corrected_station_title">Corrected station title</string>
+    <string name="corrected_station_coords">Corrected station coords</string>
 </resources>

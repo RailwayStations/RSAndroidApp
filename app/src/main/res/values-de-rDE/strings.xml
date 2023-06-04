@@ -320,4 +320,7 @@
     <string name="sort_order_by_distance">nach Entfernung sortieren</string>
     <string name="sort_order_by_alphabet">alphabetisch sortieren</string>
     <string name="filter_clear">löschen</string>
+    <string name="problem_please_provide_corrected_title">Bitte gib einen korrigierten Bahnhofsnamen an</string>
+    <string name="corrected_station_title">Korrigierter Bahnhofsname</string>
+    <string name="corrected_station_coords">Korrigierte Bahnhofskoordinaten</string>
 </resources>
