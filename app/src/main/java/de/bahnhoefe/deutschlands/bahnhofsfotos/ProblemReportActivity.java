@@ -179,7 +179,7 @@ public class ProblemReportActivity extends AppCompatActivity {
             return;
         }
         var title = binding.etNewTitle.getText().toString();
-        if (type == ProblemType.WRONG_NAME && StringUtils.isBlank(title)) {
+        if (type == ProblemType.WRONG_NAME && (StringUtils.isBlank(title) || Objects.equals(station.getTitle(), title))) {
             Toast.makeText(getApplicationContext(), getString(R.string.problem_please_provide_corrected_title), Toast.LENGTH_LONG).show();
             return;
         }
