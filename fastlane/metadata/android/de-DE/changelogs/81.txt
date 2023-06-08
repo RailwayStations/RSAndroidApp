@@ -1,1 +1,2 @@
 - Verbesserung beim Melden von falschen Bahnhofsnamen und Koordinaten
+- Abhängigkeiten aktualisiert

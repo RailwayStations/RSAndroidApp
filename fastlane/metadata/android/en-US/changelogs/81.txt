@@ -1,1 +1,2 @@
 - Improve problem report for wrong name/location
+- Updated dependencies
