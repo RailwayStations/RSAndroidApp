@@ -18,7 +18,6 @@ def getVersionCode = { ->
 }
 
 android {
-    compileSdk 33
     namespace 'de.bahnhoefe.deutschlands.bahnhofsfotos'
 
     compileOptions {
@@ -34,10 +33,11 @@ android {
     defaultConfig {
         testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         applicationId "de.bahnhoefe.deutschlands.bahnhofsfotos"
+        compileSdk 34
         minSdk 26
-        targetSdk 33
-        versionCode 81
-        versionName "14.6.0"
+        targetSdk 34
+        versionCode 82
+        versionName "14.6.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -64,7 +64,6 @@ android {
             versionNameSuffix "-debug"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            zipAlignEnabled true
         }
         nightly {
             signingConfig signingConfigs.nightly
@@ -86,11 +85,11 @@ android {
         abortOnError false
     }
 
-    applicationVariants.all { variant ->
+    applicationVariants.configureEach { variant ->
         variant.resValue "string", "applicationId", variant.applicationId
 
         if (variant.buildType.name == 'nightly') {
-            variant.outputs.all {
+            variant.outputs.configureEach {
                 setVersionCodeOverride(getVersionCode())
                 setVersionNameOverride(versionName + "-" + versionCode)
                 outputFileName = "${applicationId}_${variant.versionCode}.apk"
@@ -132,14 +131,14 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
-    implementation 'androidx.browser:browser:1.5.0'
+    implementation 'androidx.browser:browser:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation 'com.mcxiaoke.volley:library:1.0.19'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.1'
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
