@@ -1,1 +1,2 @@
 - Update dependencies
+- Update translations
