@@ -1,0 +1,2 @@
+- Updated dependencies
+- Fix: corrected name of problem report not sent to backend

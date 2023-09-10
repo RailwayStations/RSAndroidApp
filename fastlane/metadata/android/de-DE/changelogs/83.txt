@@ -1,0 +1,2 @@
+- Abhängigkeiten aktualisiert
+- Fix: korrigierter Name wurde beim Problembericht nicht an das Backend geschickt
