@@ -243,13 +243,13 @@ class RSAPIClientTest {
     void postProblemReport() throws Exception {
         server.enqueue(new MockResponse().setBody(fromFile("reportProblem.json")));
 
-        var problemReport = new ProblemReport("de", "4711", "Comment", ProblemType.WRONG_PHOTO, 123456L, null, null);
+        var problemReport = new ProblemReport("de", "4711", "Comment", ProblemType.OTHER, 123456L, 50.1, 9.2, "New Title");
         var response = client.reportProblem(problemReport).execute();
 
         var recordedRequest = server.takeRequest();
         assertThat(recordedRequest.getPath()).isEqualTo("/reportProblem");
         assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo("application/json");
-        assertThat(recordedRequest.getBody().readString(Charset.defaultCharset())).isEqualTo("{\"countryCode\":\"de\",\"stationId\":\"4711\",\"comment\":\"Comment\",\"type\":\"WRONG_PHOTO\",\"photoId\":123456}");
+        assertThat(recordedRequest.getBody().readString(Charset.defaultCharset())).isEqualTo("{\"countryCode\":\"de\",\"stationId\":\"4711\",\"comment\":\"Comment\",\"type\":\"OTHER\",\"photoId\":123456,\"lat\":50.1,\"lon\":9.2,\"title\":\"New Title\"}");
         assertThat(response.body()).isNotNull();
         assertThat(response.body()).usingRecursiveComparison().isEqualTo(new InboxResponse(InboxResponse.InboxResponseState.REVIEW, "message", 123456L));
     }

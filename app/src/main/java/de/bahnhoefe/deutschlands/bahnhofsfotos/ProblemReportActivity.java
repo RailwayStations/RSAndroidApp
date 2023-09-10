@@ -206,7 +206,8 @@ public class ProblemReportActivity extends AppCompatActivity {
                 type,
                 photoId,
                 lat,
-                lon);
+                lon,
+                title);
 
         SimpleDialogs.confirmOkCancel(ProblemReportActivity.this, R.string.send_problem_report,
                 (dialog, which) -> rsapiClient.reportProblem(problemReport).enqueue(new Callback<>() {

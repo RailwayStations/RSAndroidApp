@@ -7,5 +7,6 @@ data class ProblemReport @JvmOverloads constructor(
     var type: ProblemType? = null,
     var photoId: Long? = null,
     var lat: Double? = null,
-    var lon: Double? = null
+    var lon: Double? = null,
+    var title: String? = null,
 )
