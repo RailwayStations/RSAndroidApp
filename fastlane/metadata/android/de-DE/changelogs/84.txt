@@ -1,0 +1,3 @@
+- Neu: monochromes Starticon
+- Übersetzungen aktualisiert
+- Abhängigkeiten aktualisiert

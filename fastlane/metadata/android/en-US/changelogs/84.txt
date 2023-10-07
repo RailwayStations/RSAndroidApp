@@ -1,0 +1,3 @@
+- new: monochrome launcher icon
+- updated translations
+- updated dependencies
