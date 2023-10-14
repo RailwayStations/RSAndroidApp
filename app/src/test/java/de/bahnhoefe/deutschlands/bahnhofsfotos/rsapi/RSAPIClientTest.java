@@ -57,8 +57,8 @@ class RSAPIClientTest {
         assertThat(server.takeRequest().getPath()).isEqualTo("/countries");
         assertThat(response.body()).isNotNull();
         assertThat(response.body()).containsExactly(
-                new Country("in", "India", null, "@Bahnhofsoma, #dbHackathon, #dbOpendata, #Bahnhofsfoto, @khgdrn", "https://enquiry.indianrail.gov.in/ntes/"),
-                new Country("ch", "Schweiz", "fotos@schweizer-bahnhoefe.ch", "@BahnhoefeCH, @Bahnhofsoma, #BahnhofsfotoCH",
+                new Country("in", "India", null, "https://enquiry.indianrail.gov.in/ntes/"),
+                new Country("ch", "Schweiz", "fotos@schweizer-bahnhoefe.ch",
                         "http://fahrplan.sbb.ch/bin/stboard.exe/dn?input={title}&REQTrain_name=&boardType=dep&time=now&maxJourneys=20&selectDate=today&productsFilter=1111111111&start=yes",
                         null,
                         List.of(
