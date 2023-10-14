@@ -24,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -116,6 +117,13 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
             });
             return;
         }
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                navigateUp();
+            }
+        });
 
         onNewIntent(getIntent());
     }
@@ -376,11 +384,6 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
         }
 
         return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        navigateUp();
     }
 
     public void navigateUp() {

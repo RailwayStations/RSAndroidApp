@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -113,6 +114,13 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         // switch off image and license view until we actually have a foto
         binding.details.licenseTag.setVisibility(View.INVISIBLE);
         binding.details.licenseTag.setMovementMethod(LinkMovementMethod.getInstance());
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                navigateUp();
+            }
+        });
 
         readPreferences();
         onNewIntent(getIntent());
@@ -393,11 +401,6 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
         } catch (ActivityNotFoundException e) {
             return false;
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        navigateUp();
     }
 
     public void navigateUp() {
