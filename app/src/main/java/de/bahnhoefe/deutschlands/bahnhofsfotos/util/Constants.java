@@ -35,7 +35,6 @@ public class Constants {
         public static final String COUNTRYNAME = "country";
         public static final String COUNTRYSHORTCODE = "countryflag";
         public static final String EMAIL = "mail";
-        public static final String TWITTERTAGS = "twitter_tags";
         public static final String ROWID_COUNTRIES = "rowidcountries";
         public static final String TIMETABLE_URL_TEMPLATE = "timetable_url_template";
         public static final String OVERRIDE_LICENSE = "override_license";

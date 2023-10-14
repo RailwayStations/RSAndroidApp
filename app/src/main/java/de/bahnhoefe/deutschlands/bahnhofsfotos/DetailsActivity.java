@@ -317,7 +317,7 @@ public class DetailsActivity extends AppCompatActivity implements ActivityCompat
                 if (shareIntent == null) {
                     return null;
                 }
-                shareIntent.putExtra(Intent.EXTRA_TEXT, country.getTwitterTags() + " " + binding.details.tvStationTitle.getText());
+                shareIntent.putExtra(Intent.EXTRA_TEXT, binding.details.tvStationTitle.getText());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, "send"));
                 return null;

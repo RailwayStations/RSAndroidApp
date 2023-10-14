@@ -45,7 +45,7 @@ public class DbAdapter {
     private static final String DATABASE_TABLE_PROVIDER_APPS = "providerApps";
     private static final String DATABASE_TABLE_UPLOADS = "uploads";
     private static final String DATABASE_NAME = "bahnhoefe.db";
-    private static final int DATABASE_VERSION = 21;
+    private static final int DATABASE_VERSION = 22;
 
     private static final String CREATE_STATEMENT_STATIONS = "CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
             + Constants.STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -71,7 +71,6 @@ public class DbAdapter {
             + Constants.COUNTRIES.COUNTRYSHORTCODE + " TEXT, "
             + Constants.COUNTRIES.COUNTRYNAME + " TEXT, "
             + Constants.COUNTRIES.EMAIL + " TEXT, "
-            + Constants.COUNTRIES.TWITTERTAGS + " TEXT, "
             + Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE + " TEXT, "
             + Constants.COUNTRIES.OVERRIDE_LICENSE + " TEXT)";
     private static final String CREATE_STATEMENT_PROVIDER_APPS = "CREATE TABLE " + DATABASE_TABLE_PROVIDER_APPS + " ("
@@ -189,7 +188,6 @@ public class DbAdapter {
         values.put(Constants.COUNTRIES.COUNTRYSHORTCODE, country.getCode());
         values.put(Constants.COUNTRIES.COUNTRYNAME, country.getName());
         values.put(Constants.COUNTRIES.EMAIL, country.getEmail());
-        values.put(Constants.COUNTRIES.TWITTERTAGS, country.getTwitterTags());
         values.put(Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE, country.getTimetableUrlTemplate());
         values.put(Constants.COUNTRIES.OVERRIDE_LICENSE, country.getOverrideLicense());
         return values;
@@ -552,6 +550,7 @@ public class DbAdapter {
                 if (oldVersion < 21) {
                     db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Constants.STATIONS.PHOTO_ID + " INTEGER");
                 }
+
             }
 
             db.setTransactionSuccessful();
@@ -585,7 +584,6 @@ public class DbAdapter {
                 cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYSHORTCODE)),
                 cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.COUNTRYNAME)),
                 cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.EMAIL)),
-                cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.TWITTERTAGS)),
                 cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.TIMETABLE_URL_TEMPLATE)),
                 cursor.getString(cursor.getColumnIndexOrThrow(Constants.COUNTRIES.OVERRIDE_LICENSE)));
     }

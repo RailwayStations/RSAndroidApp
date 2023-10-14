@@ -363,10 +363,9 @@ public class UploadActivity extends AppCompatActivity implements ActivityCompat.
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.share_photo) {
-            var twitterTags = station != null ? Country.getCountryByCode(countries, station.getCountry()).map(Country::getTwitterTags).orElse("") : "";
             var shareIntent = createPhotoSendIntent();
             if (shareIntent != null) {
-                shareIntent.putExtra(Intent.EXTRA_TEXT, binding.upload.etStationTitle.getText() + " " + twitterTags);
+                shareIntent.putExtra(Intent.EXTRA_TEXT, binding.upload.etStationTitle.getText());
                 shareIntent.setType("image/jpeg");
                 startActivity(createChooser(shareIntent, getString(R.string.share_photo)));
             }

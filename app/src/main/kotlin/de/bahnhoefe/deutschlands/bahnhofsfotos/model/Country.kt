@@ -1,13 +1,13 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
 import java.io.Serializable
-import java.util.*
+import java.util.Objects
+import java.util.Optional
 
 data class Country @JvmOverloads constructor(
     val code: String,
     val name: String,
     val email: String? = null,
-    val twitterTags: String? = null,
     val timetableUrlTemplate: String? = null,
     val overrideLicense: String? = null,
     val providerApps: List<ProviderApp> = ArrayList()
