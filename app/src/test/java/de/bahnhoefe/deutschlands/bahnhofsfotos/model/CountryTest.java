@@ -28,7 +28,7 @@ class CountryTest {
             "'blah', true"
     })
     void hasTimetableUrlTemplate(String timetableUrlTemplate, boolean expectedValue) {
-        var country = new Country("de", "Deutschland", null, null, timetableUrlTemplate);
+        var country = new Country("de", "Deutschland", null, timetableUrlTemplate);
 
         assertThat(country.hasTimetableUrlTemplate()).isEqualTo(expectedValue);
     }
