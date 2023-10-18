@@ -1,3 +1,4 @@
 - Neu: monochromes Starticon
 - Übersetzungen aktualisiert
 - Abhängigkeiten aktualisiert
+- Twitter Tags entfernt

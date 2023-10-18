@@ -1,3 +1,4 @@
 - new: monochrome launcher icon
 - updated translations
 - updated dependencies
+- remove twitter tags
