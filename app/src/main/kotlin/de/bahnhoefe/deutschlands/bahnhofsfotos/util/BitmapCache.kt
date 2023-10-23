@@ -10,27 +10,21 @@ import java.util.function.Consumer
  * A cache for station photos.
  */
 class BitmapCache private constructor() {
-    private val TAG = BitmapCache::class.java.simpleName
-    private val requests: HashMap<URL, MutableCollection<BitmapAvailableHandler>>
-    private val cache: HashMap<URL, Bitmap>
 
-    init {
-        cache = HashMap(10)
-        requests = HashMap(3)
-    }
+    private val requests: MutableMap<URL, MutableCollection<BitmapAvailableHandler>> =
+        mutableMapOf()
+    private val cache: MutableMap<URL, Bitmap> = mutableMapOf()
 
     /**
      * Get a picture for the given URL, either from cache or by downloading.
      * The fetching happens asynchronously. When finished, the provided callback interface is called.
      *
-     * @param callback    the BitmapAvailableHandler to call on completion.
      * @param resourceUrl the URL to fetch
+     * @param callback    the BitmapAvailableHandler to call on completion.
      */
-    fun getPhoto(callback: BitmapAvailableHandler, resourceUrl: String) {
-        var url: URL? = null
+    fun getPhoto(resourceUrl: String, callback: BitmapAvailableHandler) {
         try {
-            url = URL(resourceUrl)
-            getPhoto(callback, url)
+            getPhoto(URL(resourceUrl), callback)
         } catch (e: MalformedURLException) {
             Log.e(TAG, "Couldn't load photo from malformed URL $resourceUrl")
             callback.onBitmapAvailable(null)
@@ -41,31 +35,31 @@ class BitmapCache private constructor() {
      * Get a picture for the given URL, either from cache or by downloading.
      * The fetching happens asynchronously. When finished, the provided callback interface is called.
      *
-     * @param callback    the BitmapAvailableHandler to call on completion.
      * @param resourceUrl the URL to fetch
+     * @param callback    the BitmapAvailableHandler to call on completion.
      */
-    fun getPhoto(callback: BitmapAvailableHandler, resourceUrl: URL) {
+    private fun getPhoto(resourceUrl: URL, callback: BitmapAvailableHandler) {
         val bitmap = cache[resourceUrl]
         if (bitmap == null) {
-            val downloader = BitmapDownloader({ bitmap1: Bitmap? ->
-                if (bitmap1 != null) {
-                    cache[resourceUrl] = bitmap1
+            val downloader = BitmapDownloader(resourceUrl) { fetchedBitmap: Bitmap? ->
+                if (fetchedBitmap != null) {
+                    cache[resourceUrl] = fetchedBitmap
                 }
 
-                // inform all requestors about the available image
+                // inform all requesters about the available image
                 synchronized(requests) {
                     val handlers: Collection<BitmapAvailableHandler>? = requests.remove(resourceUrl)
                     handlers?.forEach(Consumer { handler: BitmapAvailableHandler ->
                         handler.onBitmapAvailable(
-                            bitmap1
+                            fetchedBitmap
                         )
                     })
-                        ?: Log.wtf(
+                        ?: Log.e(
                             TAG,
-                            "Request result without a saved requestor. This should never happen."
+                            "Request result without a saved requester. This should never happen."
                         )
                 }
-            }, resourceUrl)
+            }
             synchronized(requests) {
                 var handlers = requests[resourceUrl]
                 if (handlers == null) {
@@ -83,6 +77,9 @@ class BitmapCache private constructor() {
     }
 
     companion object {
+
+        private val TAG = BitmapCache::class.java.simpleName
+
         /**
          * The singleton.
          */

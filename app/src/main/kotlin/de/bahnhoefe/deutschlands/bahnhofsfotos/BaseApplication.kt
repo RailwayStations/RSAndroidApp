@@ -21,7 +21,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
 import org.apache.commons.lang3.StringUtils
 import org.mapsforge.core.model.LatLong
 import org.mapsforge.core.model.MapPosition
-import java.util.Optional
 
 class BaseApplication : Application() {
     lateinit var dbAdapter: DbAdapter
@@ -136,7 +135,7 @@ class BaseApplication : Application() {
         editor.apply()
     }
 
-    private fun putStringSet(key: Int, value: Set<String?>?) {
+    private fun putStringSet(key: Int, value: Set<String>?) {
         val editor = preferences.edit()
         editor.putStringSet(getString(key), value)
         editor.apply()
@@ -335,10 +334,10 @@ class BaseApplication : Application() {
         putString(key, uri?.toString())
     }
 
-    val mapDirectoryUri: Optional<Uri>
+    val mapDirectoryUri: Uri?
         get() = getUri(getString(R.string.MAP_DIRECTORY))
 
-    private fun getUri(key: String): Optional<Uri> {
+    private fun getUri(key: String): Uri? {
         return toUri(preferences.getString(key, null))
     }
 
@@ -346,14 +345,14 @@ class BaseApplication : Application() {
         putUri(R.string.MAP_DIRECTORY, mapDirectory)
     }
 
-    val mapThemeDirectoryUri: Optional<Uri>
+    val mapThemeDirectoryUri: Uri?
         get() = getUri(getString(R.string.MAP_THEME_DIRECTORY))
 
     fun setMapThemeDirectoryUri(mapThemeDirectory: Uri?) {
         putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory)
     }
 
-    val mapThemeUri: Optional<Uri>
+    val mapThemeUri: Uri?
         get() = getUri(getString(R.string.MAP_THEME))
 
     fun setMapThemeUri(mapTheme: Uri?) {
@@ -379,8 +378,8 @@ class BaseApplication : Application() {
 
         private fun getValidatedApiUrlString(apiUrl: String?): String {
             val uri = toUri(apiUrl)
-            if (uri.isPresent) {
-                val scheme = uri.get().scheme
+            uri?.let {
+                val scheme = it.scheme
                 if (scheme != null && scheme.matches("https?".toRegex())) {
                     return apiUrl + if (apiUrl!!.endsWith("/")) "" else "/"
                 }
@@ -388,13 +387,13 @@ class BaseApplication : Application() {
             return "https://api.railway-stations.org/"
         }
 
-        fun toUri(uriString: String?): Optional<Uri> {
+        fun toUri(uriString: String?): Uri? {
             try {
-                return Optional.ofNullable(Uri.parse(uriString))
+                return Uri.parse(uriString)
             } catch (ignored: Exception) {
                 Log.e(TAG, "can't read Uri string $uriString")
             }
-            return Optional.empty()
+            return null
         }
     }
 }

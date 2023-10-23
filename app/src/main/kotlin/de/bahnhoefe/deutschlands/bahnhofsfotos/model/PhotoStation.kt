@@ -8,5 +8,5 @@ data class PhotoStation @JvmOverloads constructor(
     var lon: Double = 0.0,
     var shortCode: String? = null,
     var inactive: Boolean = false,
-    var photos: List<Photo>? = null
+    var photos: MutableList<Photo> = mutableListOf()
 )

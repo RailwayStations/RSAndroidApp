@@ -7,7 +7,6 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.util.Locale
-import java.util.Objects
 
 object FileUtils {
     private val TAG = FileUtils::class.java.simpleName
@@ -17,8 +16,9 @@ object FileUtils {
      *
      * @return the File denoting the base directory or null, if cannot write to it
      */
-    fun getLocalFotoDir(context: Context): File? {
-        return mkdirs(Objects.requireNonNull(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)))
+    private fun getLocalFotoDir(context: Context): File? {
+        return context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            ?.let { mkdirs(it) }
     }
 
     private fun mkdirs(dir: File): File? {

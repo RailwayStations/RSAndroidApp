@@ -4,8 +4,8 @@ import java.io.Serializable
 
 data class Station @JvmOverloads constructor(
     var country: String? = null,
-    var id: String? = null,
-    var title: String? = null,
+    var id: String,
+    var title: String,
     var lat: Double = 0.0,
     var lon: Double = 0.0,
     var ds100: String? = null,

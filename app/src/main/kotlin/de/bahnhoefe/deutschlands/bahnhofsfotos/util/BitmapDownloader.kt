@@ -10,14 +10,13 @@ import java.net.URL
 /**
  * Helper class to download image in background
  */
-class BitmapDownloader
-/**
- * Construct a bitmap Downloader for the given URL
- *
- * @param handler the BitmapAvailableHandler instance that is called on completion
- * @param url     the URL to fetch the Bitmap from
- */(private val bitmapAvailableHandler: BitmapAvailableHandler, private val url: URL) : Thread() {
+class BitmapDownloader(
+    private val url: URL,
+    private val bitmapAvailableHandler: BitmapAvailableHandler,
+) : Thread() {
+
     private val TAG = BitmapDownloader::class.java.simpleName
+
     override fun run() {
         var bitmap: Bitmap? = null
         try {

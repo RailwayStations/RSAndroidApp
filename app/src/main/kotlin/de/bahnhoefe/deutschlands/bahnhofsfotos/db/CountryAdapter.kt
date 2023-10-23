@@ -18,7 +18,7 @@ class CountryAdapter(private val context: Context, c: Cursor?, flags: Int) : Cur
 ) {
     private val layoutInflater: LayoutInflater =
         context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    private val selectedCountries: MutableSet<String> =
+    val selectedCountries: MutableSet<String> =
         BaseApplication.instance.countryCodes.toMutableSet()
 
     companion object {

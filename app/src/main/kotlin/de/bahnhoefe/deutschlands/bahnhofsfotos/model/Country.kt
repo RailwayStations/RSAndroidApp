@@ -10,7 +10,7 @@ data class Country @JvmOverloads constructor(
     val email: String? = null,
     val timetableUrlTemplate: String? = null,
     val overrideLicense: String? = null,
-    val providerApps: List<ProviderApp> = ArrayList()
+    val providerApps: MutableList<ProviderApp> = mutableListOf()
 ) : Serializable, Comparable<Country> {
 
     fun hasTimetableUrlTemplate(): Boolean {

@@ -22,6 +22,7 @@ import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -69,39 +70,36 @@ import org.mapsforge.map.rendertheme.XmlRenderTheme
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.lang.ref.WeakReference
-import java.util.Optional
-import java.util.function.Function
 
 class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGeoItem>,
     StationFilterBar.OnChangeListener {
-    private val onlineTileSources: MutableMap<String?, OnlineTileSource> = HashMap()
-    protected var layer: Layer? = null
-    protected var clusterer: ClusterManager<BahnhofGeoItem>? = null
-    protected val tileCaches: MutableList<TileCache> = ArrayList()
+    private val onlineTileSources = mutableMapOf<String, OnlineTileSource>()
+    private var layer: Layer? = null
+    private var clusterer: ClusterManager<BahnhofGeoItem>? = null
+    private val tileCaches = mutableListOf<TileCache>()
     private var myPos: LatLong? = null
-    private var myLocSwitch: CheckBox? = null
-    private var dbAdapter: DbAdapter? = null
+    private lateinit var myLocSwitch: CheckBox
+    private lateinit var dbAdapter: DbAdapter
     private var nickname: String? = null
-    private var baseApplication: BaseApplication? = null
+    private lateinit var baseApplication: BaseApplication
     private var locationManager: LocationManager? = null
     private var askedForPermission = false
     private var missingMarker: Marker? = null
-    private var binding: ActivityMapsBinding? = null
+    private lateinit var binding: ActivityMapsBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidGraphicFactory.createInstance(this.application)
         binding = ActivityMapsBinding.inflate(
             layoutInflater
         )
-        setContentView(binding!!.root)
-        val window = window
+        setContentView(binding.root)
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = Color.parseColor("#c71c4d")
-        setSupportActionBar(binding!!.mapsToolbar)
+        setSupportActionBar(binding.mapsToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         baseApplication = application as BaseApplication
-        dbAdapter = baseApplication.getDbAdapter()
-        nickname = baseApplication.getNickname()
+        dbAdapter = baseApplication.dbAdapter
+        nickname = baseApplication.nickname
         val intent = intent
         var extraMarker: Marker? = null
         if (intent != null) {
@@ -122,7 +120,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         createTileCaches()
         checkPermissionsAndCreateLayersAndControls()
         if (extraMarker != null) {
-            binding!!.map.mapView.layerManager.layers.add(extraMarker)
+            binding.map.mapView.layerManager.layers.add(extraMarker)
         }
     }
 
@@ -131,39 +129,20 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         onlineTileSources[dbsBasic.name] = dbsBasic
     }
 
-    protected fun createTileCaches() {
+    private fun createTileCaches() {
         tileCaches.add(
             AndroidUtil.createTileCache(
-                this, persistableId,
-                binding!!.map.mapView.model.displayModel.tileSize, screenRatio,
-                binding!!.map.mapView.model.frameBufferModel.overdrawFactor, true
+                this, this.javaClass.simpleName,
+                binding.map.mapView.model.displayModel.tileSize, 1.0f,
+                binding.map.mapView.model.frameBufferModel.overdrawFactor, true
             )
         )
     }
 
-    protected val persistableId: String
-        /**
-         * The persistable ID is used to store settings information, like the center of the last view
-         * and the zoomlevel. By default the simple name of the class is used. The value is not user
-         * visibile.
-         *
-         * @return the id that is used to save this mapview.
-         */
-        protected get() = this.javaClass.simpleName
-    protected val screenRatio: Float
-        /**
-         * Returns the relative size of a map view in relation to the screen size of the device. This
-         * is used for cache size calculations.
-         * By default this returns 1.0, for a full size map view.
-         *
-         * @return the screen ratio of the mapview
-         */
-        protected get() = 1.0f
-
     /**
      * Hook to check for Android Runtime Permissions.
      */
-    protected fun checkPermissionsAndCreateLayersAndControls() {
+    private fun checkPermissionsAndCreateLayersAndControls() {
         createLayers()
         createControls()
     }
@@ -172,8 +151,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
      * Hook to create controls, such as scale bars.
      * You can add more controls.
      */
-    protected fun createControls() {
-        initializePosition(binding!!.map.mapView.model.mapViewPosition)
+    private fun createControls() {
+        initializePosition(binding.map.mapView.model.mapViewPosition)
     }
 
     /**
@@ -181,11 +160,11 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
      *
      * @param mvp the map view position to be set
      */
-    protected fun initializePosition(mvp: IMapViewPosition) {
+    private fun initializePosition(mvp: IMapViewPosition) {
         if (myPos != null) {
-            mvp.mapPosition = MapPosition(myPos, baseApplication.getZoomLevelDefault())
+            mvp.mapPosition = MapPosition(myPos, baseApplication.zoomLevelDefault)
         } else {
-            mvp.mapPosition = baseApplication.getLastMapPosition()
+            mvp.mapPosition = baseApplication.lastMapPosition
         }
         mvp.zoomLevelMax = zoomLevelMax
         mvp.zoomLevelMin = zoomLevelMin
@@ -194,82 +173,81 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     /**
      * Template method to create the map views.
      */
-    protected fun createMapViews() {
-        binding!!.map.mapView.isClickable = true
-        binding!!.map.mapView.setOnMapDragListener { myLocSwitch!!.isChecked = false }
-        binding!!.map.mapView.mapScaleBar.isVisible = true
-        binding!!.map.mapView.setBuiltInZoomControls(true)
-        binding!!.map.mapView.mapZoomControls.isAutoHide = true
-        binding!!.map.mapView.mapZoomControls.zoomLevelMin = zoomLevelMin
-        binding!!.map.mapView.mapZoomControls.zoomLevelMax = zoomLevelMax
-        binding!!.map.mapView.mapZoomControls.setZoomControlsOrientation(MapZoomControls.Orientation.VERTICAL_IN_OUT)
-        binding!!.map.mapView.mapZoomControls.setZoomInResource(R.drawable.zoom_control_in)
-        binding!!.map.mapView.mapZoomControls.setZoomOutResource(R.drawable.zoom_control_out)
-        binding!!.map.mapView.mapZoomControls.setMarginHorizontal(
+    private fun createMapViews() {
+        binding.map.mapView.isClickable = true
+        binding.map.mapView.setOnMapDragListener { myLocSwitch!!.isChecked = false }
+        binding.map.mapView.mapScaleBar.isVisible = true
+        binding.map.mapView.setBuiltInZoomControls(true)
+        binding.map.mapView.mapZoomControls.isAutoHide = true
+        binding.map.mapView.mapZoomControls.zoomLevelMin = zoomLevelMin
+        binding.map.mapView.mapZoomControls.zoomLevelMax = zoomLevelMax
+        binding.map.mapView.mapZoomControls.setZoomControlsOrientation(MapZoomControls.Orientation.VERTICAL_IN_OUT)
+        binding.map.mapView.mapZoomControls.setZoomInResource(R.drawable.zoom_control_in)
+        binding.map.mapView.mapZoomControls.setZoomOutResource(R.drawable.zoom_control_out)
+        binding.map.mapView.mapZoomControls.setMarginHorizontal(
             resources.getDimensionPixelOffset(
                 R.dimen.controls_margin
             )
         )
-        binding!!.map.mapView.mapZoomControls.setMarginVertical(resources.getDimensionPixelOffset(R.dimen.controls_margin))
+        binding.map.mapView.mapZoomControls.setMarginVertical(resources.getDimensionPixelOffset(R.dimen.controls_margin))
     }
 
-    protected val zoomLevelMax: Byte
-        protected get() = binding!!.map.mapView.model.mapViewPosition.zoomLevelMax
-    protected val zoomLevelMin: Byte
-        protected get() = binding!!.map.mapView.model.mapViewPosition.zoomLevelMin
+    private val zoomLevelMax: Byte
+        get() = binding.map.mapView.model.mapViewPosition.zoomLevelMax
+    private val zoomLevelMin: Byte
+        get() = binding.map.mapView.model.mapViewPosition.zoomLevelMin
 
     /**
      * Hook to purge tile caches.
      * By default we purge every tile cache that has been added to the tileCaches list.
      */
-    protected fun purgeTileCaches() {
+    private fun purgeTileCaches() {
         for (tileCache in tileCaches) {
             tileCache.purge()
         }
         tileCaches.clear()
     }
 
-    protected val renderTheme: XmlRenderTheme
-        protected get() {
-            val mapTheme = baseApplication.getMapThemeUri()
-            return mapTheme!!.map { m: Uri? ->
+    private val renderTheme: XmlRenderTheme
+        get() {
+            baseApplication.mapThemeUri?.let {
                 try {
-                    val renderThemeFile = DocumentFile.fromSingleUri(application, m!!)
-                    return@map StreamRenderTheme(
+                    val renderThemeFile = DocumentFile.fromSingleUri(application, it)
+                    return StreamRenderTheme(
                         "/assets/", contentResolver.openInputStream(
                             renderThemeFile!!.uri
                         )
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Error loading theme $mapTheme", e)
-                    return@map InternalRenderTheme.DEFAULT
+                    return InternalRenderTheme.DEFAULT
                 }
-            }.orElse(InternalRenderTheme.DEFAULT)
+            }
+            return InternalRenderTheme.DEFAULT
         }
-    protected val mapFile: Optional<MapDataStore?>
-        protected get() {
-            val mapUri: Optional<Uri> = BaseApplication.Companion.toUri(baseApplication.getMap())
-            return mapUri.map { map: Uri? ->
-                if (!DocumentFile.isDocumentUri(this, map)) {
-                    return@map null
+    private val mapFile: MapDataStore?
+        get() {
+            BaseApplication.toUri(baseApplication.map)?.let {
+                if (!DocumentFile.isDocumentUri(this, it)) {
+                    return null
                 }
                 try {
-                    val inputStream = contentResolver.openInputStream(map!!) as FileInputStream?
-                    return@map MapFile(inputStream, 0, null)
+                    val inputStream = contentResolver.openInputStream(it) as FileInputStream?
+                    return MapFile(inputStream, 0, null)
                 } catch (e: FileNotFoundException) {
                     Log.e(TAG, "Can't open mapFile", e)
                 }
                 null
             }
+            return null
         }
 
-    protected fun createLayers() {
-        val mapFile = mapFile
-        if (mapFile.isPresent) {
+    private fun createLayers() {
+        if (mapFile != null) {
             val rendererLayer: TileRendererLayer = object : TileRendererLayer(
                 tileCaches[0],
-                mapFile.get(),
-                binding!!.map.mapView.model.mapViewPosition,
+                mapFile,
+                binding.map.mapView.model.mapViewPosition,
                 false,
                 true,
                 false,
@@ -285,16 +263,16 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             }
             rendererLayer.setXmlRenderTheme(renderTheme)
             layer = rendererLayer
-            binding!!.map.mapView.layerManager.layers.add(layer)
+            binding.map.mapView.layerManager.layers.add(layer)
         } else {
-            var tileSource: AbstractTileSource? = onlineTileSources[baseApplication.getMap()]
+            var tileSource: AbstractTileSource? = onlineTileSources[baseApplication.map]
             if (tileSource == null) {
                 tileSource = OpenStreetMapMapnik.INSTANCE
             }
             tileSource!!.userAgent = USER_AGENT
             layer = object : TileDownloadLayer(
                 tileCaches[0],
-                binding!!.map.mapView.model.mapViewPosition, tileSource,
+                binding.map.mapView.model.mapViewPosition, tileSource,
                 AndroidGraphicFactory.INSTANCE
             ) {
                 override fun onLongPress(
@@ -305,13 +283,13 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                     return true
                 }
             }
-            binding!!.map.mapView.layerManager.layers.add(layer)
-            binding!!.map.mapView.setZoomLevelMin(tileSource.zoomLevelMin)
-            binding!!.map.mapView.setZoomLevelMax(tileSource.zoomLevelMax)
+            binding.map.mapView.layerManager.layers.add(layer)
+            binding.map.mapView.setZoomLevelMin(tileSource.zoomLevelMin)
+            binding.map.mapView.setZoomLevelMax(tileSource.zoomLevelMax)
         }
     }
 
-    private fun createBitmapMarker(latLong: LatLong?, markerRes: Int): Marker {
+    private fun createBitmapMarker(latLong: LatLong, markerRes: Int): Marker {
         val drawable = ContextCompat.getDrawable(this, markerRes)!!
         val bitmap = AndroidGraphicFactory.convertToBitmap(drawable)
         return Marker(latLong, bitmap, -(bitmap.width / 2), -bitmap.height)
@@ -328,7 +306,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                         SimpleDialogs.confirmOkCancel(
                             this@MapsActivity,
                             R.string.add_missing_station
-                        ) { dialogInterface: DialogInterface?, i: Int ->
+                        ) { _: DialogInterface?, _: Int ->
                             val intent = Intent(this@MapsActivity, UploadActivity::class.java)
                             intent.putExtra(
                                 UploadActivity.Companion.EXTRA_LATITUDE,
@@ -343,7 +321,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                         return false
                     }
                 }
-            binding!!.map.mapView.layerManager.layers.add(missingMarker)
+            binding.map.mapView.layerManager.layers.add(missingMarker)
         } else {
             missingMarker!!.latLong = tapLatLong
             missingMarker!!.requestRedraw()
@@ -363,11 +341,11 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         menuInflater.inflate(R.menu.maps, menu)
         val item = menu.findItem(R.id.menu_toggle_mypos)
         myLocSwitch = CheckBox(this)
-        myLocSwitch!!.setButtonDrawable(R.drawable.ic_gps_fix_selector)
-        myLocSwitch!!.isChecked = baseApplication!!.isLocationUpdates
+        myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector)
+        myLocSwitch.isChecked = baseApplication.isLocationUpdates
         item.actionView = myLocSwitch
-        myLocSwitch!!.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            baseApplication.setLocationUpdates(isChecked)
+        myLocSwitch.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+            baseApplication.isLocationUpdates = isChecked
             if (isChecked) {
                 askedForPermission = false
                 registerLocationManager()
@@ -375,7 +353,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 unregisterLocationManager()
             }
         }
-        val map = baseApplication.getMap()
+        val map = baseApplication.map
         val osmMapnick = menu.findItem(R.id.osm_mapnik)
         osmMapnick.isChecked = map == null
         osmMapnick.setOnMenuItemClickListener(MapMenuListener(this, baseApplication, null))
@@ -391,16 +369,16 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 )
             )
         }
-        val mapDirectory = baseApplication.getMapDirectoryUri()
-        if (mapDirectory!!.isPresent) {
-            val documentsTree = getDocumentFileFromTreeUri(mapDirectory!!.get())
+        baseApplication.mapDirectoryUri?.let {
+            val documentsTree = getDocumentFileFromTreeUri(it)
             if (documentsTree != null) {
                 for (file in documentsTree.listFiles()) {
                     if (file.isFile && file.name!!.endsWith(".map")) {
                         val mapItem =
                             mapSubmenu.add(R.id.maps_group, Menu.NONE, Menu.NONE, file.name)
-                        mapItem.isChecked = BaseApplication.Companion.toUri(map).map<Boolean>(
-                            Function<Uri, Boolean> { uri: Uri -> file.uri == uri }).orElse(false)
+                        mapItem.isChecked = BaseApplication.toUri(map)?.let {
+                            file.uri == it
+                        } ?: false
                         mapItem.setOnMenuItemClickListener(
                             MapMenuListener(
                                 this,
@@ -418,22 +396,22 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             openMapDirectoryChooser()
             false
         }
-        val mapTheme = baseApplication.getMapThemeUri()
-        val mapThemeDirectory = baseApplication.getMapThemeDirectoryUri()
+        val mapTheme = baseApplication.mapThemeUri
+        val mapThemeDirectory = baseApplication.mapThemeDirectoryUri
         val defaultTheme = menu.findItem(R.id.default_theme)
-        defaultTheme.isChecked = !mapTheme!!.isPresent
+        defaultTheme.isChecked = mapTheme == null
         defaultTheme.setOnMenuItemClickListener(MapThemeMenuListener(this, baseApplication, null))
         val themeSubmenu = menu.findItem(R.id.themes_submenu).subMenu!!
-        if (mapThemeDirectory!!.isPresent) {
-            val documentsTree = getDocumentFileFromTreeUri(mapThemeDirectory!!.get())
+        mapThemeDirectory?.let {
+            val documentsTree = getDocumentFileFromTreeUri(it)
             if (documentsTree != null) {
                 for (file in documentsTree.listFiles()) {
                     if (file.isFile && file.name!!.endsWith(".xml")) {
                         val themeName = file.name
                         val themeItem =
                             themeSubmenu.add(R.id.themes_group, Menu.NONE, Menu.NONE, themeName)
-                        themeItem.isChecked = mapTheme!!.map { uri: Uri? -> file.uri == uri }
-                            .orElse(false)
+                        themeItem.isChecked = mapTheme?.let { uri: Uri -> file.uri == uri }
+                            ?: false
                         themeItem.setOnMenuItemClickListener(
                             MapThemeMenuListener(
                                 this,
@@ -448,8 +426,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                             val themeItem =
                                 themeSubmenu.add(R.id.themes_group, Menu.NONE, Menu.NONE, themeName)
                             themeItem.isChecked =
-                                mapTheme!!.map { uri: Uri? -> childFile.uri == uri }
-                                    .orElse(false)
+                                mapTheme?.let { uri: Uri -> childFile.uri == uri }
+                                    ?: false
                             themeItem.setOnMenuItemClickListener(
                                 MapThemeMenuListener(
                                     this,
@@ -464,7 +442,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
         themeSubmenu.setGroupCheckable(R.id.themes_group, true, true)
         val themeFolder = themeSubmenu.add(R.string.theme_folder)
-        themeFolder.setOnMenuItemClickListener { item12: MenuItem? ->
+        themeFolder.setOnMenuItemClickListener {
             openThemeDirectoryChooser()
             false
         }
@@ -480,8 +458,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         return null
     }
 
-    protected var themeDirectoryLauncher = registerForActivityResult<Intent, ActivityResult>(
-        StartActivityForResult()
+    private var themeDirectoryLauncher = registerForActivityResult<Intent, ActivityResult>(
+        ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK && result.data != null) {
             val uri = result.data!!.data
@@ -490,13 +468,13 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-                baseApplication!!.setMapThemeDirectoryUri(uri)
+                baseApplication.setMapThemeDirectoryUri(uri)
                 recreate()
             }
         }
     }
-    protected var mapDirectoryLauncher = registerForActivityResult<Intent, ActivityResult>(
-        StartActivityForResult()
+    protected var mapDirectoryLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK && result.data != null) {
             val uri = result.data!!.data
@@ -505,13 +483,13 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-                baseApplication!!.setMapDirectoryUri(uri)
+                baseApplication.setMapDirectoryUri(uri)
                 recreate()
             }
         }
     }
 
-    fun openDirectory(launcher: ActivityResultLauncher<Intent>) {
+    private fun openDirectory(launcher: ActivityResultLauncher<Intent>) {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
         launcher.launch(intent)
@@ -529,7 +507,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
      * Android Activity life cycle method.
      */
     override fun onDestroy() {
-        binding!!.map.mapView.destroyAll()
+        binding.map.mapView.destroyAll()
         AndroidGraphicFactory.clearResourceMemoryCache()
         purgeTileCaches()
         super.onDestroy()
@@ -550,23 +528,23 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     private fun runUpdateCountriesAndStations() {
-        binding!!.map.progressBar.visibility = View.VISIBLE
-        baseApplication.getRsapiClient().runUpdateCountriesAndStations(
+        binding.map.progressBar.visibility = View.VISIBLE
+        baseApplication.rsapiClient.runUpdateCountriesAndStations(
             this,
             baseApplication
         ) { success: Boolean -> reloadMap() }
     }
 
-    private fun onStationsLoaded(stationList: List<Station?>?, uploadList: List<Upload?>?) {
+    private fun onStationsLoaded(stationList: List<Station>, uploadList: List<Upload>) {
         try {
             createClusterManager()
             addMarkers(stationList, uploadList)
-            binding!!.map.progressBar.visibility = View.GONE
+            binding.map.progressBar.visibility = View.GONE
             Toast.makeText(
                 this,
                 resources.getQuantityString(
                     R.plurals.stations_loaded,
-                    stationList!!.size,
+                    stationList.size,
                     stationList.size
                 ),
                 Toast.LENGTH_LONG
@@ -576,12 +554,12 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
     }
 
-    override fun onTap(marker: BahnhofGeoItem) {
+    override fun onTap(item: BahnhofGeoItem) {
         val intent = Intent(this@MapsActivity, DetailsActivity::class.java)
-        val id = marker.station!!.id
-        val country = marker.station!!.country
+        val id = item.station.id
+        val country = item.station.country
         try {
-            val station = dbAdapter!!.getStationByKey(country, id)
+            val station = dbAdapter.getStationByKey(country, id)
             intent.putExtra(DetailsActivity.Companion.EXTRA_STATION, station)
             startActivity(intent)
         } catch (e: RuntimeException) {
@@ -593,14 +571,12 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
     }
 
-    fun setMyLocSwitch(checked: Boolean) {
-        if (myLocSwitch != null) {
-            myLocSwitch!!.isChecked = checked
-        }
-        baseApplication.setLocationUpdates(checked)
+    private fun setMyLocSwitch(checked: Boolean) {
+        myLocSwitch.isChecked = checked
+        baseApplication.isLocationUpdates = checked
     }
 
-    override fun stationFilterChanged(stationFilter: StationFilter?) {
+    override fun stationFilterChanged(stationFilter: StationFilter) {
         reloadMap()
     }
 
@@ -616,40 +592,41 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
 
         override fun run() {
-            val stationList = activityRef.get()!!.readStations()
-            val uploadList = activityRef.get()!!.readPendingUploads()
-            val mapsActivity = activityRef.get()
-            mapsActivity?.runOnUiThread { mapsActivity.onStationsLoaded(stationList, uploadList) }
+            activityRef.get()?.let {
+                val stationList = it.readStations()
+                val uploadList = it.readPendingUploads()
+                it.runOnUiThread { it.onStationsLoaded(stationList, uploadList) }
+            }
         }
     }
 
-    private fun readStations(): List<Station?>? {
+    private fun readStations(): List<Station> {
         try {
-            return dbAdapter!!.getAllStations(
-                baseApplication.getStationFilter(),
-                baseApplication.getCountryCodes()
+            return dbAdapter.getAllStations(
+                baseApplication.stationFilter,
+                baseApplication.countryCodes
             )
         } catch (e: Exception) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden")
         }
-        return null
+        return listOf()
     }
 
-    private fun readPendingUploads(): List<Upload?>? {
+    private fun readPendingUploads(): List<Upload> {
         try {
-            return dbAdapter!!.getPendingUploads(false)
+            return dbAdapter.getPendingUploads(false)
         } catch (e: Exception) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden")
         }
-        return null
+        return listOf()
     }
 
-    private fun createMarkerBitmaps(): List<MarkerBitmap?> {
-        val markerBitmaps = ArrayList<MarkerBitmap?>()
-        markerBitmaps.add(createSmallSingleIconMarker())
-        markerBitmaps.add(createSmallClusterIconMarker())
-        markerBitmaps.add(createLargeClusterIconMarker())
-        return markerBitmaps
+    private fun createMarkerBitmaps(): List<MarkerBitmap> {
+        return listOf(
+            createSmallSingleIconMarker(),
+            createSmallClusterIconMarker(),
+            createLargeClusterIconMarker()
+        )
     }
 
     /**
@@ -664,7 +641,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         paint.color = Color.BLACK
         return MarkerBitmap(
             this.applicationContext, bitmapBalloonMN,
-            11f, paint
+            Point(0.0, 0.0), 11f, 100, paint
         )
     }
 
@@ -680,7 +657,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         paint.color = Color.BLACK
         return MarkerBitmap(
             this.applicationContext, bitmapBalloonSN,
-            9f, paint
+            Point(0.0, 0.0), 9f, 10, paint
         )
     }
 
@@ -706,7 +683,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             markerWithPhotoInactive,
             markerOwnPhotoInactive,
             markerPendingUpload,
+            Point(0.0, -(markerWithoutPhoto.height / 2.0)),
             10f,
+            1,
             paint
         )
     }
@@ -723,25 +702,25 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         return bitmap
     }
 
-    private fun addMarkers(stationMarker: List<Station?>?, uploadList: List<Upload?>?) {
+    private fun addMarkers(stationMarker: List<Station>, uploadList: List<Upload>) {
         var minLat = 0.0
         var maxLat = 0.0
         var minLon = 0.0
         var maxLon = 0.0
-        for (station in stationMarker!!) {
+        for (station in stationMarker) {
             val isPendingUpload = isPendingUpload(station, uploadList)
             val geoItem = BahnhofGeoItem(station, isPendingUpload)
-            val bahnhofPos = geoItem.getLatLong()
+            val stationPos = geoItem.latLong
             if (minLat == 0.0) {
-                minLat = bahnhofPos!!.latitude
-                maxLat = bahnhofPos.latitude
-                minLon = bahnhofPos.longitude
-                maxLon = bahnhofPos.longitude
+                minLat = stationPos.latitude
+                maxLat = stationPos.latitude
+                minLon = stationPos.longitude
+                maxLon = stationPos.longitude
             } else {
-                minLat = Math.min(minLat, bahnhofPos!!.latitude)
-                maxLat = Math.max(maxLat, bahnhofPos.latitude)
-                minLon = Math.min(minLon, bahnhofPos.longitude)
-                maxLon = Math.max(maxLon, bahnhofPos.longitude)
+                minLat = minLat.coerceAtMost(stationPos.latitude)
+                maxLat = maxLat.coerceAtLeast(stationPos.latitude)
+                minLon = minLon.coerceAtMost(stationPos.longitude)
+                maxLon = maxLon.coerceAtLeast(stationPos.longitude)
             }
             clusterer!!.addItem(geoItem)
         }
@@ -766,28 +745,28 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         if (layer is TileDownloadLayer) {
             (layer as TileDownloadLayer?)!!.onResume()
         }
-        if (baseApplication.getLastUpdate() == 0L) {
+        if (baseApplication.lastUpdate == 0L) {
             runUpdateCountriesAndStations()
         } else {
             reloadMap()
         }
-        if (baseApplication!!.isLocationUpdates) {
+        if (baseApplication.isLocationUpdates) {
             registerLocationManager()
         }
-        binding!!.map.stationFilterBar.init(baseApplication, this)
-        binding!!.map.stationFilterBar.setSortOrderEnabled(false)
+        binding.map.stationFilterBar.init(baseApplication, this)
+        binding.map.stationFilterBar.setSortOrderEnabled(false)
     }
 
     private fun createClusterManager() {
         // create clusterer instance
         clusterer = ClusterManager(
-            binding!!.map.mapView,
+            binding.map.mapView,
             createMarkerBitmaps(), 9.toByte(),
             this
         )
         // this uses the framebuffer position, the mapview position can be out of sync with
         // what the user sees on the screen if an animation is in progress
-        binding!!.map.mapView.model.frameBufferModel.addObserver(clusterer)
+        binding.map.mapView.model.frameBufferModel.addObserver(clusterer)
     }
 
     override fun onPause() {
@@ -795,8 +774,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             (layer as TileDownloadLayer?)!!.onPause()
         }
         unregisterLocationManager()
-        val mapPosition = binding!!.map.mapView.model.mapViewPosition.mapPosition
-        baseApplication.setLastMapPosition(mapPosition)
+        val mapPosition = binding.map.mapView.model.mapViewPosition.mapPosition
+        baseApplication.lastMapPosition = mapPosition
         destroyClusterManager()
         super.onPause()
     }
@@ -804,7 +783,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private fun destroyClusterManager() {
         if (clusterer != null) {
             clusterer!!.destroyGeoClusterer()
-            binding!!.map.mapView.model.frameBufferModel.removeObserver(clusterer)
+            binding.map.mapView.model.frameBufferModel.removeObserver(clusterer)
             clusterer = null
         }
     }
@@ -814,7 +793,10 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         updatePosition()
     }
 
-    override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+    @Deprecated("Deprecated in Java")
+    override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+    }
+
     override fun onProviderEnabled(provider: String) {}
     override fun onProviderDisabled(provider: String) {}
     override fun onRequestPermissionsResult(
@@ -827,7 +809,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             Log.i(TAG, "Received response for location permission request.")
 
             // Check if the required permission has been granted
-            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Location permission has been granted
                 registerLocationManager()
             } else {
@@ -841,7 +823,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
     }
 
-    fun registerLocationManager() {
+    private fun registerLocationManager() {
         try {
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -866,7 +848,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
             // getting GPS status
-            val isGPSEnabled = locationManager
+            val isGPSEnabled = locationManager!!
                 .isProviderEnabled(LocationManager.GPS_PROVIDER)
 
             // if GPS Enabled get lat/long using GPS Services
@@ -884,7 +866,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 }
             } else {
                 // getting network status
-                val isNetworkEnabled = locationManager
+                val isNetworkEnabled = locationManager!!
                     .isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
                 // First get location from Network Provider
@@ -934,45 +916,37 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     private fun updatePosition() {
-        if (myLocSwitch != null && myLocSwitch!!.isChecked) {
-            binding!!.map.mapView.setCenter(myPos)
-            binding!!.map.mapView.repaint()
+        if (myLocSwitch.isChecked) {
+            binding.map.mapView.setCenter(myPos)
+            binding.map.mapView.repaint()
         }
     }
 
-    protected inner class BahnhofGeoItem(
-        var station: Station?,
+    inner class BahnhofGeoItem(
+        var station: Station,
         override val isPendingUpload: Boolean
     ) : GeoItem {
-        override val latLong: LatLong
+        override val latLong: LatLong = LatLong(station.lat, station.lon)
 
-        init {
-            latLong = LatLong(station!!.lat, station!!.lon)
-        }
-
-        override fun getLatLong(): LatLong? {
-            return latLong
-        }
-
-        override val title: String?
-            get() = station!!.title
+        override val title: String
+            get() = station.title
 
         override fun hasPhoto(): Boolean {
-            return station!!.hasPhoto()
+            return station.hasPhoto()
         }
 
         override fun ownPhoto(): Boolean {
-            return hasPhoto() && station!!.photographer == nickname
+            return hasPhoto() && station.photographer == nickname
         }
 
         override fun stationActive(): Boolean {
-            return station!!.active
+            return station.active
         }
     }
 
     private class MapMenuListener(
         mapsActivity: MapsActivity,
-        private val baseApplication: BaseApplication?,
+        private val baseApplication: BaseApplication,
         private val map: String?
     ) : MenuItem.OnMenuItemClickListener {
         private val mapsActivityRef: WeakReference<MapsActivity>
@@ -984,9 +958,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         override fun onMenuItemClick(item: MenuItem): Boolean {
             item.isChecked = true
             if (item.itemId == R.id.osm_mapnik) { // default Mapnik online tiles
-                baseApplication.setMap(null)
+                baseApplication.map = null
             } else {
-                baseApplication.setMap(map)
+                baseApplication.map = map
             }
             val mapsActivity = mapsActivityRef.get()
             mapsActivity?.recreate()

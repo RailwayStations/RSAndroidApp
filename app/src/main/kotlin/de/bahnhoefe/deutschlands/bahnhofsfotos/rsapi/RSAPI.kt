@@ -26,37 +26,37 @@ import retrofit2.http.Query
 
 interface RSAPI {
     @get:GET("/countries")
-    val countries: Call<List<Country?>?>?
+    val countries: Call<List<Country>>
 
     @GET("/stats")
-    fun getStatistic(@Query("country") country: String?): Call<Statistic?>?
+    fun getStatistic(@Query("country") country: String?): Call<Statistic?>
 
     @GET("/photographers")
-    fun getHighScore(@Query("country") country: String?): Call<HighScore?>?
+    fun getHighScore(@Query("country") country: String?): Call<HighScore?>
 
     @get:GET("/photographers")
-    val highScore: Call<HighScore?>?
+    val highScore: Call<HighScore?>
 
     @GET("/myProfile")
-    fun getProfile(@Header("Authorization") authorization: String?): Call<Profile?>?
+    fun getProfile(@Header("Authorization") authorization: String?): Call<Profile?>
 
     @Headers("Content-Type: application/json")
     @POST("/myProfile")
     fun saveProfile(
-        @Header("Authorization") authorization: String?,
-        @Body profile: Profile?
-    ): Call<Void?>?
+        @Header("Authorization") authorization: String,
+        @Body profile: Profile
+    ): Call<Void>
 
     @Headers("Content-Type: application/json")
     @POST("/changePassword")
     fun changePassword(
-        @Header("Authorization") authorization: String?,
-        @Body changePassword: ChangePassword?
-    ): Call<Void?>?
+        @Header("Authorization") authorization: String,
+        @Body changePassword: ChangePassword
+    ): Call<Void>
 
     @POST("/photoUpload")
     fun photoUpload(
-        @Header("Authorization") authorization: String?,
+        @Header("Authorization") authorization: String,
         @Header("Station-Id") stationId: String?,
         @Header("Country") countryCode: String?,
         @Header("Station-Title") stationTitle: String?,
@@ -65,14 +65,14 @@ interface RSAPI {
         @Header("Comment") comment: String?,
         @Header("Active") active: Boolean?,
         @Body file: RequestBody?
-    ): Call<InboxResponse?>?
+    ): Call<InboxResponse?>
 
     @Headers("Content-Type: application/json")
     @POST("/userInbox")
     fun queryUploadState(
-        @Header("Authorization") authorization: String?,
-        @Body inboxStateQueries: List<InboxStateQuery?>?
-    ): Call<List<InboxStateQuery?>?>?
+        @Header("Authorization") authorization: String,
+        @Body inboxStateQueries: List<InboxStateQuery>
+    ): Call<List<InboxStateQuery>?>
 
     @Headers("Content-Type: application/json")
     @POST("/reportProblem")

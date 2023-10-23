@@ -2,7 +2,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.notification
 
 import android.app.PendingIntent
 import android.content.Context
-import android.util.Log
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
@@ -11,15 +10,12 @@ class NearbyBahnhofWithoutPhotoNotificationManager(
     context: Context,
     station: Station,
     distance: Double,
-    countries: Set<Country?>?
+    countries: Set<Country>
 ) : NearbyBahnhofNotificationManager(context, station, distance, countries) {
-    init {
-        Log.d(TAG, "Creating " + javaClass.simpleName)
-    }
 
-    private val fotoPendingIntent: PendingIntent?
+    private val fotoPendingIntent: PendingIntent
         // helpers that create notification elements that are common to "with foto" and "without foto"
-        private get() {
+        get() {
             // Build an intent for an action to take a picture
             // actually this launches UploadActivity with a specific Extra that causes it to launch
             // Photo immediately.
@@ -36,11 +32,11 @@ class NearbyBahnhofWithoutPhotoNotificationManager(
         notificationBuilder
             .addAction(
                 R.drawable.ic_photo_camera_white_48px,
-                context!!.getString(R.string.photo),
+                context.getString(R.string.photo),
                 fotoPendingIntent
             )
             .setVibrate(VIBRATION_PATTERN).color = LED_COLOR
-        onNotificationReady(notificationBuilder!!.build())
+        onNotificationReady(notificationBuilder.build())
     }
 
     companion object {

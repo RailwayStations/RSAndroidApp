@@ -84,7 +84,7 @@ object SimpleDialogs {
         inputType: Int,
         hint: Int,
         text: String?,
-        listener: (String?) -> Unit
+        listener: PromptListener
     ) {
         val binding = PromptBinding.inflate(LayoutInflater.from(context))
         text?.let {

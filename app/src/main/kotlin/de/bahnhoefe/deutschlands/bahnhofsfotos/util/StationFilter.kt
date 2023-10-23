@@ -17,7 +17,7 @@ class StationFilter(private var photo: Boolean?, var isActive: Boolean?, var nic
         get() {
             if (photo == null) {
                 return R.drawable.ic_photo_inactive_24px
-            } else if (photo) {
+            } else if (photo as Boolean) {
                 return R.drawable.ic_photo_active_24px
             }
             return R.drawable.ic_photo_missing_active_24px

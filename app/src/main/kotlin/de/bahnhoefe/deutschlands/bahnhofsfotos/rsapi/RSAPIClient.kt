@@ -25,13 +25,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PKCEUtil
 import okhttp3.Interceptor
-import okhttp3.Interceptor.Chain.proceed
-import okhttp3.Interceptor.Chain.request
-import okhttp3.OkHttpClient.Builder.addInterceptor
-import okhttp3.OkHttpClient.Builder.build
-import okhttp3.Request.Builder.build
-import okhttp3.Request.Builder.header
-import okhttp3.Request.newBuilder
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
@@ -50,7 +44,7 @@ class RSAPIClient(
     private var baseUrl: String,
     private val clientId: String,
     accessToken: String?,
-    val redirectUri: String
+    private val redirectUri: String
 ) {
     private var api: RSAPI
     private var token: Token? = null
@@ -72,19 +66,19 @@ class RSAPIClient(
     }
 
     @get:Throws(NoSuchAlgorithmException::class)
-    private val pkceCodeChallenge: String?
-        private get() {
+    private val pkceCodeChallenge: String
+        get() {
             pkce = PKCEUtil()
-            return pkce.getCodeChallenge()
+            return pkce!!.codeChallenge
         }
     private val pkceCodeVerifier: String?
-        private get() = if (pkce != null) pkce.getCodeVerifier() else null
+        get() = pkce?.codeVerifier
 
     private fun createRSAPI(): RSAPI {
         val gson = GsonBuilder()
         gson.registerTypeAdapter(HighScore::class.java, HighScoreDeserializer())
         gson.registerTypeAdapter(License::class.java, LicenseDeserializer())
-        val builder: Builder = Builder()
+        val builder: OkHttpClient.Builder = OkHttpClient.Builder()
             .addInterceptor(UserAgentInterceptor())
             .addInterceptor(AcceptLanguageInterceptor())
         if (BuildConfig.DEBUG) {
@@ -102,7 +96,7 @@ class RSAPIClient(
 
     private class AcceptLanguageInterceptor : Interceptor {
         @Throws(IOException::class)
-        override fun intercept(chain: Chain): Response {
+        override fun intercept(chain: Interceptor.Chain): Response {
             return chain.proceed(
                 chain.request().newBuilder()
                     .header("Accept-Language", Locale.getDefault().toLanguageTag())
@@ -115,35 +109,35 @@ class RSAPIClient(
      * This interceptor adds a custom User-Agent.
      */
     class UserAgentInterceptor : Interceptor {
-        private val USER_AGENT =
+        private val userAgent =
             BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT
 
         @Throws(IOException::class)
-        override fun intercept(chain: Chain): Response {
+        override fun intercept(chain: Interceptor.Chain): Response {
             return chain.proceed(
                 chain.request().newBuilder()
-                    .header("User-Agent", USER_AGENT)
+                    .header("User-Agent", userAgent)
                     .build()
             )
         }
     }
 
-    val countries: Call<List<Country?>?>?
+    val countries: Call<List<Country>>
         get() = api.countries
 
     fun runUpdateCountriesAndStations(
         context: Context,
-        baseApplication: BaseApplication?,
-        listener: (Boolean) -> Unit
+        baseApplication: BaseApplication,
+        listener: ResultListener,
     ) {
-        countries!!.enqueue(object : Callback<List<Country>?> {
+        countries.enqueue(object : Callback<List<Country>?> {
             override fun onResponse(
                 call: Call<List<Country>?>,
                 response: retrofit2.Response<List<Country>?>
             ) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
-                    baseApplication.getDbAdapter().insertCountries(body)
+                    baseApplication.dbAdapter.insertCountries(body)
                 }
             }
 
@@ -156,12 +150,12 @@ class RSAPIClient(
                 ).show()
             }
         })
-        val countryCodes = baseApplication.getCountryCodes()
+        val countryCodes = baseApplication.countryCodes
         val overallSuccess = AtomicBoolean(true)
         val runningRequestCount = AtomicInteger(
-            countryCodes!!.size
+            countryCodes.size
         )
-        countryCodes!!.forEach(Consumer<String?> { countryCode: String? ->
+        countryCodes.forEach(Consumer<String?> { countryCode: String? ->
             api.getPhotoStationsByCountry(countryCode).enqueue(object : Callback<PhotoStations?> {
                 override fun onResponse(
                     call: Call<PhotoStations?>,
@@ -169,8 +163,8 @@ class RSAPIClient(
                 ) {
                     val stationList = response.body()
                     if (response.isSuccessful && stationList != null) {
-                        baseApplication.getDbAdapter().insertStations(stationList, countryCode)
-                        baseApplication.setLastUpdate(System.currentTimeMillis())
+                        baseApplication.dbAdapter.insertStations(stationList, countryCode)
+                        baseApplication.lastUpdate = System.currentTimeMillis()
                     }
                     if (!response.isSuccessful) {
                         overallSuccess.set(false)
@@ -205,16 +199,16 @@ class RSAPIClient(
         return api.getPhotoStationById(country, id)
     }
 
-    fun getPhotoStationsByCountry(country: String?): Call<PhotoStations?>? {
+    fun getPhotoStationsByCountry(country: String?): Call<PhotoStations?> {
         return api.getPhotoStationsByCountry(country)
     }
 
     val publicInbox: Call<List<PublicInbox?>?>?
         get() = api.publicInbox
-    val highScore: Call<HighScore?>?
+    val highScore: Call<HighScore?>
         get() = api.highScore
 
-    fun getHighScore(country: String?): Call<HighScore?>? {
+    fun getHighScore(country: String?): Call<HighScore?> {
         return api.getHighScore(country)
     }
 
@@ -223,7 +217,7 @@ class RSAPIClient(
     }
 
     private val userAuthorization: String?
-        private get() = if (hasToken()) {
+        get() = if (hasToken()) {
             token!!.tokenType + " " + token!!.accessToken
         } else null
 
@@ -232,9 +226,9 @@ class RSAPIClient(
         stationTitle: String?, latitude: Double?,
         longitude: Double?, comment: String?,
         active: Boolean?, file: RequestBody?
-    ): Call<InboxResponse?>? {
+    ): Call<InboxResponse?> {
         return api.photoUpload(
-            userAuthorization,
+            userAuthorization!!,
             stationId,
             countryCode,
             stationTitle,
@@ -246,19 +240,19 @@ class RSAPIClient(
         )
     }
 
-    fun queryUploadState(stateQueries: List<InboxStateQuery?>?): Call<List<InboxStateQuery?>?>? {
-        return api.queryUploadState(userAuthorization, stateQueries)
+    fun queryUploadState(stateQueries: List<InboxStateQuery>): Call<List<InboxStateQuery>?> {
+        return api.queryUploadState(userAuthorization!!, stateQueries)
     }
 
-    val profile: Call<Profile?>?
+    val profile: Call<Profile?>
         get() = api.getProfile(userAuthorization)
 
-    fun saveProfile(profile: Profile?): Call<Void?>? {
-        return api.saveProfile(userAuthorization, profile)
+    fun saveProfile(profile: Profile): Call<Void> {
+        return api.saveProfile(userAuthorization!!, profile)
     }
 
-    fun changePassword(newPassword: String?): Call<Void?>? {
-        return api.changePassword(userAuthorization, ChangePassword(newPassword!!))
+    fun changePassword(newPassword: String): Call<Void> {
+        return api.changePassword(userAuthorization!!, ChangePassword(newPassword))
     }
 
     fun deleteAccount(): Call<Void?>? {
@@ -269,7 +263,7 @@ class RSAPIClient(
         return api.resendEmailVerification(userAuthorization)
     }
 
-    fun getStatistic(country: String?): Call<Statistic?>? {
+    fun getStatistic(country: String?): Call<Statistic?> {
         return api.getStatistic(country)
     }
 

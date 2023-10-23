@@ -45,8 +45,8 @@ class OutboxAdapter(private val activity: Activity, uploadCursor: Cursor?) : Cur
             id.toString() + (if (remoteId > 0) "/$remoteId" else "") + ": " + context.getString(
                 uploadState.textId
             )
-        binding.txtState.text = textState
-        binding.txtState.setTextColor(context.resources.getColor(uploadState.colorId, null))
+        binding.txtStationKey.text = textState
+        binding.txtStationKey.setTextColor(context.resources.getColor(uploadState.colorId, null))
         binding.uploadPhoto.setImageBitmap(null)
         binding.uploadPhoto.visibility = View.GONE
         if (problemType != null) {

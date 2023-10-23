@@ -23,7 +23,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher.addCallback
 import androidx.activity.result.ActivityResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -62,31 +61,31 @@ import java.util.Objects
 import java.util.function.Consumer
 
 class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
-    private var baseApplication: BaseApplication? = null
-    private var rsapiClient: RSAPIClient? = null
-    private var binding: ActivityDetailsBinding? = null
+    private lateinit var baseApplication: BaseApplication
+    private lateinit var rsapiClient: RSAPIClient
+    private lateinit var binding: ActivityDetailsBinding
     private var station: Station? = null
     private var countries: Set<Country?>? = null
     private var nickname: String? = null
     private var photoPagerAdapter: PhotoPagerAdapter? = null
-    private val photoBitmaps: MutableMap<String?, Bitmap?> = HashMap()
+    private val photoBitmaps: MutableMap<String, Bitmap> = mutableMapOf()
     private var selectedPhoto: PageablePhoto? = null
-    private val carouselPageIndicators: MutableList<ImageView>? = ArrayList()
+    private val carouselPageIndicators: MutableList<ImageView> = mutableListOf()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailsBinding.inflate(
             layoutInflater
         )
-        setContentView(binding!!.root)
+        setContentView(binding.root)
         baseApplication = application as BaseApplication
-        rsapiClient = baseApplication.getRsapiClient()
-        countries = baseApplication.getDbAdapter()
-            .fetchCountriesWithProviderApps(baseApplication.getCountryCodes())
+        rsapiClient = baseApplication.rsapiClient
+        countries = baseApplication.dbAdapter
+            .fetchCountriesWithProviderApps(baseApplication.countryCodes)
         Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
         photoPagerAdapter = PhotoPagerAdapter(this)
-        binding!!.details.viewPager.adapter = photoPagerAdapter
-        binding!!.details.viewPager.setCurrentItem(0, false)
-        binding!!.details.viewPager.registerOnPageChangeCallback(object :
+        binding.details.viewPager.adapter = photoPagerAdapter
+        binding.details.viewPager.setCurrentItem(0, false)
+        binding.details.viewPager.registerOnPageChangeCallback(object :
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 val pageablePhoto = photoPagerAdapter!!.getPageablePhotoAtPosition(position)
@@ -95,9 +94,9 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         })
 
         // switch off image and license view until we actually have a foto
-        binding!!.details.licenseTag.visibility = View.INVISIBLE
-        binding!!.details.licenseTag.movementMethod = LinkMovementMethod.getInstance()
-        getOnBackPressedDispatcher().addCallback(this, object : OnBackPressedCallback(true) {
+        binding.details.licenseTag.visibility = View.INVISIBLE
+        binding.details.licenseTag.movementMethod = LinkMovementMethod.getInstance()
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 navigateUp()
             }
@@ -108,48 +107,46 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent != null) {
-            station = intent.getSerializableExtra(EXTRA_STATION) as Station?
-            if (station == null) {
-                Log.w(TAG, "EXTRA_STATION in intent data missing")
-                Toast.makeText(this, R.string.station_not_found, Toast.LENGTH_LONG).show()
-                finish()
-                return
-            }
-            binding!!.details.marker.setImageDrawable(ContextCompat.getDrawable(this, markerRes))
-            binding!!.details.tvStationTitle.text = station!!.title
-            binding!!.details.tvStationTitle.isSingleLine = false
-            if (station!!.hasPhoto()) {
-                if (ConnectionUtil.checkInternetConnection(this)) {
-                    photoBitmaps[station!!.photoUrl] = null
-                    BitmapCache.Companion.getInstance()
-                        .getPhoto(BitmapAvailableHandler { bitmap: Bitmap? ->
-                            if (bitmap != null) {
-                                val pageablePhoto = PageablePhoto(station!!, bitmap)
-                                runOnUiThread {
-                                    addIndicator()
-                                    val position =
-                                        photoPagerAdapter!!.addPageablePhoto(pageablePhoto)
-                                    if (position == 0) {
-                                        onPageablePhotoSelected(pageablePhoto, position)
-                                    }
+        station = intent.getSerializableExtra(EXTRA_STATION) as Station?
+        if (station == null) {
+            Log.w(TAG, "EXTRA_STATION in intent data missing")
+            Toast.makeText(this, R.string.station_not_found, Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        binding.details.marker.setImageDrawable(ContextCompat.getDrawable(this, markerRes))
+        binding.details.tvStationTitle.text = station!!.title
+        binding.details.tvStationTitle.isSingleLine = false
+        if (station!!.hasPhoto()) {
+            if (ConnectionUtil.checkInternetConnection(this)) {
+                photoBitmaps[station!!.photoUrl] = null
+                BitmapCache.instance
+                    ?.getPhoto(station!!.photoUrl) { bitmap: Bitmap? ->
+                        if (bitmap != null) {
+                            val pageablePhoto = PageablePhoto(station!!, bitmap)
+                            runOnUiThread {
+                                addIndicator()
+                                val position =
+                                    photoPagerAdapter!!.addPageablePhoto(pageablePhoto)
+                                if (position == 0) {
+                                    onPageablePhotoSelected(pageablePhoto, position)
                                 }
                             }
-                        }, station!!.photoUrl)
-                }
+                        }
+                    }
             }
-            loadAdditionalPhotos(station!!)
-            baseApplication.getDbAdapter()
-                .getPendingUploadsForStation(station)
-                .forEach(Consumer { upload: Upload? -> addUploadPhoto(upload) })
         }
+        loadAdditionalPhotos(station!!)
+        baseApplication.dbAdapter
+            .getPendingUploadsForStation(station)
+            .forEach(Consumer { upload: Upload? -> addUploadPhoto(upload) })
     }
 
     private fun addUploadPhoto(upload: Upload?) {
         if (!upload!!.isPendingPhotoUpload) {
             return
         }
-        val profile = baseApplication.getProfile()
+        val profile = baseApplication.profile
         val file = FileUtils.getStoredMediaFile(this, upload.id)
         if (file != null && file.canRead()) {
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
@@ -159,7 +156,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
                     file.toURI().toString(),
                     getString(R.string.new_local_photo),
                     "",
-                    if (profile!!.license != null) profile!!.license!!.longName else "",
+                    if (profile!!.license != null) profile.license!!.longName else "",
                     "",
                     bitmap
                 )
