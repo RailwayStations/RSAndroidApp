@@ -1,77 +1,85 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.db
 
-import android.app.Activity;
-import android.content.Context;
-import android.database.Cursor;
-import android.graphics.BitmapFactory;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CursorAdapter;
+import android.app.Activity
+import android.content.Context
+import android.database.Cursor
+import android.graphics.BitmapFactory
+import android.view.View
+import android.view.ViewGroup
+import android.widget.CursorAdapter
+import androidx.appcompat.content.res.AppCompatResources
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemUploadBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.UPLOADS
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
 
-import androidx.appcompat.content.res.AppCompatResources;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemUploadBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils;
-
-public class OutboxAdapter extends CursorAdapter {
-
-    private final Activity activity;
-
-    public OutboxAdapter(Activity activity, Cursor uploadCursor) {
-        super(activity, uploadCursor, 0);
-        this.activity = activity;
+class OutboxAdapter(private val activity: Activity, uploadCursor: Cursor?) : CursorAdapter(
+    activity, uploadCursor, 0
+) {
+    override fun newView(context: Context, cursor: Cursor, parent: ViewGroup): View {
+        val binding = ItemUploadBinding.inflate(
+            activity.layoutInflater, parent, false
+        )
+        val view = binding.root
+        view.tag = binding
+        return view
     }
 
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        var binding = ItemUploadBinding.inflate(activity.getLayoutInflater(), parent, false);
-        var view = binding.getRoot();
-        view.setTag(binding);
-        return view;
-    }
-
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        var binding = (ItemUploadBinding) view.getTag();
-        var id = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.CURSOR_ADAPTER_ID));
-        var remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REMOTE_ID));
-        var stationId = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.STATION_ID));
-        var uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.TITLE));
-        var stationTitle = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.JOIN_STATION_TITLE));
-        var problemType = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.PROBLEM_TYPE));
-        var uploadStateStr = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.UPLOAD_STATE));
-        var comment = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.COMMENT));
-        var rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(Constants.UPLOADS.REJECTED_REASON));
-
-        var uploadState = UploadState.valueOf(uploadStateStr);
-        var textState = id + (remoteId > 0 ? "/" + remoteId : "") + ": " + context.getString(uploadState.getTextId());
-        binding.txtState.setText(textState);
-        binding.txtState.setTextColor(context.getResources().getColor(uploadState.getColorId(), null));
-        binding.uploadPhoto.setImageBitmap(null);
-        binding.uploadPhoto.setVisibility(View.GONE);
-
+    override fun bindView(view: View, context: Context, cursor: Cursor) {
+        val binding = view.tag as ItemUploadBinding
+        val id = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.CURSOR_ADAPTER_ID))
+        val remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(UPLOADS.REMOTE_ID))
+        val stationId = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.STATION_ID))
+        val uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.TITLE))
+        val stationTitle =
+            cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.JOIN_STATION_TITLE))
+        val problemType = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.PROBLEM_TYPE))
+        val uploadStateStr = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.UPLOAD_STATE))
+        val comment = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.COMMENT))
+        val rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.REJECTED_REASON))
+        val uploadState = UploadState.valueOf(uploadStateStr)
+        val textState =
+            id.toString() + (if (remoteId > 0) "/$remoteId" else "") + ": " + context.getString(
+                uploadState.textId
+            )
+        binding.txtState.text = textState
+        binding.txtState.setTextColor(context.resources.getColor(uploadState.colorId, null))
+        binding.uploadPhoto.setImageBitmap(null)
+        binding.uploadPhoto.visibility = View.GONE
         if (problemType != null) {
-            binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_bullhorn_red_48px));
-            binding.txtComment.setText(String.format("%s: %s", context.getText(ProblemType.valueOf(problemType).getMessageId()), comment));
+            binding.uploadType.setImageDrawable(
+                AppCompatResources.getDrawable(
+                    context,
+                    R.drawable.ic_bullhorn_red_48px
+                )
+            )
+            binding.txtComment.text = String.format(
+                "%s: %s",
+                context.getText(ProblemType.valueOf(problemType).messageId),
+                comment
+            )
         } else {
-            binding.uploadType.setImageDrawable(AppCompatResources.getDrawable(context, stationId == null ? R.drawable.ic_station_red_24px : R.drawable.ic_photo_red_48px));
-            binding.txtComment.setText(comment);
-            var file = FileUtils.getStoredMediaFile(context, id);
+            binding.uploadType.setImageDrawable(
+                AppCompatResources.getDrawable(
+                    context,
+                    if (stationId == null) R.drawable.ic_station_red_24px else R.drawable.ic_photo_red_48px
+                )
+            )
+            binding.txtComment.text = comment
+            val file = FileUtils.getStoredMediaFile(context, id)
             if (file != null) {
-                var bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-                binding.uploadPhoto.setImageBitmap(bitmap);
-                binding.uploadPhoto.setVisibility(View.VISIBLE);
+                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                binding.uploadPhoto.setImageBitmap(bitmap)
+                binding.uploadPhoto.visibility = View.VISIBLE
             }
         }
-        binding.txtComment.setVisibility(comment == null ? View.GONE : View.VISIBLE);
-
-        binding.txtStationName.setText(uploadTitle != null ? uploadTitle : stationTitle);
-        binding.txtRejectReason.setText(rejectReason);
-        binding.txtRejectReason.setVisibility(rejectReason == null ? View.GONE : View.VISIBLE);
+        binding.txtComment.visibility =
+            if (comment == null) View.GONE else View.VISIBLE
+        binding.txtStationName.text = uploadTitle ?: stationTitle
+        binding.txtRejectReason.text = rejectReason
+        binding.txtRejectReason.visibility = if (rejectReason == null) View.GONE else View.VISIBLE
     }
-
 }

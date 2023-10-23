@@ -1,444 +1,400 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos;
+package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import android.annotation.SuppressLint;
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.location.Location;
-import android.net.Uri;
-import android.os.Build;
-import android.util.Log;
+import android.annotation.SuppressLint
+import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
+import android.location.Location
+import android.net.Uri
+import android.os.Build
+import android.util.Log
+import androidx.multidex.MultiDex
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ExceptionHandler
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
+import org.apache.commons.lang3.StringUtils
+import org.mapsforge.core.model.LatLong
+import org.mapsforge.core.model.MapPosition
+import java.util.Optional
 
-import androidx.annotation.NonNull;
-import androidx.multidex.MultiDex;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
+class BaseApplication : Application() {
+    lateinit var dbAdapter: DbAdapter
+    lateinit var rsapiClient: RSAPIClient
+    private lateinit var preferences: SharedPreferences
+    private lateinit var encryptedPreferences: SharedPreferences
 
-import org.apache.commons.lang3.StringUtils;
-import org.mapsforge.core.model.LatLong;
-import org.mapsforge.core.model.MapPosition;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ExceptionHandler;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
-
-public class BaseApplication extends Application {
-
-    private static final String TAG = BaseApplication.class.getSimpleName();
-    private static final Boolean DEFAULT_FIRSTAPPSTART = false;
-    private static final String DEFAULT = "";
-    private static BaseApplication instance;
-
-    public static final String DEFAULT_COUNTRY = "de";
-    public static final String PREF_FILE = "APP_PREF_FILE";
-
-    private DbAdapter dbAdapter;
-    private RSAPIClient rsapiClient;
-    private SharedPreferences preferences;
-    private SharedPreferences encryptedPreferences;
-
-    public BaseApplication() {
-        setInstance(this);
+    init {
+        instance = this
     }
 
-    public DbAdapter getDbAdapter() {
-        return dbAdapter;
-    }
-
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        MultiDex.install(this);
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        MultiDex.install(this)
 
         // handle crashes only outside the crash reporter activity/process
-        if (!isCrashReportingProcess()) {
+        if (!isCrashReportingProcess) {
             Thread.setDefaultUncaughtExceptionHandler(
-                    new ExceptionHandler(this, Thread.getDefaultUncaughtExceptionHandler()));
+                Thread.getDefaultUncaughtExceptionHandler()?.let { ExceptionHandler(this, it) }
+            )
         }
     }
 
-    private boolean isCrashReportingProcess() {
-        var processName = "";
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            // Using the same technique as Application.getProcessName() for older devices
-            // Using reflection since ActivityThread is an internal API
-            try {
-                @SuppressLint("PrivateApi")
-                var activityThread = Class.forName("android.app.ActivityThread");
-                @SuppressLint("DiscouragedPrivateApi")
-                var getProcessName = activityThread.getDeclaredMethod("currentProcessName");
-                processName = (String) getProcessName.invoke(null);
-            } catch (Exception ignored) {
+    private val isCrashReportingProcess: Boolean
+        get() {
+            var processName: String? = ""
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                // Using the same technique as Application.getProcessName() for older devices
+                // Using reflection since ActivityThread is an internal API
+                try {
+                    @SuppressLint("PrivateApi") val activityThread =
+                        Class.forName("android.app.ActivityThread")
+                    @SuppressLint("DiscouragedPrivateApi") val getProcessName =
+                        activityThread.getDeclaredMethod("currentProcessName")
+                    processName = getProcessName.invoke(null) as String
+                } catch (ignored: Exception) {
+                }
+            } else {
+                processName = getProcessName()
             }
-        } else {
-            processName = Application.getProcessName();
+            return processName != null && processName.endsWith(":crash")
         }
-        return processName != null && processName.endsWith(":crash");
-    }
 
-    private static void setInstance(@NonNull BaseApplication application) {
-        instance = application;
-    }
-
-    public static BaseApplication getInstance() {
-        return instance;
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        dbAdapter = new DbAdapter(this);
-        dbAdapter.open();
-
-        preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE);
+    override fun onCreate() {
+        super.onCreate()
+        dbAdapter = DbAdapter(this)
+        dbAdapter.open()
+        preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE)
 
         // Creates the instance for the encrypted preferences.
-        encryptedPreferences = null;
-        try {
-            var masterKey = new MasterKey.Builder(this)
-                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                    .build();
+        encryptedPreferences = try {
+            val masterKey = MasterKey.Builder(this)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                this,
+                "secret_shared_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            Log.w(
+                TAG,
+                "Unable to create EncryptedSharedPreferences, fallback to unencrypted preferences",
+                e
+            )
+            preferences
+        }
 
-            encryptedPreferences = EncryptedSharedPreferences.create(
-                    this,
-                    "secret_shared_prefs",
-                    masterKey,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
-
-            // migrate access token from unencrypted to encrypted preferences
-            if (!encryptedPreferences.contains(getString(R.string.ACCESS_TOKEN))
-                    && preferences.contains(getString(R.string.ACCESS_TOKEN))) {
-                setAccessToken(preferences.getString(getString(R.string.ACCESS_TOKEN), null));
-                preferences.edit().remove(getString(R.string.ACCESS_TOKEN)).apply();
-            }
-        } catch (GeneralSecurityException | IOException e) {
-            Log.w("Unable to create EncryptedSharedPreferences, fallback to unencrypted preferences", e);
-
+        // migrate access token from unencrypted to encrypted preferences
+        if (encryptedPreferences != preferences
+            && !encryptedPreferences.contains(getString(R.string.ACCESS_TOKEN))
+            && preferences.contains(getString(R.string.ACCESS_TOKEN))
+        ) {
+            accessToken = preferences.getString(getString(R.string.ACCESS_TOKEN), null)
+            preferences.edit().remove(getString(R.string.ACCESS_TOKEN)).apply()
         }
 
         // migrate photo owner preference to boolean
-        var photoOwner = preferences.getAll().get(getString(R.string.PHOTO_OWNER));
-        if ("YES".equals(photoOwner)) {
-            setPhotoOwner(true);
+        val photoOwner = preferences.all[getString(R.string.PHOTO_OWNER)]
+        if ("YES" == photoOwner) {
+            this.photoOwner = true
+        }
+        rsapiClient = RSAPIClient(
+            apiUrl!!, getString(R.string.rsapiClientId), accessToken, getString(
+                R.string.rsapiRedirectScheme
+            ) + "://" + getString(R.string.rsapiRedirectHost)
+        )
+    }
+
+    var apiUrl: String?
+        get() {
+            val apiUri = preferences.getString(getString(R.string.API_URL), null)
+            return getValidatedApiUrlString(apiUri)
+        }
+        set(apiUrl) {
+            val validatedUrl = getValidatedApiUrlString(apiUrl)
+            putString(R.string.API_URL, validatedUrl)
+            rsapiClient.setBaseUrl(validatedUrl)
         }
 
-        rsapiClient = new RSAPIClient(getApiUrl(), getString(R.string.rsapiClientId), getAccessToken(), getString(R.string.rsapiRedirectScheme) + "://" + getString(R.string.rsapiRedirectHost));
+    private fun putBoolean(key: Int, value: Boolean) {
+        val editor = preferences.edit()
+        editor.putBoolean(getString(key), value)
+        editor.apply()
     }
 
-    public String getApiUrl() {
-        var apiUri = preferences.getString(getString(R.string.API_URL), null);
-        return getValidatedApiUrlString(apiUri);
+    private fun putString(key: Int, value: String?) {
+        val editor = preferences.edit()
+        editor.putString(getString(key), StringUtils.trimToNull(value))
+        editor.apply()
     }
 
-    private static String getValidatedApiUrlString(final String apiUrl) {
-        var uri = toUri(apiUrl);
-        if (uri.isPresent()) {
-            var scheme = uri.get().getScheme();
-            if (scheme != null && scheme.matches("https?")) {
-                return apiUrl + (apiUrl.endsWith("/") ? "" : "/");
+    private fun putStringSet(key: Int, value: Set<String?>?) {
+        val editor = preferences.edit()
+        editor.putStringSet(getString(key), value)
+        editor.apply()
+    }
+
+    private fun putLong(key: Int, value: Long) {
+        val editor = preferences.edit()
+        editor.putLong(getString(key), value)
+        editor.apply()
+    }
+
+    private fun putDouble(key: Int, value: Double) {
+        val editor = preferences.edit()
+        editor.putLong(getString(key), java.lang.Double.doubleToRawLongBits(value))
+        editor.apply()
+    }
+
+    private fun getDouble(key: Int): Double {
+        return if (!preferences.contains(getString(key))) {
+            0.0
+        } else java.lang.Double.longBitsToDouble(preferences.getLong(getString(key), 0))
+    }
+
+    var countryCodes: Set<String>
+        get() {
+            val oldCountryCode =
+                preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY)
+            var stringSet = preferences.getStringSet(
+                getString(R.string.COUNTRIES),
+                HashSet(setOf(oldCountryCode))
+            )
+            if (stringSet!!.isEmpty()) {
+                stringSet = HashSet(setOf(DEFAULT_COUNTRY))
             }
+            return stringSet
+        }
+        set(countryCodes) {
+            putStringSet(R.string.COUNTRIES, countryCodes)
+        }
+    var firstAppStart: Boolean
+        get() = preferences.getBoolean(getString(R.string.FIRSTAPPSTART), DEFAULT_FIRSTAPPSTART)
+        set(firstAppStart) {
+            putBoolean(R.string.FIRSTAPPSTART, firstAppStart)
+        }
+    var license: License?
+        get() = License.byName(
+            preferences.getString(
+                getString(R.string.LICENCE),
+                License.UNKNOWN.toString()
+            )!!
+        )
+        set(license) {
+            putString(R.string.LICENCE, license?.toString() ?: License.UNKNOWN.toString())
+        }
+    var updatePolicy: UpdatePolicy
+        get() = UpdatePolicy.byName(
+            preferences.getString(
+                getString(R.string.UPDATE_POLICY),
+                License.UNKNOWN.toString()
+            )!!
+        )
+        set(updatePolicy) {
+            putString(R.string.UPDATE_POLICY, updatePolicy.toString())
+        }
+    private var photoOwner: Boolean
+        get() = preferences.getBoolean(getString(R.string.PHOTO_OWNER), false)
+        set(photoOwner) {
+            putBoolean(R.string.PHOTO_OWNER, photoOwner)
+        }
+    private var photographerLink: String?
+        get() = preferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT)
+        set(photographerLink) {
+            putString(R.string.LINK_TO_PHOTOGRAPHER, photographerLink)
+        }
+    var nickname: String?
+        get() = preferences.getString(getString(R.string.NICKNAME), DEFAULT)
+        set(nickname) {
+            putString(R.string.NICKNAME, nickname)
+        }
+    var email: String?
+        get() = preferences.getString(getString(R.string.EMAIL), DEFAULT)
+        set(email) {
+            putString(R.string.EMAIL, email)
+        }
+    private var isEmailVerified: Boolean
+        get() = preferences.getBoolean(getString(R.string.PHOTO_OWNER), false)
+        set(emailVerified) {
+            putBoolean(R.string.PHOTO_OWNER, emailVerified)
+        }
+    var accessToken: String?
+        get() = encryptedPreferences.getString(getString(R.string.ACCESS_TOKEN), null)
+        set(apiToken) {
+            val editor = encryptedPreferences.edit()
+            editor.putString(getString(R.string.ACCESS_TOKEN), StringUtils.trimToNull(apiToken))
+            editor.apply()
+        }
+    var stationFilter: StationFilter
+        get() {
+            val photoFilter = getOptionalBoolean(R.string.STATION_FILTER_PHOTO)
+            val activeFilter = getOptionalBoolean(R.string.STATION_FILTER_ACTIVE)
+            val nicknameFilter =
+                preferences.getString(getString(R.string.STATION_FILTER_NICKNAME), null)
+            return StationFilter(photoFilter, activeFilter, nicknameFilter)
+        }
+        set(stationFilter) {
+            putString(
+                R.string.STATION_FILTER_PHOTO,
+                if (stationFilter.hasPhoto() == null) null else stationFilter.hasPhoto()
+                    .toString()
+            )
+            putString(
+                R.string.STATION_FILTER_ACTIVE,
+                if (stationFilter.isActive == null) null else stationFilter.isActive.toString()
+            )
+            putString(R.string.STATION_FILTER_NICKNAME, stationFilter.nickname)
         }
 
-        return "https://api.railway-stations.org/";
+    private fun getOptionalBoolean(key: Int): Boolean? {
+        return if (preferences.contains(getString(key))) {
+            java.lang.Boolean.valueOf(preferences.getString(getString(key), "false"))
+        } else null
     }
 
-    public void setApiUrl(String apiUrl) {
-        var validatedUrl = getValidatedApiUrlString(apiUrl);
-        putString(R.string.API_URL, validatedUrl);
-        rsapiClient.setBaseUrl(validatedUrl);
-    }
-
-    private void putBoolean(int key, boolean value) {
-        var editor = preferences.edit();
-        editor.putBoolean(getString(key), value);
-        editor.apply();
-    }
-
-    private void putString(int key, String value) {
-        var editor = preferences.edit();
-        editor.putString(getString(key), StringUtils.trimToNull(value));
-        editor.apply();
-    }
-
-    private void putStringSet(int key, Set<String> value) {
-        var editor = preferences.edit();
-        editor.putStringSet(getString(key), value);
-        editor.apply();
-    }
-
-    private void putLong(int key, long value) {
-        var editor = preferences.edit();
-        editor.putLong(getString(key), value);
-        editor.apply();
-    }
-
-    private void putDouble(int key, double value) {
-        var editor = preferences.edit();
-        editor.putLong(getString(key), Double.doubleToRawLongBits(value));
-        editor.apply();
-    }
-
-    private double getDouble(int key) {
-        if (!preferences.contains(getString(key))) {
-            return 0.0;
+    var lastUpdate: Long
+        get() = preferences.getLong(getString(R.string.LAST_UPDATE), 0L)
+        set(lastUpdate) {
+            putLong(R.string.LAST_UPDATE, lastUpdate)
+        }
+    var isLocationUpdates: Boolean
+        get() = preferences.getBoolean(getString(R.string.LOCATION_UPDATES), true)
+        set(locationUpdates) {
+            putBoolean(R.string.LOCATION_UPDATES, locationUpdates)
+        }
+    var lastMapPosition: MapPosition
+        get() {
+            val latLong = LatLong(
+                getDouble(R.string.LAST_POSITION_LAT),
+                getDouble(R.string.LAST_POSITION_LON)
+            )
+            return MapPosition(
+                latLong,
+                preferences.getLong(
+                    getString(R.string.LAST_POSITION_ZOOM),
+                    zoomLevelDefault.toLong()
+                ).toByte()
+            )
+        }
+        set(lastMapPosition) {
+            putDouble(R.string.LAST_POSITION_LAT, lastMapPosition.latLong.latitude)
+            putDouble(R.string.LAST_POSITION_LON, lastMapPosition.latLong.longitude)
+            putLong(R.string.LAST_POSITION_ZOOM, lastMapPosition.zoomLevel.toLong())
+        }
+    val lastLocation: Location
+        get() {
+            val location = Location("")
+            location.latitude = getDouble(R.string.LAST_POSITION_LAT)
+            location.longitude = getDouble(R.string.LAST_POSITION_LON)
+            return location
+        }
+    val zoomLevelDefault: Byte
+        /**
+         * @return the default starting zoom level if nothing is encoded in the map file.
+         */
+        get() = 12.toByte()
+    var anonymous: Boolean
+        get() = preferences.getBoolean(getString(R.string.ANONYMOUS), false)
+        set(anonymous) {
+            putBoolean(R.string.ANONYMOUS, anonymous)
+        }
+    var profile: Profile?
+        get() = Profile(
+            nickname,
+            license,
+            photoOwner,
+            anonymous,
+            photographerLink,
+            email,
+            isEmailVerified
+        )
+        set(profile) {
+            license = profile!!.license
+            photoOwner = profile.photoOwner
+            anonymous = profile.anonymous
+            photographerLink = profile.link
+            nickname = profile.nickname
+            email = profile.email
+            isEmailVerified = profile.emailVerified
+        }
+    var map: String?
+        get() = preferences.getString(getString(R.string.MAP_FILE), null)
+        set(map) {
+            putString(R.string.MAP_FILE, map)
         }
 
-        return Double.longBitsToDouble(preferences.getLong(getString(key), 0));
+    private fun putUri(key: Int, uri: Uri?) {
+        putString(key, uri?.toString())
     }
 
-    public void setCountryCodes(Set<String> countryCodes) {
-        putStringSet(R.string.COUNTRIES, countryCodes);
+    val mapDirectoryUri: Optional<Uri>
+        get() = getUri(getString(R.string.MAP_DIRECTORY))
+
+    private fun getUri(key: String): Optional<Uri> {
+        return toUri(preferences.getString(key, null))
     }
 
-    public Set<String> getCountryCodes() {
-        var oldCountryCode = preferences.getString(getString(R.string.COUNTRY), DEFAULT_COUNTRY);
-        var stringSet = preferences.getStringSet(getString(R.string.COUNTRIES), new HashSet<>(Collections.singleton(oldCountryCode)));
-        if (stringSet.isEmpty()) {
-            stringSet = new HashSet<>(Collections.singleton(DEFAULT_COUNTRY));
+    fun setMapDirectoryUri(mapDirectory: Uri?) {
+        putUri(R.string.MAP_DIRECTORY, mapDirectory)
+    }
+
+    val mapThemeDirectoryUri: Optional<Uri>
+        get() = getUri(getString(R.string.MAP_THEME_DIRECTORY))
+
+    fun setMapThemeDirectoryUri(mapThemeDirectory: Uri?) {
+        putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory)
+    }
+
+    val mapThemeUri: Optional<Uri>
+        get() = getUri(getString(R.string.MAP_THEME))
+
+    fun setMapThemeUri(mapTheme: Uri?) {
+        putUri(R.string.MAP_THEME, mapTheme)
+    }
+
+    var sortByDistance: Boolean
+        get() = preferences.getBoolean(getString(R.string.SORT_BY_DISTANCE), false)
+        set(sortByDistance) {
+            putBoolean(R.string.SORT_BY_DISTANCE, sortByDistance)
         }
-        return stringSet;
-    }
+    val isLoggedIn: Boolean
+        get() = rsapiClient.hasToken()
 
-    public void setFirstAppStart(boolean firstAppStart) {
-        putBoolean(R.string.FIRSTAPPSTART, firstAppStart);
-    }
+    companion object {
+        private val TAG = BaseApplication::class.java.simpleName
+        private const val DEFAULT_FIRSTAPPSTART = false
+        private const val DEFAULT = ""
+        lateinit var instance: BaseApplication
+            private set
+        const val DEFAULT_COUNTRY = "de"
+        const val PREF_FILE = "APP_PREF_FILE"
 
-    public boolean getFirstAppStart() {
-        return preferences.getBoolean(getString(R.string.FIRSTAPPSTART), DEFAULT_FIRSTAPPSTART);
-    }
-
-    public License getLicense() {
-        return License.byName(preferences.getString(getString(R.string.LICENCE), License.UNKNOWN.toString()));
-    }
-
-    public void setLicense(License license) {
-        putString(R.string.LICENCE, license != null ? license.toString() : License.UNKNOWN.toString());
-    }
-
-    public UpdatePolicy getUpdatePolicy() {
-        return UpdatePolicy.byName(preferences.getString(getString(R.string.UPDATE_POLICY), License.UNKNOWN.toString()));
-    }
-
-    public void setUpdatePolicy(UpdatePolicy updatePolicy) {
-        putString(R.string.UPDATE_POLICY, updatePolicy.toString());
-    }
-
-    public boolean getPhotoOwner() {
-        return preferences.getBoolean(getString(R.string.PHOTO_OWNER), false);
-    }
-
-    public void setPhotoOwner(boolean photoOwner) {
-        putBoolean(R.string.PHOTO_OWNER, photoOwner);
-    }
-
-    public String getPhotographerLink() {
-        return preferences.getString(getString(R.string.LINK_TO_PHOTOGRAPHER), DEFAULT);
-    }
-
-    public void setPhotographerLink(String photographerLink) {
-        putString(R.string.LINK_TO_PHOTOGRAPHER, photographerLink);
-    }
-
-    public String getNickname() {
-        return preferences.getString(getString(R.string.NICKNAME), DEFAULT);
-    }
-
-    public void setNickname(String nickname) {
-        putString(R.string.NICKNAME, nickname);
-    }
-
-    public String getEmail() {
-        return preferences.getString(getString(R.string.EMAIL), DEFAULT);
-    }
-
-    public void setEmail(String email) {
-        putString(R.string.EMAIL, email);
-    }
-
-    public boolean isEmailVerified() {
-        return preferences.getBoolean(getString(R.string.PHOTO_OWNER), false);
-    }
-
-    public void setEmailVerified(boolean emailVerified) {
-        putBoolean(R.string.PHOTO_OWNER, emailVerified);
-    }
-
-    public String getAccessToken() {
-        return encryptedPreferences.getString(getString(R.string.ACCESS_TOKEN), null);
-    }
-
-    public void setAccessToken(String apiToken) {
-        var editor = encryptedPreferences.edit();
-        editor.putString(getString(R.string.ACCESS_TOKEN), StringUtils.trimToNull(apiToken));
-        editor.apply();
-    }
-
-    public StationFilter getStationFilter() {
-        var photoFilter = getOptionalBoolean(R.string.STATION_FILTER_PHOTO);
-        var activeFilter = getOptionalBoolean(R.string.STATION_FILTER_ACTIVE);
-        var nicknameFilter = preferences.getString(getString(R.string.STATION_FILTER_NICKNAME), null);
-        return new StationFilter(photoFilter, activeFilter, nicknameFilter);
-    }
-
-    private Boolean getOptionalBoolean(int key) {
-        if (preferences.contains(getString(key))) {
-            return Boolean.valueOf(preferences.getString(getString(key), "false"));
+        private fun getValidatedApiUrlString(apiUrl: String?): String {
+            val uri = toUri(apiUrl)
+            if (uri.isPresent) {
+                val scheme = uri.get().scheme
+                if (scheme != null && scheme.matches("https?".toRegex())) {
+                    return apiUrl + if (apiUrl!!.endsWith("/")) "" else "/"
+                }
+            }
+            return "https://api.railway-stations.org/"
         }
-        return null;
-    }
 
-    public void setStationFilter(StationFilter stationFilter) {
-        putString(R.string.STATION_FILTER_PHOTO, stationFilter.hasPhoto() == null ? null : stationFilter.hasPhoto().toString());
-        putString(R.string.STATION_FILTER_ACTIVE, stationFilter.isActive() == null ? null : stationFilter.isActive().toString());
-        putString(R.string.STATION_FILTER_NICKNAME, stationFilter.getNickname());
-    }
-
-    public long getLastUpdate() {
-        return preferences.getLong(getString(R.string.LAST_UPDATE), 0L);
-    }
-
-    public void setLastUpdate(long lastUpdate) {
-        putLong(R.string.LAST_UPDATE, lastUpdate);
-    }
-
-    public void setLocationUpdates(boolean locationUpdates) {
-        putBoolean(R.string.LOCATION_UPDATES, locationUpdates);
-    }
-
-    public boolean isLocationUpdates() {
-        return preferences.getBoolean(getString(R.string.LOCATION_UPDATES), true);
-    }
-
-    public void setLastMapPosition(MapPosition lastMapPosition) {
-        putDouble(R.string.LAST_POSITION_LAT, lastMapPosition.latLong.latitude);
-        putDouble(R.string.LAST_POSITION_LON, lastMapPosition.latLong.longitude);
-        putLong(R.string.LAST_POSITION_ZOOM, lastMapPosition.zoomLevel);
-    }
-
-    public MapPosition getLastMapPosition() {
-        var latLong = new LatLong(getDouble(R.string.LAST_POSITION_LAT), getDouble(R.string.LAST_POSITION_LON));
-        return new MapPosition(latLong, (byte) preferences.getLong(getString(R.string.LAST_POSITION_ZOOM), getZoomLevelDefault()));
-    }
-
-    public Location getLastLocation() {
-        var location = new Location("");
-        location.setLatitude(getDouble(R.string.LAST_POSITION_LAT));
-        location.setLongitude(getDouble(R.string.LAST_POSITION_LON));
-        return location;
-    }
-
-    /**
-     * @return the default starting zoom level if nothing is encoded in the map file.
-     */
-    public byte getZoomLevelDefault() {
-        return (byte) 12;
-    }
-
-    public boolean getAnonymous() {
-        return preferences.getBoolean(getString(R.string.ANONYMOUS), false);
-    }
-
-    public void setAnonymous(boolean anonymous) {
-        putBoolean(R.string.ANONYMOUS, anonymous);
-    }
-
-    public void setProfile(Profile profile) {
-        setLicense(profile.getLicense());
-        setPhotoOwner(profile.getPhotoOwner());
-        setAnonymous(profile.getAnonymous());
-        setPhotographerLink(profile.getLink());
-        setNickname(profile.getNickname());
-        setEmail(profile.getEmail());
-        setEmailVerified(profile.getEmailVerified());
-    }
-
-    public Profile getProfile() {
-        return new Profile(
-                getNickname(),
-                getLicense(),
-                getPhotoOwner(),
-                getAnonymous(),
-                getPhotographerLink(),
-                getEmail(),
-                isEmailVerified());
-    }
-
-    public RSAPIClient getRsapiClient() {
-        return rsapiClient;
-    }
-
-    public String getMap() {
-        return preferences.getString(getString(R.string.MAP_FILE), null);
-    }
-
-    public void setMap(String map) {
-        putString(R.string.MAP_FILE, map);
-    }
-
-    private void putUri(int key, Uri uri) {
-        putString(key, uri != null ? uri.toString() : null);
-    }
-
-    public Optional<Uri> getMapDirectoryUri() {
-        return getUri(getString(R.string.MAP_DIRECTORY));
-    }
-
-    private Optional<Uri> getUri(String key) {
-        return toUri(preferences.getString(key, null));
-    }
-
-    public static Optional<Uri> toUri(String uriString) {
-        try {
-            return Optional.ofNullable(Uri.parse(uriString));
-        } catch (Exception ignored) {
-            Log.e(TAG, "can't read Uri string " + uriString);
+        fun toUri(uriString: String?): Optional<Uri> {
+            try {
+                return Optional.ofNullable(Uri.parse(uriString))
+            } catch (ignored: Exception) {
+                Log.e(TAG, "can't read Uri string $uriString")
+            }
+            return Optional.empty()
         }
-        return Optional.empty();
     }
-
-    public void setMapDirectoryUri(Uri mapDirectory) {
-        putUri(R.string.MAP_DIRECTORY, mapDirectory);
-    }
-
-    public Optional<Uri> getMapThemeDirectoryUri() {
-        return getUri(getString(R.string.MAP_THEME_DIRECTORY));
-    }
-
-    public void setMapThemeDirectoryUri(Uri mapThemeDirectory) {
-        putUri(R.string.MAP_THEME_DIRECTORY, mapThemeDirectory);
-    }
-
-    public Optional<Uri> getMapThemeUri() {
-        return getUri(getString(R.string.MAP_THEME));
-    }
-
-    public void setMapThemeUri(Uri mapTheme) {
-        putUri(R.string.MAP_THEME, mapTheme);
-    }
-
-    public boolean getSortByDistance() {
-        return preferences.getBoolean(getString(R.string.SORT_BY_DISTANCE), false);
-    }
-
-    public void setSortByDistance(boolean sortByDistance) {
-        putBoolean(R.string.SORT_BY_DISTANCE, sortByDistance);
-    }
-
-    public boolean isLoggedIn() {
-        return rsapiClient.hasToken();
-    }
-
 }

@@ -1,37 +1,35 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.util
 
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Base64;
+import java.nio.charset.Charset
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.security.SecureRandom
+import java.util.Base64
 
-public class PKCEUtil {
+class PKCEUtil {
+    var codeVerifier = ""
+        private set
 
-    private String verifier = "";
+    @get:Throws(NoSuchAlgorithmException::class)
+    val codeChallenge: String
+        get() {
+            codeVerifier = generateCodeVerifier()
+            return generateCodeChallenge(codeVerifier)
+        }
 
-    public String getCodeVerifier() {
-        return verifier;
+    private fun generateCodeVerifier(): String {
+        val secureRandom = SecureRandom()
+        val codeVerifier = ByteArray(32)
+        secureRandom.nextBytes(codeVerifier)
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier)
     }
 
-    public String getCodeChallenge() throws NoSuchAlgorithmException {
-        verifier = generateCodeVerifier();
-        return generateCodeChallenge(verifier);
+    @Throws(NoSuchAlgorithmException::class)
+    private fun generateCodeChallenge(codeVerifier: String): String {
+        val bytes = codeVerifier.toByteArray(Charset.defaultCharset())
+        val messageDigest = MessageDigest.getInstance("SHA-256")
+        messageDigest.update(bytes, 0, bytes.size)
+        val digest = messageDigest.digest()
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
     }
-
-    private String generateCodeVerifier() {
-        var secureRandom = new SecureRandom();
-        var codeVerifier = new byte[32];
-        secureRandom.nextBytes(codeVerifier);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
-    }
-
-    private String generateCodeChallenge(String codeVerifier) throws NoSuchAlgorithmException {
-        var bytes = codeVerifier.getBytes(Charset.defaultCharset());
-        var messageDigest = MessageDigest.getInstance("SHA-256");
-        messageDigest.update(bytes, 0, bytes.length);
-        var digest = messageDigest.digest();
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
-    }
-
 }

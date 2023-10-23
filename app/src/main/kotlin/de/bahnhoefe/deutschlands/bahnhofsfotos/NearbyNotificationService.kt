@@ -1,193 +1,152 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos;
+package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import android.Manifest
+import android.app.Notification
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Binder
+import android.os.Bundle
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
+import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager
+import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManagerFactory
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sqrt
 
-import android.Manifest;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManagerFactory;
-
-public class NearbyNotificationService extends Service implements LocationListener {
-
-    // The minimum distance to change Updates in meters
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1000; // 1km
-
-    // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 10000; // 10 seconds
-
-    private static final double MIN_NOTIFICATION_DISTANCE = 1.0d; // km
-    private static final double EARTH_CIRCUMFERENCE = 40075.017d; // km at equator
-    private static final int ONGOING_NOTIFICATION_ID = 0xdeadbeef;
-
-    private final String TAG = NearbyNotificationService.class.getSimpleName();
-    private List<Station> nearStations;
-    private Location myPos = new Location((String)null);
-
-    private LocationManager locationManager;
-
-    private NearbyBahnhofNotificationManager notifiedStationManager;
-    private BaseApplication baseApplication = null;
-    private DbAdapter dbAdapter = null;
-
-    /**
-     * The intent action to use to bind to this service's status interface.
-     */
-    public static final String STATUS_INTERFACE = NearbyNotificationService.class.getPackage().getName() + ".Status";
-
-    public NearbyNotificationService() {
+class NearbyNotificationService : Service(), LocationListener {
+    private val TAG = NearbyNotificationService::class.java.simpleName
+    private var nearStations = listOf<Station>()
+    private var myPos: Location? = Location(null as String?)
+    private var locationManager: LocationManager? = null
+    private var notifiedStationManager: NearbyBahnhofNotificationManager? = null
+    private lateinit var baseApplication: BaseApplication
+    private lateinit var dbAdapter: DbAdapter
+    override fun onCreate() {
+        super.onCreate()
+        myPos!!.latitude = 50.0
+        myPos!!.longitude = 8.0
+        notifiedStationManager = null
+        baseApplication = application as BaseApplication
+        dbAdapter = baseApplication.dbAdapter
     }
 
-    @Override
-    public void onCreate() {
-        Log.i(TAG, "About to create");
-        super.onCreate();
-        myPos.setLatitude(50d);
-        myPos.setLongitude(8d);
-        nearStations = new ArrayList<>(0); // no markers until we know where we are
-        notifiedStationManager = null;
-        baseApplication = (BaseApplication)getApplication();
-        dbAdapter = baseApplication.getDbAdapter();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        cancelNotification();
-
-        Log.i(TAG, "Received start command");
-
-        var resultIntent = new Intent(this, MainActivity.class);
-        var resultPendingIntent =
-                PendingIntent.getActivity(
-                        this,
-                        0,
-                        resultIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE
-                );
-
-        NearbyBahnhofNotificationManager.createChannel(this);
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        cancelNotification()
+        Log.i(TAG, "Received start command")
+        val resultIntent = Intent(this, MainActivity::class.java)
+        val resultPendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            resultIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        NearbyBahnhofNotificationManager.Companion.createChannel(this)
 
         // show a permanent notification to indicate that position detection is running
-        var ongoingNotification = new NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.CHANNEL_ID)
+        val ongoingNotification: Notification =
+            NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.Companion.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(getString(R.string.nearby_notification_active))
                 .setOngoing(true)
                 .setLocalOnly(true)
                 .setContentIntent(resultPendingIntent)
-                .build();
-        var notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
-
-        registerLocationManager();
-
-        return START_STICKY;
+                .build()
+        val notificationManager = NotificationManagerCompat.from(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return START_STICKY
+        }
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification)
+        registerLocationManager()
+        return START_STICKY
     }
 
-    @Override
-    public void onLowMemory() {
+    override fun onLowMemory() {
         // stop tracking
-        super.onLowMemory();
-        stopSelf();
+        super.onLowMemory()
+        stopSelf()
     }
 
-    @Override
-    public void onDestroy() {
-        Log.i(TAG, "Service gets destroyed");
+    override fun onDestroy() {
+        Log.i(TAG, "Service gets destroyed")
         try {
-            cancelNotification();
-            unregisterLocationManager();
-        } catch (Throwable t) {
-            Log.wtf(TAG, "Unknown problem when trying to de-register from GPS updates", t);
+            cancelNotification()
+            unregisterLocationManager()
+        } catch (t: Throwable) {
+            Log.wtf(TAG, "Unknown problem when trying to de-register from GPS updates", t)
         }
 
         // Cancel the ongoing notification
-        var notificationManager =
-                NotificationManagerCompat.from(this);
-        notificationManager.cancel(ONGOING_NOTIFICATION_ID);
-
-        super.onDestroy();
+        val notificationManager = NotificationManagerCompat.from(this)
+        notificationManager.cancel(ONGOING_NOTIFICATION_ID)
+        super.onDestroy()
     }
 
-    private void cancelNotification() {
+    private fun cancelNotification() {
         if (notifiedStationManager != null) {
-            notifiedStationManager.destroy();
-            notifiedStationManager = null;
+            notifiedStationManager!!.destroy()
+            notifiedStationManager = null
         }
     }
 
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-        Log.i(TAG, "Received new location: " + location);
+    override fun onLocationChanged(location: Location) {
+        Log.i(TAG, "Received new location: $location")
         try {
-            myPos = location;
+            myPos = location
 
             // check if currently advertised station is still in range
             if (notifiedStationManager != null) {
-                if (calcDistance(notifiedStationManager.getStation()) > MIN_NOTIFICATION_DISTANCE) {
-                    cancelNotification();
+                if (calcDistance(notifiedStationManager!!.station) > MIN_NOTIFICATION_DISTANCE) {
+                    cancelNotification()
                 }
             }
-            Log.d(TAG, "Reading matching stations from local database");
-            readStations();
+            Log.d(TAG, "Reading matching stations from local database")
+            readStations()
 
             // check if a user notification is appropriate
-            checkNearestStation();
-        } catch (Throwable t) {
-            Log.e(TAG, "Unknown Problem arised during location change handling", t);
+            checkNearestStation()
+        } catch (t: Throwable) {
+            Log.e(TAG, "Unknown Problem arised during location change handling", t)
         }
     }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
+    @Deprecated("Deprecated in Java")
+    override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
     }
 
-    @Override
-    public void onProviderEnabled(@NonNull String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(@NonNull String provider) {
-
-    }
-
-    private void checkNearestStation() {
-        double minDist = 3e3;
-        Station nearest = null;
-        for (var station : nearStations) {
-            var dist = calcDistance(station);
+    override fun onProviderEnabled(provider: String) {}
+    override fun onProviderDisabled(provider: String) {}
+    private fun checkNearestStation() {
+        var minDist = 3e3
+        var nearest: Station? = null
+        for (station in nearStations) {
+            val dist = calcDistance(station)
             if (dist < minDist) {
-                nearest = station;
-                minDist = dist;
+                nearest = station
+                minDist = dist
             }
         }
         if (nearest != null && minDist < MIN_NOTIFICATION_DISTANCE) {
-            notifyNearest(nearest, minDist);
-            Log.i(TAG, "Issued notification to user");
+            notifyNearest(nearest, minDist)
+            Log.i(TAG, "Issued notification to user")
         } else {
-            Log.d(TAG, "No notification - nearest station was " + minDist + " km away: " + nearest);
+            Log.d(TAG, "No notification - nearest station was $minDist km away: $nearest")
         }
     }
 
@@ -199,17 +158,22 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @param nearest  the station nearest to the current position
      * @param distance the distance of the station to the current position
      */
-    private void notifyNearest(Station nearest, double distance) {
+    private fun notifyNearest(nearest: Station, distance: Double) {
         if (notifiedStationManager != null) {
-            if (notifiedStationManager.getStation().equals(nearest)) {
-                return; // Notification für diesen Bahnhof schon angezeigt
+            notifiedStationManager = if (nearest == notifiedStationManager!!.station) {
+                return  // Notification für diesen Bahnhof schon angezeigt
             } else {
-                notifiedStationManager.destroy();
-                notifiedStationManager = null;
+                notifiedStationManager!!.destroy()
+                null
             }
         }
-        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(this, nearest, distance, dbAdapter.fetchCountriesWithProviderApps(baseApplication.getCountryCodes()));
-        notifiedStationManager.notifyUser();
+        notifiedStationManager = NearbyBahnhofNotificationManagerFactory.create(
+            this,
+            nearest,
+            distance,
+            dbAdapter.fetchCountriesWithProviderApps(baseApplication.countryCodes)
+        )
+        notifiedStationManager!!.notifyUser()
     }
 
     /**
@@ -218,78 +182,96 @@ public class NearbyNotificationService extends Service implements LocationListen
      * @param station the station to calculate the distance to
      * @return the distance
      */
-    private double calcDistance(Station station) {
+    private fun calcDistance(station: Station): Double {
         // Wir nähern für glatte Oberflächen, denn wir sind an Abständen kleiner 1km interessiert
-        var lateralDiff = myPos.getLatitude() - station.getLat();
-        var longDiff = (Math.abs(myPos.getLatitude()) < 89.99d) ?
-                (myPos.getLongitude() - station.getLon()) * Math.cos(myPos.getLatitude() / 180 * Math.PI) :
-                0.0d; // at the poles, longitude doesn't matter
+        val lateralDiff = myPos!!.latitude - station.lat
+        val longDiff =
+            if (abs(myPos!!.latitude) < 89.99) (myPos!!.longitude - station.lon) * cos(
+                myPos!!.latitude / 180 * Math.PI
+            ) else 0.0 // at the poles, longitude doesn't matter
         // simple Pythagoras now.
-        return Math.sqrt(Math.pow(lateralDiff, 2.0d) + Math.pow(longDiff, 2.0d)) * EARTH_CIRCUMFERENCE / 360.0d;
+        return sqrt(
+            lateralDiff.pow(2.0) + longDiff.pow(2.0)
+        ) * EARTH_CIRCUMFERENCE / 360.0
     }
 
-    public void registerLocationManager() {
-
+    private fun registerLocationManager() {
         try {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.w(TAG, "No Location Permission");
-                return;
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.w(TAG, "No Location Permission")
+                return
             }
-
-            locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            locationManager =
+                applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
             // getting GPS status
-            var isGPSEnabled = locationManager
-                    .isProviderEnabled(LocationManager.GPS_PROVIDER);
+            val isGPSEnabled = locationManager!!
+                .isProviderEnabled(LocationManager.GPS_PROVIDER)
 
             // if GPS Enabled get lat/long using GPS Services
             if (isGPSEnabled) {
-                locationManager.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                Log.d(TAG, "GPS Enabled");
+                locationManager!!.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    MIN_TIME_BW_UPDATES,
+                    MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                )
+                Log.d(TAG, "GPS Enabled")
                 if (locationManager != null) {
-                    myPos = locationManager
-                            .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    myPos = locationManager!!
+                        .getLastKnownLocation(LocationManager.GPS_PROVIDER)
                 }
             } else {
                 // getting network status
-                var isNetworkEnabled = locationManager
-                        .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                val isNetworkEnabled = locationManager!!
+                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
                 // First get location from Network Provider
                 if (isNetworkEnabled) {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    Log.d(TAG, "Network Location enabled");
+                    locationManager!!.requestLocationUpdates(
+                        LocationManager.NETWORK_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                    )
+                    Log.d(TAG, "Network Location enabled")
                     if (locationManager != null) {
-                        myPos = locationManager
-                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        myPos = locationManager!!
+                            .getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
                     }
                 }
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error registering LocationManager", e);
-            var b = new Bundle();
-            b.putString("error", "Error registering LocationManager: " + e);
-            locationManager = null;
-            myPos = null;
-            return;
+        } catch (e: Exception) {
+            Log.e(TAG, "Error registering LocationManager", e)
+            val b = Bundle()
+            b.putString("error", "Error registering LocationManager: $e")
+            locationManager = null
+            myPos = null
+            return
         }
-        Log.i(TAG, "LocationManager registered");
+        Log.i(TAG, "LocationManager registered")
     }
 
-    private void unregisterLocationManager() {
+    private fun unregisterLocationManager() {
         if (locationManager != null) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.removeUpdates(this);
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                locationManager!!.removeUpdates(this)
             }
-            locationManager = null;
+            locationManager = null
         }
-        Log.i(TAG, "LocationManager unregistered");
+        Log.i(TAG, "LocationManager unregistered")
     }
 
     /**
@@ -297,34 +279,52 @@ public class NearbyNotificationService extends Service implements LocationListen
      * Currently, can only be used to query the service state, i.e. if the location tracking
      * is switched off or on with photo or on without photo.
      */
-    public static class StatusBinder extends Binder {
-    }
+    class StatusBinder : Binder()
 
     /**
      * Bind to interfaces provided by this service. Currently implemented:
-     * <ul>
-     * <li>STATUS_INTERFACE: Returns a StatusBinder that can be used to query the tracking status</li>
-     * </ul>
+     *
+     *  * STATUS_INTERFACE: Returns a StatusBinder that can be used to query the tracking status
+     *
      *
      * @param intent an Intent giving the intended action
      * @return a Binder instance suitable for the intent supplied, or null if none matches.
      */
-    @Override
-    public IBinder onBind(Intent intent) {
-        if (STATUS_INTERFACE.equals(intent.getAction())) {
-            return new StatusBinder();
+    override fun onBind(intent: Intent): IBinder? {
+        return if (STATUS_INTERFACE == intent.action) {
+            StatusBinder()
         } else {
-            return null;
+            null
         }
     }
 
-    private void readStations() {
+    private fun readStations() {
         try {
-            Log.i(TAG, "Lade nahegelegene Bahnhoefe");
-            nearStations = dbAdapter.getStationByLatLngRectangle(myPos.getLatitude(), myPos.getLongitude(), baseApplication.getStationFilter());
-        } catch (Exception e) {
-            Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e);
+            Log.i(TAG, "Lade nahegelegene Bahnhoefe")
+            nearStations = dbAdapter.getStationByLatLngRectangle(
+                myPos!!.latitude,
+                myPos!!.longitude,
+                baseApplication.stationFilter
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e)
         }
     }
 
+    companion object {
+        // The minimum distance to change Updates in meters
+        private const val MIN_DISTANCE_CHANGE_FOR_UPDATES: Long = 1000 // 1km
+
+        // The minimum time between updates in milliseconds
+        private const val MIN_TIME_BW_UPDATES: Long = 10000 // 10 seconds
+        private const val MIN_NOTIFICATION_DISTANCE = 1.0 // km
+        private const val EARTH_CIRCUMFERENCE = 40075.017 // km at equator
+        private const val ONGOING_NOTIFICATION_ID = -0x21524111
+
+        /**
+         * The intent action to use to bind to this service's status interface.
+         */
+        val STATUS_INTERFACE =
+            (NearbyNotificationService::class.java.getPackage()?.name ?: "") + ".Status"
+    }
 }

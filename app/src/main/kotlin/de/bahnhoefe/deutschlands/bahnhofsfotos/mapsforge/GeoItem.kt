@@ -14,38 +14,33 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
+package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge
 
-package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
-
-import org.mapsforge.core.model.LatLong;
+import org.mapsforge.core.model.LatLong
 
 /**
  * Utility Class to handle GeoItem for ClusterMarker
  */
-public interface GeoItem {
+interface GeoItem {
     /**
      * getLatLong
      *
      * @return item location in LatLong.
      */
-    LatLong getLatLong();
+    val latLong: LatLong
 
     /**
      * getTitle
      *
      * @return Title of the item, might be used as Caption text.
      */
-    String getTitle();
-
-    boolean hasPhoto();
-
-    boolean ownPhoto();
+    val title: String?
+    fun hasPhoto(): Boolean
+    fun ownPhoto(): Boolean
 
     /**
      * @return true if the station is active
      */
-    boolean stationActive();
-
-    boolean isPendingUpload();
-
+    fun stationActive(): Boolean
+    val isPendingUpload: Boolean
 }

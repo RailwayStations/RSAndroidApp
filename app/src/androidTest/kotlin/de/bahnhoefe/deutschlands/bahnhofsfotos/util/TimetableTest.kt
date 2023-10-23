@@ -1,44 +1,47 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.util
 
-import static org.assertj.core.api.Assertions.assertThat;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-
-public class TimetableTest {
-
-    private Station station;
+class TimetableTest {
+    private var station: Station? = null
 
     @BeforeEach
-    public void setUp() {
-        station = new Station(
-                "de",
-                "4711",
-                "Some Famous Station",
-                0.0,
-                0.0,
-                "LOL");
+    fun setUp() {
+        station = Station(
+            "de",
+            "4711",
+            "Some Famous Station",
+            0.0,
+            0.0,
+            "LOL"
+        )
     }
 
     @Test
-    public void createTimetableIntentWithId() {
-        var country = new Country("de", "Deutschland", null, "https://example.com/{id}/blah");
-        assertThat(new Timetable().createTimetableIntent(country, station).getData().toString()).isEqualTo("https://example.com/4711/blah");
+    fun createTimetableIntentWithId() {
+        val country = Country("de", "Deutschland", null, "https://example.com/{id}/blah")
+        assertThat(
+            Timetable().createTimetableIntent(country, station)!!.data.toString()
+        ).isEqualTo("https://example.com/4711/blah")
     }
 
     @Test
-    public void createTimetableIntentWithTitle() {
-        var country = new Country("de", "Deutschland", null, "https://example.com/{title}/blah");
-        assertThat(new Timetable().createTimetableIntent(country, station).getData().toString()).isEqualTo("https://example.com/Some Famous Station/blah");
+    fun createTimetableIntentWithTitle() {
+        val country = Country("de", "Deutschland", null, "https://example.com/{title}/blah")
+        assertThat(
+            Timetable().createTimetableIntent(country, station)!!.data.toString()
+        ).isEqualTo("https://example.com/Some Famous Station/blah")
     }
 
     @Test
-    public void createTimetableIntentWithDS100() {
-        var country = new Country("de", "Deutschland", null, "https://example.com/{DS100}/blah");
-        assertThat(new Timetable().createTimetableIntent(country, station).getData().toString()).isEqualTo("https://example.com/LOL/blah");
+    fun createTimetableIntentWithDS100() {
+        val country = Country("de", "Deutschland", null, "https://example.com/{DS100}/blah")
+        assertThat(
+            Timetable().createTimetableIntent(country, station)!!.data.toString()
+        ).isEqualTo("https://example.com/LOL/blah")
     }
-
 }

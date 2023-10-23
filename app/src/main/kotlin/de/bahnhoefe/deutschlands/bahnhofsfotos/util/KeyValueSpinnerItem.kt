@@ -1,29 +1,8 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.util
 
-import androidx.annotation.NonNull;
+class KeyValueSpinnerItem(val spinnerText: String, val value: String) {
 
-public class KeyValueSpinnerItem {
-
-    private final String spinnerText;
-    private final String value;
-
-    public KeyValueSpinnerItem(String spinnerText, String value) {
-        this.spinnerText = spinnerText;
-        this.value = value;
+    override fun toString(): String {
+        return spinnerText
     }
-
-    public String getSpinnerText() {
-        return spinnerText;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    @NonNull
-    public String toString() {
-        return spinnerText;
-    }
-
 }

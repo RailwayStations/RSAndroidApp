@@ -1,7 +1,5 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge
 
-public interface TapHandler<T extends GeoItem> {
-
-    void onTap(T item);
-
+fun interface TapHandler<T : GeoItem?> {
+    fun onTap(item: T)
 }

@@ -1,59 +1,65 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos;
+package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemClickListener
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityInboxBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.InboxAdapter
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import java.util.List;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityInboxBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.InboxAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class InboxActivity extends AppCompatActivity {
-
-    private static final String TAG = InboxActivity.class.getSimpleName();
-
-    private InboxAdapter adapter;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        var binding = ActivityInboxBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        Call<List<PublicInbox>> inboxCall = ((BaseApplication)getApplication()).getRsapiClient().getPublicInbox();
-        inboxCall.enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<List<PublicInbox>> call, @NonNull Response<List<PublicInbox>> response) {
-                var body = response.body();
-                if (response.isSuccessful() && body != null) {
-                    adapter = new InboxAdapter(InboxActivity.this, body);
-                    binding.inboxList.setAdapter(adapter);
-                    binding.inboxList.setOnItemClickListener((parent, view, position, id) -> {
-                        var inboxItem = body.get(position);
-                        var intent = new Intent(InboxActivity.this, MapsActivity.class);
-                        intent.putExtra(MapsActivity.EXTRAS_LATITUDE, inboxItem.getLat());
-                        intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, inboxItem.getLon());
-                        intent.putExtra(MapsActivity.EXTRAS_MARKER, inboxItem.getStationId() == null ? R.drawable.marker_missing : R.drawable.marker_red);
-                        startActivity(intent);
-                    });
+class InboxActivity : AppCompatActivity() {
+    private var adapter: InboxAdapter? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val binding = ActivityInboxBinding.inflate(
+            layoutInflater
+        )
+        setContentView(binding.root)
+        val inboxCall = (application as BaseApplication).rsapiClient.publicInbox
+        inboxCall!!.enqueue(object : Callback<List<PublicInbox>?> {
+            override fun onResponse(
+                call: Call<List<PublicInbox>?>,
+                response: Response<List<PublicInbox>?>
+            ) {
+                val body = response.body()
+                if (response.isSuccessful && body != null) {
+                    adapter = InboxAdapter(this@InboxActivity, body)
+                    binding.inboxList.adapter = adapter
+                    binding.inboxList.onItemClickListener =
+                        OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
+                            val (_, _, stationId, lat, lon) = body[position]
+                            val intent = Intent(this@InboxActivity, MapsActivity::class.java)
+                            intent.putExtra(MapsActivity.Companion.EXTRAS_LATITUDE, lat)
+                            intent.putExtra(MapsActivity.Companion.EXTRAS_LONGITUDE, lon)
+                            intent.putExtra(
+                                MapsActivity.Companion.EXTRAS_MARKER,
+                                if (stationId == null) R.drawable.marker_missing else R.drawable.marker_red
+                            )
+                            startActivity(intent)
+                        }
                 }
             }
 
-            @Override
-            public void onFailure(@NonNull Call<List<PublicInbox>> call, @NonNull Throwable t) {
-                Log.e(TAG, "Error loading public inbox", t);
-                Toast.makeText(getBaseContext(), getString(R.string.error_loading_inbox) + t.getMessage(), Toast.LENGTH_LONG).show();
+            override fun onFailure(call: Call<List<PublicInbox>?>, t: Throwable) {
+                Log.e(TAG, "Error loading public inbox", t)
+                Toast.makeText(
+                    baseContext,
+                    getString(R.string.error_loading_inbox) + t.message,
+                    Toast.LENGTH_LONG
+                ).show()
             }
-        });
+        })
     }
 
+    companion object {
+        private val TAG = InboxActivity::class.java.simpleName
+    }
 }

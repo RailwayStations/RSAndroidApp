@@ -1,155 +1,129 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos;
+package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.text.Html;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.TextView;
+import android.content.Intent
+import android.graphics.Color
+import android.os.Bundle
+import android.text.Html
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityIntroSliderBinding
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityIntroSliderBinding;
-
-public class IntroSliderActivity extends AppCompatActivity {
-
-    private ActivityIntroSliderBinding binding;
-    private int[] layouts;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        BaseApplication baseApplication = (BaseApplication) getApplication();
-
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-
-        binding = ActivityIntroSliderBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        layouts = new int[]{R.layout.intro_slider1, R.layout.intro_slider2};
-
-        addBottomDots(0);
-        changeStatusBarColor();
-        var viewPagerAdapter = new ViewPagerAdapter();
-        binding.viewPager.setAdapter(viewPagerAdapter);
-        binding.viewPager.addOnPageChangeListener(viewListener);
-
-        binding.btnSliderSkip.setOnClickListener(v -> {
-            baseApplication.setFirstAppStart(true);
-            openMainActivity();
-        });
-
-        binding.btnSliderNext.setOnClickListener(v -> {
-            int current = getNextItem();
-            if (current < layouts.length) {
-                binding.viewPager.setCurrentItem(current);
+class IntroSliderActivity : AppCompatActivity() {
+    private var binding: ActivityIntroSliderBinding? = null
+    private var layouts: IntArray
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val baseApplication = application as BaseApplication
+        window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        binding = ActivityIntroSliderBinding.inflate(
+            layoutInflater
+        )
+        setContentView(binding!!.root)
+        layouts = intArrayOf(R.layout.intro_slider1, R.layout.intro_slider2)
+        addBottomDots(0)
+        changeStatusBarColor()
+        val viewPagerAdapter = ViewPagerAdapter()
+        binding!!.viewPager.adapter = viewPagerAdapter
+        binding!!.viewPager.addOnPageChangeListener(viewListener)
+        binding!!.btnSliderSkip.setOnClickListener { v: View? ->
+            baseApplication.firstAppStart = true
+            openMainActivity()
+        }
+        binding!!.btnSliderNext.setOnClickListener { v: View? ->
+            val current = nextItem
+            if (current < layouts.size) {
+                binding!!.viewPager.currentItem = current
             } else {
-                openMainActivity();
+                openMainActivity()
             }
-        });
-    }
-
-    private void openMainActivity() {
-        var intent = new Intent(IntroSliderActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        openMainActivity();
-    }
-
-    private void addBottomDots(int position) {
-        var dots = new TextView[layouts.length];
-        var colorActive = getResources().getIntArray(R.array.dot_active);
-        var colorInactive = getResources().getIntArray(R.array.dot_inactive);
-        binding.layoutDots.removeAllViews();
-
-        for (int i = 0; i < dots.length; i++) {
-            dots[i] = new TextView(this);
-            dots[i].setText(Html.fromHtml("&#8226;", Html.FROM_HTML_MODE_LEGACY));
-            dots[i].setTextSize(35);
-            dots[i].setTextColor(colorInactive[position]);
-            binding.layoutDots.addView(dots[i]);
-        }
-
-        if (dots.length > 0) {
-            dots[position].setTextColor(colorActive[position]);
         }
     }
 
-    private int getNextItem() {
-        return binding.viewPager.getCurrentItem() + 1;
+    private fun openMainActivity() {
+        val intent = Intent(this@IntroSliderActivity, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
-    final ViewPager.OnPageChangeListener viewListener = new ViewPager.OnPageChangeListener() {
+    override fun onBackPressed() {
+        openMainActivity()
+    }
 
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    private fun addBottomDots(position: Int) {
+        val dots = arrayOfNulls<TextView>(layouts.size)
+        val colorActive = resources.getIntArray(R.array.dot_active)
+        val colorInactive = resources.getIntArray(R.array.dot_inactive)
+        binding!!.layoutDots.removeAllViews()
+        for (i in dots.indices) {
+            dots[i] = TextView(this)
+            dots[i]!!.text = Html.fromHtml("&#8226;", Html.FROM_HTML_MODE_LEGACY)
+            dots[i]!!.textSize = 35f
+            dots[i]!!.setTextColor(colorInactive[position])
+            binding!!.layoutDots.addView(dots[i])
+        }
+        if (dots.size > 0) {
+            dots[position]!!.setTextColor(colorActive[position])
+        }
+    }
 
+    private val nextItem: Int
+        private get() = binding!!.viewPager.currentItem + 1
+    val viewListener: OnPageChangeListener = object : OnPageChangeListener {
+        override fun onPageScrolled(
+            position: Int,
+            positionOffset: Float,
+            positionOffsetPixels: Int
+        ) {
         }
 
-        @Override
-        public void onPageSelected(int position) {
-            var baseApplication = (BaseApplication) getApplication();
-            addBottomDots(position);
-
-            if (position == layouts.length - 1) {
-                binding.btnSliderNext.setText(R.string.proceed);
-                binding.btnSliderSkip.setVisibility(View.INVISIBLE);
-                baseApplication.setFirstAppStart(true);
+        override fun onPageSelected(position: Int) {
+            val baseApplication = application as BaseApplication
+            addBottomDots(position)
+            if (position == layouts.size - 1) {
+                binding!!.btnSliderNext.setText(R.string.proceed)
+                binding!!.btnSliderSkip.visibility = View.INVISIBLE
+                baseApplication.firstAppStart = true
             } else {
-                binding.btnSliderNext.setText(R.string.next);
-                binding.btnSliderSkip.setVisibility(View.VISIBLE);
+                binding!!.btnSliderNext.setText(R.string.next)
+                binding!!.btnSliderSkip.visibility = View.VISIBLE
             }
         }
 
-        @Override
-        public void onPageScrollStateChanged(int state) {
-
-        }
-    };
-
-    private void changeStatusBarColor() {
-        var window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.TRANSPARENT);
+        override fun onPageScrollStateChanged(state: Int) {}
     }
 
-    public class ViewPagerAdapter extends PagerAdapter {
-
-        @Override
-        @NonNull
-        public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            var layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            var view = layoutInflater.inflate(layouts[position], container, false);
-            container.addView(view);
-            return view;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
-            var view = (View) object;
-            container.removeView(view);
-        }
-
-        @Override
-        public int getCount() {
-            return layouts.length;
-        }
-
-        @Override
-        public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
-            return view == object;
-        }
+    private fun changeStatusBarColor() {
+        val window = window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = Color.TRANSPARENT
     }
 
+    inner class ViewPagerAdapter : PagerAdapter() {
+        override fun instantiateItem(container: ViewGroup, position: Int): Any {
+            val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val view = layoutInflater.inflate(layouts[position], container, false)
+            container.addView(view)
+            return view
+        }
+
+        override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
+            val view = `object` as View
+            container.removeView(view)
+        }
+
+        override fun getCount(): Int {
+            return layouts.size
+        }
+
+        override fun isViewFromObject(view: View, `object`: Any): Boolean {
+            return view === `object`
+        }
+    }
 }

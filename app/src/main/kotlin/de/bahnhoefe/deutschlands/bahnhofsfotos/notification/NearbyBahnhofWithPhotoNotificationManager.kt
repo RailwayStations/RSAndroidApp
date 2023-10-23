@@ -1,74 +1,63 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.notification
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.util.Log;
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.util.Log
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.app.NotificationCompat
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.app.NotificationCompat;
-
-import java.util.Set;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil;
-
-public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNotificationManager implements BitmapAvailableHandler {
-
-    private static final long[] VIBRATION_PATTERN = new long[]{300};
-    private static final int LED_COLOR = 0x00ff0000;
-    public static final int BITMAP_HEIGHT = 400;
-    public static final int BITMAP_WIDTH = 400;
-
-    public NearbyBahnhofWithPhotoNotificationManager(Context context, Station station, double distance, Set<Country> countries) {
-        super(context, station, distance, countries);
-        Log.d(TAG, "Creating " + getClass().getSimpleName());
+class NearbyBahnhofWithPhotoNotificationManager(
+    context: Context,
+    station: Station,
+    distance: Double,
+    countries: Set<Country?>?
+) : NearbyBahnhofNotificationManager(context, station, distance, countries),
+    BitmapAvailableHandler {
+    init {
+        Log.d(TAG, "Creating " + javaClass.simpleName)
     }
 
     /**
      * Build a notification for a station with Photo
      */
-    @Override
-    public void notifyUser() {
-        if (ConnectionUtil.checkInternetConnection(context)) {
-            BitmapCache.getInstance().getPhoto(this, notificationStation.getPhotoUrl());
+    override fun notifyUser() {
+        if (ConnectionUtil.checkInternetConnection(context!!)) {
+            BitmapCache.Companion.getInstance().getPhoto(this, notificationStation.photoUrl)
         }
     }
-
 
     /**
      * This gets called if the requested bitmap is available. Finish and issue the notification.
      *
      * @param bitmap the fetched Bitmap for the notification. May be null
      */
-    @Override
-    public void onBitmapAvailable(@Nullable Bitmap bitmap) {
+    override fun onBitmapAvailable(bitmap: Bitmap?) {
+        var bitmap = bitmap
         if (context == null) {
-            return; // we're already destroyed
+            return  // we're already destroyed
         }
-
         if (bitmap == null) {
-            bitmap = getBitmapFromResource(R.drawable.ic_stations_with_photo);
+            bitmap = getBitmapFromResource(R.drawable.ic_stations_with_photo)
         }
-
-        var bigPictureStyle = new NotificationCompat.BigPictureStyle();
+        val bigPictureStyle = NotificationCompat.BigPictureStyle()
         if (bitmap != null) {
-            bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null).setSummaryText(notificationStation.getLicense());
+            bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null)
+                .setSummaryText(notificationStation.license)
         }
-
-        var notificationBuilder = getBasicNotificationBuilder()
-                .setStyle(bigPictureStyle)
-                .extend(new NotificationCompat.WearableExtender())
-                .setVibrate(VIBRATION_PATTERN)
-                .setColor(LED_COLOR);
-
-        onNotificationReady(notificationBuilder.build());
+        val notificationBuilder = basicNotificationBuilder
+            .setStyle(bigPictureStyle)
+            .extend(NotificationCompat.WearableExtender())
+            .setVibrate(VIBRATION_PATTERN)
+            .setColor(LED_COLOR)
+        onNotificationReady(notificationBuilder.build())
     }
 
     /**
@@ -77,15 +66,20 @@ public class NearbyBahnhofWithPhotoNotificationManager extends NearbyBahnhofNoti
      * @param id the resource ID denoting a drawable resource
      * @return the Bitmap. May be null.
      */
-    private Bitmap getBitmapFromResource(int id) {
-        var vectorDrawable = AppCompatResources.getDrawable(context, id);
-        assert vectorDrawable != null;
-        vectorDrawable.setBounds(0, 0, BITMAP_WIDTH, BITMAP_HEIGHT);
-        var bm = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
-        var canvas = new Canvas(bm);
-        canvas.drawColor(Color.WHITE);
-        vectorDrawable.draw(canvas);
-        return bm;
+    private fun getBitmapFromResource(id: Int): Bitmap {
+        val vectorDrawable = AppCompatResources.getDrawable(context!!, id)!!
+        vectorDrawable.setBounds(0, 0, BITMAP_WIDTH, BITMAP_HEIGHT)
+        val bm = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bm)
+        canvas.drawColor(Color.WHITE)
+        vectorDrawable.draw(canvas)
+        return bm
     }
 
+    companion object {
+        private val VIBRATION_PATTERN = longArrayOf(300)
+        private const val LED_COLOR = 0x00ff0000
+        const val BITMAP_HEIGHT = 400
+        const val BITMAP_WIDTH = 400
+    }
 }

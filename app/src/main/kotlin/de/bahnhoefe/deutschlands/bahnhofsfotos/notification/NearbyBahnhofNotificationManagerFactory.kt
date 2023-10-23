@@ -1,14 +1,10 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.notification
 
-import android.content.Context;
+import android.content.Context
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 
-import java.util.Set;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-
-public class NearbyBahnhofNotificationManagerFactory {
-
+object NearbyBahnhofNotificationManagerFactory {
     /**
      * Construct the appropriate subclass of NearbyBahnhofNotificationManager for the given parameters.
      *
@@ -17,11 +13,16 @@ public class NearbyBahnhofNotificationManagerFactory {
      * @param distance the distance of the station from current position of the user
      * @return an instance of NearbyBahnhofNotificationManager
      */
-    static public NearbyBahnhofNotificationManager create(Context context, Station station, double distance, Set<Country> countries) {
-        if (station.hasPhoto()) {
-            return new NearbyBahnhofWithPhotoNotificationManager(context, station, distance, countries);
+    fun create(
+        context: Context,
+        station: Station,
+        distance: Double,
+        countries: Set<Country>
+    ): NearbyBahnhofNotificationManager {
+        return if (station.hasPhoto()) {
+            NearbyBahnhofWithPhotoNotificationManager(context, station, distance, countries)
         } else {
-            return new NearbyBahnhofWithoutPhotoNotificationManager(context, station, distance, countries);
+            NearbyBahnhofWithoutPhotoNotificationManager(context, station, distance, countries)
         }
     }
 }

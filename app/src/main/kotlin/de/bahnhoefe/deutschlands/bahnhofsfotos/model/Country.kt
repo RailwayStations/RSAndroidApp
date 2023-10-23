@@ -14,7 +14,7 @@ data class Country @JvmOverloads constructor(
 ) : Serializable, Comparable<Country> {
 
     fun hasTimetableUrlTemplate(): Boolean {
-        return (timetableUrlTemplate != null) && timetableUrlTemplate.isNotEmpty()
+        return !timetableUrlTemplate.isNullOrEmpty()
     }
 
     val compatibleProviderApps: List<ProviderApp>

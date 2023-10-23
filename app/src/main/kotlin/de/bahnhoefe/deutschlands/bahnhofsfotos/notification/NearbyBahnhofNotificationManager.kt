@@ -1,251 +1,260 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.notification;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.notification
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country.Companion.getCountryByCode
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-
-import java.util.Set;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable;
-
-public abstract class NearbyBahnhofNotificationManager {
-    private static final int NOTIFICATION_ID = 1;
-    private static final int REQUEST_MAP = 0x10;
-    private static final int REQUEST_DETAIL = 0x20;
-    private static final int REQUEST_TIMETABLE = 0x30;
-    private static final int REQUEST_STATION = 0x40;
-    protected final String TAG = NearbyBahnhofNotificationManager.class.getSimpleName();
-
-    public static final String CHANNEL_ID = "bahnhoefe_channel_01";// The id of the channel.
-
-    private static final String DB_BAHNHOF_LIVE_PKG = "de.deutschebahn.bahnhoflive";
-    private static final String DB_BAHNHOF_LIVE_CLASS = "de.deutschebahn.bahnhoflive.MeinBahnhofActivity";
-    private final Set<Country> countries;
+abstract class NearbyBahnhofNotificationManager(
+    context: Context,
+    station: Station,
+    distance: Double,
+    countries: Set<Country>
+) {
+    protected val TAG: String = NearbyBahnhofNotificationManager::class.java.simpleName
+    private val countries: Set<Country>
 
     /**
      * The Bahnhof about which a notification is being built.
      */
-    protected Station notificationStation;
+    var station: Station
+        protected set
 
     /**
      * The distance of the Bahnhof about which a notification is being built.
      */
-    protected final double notificationDistance;
+    protected val notificationDistance: Double
 
     /**
      * The Android Context for which the notification is generated.
      */
-    protected Context context;
+    protected var context: Context
 
     /**
      * Constructor. After construction, you need to call notifyUser for action to happen.
-     *
-     * @param context  the Android Context from which this object ist created.
-     * @param station  the station to issue a notification for.
-     * @param distance a double giving the distance from current location to bahnhof (in km)
      */
-    public NearbyBahnhofNotificationManager(@NonNull Context context, @NonNull Station station, double distance, Set<Country> countries) {
-        this.context = context;
-        notificationDistance = distance;
-        this.notificationStation = station;
-        this.countries = countries;
+    init {
+        this.context = context
+        notificationDistance = distance
+        this.station = station
+        this.countries = countries
     }
 
     /**
      * Build a notification for a station with Photo. The start command.
      */
-    public abstract void notifyUser();
+    abstract fun notifyUser()
 
     /**
      * Called back once the notification was built up ready.
      */
-    protected void onNotificationReady(Notification notification) {
-        if (context == null) {
-            return; // we're already destroyed
-        }
-
+    protected fun onNotificationReady(notification: Notification?) {
         // Get an instance of the NotificationManager service
-        var notificationManager = NotificationManagerCompat.from(context);
+        val notificationManager = NotificationManagerCompat.from(
+            context
+        )
 
         // Build the notification and issues it with notification manager.
-        notificationManager.notify(NOTIFICATION_ID, notification);
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        notificationManager.notify(NOTIFICATION_ID, notification!!)
     }
 
-    /**
-     * Helper method that configures a NotificationBuilder wtih the elements common to both
-     * notification types.
-     */
-    protected NotificationCompat.Builder getBasicNotificationBuilder() {
-        // Build an intent for an action to see station details
-        var detailPendingIntent = getDetailPendingIntent();
-        // Build an intent to see the station on a map
-        var mapPendingIntent = getMapPendingIntent();
-        // Build an intent to view the station's timetable
-        var countryByCode = Country.getCountryByCode(countries, notificationStation.getCountry());
-        var timetablePendingIntent = countryByCode.map(country -> getTimetablePendingIntent(country, notificationStation)).orElse(null);
+    protected val basicNotificationBuilder: NotificationCompat.Builder
+        /**
+         * Helper method that configures a NotificationBuilder wtih the elements common to both
+         * notification types.
+         */
+        get() {
+            // Build an intent for an action to see station details
+            val detailPendingIntent = detailPendingIntent
+            // Build an intent to see the station on a map
+            val mapPendingIntent = mapPendingIntent
+            // Build an intent to view the station's timetable
+            val countryByCode = getCountryByCode(countries, station.country)
+            val timetablePendingIntent = countryByCode.map { country: Country ->
+                getTimetablePendingIntent(
+                    country,
+                    station
+                )
+            }
+                .orElse(null)
+            createChannel(context)
 
-        createChannel(context);
-
-        // Texts and bigStyle
-        var textCreator = new TextCreator().invoke();
-        var shortText = textCreator.getShortText();
-        var bigStyle = textCreator.getBigStyle();
-
-        var builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+            // Texts and bigStyle
+            val textCreator = TextCreator().invoke()
+            val shortText = textCreator.shortText
+            val bigStyle = textCreator.bigStyle
+            var builder = NotificationCompat.Builder(
+                context, CHANNEL_ID
+            )
                 .setSmallIcon(R.drawable.ic_logotrain_found)
                 .setContentTitle(context.getString(R.string.station_is_near))
                 .setContentText(shortText)
                 .setContentIntent(detailPendingIntent)
-                .addAction(R.drawable.ic_directions_white_24dp,
-                        context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
+                .addAction(
+                    R.drawable.ic_directions_white_24dp,
+                    context.getString(R.string.label_map), mapPendingIntent
+                )
                 .setStyle(bigStyle)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setOnlyAlertOnce(true)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-
-        if (timetablePendingIntent != null) {
-            builder.addAction(R.drawable.ic_timetable,
-                    context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_timetable),
-                    timetablePendingIntent);
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            if (timetablePendingIntent != null) {
+                builder.addAction(
+                    R.drawable.ic_timetable,
+                    context.getString(R.string.label_timetable),
+                    timetablePendingIntent
+                )
+            }
+            builder = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_logotrain_found)
+                .setContentTitle(context.getString(R.string.station_is_near))
+                .setContentText(shortText)
+                .setContentIntent(detailPendingIntent)
+                .addAction(
+                    R.drawable.ic_directions_white_24dp,
+                    context.getString(R.string.label_map), mapPendingIntent
+                )
+                .addAction(
+                    R.drawable.ic_timetable,
+                    context.getString(R.string.label_timetable),
+                    timetablePendingIntent
+                )
+                .setStyle(bigStyle)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setOnlyAlertOnce(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            return builder
         }
 
-        builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_logotrain_found)
-                .setContentTitle(context.getString(R.string.station_is_near))
-                .setContentText(shortText)
-                .setContentIntent(detailPendingIntent)
-                .addAction(R.drawable.ic_directions_white_24dp,
-                        context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_map), mapPendingIntent)
-                .addAction(R.drawable.ic_timetable, context.getString(de.bahnhoefe.deutschlands.bahnhofsfotos.R.string.label_timetable), timetablePendingIntent)
-                .setStyle(bigStyle)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-
-        return builder;
-    }
-
-    public static void createChannel(Context context) {
-        var notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.createNotificationChannel(new NotificationChannel(CHANNEL_ID, context.getString(R.string.channel_name), NotificationManager.IMPORTANCE_DEFAULT));
-    }
-
-    protected PendingIntent pendifyMe(Intent intent, int requestCode) {
-        var stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addNextIntent(intent);
+    protected fun pendifyMe(intent: Intent?, requestCode: Int): PendingIntent {
+        val stackBuilder = TaskStackBuilder.create(context)
+        stackBuilder.addNextIntent(intent)
         try {
-            stackBuilder.addNextIntentWithParentStack(intent); // syntesize a back stack from the parent information in manifest
-        } catch (IllegalArgumentException iae) {
+            stackBuilder.addNextIntentWithParentStack(intent) // syntesize a back stack from the parent information in manifest
+        } catch (iae: IllegalArgumentException) {
             // unfortunately, this occurs if the supplied intent is not handled by our app
             // in this case, just add the the intent...
-            stackBuilder.addNextIntent(intent);
+            stackBuilder.addNextIntent(intent)
         }
-        return stackBuilder.getPendingIntent(requestCode, PendingIntent.FLAG_CANCEL_CURRENT);
+        return stackBuilder.getPendingIntent(requestCode, PendingIntent.FLAG_CANCEL_CURRENT)
     }
 
-    @NonNull
-    protected Intent getUploadActivity() {
-        // Build an intent for an action to see station details
-        var detailIntent = new Intent(context, UploadActivity.class);
-        detailIntent.putExtra(UploadActivity.EXTRA_STATION, notificationStation);
-        return detailIntent;
-    }
-
-    @NonNull
-    protected PendingIntent getDetailPendingIntent() {
-        return pendifyMe(getUploadActivity(), REQUEST_DETAIL);
-    }
-
-    /**
-     * Build an intent for an action to view a map.
-     *
-     * @return the PendingIntent built.
-     */
-    protected PendingIntent getMapPendingIntent() {
-        var mapIntent = new Intent(Intent.ACTION_VIEW);
-        mapIntent.setData(Uri.parse("geo:" + notificationStation.getLat() + "," + notificationStation.getLon()));
-        return pendifyMe(mapIntent, REQUEST_MAP);
-    }
+    protected val uploadActivity: Intent
+        get() {
+            // Build an intent for an action to see station details
+            val detailIntent = Intent(context, UploadActivity::class.java)
+            detailIntent.putExtra(UploadActivity.Companion.EXTRA_STATION, station)
+            return detailIntent
+        }
+    private val detailPendingIntent: PendingIntent
+        get() = pendifyMe(uploadActivity, REQUEST_DETAIL)
+    private val mapPendingIntent: PendingIntent
+        /**
+         * Build an intent for an action to view a map.
+         *
+         * @return the PendingIntent built.
+         */
+        get() {
+            val mapIntent = Intent(Intent.ACTION_VIEW)
+            mapIntent.data = Uri.parse("geo:" + station.lat + "," + station.lon)
+            return pendifyMe(mapIntent, REQUEST_MAP)
+        }
 
     /**
      * Build an intent for an action to view a timetable for the station.
      *
      * @return the PendingIntent built.
      */
-    protected
-    @Nullable
-    PendingIntent getTimetablePendingIntent(Country country, Station station) {
-        var timetableIntent = new Timetable().createTimetableIntent(country, station);
-        if (timetableIntent != null) {
-            return pendifyMe(timetableIntent, NearbyBahnhofNotificationManager.REQUEST_TIMETABLE);
-        }
-        return null;
+    private fun getTimetablePendingIntent(country: Country, station: Station?): PendingIntent? {
+        val timetableIntent = Timetable().createTimetableIntent(country, station)
+        return if (timetableIntent != null) {
+            pendifyMe(timetableIntent, REQUEST_TIMETABLE)
+        } else null
     }
 
-    /**
-     * Build an intent for an action to view a map.
-     *
-     * @return the PendingIntent built.
-     */
-    @NonNull
-    protected PendingIntent getStationPendingIntent() {
-        // Build an intent for an action to see station details
-        var stationIntent = new Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS);
-        stationIntent.putExtra(DetailsActivity.EXTRA_STATION, notificationStation);
-        return pendifyMe(stationIntent, REQUEST_STATION);
-    }
-
-
-    public void destroy() {
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
-        notificationStation = null;
-        context = null;
-    }
-
-    public Station getStation() {
-        return notificationStation;
-    }
-
-    protected class TextCreator {
-        private String shortText;
-        private NotificationCompat.BigTextStyle bigStyle;
-
-        public String getShortText() {
-            return shortText;
+    protected val stationPendingIntent: PendingIntent
+        /**
+         * Build an intent for an action to view a map.
+         *
+         * @return the PendingIntent built.
+         */
+        get() {
+            // Build an intent for an action to see station details
+            val stationIntent = Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS)
+            stationIntent.putExtra(DetailsActivity.Companion.EXTRA_STATION, station)
+            return pendifyMe(stationIntent, REQUEST_STATION)
         }
 
-        public NotificationCompat.BigTextStyle getBigStyle() {
-            return bigStyle;
+    fun destroy() {
+        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
+    }
+
+    protected inner class TextCreator {
+        var shortText: String? = null
+            private set
+        var bigStyle: NotificationCompat.BigTextStyle? = null
+            private set
+
+        operator fun invoke(): TextCreator {
+            shortText = context.getString(
+                R.string.template_short_text,
+                station.title,
+                notificationDistance
+            )
+            val longText = context.getString(
+                R.string.template_long_text,
+                station.title,
+                notificationDistance,
+                if (station.hasPhoto()) context.getString(R.string.photo_exists) else ""
+            )
+            bigStyle = NotificationCompat.BigTextStyle()
+            bigStyle!!.bigText(longText)
+            return this
         }
+    }
 
-        public TextCreator invoke() {
-            shortText = context.getString(R.string.template_short_text, notificationStation.getTitle(), notificationDistance);
-            var longText = context.getString(R.string.template_long_text,
-                    notificationStation.getTitle(),
-                    notificationDistance,
-                    (notificationStation.hasPhoto() ?
-                            context.getString(R.string.photo_exists) :
-                            ""));
-
-            bigStyle = new NotificationCompat.BigTextStyle();
-            bigStyle.bigText(longText);
-            return this;
+    companion object {
+        private const val NOTIFICATION_ID = 1
+        private const val REQUEST_MAP = 0x10
+        private const val REQUEST_DETAIL = 0x20
+        private const val REQUEST_TIMETABLE = 0x30
+        private const val REQUEST_STATION = 0x40
+        const val CHANNEL_ID = "bahnhoefe_channel_01" // The id of the channel.
+        private const val DB_BAHNHOF_LIVE_PKG = "de.deutschebahn.bahnhoflive"
+        private const val DB_BAHNHOF_LIVE_CLASS = "de.deutschebahn.bahnhoflive.MeinBahnhofActivity"
+        fun createChannel(context: Context?) {
+            val notificationManager =
+                context!!.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_ID, context.getString(
+                        R.string.channel_name
+                    ), NotificationManager.IMPORTANCE_DEFAULT
+                )
+            )
         }
     }
 }

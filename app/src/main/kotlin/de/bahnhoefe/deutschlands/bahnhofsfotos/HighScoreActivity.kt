@@ -1,134 +1,145 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos;
+package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import android.app.SearchManager;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
+import android.app.SearchManager
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.view.Menu
+import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemClickListener
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityHighScoreBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.Collections
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-
-import java.util.ArrayList;
-import java.util.Collections;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityHighScoreBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class HighScoreActivity extends AppCompatActivity {
-
-    private static final String TAG = "HighScoreActivity";
-    private HighScoreAdapter adapter;
-    private ActivityHighScoreBinding binding;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityHighScoreBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        var baseApplication = (BaseApplication) getApplication();
-        var firstSelectedCountry = baseApplication.getCountryCodes().iterator().next();
-        var countries = new ArrayList<>(baseApplication.getDbAdapter().getAllCountries());
-        Collections.sort(countries);
-        countries.add(0, new Country("", getString(R.string.all_countries)));
-        int selectedItem = 0;
-        for (var country : countries) {
-            if (country.getCode().equals(firstSelectedCountry)) {
-                selectedItem = countries.indexOf(country);
+class HighScoreActivity : AppCompatActivity() {
+    private var adapter: HighScoreAdapter? = null
+    private var binding: ActivityHighScoreBinding? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityHighScoreBinding.inflate(
+            layoutInflater
+        )
+        setContentView(binding!!.root)
+        val baseApplication = application as BaseApplication
+        val firstSelectedCountry = baseApplication.countryCodes.iterator().next()
+        val countries = ArrayList(baseApplication.dbAdapter.allCountries)
+        Collections.sort(countries)
+        countries.add(0, Country("", getString(R.string.all_countries)))
+        var selectedItem = 0
+        for (country in countries) {
+            if (country!!.code == firstSelectedCountry) {
+                selectedItem = countries.indexOf(country)
             }
         }
-
-        var countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, countries.toArray(new Country[0]));
-        binding.countries.setAdapter(countryAdapter);
-        binding.countries.setSelection(selectedItem);
-        binding.countries.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                loadHighScore(baseApplication, (Country) parent.getSelectedItem());
+        val countryAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            countries.toTypedArray()
+        )
+        binding!!.countries.adapter = countryAdapter
+        binding!!.countries.setSelection(selectedItem)
+        binding!!.countries.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View,
+                position: Int,
+                id: Long
+            ) {
+                loadHighScore(baseApplication, parent.selectedItem as Country)
             }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
-    private void loadHighScore(BaseApplication baseApplication, Country selectedCountry) {
-        var rsapi = baseApplication.getRsapiClient();
-        var highScoreCall = selectedCountry.getCode().isEmpty() ? rsapi.getHighScore() : rsapi.getHighScore(selectedCountry.getCode());
-        highScoreCall.enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<HighScore> call, @NonNull Response<HighScore> response) {
-                if (response.isSuccessful()) {
-                    adapter = new HighScoreAdapter(HighScoreActivity.this, response.body().getItems());
-                    binding.highscoreList.setAdapter(adapter);
-                    binding.highscoreList.setOnItemClickListener((adapter, v, position, arg3) -> {
-                        var highScoreItem = (HighScoreItem) adapter.getItemAtPosition(position);
-                        var stationFilter = baseApplication.getStationFilter();
-                        stationFilter.setNickname(highScoreItem.getName());
-                        baseApplication.setStationFilter(stationFilter);
-                        var intent = new Intent(HighScoreActivity.this, MapsActivity.class);
-                        startActivity(intent);
-                    });
+    private fun loadHighScore(baseApplication: BaseApplication, selectedCountry: Country) {
+        val rsapi = baseApplication.rsapiClient
+        val highScoreCall =
+            if (selectedCountry.code.isEmpty()) rsapi!!.highScore else rsapi!!.getHighScore(
+                selectedCountry.code
+            )
+        highScoreCall!!.enqueue(object : Callback<HighScore> {
+            override fun onResponse(call: Call<HighScore>, response: Response<HighScore>) {
+                if (response.isSuccessful) {
+                    adapter = HighScoreAdapter(this@HighScoreActivity, response.body()!!.getItems())
+                    binding!!.highscoreList.adapter = adapter
+                    binding!!.highscoreList.onItemClickListener =
+                        OnItemClickListener { adapter: AdapterView<*>, v: View?, position: Int, arg3: Long ->
+                            val (name) = adapter.getItemAtPosition(position) as HighScoreItem
+                            val stationFilter = baseApplication.stationFilter
+                            stationFilter.nickname = name
+                            baseApplication.stationFilter = stationFilter
+                            val intent = Intent(this@HighScoreActivity, MapsActivity::class.java)
+                            startActivity(intent)
+                        }
                 }
             }
 
-            @Override
-            public void onFailure(@NonNull Call<HighScore> call, @NonNull Throwable t) {
-                Log.e(TAG, "Error loading highscore", t);
-                Toast.makeText(getBaseContext(), getString(R.string.error_loading_highscore) + t.getMessage(), Toast.LENGTH_LONG).show();
+            override fun onFailure(call: Call<HighScore>, t: Throwable) {
+                Log.e(TAG, "Error loading highscore", t)
+                Toast.makeText(
+                    baseContext,
+                    getString(R.string.error_loading_highscore) + t.message,
+                    Toast.LENGTH_LONG
+                ).show()
             }
-        });
+        })
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_high_score, menu);
-
-        var manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        var search = (SearchView) menu.findItem(R.id.search).getActionView();
-        search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
-        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                Log.d(TAG, "onQueryTextSubmit ");
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_high_score, menu)
+        val manager = getSystemService(SEARCH_SERVICE) as SearchManager
+        val search = menu.findItem(R.id.search).actionView as SearchView?
+        search!!.setSearchableInfo(manager.getSearchableInfo(componentName))
+        search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(s: String): Boolean {
+                Log.d(TAG, "onQueryTextSubmit ")
                 if (adapter != null) {
-                    adapter.getFilter().filter(s);
-                    if (adapter.isEmpty()) {
-                        Toast.makeText(HighScoreActivity.this, R.string.no_records_found, Toast.LENGTH_LONG).show();
+                    adapter!!.filter.filter(s)
+                    if (adapter!!.isEmpty) {
+                        Toast.makeText(
+                            this@HighScoreActivity,
+                            R.string.no_records_found,
+                            Toast.LENGTH_LONG
+                        ).show()
                     } else {
-                        Toast.makeText(HighScoreActivity.this, getResources().getQuantityString(R.plurals.records_found, adapter.getCount(), adapter.getCount()), Toast.LENGTH_LONG).show();
+                        Toast.makeText(
+                            this@HighScoreActivity,
+                            resources.getQuantityString(
+                                R.plurals.records_found,
+                                adapter!!.count,
+                                adapter!!.count
+                            ),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
-                return false;
+                return false
             }
 
-            @Override
-            public boolean onQueryTextChange(String s) {
-                Log.d(TAG, "onQueryTextChange ");
+            override fun onQueryTextChange(s: String): Boolean {
+                Log.d(TAG, "onQueryTextChange ")
                 if (adapter != null) {
-                    adapter.getFilter().filter(s);
+                    adapter!!.filter.filter(s)
                 }
-                return false;
+                return false
             }
-
-        });
-
-        return true;
+        })
+        return true
     }
 
+    companion object {
+        private const val TAG = "HighScoreActivity"
+    }
 }

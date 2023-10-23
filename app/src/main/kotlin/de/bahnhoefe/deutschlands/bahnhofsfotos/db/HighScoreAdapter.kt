@@ -1,127 +1,106 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.db
 
-import android.app.Activity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Filter;
+import android.app.Activity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Filter
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemHighscoreBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem
+import java.util.Locale
 
-import androidx.annotation.NonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemHighscoreBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem;
-
-public class HighScoreAdapter extends ArrayAdapter<HighScoreItem> {
-    private final Activity context;
-    private List<HighScoreItem> highScore;
-    private HighScoreFilter filter;
-
-    public HighScoreAdapter(Activity context, List<HighScoreItem> highScore) {
-        super(context, R.layout.item_highscore, highScore);
-        this.highScore = highScore;
-        this.context = context;
-    }
-
-    @Override
-    @NonNull
-    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-        var rowView = convertView;
+class HighScoreAdapter(private val context: Activity, private var highScore: List<HighScoreItem>) :
+    ArrayAdapter<HighScoreItem?>(
+        context, R.layout.item_highscore, highScore
+    ) {
+    private var filter: HighScoreFilter? = null
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        var rowView = convertView
         // reuse views
-        ItemHighscoreBinding binding;
+        val binding: ItemHighscoreBinding
         if (rowView == null) {
-            binding = ItemHighscoreBinding.inflate(context.getLayoutInflater(), parent, false);
-            rowView = binding.getRoot();
-            rowView.setTag(binding);
+            binding = ItemHighscoreBinding.inflate(
+                context.layoutInflater, parent, false
+            )
+            rowView = binding.root
+            rowView.setTag(binding)
         } else {
-            binding = (ItemHighscoreBinding) rowView.getTag();
+            binding = rowView.tag as ItemHighscoreBinding
         }
+        val (name, photos, position1) = highScore[position]
+        binding.highscoreName.text = name
+        binding.highscorePhotos.text = photos.toString()
+        binding.highscorePosition.text = "$position1."
+        when (position1) {
+            1 -> {
+                binding.highscoreAward.setImageResource(R.drawable.ic_crown_gold)
+                binding.highscoreAward.visibility = View.VISIBLE
+                binding.highscorePosition.visibility = View.GONE
+            }
 
-        var item = highScore.get(position);
-        binding.highscoreName.setText(item.getName());
-        binding.highscorePhotos.setText(String.valueOf(item.getPhotos()));
-        binding.highscorePosition.setText(String.valueOf(item.getPosition()).concat("."));
+            2 -> {
+                binding.highscoreAward.setImageResource(R.drawable.ic_crown_silver)
+                binding.highscoreAward.visibility = View.VISIBLE
+                binding.highscorePosition.visibility = View.GONE
+            }
 
-        switch (item.getPosition()) {
-            case 1:
-                binding.highscoreAward.setImageResource(R.drawable.ic_crown_gold);
-                binding.highscoreAward.setVisibility(View.VISIBLE);
-                binding.highscorePosition.setVisibility(View.GONE);
-                break;
-            case 2:
-                binding.highscoreAward.setImageResource(R.drawable.ic_crown_silver);
-                binding.highscoreAward.setVisibility(View.VISIBLE);
-                binding.highscorePosition.setVisibility(View.GONE);
-                break;
-            case 3:
-                binding.highscoreAward.setImageResource(R.drawable.ic_crown_bronze);
-                binding.highscoreAward.setVisibility(View.VISIBLE);
-                binding.highscorePosition.setVisibility(View.GONE);
-                break;
-            default:
-                binding.highscoreAward.setVisibility(View.GONE);
-                binding.highscorePosition.setVisibility(View.VISIBLE);
-                break;
+            3 -> {
+                binding.highscoreAward.setImageResource(R.drawable.ic_crown_bronze)
+                binding.highscoreAward.visibility = View.VISIBLE
+                binding.highscorePosition.visibility = View.GONE
+            }
+
+            else -> {
+                binding.highscoreAward.visibility = View.GONE
+                binding.highscorePosition.visibility = View.VISIBLE
+            }
         }
-
         if (position % 2 == 1) {
-            rowView.setBackgroundResource(R.drawable.item_list_backgroundcolor);
+            rowView.setBackgroundResource(R.drawable.item_list_backgroundcolor)
         } else {
-            rowView.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
+            rowView.setBackgroundResource(R.drawable.item_list_backgroundcolor2)
         }
-
-        return rowView;
+        return rowView
     }
 
-    @NonNull
-    @Override
-    public Filter getFilter() {
+    override fun getFilter(): Filter {
         if (filter == null) {
-            filter = new HighScoreFilter(highScore);
+            filter = HighScoreFilter(highScore)
         }
-        return filter;
+        return filter!!
     }
 
-    private class HighScoreFilter extends Filter {
+    private inner class HighScoreFilter(originalItems: List<HighScoreItem>) : Filter() {
+        private val originalItems: MutableList<HighScoreItem> = ArrayList()
 
-        private final List<HighScoreItem> originalItems = new ArrayList<>();
-
-        public HighScoreFilter(List<HighScoreItem> originalItems) {
-            this.originalItems.addAll(originalItems);
+        init {
+            this.originalItems.addAll(originalItems)
         }
 
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            var filterResults = new FilterResults();
-
-            if (constraint != null) {
-                var search = constraint.toString().toLowerCase();
-                var tempList = originalItems.stream()
-                        .filter(item -> item.getName().toLowerCase().contains(search))
-                        .collect(Collectors.toList());
-
-                filterResults.values = tempList;
-                filterResults.count = tempList.size();
-            }
-            return filterResults;
+        override fun performFiltering(constraint: CharSequence): FilterResults {
+            val filterResults = FilterResults()
+            val search = constraint.toString().lowercase(Locale.getDefault())
+            val tempList = originalItems
+                .filter { (name): HighScoreItem ->
+                    name!!.lowercase(Locale.getDefault()).contains(search)
+                }
+                .toList()
+            filterResults.values = tempList
+            filterResults.count = tempList.size
+            return filterResults
         }
 
-        @SuppressWarnings("unchecked")
-        @Override
-        protected void publishResults(CharSequence contraint, FilterResults results) {
-            highScore = (ArrayList<HighScoreItem>) results.values;
-            clear();
-            addAll(highScore);
+        override fun publishResults(contraint: CharSequence, results: FilterResults) {
+            @Suppress("UNCHECKED_CAST")
+            highScore = results.values as List<HighScoreItem>
+            clear()
+            addAll(highScore)
             if (results.count > 0) {
-                notifyDataSetChanged();
+                notifyDataSetChanged()
             } else {
-                notifyDataSetInvalidated();
+                notifyDataSetInvalidated()
             }
         }
     }
-
 }

@@ -1,87 +1,48 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.util
 
-import android.content.Context;
+import android.content.Context
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
+class StationFilter(private var photo: Boolean?, var isActive: Boolean?, var nickname: String?) {
 
-public class StationFilter {
-
-    private Boolean photo;
-
-    private Boolean active;
-
-    private String nickname;
-
-    public StationFilter(Boolean photo, Boolean active, String nickname) {
-        this.photo = photo;
-        this.active = active;
-        this.nickname = nickname;
+    fun hasPhoto(): Boolean? {
+        return photo
     }
 
-    public Boolean hasPhoto() {
-        return photo;
+    fun setPhoto(photo: Boolean?) {
+        this.photo = photo
     }
 
-    public void setPhoto(Boolean photo) {
-        this.photo = photo;
-    }
-
-    public Boolean isActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public int getPhotoIcon() {
-        if (photo == null) {
-            return R.drawable.ic_photo_inactive_24px;
-        } else if (photo) {
-            return R.drawable.ic_photo_active_24px;
+    val photoIcon: Int
+        get() {
+            if (photo == null) {
+                return R.drawable.ic_photo_inactive_24px
+            } else if (photo) {
+                return R.drawable.ic_photo_active_24px
+            }
+            return R.drawable.ic_photo_missing_active_24px
         }
-        return R.drawable.ic_photo_missing_active_24px;
-    }
-
-    public int getNicknameIcon() {
-        return nickname == null ? R.drawable.ic_person_inactive_24px : R.drawable.ic_person_active_24px;
-    }
-
-    public int getActiveIcon() {
-        if (active == null) {
-            return R.drawable.ic_station_active_inactive_24px;
-        } else if (active) {
-            return R.drawable.ic_station_active_active_24px;
+    val nicknameIcon: Int
+        get() = if (nickname == null) R.drawable.ic_person_inactive_24px else R.drawable.ic_person_active_24px
+    val activeIcon: Int
+        get() {
+            if (isActive == null) {
+                return R.drawable.ic_station_active_inactive_24px
+            } else if (isActive!!) {
+                return R.drawable.ic_station_active_active_24px
+            }
+            return R.drawable.ic_station_inactive_active_24px
         }
-        return R.drawable.ic_station_inactive_active_24px;
-    }
+    val activeText: Int
+        get() = if (isActive == null) R.string.no_text else if (isActive!!) R.string.filter_active else R.string.filter_inactive
+    val isPhotoFilterActive: Boolean
+        get() = photo != null
+    val isActiveFilterActive: Boolean
+        get() = isActive != null
+    val isNicknameFilterActive: Boolean
+        get() = nickname != null
 
-    public int getActiveText() {
-        return active == null ? R.string.no_text : active ? R.string.filter_active : R.string.filter_inactive;
+    fun getNicknameText(context: Context?): String? {
+        return if (isNicknameFilterActive) nickname else context!!.getString(R.string.no_text)
     }
-
-    public boolean isPhotoFilterActive() {
-        return photo != null;
-    }
-
-    public boolean isActiveFilterActive() {
-        return active != null;
-    }
-
-    public boolean isNicknameFilterActive() {
-        return nickname != null;
-    }
-
-    public String getNicknameText(Context context) {
-        return isNicknameFilterActive() ? nickname : context.getString(R.string.no_text);
-    }
-
 }

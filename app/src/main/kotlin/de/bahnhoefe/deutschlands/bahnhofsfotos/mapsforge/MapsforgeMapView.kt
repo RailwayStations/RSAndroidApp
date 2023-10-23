@@ -1,65 +1,59 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.util.AttributeSet;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
+import android.annotation.SuppressLint
+import android.content.Context
+import android.util.AttributeSet
+import android.view.GestureDetector
+import android.view.GestureDetector.SimpleOnGestureListener
+import android.view.MotionEvent
+import org.mapsforge.map.android.view.MapView
 
-import org.mapsforge.map.android.view.MapView;
+class MapsforgeMapView(context: Context?, attributeSet: AttributeSet?) :
+    MapView(context, attributeSet) {
+    private val gestureDetector: GestureDetector
+    private var onDragListener: MapDragListener? = null
 
-public class MapsforgeMapView extends MapView {
-
-    private final GestureDetector gestureDetector;
-    private MapDragListener onDragListener;
-
-    public MapsforgeMapView(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet);
-
-        gestureDetector = new GestureDetector(context, new GestureListener());
+    init {
+        gestureDetector = GestureDetector(context, GestureListener())
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
+    override fun onTouchEvent(ev: MotionEvent): Boolean {
         try {
-            gestureDetector.onTouchEvent(ev);
-            return super.onTouchEvent(ev);
-        } catch (Exception ignored) {
+            gestureDetector.onTouchEvent(ev)
+            return super.onTouchEvent(ev)
+        } catch (ignored: Exception) {
         }
-        return false;
+        return false
     }
 
-    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
+    private inner class GestureListener : SimpleOnGestureListener() {
+        override fun onDoubleTap(e: MotionEvent): Boolean {
             if (onDragListener != null) {
-                onDragListener.onDrag();
+                onDragListener!!.onDrag()
             }
-            return true;
+            return true
         }
 
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2,
-                                float distanceX, float distanceY) {
+        override fun onScroll(
+            e1: MotionEvent?, e2: MotionEvent,
+            distanceX: Float, distanceY: Float
+        ): Boolean {
             if (onDragListener != null) {
-                onDragListener.onDrag();
+                onDragListener!!.onDrag()
             }
-            return super.onScroll(e1, e2, distanceX, distanceY);
+            return super.onScroll(e1, e2, distanceX, distanceY)
         }
     }
 
-    public void setOnMapDragListener(MapDragListener onDragListener) {
-        this.onDragListener = onDragListener;
+    fun setOnMapDragListener(onDragListener: MapDragListener?) {
+        this.onDragListener = onDragListener
     }
 
     /**
      * Notifies the parent class when a MapView has been dragged
      */
-    public interface MapDragListener {
-
-        void onDrag();
-
+    interface MapDragListener {
+        fun onDrag()
     }
-
 }

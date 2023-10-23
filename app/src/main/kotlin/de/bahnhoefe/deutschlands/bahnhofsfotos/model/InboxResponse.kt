@@ -9,7 +9,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import java.lang.reflect.Type
 
 data class InboxResponse @JvmOverloads constructor(
-    @SerializedName("state") var _state: InboxResponseState? = InboxResponseState.ERROR,
+    @SerializedName("state") var inState: InboxResponseState? = InboxResponseState.ERROR,
     var message: String? = null,
     var id: Long? = null,
     var filename: String? = null,
@@ -18,9 +18,9 @@ data class InboxResponse @JvmOverloads constructor(
 ) {
 
     var state: InboxResponseState
-        get() = _state ?: InboxResponseState.ERROR
+        get() = inState ?: InboxResponseState.ERROR
         set(value) {
-            _state = value
+            inState = value
         }
 
     @JsonAdapter(InboxResponseState.Serializer::class)

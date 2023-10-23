@@ -1,64 +1,93 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
-import android.content.Context;
-
-import org.junit.jupiter.api.Test;
-import org.mapsforge.core.graphics.Bitmap;
-import org.mapsforge.core.graphics.Paint;
-import org.mapsforge.core.model.Point;
+import android.content.Context
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.mapsforge.core.graphics.Bitmap
+import org.mapsforge.core.graphics.Paint
+import org.mockito.Mockito.mock
 
 /**
- * Tests for {@link MarkerBitmap}.
+ * Tests for [MarkerBitmap].
  */
-public class MarkerBitmapTest {
-
-    private final Bitmap srcWithoutPhoto = mock(Bitmap.class);
-    private final Bitmap srcWithPhoto = mock(Bitmap.class);
-    private final Bitmap srcOwnPhoto = mock(Bitmap.class);
-    private final Bitmap srcWithoutPhotoInactive = mock(Bitmap.class);
-    private final Bitmap srcWithPhotoInactive = mock(Bitmap.class);
-    private final Bitmap srcOwnPhotoInactive = mock(Bitmap.class);
-    private final Bitmap srcPendingUpload = mock(Bitmap.class);
-    private final MarkerBitmap markerBitmap = new MarkerBitmap(mock(Context.class),
-            srcWithoutPhoto, srcWithPhoto, srcOwnPhoto, srcWithoutPhotoInactive, srcWithPhotoInactive, srcOwnPhotoInactive, srcPendingUpload,
-            mock(Point.class), 0, 0, mock(Paint.class));
+class MarkerBitmapTest {
+    private val srcWithoutPhoto = mock(
+        Bitmap::class.java
+    )
+    private val srcWithPhoto = mock(
+        Bitmap::class.java
+    )
+    private val srcOwnPhoto = mock(
+        Bitmap::class.java
+    )
+    private val srcWithoutPhotoInactive = mock(
+        Bitmap::class.java
+    )
+    private val srcWithPhotoInactive = mock(
+        Bitmap::class.java
+    )
+    private val srcOwnPhotoInactive = mock(
+        Bitmap::class.java
+    )
+    private val srcPendingUpload = mock(
+        Bitmap::class.java
+    )
+    private val markerBitmap = MarkerBitmap(
+        mock(
+            Context::class.java
+        ),
+        srcWithoutPhoto,
+        srcWithPhoto,
+        srcOwnPhoto,
+        srcWithoutPhotoInactive,
+        srcWithPhotoInactive,
+        srcOwnPhotoInactive,
+        srcPendingUpload,
+        0f,
+        mock(
+            Paint::class.java
+        )
+    )
 
     @Test
-    public void getBitmap_OwnPhotoActive() {
-        assertThat(markerBitmap.getBitmap(true, true, true, false)).isSameAs(srcOwnPhoto);
+    fun bitmap_OwnPhotoActive() {
+        assertThat(markerBitmap.getBitmap(true, true, true, false))
+            .isSameAs(srcOwnPhoto)
     }
 
     @Test
-    public void getBitmap_OwnPhotoInactive() {
-        assertThat(markerBitmap.getBitmap(true, true, false, false)).isSameAs(srcOwnPhotoInactive);
+    fun bitmap_OwnPhotoInactive() {
+        assertThat(markerBitmap.getBitmap(true, true, false, false))
+            .isSameAs(srcOwnPhotoInactive)
     }
 
     @Test
-    public void getBitmap_PhotoActive() {
-        assertThat(markerBitmap.getBitmap(true, false, true, false)).isSameAs(srcWithPhoto);
+    fun bitmap_PhotoActive() {
+        assertThat(markerBitmap.getBitmap(true, false, true, false))
+            .isSameAs(srcWithPhoto)
     }
 
     @Test
-    public void getBitmap_PhotoInactive() {
-        assertThat(markerBitmap.getBitmap(true, false, false, false)).isSameAs(srcWithPhotoInactive);
+    fun bitmap_PhotoInactive() {
+        assertThat(markerBitmap.getBitmap(true, false, false, false))
+            .isSameAs(srcWithPhotoInactive)
     }
 
     @Test
-    public void getBitmap_WithoutPhotoActive() {
-        assertThat(markerBitmap.getBitmap(false, false, true, false)).isSameAs(srcWithoutPhoto);
+    fun bitmap_WithoutPhotoActive() {
+        assertThat(markerBitmap.getBitmap(false, false, true, false))
+            .isSameAs(srcWithoutPhoto)
     }
 
     @Test
-    public void getBitmap_WithoutPhotoInactive() {
-        assertThat(markerBitmap.getBitmap(false, false, false, false)).isSameAs(srcWithoutPhotoInactive);
+    fun bitmap_WithoutPhotoInactive() {
+        assertThat(markerBitmap.getBitmap(false, false, false, false))
+            .isSameAs(srcWithoutPhotoInactive)
     }
 
     @Test
-    public void getBitmap_PendingUpload() {
-        assertThat(markerBitmap.getBitmap(false, false, false, true)).isSameAs(srcPendingUpload);
+    fun bitmap_PendingUpload() {
+        assertThat(markerBitmap.getBitmap(false, false, false, true))
+            .isSameAs(srcPendingUpload)
     }
-
 }

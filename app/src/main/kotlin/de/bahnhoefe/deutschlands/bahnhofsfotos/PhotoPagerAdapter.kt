@@ -1,70 +1,49 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos;
+package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.github.chrisbanes.photoview.PhotoView
+import de.bahnhoefe.deutschlands.bahnhofsfotos.PhotoPagerAdapter.PhotoViewHolder
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PageablePhoto
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.github.chrisbanes.photoview.PhotoView;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PageablePhoto;
-
-public class PhotoPagerAdapter extends RecyclerView.Adapter<PhotoPagerAdapter.PhotoViewHolder> {
-
-    private final List<PageablePhoto> pageablePhotos = new ArrayList<>();
-
-    private final Context context;
-
-    public PhotoPagerAdapter(Context context) {
-        this.context = context;
+class PhotoPagerAdapter(private val context: Context) : RecyclerView.Adapter<PhotoViewHolder>() {
+    private val pageablePhotos: MutableList<PageablePhoto> = ArrayList()
+    fun addPageablePhoto(pageablePhoto: PageablePhoto): Int {
+        pageablePhotos.add(pageablePhoto)
+        notifyDataSetChanged()
+        return pageablePhotos.size - 1
     }
 
-    public int addPageablePhoto(PageablePhoto pageablePhoto) {
-        pageablePhotos.add(pageablePhoto);
-        notifyDataSetChanged();
-        return pageablePhotos.size() - 1;
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
+        val view = LayoutInflater.from(context).inflate(R.layout.photo_view_item, parent, false)
+        return PhotoViewHolder(view)
     }
 
-    @NonNull
-    @Override
-    public PhotoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        var view = LayoutInflater.from(context).inflate(R.layout.photo_view_item, parent, false);
-        return new PhotoViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull PhotoViewHolder holder, int position) {
-        var pageablePhoto = getPageablePhotoAtPosition(position);
+    override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
+        val pageablePhoto = getPageablePhotoAtPosition(position)
         if (pageablePhoto == null) {
-            holder.photoView.setImageResource(R.drawable.photo_missing);
+            holder.photoView.setImageResource(R.drawable.photo_missing)
         } else {
-            holder.photoView.setImageBitmap(pageablePhoto.getBitmap());
+            holder.photoView.setImageBitmap(pageablePhoto.bitmap)
         }
     }
 
-    public PageablePhoto getPageablePhotoAtPosition(int position) {
-        return pageablePhotos.isEmpty() ? null : pageablePhotos.get(position);
+    fun getPageablePhotoAtPosition(position: Int): PageablePhoto? {
+        return if (pageablePhotos.isEmpty()) null else pageablePhotos[position]
     }
 
-    @Override
-    public int getItemCount() {
-        return pageablePhotos.isEmpty() ? 1 : pageablePhotos.size();
+    override fun getItemCount(): Int {
+        return if (pageablePhotos.isEmpty()) 1 else pageablePhotos.size
     }
 
-    public static class PhotoViewHolder extends RecyclerView.ViewHolder {
+    class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var photoView: PhotoView
 
-        PhotoView photoView;
-
-        public PhotoViewHolder(@NonNull View itemView) {
-            super(itemView);
-            photoView = itemView.findViewById(R.id.photoView);
+        init {
+            photoView = itemView.findViewById(R.id.photoView)
         }
     }
-
 }

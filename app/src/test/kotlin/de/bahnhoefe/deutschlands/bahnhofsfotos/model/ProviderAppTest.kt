@@ -1,34 +1,28 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import static org.assertj.core.api.Assertions.assertThat;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp.Companion.getCompatibleProviderApps
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp.Companion.hasCompatibleProviderApps
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import java.util.List
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-
-import java.util.List;
-
-class ProviderAppTest {
-
+internal class ProviderAppTest {
     @ParameterizedTest
-    @CsvSource({
-            "iOS, false",
-            "android, true",
-            "web, true"
-    })
-    void hasCompatibleProviderApps(String type, boolean expectedHasCompatibleProviderApps) {
-        var providerApps = List.of(new ProviderApp(type));
-
-        assertThat(ProviderApp.hasCompatibleProviderApps(providerApps)).isEqualTo(expectedHasCompatibleProviderApps);
+    @CsvSource("iOS, false", "android, true", "web, true")
+    fun hasCompatibleProviderApps(type: String?, expectedHasCompatibleProviderApps: Boolean) {
+        val providerApps = List.of(ProviderApp(type))
+        assertThat(hasCompatibleProviderApps(providerApps))
+            .isEqualTo(expectedHasCompatibleProviderApps)
     }
 
     @Test
-    void getCompatibleProviderApps() {
-        var webProviderApp = new ProviderApp("web");
-        var androidProviderApp = new ProviderApp("android");
-        var providerApps = List.of(webProviderApp, new ProviderApp("iOS"), androidProviderApp);
-
-        assertThat(ProviderApp.getCompatibleProviderApps(providerApps)).containsExactlyInAnyOrder(webProviderApp, androidProviderApp);
+    fun compatibleProviderApps() {
+        val webProviderApp = ProviderApp("web")
+        val androidProviderApp = ProviderApp("android")
+        val providerApps = List.of(webProviderApp, ProviderApp("iOS"), androidProviderApp)
+        assertThat(getCompatibleProviderApps(providerApps))
+            .containsExactlyInAnyOrder(webProviderApp, androidProviderApp)
     }
-
 }

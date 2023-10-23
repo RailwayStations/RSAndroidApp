@@ -1,45 +1,46 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.db;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.db
 
-import android.content.Context;
-import android.database.Cursor;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CursorAdapter;
+import android.content.Context
+import android.database.Cursor
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.CursorAdapter
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemStationBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.STATIONS
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemStationBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants;
+class StationListAdapter(context: Context, cursor: Cursor?, flags: Int) :
+    CursorAdapter(context, cursor, flags) {
+    private val mInflater: LayoutInflater
 
-public class StationListAdapter extends CursorAdapter {
-    private final LayoutInflater mInflater;
-
-    public StationListAdapter(Context context, Cursor cursor, int flags) {
-        super(context, cursor, flags);
-        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    init {
+        mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     }
 
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        var binding = ItemStationBinding.inflate(mInflater, parent, false);
-        var view = binding.getRoot();
-        view.setTag(binding);
-        return view;
+    override fun newView(context: Context, cursor: Cursor, parent: ViewGroup): View {
+        val binding = ItemStationBinding.inflate(mInflater, parent, false)
+        val view = binding.root
+        view.tag = binding
+        return view
     }
 
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    override fun bindView(view: View, context: Context, cursor: Cursor) {
         //If you want to have zebra lines color effect uncomment below code
-        if (cursor.getPosition() % 2 == 1) {
-            view.setBackgroundResource(R.drawable.item_list_backgroundcolor);
+        if (cursor.position % 2 == 1) {
+            view.setBackgroundResource(R.drawable.item_list_backgroundcolor)
         } else {
-            view.setBackgroundResource(R.drawable.item_list_backgroundcolor2);
+            view.setBackgroundResource(R.drawable.item_list_backgroundcolor2)
         }
-
-        var binding = (ItemStationBinding) view.getTag();
-        binding.txtState.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.COUNTRY)).concat(": ").concat(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.ID))));
-        binding.txtStationName.setText(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.TITLE)));
-        binding.hasPhoto.setVisibility(cursor.getString(cursor.getColumnIndexOrThrow(Constants.STATIONS.PHOTO_URL)) != null? View.VISIBLE : View.INVISIBLE);
+        val binding = view.tag as ItemStationBinding
+        binding.txtStationKey.text = getStationkey(cursor)
+        binding.txtStationName.text = cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.TITLE))
+        binding.hasPhoto.visibility =
+            if (cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.PHOTO_URL)) != null) View.VISIBLE else View.INVISIBLE
     }
 
+    private fun getStationkey(cursor: Cursor) =
+        cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.COUNTRY)) + ": " + cursor.getString(
+            cursor.getColumnIndexOrThrow(STATIONS.ID)
+        )
 }

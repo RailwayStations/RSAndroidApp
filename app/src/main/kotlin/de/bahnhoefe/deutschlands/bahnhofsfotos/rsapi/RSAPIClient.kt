@@ -1,286 +1,310 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi
 
-import android.content.Context;
-import android.net.Uri;
-import android.os.Build;
-import android.util.Log;
-import android.widget.Toast;
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.util.Log
+import android.widget.Toast
+import com.google.gson.GsonBuilder
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore.HighScoreDeserializer
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License.LicenseDeserializer
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PKCEUtil
+import okhttp3.Interceptor
+import okhttp3.Interceptor.Chain.proceed
+import okhttp3.Interceptor.Chain.request
+import okhttp3.OkHttpClient.Builder.addInterceptor
+import okhttp3.OkHttpClient.Builder.build
+import okhttp3.Request.Builder.build
+import okhttp3.Request.Builder.header
+import okhttp3.Request.newBuilder
+import okhttp3.RequestBody
+import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
+import java.security.NoSuchAlgorithmException
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Consumer
 
-import androidx.annotation.NonNull;
+class RSAPIClient(
+    private var baseUrl: String,
+    private val clientId: String,
+    accessToken: String?,
+    val redirectUri: String
+) {
+    private var api: RSAPI
+    private var token: Token? = null
+    private var pkce: PKCEUtil? = null
 
-import com.google.gson.GsonBuilder;
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PKCEUtil;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
-public class RSAPIClient {
-
-    private static final String TAG = RSAPIClient.class.getSimpleName();
-    private final String redirectUri;
-    private RSAPI api;
-    private String baseUrl;
-    private final String clientId;
-    private Token token;
-    private PKCEUtil pkce;
-
-    public RSAPIClient(String baseUrl, String clientId, String accessToken, String redirectUri) {
-        this.baseUrl = baseUrl;
-        this.clientId = clientId;
-        this.redirectUri = redirectUri;
+    init {
         if (accessToken != null) {
-            this.token = new Token(
-                    accessToken,
-                    "Bearer");
+            token = Token(
+                accessToken,
+                "Bearer"
+            )
         }
-        api = createRSAPI();
+        api = createRSAPI()
     }
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-        this.api = createRSAPI();
+    fun setBaseUrl(baseUrl: String) {
+        this.baseUrl = baseUrl
+        api = createRSAPI()
     }
 
-    private String getPkceCodeChallenge() throws NoSuchAlgorithmException {
-        pkce = new PKCEUtil();
-        return pkce.getCodeChallenge();
-    }
+    @get:Throws(NoSuchAlgorithmException::class)
+    private val pkceCodeChallenge: String?
+        private get() {
+            pkce = PKCEUtil()
+            return pkce.getCodeChallenge()
+        }
+    private val pkceCodeVerifier: String?
+        private get() = if (pkce != null) pkce.getCodeVerifier() else null
 
-    private String getPkceCodeVerifier() {
-        return pkce != null ? pkce.getCodeVerifier() : null;
-    }
-
-    private RSAPI createRSAPI() {
-        var gson = new GsonBuilder();
-        gson.registerTypeAdapter(HighScore.class, new HighScore.HighScoreDeserializer());
-        gson.registerTypeAdapter(License.class, new License.LicenseDeserializer());
-
-        var builder = new OkHttpClient.Builder()
-                .addInterceptor(new UserAgentInterceptor())
-                .addInterceptor(new AcceptLanguageInterceptor());
-
+    private fun createRSAPI(): RSAPI {
+        val gson = GsonBuilder()
+        gson.registerTypeAdapter(HighScore::class.java, HighScoreDeserializer())
+        gson.registerTypeAdapter(License::class.java, LicenseDeserializer())
+        val builder: Builder = Builder()
+            .addInterceptor(UserAgentInterceptor())
+            .addInterceptor(AcceptLanguageInterceptor())
         if (BuildConfig.DEBUG) {
-            var loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            builder.addInterceptor(loggingInterceptor);
+            val loggingInterceptor = HttpLoggingInterceptor()
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+            builder.addInterceptor(loggingInterceptor)
         }
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .client(builder.build())
-                .addConverterFactory(GsonConverterFactory.create(gson.create()))
-                .build();
-
-        return retrofit.create(RSAPI.class);
+        val retrofit = Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .client(builder.build())
+            .addConverterFactory(GsonConverterFactory.create(gson.create()))
+            .build()
+        return retrofit.create(RSAPI::class.java)
     }
 
-    private static class AcceptLanguageInterceptor implements Interceptor {
-
-        @NonNull
-        @Override
-        public okhttp3.Response intercept(@NonNull final Chain chain) throws IOException {
-            return chain.proceed(chain.request().newBuilder()
+    private class AcceptLanguageInterceptor : Interceptor {
+        @Throws(IOException::class)
+        override fun intercept(chain: Chain): Response {
+            return chain.proceed(
+                chain.request().newBuilder()
                     .header("Accept-Language", Locale.getDefault().toLanguageTag())
-                    .build());
+                    .build()
+            )
         }
-
     }
 
     /**
      * This interceptor adds a custom User-Agent.
      */
-    public static class UserAgentInterceptor implements Interceptor {
+    class UserAgentInterceptor : Interceptor {
+        private val USER_AGENT =
+            BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT
 
-        private final String USER_AGENT = BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + "); Android " + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT;
-
-        @Override
-        @NonNull
-        public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
-            return chain.proceed(chain.request().newBuilder()
+        @Throws(IOException::class)
+        override fun intercept(chain: Chain): Response {
+            return chain.proceed(
+                chain.request().newBuilder()
                     .header("User-Agent", USER_AGENT)
-                    .build());
+                    .build()
+            )
         }
     }
 
-    public Call<List<Country>> getCountries() {
-        return api.getCountries();
-    }
+    val countries: Call<List<Country?>?>?
+        get() = api.countries
 
-    public void runUpdateCountriesAndStations(Context context, BaseApplication baseApplication, ResultListener listener) {
-        getCountries().enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Country>> call, @NonNull Response<List<Country>> response) {
-                var body = response.body();
-                if (response.isSuccessful() && body != null) {
-                    baseApplication.getDbAdapter().insertCountries(body);
+    fun runUpdateCountriesAndStations(
+        context: Context,
+        baseApplication: BaseApplication?,
+        listener: (Boolean) -> Unit
+    ) {
+        countries!!.enqueue(object : Callback<List<Country>?> {
+            override fun onResponse(
+                call: Call<List<Country>?>,
+                response: retrofit2.Response<List<Country>?>
+            ) {
+                val body = response.body()
+                if (response.isSuccessful && body != null) {
+                    baseApplication.getDbAdapter().insertCountries(body)
                 }
             }
 
-            @Override
-            public void onFailure(@NonNull Call<List<Country>> call, @NonNull Throwable t) {
-                Log.e(TAG, "Error refreshing countries", t);
-                Toast.makeText(context, context.getString(R.string.error_updating_countries) + t.getMessage(), Toast.LENGTH_LONG).show();
+            override fun onFailure(call: Call<List<Country>?>, t: Throwable) {
+                Log.e(TAG, "Error refreshing countries", t)
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.error_updating_countries) + t.message,
+                    Toast.LENGTH_LONG
+                ).show()
             }
-        });
-
-        var countryCodes = baseApplication.getCountryCodes();
-        var overallSuccess = new AtomicBoolean(true);
-        var runningRequestCount = new AtomicInteger(countryCodes.size());
-        countryCodes.forEach(countryCode -> api.getPhotoStationsByCountry(countryCode).enqueue(new Callback<PhotoStations>() {
-            @Override
-            public void onResponse(@NonNull Call<PhotoStations> call, @NonNull Response<PhotoStations> response) {
-                var stationList = response.body();
-                if (response.isSuccessful() && stationList != null) {
-                    baseApplication.getDbAdapter().insertStations(stationList, countryCode);
-                    baseApplication.setLastUpdate(System.currentTimeMillis());
+        })
+        val countryCodes = baseApplication.getCountryCodes()
+        val overallSuccess = AtomicBoolean(true)
+        val runningRequestCount = AtomicInteger(
+            countryCodes!!.size
+        )
+        countryCodes!!.forEach(Consumer<String?> { countryCode: String? ->
+            api.getPhotoStationsByCountry(countryCode).enqueue(object : Callback<PhotoStations?> {
+                override fun onResponse(
+                    call: Call<PhotoStations?>,
+                    response: retrofit2.Response<PhotoStations?>
+                ) {
+                    val stationList = response.body()
+                    if (response.isSuccessful && stationList != null) {
+                        baseApplication.getDbAdapter().insertStations(stationList, countryCode)
+                        baseApplication.setLastUpdate(System.currentTimeMillis())
+                    }
+                    if (!response.isSuccessful) {
+                        overallSuccess.set(false)
+                    }
+                    onResult(response.isSuccessful)
                 }
-                if (!response.isSuccessful()) {
-                    overallSuccess.set(false);
+
+                override fun onFailure(call: Call<PhotoStations?>, t: Throwable) {
+                    Log.e(TAG, "Error refreshing stations", t)
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.station_update_failed) + t.message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                    onResult(false)
                 }
-                onResult(response.isSuccessful());
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<PhotoStations> call, @NonNull Throwable t) {
-                Log.e(TAG, "Error refreshing stations", t);
-                Toast.makeText(context, context.getString(R.string.station_update_failed) + t.getMessage(), Toast.LENGTH_LONG).show();
-                onResult(false);
-            }
-
-            void onResult(boolean success) {
-                var stillRunningRequests = runningRequestCount.decrementAndGet();
-                if (!success) {
-                    overallSuccess.set(false);
+                fun onResult(success: Boolean) {
+                    val stillRunningRequests = runningRequestCount.decrementAndGet()
+                    if (!success) {
+                        overallSuccess.set(false)
+                    }
+                    if (stillRunningRequests == 0) {
+                        listener.onResult(overallSuccess.get())
+                    }
                 }
-                if (stillRunningRequests == 0) {
-                    listener.onResult(overallSuccess.get());
-                }
-            }
-        }));
-
+            })
+        })
     }
 
-    public Call<PhotoStations> getPhotoStationById(String country, String id) {
-        return api.getPhotoStationById(country, id);
+    fun getPhotoStationById(country: String?, id: String?): Call<PhotoStations?>? {
+        return api.getPhotoStationById(country, id)
     }
 
-    public Call<PhotoStations> getPhotoStationsByCountry(String country) {
-        return api.getPhotoStationsByCountry(country);
+    fun getPhotoStationsByCountry(country: String?): Call<PhotoStations?>? {
+        return api.getPhotoStationsByCountry(country)
     }
 
-    public Call<List<PublicInbox>> getPublicInbox() {
-        return api.getPublicInbox();
+    val publicInbox: Call<List<PublicInbox?>?>?
+        get() = api.publicInbox
+    val highScore: Call<HighScore?>?
+        get() = api.highScore
+
+    fun getHighScore(country: String?): Call<HighScore?>? {
+        return api.getHighScore(country)
     }
 
-    public Call<HighScore> getHighScore() {
-        return api.getHighScore();
+    fun reportProblem(problemReport: ProblemReport?): Call<InboxResponse?>? {
+        return api.reportProblem(userAuthorization, problemReport)
     }
 
-    public Call<HighScore> getHighScore(String country) {
-        return api.getHighScore(country);
+    private val userAuthorization: String?
+        private get() = if (hasToken()) {
+            token!!.tokenType + " " + token!!.accessToken
+        } else null
+
+    fun photoUpload(
+        stationId: String?, countryCode: String?,
+        stationTitle: String?, latitude: Double?,
+        longitude: Double?, comment: String?,
+        active: Boolean?, file: RequestBody?
+    ): Call<InboxResponse?>? {
+        return api.photoUpload(
+            userAuthorization,
+            stationId,
+            countryCode,
+            stationTitle,
+            latitude,
+            longitude,
+            comment,
+            active,
+            file
+        )
     }
 
-    public Call<InboxResponse> reportProblem(ProblemReport problemReport) {
-        return api.reportProblem(getUserAuthorization(), problemReport);
+    fun queryUploadState(stateQueries: List<InboxStateQuery?>?): Call<List<InboxStateQuery?>?>? {
+        return api.queryUploadState(userAuthorization, stateQueries)
     }
 
-    private String getUserAuthorization() {
-        if (hasToken()) {
-            return token.getTokenType() + " " + token.getAccessToken();
-        }
-        return null;
+    val profile: Call<Profile?>?
+        get() = api.getProfile(userAuthorization)
+
+    fun saveProfile(profile: Profile?): Call<Void?>? {
+        return api.saveProfile(userAuthorization, profile)
     }
 
-    public Call<InboxResponse> photoUpload(String stationId, String countryCode,
-                                           String stationTitle, Double latitude,
-                                           Double longitude, String comment,
-                                           Boolean active, RequestBody file) {
-        return api.photoUpload(getUserAuthorization(), stationId, countryCode, stationTitle, latitude, longitude, comment, active, file);
+    fun changePassword(newPassword: String?): Call<Void?>? {
+        return api.changePassword(userAuthorization, ChangePassword(newPassword!!))
     }
 
-    public Call<List<InboxStateQuery>> queryUploadState(List<InboxStateQuery> stateQueries) {
-        return api.queryUploadState(getUserAuthorization(), stateQueries);
+    fun deleteAccount(): Call<Void?>? {
+        return api.deleteAccount(userAuthorization)
     }
 
-    public Call<Profile> getProfile() {
-        return api.getProfile(getUserAuthorization());
+    fun resendEmailVerification(): Call<Void?>? {
+        return api.resendEmailVerification(userAuthorization)
     }
 
-    public Call<Void> saveProfile(Profile profile) {
-        return api.saveProfile(getUserAuthorization(), profile);
+    fun getStatistic(country: String?): Call<Statistic?>? {
+        return api.getStatistic(country)
     }
 
-    public Call<Void> changePassword(String newPassword) {
-        return api.changePassword(getUserAuthorization(), new ChangePassword(newPassword));
+    fun requestAccessToken(code: String?): Call<Token?>? {
+        return api.requestAccessToken(
+            code,
+            clientId,
+            "authorization_code",
+            redirectUri,
+            pkceCodeVerifier
+        )
     }
 
-    public Call<Void> deleteAccount() {
-        return api.deleteAccount(getUserAuthorization());
+    fun setToken(token: Token?) {
+        this.token = token
     }
 
-    public Call<Void> resendEmailVerification() {
-        return api.resendEmailVerification(getUserAuthorization());
+    fun hasToken(): Boolean {
+        return token != null
     }
 
-    public Call<Statistic> getStatistic(String country) {
-        return api.getStatistic(country);
+    fun clearToken() {
+        token = null
     }
 
-    public Call<Token> requestAccessToken(String code) {
-        return api.requestAccessToken(code, clientId, "authorization_code", redirectUri, getPkceCodeVerifier());
+    @Throws(NoSuchAlgorithmException::class)
+    fun createAuthorizeUri(): Uri {
+        return Uri.parse(baseUrl + "oauth2/authorize" + "?client_id=" + clientId + "&code_challenge=" + pkceCodeChallenge + "&code_challenge_method=S256&scope=all&response_type=code&redirect_uri=" + redirectUri)
     }
 
-    public void setToken(Token token) {
-        this.token = token;
+    interface ResultListener {
+        fun onResult(success: Boolean)
     }
 
-    public boolean hasToken() {
-        return token != null;
+    companion object {
+        private val TAG = RSAPIClient::class.java.simpleName
     }
-
-    public void clearToken() {
-        this.token = null;
-    }
-
-    public Uri createAuthorizeUri() throws NoSuchAlgorithmException {
-        return Uri.parse(baseUrl + "oauth2/authorize" + "?client_id=" + clientId + "&code_challenge=" + getPkceCodeChallenge() + "&code_challenge_method=S256&scope=all&response_type=code&redirect_uri=" + redirectUri);
-    }
-
-    public String getRedirectUri() {
-        return redirectUri;
-    }
-
-    public interface ResultListener {
-        void onResult(boolean success);
-    }
-
 }

@@ -1,48 +1,43 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.model;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.google.gson.Gson
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse.InboxResponseState
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
-import com.google.gson.Gson;
-
-import org.junit.jupiter.api.Test;
-
-class InboxResponseTest {
-
+internal class InboxResponseTest {
     @Test
-    void defaultConstructor() {
-        var inboxResponse = new InboxResponse();
-
-        assertThat(inboxResponse.getState()).isSameAs(InboxResponse.InboxResponseState.ERROR);
+    fun defaultConstructor() {
+        val inboxResponse = InboxResponse()
+        assertThat(inboxResponse.state).isSameAs(InboxResponseState.ERROR)
     }
 
     @Test
-    void defaultConstructorNullState() {
-        var inboxResponse = new InboxResponse(null);
-
-        assertThat(inboxResponse.getState()).isSameAs(InboxResponse.InboxResponseState.ERROR);
+    fun defaultConstructorNullState() {
+        val inboxResponse = InboxResponse(null)
+        assertThat(inboxResponse.state).isSameAs(InboxResponseState.ERROR)
     }
 
     @Test
-    void defaultConstructorWithState() {
-        var inboxResponse = new InboxResponse(InboxResponse.InboxResponseState.REVIEW);
-
-        assertThat(inboxResponse.getState()).isSameAs(InboxResponse.InboxResponseState.REVIEW);
+    fun defaultConstructorWithState() {
+        val inboxResponse = InboxResponse(InboxResponseState.REVIEW)
+        assertThat(inboxResponse.state).isSameAs(InboxResponseState.REVIEW)
     }
 
     @Test
-    void fromJsonWithoutState() {
-        var inboxResponse = new Gson().fromJson("{'message':'some message'}", InboxResponse.class);
-
-        assertThat(inboxResponse.getState()).isSameAs(InboxResponse.InboxResponseState.ERROR);
-        assertThat(inboxResponse.getMessage()).isEqualTo("some message");
+    fun fromJsonWithoutState() {
+        val inboxResponse = Gson().fromJson("{'message':'some message'}", InboxResponse::class.java)
+        assertThat(inboxResponse.state).isSameAs(InboxResponseState.ERROR)
+        assertThat(inboxResponse.message).isEqualTo("some message")
     }
 
     @Test
-    void fromJsonWithState() {
-        var inboxResponse = new Gson().fromJson("{'state': 'REVIEW', 'message':'some message'}", InboxResponse.class);
-
-        assertThat(inboxResponse.getState()).isSameAs(InboxResponse.InboxResponseState.REVIEW);
-        assertThat(inboxResponse.getMessage()).isEqualTo("some message");
+    fun fromJsonWithState() {
+        val inboxResponse = Gson().fromJson(
+            "{'state': 'REVIEW', 'message':'some message'}",
+            InboxResponse::class.java
+        )
+        assertThat(inboxResponse.state).isSameAs(InboxResponseState.REVIEW)
+        assertThat(inboxResponse.message).isEqualTo("some message")
     }
-
 }

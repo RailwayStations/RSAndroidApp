@@ -1,109 +1,122 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi
 
-import java.util.List;
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
-import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.DELETE;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
-import retrofit2.http.Header;
-import retrofit2.http.Headers;
-import retrofit2.http.POST;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
-
-public interface RSAPI {
-
-    String TAG = RSAPI.class.getSimpleName();
-
-    @GET("/countries")
-    Call<List<Country>> getCountries();
+interface RSAPI {
+    @get:GET("/countries")
+    val countries: Call<List<Country?>?>?
 
     @GET("/stats")
-    Call<Statistic> getStatistic(@Query("country") String country);
+    fun getStatistic(@Query("country") country: String?): Call<Statistic?>?
 
     @GET("/photographers")
-    Call<HighScore> getHighScore(@Query("country") String country);
+    fun getHighScore(@Query("country") country: String?): Call<HighScore?>?
 
-    @GET("/photographers")
-    Call<HighScore> getHighScore();
+    @get:GET("/photographers")
+    val highScore: Call<HighScore?>?
 
     @GET("/myProfile")
-    Call<Profile> getProfile(@Header("Authorization") String authorization);
+    fun getProfile(@Header("Authorization") authorization: String?): Call<Profile?>?
 
-    @Headers({
-            "Content-Type: application/json"
-    })
+    @Headers("Content-Type: application/json")
     @POST("/myProfile")
-    Call<Void> saveProfile(@Header("Authorization") String authorization, @Body Profile profile);
+    fun saveProfile(
+        @Header("Authorization") authorization: String?,
+        @Body profile: Profile?
+    ): Call<Void?>?
 
-    @Headers({
-            "Content-Type: application/json"
-    })
-
+    @Headers("Content-Type: application/json")
     @POST("/changePassword")
-    Call<Void> changePassword(@Header("Authorization") String authorization, @Body ChangePassword changePassword);
+    fun changePassword(
+        @Header("Authorization") authorization: String?,
+        @Body changePassword: ChangePassword?
+    ): Call<Void?>?
 
     @POST("/photoUpload")
-    Call<InboxResponse> photoUpload(@Header("Authorization") String authorization,
-                                    @Header("Station-Id") String stationId,
-                                    @Header("Country") String countryCode,
-                                    @Header("Station-Title") String stationTitle,
-                                    @Header("Latitude") Double latitude,
-                                    @Header("Longitude") Double longitude,
-                                    @Header("Comment") String comment,
-                                    @Header("Active") Boolean active,
-                                    @Body RequestBody file);
+    fun photoUpload(
+        @Header("Authorization") authorization: String?,
+        @Header("Station-Id") stationId: String?,
+        @Header("Country") countryCode: String?,
+        @Header("Station-Title") stationTitle: String?,
+        @Header("Latitude") latitude: Double?,
+        @Header("Longitude") longitude: Double?,
+        @Header("Comment") comment: String?,
+        @Header("Active") active: Boolean?,
+        @Body file: RequestBody?
+    ): Call<InboxResponse?>?
 
-    @Headers({
-            "Content-Type: application/json"
-    })
+    @Headers("Content-Type: application/json")
     @POST("/userInbox")
-    Call<List<InboxStateQuery>> queryUploadState(@Header("Authorization") String authorization,
-                                                 @Body List<InboxStateQuery> inboxStateQueries);
+    fun queryUploadState(
+        @Header("Authorization") authorization: String?,
+        @Body inboxStateQueries: List<InboxStateQuery?>?
+    ): Call<List<InboxStateQuery?>?>?
 
-    @Headers({
-            "Content-Type: application/json"
-    })
+    @Headers("Content-Type: application/json")
     @POST("/reportProblem")
-    Call<InboxResponse> reportProblem(@Header("Authorization") String authorization,
-                                      @Body ProblemReport problemReport);
+    fun reportProblem(
+        @Header("Authorization") authorization: String?,
+        @Body problemReport: ProblemReport?
+    ): Call<InboxResponse?>?
 
-    @GET("/publicInbox")
-    Call<List<PublicInbox>> getPublicInbox();
+    @get:GET("/publicInbox")
+    val publicInbox: Call<List<PublicInbox?>?>?
 
     @POST("/resendEmailVerification")
-    Call<Void> resendEmailVerification(@Header("Authorization") String authorization);
+    fun resendEmailVerification(@Header("Authorization") authorization: String?): Call<Void?>?
 
     @GET("/photoStationById/{country}/{id}")
-    Call<PhotoStations> getPhotoStationById(@Path("country") String country, @Path("id") String id);
+    fun getPhotoStationById(
+        @Path("country") country: String?,
+        @Path("id") id: String?
+    ): Call<PhotoStations?>?
 
     @GET("/photoStationsByCountry/{country}")
-    Call<PhotoStations> getPhotoStationsByCountry(@Path("country") String country);
+    fun getPhotoStationsByCountry(@Path("country") country: String?): Call<PhotoStations?>
 
     @FormUrlEncoded
     @POST("/oauth2/token")
-    Call<Token> requestAccessToken(@Field("code") String code, @Field("client_id") String clientId, @Field("grant_type") String grantType, @Field("redirect_uri") String redirectUri, @Field("code_verifier") String codeVerifier);
+    fun requestAccessToken(
+        @Field("code") code: String?,
+        @Field("client_id") clientId: String?,
+        @Field("grant_type") grantType: String?,
+        @Field("redirect_uri") redirectUri: String?,
+        @Field("code_verifier") codeVerifier: String?
+    ): Call<Token?>?
 
     @FormUrlEncoded
     @POST("/oauth2/revoke")
-    Call<Token> revokeToken(@Field("token") String accessToken, @Field("token_type_hint") String tokenTypeHint);
+    fun revokeToken(
+        @Field("token") accessToken: String?,
+        @Field("token_type_hint") tokenTypeHint: String?
+    ): Call<Token?>?
 
     @DELETE("/myProfile")
-    Call<Void> deleteAccount(@Header("Authorization") String authorization);
+    fun deleteAccount(@Header("Authorization") authorization: String?): Call<Void?>?
 
+    companion object {
+        val TAG = RSAPI::class.java.simpleName
+    }
 }

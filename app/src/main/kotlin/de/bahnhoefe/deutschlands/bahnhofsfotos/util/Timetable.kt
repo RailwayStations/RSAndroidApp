@@ -1,35 +1,31 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.util;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.util
 
-import android.content.Intent;
-import android.net.Uri;
+import android.content.Intent
+import android.net.Uri
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
+import org.apache.commons.lang3.StringUtils
 
-import androidx.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station;
-
-public class Timetable {
-
+class Timetable {
     /**
      * Build an intent for an action to view a timetable for the station.
      *
      * @return the PendingIntent built.
      */
-    @Nullable
-    public Intent createTimetableIntent(Country country, Station station) {
+    fun createTimetableIntent(country: Country, station: Station?): Intent? {
         if (!country.hasTimetableUrlTemplate()) {
-            return null;
+            return null
         }
-
-        var timeTableTemplate = country.getTimetableUrlTemplate();
-        timeTableTemplate = timeTableTemplate.replace("{id}", station.getId());
-        timeTableTemplate = timeTableTemplate.replace("{title}", station.getTitle());
-        timeTableTemplate = timeTableTemplate.replace("{DS100}", StringUtils.trimToEmpty(station.getDs100()));
-
-        var timetableIntent = new Intent(Intent.ACTION_VIEW);
-        timetableIntent.setData(Uri.parse(timeTableTemplate));
-        return timetableIntent;
+        var timeTableTemplate = country.timetableUrlTemplate
+        timeTableTemplate = timeTableTemplate!!.replace("{id}", station!!.id!!)
+        timeTableTemplate = timeTableTemplate.replace("{title}", station.title!!)
+        timeTableTemplate = timeTableTemplate.replace(
+            "{DS100}", StringUtils.trimToEmpty(
+                station.ds100
+            )
+        )
+        val timetableIntent = Intent(Intent.ACTION_VIEW)
+        timetableIntent.data = Uri.parse(timeTableTemplate)
+        return timetableIntent
     }
 }

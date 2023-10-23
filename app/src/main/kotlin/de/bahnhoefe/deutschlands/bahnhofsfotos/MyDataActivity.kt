@@ -1,452 +1,481 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos;
+package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.ContextThemeWrapper;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.content.DialogInterface
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.util.Patterns
+import android.view.ContextThemeWrapper
+import android.view.View
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMydataBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ChangePasswordBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
+import org.apache.commons.lang3.StringUtils
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.UnsupportedEncodingException
+import java.net.MalformedURLException
+import java.net.URL
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.security.NoSuchAlgorithmException
+import java.util.Objects
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMydataBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ChangePasswordBinding;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class MyDataActivity extends AppCompatActivity {
-
-    private static final String TAG = MyDataActivity.class.getSimpleName();
-
-    private License license;
-    private BaseApplication baseApplication;
-    private RSAPIClient rsapiClient;
-    private Profile profile;
-    private ActivityMydataBinding binding;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityMydataBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(R.string.login);
-
-        binding.myData.profileForm.setVisibility(View.INVISIBLE);
-
-        baseApplication = (BaseApplication) getApplication();
-        rsapiClient = baseApplication.getRsapiClient();
-
-        setProfileToUI(baseApplication.getProfile());
-
-        oauthAuthorizationCallback(getIntent());
-        if (isLoginDataAvailable()) {
-            loadRemoteProfile();
+class MyDataActivity : AppCompatActivity() {
+    private var license: License? = null
+    private var baseApplication: BaseApplication? = null
+    private var rsapiClient: RSAPIClient? = null
+    private var profile: Profile? = null
+    private var binding: ActivityMydataBinding? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMydataBinding.inflate(
+            layoutInflater
+        )
+        setContentView(binding!!.root)
+        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setTitle(R.string.login)
+        binding!!.myData.profileForm.visibility = View.INVISIBLE
+        baseApplication = application as BaseApplication
+        rsapiClient = baseApplication.getRsapiClient()
+        setProfileToUI(baseApplication.getProfile())
+        oauthAuthorizationCallback(intent)
+        if (isLoginDataAvailable) {
+            loadRemoteProfile()
         }
     }
 
-    private void setProfileToUI(Profile profile) {
-        binding.myData.etNickname.setText(profile.getNickname());
-        binding.myData.etEmail.setText(profile.getEmail());
-        binding.myData.etLinking.setText(profile.getLink());
-        license = profile.getLicense();
-        binding.myData.cbLicenseCC0.setChecked(license == License.CC0);
-        binding.myData.cbOwnPhoto.setChecked(profile.getPhotoOwner());
-        binding.myData.cbAnonymous.setChecked(profile.getAnonymous());
-        onAnonymousChecked(null);
-
-        if (profile.getEmailVerified()) {
-            binding.myData.tvEmailVerification.setText(R.string.emailVerified);
-            binding.myData.tvEmailVerification.setTextColor(getResources().getColor(R.color.emailVerified, null));
+    private fun setProfileToUI(profile: Profile?) {
+        binding!!.myData.etNickname.setText(profile!!.nickname)
+        binding!!.myData.etEmail.setText(profile.email)
+        binding!!.myData.etLinking.setText(profile.link)
+        license = profile.license
+        binding!!.myData.cbLicenseCC0.isChecked = license === License.CC0
+        binding!!.myData.cbOwnPhoto.isChecked = profile.photoOwner
+        binding!!.myData.cbAnonymous.isChecked = profile.anonymous
+        onAnonymousChecked(null)
+        if (profile.emailVerified) {
+            binding!!.myData.tvEmailVerification.setText(R.string.emailVerified)
+            binding!!.myData.tvEmailVerification.setTextColor(
+                resources.getColor(
+                    R.color.emailVerified,
+                    null
+                )
+            )
         } else {
-            binding.myData.tvEmailVerification.setText(R.string.emailUnverified);
-            binding.myData.tvEmailVerification.setTextColor(getResources().getColor(R.color.emailUnverified, null));
+            binding!!.myData.tvEmailVerification.setText(R.string.emailUnverified)
+            binding!!.myData.tvEmailVerification.setTextColor(
+                resources.getColor(
+                    R.color.emailUnverified,
+                    null
+                )
+            )
         }
-        this.profile = profile;
+        this.profile = profile
     }
 
-    private void loadRemoteProfile() {
-        binding.myData.loginForm.setVisibility(View.VISIBLE);
-        binding.myData.profileForm.setVisibility(View.GONE);
-        binding.myData.progressBar.setVisibility(View.VISIBLE);
-
-        rsapiClient.getProfile().enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<Profile> call, @NonNull Response<Profile> response) {
-                binding.myData.progressBar.setVisibility(View.GONE);
-
-                switch (response.code()) {
-                    case 200:
-                        Log.i(TAG, "Successfully loaded profile");
-                        var remoteProfile = response.body();
+    private fun loadRemoteProfile() {
+        binding!!.myData.loginForm.visibility = View.VISIBLE
+        binding!!.myData.profileForm.visibility = View.GONE
+        binding!!.myData.progressBar.visibility = View.VISIBLE
+        rsapiClient.getProfile().enqueue(object : Callback<Profile?> {
+            override fun onResponse(call: Call<Profile?>, response: Response<Profile?>) {
+                binding!!.myData.progressBar.visibility = View.GONE
+                when (response.code()) {
+                    200 -> {
+                        Log.i(TAG, "Successfully loaded profile")
+                        val remoteProfile = response.body()
                         if (remoteProfile != null) {
-                            saveLocalProfile(remoteProfile);
-                            showProfileView();
+                            saveLocalProfile(remoteProfile)
+                            showProfileView()
                         }
-                        break;
-                    case 401:
-                        logout(null);
-                        SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
-                        break;
-                    default:
-                        SimpleDialogs.confirmOk(MyDataActivity.this,
-                                getString(R.string.read_profile_failed, String.valueOf(response.code())));
+                    }
+
+                    401 -> {
+                        logout(null)
+                        confirmOk(this@MyDataActivity, R.string.authorization_failed)
+                    }
+
+                    else -> confirmOk(
+                        this@MyDataActivity,
+                        getString(R.string.read_profile_failed, response.code().toString())
+                    )
                 }
             }
 
-            @Override
-            public void onFailure(@NonNull Call<Profile> call, @NonNull Throwable t) {
-                binding.myData.progressBar.setVisibility(View.GONE);
-                SimpleDialogs.confirmOk(MyDataActivity.this,
-                        getString(R.string.read_profile_failed, t.getMessage()));
+            override fun onFailure(call: Call<Profile?>, t: Throwable) {
+                binding!!.myData.progressBar.visibility = View.GONE
+                confirmOk(
+                    this@MyDataActivity,
+                    getString(R.string.read_profile_failed, t.message)
+                )
             }
-        });
+        })
     }
 
-    private void showProfileView() {
-        binding.myData.loginForm.setVisibility(View.GONE);
-        binding.myData.profileForm.setVisibility(View.VISIBLE);
-        Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.tvProfile);
-        binding.myData.btProfileSave.setText(R.string.bt_mydata_commit);
-        binding.myData.btLogout.setVisibility(View.VISIBLE);
-        binding.myData.btChangePassword.setVisibility(View.VISIBLE);
+    private fun showProfileView() {
+        binding!!.myData.loginForm.visibility = View.GONE
+        binding!!.myData.profileForm.visibility = View.VISIBLE
+        Objects.requireNonNull(supportActionBar).setTitle(R.string.tvProfile)
+        binding!!.myData.btProfileSave.setText(R.string.bt_mydata_commit)
+        binding!!.myData.btLogout.visibility = View.VISIBLE
+        binding!!.myData.btChangePassword.visibility = View.VISIBLE
     }
 
-    private void oauthAuthorizationCallback(Intent intent) {
-        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
-            var data = intent.getData();
+    private fun oauthAuthorizationCallback(intent: Intent?) {
+        if (intent != null && Intent.ACTION_VIEW == intent.action) {
+            val data = intent.data
             if (data != null) {
-                if (data.toString().startsWith(baseApplication.getRsapiClient().getRedirectUri())) {
-                    var code = data.getQueryParameter("code");
+                if (data.toString().startsWith(baseApplication.getRsapiClient().redirectUri)) {
+                    val code = data.getQueryParameter("code")
                     if (code != null) {
-                        baseApplication.getRsapiClient().requestAccessToken(code).enqueue(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<Token> call, @NonNull Response<Token> response) {
-                                var token = response.body();
-                                Log.d(TAG, String.valueOf(token));
-                                if (token != null) {
-                                    baseApplication.setAccessToken(token.getAccessToken());
-                                    baseApplication.getRsapiClient().setToken(token);
-                                    loadRemoteProfile();
-                                } else {
-                                    Toast.makeText(MyDataActivity.this, getString(R.string.authorization_error, "no token"), Toast.LENGTH_LONG).show();
+                        baseApplication.getRsapiClient().requestAccessToken(code)
+                            .enqueue(object : Callback<Token?> {
+                                override fun onResponse(
+                                    call: Call<Token?>,
+                                    response: Response<Token?>
+                                ) {
+                                    val token = response.body()
+                                    Log.d(TAG, token.toString())
+                                    if (token != null) {
+                                        baseApplication.setAccessToken(token.accessToken)
+                                        baseApplication.getRsapiClient().setToken(token)
+                                        loadRemoteProfile()
+                                    } else {
+                                        Toast.makeText(
+                                            this@MyDataActivity,
+                                            getString(R.string.authorization_error, "no token"),
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                                 }
+
+                                override fun onFailure(call: Call<Token?>, t: Throwable) {
+                                    Toast.makeText(
+                                        this@MyDataActivity,
+                                        getString(R.string.authorization_error, t.message),
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            })
+                    } else {
+                        val error = data.getQueryParameter("error")
+                        if (error != null) {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.authorization_error, error),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                    if (isLoginDataAvailable) {
+                        loadRemoteProfile()
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        oauthAuthorizationCallback(intent)
+    }
+
+    fun selectLicense(view: View?) {
+        license = if (binding!!.myData.cbLicenseCC0.isChecked) License.CC0 else License.UNKNOWN
+        if (license !== License.CC0) {
+            confirmOk(this, R.string.cc0_needed)
+        }
+    }
+
+    fun save(view: View?) {
+        profile = createProfileFromUI()
+        if (!isValid(profile)) {
+            return
+        }
+        if (rsapiClient!!.hasToken()) {
+            binding!!.myData.progressBar.visibility = View.VISIBLE
+            rsapiClient!!.saveProfile(profile)!!.enqueue(object : Callback<Void?> {
+                override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                    binding!!.myData.progressBar.visibility = View.GONE
+                    when (response.code()) {
+                        200 -> Log.i(TAG, "Successfully saved profile")
+                        202 -> confirmOk(this@MyDataActivity, R.string.password_email)
+                        400 -> confirmOk(this@MyDataActivity, R.string.profile_wrong_data)
+                        401 -> {
+                            logout(view)
+                            confirmOk(this@MyDataActivity, R.string.authorization_failed)
+                        }
+
+                        409 -> confirmOk(this@MyDataActivity, R.string.profile_conflict)
+                        else -> confirmOk(
+                            this@MyDataActivity,
+                            getString(R.string.save_profile_failed, response.code().toString())
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<Void?>, t: Throwable) {
+                    binding!!.myData.progressBar.visibility = View.GONE
+                    Log.e(TAG, "Error uploading profile", t)
+                    confirmOk(
+                        this@MyDataActivity,
+                        getString(R.string.save_profile_failed, t.message)
+                    )
+                }
+            })
+        }
+        saveLocalProfile(profile)
+        Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show()
+    }
+
+    private fun createProfileFromUI(): Profile {
+        val newProfile = Profile(
+            binding!!.myData.etNickname.text.toString().trim { it <= ' ' },
+            license,
+            binding!!.myData.cbOwnPhoto.isChecked,
+            binding!!.myData.cbAnonymous.isChecked,
+            binding!!.myData.etLinking.text.toString().trim { it <= ' ' },
+            binding!!.myData.etEmail.text.toString().trim { it <= ' ' }
+        )
+        if (profile != null) {
+            newProfile.emailVerified = profile!!.emailVerified
+        }
+        return newProfile
+    }
+
+    private fun saveLocalProfile(profile: Profile?) {
+        baseApplication.setProfile(profile)
+        setProfileToUI(profile)
+    }
+
+    private val isLoginDataAvailable: Boolean
+        private get() = baseApplication.getAccessToken() != null
+
+    override fun onBackPressed() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
+
+    fun isValid(profile: Profile?): Boolean {
+        if (StringUtils.isBlank(profile!!.nickname)) {
+            confirmOk(this, R.string.missing_nickname)
+            return false
+        }
+        if (!isValidEmail(profile.email)) {
+            confirmOk(this, R.string.missing_email_address)
+            return false
+        }
+        val url = profile.link
+        if (StringUtils.isNotBlank(url) && !isValidHTTPURL(url)) {
+            confirmOk(this, R.string.missing_link)
+            return false
+        }
+        return true
+    }
+
+    private fun isValidHTTPURL(urlString: String?): Boolean {
+        try {
+            val url = URL(urlString)
+            if ("http" != url.protocol && "https" != url.protocol) {
+                return false
+            }
+        } catch (e: MalformedURLException) {
+            return false
+        }
+        return true
+    }
+
+    fun isValidEmail(target: CharSequence?): Boolean {
+        return target != null && Patterns.EMAIL_ADDRESS.matcher(target).matches()
+    }
+
+    fun onAnonymousChecked(view: View?) {
+        if (binding!!.myData.cbAnonymous.isChecked) {
+            binding!!.myData.etLinking.visibility = View.GONE
+            binding!!.myData.tvLinking.visibility = View.GONE
+        } else {
+            binding!!.myData.etLinking.visibility = View.VISIBLE
+            binding!!.myData.tvLinking.visibility = View.VISIBLE
+        }
+    }
+
+    @Throws(NoSuchAlgorithmException::class)
+    fun login(view: View?) {
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            rsapiClient!!.createAuthorizeUri()
+        )
+        startActivity(intent)
+        finish()
+    }
+
+    fun logout(view: View?) {
+        baseApplication.setAccessToken(null)
+        rsapiClient!!.clearToken()
+        profile = Profile()
+        saveLocalProfile(profile)
+        binding!!.myData.profileForm.visibility = View.GONE
+        binding!!.myData.loginForm.visibility = View.VISIBLE
+        Objects.requireNonNull(supportActionBar).setTitle(R.string.login)
+    }
+
+    fun deleteAccount(view: View?) {
+        SimpleDialogs.confirmOkCancel(
+            this,
+            R.string.deleteAccountConfirmation
+        ) { d: DialogInterface?, i: Int ->
+            rsapiClient!!.deleteAccount()!!
+                .enqueue(object : Callback<Void?> {
+                    override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                        when (response.code()) {
+                            204 -> {
+                                Log.i(TAG, "Successfully deleted account")
+                                logout(view)
+                                confirmOk(this@MyDataActivity, R.string.account_deleted)
                             }
 
-                            @Override
-                            public void onFailure(@NonNull Call<Token> call, @NonNull Throwable t) {
-                                Toast.makeText(MyDataActivity.this, getString(R.string.authorization_error, t.getMessage()), Toast.LENGTH_LONG).show();
+                            401 -> {
+                                confirmOk(this@MyDataActivity, R.string.authorization_failed)
+                                logout(view)
                             }
-                        });
-                    } else {
-                        String error = data.getQueryParameter("error");
-                        if (error != null) {
-                            Toast.makeText(this, getString(R.string.authorization_error, error), Toast.LENGTH_LONG).show();
+
+                            else -> confirmOk(
+                                this@MyDataActivity,
+                                getString(
+                                    R.string.account_deletion_failed,
+                                    response.code().toString()
+                                )
+                            )
                         }
                     }
 
-                    if (isLoginDataAvailable()) {
-                        loadRemoteProfile();
+                    override fun onFailure(call: Call<Void?>, t: Throwable) {
+                        Log.e(TAG, "Error deleting account", t)
+                        confirmOk(
+                            this@MyDataActivity,
+                            getString(R.string.account_deletion_failed, t.message)
+                        )
                     }
-                }
-            }
+                })
         }
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        oauthAuthorizationCallback(intent);
-    }
-
-    public void selectLicense(View view) {
-        license = binding.myData.cbLicenseCC0.isChecked() ? License.CC0 : License.UNKNOWN;
-        if (license != License.CC0) {
-            SimpleDialogs.confirmOk(this, R.string.cc0_needed);
-        }
-    }
-
-    public void save(View view) {
-        profile = createProfileFromUI();
-        if (!isValid(profile)) {
-            return;
-        }
-        if (rsapiClient.hasToken()) {
-            binding.myData.progressBar.setVisibility(View.VISIBLE);
-
-            rsapiClient.saveProfile(profile).enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                    binding.myData.progressBar.setVisibility(View.GONE);
-
-                    switch (response.code()) {
-                        case 200:
-                            Log.i(TAG, "Successfully saved profile");
-                            break;
-                        case 202:
-                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.password_email);
-                            break;
-                        case 400:
-                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.profile_wrong_data);
-                            break;
-                        case 401:
-                            logout(view);
-                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
-                            break;
-                        case 409:
-                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.profile_conflict);
-                            break;
-                        default:
-                            SimpleDialogs.confirmOk(MyDataActivity.this,
-                                    getString(R.string.save_profile_failed, String.valueOf(response.code())));
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                    binding.myData.progressBar.setVisibility(View.GONE);
-                    Log.e(TAG, "Error uploading profile", t);
-                    SimpleDialogs.confirmOk(MyDataActivity.this,
-                            getString(R.string.save_profile_failed, t.getMessage()));
-                }
-            });
-        }
-
-        saveLocalProfile(profile);
-        Toast.makeText(this, R.string.preferences_saved, Toast.LENGTH_LONG).show();
-    }
-
-    private Profile createProfileFromUI() {
-        var newProfile = new Profile(
-                binding.myData.etNickname.getText().toString().trim(),
-                license,
-                binding.myData.cbOwnPhoto.isChecked(),
-                binding.myData.cbAnonymous.isChecked(),
-                binding.myData.etLinking.getText().toString().trim(),
-                binding.myData.etEmail.getText().toString().trim()
-        );
-
-        if (this.profile != null) {
-            newProfile.setEmailVerified(this.profile.getEmailVerified());
-        }
-
-        return newProfile;
-    }
-
-    private void saveLocalProfile(Profile profile) {
-        baseApplication.setProfile(profile);
-        setProfileToUI(profile);
-    }
-
-    private boolean isLoginDataAvailable() {
-        return baseApplication.getAccessToken() != null;
-    }
-
-    @Override
-    public void onBackPressed() {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
-    }
-
-    public boolean isValid(Profile profile) {
-        if (StringUtils.isBlank(profile.getNickname())) {
-            SimpleDialogs.confirmOk(this, R.string.missing_nickname);
-            return false;
-        }
-        if (!isValidEmail(profile.getEmail())) {
-            SimpleDialogs.confirmOk(this, R.string.missing_email_address);
-            return false;
-        }
-        String url = profile.getLink();
-        if (StringUtils.isNotBlank(url) && !isValidHTTPURL(url)) {
-            SimpleDialogs.confirmOk(this, R.string.missing_link);
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isValidHTTPURL(String urlString) {
-        try {
-            var url = new URL(urlString);
-            if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
-                return false;
-            }
-        } catch (MalformedURLException e) {
-            return false;
-        }
-        return true;
-    }
-
-    public boolean isValidEmail(CharSequence target) {
-        return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-
-    }
-
-    public void onAnonymousChecked(View view) {
-        if (binding.myData.cbAnonymous.isChecked()) {
-            binding.myData.etLinking.setVisibility(View.GONE);
-            binding.myData.tvLinking.setVisibility(View.GONE);
-        } else {
-            binding.myData.etLinking.setVisibility(View.VISIBLE);
-            binding.myData.tvLinking.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void login(View view) throws NoSuchAlgorithmException {
-        Intent intent = new Intent(
-                Intent.ACTION_VIEW,
-                rsapiClient.createAuthorizeUri());
-        startActivity(intent);
-        finish();
-    }
-
-    public void logout(View view) {
-        baseApplication.setAccessToken(null);
-        rsapiClient.clearToken();
-        profile = new Profile();
-        saveLocalProfile(profile);
-        binding.myData.profileForm.setVisibility(View.GONE);
-        binding.myData.loginForm.setVisibility(View.VISIBLE);
-        Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.login);
-    }
-
-    public void deleteAccount(View view) {
-        SimpleDialogs.confirmOkCancel(this, R.string.deleteAccountConfirmation, (d, i) -> rsapiClient.deleteAccount().enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                switch (response.code()) {
-                    case 204:
-                        Log.i(TAG, "Successfully deleted account");
-                        logout(view);
-                        SimpleDialogs.confirmOk(MyDataActivity.this, R.string.account_deleted);
-                        break;
-                    case 401:
-                        SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
-                        logout(view);
-                        break;
-                    default:
-                        SimpleDialogs.confirmOk(MyDataActivity.this,
-                                getString(R.string.account_deletion_failed, String.valueOf(response.code())));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                Log.e(TAG, "Error deleting account", t);
-                SimpleDialogs.confirmOk(MyDataActivity.this,
-                        getString(R.string.account_deletion_failed, t.getMessage()));
-            }
-        }));
-    }
-
-    public void changePassword(View view) {
-        var builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        var passwordBinding = ChangePasswordBinding.inflate(getLayoutInflater());
-
+    fun changePassword(view: View?) {
+        val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
+        val passwordBinding = ChangePasswordBinding.inflate(
+            layoutInflater
+        )
         builder.setTitle(R.string.bt_change_password)
-                .setView(passwordBinding.getRoot())
-                .setIcon(R.mipmap.ic_launcher)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, (dialog, id) -> dialog.cancel());
-
-        var alertDialog = builder.create();
-        alertDialog.show();
-
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String newPassword = getValidPassword(passwordBinding.password, passwordBinding.passwordRepeat);
-            if (newPassword == null) {
-                return;
-            }
-            alertDialog.dismiss();
-
+            .setView(passwordBinding.root)
+            .setIcon(R.mipmap.ic_launcher)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNegativeButton(android.R.string.cancel) { dialog: DialogInterface, id: Int -> dialog.cancel() }
+        val alertDialog = builder.create()
+        alertDialog.show()
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { v: View? ->
+            var newPassword: String? =
+                getValidPassword(passwordBinding.password, passwordBinding.passwordRepeat)
+                    ?: return@setOnClickListener
+            alertDialog.dismiss()
             try {
-                newPassword = URLEncoder.encode(newPassword, String.valueOf(StandardCharsets.UTF_8));
-            } catch (UnsupportedEncodingException e) {
-                Log.e(TAG, "Error encoding new password", e);
+                newPassword = URLEncoder.encode(newPassword, StandardCharsets.UTF_8.toString())
+            } catch (e: UnsupportedEncodingException) {
+                Log.e(TAG, "Error encoding new password", e)
             }
+            rsapiClient!!.changePassword(newPassword)!!.enqueue(object : Callback<Void?> {
+                override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                    when (response.code()) {
+                        200 -> {
+                            Log.i(TAG, "Successfully changed password")
+                            logout(view)
+                            confirmOk(this@MyDataActivity, R.string.password_changed)
+                        }
 
-            rsapiClient.changePassword(newPassword).enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                    switch (response.code()) {
-                        case 200:
-                            Log.i(TAG, "Successfully changed password");
-                            logout(view);
-                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.password_changed);
-                            break;
-                        case 401:
-                            SimpleDialogs.confirmOk(MyDataActivity.this, R.string.authorization_failed);
-                            logout(view);
-                            break;
-                        default:
-                            SimpleDialogs.confirmOk(MyDataActivity.this,
-                                    getString(R.string.change_password_failed, String.valueOf(response.code())));
+                        401 -> {
+                            confirmOk(this@MyDataActivity, R.string.authorization_failed)
+                            logout(view)
+                        }
+
+                        else -> confirmOk(
+                            this@MyDataActivity,
+                            getString(R.string.change_password_failed, response.code().toString())
+                        )
                     }
                 }
 
-                @Override
-                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                    Log.e(TAG, "Error changing password", t);
-                    SimpleDialogs.confirmOk(MyDataActivity.this,
-                            getString(R.string.change_password_failed, t.getMessage()));
+                override fun onFailure(call: Call<Void?>, t: Throwable) {
+                    Log.e(TAG, "Error changing password", t)
+                    confirmOk(
+                        this@MyDataActivity,
+                        getString(R.string.change_password_failed, t.message)
+                    )
                 }
-            });
-        });
-
-    }
-
-    private String getValidPassword(EditText etNewPassword, EditText etPasswordRepeat) {
-        var newPassword = etNewPassword.getText().toString().trim();
-
-        if (newPassword.length() < 8) {
-            Toast.makeText(MyDataActivity.this, R.string.password_too_short, Toast.LENGTH_LONG).show();
-            return null;
+            })
         }
-        if (!newPassword.equals(etPasswordRepeat.getText().toString().trim())) {
-            Toast.makeText(MyDataActivity.this, R.string.password_repeat_fail, Toast.LENGTH_LONG).show();
-            return null;
+    }
+
+    private fun getValidPassword(etNewPassword: EditText, etPasswordRepeat: EditText): String? {
+        val newPassword = etNewPassword.text.toString().trim { it <= ' ' }
+        if (newPassword.length < 8) {
+            Toast.makeText(this@MyDataActivity, R.string.password_too_short, Toast.LENGTH_LONG)
+                .show()
+            return null
         }
-        return newPassword;
+        if (newPassword != etPasswordRepeat.text.toString().trim { it <= ' ' }) {
+            Toast.makeText(this@MyDataActivity, R.string.password_repeat_fail, Toast.LENGTH_LONG)
+                .show()
+            return null
+        }
+        return newPassword
     }
 
-    public void requestEmailVerification(View view) {
-        SimpleDialogs.confirmOkCancel(this, R.string.requestEmailVerification, (dialogInterface, i) -> rsapiClient.resendEmailVerification().enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if (response.code() == 200) {
-                    Log.i(TAG, "Successfully requested email verification");
-                    Toast.makeText(MyDataActivity.this, R.string.emailVerificationRequested, Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(MyDataActivity.this, R.string.emailVerificationRequestFailed, Toast.LENGTH_LONG).show();
-                }
-            }
+    fun requestEmailVerification(view: View?) {
+        SimpleDialogs.confirmOkCancel(
+            this,
+            R.string.requestEmailVerification
+        ) { dialogInterface: DialogInterface?, i: Int ->
+            rsapiClient!!.resendEmailVerification()!!
+                .enqueue(object : Callback<Void?> {
+                    override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                        if (response.code() == 200) {
+                            Log.i(TAG, "Successfully requested email verification")
+                            Toast.makeText(
+                                this@MyDataActivity,
+                                R.string.emailVerificationRequested,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                this@MyDataActivity,
+                                R.string.emailVerificationRequestFailed,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
 
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                Log.e(TAG, "Error requesting email verification", t);
-                Toast.makeText(MyDataActivity.this, R.string.emailVerificationRequestFailed, Toast.LENGTH_LONG).show();
-            }
-        }));
+                    override fun onFailure(call: Call<Void?>, t: Throwable) {
+                        Log.e(TAG, "Error requesting email verification", t)
+                        Toast.makeText(
+                            this@MyDataActivity,
+                            R.string.emailVerificationRequestFailed,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                })
+        }
     }
 
+    companion object {
+        private val TAG = MyDataActivity::class.java.simpleName
+    }
 }

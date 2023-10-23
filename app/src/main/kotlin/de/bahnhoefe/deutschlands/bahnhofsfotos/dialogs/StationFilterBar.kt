@@ -1,308 +1,372 @@
-package de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs;
+package de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.InsetDrawable
+import android.text.TextUtils
+import android.util.AttributeSet
+import android.util.Log
+import android.util.TypedValue
+import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.view.menu.MenuBuilder
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import com.google.android.material.chip.Chip
+import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication
+import de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity
+import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
+import java.util.stream.IntStream
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
+class StationFilterBar(
+    context: Context,
+    attrs: AttributeSet?,
+    defStyleAttr: Int,
+    defStyleRes: Int
+) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
+    private val toggleSort: Chip
+    private val photoFilter: Chip
+    private val activeFilter: Chip
+    private val nicknameFilter: Chip
+    private val countrySelection: Chip
+    private var listener: OnChangeListener? = null
+    private lateinit var baseApplication: BaseApplication
+    private lateinit var activity: Activity
 
-import com.google.android.material.chip.Chip;
+    @JvmOverloads
+    constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : this(
+        context,
+        attrs,
+        defStyleAttr,
+        0
+    )
 
-import java.util.stream.IntStream;
-
-import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.R;
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter;
-
-public class StationFilterBar extends LinearLayout {
-
-    private static final String TAG = StationFilterBar.class.getSimpleName();
-
-    private final Chip toggleSort;
-    private final Chip photoFilter;
-    private final Chip activeFilter;
-    private final Chip nicknameFilter;
-    private final Chip countrySelection;
-    private OnChangeListener listener;
-    private BaseApplication baseApplication;
-    private Activity activity;
-
-    public StationFilterBar(Context context) {
-        this(context, null);
+    init {
+        LayoutInflater.from(context).inflate(R.layout.station_filter_bar, this)
+        toggleSort = findViewById(R.id.toggleSort)
+        toggleSort.setOnClickListener { v: View -> showSortMenu(v) }
+        photoFilter = findViewById(R.id.photoFilter)
+        photoFilter.setOnClickListener { v: View -> showPhotoFilter(v) }
+        activeFilter = findViewById(R.id.activeFilter)
+        activeFilter.setOnClickListener { v: View -> showActiveFilter(v) }
+        nicknameFilter = findViewById(R.id.nicknameFilter)
+        nicknameFilter.setOnClickListener { selectNicknameFilter() }
+        countrySelection = findViewById(R.id.countrySelection)
+        countrySelection.setOnClickListener { selectCountry() }
     }
 
-    public StationFilterBar(Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
+    private fun setCloseIcon(chip: Chip, icon: Int) {
+        chip.closeIcon = AppCompatResources.getDrawable(baseApplication, icon)
     }
 
-    public StationFilterBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
+    private fun setChipStatus(chip: Chip, iconRes: Int, active: Boolean, textRes: Int) {
+        setChipStatus(chip, iconRes, active, baseApplication.getString(textRes))
     }
 
-    public StationFilterBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-
-        LayoutInflater.from(context).inflate(R.layout.station_filter_bar, this);
-
-        toggleSort = findViewById(R.id.toggleSort);
-        toggleSort.setOnClickListener(this::showSortMenu);
-
-        photoFilter = findViewById(R.id.photoFilter);
-        photoFilter.setOnClickListener(this::showPhotoFilter);
-
-        activeFilter = findViewById(R.id.activeFilter);
-        activeFilter.setOnClickListener(this::showActiveFilter);
-
-        nicknameFilter = findViewById(R.id.nicknameFilter);
-        nicknameFilter.setOnClickListener(this::selectNicknameFilter);
-
-        countrySelection = findViewById(R.id.countrySelection);
-        countrySelection.setOnClickListener(this::selectCountry);
-    }
-
-    private void setCloseIcon(final Chip chip, final int icon) {
-        chip.setCloseIcon(AppCompatResources.getDrawable(this.baseApplication, icon));
-    }
-
-    private void setChipStatus(Chip chip, int iconRes, boolean active, int textRes) {
-        setChipStatus(chip, iconRes, active, baseApplication.getString(textRes));
-    }
-
-    private void setChipStatus(Chip chip, int iconRes, boolean active, String text) {
+    private fun setChipStatus(chip: Chip, iconRes: Int, active: Boolean, text: String?) {
         if (iconRes != 0) {
-            chip.setChipIcon(getTintedDrawable(this.baseApplication, iconRes, getChipForegroundColor(active)));
+            chip.chipIcon =
+                getTintedDrawable(baseApplication, iconRes, getChipForegroundColor(active))
         } else {
-            chip.setChipIcon(null);
+            chip.chipIcon = null
         }
-        chip.setChipBackgroundColorResource(active ? R.color.colorPrimary : R.color.fullTransparent);
-        chip.setTextColor(getChipForegroundColor(active));
-        chip.setCloseIconTintResource(getChipForegroundColorRes(active));
-        chip.setChipStrokeColorResource(active ? R.color.colorPrimary : R.color.chipForeground);
-        chip.setText(text);
-        chip.setTextEndPadding(0);
+        chip.setChipBackgroundColorResource(if (active) R.color.colorPrimary else R.color.fullTransparent)
+        chip.setTextColor(getChipForegroundColor(active))
+        chip.setCloseIconTintResource(getChipForegroundColorRes(active))
+        chip.setChipStrokeColorResource(if (active) R.color.colorPrimary else R.color.chipForeground)
+        chip.text = text
+        chip.textEndPadding = 0f
         if (TextUtils.isEmpty(text)) {
-            chip.setTextStartPadding(0);
+            chip.textStartPadding = 0f
         } else {
-            chip.setTextStartPadding(activity.getResources().getDimension(R.dimen.chip_textStartPadding));
+            chip.textStartPadding =
+                activity.resources.getDimension(R.dimen.chip_textStartPadding)
         }
     }
 
-    private Drawable getTintedDrawable(Context context, int imageId, int color) {
+    private fun getTintedDrawable(context: Context, imageId: Int, color: Int): Drawable? {
         if (imageId > 0) {
-            var unwrappedDrawable = ContextCompat.getDrawable(context, imageId);
-            return getTintedDrawable(unwrappedDrawable, color);
+            val unwrappedDrawable = ContextCompat.getDrawable(context, imageId)
+            return getTintedDrawable(unwrappedDrawable, color)
         }
-        return null;
+        return null
     }
 
-    @Nullable
-    private static Drawable getTintedDrawable(Drawable unwrappedDrawable, int color) {
-        if (unwrappedDrawable != null) {
-            var wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable);
-            DrawableCompat.setTint(wrappedDrawable, color);
-            return wrappedDrawable;
+    private fun getChipForegroundColor(active: Boolean): Int {
+        return baseApplication.getColor(getChipForegroundColorRes(active))
+    }
+
+    private fun getChipForegroundColorRes(active: Boolean): Int {
+        return if (active) R.color.colorOnPrimary else R.color.chipForeground
+    }
+
+    fun init(baseApplication: BaseApplication, activity: Activity) {
+        this.baseApplication = baseApplication
+        this.activity = activity
+        if (activity is OnChangeListener) {
+            listener = activity
         }
-        return null;
+        val stationFilter = baseApplication.stationFilter
+        setChipStatus(
+            photoFilter,
+            stationFilter.photoIcon,
+            stationFilter.isPhotoFilterActive,
+            R.string.no_text
+        )
+        setChipStatus(
+            nicknameFilter,
+            stationFilter.nicknameIcon,
+            stationFilter.isNicknameFilterActive,
+            stationFilter.getNicknameText(this.baseApplication)
+        )
+        setChipStatus(
+            activeFilter,
+            stationFilter.activeIcon,
+            stationFilter.isActiveFilterActive,
+            stationFilter.activeText
+        )
+        setChipStatus(
+            countrySelection,
+            R.drawable.ic_countries_active_24px,
+            true,
+            getCountryText(baseApplication)
+        )
+        setSortOrder(baseApplication.sortByDistance)
     }
 
-    private int getChipForegroundColor(final boolean active) {
-        return this.baseApplication.getColor(getChipForegroundColorRes(active));
-    }
+    private fun showActiveFilter(v: View) {
+        val popup = PopupMenu(activity, v)
+        popup.menuInflater.inflate(R.menu.active_filter, popup.menu)
+        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+            val stationFilter = baseApplication.stationFilter
+            when (menuItem.itemId) {
+                R.id.active_filter_active -> {
+                    stationFilter.isActive = java.lang.Boolean.TRUE
+                }
 
-    private int getChipForegroundColorRes(final boolean active) {
-        return active ? R.color.colorOnPrimary : R.color.chipForeground;
-    }
+                R.id.active_filter_inactive -> {
+                    stationFilter.isActive = java.lang.Boolean.FALSE
+                }
 
-    public void init(BaseApplication baseApplication, Activity activity) {
-        this.baseApplication = baseApplication;
-        this.activity = activity;
-        if (activity instanceof OnChangeListener onChangeListener) {
-            listener = onChangeListener;
-        }
-        var stationFilter = baseApplication.getStationFilter();
-
-        setChipStatus(photoFilter, stationFilter.getPhotoIcon(), stationFilter.isPhotoFilterActive(), R.string.no_text);
-        setChipStatus(nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.isNicknameFilterActive(), stationFilter.getNicknameText(this.baseApplication));
-        setChipStatus(activeFilter, stationFilter.getActiveIcon(), stationFilter.isActiveFilterActive(), stationFilter.getActiveText());
-        setChipStatus(countrySelection, R.drawable.ic_countries_active_24px, true, getCountryText(baseApplication));
-
-        setSortOrder(baseApplication.getSortByDistance());
-    }
-
-    private static String getCountryText(final BaseApplication baseApplication) {
-        return String.join(",", baseApplication.getCountryCodes());
-    }
-
-    private void showActiveFilter(View v) {
-        var popup = new PopupMenu(activity, v);
-        popup.getMenuInflater().inflate(R.menu.active_filter, popup.getMenu());
-
-        popup.setOnMenuItemClickListener(menuItem -> {
-            var stationFilter = baseApplication.getStationFilter();
-            if (menuItem.getItemId() == R.id.active_filter_active) {
-                stationFilter.setActive(Boolean.TRUE);
-            } else if (menuItem.getItemId() == R.id.active_filter_inactive) {
-                stationFilter.setActive(Boolean.FALSE);
-            } else {
-                stationFilter.setActive(null);
+                else -> {
+                    stationFilter.isActive = null
+                }
             }
-            setChipStatus(activeFilter, stationFilter.getActiveIcon(), stationFilter.isActiveFilterActive(), R.string.no_text);
-            updateStationFilter(stationFilter);
-            return false;
-        });
-
-        setPopupMenuIcons(popup);
-        popup.setOnDismissListener(menu -> setCloseIcon(activeFilter, R.drawable.ic_baseline_arrow_drop_up_24));
-        popup.show();
-        setCloseIcon(activeFilter, R.drawable.ic_baseline_arrow_drop_down_24);
+            setChipStatus(
+                activeFilter,
+                stationFilter.activeIcon,
+                stationFilter.isActiveFilterActive,
+                R.string.no_text
+            )
+            updateStationFilter(stationFilter)
+            false
+        }
+        setPopupMenuIcons(popup)
+        popup.setOnDismissListener {
+            setCloseIcon(
+                activeFilter,
+                R.drawable.ic_baseline_arrow_drop_up_24
+            )
+        }
+        popup.show()
+        setCloseIcon(activeFilter, R.drawable.ic_baseline_arrow_drop_down_24)
     }
 
-    private void showPhotoFilter(View v) {
-        var popup = new PopupMenu(activity, v);
-        popup.getMenuInflater().inflate(R.menu.photo_filter, popup.getMenu());
+    private fun showPhotoFilter(v: View) {
+        val popup = PopupMenu(activity, v)
+        popup.menuInflater.inflate(R.menu.photo_filter, popup.menu)
+        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+            val stationFilter = baseApplication.stationFilter
+            when (menuItem.itemId) {
+                R.id.photo_filter_has_photo -> {
+                    stationFilter.setPhoto(java.lang.Boolean.TRUE)
+                }
 
-        popup.setOnMenuItemClickListener(menuItem -> {
-            var stationFilter = baseApplication.getStationFilter();
-            if (menuItem.getItemId() == R.id.photo_filter_has_photo) {
-                stationFilter.setPhoto(Boolean.TRUE);
-            } else if (menuItem.getItemId() == R.id.photo_filter_without_photo) {
-                stationFilter.setPhoto(Boolean.FALSE);
-            } else {
-                stationFilter.setPhoto(null);
+                R.id.photo_filter_without_photo -> {
+                    stationFilter.setPhoto(java.lang.Boolean.FALSE)
+                }
+
+                else -> {
+                    stationFilter.setPhoto(null)
+                }
             }
-            setChipStatus(photoFilter, stationFilter.getPhotoIcon(), stationFilter.isPhotoFilterActive(), R.string.no_text);
-            updateStationFilter(stationFilter);
-            return false;
-        });
-
-        setPopupMenuIcons(popup);
-        popup.setOnDismissListener(menu -> setCloseIcon(photoFilter, R.drawable.ic_baseline_arrow_drop_up_24));
-        popup.show();
-        setCloseIcon(photoFilter, R.drawable.ic_baseline_arrow_drop_down_24);
+            setChipStatus(
+                photoFilter,
+                stationFilter.photoIcon,
+                stationFilter.isPhotoFilterActive,
+                R.string.no_text
+            )
+            updateStationFilter(stationFilter)
+            false
+        }
+        setPopupMenuIcons(popup)
+        popup.setOnDismissListener {
+            setCloseIcon(
+                photoFilter,
+                R.drawable.ic_baseline_arrow_drop_up_24
+            )
+        }
+        popup.show()
+        setCloseIcon(photoFilter, R.drawable.ic_baseline_arrow_drop_down_24)
     }
 
-    public void selectCountry(View view) {
-        getContext().startActivity(new Intent(getContext(), CountryActivity.class));
+    private fun selectCountry() {
+        context.startActivity(Intent(context, CountryActivity::class.java))
     }
 
-    private void showSortMenu(View v) {
-        var popup = new PopupMenu(activity, v);
-        popup.getMenuInflater().inflate(R.menu.sort_order, popup.getMenu());
-
-        popup.setOnMenuItemClickListener(menuItem -> {
-            boolean sortByDistance = menuItem.getItemId() == R.id.sort_order_by_distance;
-            setSortOrder(sortByDistance);
-            baseApplication.setSortByDistance(sortByDistance);
+    private fun showSortMenu(v: View) {
+        val popup = PopupMenu(activity, v)
+        popup.menuInflater.inflate(R.menu.sort_order, popup.menu)
+        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+            val sortByDistance = menuItem.itemId == R.id.sort_order_by_distance
+            setSortOrder(sortByDistance)
+            baseApplication.sortByDistance = sortByDistance
             if (listener != null) {
-                listener.sortOrderChanged(sortByDistance);
+                listener!!.sortOrderChanged(sortByDistance)
             }
-            return false;
-        });
-
-        setPopupMenuIcons(popup);
-        popup.setOnDismissListener(menu -> setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_up_24));
-        popup.show();
-        setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_down_24);
+            false
+        }
+        setPopupMenuIcons(popup)
+        popup.setOnDismissListener {
+            setCloseIcon(
+                toggleSort,
+                R.drawable.ic_baseline_arrow_drop_up_24
+            )
+        }
+        popup.show()
+        setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_down_24)
     }
 
     @SuppressLint("RestrictedApi")
-    private void setPopupMenuIcons(final PopupMenu popup) {
+    private fun setPopupMenuIcons(popup: PopupMenu) {
         try {
-            if (popup.getMenu() instanceof MenuBuilder menuBuilder) {
-                menuBuilder.setOptionalIconsVisible(true);
-                for (var item : menuBuilder.getVisibleItems()) {
-                    var iconMarginPx =
-                            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 0, getResources().getDisplayMetrics());
-                    if (item.getIcon() != null) {
-                        InsetDrawable icon;
-                        icon = new InsetDrawable(item.getIcon(), iconMarginPx, 0, iconMarginPx, 0);
-                        icon.setTint(getResources().getColor(R.color.colorSurface, null));
-                        item.setIcon(icon);
-                    }
+            val menuBuilder = popup.menu
+            if (menuBuilder is MenuBuilder) {
+                menuBuilder.setOptionalIconsVisible(true)
+                for (item in menuBuilder.visibleItems) {
+                    val iconMarginPx = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        0f,
+                        resources.displayMetrics
+                    )
+                    val icon =
+                        InsetDrawable(item.icon, iconMarginPx, 0f, iconMarginPx, 0f)
+                    icon.setTint(resources.getColor(R.color.colorSurface, null))
+                    item.icon = icon
                 }
             }
-        } catch (Exception e) {
-            Log.w(TAG, "Error setting popupMenuIcons: ", e);
+        } catch (e: Exception) {
+            Log.w(TAG, "Error setting popupMenuIcons: ", e)
         }
     }
 
-    public void setSortOrder(boolean sortByDistance) {
-        setChipStatus(toggleSort, sortByDistance ? R.drawable.ic_sort_by_distance_active_24px : R.drawable.ic_sort_by_alpha_active_24px, true, R.string.no_text);
+    fun setSortOrder(sortByDistance: Boolean) {
+        setChipStatus(
+            toggleSort,
+            if (sortByDistance) R.drawable.ic_sort_by_distance_active_24px else R.drawable.ic_sort_by_alpha_active_24px,
+            true,
+            R.string.no_text
+        )
     }
 
-    public void selectNicknameFilter(View view) {
-        var nicknames = baseApplication.getDbAdapter().getPhotographerNicknames();
-        var stationFilter = baseApplication.getStationFilter();
-        if (nicknames.length == 0) {
-            Toast.makeText(getContext(), getContext().getString(R.string.no_nicknames_found), Toast.LENGTH_LONG).show();
-            return;
+    private fun selectNicknameFilter() {
+        val nicknames = baseApplication.dbAdapter.photographerNicknames
+        val stationFilter = baseApplication.stationFilter
+        if (nicknames.isEmpty()) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.no_nicknames_found),
+                Toast.LENGTH_LONG
+            ).show()
+            return
         }
-        int selectedNickname = IntStream.range(0, nicknames.length)
-                .filter(i -> nicknames[i].equals(stationFilter.getNickname()))
-                .findFirst().orElse(-1);
-
-        new AlertDialog.Builder(new ContextThemeWrapper(getContext(), R.style.AlertDialogCustom))
-                .setIcon(R.mipmap.ic_launcher)
-                .setTitle(R.string.select_nickname)
-                .setSingleChoiceItems(nicknames, selectedNickname, null)
-                .setPositiveButton(R.string.button_ok_text, (dialog, whichButton) -> {
-                    dialog.dismiss();
-                    int selectedPosition = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                    if (selectedPosition >= 0 && nicknames.length > selectedPosition) {
-                        stationFilter.setNickname(nicknames[selectedPosition]);
-                        setChipStatus(nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.isNicknameFilterActive(), stationFilter.getNicknameText(baseApplication));
-                        updateStationFilter(stationFilter);
-                    }
-                })
-                .setNeutralButton(R.string.button_remove_text, (dialog, whichButton) -> {
-                    dialog.dismiss();
-                    stationFilter.setNickname(null);
-                    setChipStatus(nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.isNicknameFilterActive(), stationFilter.getNicknameText(baseApplication));
-                    updateStationFilter(stationFilter);
-                })
-                .setNegativeButton(R.string.button_myself_text, (dialog, whichButton) -> {
-                    dialog.dismiss();
-                    stationFilter.setNickname(baseApplication.getNickname());
-                    setChipStatus(nicknameFilter, stationFilter.getNicknameIcon(), stationFilter.isNicknameFilterActive(), stationFilter.getNicknameText(baseApplication));
-                    updateStationFilter(stationFilter);
-                })
-                .create().show();
+        val selectedNickname = IntStream.range(0, nicknames.size)
+            .filter { i: Int -> nicknames[i] == stationFilter.nickname }
+            .findFirst().orElse(-1)
+        AlertDialog.Builder(ContextThemeWrapper(context, R.style.AlertDialogCustom))
+            .setIcon(R.mipmap.ic_launcher)
+            .setTitle(R.string.select_nickname)
+            .setSingleChoiceItems(nicknames, selectedNickname, null)
+            .setPositiveButton(R.string.button_ok_text) { dialog: DialogInterface, _: Int ->
+                dialog.dismiss()
+                val selectedPosition = (dialog as AlertDialog).listView.checkedItemPosition
+                if (selectedPosition >= 0 && nicknames.size > selectedPosition) {
+                    stationFilter.nickname = nicknames[selectedPosition]
+                    setChipStatus(
+                        nicknameFilter,
+                        stationFilter.nicknameIcon,
+                        stationFilter.isNicknameFilterActive,
+                        stationFilter.getNicknameText(baseApplication)
+                    )
+                    updateStationFilter(stationFilter)
+                }
+            }
+            .setNeutralButton(R.string.button_remove_text) { dialog: DialogInterface, _: Int ->
+                dialog.dismiss()
+                stationFilter.nickname = null
+                setChipStatus(
+                    nicknameFilter,
+                    stationFilter.nicknameIcon,
+                    stationFilter.isNicknameFilterActive,
+                    stationFilter.getNicknameText(baseApplication)
+                )
+                updateStationFilter(stationFilter)
+            }
+            .setNegativeButton(R.string.button_myself_text) { dialog: DialogInterface, _: Int ->
+                dialog.dismiss()
+                stationFilter.nickname = baseApplication.nickname
+                setChipStatus(
+                    nicknameFilter,
+                    stationFilter.nicknameIcon,
+                    stationFilter.isNicknameFilterActive,
+                    stationFilter.getNicknameText(baseApplication)
+                )
+                updateStationFilter(stationFilter)
+            }
+            .create().show()
     }
 
-    private void updateStationFilter(StationFilter stationFilter) {
-        baseApplication.setStationFilter(stationFilter);
+    private fun updateStationFilter(stationFilter: StationFilter) {
+        baseApplication.stationFilter = stationFilter
         if (listener != null) {
-            listener.stationFilterChanged(stationFilter);
+            listener!!.stationFilterChanged(stationFilter)
         }
     }
 
-    public void setSortOrderEnabled(boolean enabled) {
-        toggleSort.setVisibility(enabled ? VISIBLE : GONE);
+    fun setSortOrderEnabled(enabled: Boolean) {
+        toggleSort.visibility = if (enabled) VISIBLE else GONE
     }
 
-    public interface OnChangeListener {
-        void stationFilterChanged(StationFilter stationFilter);
-
-        void sortOrderChanged(boolean sortByDistance);
+    interface OnChangeListener {
+        fun stationFilterChanged(stationFilter: StationFilter)
+        fun sortOrderChanged(sortByDistance: Boolean)
     }
 
+    companion object {
+        private val TAG = StationFilterBar::class.java.simpleName
+        private fun getTintedDrawable(unwrappedDrawable: Drawable?, color: Int): Drawable? {
+            if (unwrappedDrawable != null) {
+                val wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable)
+                DrawableCompat.setTint(wrappedDrawable, color)
+                return wrappedDrawable
+            }
+            return null
+        }
+
+        private fun getCountryText(baseApplication: BaseApplication): String {
+            return baseApplication.countryCodes.joinToString(",")
+        }
+    }
 }
