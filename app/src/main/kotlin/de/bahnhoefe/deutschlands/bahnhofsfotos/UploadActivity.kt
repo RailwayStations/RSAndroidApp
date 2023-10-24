@@ -101,6 +101,9 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             }
             return
         }
+        binding.upload.buttonTakePicture.setOnClickListener { takePicture() }
+        binding.upload.buttonSelectPicture.setOnClickListener { selectPicture() }
+        binding.upload.buttonUpload.setOnClickListener { upload() }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {

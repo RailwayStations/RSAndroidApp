@@ -10,6 +10,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import com.google.gson.Gson
@@ -92,6 +93,14 @@ class ProblemReportActivity : AppCompatActivity() {
             }
             return
         }
+        binding.buttonReportProblem.setOnClickListener { reportProblem() }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                navigateUp()
+            }
+        })
+
         onNewIntent(intent)
     }
 
@@ -306,12 +315,6 @@ class ProblemReportActivity : AppCompatActivity() {
                     Log.e(TAG, "Error retrieving upload state", t)
                 }
             })
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        super.onBackPressed()
-        navigateUp()
     }
 
     private fun navigateUp() {

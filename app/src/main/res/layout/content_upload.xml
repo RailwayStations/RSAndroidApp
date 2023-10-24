@@ -81,7 +81,6 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_photo_camera_red_48px"
                     android:background="@null"
-                    android:onClick="takePicture"
                     android:contentDescription="@string/take_photo" />
 
                 <ImageButton
@@ -90,7 +89,6 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_photo_red_48px"
                     android:background="@null"
-                    android:onClick="selectPicture"
                     android:contentDescription="@string/select_photo" />
 
             </LinearLayout>
@@ -166,7 +164,6 @@
                 android:backgroundTint="@color/colorPrimary"
                 android:drawableStart="@drawable/ic_file_upload_red_48dp"
                 android:drawableTint="@color/colorActions"
-                android:onClick="upload"
                 android:text="@string/send"
                 android:textColor="@color/colorActions" />
 

@@ -9,6 +9,7 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMydataBinding
@@ -52,6 +53,21 @@ class MyDataActivity : AppCompatActivity() {
         if (isLoginDataAvailable) {
             loadRemoteProfile()
         }
+        binding.myData.btLogin.setOnClickListener { login() }
+        binding.myData.tvEmailVerification.setOnClickListener { requestEmailVerification() }
+        binding.myData.cbLicenseCC0.setOnClickListener { selectLicense() }
+        binding.myData.cbAnonymous.setOnClickListener { onAnonymousChecked() }
+        binding.myData.btProfileSave.setOnClickListener { save() }
+        binding.myData.btLogout.setOnClickListener { logout() }
+        binding.myData.btChangePassword.setOnClickListener { changePassword() }
+        binding.myData.btDeleteAccount.setOnClickListener { deleteAccount() }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                startActivity(Intent(this@MyDataActivity, MainActivity::class.java))
+                finish()
+            }
+        })
     }
 
     private fun setProfileToUI(profile: Profile) {
@@ -190,14 +206,14 @@ class MyDataActivity : AppCompatActivity() {
         oauthAuthorizationCallback(intent)
     }
 
-    fun selectLicense() {
+    private fun selectLicense() {
         license = if (binding.myData.cbLicenseCC0.isChecked) License.CC0 else License.UNKNOWN
         if (license !== License.CC0) {
             confirmOk(this, R.string.cc0_needed)
         }
     }
 
-    fun save() {
+    private fun save() {
         profile = createProfileFromUI()
         if (!isValid(profile)) {
             return
@@ -258,13 +274,6 @@ class MyDataActivity : AppCompatActivity() {
 
     private val isLoginDataAvailable: Boolean
         get() = baseApplication.accessToken != null
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        super.onBackPressed()
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
 
     private fun isValid(profile: Profile?): Boolean {
         if (StringUtils.isBlank(profile!!.nickname)) {

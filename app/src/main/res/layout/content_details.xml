@@ -53,8 +53,7 @@
                 android:layout_marginTop="8dp"
                 android:padding="8dp"
                 tools:scaleType="centerCrop"
-                android:contentDescription="@string/station_info"
-                android:onClick="showStationInfo" />
+                android:contentDescription="@string/station_info" />
 
             <TextView
                 android:id="@+id/tv_station_title"

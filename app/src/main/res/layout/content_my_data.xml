@@ -44,7 +44,6 @@
                     android:layout_marginTop="10dp"
                     android:layout_alignParentTop="true"
                     android:text="@string/login_to_railways_stations_org"
-                    android:onClick="login"
                     android:backgroundTint="@color/colorPrimary"
                     android:drawableStart="@drawable/ic_menu_login"
                     android:drawableTint="@color/colorActions"
@@ -81,8 +80,7 @@
                     android:textColor="@color/emailUnverified"
                     android:layout_marginEnd="10dp"
                     android:layout_toEndOf="@id/tvEmail"
-                    android:layout_alignBottom="@id/tvEmail"
-                    android:onClick="requestEmailVerification" />
+                    android:layout_alignBottom="@id/tvEmail" />
 
                 <EditText
                     android:id="@+id/etEmail"
@@ -126,8 +124,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/tvLicense"
                     android:layout_alignParentStart="true"
-                    android:text="@string/CC0"
-                    android:onClick="selectLicense" />
+                    android:text="@string/CC0" />
 
                 <TextView
                     android:id="@+id/tvLicenseDescription"
@@ -176,7 +173,6 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/tvAnonymous"
                     android:layout_alignParentStart="true"
-                    android:onClick="onAnonymousChecked"
                     android:layout_marginBottom="20dp"
                     android:text="@string/anonymous" />
 
@@ -207,8 +203,7 @@
                     android:text="@string/bt_save"
                     android:backgroundTint="@color/colorPrimary"
                     android:drawableTint="@color/colorActions"
-                    android:textColor="@color/colorActions"
-                    android:onClick="save" />
+                    android:textColor="@color/colorActions" />
 
                 <Button
                     android:id="@+id/bt_logout"
@@ -220,8 +215,7 @@
                     android:backgroundTint="@color/colorPrimary"
                     android:drawableTint="@color/colorActions"
                     android:textColor="@color/colorActions"
-                    android:text="@string/bt_logout"
-                    android:onClick="logout" />
+                    android:text="@string/bt_logout" />
 
                 <Button
                     android:id="@+id/bt_changePassword"
@@ -233,8 +227,7 @@
                     android:backgroundTint="@color/colorPrimary"
                     android:drawableTint="@color/colorActions"
                     android:textColor="@color/colorActions"
-                    android:text="@string/bt_change_password"
-                    android:onClick="changePassword" />
+                    android:text="@string/bt_change_password" />
 
                 <View
                     android:id="@+id/dangerZone"
@@ -253,8 +246,7 @@
                     android:backgroundTint="@color/colorDanger"
                     android:drawableTint="@color/colorDanger"
                     android:textColor="@color/colorOnDanger"
-                    android:text="@string/bt_deleteAccount"
-                    android:onClick="deleteAccount" />
+                    android:text="@string/bt_deleteAccount" />
 
             </RelativeLayout>
         </LinearLayout>

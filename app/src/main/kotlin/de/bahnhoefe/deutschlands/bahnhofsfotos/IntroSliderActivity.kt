@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
@@ -44,18 +45,17 @@ class IntroSliderActivity : AppCompatActivity() {
                 openMainActivity()
             }
         }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                openMainActivity()
+            }
+        })
     }
 
     private fun openMainActivity() {
-        val intent = Intent(this@IntroSliderActivity, MainActivity::class.java)
-        startActivity(intent)
+        startActivity(Intent(this@IntroSliderActivity, MainActivity::class.java))
         finish()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        super.onBackPressed()
-        openMainActivity()
     }
 
     private fun addBottomDots(position: Int) {

@@ -100,6 +100,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
                 navigateUp()
             }
         })
+        binding.details.marker.setOnClickListener { showStationInfo() }
         readPreferences()
         onNewIntent(intent)
     }
