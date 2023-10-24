@@ -24,6 +24,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
@@ -44,7 +45,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants
@@ -57,18 +57,17 @@ import retrofit2.Response
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.util.Locale
-import java.util.Objects
 import java.util.function.Consumer
 
 class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     private lateinit var baseApplication: BaseApplication
     private lateinit var rsapiClient: RSAPIClient
     private lateinit var binding: ActivityDetailsBinding
-    private var station: Station? = null
-    private var countries: Set<Country?>? = null
+    private lateinit var station: Station
+    private lateinit var countries: Set<Country>
     private var nickname: String? = null
-    private var photoPagerAdapter: PhotoPagerAdapter? = null
-    private val photoBitmaps: MutableMap<String, Bitmap> = mutableMapOf()
+    private lateinit var photoPagerAdapter: PhotoPagerAdapter
+    private val photoBitmaps: MutableMap<String, Bitmap?> = mutableMapOf()
     private var selectedPhoto: PageablePhoto? = null
     private val carouselPageIndicators: MutableList<ImageView> = mutableListOf()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,14 +80,14 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         rsapiClient = baseApplication.rsapiClient
         countries = baseApplication.dbAdapter
             .fetchCountriesWithProviderApps(baseApplication.countryCodes)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         photoPagerAdapter = PhotoPagerAdapter(this)
         binding.details.viewPager.adapter = photoPagerAdapter
         binding.details.viewPager.setCurrentItem(0, false)
         binding.details.viewPager.registerOnPageChangeCallback(object :
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                val pageablePhoto = photoPagerAdapter!!.getPageablePhotoAtPosition(position)
+                val pageablePhoto = photoPagerAdapter.getPageablePhotoAtPosition(position)
                 onPageablePhotoSelected(pageablePhoto, position)
             }
         })
@@ -107,27 +106,28 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        station = intent.getSerializableExtra(EXTRA_STATION) as Station?
-        if (station == null) {
+        val newStation = intent.getSerializableExtra(EXTRA_STATION) as Station?
+        if (newStation == null) {
             Log.w(TAG, "EXTRA_STATION in intent data missing")
             Toast.makeText(this, R.string.station_not_found, Toast.LENGTH_LONG).show()
             finish()
             return
         }
+        station = newStation
         binding.details.marker.setImageDrawable(ContextCompat.getDrawable(this, markerRes))
-        binding.details.tvStationTitle.text = station!!.title
+        binding.details.tvStationTitle.text = station.title
         binding.details.tvStationTitle.isSingleLine = false
-        if (station!!.hasPhoto()) {
+        station.photoUrl?.let {
             if (ConnectionUtil.checkInternetConnection(this)) {
-                photoBitmaps[station!!.photoUrl] = null
+                photoBitmaps[it] = null
                 BitmapCache.instance
-                    ?.getPhoto(station!!.photoUrl) { bitmap: Bitmap? ->
+                    ?.getPhoto(it) { bitmap: Bitmap? ->
                         if (bitmap != null) {
-                            val pageablePhoto = PageablePhoto(station!!, bitmap)
+                            val pageablePhoto = PageablePhoto(station, bitmap)
                             runOnUiThread {
                                 addIndicator()
                                 val position =
-                                    photoPagerAdapter!!.addPageablePhoto(pageablePhoto)
+                                    photoPagerAdapter.addPageablePhoto(pageablePhoto)
                                 if (position == 0) {
                                     onPageablePhotoSelected(pageablePhoto, position)
                                 }
@@ -136,7 +136,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
                     }
             }
         }
-        loadAdditionalPhotos(station!!)
+        loadAdditionalPhotos(station)
         baseApplication.dbAdapter
             .getPendingUploadsForStation(station)
             .forEach(Consumer { upload: Upload? -> addUploadPhoto(upload) })
@@ -156,13 +156,13 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
                     file.toURI().toString(),
                     getString(R.string.new_local_photo),
                     "",
-                    if (profile!!.license != null) profile.license!!.longName else "",
+                    if (profile.license != null) profile.license!!.longName else "",
                     "",
                     bitmap
                 )
                 runOnUiThread {
                     addIndicator()
-                    val position = photoPagerAdapter!!.addPageablePhoto(pageablePhoto)
+                    val position = photoPagerAdapter.addPageablePhoto(pageablePhoto)
                     if (position == 0) {
                         onPageablePhotoSelected(pageablePhoto, position)
                     }
@@ -172,7 +172,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
     }
 
     private fun loadAdditionalPhotos(station: Station) {
-        rsapiClient!!.getPhotoStationById(station.country, station.id)!!
+        rsapiClient.getPhotoStationById(station.country, station.id)
             .enqueue(object : Callback<PhotoStations?> {
                 override fun onResponse(
                     call: Call<PhotoStations?>,
@@ -180,24 +180,24 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
                 ) {
                     if (response.isSuccessful) {
                         val photoStations = response.body() ?: return
-                        photoStations.stations.stream()
-                            .flatMap<Photo> { (_, _, _, _, _, _, _, photos): PhotoStation -> photos!!.stream() }
+                        photoStations.stations
+                            .flatMap { (_, _, _, _, _, _, _, photos): PhotoStation -> photos }
                             .forEach { photo: Photo ->
                                 val url = photoStations.photoBaseUrl + photo.path
                                 if (!photoBitmaps.containsKey(url)) {
                                     photoBitmaps[url] = null
                                     addIndicator()
-                                    BitmapCache.Companion.getInstance()
-                                        .getPhoto(BitmapAvailableHandler { bitmap: Bitmap ->
+                                    BitmapCache.instance
+                                        ?.getPhoto(url) { fetchedBitmap: Bitmap? ->
                                             runOnUiThread {
                                                 addAdditionalPhotoToPagerAdapter(
                                                     photo,
                                                     url,
                                                     photoStations,
-                                                    bitmap
+                                                    fetchedBitmap
                                                 )
                                             }
-                                        }, url)
+                                        }
                                 }
                             }
                     }
@@ -213,42 +213,41 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         photo: Photo,
         url: String,
         photoStations: PhotoStations,
-        bitmap: Bitmap
+        bitmap: Bitmap?
     ) {
-        photoPagerAdapter!!.addPageablePhoto(
-            PageablePhoto(
-                photo.id,
-                url,
-                photo.photographer,
-                photoStations.getPhotographerUrl(photo.photographer),
-                photoStations.getLicenseName(photo.license),
-                photoStations.getLicenseUrl(photo.license),
-                bitmap
+        bitmap?.let {
+            photoPagerAdapter.addPageablePhoto(
+                PageablePhoto(
+                    photo.id,
+                    url,
+                    photo.photographer,
+                    photoStations.getPhotographerUrl(photo.photographer),
+                    photoStations.getLicenseName(photo.license),
+                    photoStations.getLicenseUrl(photo.license),
+                    it
+                )
             )
-        )
+        }
     }
 
     private fun addIndicator() {
         val indicator = ImageView(this@DetailsActivity)
         indicator.setImageResource(R.drawable.selector_carousel_page_indicator)
         indicator.setPadding(0, 0, 5, 0) // left, top, right, bottom
-        binding!!.details.llPageIndicatorContainer.addView(indicator)
-        carouselPageIndicators!!.add(indicator)
+        binding.details.llPageIndicatorContainer.addView(indicator)
+        carouselPageIndicators.add(indicator)
     }
 
     private val markerRes: Int
-        private get() {
-            if (station == null) {
-                return R.drawable.marker_missing
-            }
-            return if (station!!.hasPhoto()) {
+        get() {
+            return if (station.hasPhoto()) {
                 if (isOwner) {
-                    if (station!!.active) R.drawable.marker_violet else R.drawable.marker_violet_inactive
+                    if (station.active) R.drawable.marker_violet else R.drawable.marker_violet_inactive
                 } else {
-                    if (station!!.active) R.drawable.marker_green else R.drawable.marker_green_inactive
+                    if (station.active) R.drawable.marker_green else R.drawable.marker_green_inactive
                 }
             } else {
-                if (station!!.active) R.drawable.marker_red else R.drawable.marker_red_inactive
+                if (station.active) R.drawable.marker_red else R.drawable.marker_red_inactive
             }
         }
 
@@ -258,89 +257,104 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
     }
 
     private fun readPreferences() {
-        nickname = baseApplication.getNickname()
+        nickname = baseApplication.nickname
     }
 
     private val isOwner: Boolean
-        private get() = station != null && TextUtils.equals(nickname, station!!.photographer)
+        get() = TextUtils.equals(nickname, station.photographer)
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.details, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
-    var activityForResultLauncher = registerForActivityResult<Intent, ActivityResult>(
-        StartActivityForResult()
-    ) { result: ActivityResult? -> recreate() }
+    private var activityForResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _: ActivityResult? -> recreate() }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
-        if (itemId == R.id.add_photo) {
-            val intent = Intent(this@DetailsActivity, UploadActivity::class.java)
-            intent.putExtra(UploadActivity.Companion.EXTRA_STATION, station)
-            activityForResultLauncher.launch(intent)
-        } else if (itemId == R.id.report_problem) {
-            val intent = Intent(this@DetailsActivity, ProblemReportActivity::class.java)
-            intent.putExtra(ProblemReportActivity.Companion.EXTRA_STATION, station)
-            intent.putExtra(
-                ProblemReportActivity.Companion.EXTRA_PHOTO_ID,
-                if (selectedPhoto != null) selectedPhoto!!.id else null
-            )
-            startActivity(intent)
-        } else if (itemId == R.id.nav_to_station) {
-            startNavigation(this@DetailsActivity)
-        } else if (itemId == R.id.timetable) {
-            getCountryByCode(countries, station!!.country).map<Any?> { country: Country ->
-                val timetableIntent = Timetable().createTimetableIntent(country, station)
-                timetableIntent?.let { startActivity(it) }
-                null
+        when (item.itemId) {
+            R.id.add_photo -> {
+                val intent = Intent(this@DetailsActivity, UploadActivity::class.java)
+                intent.putExtra(UploadActivity.EXTRA_STATION, station)
+                activityForResultLauncher.launch(intent)
             }
-        } else if (itemId == R.id.share_link) {
-            val stationUri = Uri.parse(
-                String.format(
-                    "https://map.railway-stations.org/station.php?countryCode=%s&stationId=%s",
-                    station!!.country,
-                    station!!.id
+
+            R.id.report_problem -> {
+                val intent = Intent(this@DetailsActivity, ProblemReportActivity::class.java)
+                intent.putExtra(ProblemReportActivity.EXTRA_STATION, station)
+                intent.putExtra(
+                    ProblemReportActivity.EXTRA_PHOTO_ID,
+                    if (selectedPhoto != null) selectedPhoto!!.id else null
                 )
-            )
-            startActivity(Intent(Intent.ACTION_VIEW, stationUri))
-        } else if (itemId == R.id.share_photo) {
-            getCountryByCode(countries, station!!.country).map<Any?> { country: Country? ->
-                val shareIntent = createPhotoSendIntent() ?: return@map null
-                shareIntent.putExtra(Intent.EXTRA_TEXT, binding!!.details.tvStationTitle.text)
-                shareIntent.type = "image/jpeg"
-                startActivity(Intent.createChooser(shareIntent, "send"))
-                null
+                startActivity(intent)
             }
-        } else if (itemId == R.id.station_info) {
-            showStationInfo(null)
-        } else if (itemId == R.id.provider_android_app) {
-            getCountryByCode(countries, station!!.country).map<Any?> { country: Country ->
-                val providerApps = country.compatibleProviderApps
-                if (providerApps.size == 1) {
-                    openAppOrPlayStore(providerApps[0], this)
-                } else if (providerApps.size > 1) {
-                    val appNames = providerApps.stream()
-                        .map<String>(ProviderApp::name)
-                        .toArray<CharSequence> { _Dummy_.__Array__() }
-                    SimpleDialogs.simpleSelect(
-                        this,
-                        resources.getString(R.string.choose_provider_app),
-                        appNames
-                    ) { dialog: DialogInterface?, which: Int ->
-                        if (which >= 0 && providerApps.size > which) {
-                            openAppOrPlayStore(providerApps[which], this@DetailsActivity)
-                        }
-                    }
-                } else {
-                    Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG).show()
+
+            R.id.nav_to_station -> {
+                startNavigation(this@DetailsActivity)
+            }
+
+            R.id.timetable -> {
+                getCountryByCode(countries, station.country)?.let { country: Country ->
+                    Timetable().createTimetableIntent(country, station)?.let { startActivity(it) }
                 }
-                null
             }
-        } else if (itemId == android.R.id.home) {
-            navigateUp()
-        } else {
-            return super.onOptionsItemSelected(item)
+
+            R.id.share_link -> {
+                val stationUri = Uri.parse(
+                    String.format(
+                        "https://map.railway-stations.org/station.php?countryCode=%s&stationId=%s",
+                        station.country,
+                        station.id
+                    )
+                )
+                startActivity(Intent(Intent.ACTION_VIEW, stationUri))
+            }
+
+            R.id.share_photo -> {
+                createPhotoSendIntent()?.let {
+                    it.putExtra(Intent.EXTRA_TEXT, binding.details.tvStationTitle.text)
+                    it.type = "image/jpeg"
+                    startActivity(Intent.createChooser(it, "send"))
+                }
+            }
+
+            R.id.station_info -> {
+                showStationInfo()
+            }
+
+            R.id.provider_android_app -> {
+                getCountryByCode(countries, station.country)?.let { country: Country ->
+                    val providerApps = country.compatibleProviderApps
+                    if (providerApps.size == 1) {
+                        openAppOrPlayStore(providerApps[0], this)
+                    } else if (providerApps.size > 1) {
+                        val appNames = providerApps
+                            .map(ProviderApp::name)
+                            .toTypedArray()
+                        SimpleDialogs.simpleSelect(
+                            this,
+                            resources.getString(R.string.choose_provider_app),
+                            appNames
+                        ) { _: DialogInterface?, which: Int ->
+                            if (which >= 0 && providerApps.size > which) {
+                                openAppOrPlayStore(providerApps[which], this@DetailsActivity)
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this, R.string.provider_app_missing, Toast.LENGTH_LONG)
+                            .show()
+                    }
+                }
+            }
+
+            android.R.id.home -> {
+                navigateUp()
+            }
+
+            else -> {
+                return super.onOptionsItemSelected(item)
+            }
         }
         return true
     }
@@ -350,7 +364,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
      *
      * @param context activity context
      */
-    fun openAppOrPlayStore(providerApp: ProviderApp, context: Context) {
+    private fun openAppOrPlayStore(providerApp: ProviderApp, context: Context) {
         // Try to open App
         val success = openApp(providerApp, context)
         // Could not open App, open play store instead
@@ -363,19 +377,19 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
 
     /**
      * Open another app.
+     * https://stackoverflow.com/a/7596063/714965
      *
      * @param context activity context
      * @return true if likely successful, false if unsuccessful
-     * @see https://stackoverflow.com/a/7596063/714965
      */
     private fun openApp(providerApp: ProviderApp, context: Context): Boolean {
         if (!providerApp.isAndroid) {
             return false
         }
-        val manager = context.packageManager
         return try {
             val packageName = Uri.parse(providerApp.url).getQueryParameter("id")!!
-            val intent = manager.getLaunchIntentForPackage(packageName) ?: return false
+            val intent =
+                context.packageManager.getLaunchIntentForPackage(packageName) ?: return false
             intent.addCategory(Intent.CATEGORY_LAUNCHER)
             context.startActivity(intent)
             true
@@ -399,25 +413,25 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         finish()
     }
 
-    fun showStationInfo(view: View?) {
+    fun showStationInfo() {
         val stationInfoBinding = StationInfoBinding.inflate(
             layoutInflater
         )
-        stationInfoBinding.id.text = station!!.id
+        stationInfoBinding.id.text = station.id
         stationInfoBinding.coordinates.text = String.format(
             Locale.US,
             resources.getString(R.string.coordinates),
-            station!!.lat,
-            station!!.lon
+            station.lat,
+            station.lon
         )
-        stationInfoBinding.active.setText(if (station != null && station!!.active) R.string.active else R.string.inactive)
+        stationInfoBinding.active.setText(if (station.active) R.string.active else R.string.inactive)
         stationInfoBinding.owner.text =
-            if (station != null && station!!.photographer != null) station!!.photographer else ""
-        if (station!!.outdated) {
+            if (station.photographer != null) station.photographer else ""
+        if (station.outdated) {
             stationInfoBinding.outdatedLabel.visibility = View.VISIBLE
         }
         AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
-            .setTitle(binding!!.details.tvStationTitle.text)
+            .setTitle(binding.details.tvStationTitle.text)
             .setView(stationInfoBinding.root)
             .setIcon(R.mipmap.ic_launcher)
             .setPositiveButton(android.R.string.ok, null)
@@ -441,7 +455,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
                 sendIntent.putExtra(
                     Intent.EXTRA_STREAM, FileProvider.getUriForFile(
                         this@DetailsActivity,
-                        BuildConfig.APPLICATION_ID + ".fileprovider", newFile!!
+                        BuildConfig.APPLICATION_ID + ".fileprovider", newFile
                     )
                 )
                 return sendIntent
@@ -453,7 +467,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
     }
 
     private fun startNavigation(context: Context) {
-        val adapter: ArrayAdapter<NavItem> = object : ArrayAdapter<NavItem?>(
+        val adapter: ArrayAdapter<NavItem> = object : ArrayAdapter<NavItem>(
             this, android.R.layout.select_dialog_item,
             android.R.id.text1, NavItem.values()
         ) {
@@ -477,15 +491,15 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         AlertDialog.Builder(this)
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.navMethod)
-            .setAdapter(adapter) { dialog: DialogInterface?, position: Int ->
+            .setAdapter(adapter) { _: DialogInterface?, position: Int ->
                 val item = adapter.getItem(position)!!
-                val lat = station!!.lat
-                val lon = station!!.lon
+                val lat = station.lat
+                val lon = station.lon
                 val intent = item.createIntent(
                     this@DetailsActivity,
                     lat,
                     lon,
-                    binding!!.details.tvStationTitle.text.toString(),
+                    binding.details.tvStationTitle.text.toString(),
                     markerRes
                 )
                 try {
@@ -498,19 +512,18 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
 
     fun onPageablePhotoSelected(pageablePhoto: PageablePhoto?, position: Int) {
         selectedPhoto = pageablePhoto
-        binding!!.details.licenseTag.visibility = View.INVISIBLE
+        binding.details.licenseTag.visibility = View.INVISIBLE
         if (pageablePhoto == null) {
             return
         }
 
         // Lizenzinfo aufbauen und einblenden
-        binding!!.details.licenseTag.visibility = View.VISIBLE
+        binding.details.licenseTag.visibility = View.VISIBLE
         val photographerUrlAvailable =
-            pageablePhoto.photographerUrl != null && !pageablePhoto.photographerUrl!!.isEmpty()
+            pageablePhoto.photographerUrl != null && pageablePhoto.photographerUrl!!.isNotEmpty()
         val licenseUrlAvailable =
-            pageablePhoto.licenseUrl != null && !pageablePhoto.licenseUrl!!.isEmpty()
-        val photographerText: String?
-        photographerText = if (photographerUrlAvailable) {
+            pageablePhoto.licenseUrl != null && pageablePhoto.licenseUrl!!.isNotEmpty()
+        val photographerText: String? = if (photographerUrlAvailable) {
             String.format(
                 LINK_FORMAT,
                 pageablePhoto.photographerUrl,
@@ -519,8 +532,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         } else {
             pageablePhoto.photographer
         }
-        val licenseText: String?
-        licenseText = if (licenseUrlAvailable) {
+        val licenseText: String? = if (licenseUrlAvailable) {
             String.format(
                 LINK_FORMAT,
                 pageablePhoto.licenseUrl,
@@ -529,20 +541,18 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         } else {
             pageablePhoto.license
         }
-        binding!!.details.licenseTag.text = Html.fromHtml(
+        binding.details.licenseTag.text = Html.fromHtml(
             String.format(
                 getText(R.string.license_tag).toString(),
                 photographerText,
                 licenseText
             ), Html.FROM_HTML_MODE_LEGACY
         )
-        if (carouselPageIndicators != null) {
-            for (i in carouselPageIndicators.indices) {
-                if (i == position) {
-                    carouselPageIndicators[position].isSelected = true
-                } else {
-                    carouselPageIndicators[i].isSelected = false
-                }
+        for (i in carouselPageIndicators.indices) {
+            if (i == position) {
+                carouselPageIndicators[position].isSelected = true
+            } else {
+                carouselPageIndicators[i].isSelected = false
             }
         }
     }

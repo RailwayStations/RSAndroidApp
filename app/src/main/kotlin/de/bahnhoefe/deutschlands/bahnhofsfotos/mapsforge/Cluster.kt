@@ -22,7 +22,7 @@ class Cluster<T : GeoItem>(
     /**
      * List of GeoItem within cluster
      */
-    val items = Collections.synchronizedList(ArrayList<T>())
+    private val items = Collections.synchronizedList(ArrayList<T>())
 
     private var clusterMarker: ClusterMarker<T>?
 
@@ -34,7 +34,7 @@ class Cluster<T : GeoItem>(
     val title: String
         get() {
             if (getItems().size == 1) {
-                return getItems()[0].title ?: ""
+                return getItems()[0].title
             }
             synchronized(items) {
                 return items.stream().filter { obj: T -> obj.hasPhoto() }.count()

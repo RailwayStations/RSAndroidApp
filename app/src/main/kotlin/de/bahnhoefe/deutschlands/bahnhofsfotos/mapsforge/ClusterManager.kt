@@ -88,7 +88,7 @@ class ClusterManager<T : GeoItem>(
             val rtnList = Collections.synchronizedList(ArrayList<T>())
             synchronized(leftItems) { rtnList.addAll(leftItems) }
             synchronized(clusters) {
-                clusters.map { obj: Cluster<T> -> obj.items }
+                clusters.map { obj: Cluster<T> -> obj.getItems() }
                     .forEach { c: List<T>? ->
                         rtnList.addAll(
                             c!!
@@ -124,13 +124,13 @@ class ClusterManager<T : GeoItem>(
                     if (clusterTask != null && clusterTask!!.isInterrupted) {
                         return
                     }
-                    require(mCluster.items.size != 0) { "cluster.getItems().size() == 0" }
+                    require(mCluster.getItems().size != 0) { "cluster.getItems().size() == 0" }
 
                     // find a cluster which contains the marker.
                     // use 1st element to fix the location, hinder the cluster from
                     // running around and isClustering.
                     val gpCenter =
-                        mCluster.items[0].latLong
+                        mCluster.getItems()[0].latLong
                     val ptCenter = mapView.mapViewProjection.toPixels(gpCenter)
                     // find a cluster which contains the marker.
                     if (pos.distance(ptCenter) <= gridsize) {
@@ -169,7 +169,8 @@ class ClusterManager<T : GeoItem>(
                 clusters
                     .filter { mCluster -> mCluster.size < MIN_CLUSTER_SIZE }
                     .forEach { mCluster ->
-                        mCluster.items.forEach(Consumer { item -> singles.add(createCluster(item)) })
+                        mCluster.getItems()
+                            .forEach(Consumer { item -> singles.add(createCluster(item)) })
                         mCluster.clear()
                         removed.add(mCluster)
                     }
@@ -314,7 +315,7 @@ class ClusterManager<T : GeoItem>(
             } else {
                 synchronized(clusters) {
                     for (mCluster in clusters) {
-                        synchronized(leftItems) { leftItems.addAll(mCluster.items) }
+                        synchronized(leftItems) { leftItems.addAll(mCluster.getItems()) }
                         mCluster.clear()
                     }
                 }
@@ -341,14 +342,5 @@ class ClusterManager<T : GeoItem>(
          */
         var toast: Toast? = null
 
-        /**
-         * You might like to set the Toast from external, in order to make sure that only a single Toast
-         * is showing up.
-         *
-         * @param toast A 'Toast' to display information, intended to show information on [ClusterMarker]
-         */
-        fun setToast(toast: Toast?) {
-            Companion.toast = toast
-        }
     }
 }

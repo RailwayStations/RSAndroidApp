@@ -25,20 +25,20 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface RSAPI {
-    @get:GET("/countries")
-    val countries: Call<List<Country>>
+    @GET("/countries")
+    fun getCountries(): Call<List<Country>>
 
     @GET("/stats")
-    fun getStatistic(@Query("country") country: String?): Call<Statistic?>
+    fun getStatistic(@Query("country") country: String?): Call<Statistic>
 
     @GET("/photographers")
-    fun getHighScore(@Query("country") country: String?): Call<HighScore?>
+    fun getHighScore(@Query("country") country: String?): Call<HighScore>
 
-    @get:GET("/photographers")
-    val highScore: Call<HighScore?>
+    @GET("/photographers")
+    fun getHighScore(): Call<HighScore>
 
     @GET("/myProfile")
-    fun getProfile(@Header("Authorization") authorization: String?): Call<Profile?>
+    fun getProfile(@Header("Authorization") authorization: String): Call<Profile>
 
     @Headers("Content-Type: application/json")
     @POST("/myProfile")
@@ -72,51 +72,44 @@ interface RSAPI {
     fun queryUploadState(
         @Header("Authorization") authorization: String,
         @Body inboxStateQueries: List<InboxStateQuery>
-    ): Call<List<InboxStateQuery>?>
+    ): Call<List<InboxStateQuery>>
 
     @Headers("Content-Type: application/json")
     @POST("/reportProblem")
     fun reportProblem(
         @Header("Authorization") authorization: String?,
-        @Body problemReport: ProblemReport?
-    ): Call<InboxResponse?>?
+        @Body problemReport: ProblemReport
+    ): Call<InboxResponse>
 
-    @get:GET("/publicInbox")
-    val publicInbox: Call<List<PublicInbox?>?>?
+    @GET("/publicInbox")
+    fun getPublicInbox(): Call<List<PublicInbox>>
 
     @POST("/resendEmailVerification")
-    fun resendEmailVerification(@Header("Authorization") authorization: String?): Call<Void?>?
+    fun resendEmailVerification(@Header("Authorization") authorization: String): Call<Void>
 
     @GET("/photoStationById/{country}/{id}")
     fun getPhotoStationById(
-        @Path("country") country: String?,
-        @Path("id") id: String?
-    ): Call<PhotoStations?>?
+        @Path("country") country: String,
+        @Path("id") id: String
+    ): Call<PhotoStations>
 
     @GET("/photoStationsByCountry/{country}")
-    fun getPhotoStationsByCountry(@Path("country") country: String?): Call<PhotoStations?>
+    fun getPhotoStationsByCountry(@Path("country") country: String): Call<PhotoStations>
 
     @FormUrlEncoded
     @POST("/oauth2/token")
     fun requestAccessToken(
-        @Field("code") code: String?,
-        @Field("client_id") clientId: String?,
-        @Field("grant_type") grantType: String?,
-        @Field("redirect_uri") redirectUri: String?,
-        @Field("code_verifier") codeVerifier: String?
-    ): Call<Token?>?
-
-    @FormUrlEncoded
-    @POST("/oauth2/revoke")
-    fun revokeToken(
-        @Field("token") accessToken: String?,
-        @Field("token_type_hint") tokenTypeHint: String?
-    ): Call<Token?>?
+        @Field("code") code: String,
+        @Field("client_id") clientId: String,
+        @Field("grant_type") grantType: String,
+        @Field("redirect_uri") redirectUri: String,
+        @Field("code_verifier") codeVerifier: String
+    ): Call<Token>
 
     @DELETE("/myProfile")
-    fun deleteAccount(@Header("Authorization") authorization: String?): Call<Void?>?
+    fun deleteAccount(@Header("Authorization") authorization: String?): Call<Void>
 
     companion object {
-        val TAG = RSAPI::class.java.simpleName
+        val TAG: String = RSAPI::class.java.simpleName
     }
 }

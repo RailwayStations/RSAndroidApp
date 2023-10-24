@@ -115,7 +115,4 @@ class CountryAdapter(private val context: Context, c: Cursor?, flags: Int) : Cur
         }
     }
 
-    fun getSelectedCountries(): Set<String?> {
-        return selectedCountries
-    }
 }

@@ -15,8 +15,6 @@ class BitmapDownloader(
     private val bitmapAvailableHandler: BitmapAvailableHandler,
 ) : Thread() {
 
-    private val TAG = BitmapDownloader::class.java.simpleName
-
     override fun run() {
         var bitmap: Bitmap? = null
         try {
@@ -42,4 +40,9 @@ class BitmapDownloader(
         }
         bitmapAvailableHandler.onBitmapAvailable(bitmap)
     }
+
+    companion object {
+        private val TAG = BitmapDownloader::class.java.simpleName
+    }
+
 }

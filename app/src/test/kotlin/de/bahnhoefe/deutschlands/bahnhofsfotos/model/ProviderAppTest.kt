@@ -6,22 +6,21 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import java.util.List
 
 internal class ProviderAppTest {
     @ParameterizedTest
     @CsvSource("iOS, false", "android, true", "web, true")
-    fun hasCompatibleProviderApps(type: String?, expectedHasCompatibleProviderApps: Boolean) {
-        val providerApps = List.of(ProviderApp(type))
+    fun hasCompatibleProviderApps(type: String, expectedHasCompatibleProviderApps: Boolean) {
+        val providerApps = listOf(ProviderApp(type, "", ""))
         assertThat(hasCompatibleProviderApps(providerApps))
             .isEqualTo(expectedHasCompatibleProviderApps)
     }
 
     @Test
     fun compatibleProviderApps() {
-        val webProviderApp = ProviderApp("web")
-        val androidProviderApp = ProviderApp("android")
-        val providerApps = List.of(webProviderApp, ProviderApp("iOS"), androidProviderApp)
+        val webProviderApp = ProviderApp("web", "", "")
+        val androidProviderApp = ProviderApp("android", "", "")
+        val providerApps = listOf(webProviderApp, ProviderApp("iOS", "", ""), androidProviderApp)
         assertThat(getCompatibleProviderApps(providerApps))
             .containsExactlyInAnyOrder(webProviderApp, androidProviderApp)
     }

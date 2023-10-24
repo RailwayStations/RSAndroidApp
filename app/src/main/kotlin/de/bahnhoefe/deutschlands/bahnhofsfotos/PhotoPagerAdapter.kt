@@ -10,7 +10,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.PhotoPagerAdapter.PhotoViewHolder
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PageablePhoto
 
 class PhotoPagerAdapter(private val context: Context) : RecyclerView.Adapter<PhotoViewHolder>() {
-    private val pageablePhotos: MutableList<PageablePhoto> = ArrayList()
+    private val pageablePhotos: MutableList<PageablePhoto> = mutableListOf()
+
     fun addPageablePhoto(pageablePhoto: PageablePhoto): Int {
         pageablePhotos.add(pageablePhoto)
         notifyDataSetChanged()

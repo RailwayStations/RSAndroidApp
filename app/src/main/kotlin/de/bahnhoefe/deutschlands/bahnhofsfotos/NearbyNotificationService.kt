@@ -27,7 +27,7 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 class NearbyNotificationService : Service(), LocationListener {
-    private val TAG = NearbyNotificationService::class.java.simpleName
+
     private var nearStations = listOf<Station>()
     private var myPos: Location? = Location(null as String?)
     private var locationManager: LocationManager? = null
@@ -53,11 +53,11 @@ class NearbyNotificationService : Service(), LocationListener {
             resultIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        NearbyBahnhofNotificationManager.Companion.createChannel(this)
+        NearbyBahnhofNotificationManager.createChannel(this)
 
         // show a permanent notification to indicate that position detection is running
         val ongoingNotification: Notification =
-            NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.Companion.CHANNEL_ID)
+            NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(getString(R.string.nearby_notification_active))
                 .setOngoing(true)
@@ -312,6 +312,8 @@ class NearbyNotificationService : Service(), LocationListener {
     }
 
     companion object {
+        private val TAG = NearbyNotificationService::class.java.simpleName
+
         // The minimum distance to change Updates in meters
         private const val MIN_DISTANCE_CHANGE_FOR_UPDATES: Long = 1000 // 1km
 

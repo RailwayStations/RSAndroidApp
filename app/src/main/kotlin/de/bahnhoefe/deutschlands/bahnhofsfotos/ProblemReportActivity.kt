@@ -15,6 +15,7 @@ import androidx.core.app.NavUtils
 import com.google.gson.Gson
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ReportProblemBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs.confirmOk
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport
@@ -26,33 +27,34 @@ import org.apache.commons.lang3.StringUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.Objects
 
 class ProblemReportActivity : AppCompatActivity() {
-    private var baseApplication: BaseApplication? = null
-    private var rsapiClient: RSAPIClient? = null
-    private var binding: ReportProblemBinding? = null
+
+    private lateinit var baseApplication: BaseApplication
+    private lateinit var rsapiClient: RSAPIClient
+    private lateinit var binding: ReportProblemBinding
     private var upload: Upload? = null
     private var station: Station? = null
     private var photoId: Long? = null
-    private val problemTypes = ArrayList<String>()
+    private val problemTypes = mutableListOf<String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ReportProblemBinding.inflate(
             layoutInflater
         )
-        setContentView(binding!!.root)
+        setContentView(binding.root)
         baseApplication = application as BaseApplication
-        rsapiClient = baseApplication.getRsapiClient()
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        rsapiClient = baseApplication.rsapiClient
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         problemTypes.add(getString(R.string.problem_please_specify))
         for (type in ProblemType.values()) {
             problemTypes.add(getString(type.messageId))
         }
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, problemTypes)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding!!.problemType.adapter = adapter
-        binding!!.problemType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.problemType.adapter = adapter
+        binding.problemType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
                 view: View,
@@ -74,17 +76,17 @@ class ProblemReportActivity : AppCompatActivity() {
                 setTitleVisible(false)
             }
         }
-        if (!baseApplication!!.isLoggedIn) {
+        if (!baseApplication.isLoggedIn) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show()
             startActivity(Intent(this@ProblemReportActivity, MyDataActivity::class.java))
             finish()
             return
         }
-        if (!baseApplication.getProfile().emailVerified) {
-            SimpleDialogs.confirmOk(
+        if (!baseApplication.profile.emailVerified) {
+            confirmOk(
                 this,
                 R.string.email_unverified_for_problem_report
-            ) { dialog: DialogInterface?, view: Int ->
+            ) { _: DialogInterface?, _: Int ->
                 startActivity(Intent(this@ProblemReportActivity, MyDataActivity::class.java))
                 finish()
             }
@@ -94,44 +96,42 @@ class ProblemReportActivity : AppCompatActivity() {
     }
 
     private fun setCoordsVisible(visible: Boolean) {
-        binding!!.tvNewCoords.visibility = if (visible) View.VISIBLE else View.GONE
-        binding!!.etNewLatitude.visibility = if (visible) View.VISIBLE else View.GONE
-        binding!!.etNewLongitude.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.tvNewCoords.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.etNewLatitude.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.etNewLongitude.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     private fun setTitleVisible(visible: Boolean) {
-        binding!!.tvNewTitle.visibility = if (visible) View.VISIBLE else View.GONE
-        binding!!.etNewTitle.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.tvNewTitle.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.etNewTitle.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent != null) {
-            upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
-            station = intent.getSerializableExtra(EXTRA_STATION) as Station?
-            photoId = intent.getSerializableExtra(EXTRA_PHOTO_ID) as Long?
-            if (upload != null && upload!!.isProblemReport) {
-                binding!!.etProblemComment.setText(upload!!.comment)
-                binding!!.etNewLatitude.setText(if (upload!!.lat != null) upload!!.lat.toString() else "")
-                binding!!.etNewLongitude.setText(if (upload!!.lon != null) upload!!.lon.toString() else "")
-                val selected = upload!!.problemType!!.ordinal + 1
-                binding!!.problemType.setSelection(selected)
-                if (station == null) {
-                    station = baseApplication.getDbAdapter().getStationForUpload(upload)
-                }
-                fetchUploadStatus(upload)
+        upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
+        station = intent.getSerializableExtra(EXTRA_STATION) as Station?
+        photoId = intent.getSerializableExtra(EXTRA_PHOTO_ID) as Long?
+        if (upload != null && upload!!.isProblemReport) {
+            binding.etProblemComment.setText(upload!!.comment)
+            binding.etNewLatitude.setText(if (upload!!.lat != null) upload!!.lat.toString() else "")
+            binding.etNewLongitude.setText(if (upload!!.lon != null) upload!!.lon.toString() else "")
+            val selected = upload!!.problemType!!.ordinal + 1
+            binding.problemType.setSelection(selected)
+            if (station == null) {
+                station = baseApplication.dbAdapter.getStationForUpload(upload!!)
             }
-            if (station != null) {
-                binding!!.tvStationTitle.text = station!!.title
-                binding!!.etNewTitle.setText(station!!.title)
-                binding!!.etNewLatitude.setText(station!!.lat.toString())
-                binding!!.etNewLongitude.setText(station!!.lon.toString())
-            }
+            fetchUploadStatus(upload)
+        }
+        if (station != null) {
+            binding.tvStationTitle.text = station!!.title
+            binding.etNewTitle.setText(station!!.title)
+            binding.etNewLatitude.setText(station!!.lat.toString())
+            binding.etNewLongitude.setText(station!!.lon.toString())
         }
     }
 
-    fun reportProblem(view: View?) {
-        val selectedType = binding!!.problemType.selectedItemPosition
+    fun reportProblem() {
+        val selectedType = binding.problemType.selectedItemPosition
         if (selectedType == 0) {
             Toast.makeText(
                 applicationContext,
@@ -141,7 +141,7 @@ class ProblemReportActivity : AppCompatActivity() {
             return
         }
         val type = ProblemType.values()[selectedType - 1]
-        val comment = binding!!.etProblemComment.text.toString()
+        val comment = binding.etProblemComment.text.toString()
         if (StringUtils.isBlank(comment)) {
             Toast.makeText(
                 applicationContext,
@@ -152,11 +152,11 @@ class ProblemReportActivity : AppCompatActivity() {
         }
         var lat: Double? = null
         var lon: Double? = null
-        if (binding!!.etNewLatitude.visibility == View.VISIBLE) {
-            lat = parseDouble(binding!!.etNewLatitude)
+        if (binding.etNewLatitude.visibility == View.VISIBLE) {
+            lat = parseDouble(binding.etNewLatitude)
         }
-        if (binding!!.etNewLongitude.visibility == View.VISIBLE) {
-            lon = parseDouble(binding!!.etNewLongitude)
+        if (binding.etNewLongitude.visibility == View.VISIBLE) {
+            lon = parseDouble(binding.etNewLongitude)
         }
         if (type === ProblemType.WRONG_LOCATION && (lat == null || lon == null)) {
             Toast.makeText(
@@ -166,7 +166,7 @@ class ProblemReportActivity : AppCompatActivity() {
             ).show()
             return
         }
-        val title = binding!!.etNewTitle.text.toString()
+        val title = binding.etNewTitle.text.toString()
         if (type === ProblemType.WRONG_NAME && (StringUtils.isBlank(title) || station!!.title == title)) {
             Toast.makeText(
                 applicationContext,
@@ -187,7 +187,7 @@ class ProblemReportActivity : AppCompatActivity() {
             null,
             type
         )
-        upload = baseApplication.getDbAdapter().insertUpload(upload)
+        upload = baseApplication.dbAdapter.insertUpload(upload!!)
         val problemReport = ProblemReport(
             station!!.country,
             station!!.id,
@@ -200,28 +200,27 @@ class ProblemReportActivity : AppCompatActivity() {
         )
         SimpleDialogs.confirmOkCancel(
             this@ProblemReportActivity, R.string.send_problem_report
-        ) { dialog: DialogInterface?, which: Int ->
-            rsapiClient!!.reportProblem(problemReport)!!
-                .enqueue(object : Callback<InboxResponse?> {
+        ) { _: DialogInterface?, _: Int ->
+            rsapiClient.reportProblem(problemReport)
+                .enqueue(object : Callback<InboxResponse> {
                     override fun onResponse(
-                        call: Call<InboxResponse?>,
-                        response: Response<InboxResponse?>
+                        call: Call<InboxResponse>,
+                        response: Response<InboxResponse>
                     ) {
-                        val inboxResponse: InboxResponse?
-                        inboxResponse = if (response.isSuccessful) {
-                            response.body()
+                        val inboxResponse: InboxResponse = if (response.isSuccessful) {
+                            response.body()!!
                         } else if (response.code() == 401) {
                             onUnauthorized()
-                            return@confirmOkCancel
+                            return
                         } else {
-                            Gson().fromJson<InboxResponse>(
+                            Gson().fromJson(
                                 response.errorBody()!!.charStream(),
                                 InboxResponse::class.java
                             )
                         }
-                        upload!!.remoteId = inboxResponse!!.id
+                        upload!!.remoteId = inboxResponse.id
                         upload!!.uploadState = inboxResponse.state.uploadState
-                        baseApplication.getDbAdapter().updateUpload(upload)
+                        baseApplication.dbAdapter.updateUpload(upload)
                         if (inboxResponse.state === InboxResponse.InboxResponseState.ERROR) {
                             confirmOk(
                                 this@ProblemReportActivity,
@@ -243,8 +242,8 @@ class ProblemReportActivity : AppCompatActivity() {
     }
 
     private fun onUnauthorized() {
-        baseApplication.setAccessToken(null)
-        rsapiClient!!.clearToken()
+        baseApplication.accessToken = null
+        rsapiClient.clearToken()
         Toast.makeText(this@ProblemReportActivity, R.string.authorization_failed, Toast.LENGTH_LONG)
             .show()
         startActivity(Intent(this@ProblemReportActivity, MyDataActivity::class.java))
@@ -261,7 +260,7 @@ class ProblemReportActivity : AppCompatActivity() {
     }
 
     private fun fetchUploadStatus(upload: Upload?) {
-        if (upload == null || upload.remoteId == null) {
+        if (upload?.remoteId == null) {
             return
         }
         val stateQuery = InboxStateQuery(
@@ -269,29 +268,32 @@ class ProblemReportActivity : AppCompatActivity() {
             upload.country,
             upload.stationId
         )
-        rsapiClient!!.queryUploadState(java.util.List.of(stateQuery))!!
-            .enqueue(object : Callback<List<InboxStateQuery>?> {
+        rsapiClient.queryUploadState(listOf(stateQuery))
+            .enqueue(object : Callback<List<InboxStateQuery>> {
                 override fun onResponse(
-                    call: Call<List<InboxStateQuery>?>,
-                    response: Response<List<InboxStateQuery>?>
+                    call: Call<List<InboxStateQuery>>,
+                    response: Response<List<InboxStateQuery>>
                 ) {
                     if (response.isSuccessful) {
-                        val stateQueries = response.body()
-                        if (stateQueries != null && !stateQueries.isEmpty()) {
-                            val stateQuery = stateQueries[0]
-                            binding!!.uploadStatus.text =
-                                getString(R.string.upload_state, getString(stateQuery.state.textId))
-                            binding!!.uploadStatus.setTextColor(
+                        val remoteStateQueries = response.body()
+                        if (!remoteStateQueries.isNullOrEmpty()) {
+                            val remoteStateQuery = remoteStateQueries[0]
+                            binding.uploadStatus.text =
+                                getString(
+                                    R.string.upload_state,
+                                    getString(remoteStateQuery.state.textId)
+                                )
+                            binding.uploadStatus.setTextColor(
                                 resources.getColor(
-                                    stateQuery.state.colorId,
+                                    remoteStateQuery.state.colorId,
                                     null
                                 )
                             )
-                            upload.uploadState = stateQuery.state
-                            upload.rejectReason = stateQuery.rejectedReason
-                            upload.crc32 = stateQuery.crc32
-                            upload.remoteId = stateQuery.id
-                            baseApplication.getDbAdapter().updateUpload(upload)
+                            upload.uploadState = remoteStateQuery.state
+                            upload.rejectReason = remoteStateQuery.rejectedReason
+                            upload.crc32 = remoteStateQuery.crc32
+                            upload.remoteId = remoteStateQuery.id
+                            baseApplication.dbAdapter.updateUpload(upload)
                         }
                     } else if (response.code() == 401) {
                         onUnauthorized()
@@ -306,11 +308,13 @@ class ProblemReportActivity : AppCompatActivity() {
             })
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        super.onBackPressed()
         navigateUp()
     }
 
-    fun navigateUp() {
+    private fun navigateUp() {
         val callingActivity =
             callingActivity // if MapsActivity was calling, then we don't want to rebuild the Backstack
         if (callingActivity == null) {

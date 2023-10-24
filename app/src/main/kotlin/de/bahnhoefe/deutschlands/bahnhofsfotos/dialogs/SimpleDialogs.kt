@@ -65,7 +65,7 @@ object SimpleDialogs {
     fun simpleSelect(
         context: Context,
         message: CharSequence,
-        items: Array<CharSequence>,
+        items: Array<String>,
         listener: DialogInterface.OnClickListener?
     ) {
         AlertDialog.Builder(ContextThemeWrapper(context, R.style.AlertDialogCustom))
@@ -112,7 +112,7 @@ object SimpleDialogs {
             }
     }
 
-    interface PromptListener {
-        fun prompt(prompt: String?)
+    fun interface PromptListener {
+        fun prompt(prompt: String)
     }
 }

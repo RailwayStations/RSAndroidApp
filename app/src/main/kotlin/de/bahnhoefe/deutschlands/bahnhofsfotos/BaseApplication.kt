@@ -305,7 +305,7 @@ class BaseApplication : Application() {
         set(anonymous) {
             putBoolean(R.string.ANONYMOUS, anonymous)
         }
-    var profile: Profile?
+    var profile: Profile
         get() = Profile(
             nickname,
             license,
@@ -316,7 +316,7 @@ class BaseApplication : Application() {
             isEmailVerified
         )
         set(profile) {
-            license = profile!!.license
+            license = profile.license
             photoOwner = profile.photoOwner
             anonymous = profile.anonymous
             photographerLink = profile.link

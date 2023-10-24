@@ -2,7 +2,6 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
 import java.io.Serializable
 import java.util.Objects
-import java.util.Optional
 
 data class Country @JvmOverloads constructor(
     val code: String,
@@ -10,7 +9,7 @@ data class Country @JvmOverloads constructor(
     val email: String? = null,
     val timetableUrlTemplate: String? = null,
     val overrideLicense: String? = null,
-    val providerApps: MutableList<ProviderApp> = mutableListOf()
+    val providerApps: List<ProviderApp> = listOf()
 ) : Serializable, Comparable<Country> {
 
     fun hasTimetableUrlTemplate(): Boolean {
@@ -43,10 +42,9 @@ data class Country @JvmOverloads constructor(
         fun getCountryByCode(
             countries: Collection<Country>,
             countryCode: String?
-        ): Optional<Country> {
-            return countries.stream()
-                .filter { country: Country -> country.code == countryCode }
-                .findAny()
+        ): Country? {
+            return countries
+                .firstOrNull { country: Country -> country.code == countryCode }
         }
     }
 }

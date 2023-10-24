@@ -27,8 +27,9 @@ import retrofit2.Response
 import java.util.stream.Collectors
 
 class OutboxActivity : AppCompatActivity() {
-    private var adapter: OutboxAdapter? = null
-    private var dbAdapter: DbAdapter? = null
+    private lateinit var adapter: OutboxAdapter
+    private lateinit var dbAdapter: DbAdapter
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val baseApplication = application as BaseApplication
@@ -37,37 +38,37 @@ class OutboxActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
-        adapter = OutboxAdapter(this@OutboxActivity, dbAdapter.getOutbox())
+        adapter = OutboxAdapter(this@OutboxActivity, dbAdapter.outbox)
         binding.lstUploads.adapter = adapter
 
         // item click
         binding.lstUploads.onItemClickListener =
-            OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
-                val upload = dbAdapter!!.getUploadById(id)
+            OnItemClickListener { _: AdapterView<*>?, _: View?, _: Int, id: Long ->
+                val upload = dbAdapter.getUploadById(id)
                 val intent: Intent
                 if (upload!!.isProblemReport) {
                     intent = Intent(this@OutboxActivity, ProblemReportActivity::class.java)
-                    intent.putExtra(ProblemReportActivity.Companion.EXTRA_UPLOAD, upload)
+                    intent.putExtra(ProblemReportActivity.EXTRA_UPLOAD, upload)
                 } else {
                     intent = Intent(this@OutboxActivity, UploadActivity::class.java)
-                    intent.putExtra(UploadActivity.Companion.EXTRA_UPLOAD, upload)
+                    intent.putExtra(UploadActivity.EXTRA_UPLOAD, upload)
                 }
                 startActivity(intent)
             }
         binding.lstUploads.onItemLongClickListener =
-            OnItemLongClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
+            OnItemLongClickListener { _: AdapterView<*>?, _: View?, _: Int, id: Long ->
                 val uploadId = id.toString()
                 SimpleDialogs.confirmOkCancel(
                     this@OutboxActivity,
                     resources.getString(R.string.delete_upload, uploadId)
-                ) { dialog: DialogInterface?, which: Int ->
-                    dbAdapter!!.deleteUpload(id)
+                ) { _: DialogInterface?, _: Int ->
+                    dbAdapter.deleteUpload(id)
                     FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, id))
-                    adapter!!.changeCursor(dbAdapter.getOutbox())
+                    adapter.changeCursor(dbAdapter.outbox)
                 }
                 true
             }
-        val query = dbAdapter!!.getPendingUploads(true).stream()
+        val query = dbAdapter.getPendingUploads(true).stream()
             .map { upload: Upload? ->
                 InboxStateQuery(
                     upload!!.remoteId
@@ -75,16 +76,16 @@ class OutboxActivity : AppCompatActivity() {
             }
             .collect(Collectors.toList())
         baseApplication.rsapiClient.queryUploadState(query)
-            .enqueue(object : Callback<List<InboxStateQuery>?> {
+            .enqueue(object : Callback<List<InboxStateQuery>> {
                 override fun onResponse(
-                    call: Call<List<InboxStateQuery>?>,
-                    response: Response<List<InboxStateQuery>?>
+                    call: Call<List<InboxStateQuery>>,
+                    response: Response<List<InboxStateQuery>>
                 ) {
                     if (response.isSuccessful) {
                         val stateQueries = response.body()
                         if (stateQueries != null) {
-                            dbAdapter!!.updateUploadStates(stateQueries)
-                            adapter!!.changeCursor(dbAdapter.getOutbox())
+                            dbAdapter.updateUploadStates(stateQueries)
+                            adapter.changeCursor(dbAdapter.outbox)
                         }
                     } else if (response.code() == 401) {
                         baseApplication.accessToken = null
@@ -101,7 +102,7 @@ class OutboxActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<List<InboxStateQuery>?>, t: Throwable) {
+                override fun onFailure(call: Call<List<InboxStateQuery>>, t: Throwable) {
                     Log.e(TAG, "Error retrieving upload state", t)
                     Toast.makeText(
                         this@OutboxActivity,
@@ -127,27 +128,28 @@ class OutboxActivity : AppCompatActivity() {
     }
 
     private fun deleteCompletedUploads() {
-        val uploads = dbAdapter.getCompletedUploads()
-        if (uploads!!.isEmpty()) {
+        val uploads = dbAdapter.completedUploads
+        if (uploads.isEmpty()) {
             return
         }
         AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.confirm_delete_processed_uploads)
-            .setPositiveButton(R.string.button_ok_text) { dialog: DialogInterface?, which: Int ->
+            .setPositiveButton(R.string.button_ok_text) { _: DialogInterface?, _: Int ->
                 for (upload in uploads) {
-                    dbAdapter!!.deleteUpload(upload!!.id!!)
-                    FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, upload!!.id))
+                    dbAdapter.deleteUpload(upload.id!!)
+                    FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, upload.id))
                 }
-                adapter!!.changeCursor(dbAdapter.getOutbox())
+                adapter.changeCursor(dbAdapter.outbox)
             }
             .setNegativeButton(R.string.button_cancel_text, null)
             .create().show()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        adapter!!.changeCursor(dbAdapter.getOutbox())
+        adapter.changeCursor(dbAdapter.outbox)
     }
 
     companion object {

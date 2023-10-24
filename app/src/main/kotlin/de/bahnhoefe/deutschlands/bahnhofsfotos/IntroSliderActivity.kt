@@ -15,8 +15,8 @@ import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityIntroSliderBinding
 
 class IntroSliderActivity : AppCompatActivity() {
-    private var binding: ActivityIntroSliderBinding? = null
-    private var layouts: IntArray
+    private lateinit var binding: ActivityIntroSliderBinding
+    private lateinit var layouts: IntArray
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val baseApplication = application as BaseApplication
@@ -25,21 +25,21 @@ class IntroSliderActivity : AppCompatActivity() {
         binding = ActivityIntroSliderBinding.inflate(
             layoutInflater
         )
-        setContentView(binding!!.root)
+        setContentView(binding.root)
         layouts = intArrayOf(R.layout.intro_slider1, R.layout.intro_slider2)
         addBottomDots(0)
         changeStatusBarColor()
         val viewPagerAdapter = ViewPagerAdapter()
-        binding!!.viewPager.adapter = viewPagerAdapter
-        binding!!.viewPager.addOnPageChangeListener(viewListener)
-        binding!!.btnSliderSkip.setOnClickListener { v: View? ->
+        binding.viewPager.adapter = viewPagerAdapter
+        binding.viewPager.addOnPageChangeListener(viewListener)
+        binding.btnSliderSkip.setOnClickListener {
             baseApplication.firstAppStart = true
             openMainActivity()
         }
-        binding!!.btnSliderNext.setOnClickListener { v: View? ->
+        binding.btnSliderNext.setOnClickListener {
             val current = nextItem
             if (current < layouts.size) {
-                binding!!.viewPager.currentItem = current
+                binding.viewPager.currentItem = current
             } else {
                 openMainActivity()
             }
@@ -52,7 +52,9 @@ class IntroSliderActivity : AppCompatActivity() {
         finish()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        super.onBackPressed()
         openMainActivity()
     }
 
@@ -60,22 +62,23 @@ class IntroSliderActivity : AppCompatActivity() {
         val dots = arrayOfNulls<TextView>(layouts.size)
         val colorActive = resources.getIntArray(R.array.dot_active)
         val colorInactive = resources.getIntArray(R.array.dot_inactive)
-        binding!!.layoutDots.removeAllViews()
-        for (i in dots.indices) {
-            dots[i] = TextView(this)
-            dots[i]!!.text = Html.fromHtml("&#8226;", Html.FROM_HTML_MODE_LEGACY)
-            dots[i]!!.textSize = 35f
-            dots[i]!!.setTextColor(colorInactive[position])
-            binding!!.layoutDots.addView(dots[i])
+        binding.layoutDots.removeAllViews()
+        dots.indices.forEach { i ->
+            val textView = TextView(this)
+            textView.text = Html.fromHtml("&#8226;", Html.FROM_HTML_MODE_LEGACY)
+            textView.textSize = 35f
+            textView.setTextColor(colorInactive[position])
+            dots[i] = textView
+            binding.layoutDots.addView(textView)
         }
-        if (dots.size > 0) {
+        if (dots.isNotEmpty()) {
             dots[position]!!.setTextColor(colorActive[position])
         }
     }
 
     private val nextItem: Int
-        private get() = binding!!.viewPager.currentItem + 1
-    val viewListener: OnPageChangeListener = object : OnPageChangeListener {
+        get() = binding.viewPager.currentItem + 1
+    private val viewListener: OnPageChangeListener = object : OnPageChangeListener {
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
@@ -87,12 +90,12 @@ class IntroSliderActivity : AppCompatActivity() {
             val baseApplication = application as BaseApplication
             addBottomDots(position)
             if (position == layouts.size - 1) {
-                binding!!.btnSliderNext.setText(R.string.proceed)
-                binding!!.btnSliderSkip.visibility = View.INVISIBLE
+                binding.btnSliderNext.setText(R.string.proceed)
+                binding.btnSliderSkip.visibility = View.INVISIBLE
                 baseApplication.firstAppStart = true
             } else {
-                binding!!.btnSliderNext.setText(R.string.next)
-                binding!!.btnSliderSkip.visibility = View.VISIBLE
+                binding.btnSliderNext.setText(R.string.next)
+                binding.btnSliderSkip.visibility = View.VISIBLE
             }
         }
 

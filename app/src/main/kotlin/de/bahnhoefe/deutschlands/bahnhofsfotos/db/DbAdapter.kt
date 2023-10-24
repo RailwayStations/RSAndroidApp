@@ -46,10 +46,10 @@ class DbAdapter(private val context: Context) {
         dbHelper!!.close()
     }
 
-    fun insertStations(photoStations: PhotoStations, countryCode: String?) {
+    fun insertStations(photoStations: PhotoStations, countryCode: String) {
         db!!.beginTransaction()
         try {
-            deleteStations(java.util.Set.of(countryCode))
+            deleteStations(mutableSetOf(countryCode))
             photoStations.stations.forEach(Consumer { station: PhotoStation ->
                 db!!.insert(
                     DATABASE_TABLE_STATIONS, null, toContentValues(station, photoStations)
@@ -85,8 +85,8 @@ class DbAdapter(private val context: Context) {
         values.put(STATIONS.LON, station.lon)
         values.put(STATIONS.DS100, station.shortCode)
         values.put(STATIONS.ACTIVE, !station.inactive)
-        if (station.photos!!.isNotEmpty()) {
-            val (id, photographer, path, _, license, outdated) = station.photos!![0]
+        if (station.photos.isNotEmpty()) {
+            val (id, photographer, path, _, license, outdated) = station.photos[0]
             values.put(STATIONS.PHOTO_ID, id)
             values.put(STATIONS.PHOTO_URL, photoStations.photoBaseUrl + path)
             values.put(STATIONS.PHOTOGRAPHER, photographer)
@@ -339,8 +339,8 @@ class DbAdapter(private val context: Context) {
         return values
     }
 
-    fun getPendingUploadsForStation(station: Station): List<Upload?> {
-        val uploads = ArrayList<Upload?>()
+    fun getPendingUploadsForStation(station: Station): List<Upload> {
+        val uploads = mutableListOf<Upload>()
         db!!.query(
             DATABASE_TABLE_UPLOADS,
             null,
@@ -682,8 +682,8 @@ class DbAdapter(private val context: Context) {
         return null
     }
 
-    fun fetchCountriesWithProviderApps(countryCodes: Set<String?>?): Set<Country> {
-        val countryList = countryCodes!!.stream()
+    fun fetchCountriesWithProviderApps(countryCodes: Set<String>): Set<Country> {
+        val countryList = countryCodes.stream()
             .map { c: String? -> "'$c'" }
             .collect(Collectors.joining(","))
         val countries = HashSet<Country>()
@@ -698,8 +698,8 @@ class DbAdapter(private val context: Context) {
         ).use { cursor ->
             if (cursor != null && cursor.moveToFirst()) {
                 do {
-                    val country = createCountryFromCursor(cursor)
-                    countries.add(country)
+                    var country = createCountryFromCursor(cursor)
+                    val providerApps = mutableListOf<ProviderApp>()
                     db!!.query(
                         DATABASE_TABLE_PROVIDER_APPS,
                         null,
@@ -711,10 +711,12 @@ class DbAdapter(private val context: Context) {
                     ).use { cursorPa ->
                         if (cursorPa != null && cursorPa.moveToFirst()) {
                             do {
-                                country.providerApps.add(createProviderAppFromCursor(cursorPa))
+                                providerApps.add(createProviderAppFromCursor(cursorPa))
                             } while (cursorPa.moveToNext())
                         }
                     }
+                    country = country.copy(providerApps = providerApps)
+                    countries.add(country)
                 } while (cursor.moveToNext())
             }
         }

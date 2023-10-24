@@ -23,8 +23,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher.addCallback
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.app.NavUtils
@@ -32,6 +32,7 @@ import androidx.core.content.FileProvider
 import com.google.gson.Gson
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityUploadBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs.confirmOk
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country.Companion.getCountryByCode
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse
@@ -42,7 +43,10 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.KeyValueSpinnerItem
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -54,49 +58,51 @@ import java.io.UnsupportedEncodingException
 import java.net.URLConnection
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.util.Objects
 import java.util.zip.CRC32
 import java.util.zip.CheckedInputStream
 import java.util.zip.CheckedOutputStream
 
 class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
-    private var baseApplication: BaseApplication? = null
-    private var rsapiClient: RSAPIClient? = null
-    private var binding: ActivityUploadBinding? = null
+
+    private lateinit var baseApplication: BaseApplication
+    private lateinit var rsapiClient: RSAPIClient
+    private lateinit var binding: ActivityUploadBinding
+    private lateinit var countries: List<Country>
     private var upload: Upload? = null
     private var station: Station? = null
-    private var countries: List<Country?>? = null
     private var latitude: Double? = null
     private var longitude: Double? = null
     private var bahnhofId: String? = null
     private var crc32: Long? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUploadBinding.inflate(
             layoutInflater
         )
-        setContentView(binding!!.root)
+        setContentView(binding.root)
         baseApplication = application as BaseApplication
-        rsapiClient = baseApplication.getRsapiClient()
-        countries = ArrayList(baseApplication.getDbAdapter().allCountries)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
-        if (!baseApplication!!.isLoggedIn) {
+        rsapiClient = baseApplication.rsapiClient
+        countries = ArrayList(baseApplication.dbAdapter.allCountries)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        if (!baseApplication.isLoggedIn) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show()
             startActivity(Intent(this, MyDataActivity::class.java))
             finish()
             return
         }
-        if (!baseApplication.getProfile().isAllowedToUploadPhoto()) {
-            SimpleDialogs.confirmOk(
+        if (!baseApplication.profile.isAllowedToUploadPhoto()) {
+            confirmOk(
                 this,
                 R.string.no_photo_upload_allowed
-            ) { dialog: DialogInterface?, which: Int ->
+            ) { _: DialogInterface?, _: Int ->
                 startActivity(Intent(this, MyDataActivity::class.java))
                 finish()
             }
             return
         }
-        getOnBackPressedDispatcher().addCallback(this, object : OnBackPressedCallback(true) {
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 navigateUp()
             }
@@ -106,125 +112,121 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent != null) {
-            upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
-            station = intent.getSerializableExtra(EXTRA_STATION) as Station?
-            latitude = intent.getSerializableExtra(EXTRA_LATITUDE) as Double?
-            longitude = intent.getSerializableExtra(EXTRA_LONGITUDE) as Double?
-            if (station == null && upload != null && upload!!.isUploadForExistingStation) {
-                station = baseApplication.getDbAdapter().getStationForUpload(upload)
-            }
-            if (latitude == null && longitude == null && upload != null && upload!!.isUploadForMissingStation) {
-                latitude = upload!!.lat
-                longitude = upload!!.lon
-            }
-            if (station == null && (latitude == null || longitude == null)) {
-                Log.w(
-                    TAG,
-                    "EXTRA_STATION and EXTRA_LATITUDE or EXTRA_LONGITUDE in intent data missing"
-                )
-                Toast.makeText(this, R.string.station_or_coords_not_found, Toast.LENGTH_LONG).show()
-                finish()
-                return
-            }
-            if (station != null) {
-                bahnhofId = station!!.id
-                binding!!.upload.etStationTitle.setText(station!!.title)
-                binding!!.upload.etStationTitle.inputType = EditorInfo.TYPE_NULL
-                binding!!.upload.etStationTitle.isSingleLine = false
-                if (upload == null) {
-                    upload =
-                        baseApplication.getDbAdapter().getPendingUploadsForStation(station).stream()
-                            .filter(Upload::isPendingPhotoUpload)
-                            .findFirst()
-                            .orElse(null)
-                }
-                setLocalBitmap(upload)
-                binding!!.upload.spActive.visibility = View.GONE
-                binding!!.upload.spCountries.visibility = View.GONE
-                val country = station!!.country
-                updateOverrideLicense(country)
-            } else {
-                if (upload == null) {
-                    upload = baseApplication.getDbAdapter()
-                        .getPendingUploadForCoordinates(latitude, longitude)
-                }
-                binding!!.upload.etStationTitle.inputType = EditorInfo.TYPE_CLASS_TEXT
-                binding!!.upload.spActive.adapter = ArrayAdapter(
-                    this, android.R.layout.simple_spinner_dropdown_item, resources.getStringArray(
-                        R.array.active_flag_options
-                    )
-                )
-                if (upload != null) {
-                    binding!!.upload.etStationTitle.setText(upload!!.title)
-                    setLocalBitmap(upload)
-                    if (upload!!.active == null) {
-                        binding!!.upload.spActive.setSelection(0)
-                    } else if (upload!!.active!!) {
-                        binding!!.upload.spActive.setSelection(1)
-                    } else {
-                        binding!!.upload.spActive.setSelection(2)
-                    }
-                } else {
-                    binding!!.upload.spActive.setSelection(0)
-                }
-                val items = arrayOfNulls<KeyValueSpinnerItem>(
-                    countries!!.size + 1
-                )
-                items[0] = KeyValueSpinnerItem(getString(R.string.chooseCountry), "")
-                var selected = 0
-                for (i in countries!!.indices) {
-                    val country = countries!![i]
-                    items[i + 1] = KeyValueSpinnerItem(country!!.name, country.code)
-                    if (upload != null && country.code == upload!!.country) {
-                        selected = i + 1
-                    }
-                }
-                val countryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, items)
-                countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding!!.upload.spCountries.adapter = countryAdapter
-                binding!!.upload.spCountries.setSelection(selected)
-                binding!!.upload.spCountries.onItemSelectedListener =
-                    object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(
-                            parent: AdapterView<*>,
-                            view: View,
-                            position: Int,
-                            id: Long
-                        ) {
-                            val selectedCountry =
-                                parent.getItemAtPosition(position) as KeyValueSpinnerItem
-                            updateOverrideLicense(selectedCountry.value)
-                        }
-
-                        override fun onNothingSelected(parent: AdapterView<*>?) {
-                            updateOverrideLicense(null)
-                        }
-                    }
-            }
-            if (upload != null) {
-                binding!!.upload.etComment.setText(upload!!.comment)
-            }
-            binding!!.upload.txtPanorama.text =
-                Html.fromHtml(getString(R.string.panorama_info), Html.FROM_HTML_MODE_COMPACT)
-            binding!!.upload.txtPanorama.movementMethod = LinkMovementMethod.getInstance()
-            binding!!.upload.txtPanorama.setLinkTextColor(Color.parseColor("#c71c4d"))
+        upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
+        station = intent.getSerializableExtra(EXTRA_STATION) as Station?
+        latitude = intent.getSerializableExtra(EXTRA_LATITUDE) as Double?
+        longitude = intent.getSerializableExtra(EXTRA_LONGITUDE) as Double?
+        if (station == null && upload != null && upload!!.isUploadForExistingStation) {
+            station = baseApplication.dbAdapter.getStationForUpload(upload!!)
         }
+        if (latitude == null && longitude == null && upload != null && upload!!.isUploadForMissingStation) {
+            latitude = upload!!.lat
+            longitude = upload!!.lon
+        }
+        if (station == null && (latitude == null || longitude == null)) {
+            Log.w(
+                TAG,
+                "EXTRA_STATION and EXTRA_LATITUDE or EXTRA_LONGITUDE in intent data missing"
+            )
+            Toast.makeText(this, R.string.station_or_coords_not_found, Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        if (station != null) {
+            bahnhofId = station!!.id
+            binding.upload.etStationTitle.setText(station!!.title)
+            binding.upload.etStationTitle.inputType = EditorInfo.TYPE_NULL
+            binding.upload.etStationTitle.isSingleLine = false
+            if (upload == null) {
+                upload =
+                    baseApplication.dbAdapter.getPendingUploadsForStation(station!!)
+                        .firstOrNull(Upload::isPendingPhotoUpload)
+            }
+            setLocalBitmap(upload)
+            binding.upload.spActive.visibility = View.GONE
+            binding.upload.spCountries.visibility = View.GONE
+            val country = station!!.country
+            updateOverrideLicense(country)
+        } else {
+            if (upload == null) {
+                upload = baseApplication.dbAdapter
+                    .getPendingUploadForCoordinates(latitude!!, longitude!!)
+            }
+            binding.upload.etStationTitle.inputType = EditorInfo.TYPE_CLASS_TEXT
+            binding.upload.spActive.adapter = ArrayAdapter(
+                this, android.R.layout.simple_spinner_dropdown_item, resources.getStringArray(
+                    R.array.active_flag_options
+                )
+            )
+            if (upload != null) {
+                binding.upload.etStationTitle.setText(upload!!.title)
+                setLocalBitmap(upload)
+                if (upload!!.active == null) {
+                    binding.upload.spActive.setSelection(0)
+                } else if (upload!!.active!!) {
+                    binding.upload.spActive.setSelection(1)
+                } else {
+                    binding.upload.spActive.setSelection(2)
+                }
+            } else {
+                binding.upload.spActive.setSelection(0)
+            }
+            val items = arrayOfNulls<KeyValueSpinnerItem>(
+                countries.size + 1
+            )
+            items[0] = KeyValueSpinnerItem(getString(R.string.chooseCountry), "")
+            var selected = 0
+            for (i in countries.indices) {
+                val country = countries[i]
+                items[i + 1] = KeyValueSpinnerItem(country.name, country.code)
+                if (upload != null && country.code == upload!!.country) {
+                    selected = i + 1
+                }
+            }
+            val countryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, items)
+            countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.upload.spCountries.adapter = countryAdapter
+            binding.upload.spCountries.setSelection(selected)
+            binding.upload.spCountries.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>,
+                        view: View,
+                        position: Int,
+                        id: Long
+                    ) {
+                        val selectedCountry =
+                            parent.getItemAtPosition(position) as KeyValueSpinnerItem
+                        updateOverrideLicense(selectedCountry.value)
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+                        updateOverrideLicense(null)
+                    }
+                }
+        }
+        if (upload != null) {
+            binding.upload.etComment.setText(upload!!.comment)
+        }
+        binding.upload.txtPanorama.text =
+            Html.fromHtml(getString(R.string.panorama_info), Html.FROM_HTML_MODE_COMPACT)
+        binding.upload.txtPanorama.movementMethod = LinkMovementMethod.getInstance()
+        binding.upload.txtPanorama.setLinkTextColor(Color.parseColor("#c71c4d"))
     }
 
     private fun updateOverrideLicense(country: String?) {
         val overrideLicense =
-            getCountryByCode(countries, country).map(Country::overrideLicense).orElse(null)
+            getCountryByCode(countries, country)?.overrideLicense
         if (overrideLicense != null) {
-            binding!!.upload.cbSpecialLicense.text =
+            binding.upload.cbSpecialLicense.text =
                 getString(R.string.special_license, overrideLicense)
         }
-        binding!!.upload.cbSpecialLicense.visibility =
+        binding.upload.cbSpecialLicense.visibility =
             if (overrideLicense == null) View.GONE else View.VISIBLE
     }
 
-    private val imageCaptureResultLauncher = registerForActivityResult<Intent, ActivityResult>(
-        StartActivityForResult()
+    private val imageCaptureResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK) {
             try {
@@ -232,7 +234,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                 val cameraTempFile = cameraTempFile
                 val options = BitmapFactory.Options()
                 options.inJustDecodeBounds = true // just query the image size in the first step
-                BitmapFactory.decodeFile(cameraTempFile!!.path, options)
+                BitmapFactory.decodeFile(cameraTempFile.path, options)
                 val sampling = options.outWidth / Constants.STORED_PHOTO_WIDTH
                 if (sampling > 1) {
                     options.inSampleSize = sampling
@@ -255,7 +257,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         }
     }
 
-    fun takePicture(view: View?) {
+    fun takePicture() {
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return
         }
@@ -263,12 +265,12 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         val photoURI = FileProvider.getUriForFile(
             this,
             BuildConfig.APPLICATION_ID + ".fileprovider",
-            cameraTempFile!!
+            cameraTempFile
         )
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
         intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, resources.getString(R.string.app_name))
-        intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, binding!!.upload.etStationTitle.text)
+        intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, binding.upload.etStationTitle.text)
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         try {
             imageCaptureResultLauncher.launch(intent)
@@ -278,7 +280,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     }
 
     private val selectPictureResultLauncher = registerForActivityResult<String, Uri>(
-        GetContent()
+        ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         try {
             contentResolver.openFileDescriptor(uri!!, "r").use { parcelFileDescriptor ->
@@ -310,13 +312,13 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         }
     }
 
-    fun selectPicture(view: View?) {
+    fun selectPicture() {
         selectPictureResultLauncher.launch("image/*")
     }
 
     private fun assertCurrentPhotoUploadExists() {
         if (upload == null || upload!!.isProblemReport || upload!!.isUploaded) {
-            upload = Upload(
+            val newUpload = Upload(
                 null,
                 if (station != null) station!!.country else null,
                 if (station != null) station!!.id else null,
@@ -325,7 +327,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                 latitude,
                 longitude
             )
-            upload = baseApplication.getDbAdapter().insertUpload(upload)
+            upload = baseApplication.dbAdapter.insertUpload(newUpload)
         }
     }
 
@@ -350,17 +352,17 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
      *
      * @return the File
      */
-    fun getStoredMediaFile(upload: Upload?): File? {
+    private fun getStoredMediaFile(upload: Upload?): File? {
         return if (upload == null) {
             null
         } else FileUtils.getStoredMediaFile(this, upload.id)
     }
 
-    private val cameraTempFile: File?
+    private val cameraTempFile: File
         /**
          * Get the file path for the Camera app to store the unprocessed photo to.
          */
-        private get() = FileUtils.getImageCacheFile(this, upload!!.id.toString())
+        get() = FileUtils.getImageCacheFile(this, upload!!.id.toString())
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.upload, menu)
@@ -372,7 +374,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         if (itemId == R.id.share_photo) {
             val shareIntent = createPhotoSendIntent()
             if (shareIntent != null) {
-                shareIntent.putExtra(Intent.EXTRA_TEXT, binding!!.upload.etStationTitle.text)
+                shareIntent.putExtra(Intent.EXTRA_TEXT, binding.upload.etStationTitle.text)
                 shareIntent.type = "image/jpeg"
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.share_photo)))
             }
@@ -399,8 +401,8 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         finish()
     }
 
-    fun upload(view: View?) {
-        if (TextUtils.isEmpty(binding!!.upload.etStationTitle.text)) {
+    fun upload() {
+        if (TextUtils.isEmpty(binding.upload.etStationTitle.text)) {
             Toast.makeText(this, R.string.station_title_needed, Toast.LENGTH_LONG).show()
             return
         }
@@ -412,68 +414,67 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                 return
             }
         }
-        if (binding!!.upload.cbSpecialLicense.text.length > 0 && !binding!!.upload.cbSpecialLicense.isChecked) {
+        if (binding.upload.cbSpecialLicense.text.isNotEmpty() && !binding.upload.cbSpecialLicense.isChecked) {
             Toast.makeText(this, R.string.special_license_confirm, Toast.LENGTH_LONG).show()
             return
         }
-        if (crc32 != null && upload != null && crc32 == upload!!.crc32 && !binding!!.upload.cbChecksum.isChecked) {
+        if (crc32 != null && upload != null && crc32 == upload!!.crc32 && !binding.upload.cbChecksum.isChecked) {
             Toast.makeText(this, R.string.photo_checksum, Toast.LENGTH_LONG).show()
             return
         }
         if (station == null) {
-            if (binding!!.upload.spActive.selectedItemPosition == 0) {
+            if (binding.upload.spActive.selectedItemPosition == 0) {
                 Toast.makeText(this, R.string.active_flag_choose, Toast.LENGTH_LONG).show()
                 return
             }
-            val selectedCountry = binding!!.upload.spCountries.selectedItem as KeyValueSpinnerItem
+            val selectedCountry = binding.upload.spCountries.selectedItem as KeyValueSpinnerItem
             upload!!.country = selectedCountry.value
         }
         SimpleDialogs.confirmOkCancel(
             this,
             if (station != null) R.string.photo_upload else R.string.report_missing_station
-        ) { dialog: DialogInterface?, which: Int ->
-            binding!!.upload.progressBar.visibility = View.VISIBLE
-            var stationTitle: String? = binding!!.upload.etStationTitle.text.toString()
-            var comment: String? = binding!!.upload.etComment.text.toString()
+        ) { _: DialogInterface?, _: Int ->
+            binding.upload.progressBar.visibility = View.VISIBLE
+            var stationTitle: String? = binding.upload.etStationTitle.text.toString()
+            var comment: String? = binding.upload.etComment.text.toString()
             upload!!.title = stationTitle
             upload!!.comment = comment
             try {
                 stationTitle = URLEncoder.encode(
-                    binding!!.upload.etStationTitle.text.toString(),
+                    binding.upload.etStationTitle.text.toString(),
                     StandardCharsets.UTF_8.toString()
                 )
                 comment = URLEncoder.encode(comment, StandardCharsets.UTF_8.toString())
             } catch (e: UnsupportedEncodingException) {
                 Log.e(TAG, "Error encoding station title or comment", e)
             }
-            upload!!.active = binding!!.upload.spActive.selectedItemPosition == 1
-            baseApplication.getDbAdapter().updateUpload(upload)
-            val file: RequestBody = if (mediaFile.exists()) RequestBody.create(
-                mediaFile, parse.parse(
-                    URLConnection.guessContentTypeFromName(
-                        mediaFile.name
-                    )
-                )
-            ) else RequestBody.create(byteArrayOf(), parse.parse("application/octet-stream"))
-            rsapiClient!!.photoUpload(
+            upload!!.active = binding.upload.spActive.selectedItemPosition == 1
+            baseApplication.dbAdapter.updateUpload(upload)
+            val file: RequestBody = if (mediaFile.exists()) mediaFile.asRequestBody(
+                URLConnection.guessContentTypeFromName(
+                    mediaFile.name
+                ).toMediaTypeOrNull()
+            ) else byteArrayOf().toRequestBody(
+                "application/octet-stream".toMediaTypeOrNull(),
+            )
+            rsapiClient.photoUpload(
                 bahnhofId, if (station != null) station!!.country else upload!!.country,
                 stationTitle, latitude, longitude, comment, upload!!.active, file
-            )!!.enqueue(object : Callback<InboxResponse?> {
+            ).enqueue(object : Callback<InboxResponse?> {
                 override fun onResponse(
                     call: Call<InboxResponse?>,
                     response: Response<InboxResponse?>
                 ) {
-                    binding!!.upload.progressBar.visibility = View.GONE
-                    val inboxResponse: InboxResponse?
-                    inboxResponse = if (response.isSuccessful) {
+                    binding.upload.progressBar.visibility = View.GONE
+                    val inboxResponse: InboxResponse? = if (response.isSuccessful) {
                         response.body()
                     } else if (response.code() == 401) {
                         onUnauthorized()
-                        return@confirmOkCancel
+                        return
                     } else {
                         assert(response.errorBody() != null)
                         val gson = Gson()
-                        gson.fromJson<InboxResponse>(
+                        gson.fromJson(
                             response.errorBody()!!.charStream(),
                             InboxResponse::class.java
                         )
@@ -483,7 +484,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                     upload!!.inboxUrl = inboxResponse.inboxUrl
                     upload!!.uploadState = inboxResponse.state.uploadState
                     upload!!.crc32 = inboxResponse.crc32
-                    baseApplication.getDbAdapter().updateUpload(upload)
+                    baseApplication.dbAdapter.updateUpload(upload)
                     if (inboxResponse.state === InboxResponse.InboxResponseState.ERROR) {
                         confirmOk(
                             this@UploadActivity,
@@ -499,7 +500,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
                 override fun onFailure(call: Call<InboxResponse?>, t: Throwable) {
                     Log.e(TAG, "Error uploading photo", t)
-                    binding!!.upload.progressBar.visibility = View.GONE
+                    binding.upload.progressBar.visibility = View.GONE
                     confirmOk(
                         this@UploadActivity,
                         getString(InboxResponse.InboxResponseState.ERROR.messageId, t.message)
@@ -531,13 +532,13 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     private fun setLocalBitmap(upload: Upload?) {
         val localPhoto = checkForLocalPhoto(upload)
         if (localPhoto != null) {
-            binding!!.upload.imageview.setImageBitmap(localPhoto)
+            binding.upload.imageview.setImageBitmap(localPhoto)
             fetchUploadStatus(upload)
         }
     }
 
     private fun fetchUploadStatus(upload: Upload?) {
-        if (upload == null || upload.remoteId == null) {
+        if (upload?.remoteId == null) {
             return
         }
         val stateQuery = InboxStateQuery(
@@ -545,30 +546,33 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             upload.country,
             upload.stationId
         )
-        rsapiClient!!.queryUploadState(java.util.List.of(stateQuery))!!
-            .enqueue(object : Callback<List<InboxStateQuery>?> {
+        rsapiClient.queryUploadState(listOf(stateQuery))
+            .enqueue(object : Callback<List<InboxStateQuery>> {
                 override fun onResponse(
-                    call: Call<List<InboxStateQuery>?>,
-                    response: Response<List<InboxStateQuery>?>
+                    call: Call<List<InboxStateQuery>>,
+                    response: Response<List<InboxStateQuery>>
                 ) {
                     if (response.isSuccessful) {
-                        val stateQueries = response.body()
-                        if (stateQueries != null && !stateQueries.isEmpty()) {
-                            val stateQuery = stateQueries[0]
-                            binding!!.upload.uploadStatus.text =
-                                getString(R.string.upload_state, getString(stateQuery.state.textId))
-                            binding!!.upload.uploadStatus.setTextColor(
+                        val remoteStateQueries = response.body()
+                        if (!remoteStateQueries.isNullOrEmpty()) {
+                            val remoteStateQuery = remoteStateQueries[0]
+                            binding.upload.uploadStatus.text =
+                                getString(
+                                    R.string.upload_state,
+                                    getString(remoteStateQuery.state.textId)
+                                )
+                            binding.upload.uploadStatus.setTextColor(
                                 resources.getColor(
-                                    stateQuery.state.colorId,
+                                    remoteStateQuery.state.colorId,
                                     null
                                 )
                             )
-                            binding!!.upload.uploadStatus.visibility = View.VISIBLE
-                            upload.uploadState = stateQuery.state
-                            upload.rejectReason = stateQuery.rejectedReason
-                            upload.crc32 = stateQuery.crc32
-                            upload.remoteId = stateQuery.id
-                            baseApplication.getDbAdapter().updateUpload(upload)
+                            binding.upload.uploadStatus.visibility = View.VISIBLE
+                            upload.uploadState = remoteStateQuery.state
+                            upload.rejectReason = remoteStateQuery.rejectedReason
+                            upload.crc32 = remoteStateQuery.crc32
+                            upload.remoteId = remoteStateQuery.id
+                            baseApplication.dbAdapter.updateUpload(upload)
                             updateCrc32Checkbox()
                         }
                     } else if (response.code() == 401) {
@@ -578,15 +582,15 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                     }
                 }
 
-                override fun onFailure(call: Call<List<InboxStateQuery>?>, t: Throwable) {
+                override fun onFailure(call: Call<List<InboxStateQuery>>, t: Throwable) {
                     Log.e(TAG, "Error retrieving upload state", t)
                 }
             })
     }
 
     private fun onUnauthorized() {
-        baseApplication.setAccessToken(null)
-        rsapiClient!!.clearToken()
+        baseApplication.accessToken = null
+        rsapiClient.clearToken()
         Toast.makeText(this, R.string.authorization_failed, Toast.LENGTH_LONG).show()
         startActivity(Intent(this, MyDataActivity::class.java))
         finish()
@@ -595,7 +599,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     private fun updateCrc32Checkbox() {
         if (crc32 != null && upload != null) {
             val sameChecksum = crc32 == upload!!.crc32
-            binding!!.upload.cbChecksum.visibility = if (sameChecksum) View.VISIBLE else View.GONE
+            binding.upload.cbChecksum.visibility = if (sameChecksum) View.VISIBLE else View.GONE
         }
     }
 

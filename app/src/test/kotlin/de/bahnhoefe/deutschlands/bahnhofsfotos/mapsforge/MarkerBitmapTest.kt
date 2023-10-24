@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mapsforge.core.graphics.Bitmap
 import org.mapsforge.core.graphics.Paint
+import org.mapsforge.core.model.Point
 import org.mockito.Mockito.mock
 
 /**
@@ -43,7 +44,9 @@ class MarkerBitmapTest {
         srcWithPhotoInactive,
         srcOwnPhotoInactive,
         srcPendingUpload,
+        mock(Point::class.java),
         0f,
+        0,
         mock(
             Paint::class.java
         )

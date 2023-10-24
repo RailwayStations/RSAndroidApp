@@ -44,7 +44,7 @@ class RSAPIClient(
     private var baseUrl: String,
     private val clientId: String,
     accessToken: String?,
-    private val redirectUri: String
+    val redirectUri: String
 ) {
     private var api: RSAPI
     private var token: Token? = null
@@ -122,18 +122,19 @@ class RSAPIClient(
         }
     }
 
-    val countries: Call<List<Country>>
-        get() = api.countries
+    fun getCountries(): Call<List<Country>> {
+        return api.getCountries()
+    }
 
     fun runUpdateCountriesAndStations(
         context: Context,
         baseApplication: BaseApplication,
         listener: ResultListener,
     ) {
-        countries.enqueue(object : Callback<List<Country>?> {
+        getCountries().enqueue(object : Callback<List<Country>> {
             override fun onResponse(
-                call: Call<List<Country>?>,
-                response: retrofit2.Response<List<Country>?>
+                call: Call<List<Country>>,
+                response: retrofit2.Response<List<Country>>
             ) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
@@ -155,7 +156,7 @@ class RSAPIClient(
         val runningRequestCount = AtomicInteger(
             countryCodes.size
         )
-        countryCodes.forEach(Consumer<String?> { countryCode: String? ->
+        countryCodes.forEach(Consumer { countryCode: String ->
             api.getPhotoStationsByCountry(countryCode).enqueue(object : Callback<PhotoStations?> {
                 override fun onResponse(
                     call: Call<PhotoStations?>,
@@ -195,24 +196,27 @@ class RSAPIClient(
         })
     }
 
-    fun getPhotoStationById(country: String?, id: String?): Call<PhotoStations?>? {
+    fun getPhotoStationById(country: String, id: String): Call<PhotoStations> {
         return api.getPhotoStationById(country, id)
     }
 
-    fun getPhotoStationsByCountry(country: String?): Call<PhotoStations?> {
+    fun getPhotoStationsByCountry(country: String): Call<PhotoStations> {
         return api.getPhotoStationsByCountry(country)
     }
 
-    val publicInbox: Call<List<PublicInbox?>?>?
-        get() = api.publicInbox
-    val highScore: Call<HighScore?>
-        get() = api.highScore
+    fun getPublicInbox(): Call<List<PublicInbox>> {
+        return api.getPublicInbox()
+    }
 
-    fun getHighScore(country: String?): Call<HighScore?> {
+    fun getHighScore(): Call<HighScore> {
+        return api.getHighScore()
+    }
+
+    fun getHighScore(country: String?): Call<HighScore> {
         return api.getHighScore(country)
     }
 
-    fun reportProblem(problemReport: ProblemReport?): Call<InboxResponse?>? {
+    fun reportProblem(problemReport: ProblemReport): Call<InboxResponse> {
         return api.reportProblem(userAuthorization, problemReport)
     }
 
@@ -240,12 +244,13 @@ class RSAPIClient(
         )
     }
 
-    fun queryUploadState(stateQueries: List<InboxStateQuery>): Call<List<InboxStateQuery>?> {
+    fun queryUploadState(stateQueries: List<InboxStateQuery>): Call<List<InboxStateQuery>> {
         return api.queryUploadState(userAuthorization!!, stateQueries)
     }
 
-    val profile: Call<Profile?>
-        get() = api.getProfile(userAuthorization)
+    fun getProfile(): Call<Profile> {
+        return api.getProfile(userAuthorization!!)
+    }
 
     fun saveProfile(profile: Profile): Call<Void> {
         return api.saveProfile(userAuthorization!!, profile)
@@ -255,25 +260,25 @@ class RSAPIClient(
         return api.changePassword(userAuthorization!!, ChangePassword(newPassword))
     }
 
-    fun deleteAccount(): Call<Void?>? {
+    fun deleteAccount(): Call<Void> {
         return api.deleteAccount(userAuthorization)
     }
 
-    fun resendEmailVerification(): Call<Void?>? {
-        return api.resendEmailVerification(userAuthorization)
+    fun resendEmailVerification(): Call<Void> {
+        return api.resendEmailVerification(userAuthorization!!)
     }
 
-    fun getStatistic(country: String?): Call<Statistic?> {
+    fun getStatistic(country: String?): Call<Statistic> {
         return api.getStatistic(country)
     }
 
-    fun requestAccessToken(code: String?): Call<Token?>? {
+    fun requestAccessToken(code: String): Call<Token> {
         return api.requestAccessToken(
             code,
             clientId,
             "authorization_code",
             redirectUri,
-            pkceCodeVerifier
+            pkceCodeVerifier!!
         )
     }
 
@@ -294,7 +299,7 @@ class RSAPIClient(
         return Uri.parse(baseUrl + "oauth2/authorize" + "?client_id=" + clientId + "&code_challenge=" + pkceCodeChallenge + "&code_challenge_method=S256&scope=all&response_type=code&redirect_uri=" + redirectUri)
     }
 
-    interface ResultListener {
+    fun interface ResultListener {
         fun onResult(success: Boolean)
     }
 

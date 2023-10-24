@@ -111,7 +111,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             }
             val markerRes = intent.getSerializableExtra(EXTRAS_MARKER) as Int?
             if (markerRes != null) {
-                extraMarker = createBitmapMarker(myPos, markerRes)
+                extraMarker = createBitmapMarker(myPos!!, markerRes)
             }
         }
         addDBSTileSource(R.string.dbs_osm_basic, "/styles/dbs-osm-basic/")
@@ -175,7 +175,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
      */
     private fun createMapViews() {
         binding.map.mapView.isClickable = true
-        binding.map.mapView.setOnMapDragListener { myLocSwitch!!.isChecked = false }
+        binding.map.mapView.setOnMapDragListener { myLocSwitch.isChecked = false }
         binding.map.mapView.mapScaleBar.isVisible = true
         binding.map.mapView.setBuiltInZoomControls(true)
         binding.map.mapView.mapZoomControls.isAutoHide = true
@@ -219,7 +219,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                         )
                     )
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error loading theme $mapTheme", e)
+                    Log.e(TAG, "Error loading theme $it", e)
                     return InternalRenderTheme.DEFAULT
                 }
             }
@@ -309,11 +309,11 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                         ) { _: DialogInterface?, _: Int ->
                             val intent = Intent(this@MapsActivity, UploadActivity::class.java)
                             intent.putExtra(
-                                UploadActivity.Companion.EXTRA_LATITUDE,
+                                UploadActivity.EXTRA_LATITUDE,
                                 latLong.latitude
                             )
                             intent.putExtra(
-                                UploadActivity.Companion.EXTRA_LONGITUDE,
+                                UploadActivity.EXTRA_LONGITUDE,
                                 latLong.longitude
                             )
                             startActivity(intent)
@@ -369,8 +369,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 )
             )
         }
-        baseApplication.mapDirectoryUri?.let {
-            val documentsTree = getDocumentFileFromTreeUri(it)
+        baseApplication.mapDirectoryUri?.let { mapDirectoryUri ->
+            val documentsTree = getDocumentFileFromTreeUri(mapDirectoryUri)
             if (documentsTree != null) {
                 for (file in documentsTree.listFiles()) {
                     if (file.isFile && file.name!!.endsWith(".map")) {
@@ -392,7 +392,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
         mapSubmenu.setGroupCheckable(R.id.maps_group, true, true)
         val mapFolder = mapSubmenu.add(R.string.map_folder)
-        mapFolder.setOnMenuItemClickListener { item1: MenuItem? ->
+        mapFolder.setOnMenuItemClickListener {
             openMapDirectoryChooser()
             false
         }
@@ -458,7 +458,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         return null
     }
 
-    private var themeDirectoryLauncher = registerForActivityResult<Intent, ActivityResult>(
+    private var themeDirectoryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK && result.data != null) {
@@ -473,7 +473,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             }
         }
     }
-    protected var mapDirectoryLauncher = registerForActivityResult(
+
+    private var mapDirectoryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK && result.data != null) {
@@ -532,7 +533,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         baseApplication.rsapiClient.runUpdateCountriesAndStations(
             this,
             baseApplication
-        ) { success: Boolean -> reloadMap() }
+        ) { reloadMap() }
     }
 
     private fun onStationsLoaded(stationList: List<Station>, uploadList: List<Upload>) {
@@ -560,7 +561,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         val country = item.station.country
         try {
             val station = dbAdapter.getStationByKey(country, id)
-            intent.putExtra(DetailsActivity.Companion.EXTRA_STATION, station)
+            intent.putExtra(DetailsActivity.EXTRA_STATION, station)
             startActivity(intent)
         } catch (e: RuntimeException) {
             Log.wtf(

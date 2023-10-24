@@ -53,7 +53,7 @@ class MapsforgeMapView(context: Context?, attributeSet: AttributeSet?) :
     /**
      * Notifies the parent class when a MapView has been dragged
      */
-    interface MapDragListener {
+    fun interface MapDragListener {
         fun onDrag()
     }
 }

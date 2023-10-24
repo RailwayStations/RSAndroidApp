@@ -13,6 +13,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemReport
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -29,14 +30,14 @@ import java.nio.charset.Charset
 import java.util.Objects
 
 internal class RSAPIClientTest {
-    private var server: MockWebServer? = null
-    private var client: RSAPIClient? = null
+    private lateinit var server: MockWebServer
+    private lateinit var client: RSAPIClient
 
     @BeforeEach
     fun setup() {
         server = MockWebServer()
-        server!!.start()
-        val baseUrl = server!!.url("/")
+        server.start()
+        val baseUrl = server.url("/")
         client = RSAPIClient(
             baseUrl.toString(),
             "clientId",
@@ -47,14 +48,14 @@ internal class RSAPIClientTest {
 
     @AfterEach
     fun teardown() {
-        server!!.shutdown()
+        server.shutdown()
     }
 
     @Test
     fun countries() {
-        server!!.enqueue(MockResponse().setBody(fromFile("countries.json")))
-        val response = client!!.countries.execute()
-        assertThat(server!!.takeRequest().path).isEqualTo("/countries")
+        server.enqueue(MockResponse().setBody(fromFile("countries.json")))
+        val response = client.getCountries().execute()
+        assertThat(server.takeRequest().path).isEqualTo("/countries")
         assertThat(response.body()).isNotNull
         assertThat(response.body()).containsExactly(
             Country("in", "India", null, "https://enquiry.indianrail.gov.in/ntes/"),
@@ -80,9 +81,9 @@ internal class RSAPIClientTest {
 
     @Test
     fun highScore() {
-        server!!.enqueue(MockResponse().setBody(fromFile("highscore.json")))
-        val response = client!!.highScore.execute()
-        assertThat(server!!.takeRequest().path).isEqualTo("/photographers")
+        server.enqueue(MockResponse().setBody(fromFile("highscore.json")))
+        val response = client.getHighScore().execute()
+        assertThat(server.takeRequest().path).isEqualTo("/photographers")
         assertThat(response.body()).isNotNull
         assertThat(response.body()!!.getItems()).containsExactly(
             HighScoreItem(
@@ -105,9 +106,9 @@ internal class RSAPIClientTest {
 
     @Test
     fun highScoreWithCountry() {
-        server!!.enqueue(MockResponse().setBody(fromFile("highscore.json")))
-        val response = client!!.getHighScore("de").execute()
-        assertThat(server!!.takeRequest().path)
+        server.enqueue(MockResponse().setBody(fromFile("highscore.json")))
+        val response = client.getHighScore("de").execute()
+        assertThat(server.takeRequest().path)
             .isEqualTo("/photographers?country=de")
         assertThat(response.body()).isNotNull
         assertThat(response.body()!!.getItems()).containsExactly(
@@ -131,9 +132,9 @@ internal class RSAPIClientTest {
 
     @Test
     fun statsWithCountry() {
-        server!!.enqueue(MockResponse().setBody(fromFile("stats.json")))
-        val response = client!!.getStatistic("de").execute()
-        assertThat(server!!.takeRequest().path).isEqualTo("/stats?country=de")
+        server.enqueue(MockResponse().setBody(fromFile("stats.json")))
+        val response = client.getStatistic("de").execute()
+        assertThat(server.takeRequest().path).isEqualTo("/stats?country=de")
         assertThat(response.body()).isNotNull
         assertThat(response.body()).usingRecursiveComparison()
             .isEqualTo(Statistic(7863, 7861, 2, 249))
@@ -141,9 +142,9 @@ internal class RSAPIClientTest {
 
     @Test
     fun photoStationById() {
-        server!!.enqueue(MockResponse().setBody(fromFile("photoStationById.json")))
-        val response = client!!.getPhotoStationById("de", "1973").execute()
-        assertThat(server!!.takeRequest().path)
+        server.enqueue(MockResponse().setBody(fromFile("photoStationById.json")))
+        val response = client.getPhotoStationById("de", "1973").execute()
+        assertThat(server.takeRequest().path)
             .isEqualTo("/photoStationById/de/1973")
         assertThat(response.body()).isNotNull
         assertThat(response.body()).isEqualTo(
@@ -195,9 +196,9 @@ internal class RSAPIClientTest {
 
     @Test
     fun photoStationsByCountry() {
-        server!!.enqueue(MockResponse().setBody(fromFile("photoStationsByCountry.json")))
-        val response = client!!.getPhotoStationsByCountry("de").execute()
-        assertThat(server!!.takeRequest().path)
+        server.enqueue(MockResponse().setBody(fromFile("photoStationsByCountry.json")))
+        val response = client.getPhotoStationsByCountry("de").execute()
+        assertThat(server.takeRequest().path)
             .isEqualTo("/photoStationsByCountry/de")
         assertThat(response.body()).isNotNull
         assertThat(response.body()).isEqualTo(
@@ -251,14 +252,15 @@ internal class RSAPIClientTest {
 
     @Test
     fun postPhotoUpload() {
-        server!!.enqueue(MockResponse().setBody(fromFile("photoUpload.json")))
+        server.enqueue(MockResponse().setBody(fromFile("photoUpload.json")))
         val requestBody: RequestBody = "IMAGE".toByteArray().toRequestBody(
             URLConnection.guessContentTypeFromName("photo.png").toMediaTypeOrNull(),
         )
+        client.setToken(Token("accessToken", "tokenType", "refeshToken"))
         val response =
-            client!!.photoUpload("4711", "de", "Title", 50.0, 9.0, "Comment", null, requestBody)
+            client.photoUpload("4711", "de", "Title", 50.0, 9.0, "Comment", null, requestBody)
                 .execute()
-        val recordedRequest = server!!.takeRequest()
+        val recordedRequest = server.takeRequest()
         assertThat(recordedRequest.path).isEqualTo("/photoUpload")
         assertThat(recordedRequest.getHeader("Station-Id")).isEqualTo("4711")
         assertThat(recordedRequest.getHeader("Country")).isEqualTo("de")
@@ -288,7 +290,7 @@ internal class RSAPIClientTest {
 
     @Test
     fun postProblemReport() {
-        server!!.enqueue(MockResponse().setBody(fromFile("reportProblem.json")))
+        server.enqueue(MockResponse().setBody(fromFile("reportProblem.json")))
         val problemReport = ProblemReport(
             "de",
             "4711",
@@ -299,8 +301,8 @@ internal class RSAPIClientTest {
             9.2,
             "New Title"
         )
-        val response = client!!.reportProblem(problemReport).execute()
-        val recordedRequest = server!!.takeRequest()
+        val response = client.reportProblem(problemReport).execute()
+        val recordedRequest = server.takeRequest()
         assertThat(recordedRequest.path).isEqualTo("/reportProblem")
         assertThat(recordedRequest.getHeader("Content-Type"))
             .isEqualTo("application/json")

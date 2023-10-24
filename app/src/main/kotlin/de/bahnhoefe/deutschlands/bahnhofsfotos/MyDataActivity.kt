@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMydataBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ChangePasswordBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
+import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs.confirmOk
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
@@ -28,52 +29,51 @@ import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.NoSuchAlgorithmException
-import java.util.Objects
 
 class MyDataActivity : AppCompatActivity() {
     private var license: License? = null
-    private var baseApplication: BaseApplication? = null
-    private var rsapiClient: RSAPIClient? = null
-    private var profile: Profile? = null
-    private var binding: ActivityMydataBinding? = null
+    private lateinit var baseApplication: BaseApplication
+    private lateinit var rsapiClient: RSAPIClient
+    private lateinit var profile: Profile
+    private lateinit var binding: ActivityMydataBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMydataBinding.inflate(
             layoutInflater
         )
-        setContentView(binding!!.root)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        setContentView(binding.root)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setTitle(R.string.login)
-        binding!!.myData.profileForm.visibility = View.INVISIBLE
+        binding.myData.profileForm.visibility = View.INVISIBLE
         baseApplication = application as BaseApplication
-        rsapiClient = baseApplication.getRsapiClient()
-        setProfileToUI(baseApplication.getProfile())
+        rsapiClient = baseApplication.rsapiClient
+        setProfileToUI(baseApplication.profile)
         oauthAuthorizationCallback(intent)
         if (isLoginDataAvailable) {
             loadRemoteProfile()
         }
     }
 
-    private fun setProfileToUI(profile: Profile?) {
-        binding!!.myData.etNickname.setText(profile!!.nickname)
-        binding!!.myData.etEmail.setText(profile.email)
-        binding!!.myData.etLinking.setText(profile.link)
+    private fun setProfileToUI(profile: Profile) {
+        binding.myData.etNickname.setText(profile.nickname)
+        binding.myData.etEmail.setText(profile.email)
+        binding.myData.etLinking.setText(profile.link)
         license = profile.license
-        binding!!.myData.cbLicenseCC0.isChecked = license === License.CC0
-        binding!!.myData.cbOwnPhoto.isChecked = profile.photoOwner
-        binding!!.myData.cbAnonymous.isChecked = profile.anonymous
-        onAnonymousChecked(null)
+        binding.myData.cbLicenseCC0.isChecked = license === License.CC0
+        binding.myData.cbOwnPhoto.isChecked = profile.photoOwner
+        binding.myData.cbAnonymous.isChecked = profile.anonymous
+        onAnonymousChecked()
         if (profile.emailVerified) {
-            binding!!.myData.tvEmailVerification.setText(R.string.emailVerified)
-            binding!!.myData.tvEmailVerification.setTextColor(
+            binding.myData.tvEmailVerification.setText(R.string.emailVerified)
+            binding.myData.tvEmailVerification.setTextColor(
                 resources.getColor(
                     R.color.emailVerified,
                     null
                 )
             )
         } else {
-            binding!!.myData.tvEmailVerification.setText(R.string.emailUnverified)
-            binding!!.myData.tvEmailVerification.setTextColor(
+            binding.myData.tvEmailVerification.setText(R.string.emailUnverified)
+            binding.myData.tvEmailVerification.setTextColor(
                 resources.getColor(
                     R.color.emailUnverified,
                     null
@@ -84,12 +84,12 @@ class MyDataActivity : AppCompatActivity() {
     }
 
     private fun loadRemoteProfile() {
-        binding!!.myData.loginForm.visibility = View.VISIBLE
-        binding!!.myData.profileForm.visibility = View.GONE
-        binding!!.myData.progressBar.visibility = View.VISIBLE
-        rsapiClient.getProfile().enqueue(object : Callback<Profile?> {
-            override fun onResponse(call: Call<Profile?>, response: Response<Profile?>) {
-                binding!!.myData.progressBar.visibility = View.GONE
+        binding.myData.loginForm.visibility = View.VISIBLE
+        binding.myData.profileForm.visibility = View.GONE
+        binding.myData.progressBar.visibility = View.VISIBLE
+        rsapiClient.getProfile().enqueue(object : Callback<Profile> {
+            override fun onResponse(call: Call<Profile>, response: Response<Profile>) {
+                binding.myData.progressBar.visibility = View.GONE
                 when (response.code()) {
                     200 -> {
                         Log.i(TAG, "Successfully loaded profile")
@@ -101,7 +101,7 @@ class MyDataActivity : AppCompatActivity() {
                     }
 
                     401 -> {
-                        logout(null)
+                        logout()
                         confirmOk(this@MyDataActivity, R.string.authorization_failed)
                     }
 
@@ -113,7 +113,7 @@ class MyDataActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<Profile?>, t: Throwable) {
-                binding!!.myData.progressBar.visibility = View.GONE
+                binding.myData.progressBar.visibility = View.GONE
                 confirmOk(
                     this@MyDataActivity,
                     getString(R.string.read_profile_failed, t.message)
@@ -123,32 +123,32 @@ class MyDataActivity : AppCompatActivity() {
     }
 
     private fun showProfileView() {
-        binding!!.myData.loginForm.visibility = View.GONE
-        binding!!.myData.profileForm.visibility = View.VISIBLE
-        Objects.requireNonNull(supportActionBar).setTitle(R.string.tvProfile)
-        binding!!.myData.btProfileSave.setText(R.string.bt_mydata_commit)
-        binding!!.myData.btLogout.visibility = View.VISIBLE
-        binding!!.myData.btChangePassword.visibility = View.VISIBLE
+        binding.myData.loginForm.visibility = View.GONE
+        binding.myData.profileForm.visibility = View.VISIBLE
+        supportActionBar?.setTitle(R.string.tvProfile)
+        binding.myData.btProfileSave.setText(R.string.bt_mydata_commit)
+        binding.myData.btLogout.visibility = View.VISIBLE
+        binding.myData.btChangePassword.visibility = View.VISIBLE
     }
 
     private fun oauthAuthorizationCallback(intent: Intent?) {
         if (intent != null && Intent.ACTION_VIEW == intent.action) {
             val data = intent.data
             if (data != null) {
-                if (data.toString().startsWith(baseApplication.getRsapiClient().redirectUri)) {
+                if (data.toString().startsWith(rsapiClient.redirectUri)) {
                     val code = data.getQueryParameter("code")
                     if (code != null) {
-                        baseApplication.getRsapiClient().requestAccessToken(code)
-                            .enqueue(object : Callback<Token?> {
+                        rsapiClient.requestAccessToken(code)
+                            .enqueue(object : Callback<Token> {
                                 override fun onResponse(
-                                    call: Call<Token?>,
-                                    response: Response<Token?>
+                                    call: Call<Token>,
+                                    response: Response<Token>
                                 ) {
                                     val token = response.body()
                                     Log.d(TAG, token.toString())
                                     if (token != null) {
-                                        baseApplication.setAccessToken(token.accessToken)
-                                        baseApplication.getRsapiClient().setToken(token)
+                                        baseApplication.accessToken = token.accessToken
+                                        baseApplication.rsapiClient.setToken(token)
                                         loadRemoteProfile()
                                     } else {
                                         Toast.makeText(
@@ -190,29 +190,29 @@ class MyDataActivity : AppCompatActivity() {
         oauthAuthorizationCallback(intent)
     }
 
-    fun selectLicense(view: View?) {
-        license = if (binding!!.myData.cbLicenseCC0.isChecked) License.CC0 else License.UNKNOWN
+    fun selectLicense() {
+        license = if (binding.myData.cbLicenseCC0.isChecked) License.CC0 else License.UNKNOWN
         if (license !== License.CC0) {
             confirmOk(this, R.string.cc0_needed)
         }
     }
 
-    fun save(view: View?) {
+    fun save() {
         profile = createProfileFromUI()
         if (!isValid(profile)) {
             return
         }
-        if (rsapiClient!!.hasToken()) {
-            binding!!.myData.progressBar.visibility = View.VISIBLE
-            rsapiClient!!.saveProfile(profile)!!.enqueue(object : Callback<Void?> {
-                override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
-                    binding!!.myData.progressBar.visibility = View.GONE
+        if (rsapiClient.hasToken()) {
+            binding.myData.progressBar.visibility = View.VISIBLE
+            rsapiClient.saveProfile(profile).enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    binding.myData.progressBar.visibility = View.GONE
                     when (response.code()) {
                         200 -> Log.i(TAG, "Successfully saved profile")
                         202 -> confirmOk(this@MyDataActivity, R.string.password_email)
                         400 -> confirmOk(this@MyDataActivity, R.string.profile_wrong_data)
                         401 -> {
-                            logout(view)
+                            logout()
                             confirmOk(this@MyDataActivity, R.string.authorization_failed)
                         }
 
@@ -224,8 +224,8 @@ class MyDataActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<Void?>, t: Throwable) {
-                    binding!!.myData.progressBar.visibility = View.GONE
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    binding.myData.progressBar.visibility = View.GONE
                     Log.e(TAG, "Error uploading profile", t)
                     confirmOk(
                         this@MyDataActivity,
@@ -240,33 +240,33 @@ class MyDataActivity : AppCompatActivity() {
 
     private fun createProfileFromUI(): Profile {
         val newProfile = Profile(
-            binding!!.myData.etNickname.text.toString().trim { it <= ' ' },
+            binding.myData.etNickname.text.toString().trim { it <= ' ' },
             license,
-            binding!!.myData.cbOwnPhoto.isChecked,
-            binding!!.myData.cbAnonymous.isChecked,
-            binding!!.myData.etLinking.text.toString().trim { it <= ' ' },
-            binding!!.myData.etEmail.text.toString().trim { it <= ' ' }
+            binding.myData.cbOwnPhoto.isChecked,
+            binding.myData.cbAnonymous.isChecked,
+            binding.myData.etLinking.text.toString().trim { it <= ' ' },
+            binding.myData.etEmail.text.toString().trim { it <= ' ' }
         )
-        if (profile != null) {
-            newProfile.emailVerified = profile!!.emailVerified
-        }
+        newProfile.emailVerified = profile.emailVerified
         return newProfile
     }
 
-    private fun saveLocalProfile(profile: Profile?) {
-        baseApplication.setProfile(profile)
+    private fun saveLocalProfile(profile: Profile) {
+        baseApplication.profile = profile
         setProfileToUI(profile)
     }
 
     private val isLoginDataAvailable: Boolean
-        private get() = baseApplication.getAccessToken() != null
+        get() = baseApplication.accessToken != null
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        super.onBackPressed()
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
 
-    fun isValid(profile: Profile?): Boolean {
+    private fun isValid(profile: Profile?): Boolean {
         if (StringUtils.isBlank(profile!!.nickname)) {
             confirmOk(this, R.string.missing_nickname)
             return false
@@ -295,58 +295,58 @@ class MyDataActivity : AppCompatActivity() {
         return true
     }
 
-    fun isValidEmail(target: CharSequence?): Boolean {
+    private fun isValidEmail(target: CharSequence?): Boolean {
         return target != null && Patterns.EMAIL_ADDRESS.matcher(target).matches()
     }
 
-    fun onAnonymousChecked(view: View?) {
-        if (binding!!.myData.cbAnonymous.isChecked) {
-            binding!!.myData.etLinking.visibility = View.GONE
-            binding!!.myData.tvLinking.visibility = View.GONE
+    fun onAnonymousChecked() {
+        if (binding.myData.cbAnonymous.isChecked) {
+            binding.myData.etLinking.visibility = View.GONE
+            binding.myData.tvLinking.visibility = View.GONE
         } else {
-            binding!!.myData.etLinking.visibility = View.VISIBLE
-            binding!!.myData.tvLinking.visibility = View.VISIBLE
+            binding.myData.etLinking.visibility = View.VISIBLE
+            binding.myData.tvLinking.visibility = View.VISIBLE
         }
     }
 
     @Throws(NoSuchAlgorithmException::class)
-    fun login(view: View?) {
+    fun login() {
         val intent = Intent(
             Intent.ACTION_VIEW,
-            rsapiClient!!.createAuthorizeUri()
+            rsapiClient.createAuthorizeUri()
         )
         startActivity(intent)
         finish()
     }
 
-    fun logout(view: View?) {
-        baseApplication.setAccessToken(null)
-        rsapiClient!!.clearToken()
+    fun logout() {
+        baseApplication.accessToken = null
+        rsapiClient.clearToken()
         profile = Profile()
         saveLocalProfile(profile)
-        binding!!.myData.profileForm.visibility = View.GONE
-        binding!!.myData.loginForm.visibility = View.VISIBLE
-        Objects.requireNonNull(supportActionBar).setTitle(R.string.login)
+        binding.myData.profileForm.visibility = View.GONE
+        binding.myData.loginForm.visibility = View.VISIBLE
+        supportActionBar?.setTitle(R.string.login)
     }
 
-    fun deleteAccount(view: View?) {
+    fun deleteAccount() {
         SimpleDialogs.confirmOkCancel(
             this,
             R.string.deleteAccountConfirmation
-        ) { d: DialogInterface?, i: Int ->
-            rsapiClient!!.deleteAccount()!!
-                .enqueue(object : Callback<Void?> {
-                    override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+        ) { _: DialogInterface?, _: Int ->
+            rsapiClient.deleteAccount()
+                .enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
                         when (response.code()) {
                             204 -> {
                                 Log.i(TAG, "Successfully deleted account")
-                                logout(view)
+                                logout()
                                 confirmOk(this@MyDataActivity, R.string.account_deleted)
                             }
 
                             401 -> {
                                 confirmOk(this@MyDataActivity, R.string.authorization_failed)
-                                logout(view)
+                                logout()
                             }
 
                             else -> confirmOk(
@@ -370,7 +370,7 @@ class MyDataActivity : AppCompatActivity() {
         }
     }
 
-    fun changePassword(view: View?) {
+    fun changePassword() {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
         val passwordBinding = ChangePasswordBinding.inflate(
             layoutInflater
@@ -379,11 +379,11 @@ class MyDataActivity : AppCompatActivity() {
             .setView(passwordBinding.root)
             .setIcon(R.mipmap.ic_launcher)
             .setPositiveButton(android.R.string.ok, null)
-            .setNegativeButton(android.R.string.cancel) { dialog: DialogInterface, id: Int -> dialog.cancel() }
+            .setNegativeButton(android.R.string.cancel) { dialog: DialogInterface, _: Int -> dialog.cancel() }
         val alertDialog = builder.create()
         alertDialog.show()
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { v: View? ->
-            var newPassword: String? =
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            var newPassword: String =
                 getValidPassword(passwordBinding.password, passwordBinding.passwordRepeat)
                     ?: return@setOnClickListener
             alertDialog.dismiss()
@@ -392,18 +392,18 @@ class MyDataActivity : AppCompatActivity() {
             } catch (e: UnsupportedEncodingException) {
                 Log.e(TAG, "Error encoding new password", e)
             }
-            rsapiClient!!.changePassword(newPassword)!!.enqueue(object : Callback<Void?> {
+            rsapiClient.changePassword(newPassword).enqueue(object : Callback<Void?> {
                 override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
                     when (response.code()) {
                         200 -> {
                             Log.i(TAG, "Successfully changed password")
-                            logout(view)
+                            logout()
                             confirmOk(this@MyDataActivity, R.string.password_changed)
                         }
 
                         401 -> {
                             confirmOk(this@MyDataActivity, R.string.authorization_failed)
-                            logout(view)
+                            logout()
                         }
 
                         else -> confirmOk(
@@ -439,12 +439,12 @@ class MyDataActivity : AppCompatActivity() {
         return newPassword
     }
 
-    fun requestEmailVerification(view: View?) {
+    fun requestEmailVerification() {
         SimpleDialogs.confirmOkCancel(
             this,
             R.string.requestEmailVerification
-        ) { dialogInterface: DialogInterface?, i: Int ->
-            rsapiClient!!.resendEmailVerification()!!
+        ) { _: DialogInterface?, _: Int ->
+            rsapiClient.resendEmailVerification()
                 .enqueue(object : Callback<Void?> {
                     override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
                         if (response.code() == 200) {

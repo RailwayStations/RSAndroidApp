@@ -32,7 +32,7 @@ class ClusterMarker<T : GeoItem>(private val cluster: Cluster<T>) : Layer() {
         while (markerType < (cluster.clusterManager?.markerIconBmps?.size ?: 0)) {
 
             // Check if the number of items in this cluster is below or equal the limit of the MarkerBitMap
-            if (cluster.items.size <= (cluster.clusterManager?.markerIconBmps?.get(markerType)?.itemMax
+            if (cluster.getItems().size <= (cluster.clusterManager?.markerIconBmps?.get(markerType)?.itemMax
                     ?: 0)
             ) {
                 return
@@ -127,23 +127,23 @@ class ClusterMarker<T : GeoItem>(private val cluster: Cluster<T>) : Layer() {
         geoPoint: LatLong, viewPosition: Point,
         tapPoint: Point
     ): Boolean {
-        if (cluster.items.size == 1 && contains(viewPosition, tapPoint)) {
+        if (cluster.getItems().size == 1 && contains(viewPosition, tapPoint)) {
             Log.w(
                 TAG, "The Marker was touched with onTap: "
                         + this.position.toString()
             )
-            cluster.clusterManager?.onTap(cluster.items[0])
+            cluster.clusterManager?.onTap(cluster.getItems()[0])
             requestRedraw()
             return true
         } else if (contains(viewPosition, tapPoint)) {
-            val builder = StringBuilder(cluster.items.size.toString() + " items:")
-                .append(cluster.items
+            val builder = StringBuilder(cluster.getItems().size.toString() + " items:")
+                .append(cluster.getItems()
                     .map { i ->
                         i.title
                     }
                     .take(6)
                     .joinToString("\n- ", "\n- "))
-            if (cluster.items.size > 6) {
+            if (cluster.getItems().size > 6) {
                 builder.append("\n...")
             }
             ClusterManager.toast?.let {
@@ -175,23 +175,23 @@ class ClusterMarker<T : GeoItem>(private val cluster: Cluster<T>) : Layer() {
     }
 
     fun hasPhoto(): Boolean {
-        return cluster.items.size == 1 &&
-                cluster.items[0]!!.hasPhoto()
+        return cluster.getItems().size == 1 &&
+                cluster.getItems()[0].hasPhoto()
     }
 
     private fun ownPhoto(): Boolean {
-        return cluster.items.size == 1 &&
-                cluster.items[0]!!.ownPhoto()
+        return cluster.getItems().size == 1 &&
+                cluster.getItems()[0].ownPhoto()
     }
 
     private fun stationActive(): Boolean {
-        return cluster.items.size == 1 &&
-                cluster.items[0]!!.stationActive()
+        return cluster.getItems().size == 1 &&
+                cluster.getItems()[0].stationActive()
     }
 
     private val isPendingUpload: Boolean
-        get() = cluster.items.size == 1 &&
-                cluster.items[0]!!.isPendingUpload
+        get() = cluster.getItems().size == 1 &&
+                cluster.getItems()[0].isPendingUpload
 
     companion object {
         private const val TAG = "ClusterMarker"

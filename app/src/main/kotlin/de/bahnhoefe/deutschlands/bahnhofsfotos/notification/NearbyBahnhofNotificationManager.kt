@@ -13,7 +13,6 @@ import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
@@ -27,7 +26,6 @@ abstract class NearbyBahnhofNotificationManager(
     distance: Double,
     countries: Set<Country>
 ) {
-    protected val TAG: String = NearbyBahnhofNotificationManager::class.java.simpleName
     private val countries: Set<Country>
 
     /**
@@ -93,13 +91,12 @@ abstract class NearbyBahnhofNotificationManager(
             val mapPendingIntent = mapPendingIntent
             // Build an intent to view the station's timetable
             val countryByCode = getCountryByCode(countries, station.country)
-            val timetablePendingIntent = countryByCode.map { country: Country ->
+            val timetablePendingIntent = countryByCode?.let { country: Country ->
                 getTimetablePendingIntent(
                     country,
                     station
                 )
             }
-                .orElse(null)
             createChannel(context)
 
             // Texts and bigStyle
@@ -166,7 +163,7 @@ abstract class NearbyBahnhofNotificationManager(
         get() {
             // Build an intent for an action to see station details
             val detailIntent = Intent(context, UploadActivity::class.java)
-            detailIntent.putExtra(UploadActivity.Companion.EXTRA_STATION, station)
+            detailIntent.putExtra(UploadActivity.EXTRA_STATION, station)
             return detailIntent
         }
     private val detailPendingIntent: PendingIntent
@@ -194,19 +191,6 @@ abstract class NearbyBahnhofNotificationManager(
             pendifyMe(timetableIntent, REQUEST_TIMETABLE)
         } else null
     }
-
-    protected val stationPendingIntent: PendingIntent
-        /**
-         * Build an intent for an action to view a map.
-         *
-         * @return the PendingIntent built.
-         */
-        get() {
-            // Build an intent for an action to see station details
-            val stationIntent = Intent().setClassName(DB_BAHNHOF_LIVE_PKG, DB_BAHNHOF_LIVE_CLASS)
-            stationIntent.putExtra(DetailsActivity.Companion.EXTRA_STATION, station)
-            return pendifyMe(stationIntent, REQUEST_STATION)
-        }
 
     fun destroy() {
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
@@ -241,10 +225,7 @@ abstract class NearbyBahnhofNotificationManager(
         private const val REQUEST_MAP = 0x10
         private const val REQUEST_DETAIL = 0x20
         private const val REQUEST_TIMETABLE = 0x30
-        private const val REQUEST_STATION = 0x40
         const val CHANNEL_ID = "bahnhoefe_channel_01" // The id of the channel.
-        private const val DB_BAHNHOF_LIVE_PKG = "de.deutschebahn.bahnhoflive"
-        private const val DB_BAHNHOF_LIVE_CLASS = "de.deutschebahn.bahnhoflive.MeinBahnhofActivity"
         fun createChannel(context: Context?) {
             val notificationManager =
                 context!!.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

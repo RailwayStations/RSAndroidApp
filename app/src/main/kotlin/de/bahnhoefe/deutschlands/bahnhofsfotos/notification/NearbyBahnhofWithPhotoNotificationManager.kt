@@ -26,7 +26,7 @@ class NearbyBahnhofWithPhotoNotificationManager(
      */
     override fun notifyUser() {
         if (ConnectionUtil.checkInternetConnection(context)) {
-            station.photoUrl?.let { BitmapCache.instance?.getPhoto(this, it) }
+            station.photoUrl?.let { BitmapCache.instance?.getPhoto(it, this) }
         }
     }
 

@@ -23,24 +23,24 @@ class InboxActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
-        val inboxCall = (application as BaseApplication).rsapiClient.publicInbox
-        inboxCall!!.enqueue(object : Callback<List<PublicInbox>?> {
+        val inboxCall = (application as BaseApplication).rsapiClient.getPublicInbox()
+        inboxCall.enqueue(object : Callback<List<PublicInbox>> {
             override fun onResponse(
-                call: Call<List<PublicInbox>?>,
-                response: Response<List<PublicInbox>?>
+                call: Call<List<PublicInbox>>,
+                response: Response<List<PublicInbox>>
             ) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
                     adapter = InboxAdapter(this@InboxActivity, body)
                     binding.inboxList.adapter = adapter
                     binding.inboxList.onItemClickListener =
-                        OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
+                        OnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
                             val (_, _, stationId, lat, lon) = body[position]
                             val intent = Intent(this@InboxActivity, MapsActivity::class.java)
-                            intent.putExtra(MapsActivity.Companion.EXTRAS_LATITUDE, lat)
-                            intent.putExtra(MapsActivity.Companion.EXTRAS_LONGITUDE, lon)
+                            intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat)
+                            intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon)
                             intent.putExtra(
-                                MapsActivity.Companion.EXTRAS_MARKER,
+                                MapsActivity.EXTRAS_MARKER,
                                 if (stationId == null) R.drawable.marker_missing else R.drawable.marker_red
                             )
                             startActivity(intent)
@@ -48,7 +48,7 @@ class InboxActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<List<PublicInbox>?>, t: Throwable) {
+            override fun onFailure(call: Call<List<PublicInbox>>, t: Throwable) {
                 Log.e(TAG, "Error loading public inbox", t)
                 Toast.makeText(
                     baseContext,

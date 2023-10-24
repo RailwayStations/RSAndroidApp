@@ -15,33 +15,28 @@ import org.mapsforge.map.android.graphics.AndroidGraphicFactory
  * Utility functions that can be used across different mapsforge based
  * activities.
  */
-class Utils private constructor() {
-    init {
-        throw IllegalStateException()
+object Utils {
+    
+    /**
+     * Compatibility method.
+     *
+     * @param view       the view to set the background on
+     * @param background the background
+     */
+    fun setBackground(view: View, background: Drawable?) {
+        view.background = background
     }
 
-    companion object {
-        /**
-         * Compatibility method.
-         *
-         * @param view       the view to set the background on
-         * @param background the background
-         */
-        fun setBackground(view: View, background: Drawable?) {
-            view.background = background
-        }
-
-        fun viewToBitmap(c: Context, view: View): Bitmap {
-            view.measure(
-                MeasureSpec.getSize(view.measuredWidth),
-                MeasureSpec.getSize(view.measuredHeight)
-            )
-            view.layout(0, 0, view.measuredWidth, view.measuredHeight)
-            val drawable = BitmapDrawable(
-                c.resources,
-                android.graphics.Bitmap.createBitmap(view.drawingCache)
-            )
-            return AndroidGraphicFactory.convertToBitmap(drawable)
-        }
+    fun viewToBitmap(c: Context, view: View): Bitmap {
+        view.measure(
+            MeasureSpec.getSize(view.measuredWidth),
+            MeasureSpec.getSize(view.measuredHeight)
+        )
+        view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+        val drawable = BitmapDrawable(
+            c.resources,
+            android.graphics.Bitmap.createBitmap(view.drawingCache)
+        )
+        return AndroidGraphicFactory.convertToBitmap(drawable)
     }
 }

@@ -12,15 +12,17 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 class ShowErrorActivity : AppCompatActivity() {
-    private var binding: ActivityShowErrorBinding? = null
+
+    private lateinit var binding: ActivityShowErrorBinding
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityShowErrorBinding.inflate(
             layoutInflater
         )
-        setContentView(binding!!.root)
-        binding!!.textViewError.text = intent.getStringExtra(EXTRA_ERROR_TEXT)
-        setSupportActionBar(binding!!.mapsToolbar)
+        setContentView(binding.root)
+        binding.textViewError.text = intent.getStringExtra(EXTRA_ERROR_TEXT)
+        setSupportActionBar(binding.mapsToolbar)
         if (supportActionBar != null) {
             supportActionBar!!.title = createErrorTitle()
         }
@@ -31,13 +33,12 @@ class ShowErrorActivity : AppCompatActivity() {
     }
 
     private fun reportBug() {
-        val uriUrl: Uri
-        uriUrl = try {
+        val uriUrl: Uri = try {
             Uri.parse(
                 String.format(
                     getString(R.string.report_issue_link),
                     URLEncoder.encode(
-                        binding!!.textViewError.text.toString(),
+                        binding.textViewError.text.toString(),
                         StandardCharsets.UTF_8.toString()
                     )
                 )
@@ -69,7 +70,7 @@ class ShowErrorActivity : AppCompatActivity() {
     private fun onClickedShare() {
         val intent = Intent(Intent.ACTION_SEND)
         intent.putExtra(Intent.EXTRA_SUBJECT, createErrorTitle())
-        intent.putExtra(Intent.EXTRA_TEXT, binding!!.textViewError.text)
+        intent.putExtra(Intent.EXTRA_TEXT, binding.textViewError.text)
         intent.type = "text/plain"
         startActivity(intent)
     }

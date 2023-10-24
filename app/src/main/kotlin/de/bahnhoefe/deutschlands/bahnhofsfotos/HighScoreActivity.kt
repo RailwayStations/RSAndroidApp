@@ -20,21 +20,20 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.Collections
 
 class HighScoreActivity : AppCompatActivity() {
     private var adapter: HighScoreAdapter? = null
-    private var binding: ActivityHighScoreBinding? = null
+    private lateinit var binding: ActivityHighScoreBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHighScoreBinding.inflate(
             layoutInflater
         )
-        setContentView(binding!!.root)
+        setContentView(binding.root)
         val baseApplication = application as BaseApplication
         val firstSelectedCountry = baseApplication.countryCodes.iterator().next()
         val countries = ArrayList(baseApplication.dbAdapter.allCountries)
-        Collections.sort(countries)
+        countries.sort()
         countries.add(0, Country("", getString(R.string.all_countries)))
         var selectedItem = 0
         for (country in countries) {
@@ -47,9 +46,9 @@ class HighScoreActivity : AppCompatActivity() {
             android.R.layout.simple_spinner_dropdown_item,
             countries.toTypedArray()
         )
-        binding!!.countries.adapter = countryAdapter
-        binding!!.countries.setSelection(selectedItem)
-        binding!!.countries.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.countries.adapter = countryAdapter
+        binding.countries.setSelection(selectedItem)
+        binding.countries.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>,
                 view: View,
@@ -66,16 +65,16 @@ class HighScoreActivity : AppCompatActivity() {
     private fun loadHighScore(baseApplication: BaseApplication, selectedCountry: Country) {
         val rsapi = baseApplication.rsapiClient
         val highScoreCall =
-            if (selectedCountry.code.isEmpty()) rsapi!!.highScore else rsapi!!.getHighScore(
+            if (selectedCountry.code.isEmpty()) rsapi.getHighScore() else rsapi.getHighScore(
                 selectedCountry.code
             )
-        highScoreCall!!.enqueue(object : Callback<HighScore> {
+        highScoreCall.enqueue(object : Callback<HighScore> {
             override fun onResponse(call: Call<HighScore>, response: Response<HighScore>) {
                 if (response.isSuccessful) {
                     adapter = HighScoreAdapter(this@HighScoreActivity, response.body()!!.getItems())
-                    binding!!.highscoreList.adapter = adapter
-                    binding!!.highscoreList.onItemClickListener =
-                        OnItemClickListener { adapter: AdapterView<*>, v: View?, position: Int, arg3: Long ->
+                    binding.highscoreList.adapter = adapter
+                    binding.highscoreList.onItemClickListener =
+                        OnItemClickListener { adapter: AdapterView<*>, _: View?, position: Int, _: Long ->
                             val (name) = adapter.getItemAtPosition(position) as HighScoreItem
                             val stationFilter = baseApplication.stationFilter
                             stationFilter.nickname = name

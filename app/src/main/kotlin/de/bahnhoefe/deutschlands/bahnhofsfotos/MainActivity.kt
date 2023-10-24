@@ -206,8 +206,8 @@ class MainActivity : AppCompatActivity(), LocationListener,
             EditorInfo.TYPE_TEXT_VARIATION_URI,
             R.string.api_url_hint,
             baseApplication.apiUrl
-        ) { v: String? ->
-            baseApplication.apiUrl = v
+        ) { prompt: String ->
+            baseApplication.apiUrl = prompt
             baseApplication.lastUpdate = 0
             recreate()
         }
@@ -314,7 +314,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
             baseApplication.lastUpdate = System.currentTimeMillis()
             if (baseApplication.updatePolicy !== UpdatePolicy.MANUAL) {
                 for (country in baseApplication.countryCodes) {
-                    rsapiClient.getStatistic(country)!!.enqueue(object : Callback<Statistic?> {
+                    rsapiClient.getStatistic(country).enqueue(object : Callback<Statistic?> {
                         override fun onResponse(
                             call: Call<Statistic?>,
                             response: Response<Statistic?>
@@ -365,7 +365,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
 
     private fun bindToStatus() {
         val intent = Intent(this, NearbyNotificationService::class.java)
-        intent.action = NearbyNotificationService.Companion.STATUS_INTERFACE
+        intent.action = NearbyNotificationService.STATUS_INTERFACE
         if (!this.applicationContext.bindService(intent, object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, service: IBinder) {
                     Log.d(TAG, "Bound to status service of NearbyNotificationService")

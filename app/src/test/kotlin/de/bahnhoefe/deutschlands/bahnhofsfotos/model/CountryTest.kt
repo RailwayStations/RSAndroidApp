@@ -15,8 +15,8 @@ internal class CountryTest {
                 Country("at", "Österreich")
             ), "at"
         )
-        assertThat(country).isNotEmpty
-        assertThat(country.get().code).isEqualTo("at")
+        assertThat(country).isNotNull
+        assertThat(country?.code).isEqualTo("at")
     }
 
     @ParameterizedTest
