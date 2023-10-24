@@ -1,7 +1,7 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
-import java.util.*
+import java.util.Arrays
 
 enum class UpdatePolicy(val id: Int) {
     MANUAL(R.id.rb_update_manual),
@@ -9,12 +9,6 @@ enum class UpdatePolicy(val id: Int) {
     AUTOMATIC(R.id.rb_update_automatic);
 
     companion object {
-        fun byId(id: Int): UpdatePolicy {
-            return Arrays.stream(values())
-                .filter { updatePolicy: UpdatePolicy -> updatePolicy.id == id }
-                .findFirst()
-                .orElse(NOTIFY)
-        }
 
         @JvmStatic
         fun byName(name: String): UpdatePolicy {

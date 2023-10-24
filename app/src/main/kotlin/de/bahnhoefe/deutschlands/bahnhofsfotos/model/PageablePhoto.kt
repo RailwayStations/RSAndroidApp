@@ -12,14 +12,12 @@ data class PageablePhoto @JvmOverloads constructor(
     var bitmap: Bitmap? = null
 ) {
     constructor(station: Station, bitmap: Bitmap) : this(
-        station.photoId,
+        station.photoId!!,
         station.photoUrl,
         station.photographer,
         station.photographerUrl,
         station.license,
         station.licenseUrl,
         bitmap
-    ) {
-
-    }
+    )
 }

@@ -3,20 +3,20 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 import java.io.Serializable
 
 data class Station @JvmOverloads constructor(
-    var country: String? = null,
-    var id: String? = null,
-    var title: String? = null,
-    var lat: Double = 0.0,
-    var lon: Double = 0.0,
-    var ds100: String? = null,
-    var photoUrl: String? = null,
-    var photographer: String? = null,
-    var photographerUrl: String? = null,
-    var license: String? = null,
-    var licenseUrl: String? = null,
-    var active: Boolean = false,
-    var outdated: Boolean = false,
-    var photoId: Long = 0
+    val country: String,
+    val id: String,
+    val title: String,
+    val lat: Double,
+    val lon: Double,
+    val ds100: String? = null,
+    val photoUrl: String? = null,
+    val photographer: String? = null,
+    val photographerUrl: String? = null,
+    val license: String? = null,
+    val licenseUrl: String? = null,
+    val active: Boolean = false,
+    val outdated: Boolean = false,
+    val photoId: Long?,
 ) : Serializable {
 
     fun hasPhoto(): Boolean {
@@ -36,8 +36,8 @@ data class Station @JvmOverloads constructor(
     }
 
     override fun hashCode(): Int {
-        var result = country?.hashCode() ?: 0
-        result = 31 * result + (id?.hashCode() ?: 0)
+        var result = country.hashCode()
+        result = 31 * result + id.hashCode()
         return result
     }
 
