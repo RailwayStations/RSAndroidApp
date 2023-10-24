@@ -217,7 +217,7 @@ class RSAPIClient(
     }
 
     fun reportProblem(problemReport: ProblemReport): Call<InboxResponse> {
-        return api.reportProblem(userAuthorization, problemReport)
+        return api.reportProblem(userAuthorization!!, problemReport)
     }
 
     private val userAuthorization: String?
@@ -230,7 +230,7 @@ class RSAPIClient(
         stationTitle: String?, latitude: Double?,
         longitude: Double?, comment: String?,
         active: Boolean?, file: RequestBody?
-    ): Call<InboxResponse?> {
+    ): Call<InboxResponse> {
         return api.photoUpload(
             userAuthorization!!,
             stationId,
@@ -261,7 +261,7 @@ class RSAPIClient(
     }
 
     fun deleteAccount(): Call<Void> {
-        return api.deleteAccount(userAuthorization)
+        return api.deleteAccount(userAuthorization!!)
     }
 
     fun resendEmailVerification(): Call<Void> {

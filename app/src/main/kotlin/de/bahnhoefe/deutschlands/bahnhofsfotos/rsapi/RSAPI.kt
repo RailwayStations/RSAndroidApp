@@ -65,7 +65,7 @@ interface RSAPI {
         @Header("Comment") comment: String?,
         @Header("Active") active: Boolean?,
         @Body file: RequestBody?
-    ): Call<InboxResponse?>
+    ): Call<InboxResponse>
 
     @Headers("Content-Type: application/json")
     @POST("/userInbox")
@@ -77,7 +77,7 @@ interface RSAPI {
     @Headers("Content-Type: application/json")
     @POST("/reportProblem")
     fun reportProblem(
-        @Header("Authorization") authorization: String?,
+        @Header("Authorization") authorization: String,
         @Body problemReport: ProblemReport
     ): Call<InboxResponse>
 
@@ -107,7 +107,7 @@ interface RSAPI {
     ): Call<Token>
 
     @DELETE("/myProfile")
-    fun deleteAccount(@Header("Authorization") authorization: String?): Call<Void>
+    fun deleteAccount(@Header("Authorization") authorization: String): Call<Void>
 
     companion object {
         val TAG: String = RSAPI::class.java.simpleName
