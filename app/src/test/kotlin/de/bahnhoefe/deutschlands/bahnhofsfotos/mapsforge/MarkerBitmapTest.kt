@@ -54,43 +54,92 @@ class MarkerBitmapTest {
 
     @Test
     fun bitmap_OwnPhotoActive() {
-        assertThat(markerBitmap.getBitmap(true, true, true, false))
+        assertThat(
+            markerBitmap.getBitmap(
+                hasPhoto = true,
+                ownPhoto = true,
+                stationActive = true,
+                inbox = false
+            )
+        )
             .isSameAs(srcOwnPhoto)
     }
 
     @Test
     fun bitmap_OwnPhotoInactive() {
-        assertThat(markerBitmap.getBitmap(true, true, false, false))
+        assertThat(
+            markerBitmap.getBitmap(
+                hasPhoto = true,
+                ownPhoto = true,
+                stationActive = false,
+                inbox = false
+            )
+        )
             .isSameAs(srcOwnPhotoInactive)
     }
 
     @Test
     fun bitmap_PhotoActive() {
-        assertThat(markerBitmap.getBitmap(true, false, true, false))
+        assertThat(
+            markerBitmap.getBitmap(
+                hasPhoto = true,
+                ownPhoto = false,
+                stationActive = true,
+                inbox = false
+            )
+        )
             .isSameAs(srcWithPhoto)
     }
 
     @Test
     fun bitmap_PhotoInactive() {
-        assertThat(markerBitmap.getBitmap(true, false, false, false))
+        assertThat(
+            markerBitmap.getBitmap(
+                hasPhoto = true,
+                ownPhoto = false,
+                stationActive = false,
+                inbox = false
+            )
+        )
             .isSameAs(srcWithPhotoInactive)
     }
 
     @Test
     fun bitmap_WithoutPhotoActive() {
-        assertThat(markerBitmap.getBitmap(false, false, true, false))
+        assertThat(
+            markerBitmap.getBitmap(
+                hasPhoto = false,
+                ownPhoto = false,
+                stationActive = true,
+                inbox = false
+            )
+        )
             .isSameAs(srcWithoutPhoto)
     }
 
     @Test
     fun bitmap_WithoutPhotoInactive() {
-        assertThat(markerBitmap.getBitmap(false, false, false, false))
+        assertThat(
+            markerBitmap.getBitmap(
+                hasPhoto = false,
+                ownPhoto = false,
+                stationActive = false,
+                inbox = false
+            )
+        )
             .isSameAs(srcWithoutPhotoInactive)
     }
 
     @Test
     fun bitmap_PendingUpload() {
-        assertThat(markerBitmap.getBitmap(false, false, false, true))
+        assertThat(
+            markerBitmap.getBitmap(
+                hasPhoto = false,
+                ownPhoto = false,
+                stationActive = false,
+                inbox = true,
+            )
+        )
             .isSameAs(srcPendingUpload)
     }
 }

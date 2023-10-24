@@ -17,8 +17,8 @@ class Timetable {
             return null
         }
         var timeTableTemplate = country.timetableUrlTemplate
-        timeTableTemplate = timeTableTemplate!!.replace("{id}", station!!.id!!)
-        timeTableTemplate = timeTableTemplate.replace("{title}", station.title!!)
+        timeTableTemplate = timeTableTemplate!!.replace("{id}", station!!.id)
+        timeTableTemplate = timeTableTemplate.replace("{title}", station.title)
         timeTableTemplate = timeTableTemplate.replace(
             "{DS100}", StringUtils.trimToEmpty(
                 station.ds100

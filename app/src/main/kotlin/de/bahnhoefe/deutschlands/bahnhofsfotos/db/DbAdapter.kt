@@ -701,7 +701,7 @@ class DbAdapter(private val context: Context) {
                         DATABASE_TABLE_PROVIDER_APPS,
                         null,
                         PROVIDER_APPS.COUNTRYSHORTCODE + " = ?",
-                        arrayOf<String>(country.code),
+                        arrayOf(country.code),
                         null,
                         null,
                         null

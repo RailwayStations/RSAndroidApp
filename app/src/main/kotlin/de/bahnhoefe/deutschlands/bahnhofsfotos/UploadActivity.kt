@@ -73,7 +73,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     private var station: Station? = null
     private var latitude: Double? = null
     private var longitude: Double? = null
-    private var bahnhofId: String? = null
+    private var stationId: String? = null
     private var crc32: Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -148,7 +148,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             return
         }
         if (station != null) {
-            bahnhofId = station!!.id
+            stationId = station!!.id
             binding.upload.etStationTitle.setText(station!!.title)
             binding.upload.etStationTitle.inputType = EditorInfo.TYPE_NULL
             binding.upload.etStationTitle.isSingleLine = false
@@ -272,7 +272,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         }
     }
 
-    fun takePicture() {
+    private fun takePicture() {
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return
         }
@@ -327,7 +327,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         }
     }
 
-    fun selectPicture() {
+    private fun selectPicture() {
         selectPictureResultLauncher.launch("image/*")
     }
 
@@ -363,9 +363,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     }
 
     /**
-     * Get the file path for storing this stations foto
-     *
-     * @return the File
+     * Get the file path for storing this stations photo
      */
     private fun getStoredMediaFile(upload: Upload?): File? {
         return if (upload == null) {
@@ -402,13 +400,11 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     }
 
     fun navigateUp() {
-        val callingActivity =
-            callingActivity // if MapsActivity was calling, then we don't want to rebuild the Backstack
+        // if MapsActivity was calling, then we don't want to rebuild the Backstack
         val upIntent = NavUtils.getParentActivityIntent(this)
         if (callingActivity == null && upIntent != null) {
             upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot) {
-                Log.v(TAG, "Recreate back stack")
                 TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent)
                     .startActivities()
             }
@@ -450,8 +446,8 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             if (station != null) R.string.photo_upload else R.string.report_missing_station
         ) { _: DialogInterface?, _: Int ->
             binding.upload.progressBar.visibility = View.VISIBLE
-            var stationTitle: String? = binding.upload.etStationTitle.text.toString()
-            var comment: String? = binding.upload.etComment.text.toString()
+            var stationTitle = binding.upload.etStationTitle.text.toString()
+            var comment = binding.upload.etComment.text.toString()
             upload!!.title = stationTitle
             upload!!.comment = comment
             try {
@@ -473,12 +469,12 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                 "application/octet-stream".toMediaTypeOrNull(),
             )
             rsapiClient.photoUpload(
-                bahnhofId, if (station != null) station!!.country else upload!!.country,
+                stationId, if (station != null) station!!.country else upload!!.country,
                 stationTitle, latitude, longitude, comment, upload!!.active, file
-            ).enqueue(object : Callback<InboxResponse?> {
+            ).enqueue(object : Callback<InboxResponse> {
                 override fun onResponse(
-                    call: Call<InboxResponse?>,
-                    response: Response<InboxResponse?>
+                    call: Call<InboxResponse>,
+                    response: Response<InboxResponse>
                 ) {
                     binding.upload.progressBar.visibility = View.GONE
                     val inboxResponse: InboxResponse? = if (response.isSuccessful) {
@@ -513,7 +509,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                     }
                 }
 
-                override fun onFailure(call: Call<InboxResponse?>, t: Throwable) {
+                override fun onFailure(call: Call<InboxResponse>, t: Throwable) {
                     Log.e(TAG, "Error uploading photo", t)
                     binding.upload.progressBar.visibility = View.GONE
                     confirmOk(
@@ -622,7 +618,6 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
      * Check if there's a local photo file for this station.
      */
     private fun checkForLocalPhoto(upload: Upload?): Bitmap? {
-        // show the image
         val localFile = getStoredMediaFile(upload)
         Log.d(TAG, "File: $localFile")
         crc32 = null
@@ -640,7 +635,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                     return scaledScreen
                 }
             } catch (e: Exception) {
-                Log.e(TAG, String.format("Error reading media file for station %s", bahnhofId), e)
+                Log.e(TAG, String.format("Error reading media file for station %s", stationId), e)
             }
         }
         return null

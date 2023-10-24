@@ -16,7 +16,7 @@ class ExceptionHandler(
         try {
             val errorReport = generateErrorReport(formatException(thread, exception))
             val intent = Intent(context, ShowErrorActivity::class.java)
-            intent.putExtra(ShowErrorActivity.Companion.EXTRA_ERROR_TEXT, errorReport)
+            intent.putExtra(ShowErrorActivity.EXTRA_ERROR_TEXT, errorReport)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent)
             // Pass exception to OS for graceful handling - OS will report it via ADB

@@ -82,22 +82,6 @@ class ClusterManager<T : GeoItem>(
         this.tapHandler = tapHandler
     }
 
-    @get:Synchronized
-    val allItems: List<T?>
-        get() {
-            val rtnList = Collections.synchronizedList(ArrayList<T>())
-            synchronized(leftItems) { rtnList.addAll(leftItems) }
-            synchronized(clusters) {
-                clusters.map { obj: Cluster<T> -> obj.getItems() }
-                    .forEach { c: List<T>? ->
-                        rtnList.addAll(
-                            c!!
-                        )
-                    }
-            }
-            return rtnList
-        }
-
     /**
      * add item and do isClustering. NOTE: this method will not redraw screen.
      * after adding all items, you must call redraw() method.
@@ -124,7 +108,7 @@ class ClusterManager<T : GeoItem>(
                     if (clusterTask != null && clusterTask!!.isInterrupted) {
                         return
                     }
-                    require(mCluster.getItems().size != 0) { "cluster.getItems().size() == 0" }
+                    require(mCluster.getItems().isNotEmpty()) { "cluster.getItems().size() == 0" }
 
                     // find a cluster which contains the marker.
                     // use 1st element to fix the location, hinder the cluster from
@@ -164,7 +148,7 @@ class ClusterManager<T : GeoItem>(
     fun redraw() {
         synchronized(clusters) {
             if (!isClustering) {
-                val removed = mutableListOf<Cluster<T>>()
+                val removed = mutableSetOf<Cluster<T>>()
                 val singles = mutableListOf<Cluster<T>>()
                 clusters
                     .filter { mCluster -> mCluster.size < MIN_CLUSTER_SIZE }

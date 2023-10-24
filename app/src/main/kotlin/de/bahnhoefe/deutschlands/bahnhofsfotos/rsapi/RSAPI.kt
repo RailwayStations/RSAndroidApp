@@ -109,7 +109,4 @@ interface RSAPI {
     @DELETE("/myProfile")
     fun deleteAccount(@Header("Authorization") authorization: String): Call<Void>
 
-    companion object {
-        val TAG: String = RSAPI::class.java.simpleName
-    }
 }

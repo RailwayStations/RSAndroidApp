@@ -21,39 +21,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable
 
 abstract class NearbyBahnhofNotificationManager(
-    context: Context,
-    station: Station,
-    distance: Double,
-    countries: Set<Country>
+    val context: Context,
+    val station: Station,
+    val distance: Double,
+    val countries: Set<Country>
 ) {
-    private val countries: Set<Country>
-
-    /**
-     * The Bahnhof about which a notification is being built.
-     */
-    var station: Station
-        protected set
-
-    /**
-     * The distance of the Bahnhof about which a notification is being built.
-     */
-    protected val notificationDistance: Double
-
-    /**
-     * The Android Context for which the notification is generated.
-     */
-    protected var context: Context
-
-    /**
-     * Constructor. After construction, you need to call notifyUser for action to happen.
-     */
-    init {
-        this.context = context
-        notificationDistance = distance
-        this.station = station
-        this.countries = countries
-    }
-
     /**
      * Build a notification for a station with Photo. The start command.
      */
@@ -206,12 +178,12 @@ abstract class NearbyBahnhofNotificationManager(
             shortText = context.getString(
                 R.string.template_short_text,
                 station.title,
-                notificationDistance
+                distance
             )
             val longText = context.getString(
                 R.string.template_long_text,
                 station.title,
-                notificationDistance,
+                distance,
                 if (station.hasPhoto()) context.getString(R.string.photo_exists) else ""
             )
             bigStyle = NotificationCompat.BigTextStyle()

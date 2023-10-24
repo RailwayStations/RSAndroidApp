@@ -308,7 +308,7 @@ class MyDataActivity : AppCompatActivity() {
         return target != null && Patterns.EMAIL_ADDRESS.matcher(target).matches()
     }
 
-    fun onAnonymousChecked() {
+    private fun onAnonymousChecked() {
         if (binding.myData.cbAnonymous.isChecked) {
             binding.myData.etLinking.visibility = View.GONE
             binding.myData.tvLinking.visibility = View.GONE
@@ -338,7 +338,7 @@ class MyDataActivity : AppCompatActivity() {
         supportActionBar?.setTitle(R.string.login)
     }
 
-    fun deleteAccount() {
+    private fun deleteAccount() {
         SimpleDialogs.confirmOkCancel(
             this,
             R.string.deleteAccountConfirmation
@@ -379,7 +379,7 @@ class MyDataActivity : AppCompatActivity() {
         }
     }
 
-    fun changePassword() {
+    private fun changePassword() {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
         val passwordBinding = ChangePasswordBinding.inflate(
             layoutInflater

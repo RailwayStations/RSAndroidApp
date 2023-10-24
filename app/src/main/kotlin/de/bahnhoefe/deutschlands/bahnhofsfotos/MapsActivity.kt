@@ -935,7 +935,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     private fun updatePosition() {
-        if (myLocSwitch?.isChecked ?: false) {
+        if (myLocSwitch?.isChecked == true) {
             binding.map.mapView.setCenter(myPos)
             binding.map.mapView.repaint()
         }

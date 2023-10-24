@@ -386,7 +386,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
     }
 
     private val requestNotificationPermissionLauncher =
-        registerForActivityResult<String, Boolean>(ActivityResultContracts.RequestPermission()) { isGranted: Boolean? ->
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean? ->
             if (!isGranted!!) {
                 Toast.makeText(
                     this@MainActivity,

@@ -28,7 +28,7 @@ data class Upload @JvmOverloads constructor(
         get() = problemType != null
     val isPendingPhotoUpload: Boolean
         get() = (isUploadForExistingStation || isUploadForMissingStation) && isPending && !isProblemReport
-    val isPending: Boolean
+    private val isPending: Boolean
         get() = uploadState.isPending
     val isUploaded: Boolean
         get() = remoteId != null
