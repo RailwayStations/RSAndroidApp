@@ -3,6 +3,7 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos
 import android.app.TaskStackBuilder
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -117,9 +118,18 @@ class ProblemReportActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
-        station = intent.getSerializableExtra(EXTRA_STATION) as Station?
-        photoId = intent.getSerializableExtra(EXTRA_PHOTO_ID) as Long?
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            upload = intent.getSerializableExtra(EXTRA_UPLOAD, Upload::class.java)
+            station = intent.getSerializableExtra(EXTRA_STATION, Station::class.java)
+            photoId = intent.getSerializableExtra(EXTRA_PHOTO_ID, Long::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
+            @Suppress("DEPRECATION")
+            station = intent.getSerializableExtra(EXTRA_STATION) as Station?
+            @Suppress("DEPRECATION")
+            photoId = intent.getSerializableExtra(EXTRA_PHOTO_ID) as Long?
+        }
         if (upload != null && upload!!.isProblemReport) {
             binding.etProblemComment.setText(upload!!.comment)
             binding.etNewLatitude.setText(if (upload!!.lat != null) upload!!.lat.toString() else "")
@@ -139,7 +149,7 @@ class ProblemReportActivity : AppCompatActivity() {
         }
     }
 
-    fun reportProblem() {
+    private fun reportProblem() {
         val selectedType = binding.problemType.selectedItemPosition
         if (selectedType == 0) {
             Toast.makeText(

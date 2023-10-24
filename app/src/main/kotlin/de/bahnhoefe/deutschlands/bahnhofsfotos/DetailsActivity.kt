@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.text.TextUtils
@@ -107,7 +108,12 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        val newStation = intent.getSerializableExtra(EXTRA_STATION) as Station?
+        val newStation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra(EXTRA_STATION, Station::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getSerializableExtra(EXTRA_STATION) as Station?
+        }
         if (newStation == null) {
             Log.w(TAG, "EXTRA_STATION in intent data missing")
             Toast.makeText(this, R.string.station_not_found, Toast.LENGTH_LONG).show()
@@ -414,7 +420,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         finish()
     }
 
-    fun showStationInfo() {
+    private fun showStationInfo() {
         val stationInfoBinding = StationInfoBinding.inflate(
             layoutInflater
         )

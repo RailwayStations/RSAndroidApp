@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Html
@@ -115,10 +116,21 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
-        station = intent.getSerializableExtra(EXTRA_STATION) as Station?
-        latitude = intent.getSerializableExtra(EXTRA_LATITUDE) as Double?
-        longitude = intent.getSerializableExtra(EXTRA_LONGITUDE) as Double?
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            upload = intent.getSerializableExtra(EXTRA_UPLOAD, Upload::class.java)
+            station = intent.getSerializableExtra(EXTRA_STATION, Station::class.java)
+            latitude = intent.getSerializableExtra(EXTRA_LATITUDE, Double::class.java)
+            longitude = intent.getSerializableExtra(EXTRA_LONGITUDE, Double::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
+            @Suppress("DEPRECATION")
+            station = intent.getSerializableExtra(EXTRA_STATION) as Station?
+            @Suppress("DEPRECATION")
+            latitude = intent.getSerializableExtra(EXTRA_LATITUDE) as Double?
+            @Suppress("DEPRECATION")
+            longitude = intent.getSerializableExtra(EXTRA_LONGITUDE) as Double?
+        }
         if (station == null && upload != null && upload!!.isUploadForExistingStation) {
             station = baseApplication.dbAdapter.getStationForUpload(upload!!)
         }
