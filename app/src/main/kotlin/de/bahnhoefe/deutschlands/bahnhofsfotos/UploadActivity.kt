@@ -116,20 +116,20 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (intent.hasExtra(EXTRA_LATITUDE)) {
+            latitude = intent.getDoubleExtra(EXTRA_LATITUDE, 0.0)
+        }
+        if (intent.hasExtra(EXTRA_LONGITUDE)) {
+            longitude = intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             upload = intent.getSerializableExtra(EXTRA_UPLOAD, Upload::class.java)
             station = intent.getSerializableExtra(EXTRA_STATION, Station::class.java)
-            latitude = intent.getSerializableExtra(EXTRA_LATITUDE, Double::class.java)
-            longitude = intent.getSerializableExtra(EXTRA_LONGITUDE, Double::class.java)
         } else {
             @Suppress("DEPRECATION")
             upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
             @Suppress("DEPRECATION")
             station = intent.getSerializableExtra(EXTRA_STATION) as Station?
-            @Suppress("DEPRECATION")
-            latitude = intent.getSerializableExtra(EXTRA_LATITUDE) as Double?
-            @Suppress("DEPRECATION")
-            longitude = intent.getSerializableExtra(EXTRA_LONGITUDE) as Double?
         }
         if (station == null && upload != null && upload!!.isUploadForExistingStation) {
             station = baseApplication.dbAdapter.getStationForUpload(upload!!)

@@ -39,9 +39,9 @@ enum class NavItem(val textRes: Int, val iconRes: Int, private val uriTemplate: 
             markerRes: Int
         ): Intent {
             val intent = Intent(packageContext, MapsActivity::class.java)
-            intent.putExtra(MapsActivity.Companion.EXTRAS_LATITUDE, lat)
-            intent.putExtra(MapsActivity.Companion.EXTRAS_LONGITUDE, lon)
-            intent.putExtra(MapsActivity.Companion.EXTRAS_MARKER, markerRes)
+            intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat)
+            intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon)
+            intent.putExtra(MapsActivity.EXTRAS_MARKER, markerRes)
             return intent
         }
     };

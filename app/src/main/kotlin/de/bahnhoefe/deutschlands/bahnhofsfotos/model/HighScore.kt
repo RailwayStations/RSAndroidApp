@@ -23,7 +23,7 @@ class HighScore {
             val highScore = HighScore()
             val position = AtomicInteger(0)
             val lastPhotos = AtomicInteger(0)
-            json.asJsonObject.entrySet().stream()
+            json.asJsonObject.entrySet()
                 .map { entry: Map.Entry<String, JsonElement> ->
                     toHighScoreItem(
                         position,

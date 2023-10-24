@@ -16,7 +16,7 @@ data class ProviderApp constructor(
     companion object {
         @JvmStatic
         fun hasCompatibleProviderApps(providerApps: List<ProviderApp>): Boolean {
-            return providerApps.stream().anyMatch { obj: ProviderApp -> obj.isCompatible }
+            return providerApps.any { obj: ProviderApp -> obj.isCompatible }
         }
 
         @JvmStatic

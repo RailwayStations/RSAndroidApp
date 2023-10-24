@@ -37,7 +37,7 @@ class Cluster<T : GeoItem>(
                 return getItems()[0].title
             }
             synchronized(items) {
-                return items.stream().filter { obj: T -> obj.hasPhoto() }.count()
+                return items.count { obj: T -> obj.hasPhoto() }
                     .toString() + "/" + getItems().size
             }
         }

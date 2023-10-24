@@ -301,6 +301,7 @@ internal class RSAPIClientTest {
             9.2,
             "New Title"
         )
+        client.setToken(Token("accessToken", "tokenType", "refeshToken"))
         val response = client.reportProblem(problemReport).execute()
         val recordedRequest = server.takeRequest()
         assertThat(recordedRequest.path).isEqualTo("/reportProblem")

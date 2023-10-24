@@ -17,7 +17,8 @@ class TimetableTest {
             "Some Famous Station",
             0.0,
             0.0,
-            "LOL"
+            "LOL",
+            photoId = null,
         )
     }
 

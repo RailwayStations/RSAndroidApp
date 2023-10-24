@@ -114,7 +114,7 @@ class DbAdapter(private val context: Context) {
 
     private fun insertCountry(country: Country) {
         db!!.insert(DATABASE_TABLE_COUNTRIES, null, toContentValues(country))
-        country.providerApps.stream()
+        country.providerApps
             .map { p: ProviderApp -> toContentValues(country.code, p) }
             .forEach { values: ContentValues? ->
                 db!!.insert(
@@ -253,8 +253,7 @@ class DbAdapter(private val context: Context) {
     private fun whereCountryCodeIn(countryCodes: Set<String?>?): String {
         return STATIONS.COUNTRY +
                 " IN (" +
-                countryCodes!!.stream().map { c: String? -> "'$c'" }
-                    .collect(Collectors.joining(",")) +
+                countryCodes!!.joinToString(",") { c: String? -> "'$c'" } +
                 ")"
     }
 
@@ -683,9 +682,7 @@ class DbAdapter(private val context: Context) {
     }
 
     fun fetchCountriesWithProviderApps(countryCodes: Set<String>): Set<Country> {
-        val countryList = countryCodes.stream()
-            .map { c: String? -> "'$c'" }
-            .collect(Collectors.joining(","))
+        val countryList = countryCodes.joinToString(",") { c: String? -> "'$c'" }
         val countries = HashSet<Country>()
         db!!.query(
             DATABASE_TABLE_COUNTRIES,

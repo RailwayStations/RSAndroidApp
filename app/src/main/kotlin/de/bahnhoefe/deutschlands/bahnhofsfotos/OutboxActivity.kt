@@ -24,7 +24,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.stream.Collectors
 
 class OutboxActivity : AppCompatActivity() {
     private lateinit var adapter: OutboxAdapter
@@ -68,13 +67,13 @@ class OutboxActivity : AppCompatActivity() {
                 }
                 true
             }
-        val query = dbAdapter.getPendingUploads(true).stream()
+        val query = dbAdapter.getPendingUploads(true)
             .map { upload: Upload? ->
                 InboxStateQuery(
                     upload!!.remoteId
                 )
             }
-            .collect(Collectors.toList())
+            .toList()
         baseApplication.rsapiClient.queryUploadState(query)
             .enqueue(object : Callback<List<InboxStateQuery>> {
                 override fun onResponse(

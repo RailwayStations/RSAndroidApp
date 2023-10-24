@@ -78,7 +78,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private var clusterer: ClusterManager<BahnhofGeoItem>? = null
     private val tileCaches = mutableListOf<TileCache>()
     private var myPos: LatLong? = null
-    private lateinit var myLocSwitch: CheckBox
+    private var myLocSwitch: CheckBox? = null
     private lateinit var dbAdapter: DbAdapter
     private var nickname: String? = null
     private lateinit var baseApplication: BaseApplication
@@ -103,14 +103,14 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         val intent = intent
         var extraMarker: Marker? = null
         if (intent != null) {
-            val latitude = intent.getSerializableExtra(EXTRAS_LATITUDE) as Double?
-            val longitude = intent.getSerializableExtra(EXTRAS_LONGITUDE) as Double?
+            val latitude = intent.getDoubleExtra(EXTRAS_LATITUDE, 0.0)
+            val longitude = intent.getDoubleExtra(EXTRAS_LATITUDE, 0.0)
+            val markerRes = intent.getIntExtra(EXTRAS_MARKER, -1)
             setMyLocSwitch(false)
-            if (latitude != null && longitude != null) {
+            if (!(latitude == 0.0 && longitude == 0.0)) {
                 myPos = LatLong(latitude, longitude)
             }
-            val markerRes = intent.getSerializableExtra(EXTRAS_MARKER) as Int?
-            if (markerRes != null) {
+            if (markerRes != -1) {
                 extraMarker = createBitmapMarker(myPos!!, markerRes)
             }
         }
@@ -175,7 +175,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
      */
     private fun createMapViews() {
         binding.map.mapView.isClickable = true
-        binding.map.mapView.setOnMapDragListener { myLocSwitch.isChecked = false }
+        binding.map.mapView.setOnMapDragListener { myLocSwitch?.isChecked = false }
         binding.map.mapView.mapScaleBar.isVisible = true
         binding.map.mapView.setBuiltInZoomControls(true)
         binding.map.mapView.mapZoomControls.isAutoHide = true
@@ -254,8 +254,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 AndroidGraphicFactory.INSTANCE
             ) {
                 override fun onLongPress(
-                    tapLatLong: LatLong, thisXY: Point,
-                    tapXY: Point
+                    tapLatLong: LatLong,
+                    thisXY: Point?,
+                    tapXY: Point?
                 ): Boolean {
                     this@MapsActivity.onLongPress(tapLatLong)
                     return true
@@ -276,8 +277,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 AndroidGraphicFactory.INSTANCE
             ) {
                 override fun onLongPress(
-                    tapLatLong: LatLong, thisXY: Point,
-                    tapXY: Point
+                    tapLatLong: LatLong, thisXY: Point?,
+                    tapXY: Point?
                 ): Boolean {
                     this@MapsActivity.onLongPress(tapLatLong)
                     return true
@@ -341,10 +342,10 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         menuInflater.inflate(R.menu.maps, menu)
         val item = menu.findItem(R.id.menu_toggle_mypos)
         myLocSwitch = CheckBox(this)
-        myLocSwitch.setButtonDrawable(R.drawable.ic_gps_fix_selector)
-        myLocSwitch.isChecked = baseApplication.isLocationUpdates
+        myLocSwitch?.setButtonDrawable(R.drawable.ic_gps_fix_selector)
+        myLocSwitch?.isChecked = baseApplication.isLocationUpdates
         item.actionView = myLocSwitch
-        myLocSwitch.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+        myLocSwitch?.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             baseApplication.isLocationUpdates = isChecked
             if (isChecked) {
                 askedForPermission = false
@@ -573,7 +574,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     private fun setMyLocSwitch(checked: Boolean) {
-        myLocSwitch.isChecked = checked
+        myLocSwitch?.isChecked = checked
         baseApplication.isLocationUpdates = checked
     }
 
@@ -917,7 +918,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     private fun updatePosition() {
-        if (myLocSwitch.isChecked) {
+        if (myLocSwitch?.isChecked ?: false) {
             binding.map.mapView.setCenter(myPos)
             binding.map.mapView.repaint()
         }

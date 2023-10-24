@@ -118,17 +118,17 @@ class ProblemReportActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (intent.hasExtra(EXTRA_PHOTO_ID)) {
+            photoId = intent.getLongExtra(EXTRA_PHOTO_ID, -1)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             upload = intent.getSerializableExtra(EXTRA_UPLOAD, Upload::class.java)
             station = intent.getSerializableExtra(EXTRA_STATION, Station::class.java)
-            photoId = intent.getSerializableExtra(EXTRA_PHOTO_ID, Long::class.java)
         } else {
             @Suppress("DEPRECATION")
             upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
             @Suppress("DEPRECATION")
             station = intent.getSerializableExtra(EXTRA_STATION) as Station?
-            @Suppress("DEPRECATION")
-            photoId = intent.getSerializableExtra(EXTRA_PHOTO_ID) as Long?
         }
         if (upload != null && upload!!.isProblemReport) {
             binding.etProblemComment.setText(upload!!.comment)

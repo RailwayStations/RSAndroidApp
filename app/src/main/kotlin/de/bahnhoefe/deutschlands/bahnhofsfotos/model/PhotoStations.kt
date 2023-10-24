@@ -8,26 +8,23 @@ data class PhotoStations @JvmOverloads constructor(
 ) {
 
     fun getPhotographerUrl(photographer: String): String? {
-        return photographers.stream()
+        return photographers
             .filter { p: Photographer -> p.name == photographer }
-            .findAny()
             .map { p: Photographer -> p.url.toString() }
-            .orElse(null)
+            .firstOrNull()
     }
 
     fun getLicenseName(licenseId: String): String? {
-        return licenses.stream()
+        return licenses
             .filter { license: PhotoLicense -> license.id == licenseId }
-            .findAny()
             .map(PhotoLicense::name)
-            .orElse(null)
+            .firstOrNull()
     }
 
     fun getLicenseUrl(licenseId: String): String? {
-        return licenses.stream()
+        return licenses
             .filter { license: PhotoLicense -> license.id == licenseId }
-            .findAny()
             .map { l: PhotoLicense -> l.url.toString() }
-            .orElse(null)
+            .firstOrNull()
     }
 }
