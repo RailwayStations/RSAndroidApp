@@ -9,9 +9,12 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.CombinedVibration
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -328,13 +331,27 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             missingMarker!!.requestRedraw()
         }
 
-        // feedback for long click
-        (getSystemService(VIBRATOR_SERVICE) as Vibrator).vibrate(
-            VibrationEffect.createOneShot(
+        vibrationFeedbackForLongClick()
+    }
+
+    private fun vibrationFeedbackForLongClick() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager =
+                getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibrationEffect = VibrationEffect.createOneShot(
                 150,
                 VibrationEffect.DEFAULT_AMPLITUDE
             )
-        )
+            vibratorManager.vibrate(CombinedVibration.createParallel(vibrationEffect))
+        } else {
+            @Suppress("DEPRECATION")
+            (getSystemService(VIBRATOR_SERVICE) as Vibrator).vibrate(
+                VibrationEffect.createOneShot(
+                    150,
+                    VibrationEffect.DEFAULT_AMPLITUDE
+                )
+            )
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
