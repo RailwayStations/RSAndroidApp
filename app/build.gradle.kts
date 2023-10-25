@@ -6,7 +6,7 @@ plugins {
     id("de.mannodermaus.android-junit5")
 }
 
-fun getVersionCode(): Int {
+fun getGitVersionCode(): Int {
     return try {
         val stdout = ByteArrayOutputStream()
         exec {
@@ -86,15 +86,16 @@ android {
 
     applicationVariants.all {
         if (name == "nightly") {
-            outputs.all {
-                this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
-                versionCodeOverride = getVersionCode()
-                versionNameOverride = "${applicationId}_${versionCode}"
+            outputs.forEach { output ->
+                output as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+                output.versionCodeOverride = getGitVersionCode()
+                output.versionNameOverride = "${applicationId}_${output.versionCode}"
+                output.outputFileName = "${applicationId}_${versionCode}.apk"
             }
         }
-        outputs.all {
-            this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
-            outputFileName = "${applicationId}_${versionCode}.apk"
+        outputs.forEach { output ->
+            output as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+            output.outputFileName = "${applicationId}_${output.versionCode}.apk"
         }
     }
 
