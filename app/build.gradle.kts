@@ -85,12 +85,16 @@ android {
     }
 
     applicationVariants.all {
+        if (name == "nightly") {
+            outputs.all {
+                this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+                versionCodeOverride = getVersionCode()
+                versionNameOverride = "${applicationId}_${versionCode}"
+            }
+        }
         outputs.all {
             this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
-            versionCodeOverride = getVersionCode()
-            buildType.name
-            val apkName = "${applicationId}_${versionCode}.apk"
-            outputFileName = apkName
+            outputFileName = "${applicationId}_${versionCode}.apk"
         }
     }
 
