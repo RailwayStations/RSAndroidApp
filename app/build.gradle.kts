@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import java.io.ByteArrayOutputStream
 
 plugins {
@@ -85,16 +84,16 @@ android {
         abortOnError = false
     }
 
-    applicationVariants.forEach { variant ->
-        variant.resValue("string", "applicationId", variant.applicationId)
-        variant.outputs.forEach { output ->
-            (output as ApkVariantOutputImpl).versionCodeOverride = getVersionCode()
-            output.versionNameOverride =
-                variant.versionName + "-" + variant.versionCode
-            output.outputFileName =
-                "${variant.applicationId}_${variant.versionCode}.apk"
+    applicationVariants.all {
+        outputs.all {
+            this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+            versionCodeOverride = getVersionCode()
+            buildType.name
+            val apkName = "${applicationId}_${versionCode}.apk"
+            outputFileName = apkName
         }
     }
+
 }
 
 val mapsforgeVersion = "0.20.0"
@@ -105,7 +104,6 @@ val assertJVersion = "3.24.2"
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
-    // Desugaring
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
     implementation(group = "com.squareup.retrofit2", name = "retrofit", version = retrofitVersion)
