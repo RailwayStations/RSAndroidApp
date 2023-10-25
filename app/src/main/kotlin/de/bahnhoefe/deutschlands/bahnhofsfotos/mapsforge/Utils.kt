@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.View.MeasureSpec
+import androidx.core.view.drawToBitmap
 import org.mapsforge.core.graphics.Bitmap
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 
@@ -16,7 +17,7 @@ import org.mapsforge.map.android.graphics.AndroidGraphicFactory
  * activities.
  */
 object Utils {
-    
+
     /**
      * Compatibility method.
      *
@@ -35,7 +36,7 @@ object Utils {
         view.layout(0, 0, view.measuredWidth, view.measuredHeight)
         val drawable = BitmapDrawable(
             c.resources,
-            android.graphics.Bitmap.createBitmap(view.drawingCache)
+            view.drawToBitmap()
         )
         return AndroidGraphicFactory.convertToBitmap(drawable)
     }

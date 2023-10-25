@@ -104,7 +104,7 @@ class CountryAdapter(private val context: Context, c: Cursor?, flags: Int) : Cur
         checkCountry: CheckBox,
         position: Int
     ): View.OnClickListener {
-        return View.OnClickListener { v: View? ->
+        return View.OnClickListener {
             val cursor = getItem(position) as Cursor
             val country = cursor.getString(cursor.getColumnIndexOrThrow(COUNTRIES.COUNTRYSHORTCODE))
             if (checkCountry.isChecked) {
