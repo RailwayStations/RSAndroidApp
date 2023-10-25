@@ -7,8 +7,8 @@ plugins {
     id("de.mannodermaus.android-junit5")
 }
 
-val getVersionCode = { ->
-    try {
+fun getVersionCode(): Int {
+    return try {
         val stdout = ByteArrayOutputStream()
         exec {
             commandLine("git", "rev-list", "HEAD", "--count")
@@ -16,7 +16,7 @@ val getVersionCode = { ->
         }
         Integer.valueOf(stdout.toString().trim())
     } catch (ignored: Exception) {
-        null
+        0
     }
 }
 
@@ -24,7 +24,6 @@ android {
     namespace = "de.bahnhoefe.deutschlands.bahnhofsfotos"
 
     compileOptions {
-        // use the diamond operator and some other goodies in Android
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -34,9 +33,8 @@ android {
     }
 
     defaultConfig {
-        testInstrumentationRunnerArguments(
-            mapOf("runnerBuilder" to "de.mannodermaus.junit5.AndroidJUnit5Builder")
-        )
+        testInstrumentationRunnerArguments +=
+            mutableMapOf("runnerBuilder" to "de.mannodermaus.junit5.AndroidJUnit5Builder")
         applicationId = "de.bahnhoefe.deutschlands.bahnhofsfotos"
         compileSdk = 34
         minSdk = 26
@@ -77,7 +75,7 @@ android {
         viewBinding = true
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes += listOf("META-INF/*")
         }
@@ -90,10 +88,10 @@ android {
     applicationVariants.forEach { variant ->
         variant.resValue("string", "applicationId", variant.applicationId)
         variant.outputs.forEach { output ->
-            (output as ApkVariantOutputImpl).versionCodeOverride = getVersionCode()!!
-            (output as ApkVariantOutputImpl).versionNameOverride =
+            (output as ApkVariantOutputImpl).versionCodeOverride = getVersionCode()
+            output.versionNameOverride =
                 variant.versionName + "-" + variant.versionCode
-            (output as ApkVariantOutputImpl).outputFileName =
+            output.outputFileName =
                 "${variant.applicationId}_${variant.versionCode}.apk"
         }
     }
