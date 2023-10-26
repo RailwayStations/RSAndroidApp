@@ -101,47 +101,22 @@ android {
 
 }
 
-val mapsforgeVersion = "0.20.0"
-val retrofitVersion = "2.9.0"
-val junitVersion = "5.10.0"
-val assertJVersion = "3.24.2"
-
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
-    implementation(group = "com.squareup.retrofit2", name = "retrofit", version = retrofitVersion)
-    implementation(
-        group = "com.squareup.retrofit2",
-        name = "converter-gson",
-        version = retrofitVersion
-    )
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation(
-        group = "org.mapsforge",
-        name = "mapsforge-map-reader",
-        version = mapsforgeVersion
-    )
-    implementation(group = "org.mapsforge", name = "mapsforge-core", version = mapsforgeVersion)
-    implementation(group = "org.mapsforge", name = "mapsforge-themes", version = mapsforgeVersion)
-    implementation(group = "org.mapsforge", name = "mapsforge-map", version = mapsforgeVersion)
-    implementation(
-        group = "org.mapsforge",
-        name = "mapsforge-map-android",
-        version = mapsforgeVersion
-    )
-    implementation(
-        group = "org.mapsforge",
-        name = "mapsforge-map-android",
-        version = mapsforgeVersion
-    )
-    implementation(
-        group = "org.mapsforge",
-        name = "mapsforge-map-reader",
-        version = mapsforgeVersion
-    )
-    implementation(group = "org.mapsforge", name = "mapsforge-themes", version = mapsforgeVersion)
+    implementation("org.mapsforge:mapsforge-map-reader:0.20.0")
+    implementation("org.mapsforge:mapsforge-core:0.20.0")
+    implementation("org.mapsforge:mapsforge-themes:0.20.0")
+    implementation("org.mapsforge:mapsforge-map:0.20.0")
+    implementation("org.mapsforge:mapsforge-map-android:0.20.0")
+    implementation("org.mapsforge:mapsforge-map-android:0.20.0")
+    implementation("org.mapsforge:mapsforge-map-reader:0.20.0")
+    implementation("org.mapsforge:mapsforge-themes:0.20.0")
     implementation("net.sf.kxml:kxml2:2.3.0")
     implementation("com.caverock:androidsvg:1.4")
     implementation("org.apache.commons:commons-lang3:3.13.0")
@@ -162,43 +137,20 @@ dependencies {
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
-    testImplementation(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-api",
-        version = junitVersion
-    )
-    testImplementation(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-params",
-        version = junitVersion
-    )
-    testImplementation(group = "org.assertj", name = "assertj-core", version = assertJVersion)
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+    testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.mockito:mockito-core:5.6.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testRuntimeOnly(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-engine",
-        version = junitVersion
-    )
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.3.0")
-    androidTestImplementation(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-api",
-        version = junitVersion
-    )
-    androidTestImplementation(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-params", version = junitVersion
-    )
-    androidTestImplementation(
-        group = "org.assertj",
-        name = "assertj-core",
-        version = assertJVersion
-    )
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+    androidTestImplementation("org.assertj:assertj-core:3.24.2")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.3.0")
 
 }
