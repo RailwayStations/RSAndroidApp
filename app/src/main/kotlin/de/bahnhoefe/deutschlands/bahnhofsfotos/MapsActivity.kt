@@ -744,15 +744,15 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             clusterer!!.addItem(geoItem)
         }
         clusterer!!.redraw()
-        if (myPos == null || myPos!!.latitude == 0.0 && myPos!!.longitude == 0.0) {
+        if (!isUpdateMyLocationActive()) {
             myPos = LatLong((minLat + maxLat) / 2, (minLon + maxLon) / 2)
         }
-        updatePosition()
+        updatePosition(myLocSwitch == null || myLocSwitch?.isChecked == false)
     }
 
-    private fun isPendingUpload(station: Station?, uploadList: List<Upload?>?): Boolean {
-        for (upload in uploadList!!) {
-            if (upload!!.isPendingPhotoUpload && station!!.id == upload.stationId && station.country == upload.country) {
+    private fun isPendingUpload(station: Station, uploadList: List<Upload>): Boolean {
+        for (upload in uploadList) {
+            if (upload.isPendingPhotoUpload && station.id == upload.stationId && station.country == upload.country) {
                 return true
             }
         }
@@ -829,10 +829,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
 
             // Check if the required permission has been granted
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Location permission has been granted
                 registerLocationManager()
             } else {
-                //Permission not granted
                 Toast.makeText(
                     this@MapsActivity,
                     R.string.grant_location_permission,
@@ -906,14 +904,11 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             setMyLocSwitch(true)
         } catch (e: Exception) {
             Log.e(TAG, "Error registering LocationManager", e)
-            val b = Bundle()
-            b.putString("error", "Error registering LocationManager: $e")
             locationManager = null
             myPos = null
             setMyLocSwitch(false)
             return
         }
-        Log.i(TAG, "LocationManager registered")
         updatePosition()
     }
 
@@ -934,12 +929,14 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         Log.i(TAG, "LocationManager unregistered")
     }
 
-    private fun updatePosition() {
-        if (myLocSwitch?.isChecked == true) {
+    private fun updatePosition(force: Boolean = false) {
+        if (isUpdateMyLocationActive() || force) {
             binding.map.mapView.setCenter(myPos)
             binding.map.mapView.repaint()
         }
     }
+
+    private fun isUpdateMyLocationActive() = myLocSwitch?.isChecked == true
 
     inner class BahnhofGeoItem(
         var station: Station,
