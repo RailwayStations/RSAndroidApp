@@ -460,7 +460,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                 Log.e(TAG, "Error encoding station title or comment", e)
             }
             upload!!.active = binding.upload.spActive.selectedItemPosition == 1
-            baseApplication.dbAdapter.updateUpload(upload)
+            baseApplication.dbAdapter.updateUpload(upload!!)
             val file: RequestBody = if (mediaFile.exists()) mediaFile.asRequestBody(
                 URLConnection.guessContentTypeFromName(
                     mediaFile.name
@@ -495,7 +495,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                     upload!!.inboxUrl = inboxResponse.inboxUrl
                     upload!!.uploadState = inboxResponse.state.uploadState
                     upload!!.crc32 = inboxResponse.crc32
-                    baseApplication.dbAdapter.updateUpload(upload)
+                    baseApplication.dbAdapter.updateUpload(upload!!)
                     if (inboxResponse.state === InboxResponse.InboxResponseState.ERROR) {
                         confirmOk(
                             this@UploadActivity,

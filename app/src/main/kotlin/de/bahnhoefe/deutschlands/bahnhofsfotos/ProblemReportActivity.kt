@@ -239,7 +239,7 @@ class ProblemReportActivity : AppCompatActivity() {
                         }
                         upload!!.remoteId = inboxResponse.id
                         upload!!.uploadState = inboxResponse.state.uploadState
-                        baseApplication.dbAdapter.updateUpload(upload)
+                        baseApplication.dbAdapter.updateUpload(upload!!)
                         if (inboxResponse.state === InboxResponse.InboxResponseState.ERROR) {
                             confirmOk(
                                 this@ProblemReportActivity,

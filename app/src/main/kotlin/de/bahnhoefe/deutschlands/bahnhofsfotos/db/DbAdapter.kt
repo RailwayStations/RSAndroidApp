@@ -34,30 +34,25 @@ import kotlin.math.cos
 import kotlin.math.pow
 
 class DbAdapter(private val context: Context) {
-    private var dbHelper: DbOpenHelper? = null
-    private var db: SQLiteDatabase? = null
+    private lateinit var dbHelper: DbOpenHelper
+    private lateinit var db: SQLiteDatabase
     fun open() {
         dbHelper = DbOpenHelper(context)
-        db = dbHelper!!.writableDatabase
-    }
-
-    fun close() {
-        db!!.close()
-        dbHelper!!.close()
+        db = dbHelper.writableDatabase
     }
 
     fun insertStations(photoStations: PhotoStations, countryCode: String) {
-        db!!.beginTransaction()
+        db.beginTransaction()
         try {
             deleteStations(mutableSetOf(countryCode))
             photoStations.stations.forEach(Consumer { station: PhotoStation ->
-                db!!.insert(
+                db.insert(
                     DATABASE_TABLE_STATIONS, null, toContentValues(station, photoStations)
                 )
             })
-            db!!.setTransactionSuccessful()
+            db.setTransactionSuccessful()
         } finally {
-            db!!.endTransaction()
+            db.endTransaction()
         }
     }
 
@@ -102,22 +97,22 @@ class DbAdapter(private val context: Context) {
         if (countries.isEmpty()) {
             return
         }
-        db!!.beginTransaction()
+        db.beginTransaction()
         try {
             deleteCountries()
             countries.forEach(Consumer { country: Country -> insertCountry(country) })
-            db!!.setTransactionSuccessful()
+            db.setTransactionSuccessful()
         } finally {
-            db!!.endTransaction()
+            db.endTransaction()
         }
     }
 
     private fun insertCountry(country: Country) {
-        db!!.insert(DATABASE_TABLE_COUNTRIES, null, toContentValues(country))
+        db.insert(DATABASE_TABLE_COUNTRIES, null, toContentValues(country))
         country.providerApps
             .map { p: ProviderApp -> toContentValues(country.code, p) }
-            .forEach { values: ContentValues? ->
-                db!!.insert(
+            .forEach { values: ContentValues ->
+                db.insert(
                     DATABASE_TABLE_PROVIDER_APPS,
                     null,
                     values
@@ -145,17 +140,17 @@ class DbAdapter(private val context: Context) {
     }
 
     fun insertUpload(upload: Upload): Upload {
-        upload.id = db!!.insert(DATABASE_TABLE_UPLOADS, null, toContentValues(upload))
+        upload.id = db.insert(DATABASE_TABLE_UPLOADS, null, toContentValues(upload))
         return upload
     }
 
-    private fun deleteStations(countryCodes: Set<String?>?) {
-        db!!.delete(DATABASE_TABLE_STATIONS, whereCountryCodeIn(countryCodes), null)
+    private fun deleteStations(countryCodes: Set<String>) {
+        db.delete(DATABASE_TABLE_STATIONS, whereCountryCodeIn(countryCodes), null)
     }
 
     private fun deleteCountries() {
-        db!!.delete(DATABASE_TABLE_PROVIDER_APPS, null, null)
-        db!!.delete(DATABASE_TABLE_COUNTRIES, null, null)
+        db.delete(DATABASE_TABLE_PROVIDER_APPS, null, null)
+        db.delete(DATABASE_TABLE_COUNTRIES, null, null)
     }
 
     private fun getStationOrderBy(sortByDistance: Boolean, myPos: Location?): String {
@@ -180,7 +175,7 @@ class DbAdapter(private val context: Context) {
                         COUNTRIES.COUNTRYSHORTCODE + ", " + COUNTRIES.COUNTRYNAME +
                         " FROM " + DATABASE_TABLE_COUNTRIES + " ORDER BY " + COUNTRIES.COUNTRYNAME + " ASC"
             Log.d(TAG, selectCountries)
-            val cursor = db!!.rawQuery(selectCountries, null)
+            val cursor = db.rawQuery(selectCountries, null)
             if (!cursor.moveToFirst()) {
                 cursor.close()
                 return null
@@ -231,8 +226,8 @@ class DbAdapter(private val context: Context) {
             queryArgs.add(if (stationFilter.isActive!!) "1" else "0")
         }
         Log.w(TAG, selectQuery)
-        val cursor = db!!.query(
-            DATABASE_TABLE_STATIONS, arrayOf<String?>(
+        val cursor = db.query(
+            DATABASE_TABLE_STATIONS, arrayOf(
                 STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID,
                 STATIONS.ID,
                 STATIONS.TITLE,
@@ -250,15 +245,15 @@ class DbAdapter(private val context: Context) {
         return cursor
     }
 
-    private fun whereCountryCodeIn(countryCodes: Set<String?>?): String {
+    private fun whereCountryCodeIn(countryCodes: Set<String>): String {
         return STATIONS.COUNTRY +
                 " IN (" +
-                countryCodes!!.joinToString(",") { c: String? -> "'$c'" } +
+                countryCodes.joinToString(",") { c: String -> "'$c'" } +
                 ")"
     }
 
-    fun getStatistic(country: String?): Statistic? {
-        db!!.rawQuery(
+    fun getStatistic(country: String): Statistic? {
+        db.rawQuery(
             "SELECT COUNT(*), COUNT(" + STATIONS.PHOTO_URL + "), COUNT(DISTINCT(" + STATIONS.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + STATIONS.COUNTRY + " = ?",
             arrayOf(country)
         ).use { cursor ->
@@ -277,7 +272,7 @@ class DbAdapter(private val context: Context) {
     val photographerNicknames: Array<String>
         get() {
             val photographers = ArrayList<String>()
-            db!!.rawQuery(
+            db.rawQuery(
                 "SELECT distinct " + STATIONS.PHOTOGRAPHER + " FROM " + DATABASE_TABLE_STATIONS + " WHERE " + STATIONS.PHOTOGRAPHER + " IS NOT NULL ORDER BY " + STATIONS.PHOTOGRAPHER,
                 null
             ).use { cursor ->
@@ -288,8 +283,8 @@ class DbAdapter(private val context: Context) {
             return photographers.toTypedArray()
         }
 
-    fun countStations(countryCodes: Set<String?>?): Int {
-        db!!.rawQuery(
+    fun countStations(countryCodes: Set<String>): Int {
+        db.rawQuery(
             "SELECT COUNT(*) FROM $DATABASE_TABLE_STATIONS WHERE " + whereCountryCodeIn(
                 countryCodes
             ), null
@@ -301,23 +296,23 @@ class DbAdapter(private val context: Context) {
         return 0
     }
 
-    fun updateUpload(upload: Upload?) {
-        db!!.beginTransaction()
+    fun updateUpload(upload: Upload) {
+        db.beginTransaction()
         try {
-            db!!.update(
+            db.update(
                 DATABASE_TABLE_UPLOADS, toContentValues(upload), UPLOADS.ID + " = ?", arrayOf(
-                    upload!!.id.toString()
+                    upload.id.toString()
                 )
             )
-            db!!.setTransactionSuccessful()
+            db.setTransactionSuccessful()
         } finally {
-            db!!.endTransaction()
+            db.endTransaction()
         }
     }
 
-    private fun toContentValues(upload: Upload?): ContentValues {
+    private fun toContentValues(upload: Upload): ContentValues {
         val values = ContentValues()
-        values.put(UPLOADS.COMMENT, upload!!.comment)
+        values.put(UPLOADS.COMMENT, upload.comment)
         values.put(UPLOADS.COUNTRY, upload.country)
         values.put(UPLOADS.CREATED_AT, upload.createdAt)
         values.put(UPLOADS.INBOX_URL, upload.inboxUrl)
@@ -340,7 +335,7 @@ class DbAdapter(private val context: Context) {
 
     fun getPendingUploadsForStation(station: Station): List<Upload> {
         val uploads = mutableListOf<Upload>()
-        db!!.query(
+        db.query(
             DATABASE_TABLE_UPLOADS,
             null,
             UPLOADS.COUNTRY + " = ? AND " + UPLOADS.STATION_ID + " = ? AND " + pendingUploadWhereClause,
@@ -357,7 +352,7 @@ class DbAdapter(private val context: Context) {
     }
 
     fun getPendingUploadForCoordinates(lat: Double, lon: Double): Upload? {
-        db!!.query(
+        db.query(
             DATABASE_TABLE_UPLOADS,
             null,
             UPLOADS.LAT + " = ? AND " + UPLOADS.LON + " = ? AND " + pendingUploadWhereClause,
@@ -417,7 +412,7 @@ class DbAdapter(private val context: Context) {
         }
 
     fun getUploadById(id: Long): Upload? {
-        db!!.query(
+        db.query(
             DATABASE_TABLE_UPLOADS,
             null,
             UPLOADS.ID + "=?",
@@ -434,7 +429,7 @@ class DbAdapter(private val context: Context) {
     }
 
     fun deleteUpload(id: Long) {
-        db!!.delete(DATABASE_TABLE_UPLOADS, UPLOADS.ID + "=?", arrayOf(id.toString()))
+        db.delete(DATABASE_TABLE_UPLOADS, UPLOADS.ID + " = ?", arrayOf(id.toString()))
     }
 
     fun getPendingUploads(withRemoteId: Boolean): List<Upload> {
@@ -443,7 +438,7 @@ class DbAdapter(private val context: Context) {
             selection += " AND " + UPLOADS.REMOTE_ID + " IS NOT NULL"
         }
         val uploads = mutableListOf<Upload>()
-        db!!.query(
+        db.query(
             DATABASE_TABLE_UPLOADS, null, selection,
             null, null, null, null
         ).use { cursor ->
@@ -455,19 +450,19 @@ class DbAdapter(private val context: Context) {
     }
 
     fun updateUploadStates(stateQueries: List<InboxStateQuery>) {
-        db!!.beginTransaction()
+        db.beginTransaction()
         try {
             stateQueries.forEach(Consumer { state: InboxStateQuery ->
-                db!!.update(
+                db.update(
                     DATABASE_TABLE_UPLOADS,
                     toUploadStatesContentValues(state),
                     UPLOADS.REMOTE_ID + " = ?",
                     arrayOf(state.id.toString())
                 )
             })
-            db!!.setTransactionSuccessful()
+            db.setTransactionSuccessful()
         } finally {
-            db!!.endTransaction()
+            db.endTransaction()
         }
     }
 
@@ -482,7 +477,7 @@ class DbAdapter(private val context: Context) {
     val completedUploads: List<Upload>
         get() {
             val uploads = ArrayList<Upload>()
-            db!!.query(
+            db.query(
                 DATABASE_TABLE_UPLOADS, null,
                 UPLOADS.REMOTE_ID + " IS NOT NULL AND " + completedUploadWhereClause,
                 null, null, null, null
@@ -494,7 +489,7 @@ class DbAdapter(private val context: Context) {
             return uploads
         }
 
-    internal class DbOpenHelper(context: Context?) :
+    internal class DbOpenHelper(context: Context) :
         SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
         override fun onCreate(db: SQLiteDatabase) {
             Log.i(TAG, "Creating database")
@@ -616,26 +611,26 @@ class DbAdapter(private val context: Context) {
         return upload
     }
 
-    private fun getBoolean(cursor: Cursor, columnName: String?): Boolean? {
+    private fun getBoolean(cursor: Cursor, columnName: String): Boolean? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(columnName))) {
             cursor.getInt(cursor.getColumnIndexOrThrow(columnName)) == 1
         } else null
     }
 
-    private fun getDouble(cursor: Cursor, columnName: String?): Double? {
+    private fun getDouble(cursor: Cursor, columnName: String): Double? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(columnName))) {
             cursor.getDouble(cursor.getColumnIndexOrThrow(columnName))
         } else null
     }
 
-    private fun getLong(cursor: Cursor, columnName: String?): Long? {
+    private fun getLong(cursor: Cursor, columnName: String): Long? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(columnName))) {
             cursor.getLong(cursor.getColumnIndexOrThrow(columnName))
         } else null
     }
 
     fun fetchStationByRowId(id: Long): Station? {
-        db!!.query(
+        db.query(
             DATABASE_TABLE_STATIONS, null, STATIONS.ROWID + "=?", arrayOf(
                 id.toString() + ""
             ), null, null, null
@@ -647,8 +642,8 @@ class DbAdapter(private val context: Context) {
         return null
     }
 
-    fun getStationByKey(country: String?, id: String?): Station? {
-        db!!.query(
+    fun getStationByKey(country: String, id: String): Station? {
+        db.query(
             DATABASE_TABLE_STATIONS,
             null,
             STATIONS.COUNTRY + "=? AND " + STATIONS.ID + "=?",
@@ -665,10 +660,10 @@ class DbAdapter(private val context: Context) {
     }
 
     fun getStationForUpload(upload: Upload): Station? {
-        db!!.query(
+        db.query(
             DATABASE_TABLE_STATIONS,
             null,
-            STATIONS.COUNTRY + "=? AND " + STATIONS.ID + "=?",
+            STATIONS.COUNTRY + " = ? AND " + STATIONS.ID + " = ?",
             arrayOf(upload.country, upload.stationId),
             null,
             null,
@@ -682,9 +677,9 @@ class DbAdapter(private val context: Context) {
     }
 
     fun fetchCountriesWithProviderApps(countryCodes: Set<String>): Set<Country> {
-        val countryList = countryCodes.joinToString(",") { c: String? -> "'$c'" }
+        val countryList = countryCodes.joinToString(",") { c: String -> "'$c'" }
         val countries = HashSet<Country>()
-        db!!.query(
+        db.query(
             DATABASE_TABLE_COUNTRIES,
             null,
             COUNTRIES.COUNTRYSHORTCODE + " IN (" + countryList + ")",
@@ -697,7 +692,7 @@ class DbAdapter(private val context: Context) {
                 do {
                     var country = createCountryFromCursor(cursor)
                     val providerApps = mutableListOf<ProviderApp>()
-                    db!!.query(
+                    db.query(
                         DATABASE_TABLE_PROVIDER_APPS,
                         null,
                         PROVIDER_APPS.COUNTRYSHORTCODE + " = ?",
@@ -724,19 +719,19 @@ class DbAdapter(private val context: Context) {
         val stationList = ArrayList<Station>()
         var selectQuery =
             "SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes)
-        val queryArgs = ArrayList<String?>()
-        if (stationFilter.nickname != null) {
+        val queryArgs = ArrayList<String>()
+        stationFilter.nickname?.let {
             selectQuery += " AND " + STATIONS.PHOTOGRAPHER + " = ?"
-            queryArgs.add(stationFilter.nickname)
+            queryArgs.add(it)
         }
-        if (stationFilter.hasPhoto() != null) {
-            selectQuery += " AND " + STATIONS.PHOTO_URL + " IS " + (if (stationFilter.hasPhoto()!!) "NOT" else "") + " NULL"
+        stationFilter.hasPhoto()?.let {
+            selectQuery += " AND " + STATIONS.PHOTO_URL + " IS " + (if (it) "NOT" else "") + " NULL"
         }
-        if (stationFilter.isActive != null) {
+        stationFilter.isActive?.let {
             selectQuery += " AND " + STATIONS.ACTIVE + " = ?"
-            queryArgs.add(if (stationFilter.isActive!!) "1" else "0")
+            queryArgs.add(if (it) "1" else "0")
         }
-        db!!.rawQuery(selectQuery, queryArgs.toArray(arrayOf())).use { cursor ->
+        db.rawQuery(selectQuery, queryArgs.toArray(arrayOf())).use { cursor ->
             if (cursor.moveToFirst()) {
                 do {
                     stationList.add(createStationFromCursor(cursor))
@@ -756,19 +751,19 @@ class DbAdapter(private val context: Context) {
         var selectQuery =
             ("SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + STATIONS.LAT + " < " + (lat + 0.5) + " AND " + STATIONS.LAT + " > " + (lat - 0.5)
                     + " AND " + STATIONS.LON + " < " + (lng + 0.5) + " AND " + STATIONS.LON + " > " + (lng - 0.5))
-        val queryArgs = ArrayList<String?>()
-        if (stationFilter.nickname != null) {
+        val queryArgs = ArrayList<String>()
+        stationFilter.nickname?.let {
             selectQuery += " AND " + STATIONS.PHOTOGRAPHER + " = ?"
-            queryArgs.add(stationFilter.nickname)
+            queryArgs.add(it)
         }
-        if (stationFilter.hasPhoto() != null) {
-            selectQuery += " AND " + STATIONS.PHOTO_URL + " IS " + (if (stationFilter.hasPhoto()!!) "NOT" else "") + " NULL"
+        stationFilter.hasPhoto()?.let {
+            selectQuery += " AND " + STATIONS.PHOTO_URL + " IS " + (if (it) "NOT" else "") + " NULL"
         }
-        if (stationFilter.isActive != null) {
+        stationFilter.isActive?.let {
             selectQuery += " AND " + STATIONS.ACTIVE + " = ?"
-            queryArgs.add(if (stationFilter.isActive!!) "1" else "0")
+            queryArgs.add(if (it) "1" else "0")
         }
-        db!!.rawQuery(selectQuery, queryArgs.toArray(arrayOf())).use { cursor ->
+        db.rawQuery(selectQuery, queryArgs.toArray(arrayOf())).use { cursor ->
             if (cursor.moveToFirst()) {
                 do {
                     stationList.add(createStationFromCursor(cursor))
@@ -783,7 +778,7 @@ class DbAdapter(private val context: Context) {
             val countryList = HashSet<Country>()
             val query = "SELECT * FROM $DATABASE_TABLE_COUNTRIES"
             Log.d(TAG, query)
-            db!!.rawQuery(query, null).use { cursor ->
+            db.rawQuery(query, null).use { cursor ->
                 if (cursor.moveToFirst()) {
                     do {
                         countryList.add(createCountryFromCursor(cursor))

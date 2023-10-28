@@ -316,17 +316,17 @@ class MainActivity : AppCompatActivity(), LocationListener,
             baseApplication.lastUpdate = System.currentTimeMillis()
             if (baseApplication.updatePolicy !== UpdatePolicy.MANUAL) {
                 for (country in baseApplication.countryCodes) {
-                    rsapiClient.getStatistic(country).enqueue(object : Callback<Statistic?> {
+                    rsapiClient.getStatistic(country).enqueue(object : Callback<Statistic> {
                         override fun onResponse(
-                            call: Call<Statistic?>,
-                            response: Response<Statistic?>
+                            call: Call<Statistic>,
+                            response: Response<Statistic>
                         ) {
                             if (response.isSuccessful) {
-                                checkForUpdates(response.body(), country)
+                                checkForUpdates(response.body()!!, country)
                             }
                         }
 
-                        override fun onFailure(call: Call<Statistic?>, t: Throwable) {
+                        override fun onFailure(call: Call<Statistic>, t: Throwable) {
                             Log.e(TAG, "Error loading country statistic", t)
                         }
                     })
@@ -340,10 +340,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
         updateStationList()
     }
 
-    private fun checkForUpdates(statistic: Statistic?, country: String?) {
-        if (statistic == null) {
-            return
-        }
+    private fun checkForUpdates(statistic: Statistic, country: String) {
         val dbStat = dbAdapter.getStatistic(country)
         Log.d(TAG, "DbStat: $dbStat")
         if (statistic.total != dbStat!!.total || statistic.withPhoto != dbStat.withPhoto || statistic.withoutPhoto != dbStat.withoutPhoto) {
