@@ -17,15 +17,18 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManagerFactory
+import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+@AndroidEntryPoint
 class NearbyNotificationService : Service(), LocationListener {
 
     private var nearStations = listOf<Station>()
@@ -33,14 +36,16 @@ class NearbyNotificationService : Service(), LocationListener {
     private var locationManager: LocationManager? = null
     private var notifiedStationManager: NearbyBahnhofNotificationManager? = null
     private lateinit var railwayStationsApplication: RailwayStationsApplication
-    private lateinit var dbAdapter: DbAdapter
+
+    @Inject
+    lateinit var dbAdapter: DbAdapter
+
     override fun onCreate() {
         super.onCreate()
         myPos!!.latitude = 50.0
         myPos!!.longitude = 8.0
         notifiedStationManager = null
         railwayStationsApplication = application as RailwayStationsApplication
-        dbAdapter = railwayStationsApplication.dbAdapter
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {

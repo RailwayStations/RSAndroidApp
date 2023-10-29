@@ -14,6 +14,7 @@ import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityOutboxBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.OutboxAdapter
@@ -24,15 +25,18 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class OutboxActivity : AppCompatActivity() {
     private lateinit var adapter: OutboxAdapter
-    private lateinit var dbAdapter: DbAdapter
+
+    @Inject
+    lateinit var dbAdapter: DbAdapter
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val railwayStationsApplication = application as RailwayStationsApplication
-        dbAdapter = railwayStationsApplication.dbAdapter
         val binding = ActivityOutboxBinding.inflate(
             layoutInflater
         )

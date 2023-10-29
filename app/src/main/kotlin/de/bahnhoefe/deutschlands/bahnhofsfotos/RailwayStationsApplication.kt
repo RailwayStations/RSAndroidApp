@@ -12,7 +12,6 @@ import androidx.multidex.MultiDex
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.HiltAndroidApp
-import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy
@@ -25,7 +24,6 @@ import org.mapsforge.core.model.MapPosition
 
 @HiltAndroidApp
 class RailwayStationsApplication : Application() {
-    lateinit var dbAdapter: DbAdapter
     lateinit var rsapiClient: RSAPIClient
     private lateinit var preferences: SharedPreferences
     private lateinit var encryptedPreferences: SharedPreferences
@@ -68,8 +66,6 @@ class RailwayStationsApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        dbAdapter = DbAdapter(this)
-        dbAdapter.open()
         preferences = getSharedPreferences(PREF_FILE, MODE_PRIVATE)
 
         // Creates the instance for the encrypted preferences.

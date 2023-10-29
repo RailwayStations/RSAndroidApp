@@ -33,6 +33,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import com.google.android.material.navigation.NavigationView
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.NearbyNotificationService.StatusBinder
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMainBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
@@ -48,11 +49,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), LocationListener,
     NavigationView.OnNavigationItemSelectedListener, StationFilterBar.OnChangeListener {
     private lateinit var railwayStationsApplication: RailwayStationsApplication
-    private lateinit var dbAdapter: DbAdapter
+
+    @Inject
+    lateinit var dbAdapter: DbAdapter
     private lateinit var binding: ActivityMainBinding
     private var stationListAdapter: StationListAdapter? = null
     private var searchString: String? = null
@@ -68,7 +73,6 @@ class MainActivity : AppCompatActivity(), LocationListener,
         setContentView(binding.root)
         setSupportActionBar(binding.appBarMain.toolbar)
         railwayStationsApplication = application as RailwayStationsApplication
-        dbAdapter = railwayStationsApplication.dbAdapter
         rsapiClient = railwayStationsApplication.rsapiClient
         val toggle = ActionBarDrawerToggle(
             this,
@@ -289,7 +293,8 @@ class MainActivity : AppCompatActivity(), LocationListener,
         binding.appBarMain.main.progressBar.visibility = View.VISIBLE
         rsapiClient.runUpdateCountriesAndStations(
             this,
-            railwayStationsApplication
+            railwayStationsApplication,
+            dbAdapter,
         ) { success: Boolean ->
             if (success) {
                 val tvUpdate = findViewById<TextView>(R.id.tvUpdate)
@@ -340,7 +345,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
         if (railwayStationsApplication.sortByDistance) {
             registerLocationManager()
         }
-        binding.appBarMain.main.stationFilterBar.init(railwayStationsApplication, this)
+        binding.appBarMain.main.stationFilterBar.init(railwayStationsApplication, dbAdapter, this)
         updateStationList()
     }
 

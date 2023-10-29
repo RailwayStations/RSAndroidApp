@@ -15,7 +15,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ReportProblemBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs.confirmOk
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse
@@ -29,10 +31,15 @@ import org.apache.commons.lang3.StringUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ProblemReportActivity : AppCompatActivity() {
 
     private lateinit var railwayStationsApplication: RailwayStationsApplication
+
+    @Inject
+    lateinit var dbAdapter: DbAdapter
     private lateinit var rsapiClient: RSAPIClient
     private lateinit var binding: ReportProblemBinding
     private var upload: Upload? = null
@@ -137,7 +144,7 @@ class ProblemReportActivity : AppCompatActivity() {
             val selected = upload!!.problemType!!.ordinal + 1
             binding.problemType.setSelection(selected)
             if (station == null) {
-                station = railwayStationsApplication.dbAdapter.getStationForUpload(upload!!)
+                station = dbAdapter.getStationForUpload(upload!!)
             }
             fetchUploadStatus(upload)
         }
@@ -206,7 +213,7 @@ class ProblemReportActivity : AppCompatActivity() {
             null,
             type
         )
-        upload = railwayStationsApplication.dbAdapter.insertUpload(upload!!)
+        upload = dbAdapter.insertUpload(upload!!)
         val problemReport = ProblemReport(
             station!!.country,
             station!!.id,
@@ -239,7 +246,7 @@ class ProblemReportActivity : AppCompatActivity() {
                         }
                         upload!!.remoteId = inboxResponse.id
                         upload!!.uploadState = inboxResponse.state.uploadState
-                        railwayStationsApplication.dbAdapter.updateUpload(upload!!)
+                        dbAdapter.updateUpload(upload!!)
                         if (inboxResponse.state === InboxResponse.InboxResponseState.ERROR) {
                             confirmOk(
                                 this@ProblemReportActivity,
@@ -312,7 +319,7 @@ class ProblemReportActivity : AppCompatActivity() {
                             upload.rejectReason = remoteStateQuery.rejectedReason
                             upload.crc32 = remoteStateQuery.crc32
                             upload.remoteId = remoteStateQuery.id
-                            railwayStationsApplication.dbAdapter.updateUpload(upload)
+                            dbAdapter.updateUpload(upload)
                         }
                     } else if (response.code() == 401) {
                         onUnauthorized()

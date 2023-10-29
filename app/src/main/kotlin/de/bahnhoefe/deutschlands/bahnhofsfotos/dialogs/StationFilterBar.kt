@@ -27,6 +27,7 @@ import com.google.android.material.chip.Chip
 import de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import de.bahnhoefe.deutschlands.bahnhofsfotos.RailwayStationsApplication
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
 import java.util.stream.IntStream
 
@@ -43,6 +44,7 @@ class StationFilterBar(
     private val countrySelection: Chip
     private var listener: OnChangeListener? = null
     private lateinit var railwayStationsApplication: RailwayStationsApplication
+    private lateinit var dbAdapter: DbAdapter
     private lateinit var activity: Activity
 
     @JvmOverloads
@@ -116,8 +118,13 @@ class StationFilterBar(
         return if (active) R.color.colorOnPrimary else R.color.chipForeground
     }
 
-    fun init(railwayStationsApplication: RailwayStationsApplication, activity: Activity) {
+    fun init(
+        railwayStationsApplication: RailwayStationsApplication,
+        dbAdapter: DbAdapter,
+        activity: Activity
+    ) {
         this.railwayStationsApplication = railwayStationsApplication
+        this.dbAdapter = dbAdapter
         this.activity = activity
         if (activity is OnChangeListener) {
             listener = activity
@@ -286,7 +293,7 @@ class StationFilterBar(
     }
 
     private fun selectNicknameFilter() {
-        val nicknames = railwayStationsApplication.dbAdapter.photographerNicknames
+        val nicknames = dbAdapter.photographerNicknames
         val stationFilter = railwayStationsApplication.stationFilter
         if (nicknames.isEmpty()) {
             Toast.makeText(

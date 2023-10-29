@@ -12,7 +12,9 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityHighScoreBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore
@@ -20,10 +22,16 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class HighScoreActivity : AppCompatActivity() {
     private var adapter: HighScoreAdapter? = null
     private lateinit var binding: ActivityHighScoreBinding
+
+    @Inject
+    lateinit var dbAdapter: DbAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHighScoreBinding.inflate(
@@ -32,7 +40,7 @@ class HighScoreActivity : AppCompatActivity() {
         setContentView(binding.root)
         val railwayStationsApplication = application as RailwayStationsApplication
         val firstSelectedCountry = railwayStationsApplication.countryCodes.iterator().next()
-        val countries = ArrayList(railwayStationsApplication.dbAdapter.allCountries)
+        val countries = ArrayList(dbAdapter.allCountries)
         countries.sort()
         countries.add(0, Country("", getString(R.string.all_countries)))
         var selectedItem = 0

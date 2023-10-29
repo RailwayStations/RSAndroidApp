@@ -33,8 +33,10 @@ import androidx.core.app.NavUtils
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.viewpager2.widget.ViewPager2
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityDetailsBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.StationInfoBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country.Companion.getCountryByCode
@@ -59,9 +61,16 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.util.Locale
 import java.util.function.Consumer
+import javax.inject.Inject
 
+
+@AndroidEntryPoint
 class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     private lateinit var railwayStationsApplication: RailwayStationsApplication
+
+    @Inject
+    lateinit var dbAdapter: DbAdapter
+
     private lateinit var rsapiClient: RSAPIClient
     private lateinit var binding: ActivityDetailsBinding
     private lateinit var station: Station
@@ -79,7 +88,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         setContentView(binding.root)
         railwayStationsApplication = application as RailwayStationsApplication
         rsapiClient = railwayStationsApplication.rsapiClient
-        countries = railwayStationsApplication.dbAdapter
+        countries = dbAdapter
             .fetchCountriesWithProviderApps(railwayStationsApplication.countryCodes)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         photoPagerAdapter = PhotoPagerAdapter(this)
@@ -144,7 +153,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
             }
         }
         loadAdditionalPhotos(station)
-        railwayStationsApplication.dbAdapter
+        dbAdapter
             .getPendingUploadsForStation(station)
             .forEach(Consumer { upload: Upload? -> addUploadPhoto(upload) })
     }

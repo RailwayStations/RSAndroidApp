@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import de.bahnhoefe.deutschlands.bahnhofsfotos.RailwayStationsApplication
+import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore
@@ -129,6 +130,7 @@ class RSAPIClient(
     fun runUpdateCountriesAndStations(
         context: Context,
         railwayStationsApplication: RailwayStationsApplication,
+        dbAdapter: DbAdapter, // TODO: RSAPIClient should not call database
         listener: ResultListener,
     ) {
         getCountries().enqueue(object : Callback<List<Country>> {
@@ -138,7 +140,7 @@ class RSAPIClient(
             ) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
-                    railwayStationsApplication.dbAdapter.insertCountries(body)
+                    dbAdapter.insertCountries(body)
                 }
             }
 
@@ -164,7 +166,7 @@ class RSAPIClient(
                 ) {
                     val stationList = response.body()
                     if (response.isSuccessful && stationList != null) {
-                        railwayStationsApplication.dbAdapter.insertStations(
+                        dbAdapter.insertStations(
                             stationList,
                             countryCode
                         )

@@ -31,6 +31,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.documentfile.provider.DocumentFile
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.MapsActivity.BahnhofGeoItem
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMapsBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
@@ -73,7 +74,9 @@ import org.mapsforge.map.rendertheme.XmlRenderTheme
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.lang.ref.WeakReference
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGeoItem>,
     StationFilterBar.OnChangeListener {
     private val onlineTileSources = mutableMapOf<String, OnlineTileSource>()
@@ -82,7 +85,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private val tileCaches = mutableListOf<TileCache>()
     private var myPos: LatLong? = null
     private var myLocSwitch: CheckBox? = null
-    private lateinit var dbAdapter: DbAdapter
+
+    @Inject
+    lateinit var dbAdapter: DbAdapter
     private var nickname: String? = null
     private lateinit var railwayStationsApplication: RailwayStationsApplication
     private var locationManager: LocationManager? = null
@@ -101,7 +106,6 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         setSupportActionBar(binding.mapsToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         railwayStationsApplication = application as RailwayStationsApplication
-        dbAdapter = railwayStationsApplication.dbAdapter
         nickname = railwayStationsApplication.nickname
         val intent = intent
         var extraMarker: Marker? = null
@@ -562,7 +566,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         binding.map.progressBar.visibility = View.VISIBLE
         railwayStationsApplication.rsapiClient.runUpdateCountriesAndStations(
             this,
-            railwayStationsApplication
+            railwayStationsApplication,
+            dbAdapter,
         ) { reloadMap() }
     }
 
@@ -784,7 +789,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         if (railwayStationsApplication.isLocationUpdates) {
             registerLocationManager()
         }
-        binding.map.stationFilterBar.init(railwayStationsApplication, this)
+        binding.map.stationFilterBar.init(railwayStationsApplication, dbAdapter, this)
         binding.map.stationFilterBar.setSortOrderEnabled(false)
     }
 
