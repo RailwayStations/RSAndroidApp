@@ -46,6 +46,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.KeyValueSpinnerItem
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -69,11 +70,15 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
-    private lateinit var railwayStationsApplication: RailwayStationsApplication
-    private lateinit var rsapiClient: RSAPIClient
-
     @Inject
     lateinit var dbAdapter: DbAdapter
+
+    @Inject
+    lateinit var preferencesService: PreferencesService
+
+    @Inject
+    lateinit var rsapiClient: RSAPIClient
+
     private lateinit var binding: ActivityUploadBinding
     private lateinit var countries: List<Country>
     private var upload: Upload? = null
@@ -89,17 +94,15 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             layoutInflater
         )
         setContentView(binding.root)
-        railwayStationsApplication = application as RailwayStationsApplication
-        rsapiClient = railwayStationsApplication.rsapiClient
         countries = ArrayList(dbAdapter.allCountries)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        if (!railwayStationsApplication.isLoggedIn) {
+        if (!rsapiClient.isLoggedIn) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show()
             startActivity(Intent(this, MyDataActivity::class.java))
             finish()
             return
         }
-        if (!railwayStationsApplication.profile.isAllowedToUploadPhoto()) {
+        if (!preferencesService.profile.isAllowedToUploadPhoto()) {
             confirmOk(
                 this,
                 R.string.no_photo_upload_allowed
@@ -607,7 +610,6 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     }
 
     private fun onUnauthorized() {
-        railwayStationsApplication.accessToken = null
         rsapiClient.clearToken()
         Toast.makeText(this, R.string.authorization_failed, Toast.LENGTH_LONG).show()
         startActivity(Intent(this, MyDataActivity::class.java))

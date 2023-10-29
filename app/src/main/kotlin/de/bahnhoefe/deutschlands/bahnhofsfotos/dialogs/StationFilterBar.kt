@@ -26,8 +26,8 @@ import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.chip.Chip
 import de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
-import de.bahnhoefe.deutschlands.bahnhofsfotos.RailwayStationsApplication
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
 import java.util.stream.IntStream
 
@@ -43,7 +43,8 @@ class StationFilterBar(
     private val nicknameFilter: Chip
     private val countrySelection: Chip
     private var listener: OnChangeListener? = null
-    private lateinit var railwayStationsApplication: RailwayStationsApplication
+    private lateinit var context: Context
+    private lateinit var preferencesService: PreferencesService
     private lateinit var dbAdapter: DbAdapter
     private lateinit var activity: Activity
 
@@ -70,18 +71,18 @@ class StationFilterBar(
     }
 
     private fun setCloseIcon(chip: Chip, icon: Int) {
-        chip.closeIcon = AppCompatResources.getDrawable(railwayStationsApplication, icon)
+        chip.closeIcon = AppCompatResources.getDrawable(context, icon)
     }
 
     private fun setChipStatus(chip: Chip, iconRes: Int, active: Boolean, textRes: Int) {
-        setChipStatus(chip, iconRes, active, railwayStationsApplication.getString(textRes))
+        setChipStatus(chip, iconRes, active, context.getString(textRes))
     }
 
     private fun setChipStatus(chip: Chip, iconRes: Int, active: Boolean, text: String?) {
         if (iconRes != 0) {
             chip.chipIcon =
                 getTintedDrawable(
-                    railwayStationsApplication,
+                    context,
                     iconRes,
                     getChipForegroundColor(active)
                 )
@@ -111,7 +112,7 @@ class StationFilterBar(
     }
 
     private fun getChipForegroundColor(active: Boolean): Int {
-        return railwayStationsApplication.getColor(getChipForegroundColorRes(active))
+        return context.getColor(getChipForegroundColorRes(active))
     }
 
     private fun getChipForegroundColorRes(active: Boolean): Int {
@@ -119,17 +120,18 @@ class StationFilterBar(
     }
 
     fun init(
-        railwayStationsApplication: RailwayStationsApplication,
+        preferencesService: PreferencesService,
         dbAdapter: DbAdapter,
         activity: Activity
     ) {
-        this.railwayStationsApplication = railwayStationsApplication
+        this.preferencesService = preferencesService
         this.dbAdapter = dbAdapter
+        this.context = activity
         this.activity = activity
         if (activity is OnChangeListener) {
             listener = activity
         }
-        val stationFilter = railwayStationsApplication.stationFilter
+        val stationFilter = preferencesService.stationFilter
         setChipStatus(
             photoFilter,
             stationFilter.photoIcon,
@@ -140,7 +142,7 @@ class StationFilterBar(
             nicknameFilter,
             stationFilter.nicknameIcon,
             stationFilter.isNicknameFilterActive,
-            stationFilter.getNicknameText(this.railwayStationsApplication)
+            stationFilter.getNicknameText(activity)
         )
         setChipStatus(
             activeFilter,
@@ -152,16 +154,16 @@ class StationFilterBar(
             countrySelection,
             R.drawable.ic_countries_active_24px,
             true,
-            getCountryText(railwayStationsApplication)
+            getCountryText(preferencesService)
         )
-        setSortOrder(railwayStationsApplication.sortByDistance)
+        setSortOrder(preferencesService.sortByDistance)
     }
 
     private fun showActiveFilter(v: View) {
         val popup = PopupMenu(activity, v)
         popup.menuInflater.inflate(R.menu.active_filter, popup.menu)
         popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-            val stationFilter = railwayStationsApplication.stationFilter
+            val stationFilter = preferencesService.stationFilter
             when (menuItem.itemId) {
                 R.id.active_filter_active -> {
                     stationFilter.isActive = java.lang.Boolean.TRUE
@@ -199,7 +201,7 @@ class StationFilterBar(
         val popup = PopupMenu(activity, v)
         popup.menuInflater.inflate(R.menu.photo_filter, popup.menu)
         popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-            val stationFilter = railwayStationsApplication.stationFilter
+            val stationFilter = preferencesService.stationFilter
             when (menuItem.itemId) {
                 R.id.photo_filter_has_photo -> {
                     stationFilter.setPhoto(java.lang.Boolean.TRUE)
@@ -243,7 +245,7 @@ class StationFilterBar(
         popup.setOnMenuItemClickListener { menuItem: MenuItem ->
             val sortByDistance = menuItem.itemId == R.id.sort_order_by_distance
             setSortOrder(sortByDistance)
-            railwayStationsApplication.sortByDistance = sortByDistance
+            preferencesService.sortByDistance = sortByDistance
             if (listener != null) {
                 listener!!.sortOrderChanged(sortByDistance)
             }
@@ -294,7 +296,7 @@ class StationFilterBar(
 
     private fun selectNicknameFilter() {
         val nicknames = dbAdapter.photographerNicknames
-        val stationFilter = railwayStationsApplication.stationFilter
+        val stationFilter = preferencesService.stationFilter
         if (nicknames.isEmpty()) {
             Toast.makeText(
                 context,
@@ -319,7 +321,7 @@ class StationFilterBar(
                         nicknameFilter,
                         stationFilter.nicknameIcon,
                         stationFilter.isNicknameFilterActive,
-                        stationFilter.getNicknameText(railwayStationsApplication)
+                        stationFilter.getNicknameText(context)
                     )
                     updateStationFilter(stationFilter)
                 }
@@ -331,18 +333,18 @@ class StationFilterBar(
                     nicknameFilter,
                     stationFilter.nicknameIcon,
                     stationFilter.isNicknameFilterActive,
-                    stationFilter.getNicknameText(railwayStationsApplication)
+                    stationFilter.getNicknameText(context)
                 )
                 updateStationFilter(stationFilter)
             }
             .setNegativeButton(R.string.button_myself_text) { dialog: DialogInterface, _: Int ->
                 dialog.dismiss()
-                stationFilter.nickname = railwayStationsApplication.nickname
+                stationFilter.nickname = preferencesService.nickname
                 setChipStatus(
                     nicknameFilter,
                     stationFilter.nicknameIcon,
                     stationFilter.isNicknameFilterActive,
-                    stationFilter.getNicknameText(railwayStationsApplication)
+                    stationFilter.getNicknameText(context)
                 )
                 updateStationFilter(stationFilter)
             }
@@ -350,7 +352,7 @@ class StationFilterBar(
     }
 
     private fun updateStationFilter(stationFilter: StationFilter) {
-        railwayStationsApplication.stationFilter = stationFilter
+        preferencesService.stationFilter = stationFilter
         if (listener != null) {
             listener!!.stationFilterChanged(stationFilter)
         }
@@ -376,8 +378,8 @@ class StationFilterBar(
             return null
         }
 
-        private fun getCountryText(railwayStationsApplication: RailwayStationsApplication): String {
-            return railwayStationsApplication.countryCodes.joinToString(",")
+        private fun getCountryText(preferencesService: PreferencesService): String {
+            return preferencesService.countryCodes.joinToString(",")
         }
     }
 }

@@ -11,6 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityCountryBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.CountryAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -20,6 +21,9 @@ class CountryActivity : AppCompatActivity() {
     @Inject
     lateinit var dbAdapter: DbAdapter
 
+    @Inject
+    lateinit var preferencesService: PreferencesService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityCountryBinding.inflate(
@@ -27,7 +31,7 @@ class CountryActivity : AppCompatActivity() {
         )
         setContentView(binding.root)
         val cursor = dbAdapter.countryList
-        countryAdapter = CountryAdapter(this, cursor, 0)
+        countryAdapter = CountryAdapter(this, preferencesService.countryCodes, cursor!!, 0)
         binding.lstCountries.adapter = countryAdapter
         binding.lstCountries.onItemClickListener =
             OnItemClickListener { _: AdapterView<*>?, view: View?, position: Int, _: Long ->
@@ -55,12 +59,10 @@ class CountryActivity : AppCompatActivity() {
     }
 
     private fun navigateUp() {
-        val railwayStationsApplication: RailwayStationsApplication =
-            RailwayStationsApplication.instance
         val selectedCountries = countryAdapter.selectedCountries
-        if (railwayStationsApplication.countryCodes != selectedCountries) {
-            railwayStationsApplication.countryCodes = selectedCountries
-            railwayStationsApplication.lastUpdate = 0L
+        if (preferencesService.countryCodes != selectedCountries) {
+            preferencesService.countryCodes = selectedCountries
+            preferencesService.lastUpdate = 0L
         }
         finish()
     }

@@ -53,6 +53,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.NavItem
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable
 import retrofit2.Call
 import retrofit2.Callback
@@ -66,12 +67,16 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
-    private lateinit var railwayStationsApplication: RailwayStationsApplication
 
     @Inject
     lateinit var dbAdapter: DbAdapter
 
-    private lateinit var rsapiClient: RSAPIClient
+    @Inject
+    lateinit var preferencesService: PreferencesService
+
+    @Inject
+    lateinit var rsapiClient: RSAPIClient
+
     private lateinit var binding: ActivityDetailsBinding
     private lateinit var station: Station
     private lateinit var countries: Set<Country>
@@ -86,10 +91,8 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
             layoutInflater
         )
         setContentView(binding.root)
-        railwayStationsApplication = application as RailwayStationsApplication
-        rsapiClient = railwayStationsApplication.rsapiClient
         countries = dbAdapter
-            .fetchCountriesWithProviderApps(railwayStationsApplication.countryCodes)
+            .fetchCountriesWithProviderApps(preferencesService.countryCodes)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         photoPagerAdapter = PhotoPagerAdapter(this)
         binding.details.viewPager.adapter = photoPagerAdapter
@@ -162,7 +165,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         if (!upload!!.isPendingPhotoUpload) {
             return
         }
-        val profile = railwayStationsApplication.profile
+        val profile = preferencesService.profile
         val file = FileUtils.getStoredMediaFile(this, upload.id)
         if (file != null && file.canRead()) {
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
@@ -273,7 +276,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
     }
 
     private fun readPreferences() {
-        nickname = railwayStationsApplication.nickname
+        nickname = preferencesService.nickname
     }
 
     private val isOwner: Boolean

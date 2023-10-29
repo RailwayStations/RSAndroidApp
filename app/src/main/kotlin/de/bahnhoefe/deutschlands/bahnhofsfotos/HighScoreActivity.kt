@@ -19,6 +19,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.HighScoreAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,14 +34,19 @@ class HighScoreActivity : AppCompatActivity() {
     @Inject
     lateinit var dbAdapter: DbAdapter
 
+    @Inject
+    lateinit var preferencesService: PreferencesService
+
+    @Inject
+    lateinit var rsapiClient: RSAPIClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHighScoreBinding.inflate(
             layoutInflater
         )
         setContentView(binding.root)
-        val railwayStationsApplication = application as RailwayStationsApplication
-        val firstSelectedCountry = railwayStationsApplication.countryCodes.iterator().next()
+        val firstSelectedCountry = preferencesService.countryCodes.iterator().next()
         val countries = ArrayList(dbAdapter.allCountries)
         countries.sort()
         countries.add(0, Country("", getString(R.string.all_countries)))
@@ -63,7 +70,7 @@ class HighScoreActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                loadHighScore(railwayStationsApplication, parent.selectedItem as Country)
+                loadHighScore(preferencesService, rsapiClient, parent.selectedItem as Country)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -71,12 +78,12 @@ class HighScoreActivity : AppCompatActivity() {
     }
 
     private fun loadHighScore(
-        railwayStationsApplication: RailwayStationsApplication,
+        preferencesService: PreferencesService,
+        rsapiClient: RSAPIClient,
         selectedCountry: Country
     ) {
-        val rsapi = railwayStationsApplication.rsapiClient
         val highScoreCall =
-            if (selectedCountry.code.isEmpty()) rsapi.getHighScore() else rsapi.getHighScore(
+            if (selectedCountry.code.isEmpty()) rsapiClient.getHighScore() else rsapiClient.getHighScore(
                 selectedCountry.code
             )
         highScoreCall.enqueue(object : Callback<HighScore> {
@@ -87,9 +94,9 @@ class HighScoreActivity : AppCompatActivity() {
                     binding.highscoreList.onItemClickListener =
                         OnItemClickListener { adapter: AdapterView<*>, _: View?, position: Int, _: Long ->
                             val (name) = adapter.getItemAtPosition(position) as HighScoreItem
-                            val stationFilter = railwayStationsApplication.stationFilter
+                            val stationFilter = preferencesService.stationFilter
                             stationFilter.nickname = name
-                            railwayStationsApplication.stationFilter = stationFilter
+                            preferencesService.stationFilter = stationFilter
                             val intent = Intent(this@HighScoreActivity, MapsActivity::class.java)
                             startActivity(intent)
                         }

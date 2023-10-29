@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMydataBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ChangePasswordBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
@@ -20,6 +21,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import org.apache.commons.lang3.StringUtils
 import retrofit2.Call
 import retrofit2.Callback
@@ -30,13 +32,21 @@ import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.NoSuchAlgorithmException
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MyDataActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var preferencesService: PreferencesService
+
+    @Inject
+    lateinit var rsapiClient: RSAPIClient
+
     private var license: License? = null
-    private lateinit var railwayStationsApplication: RailwayStationsApplication
-    private lateinit var rsapiClient: RSAPIClient
     private lateinit var profile: Profile
     private lateinit var binding: ActivityMydataBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMydataBinding.inflate(
@@ -46,9 +56,7 @@ class MyDataActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setTitle(R.string.login)
         binding.myData.profileForm.visibility = View.INVISIBLE
-        railwayStationsApplication = application as RailwayStationsApplication
-        rsapiClient = railwayStationsApplication.rsapiClient
-        setProfileToUI(railwayStationsApplication.profile)
+        setProfileToUI(preferencesService.profile)
         oauthAuthorizationCallback(intent)
         if (isLoginDataAvailable) {
             loadRemoteProfile()
@@ -161,10 +169,8 @@ class MyDataActivity : AppCompatActivity() {
                                     response: Response<Token>
                                 ) {
                                     val token = response.body()
-                                    Log.d(TAG, token.toString())
                                     if (token != null) {
-                                        railwayStationsApplication.accessToken = token.accessToken
-                                        railwayStationsApplication.rsapiClient.setToken(token)
+                                        rsapiClient.setToken(token)
                                         loadRemoteProfile()
                                     } else {
                                         Toast.makeText(
@@ -268,12 +274,12 @@ class MyDataActivity : AppCompatActivity() {
     }
 
     private fun saveLocalProfile(profile: Profile) {
-        railwayStationsApplication.profile = profile
+        preferencesService.profile = profile
         setProfileToUI(profile)
     }
 
     private val isLoginDataAvailable: Boolean
-        get() = railwayStationsApplication.accessToken != null
+        get() = preferencesService.accessToken != null
 
     private fun isValid(profile: Profile?): Boolean {
         if (StringUtils.isBlank(profile!!.nickname)) {
@@ -329,7 +335,6 @@ class MyDataActivity : AppCompatActivity() {
     }
 
     fun logout() {
-        railwayStationsApplication.accessToken = null
         rsapiClient.clearToken()
         profile = Profile()
         saveLocalProfile(profile)

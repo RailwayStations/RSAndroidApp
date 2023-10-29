@@ -16,15 +16,22 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityIntroSliderBinding
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
+import javax.inject.Inject
 
 
+@AndroidEntryPoint
 class IntroSliderActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIntroSliderBinding
     private lateinit var layouts: IntArray
+
+    @Inject
+    lateinit var preferencesService: PreferencesService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val railwayStationsApplication = application as RailwayStationsApplication
         binding = ActivityIntroSliderBinding.inflate(layoutInflater)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
@@ -46,7 +53,7 @@ class IntroSliderActivity : AppCompatActivity() {
         binding.viewPager.adapter = viewPagerAdapter
         binding.viewPager.addOnPageChangeListener(viewListener)
         binding.btnSliderSkip.setOnClickListener {
-            railwayStationsApplication.firstAppStart = true
+            preferencesService.firstAppStart = true
             openMainActivity()
         }
         binding.btnSliderNext.setOnClickListener {
@@ -99,12 +106,11 @@ class IntroSliderActivity : AppCompatActivity() {
         }
 
         override fun onPageSelected(position: Int) {
-            val railwayStationsApplication = application as RailwayStationsApplication
             addBottomDots(position)
             if (position == layouts.size - 1) {
                 binding.btnSliderNext.setText(R.string.proceed)
                 binding.btnSliderSkip.visibility = View.INVISIBLE
-                railwayStationsApplication.firstAppStart = true
+                preferencesService.firstAppStart = true
             } else {
                 binding.btnSliderNext.setText(R.string.next)
                 binding.btnSliderSkip.visibility = View.VISIBLE

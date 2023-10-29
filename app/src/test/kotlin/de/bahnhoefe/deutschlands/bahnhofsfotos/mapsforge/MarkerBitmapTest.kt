@@ -1,42 +1,23 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.mapsforge
 
-import android.content.Context
+import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mapsforge.core.graphics.Bitmap
-import org.mapsforge.core.graphics.Paint
-import org.mapsforge.core.model.Point
-import org.mockito.Mockito.mock
 
 /**
  * Tests for [MarkerBitmap].
  */
 class MarkerBitmapTest {
-    private val srcWithoutPhoto = mock(
-        Bitmap::class.java
-    )
-    private val srcWithPhoto = mock(
-        Bitmap::class.java
-    )
-    private val srcOwnPhoto = mock(
-        Bitmap::class.java
-    )
-    private val srcWithoutPhotoInactive = mock(
-        Bitmap::class.java
-    )
-    private val srcWithPhotoInactive = mock(
-        Bitmap::class.java
-    )
-    private val srcOwnPhotoInactive = mock(
-        Bitmap::class.java
-    )
-    private val srcPendingUpload = mock(
-        Bitmap::class.java
-    )
+    private val srcWithoutPhoto = mockk<Bitmap>()
+    private val srcWithPhoto = mockk<Bitmap>()
+    private val srcOwnPhoto = mockk<Bitmap>()
+    private val srcWithoutPhotoInactive = mockk<Bitmap>()
+    private val srcWithPhotoInactive = mockk<Bitmap>()
+    private val srcOwnPhotoInactive = mockk<Bitmap>()
+    private val srcPendingUpload = mockk<Bitmap>()
     private val markerBitmap = MarkerBitmap(
-        mock(
-            Context::class.java
-        ),
+        mockk(relaxed = true),
         srcWithoutPhoto,
         srcWithPhoto,
         srcOwnPhoto,
@@ -44,12 +25,10 @@ class MarkerBitmapTest {
         srcWithPhotoInactive,
         srcOwnPhotoInactive,
         srcPendingUpload,
-        mock(Point::class.java),
+        mockk(relaxed = true),
         0f,
         0,
-        mock(
-            Paint::class.java
-        )
+        mockk(relaxed = true)
     )
 
     @Test

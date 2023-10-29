@@ -21,6 +21,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.OutboxAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
 import retrofit2.Call
 import retrofit2.Callback
@@ -34,9 +35,11 @@ class OutboxActivity : AppCompatActivity() {
     @Inject
     lateinit var dbAdapter: DbAdapter
 
+    @Inject
+    lateinit var rsapiClient: RSAPIClient
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val railwayStationsApplication = application as RailwayStationsApplication
         val binding = ActivityOutboxBinding.inflate(
             layoutInflater
         )
@@ -78,7 +81,7 @@ class OutboxActivity : AppCompatActivity() {
                 )
             }
             .toList()
-        railwayStationsApplication.rsapiClient.queryUploadState(query)
+        rsapiClient.queryUploadState(query)
             .enqueue(object : Callback<List<InboxStateQuery>> {
                 override fun onResponse(
                     call: Call<List<InboxStateQuery>>,
@@ -91,8 +94,7 @@ class OutboxActivity : AppCompatActivity() {
                             adapter.changeCursor(dbAdapter.outbox)
                         }
                     } else if (response.code() == 401) {
-                        railwayStationsApplication.accessToken = null
-                        railwayStationsApplication.rsapiClient.clearToken()
+                        rsapiClient.clearToken()
                         Toast.makeText(
                             this@OutboxActivity,
                             R.string.authorization_failed,

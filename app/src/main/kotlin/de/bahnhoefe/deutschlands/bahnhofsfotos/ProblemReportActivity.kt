@@ -27,6 +27,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import org.apache.commons.lang3.StringUtils
 import retrofit2.Call
 import retrofit2.Callback
@@ -36,11 +37,15 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ProblemReportActivity : AppCompatActivity() {
 
-    private lateinit var railwayStationsApplication: RailwayStationsApplication
-
     @Inject
     lateinit var dbAdapter: DbAdapter
-    private lateinit var rsapiClient: RSAPIClient
+
+    @Inject
+    lateinit var preferencesService: PreferencesService
+
+    @Inject
+    lateinit var rsapiClient: RSAPIClient
+
     private lateinit var binding: ReportProblemBinding
     private var upload: Upload? = null
     private var station: Station? = null
@@ -53,8 +58,6 @@ class ProblemReportActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
-        railwayStationsApplication = application as RailwayStationsApplication
-        rsapiClient = railwayStationsApplication.rsapiClient
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         problemTypes.add(getString(R.string.problem_please_specify))
         for (type in ProblemType.values()) {
@@ -85,13 +88,13 @@ class ProblemReportActivity : AppCompatActivity() {
                 setTitleVisible(false)
             }
         }
-        if (!railwayStationsApplication.isLoggedIn) {
+        if (!rsapiClient.isLoggedIn) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show()
             startActivity(Intent(this@ProblemReportActivity, MyDataActivity::class.java))
             finish()
             return
         }
-        if (!railwayStationsApplication.profile.emailVerified) {
+        if (!preferencesService.profile.emailVerified) {
             confirmOk(
                 this,
                 R.string.email_unverified_for_problem_report
@@ -268,7 +271,6 @@ class ProblemReportActivity : AppCompatActivity() {
     }
 
     private fun onUnauthorized() {
-        railwayStationsApplication.accessToken = null
         rsapiClient.clearToken()
         Toast.makeText(this@ProblemReportActivity, R.string.authorization_failed, Toast.LENGTH_LONG)
             .show()

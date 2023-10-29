@@ -9,17 +9,20 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.CursorAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
-import de.bahnhoefe.deutschlands.bahnhofsfotos.RailwayStationsApplication
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemCountryBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.COUNTRIES
 
-class CountryAdapter(private val context: Context, c: Cursor?, flags: Int) : CursorAdapter(
-    context, c, flags
+class CountryAdapter(
+    private val context: Context,
+    countryCodes: Set<String>,
+    cursor: Cursor,
+    flags: Int,
+) : CursorAdapter(
+    context, cursor, flags
 ) {
     private val layoutInflater: LayoutInflater =
         context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    val selectedCountries: MutableSet<String> =
-        RailwayStationsApplication.instance.countryCodes.toMutableSet()
+    val selectedCountries: MutableSet<String> = countryCodes.toMutableSet()
 
     companion object {
         private val TAG = CountryAdapter::class.java.simpleName

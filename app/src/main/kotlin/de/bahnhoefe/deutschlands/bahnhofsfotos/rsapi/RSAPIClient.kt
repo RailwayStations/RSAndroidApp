@@ -8,7 +8,6 @@ import android.widget.Toast
 import com.google.gson.GsonBuilder
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
-import de.bahnhoefe.deutschlands.bahnhofsfotos.RailwayStationsApplication
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
@@ -25,6 +24,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PKCEUtil
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
@@ -42,16 +42,16 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Consumer
 
 class RSAPIClient(
-    private var baseUrl: String,
+    private val preferencesService: PreferencesService,
     private val clientId: String,
-    accessToken: String?,
-    val redirectUri: String
+    val redirectUri: String,
 ) {
     private var api: RSAPI
     private var token: Token? = null
     private var pkce: PKCEUtil? = null
 
     init {
+        val accessToken = preferencesService.accessToken
         if (accessToken != null) {
             token = Token(
                 accessToken,
@@ -61,8 +61,11 @@ class RSAPIClient(
         api = createRSAPI()
     }
 
+    val isLoggedIn: Boolean
+        get() = hasToken()
+
     fun setBaseUrl(baseUrl: String) {
-        this.baseUrl = baseUrl
+        preferencesService.apiUrl = baseUrl
         api = createRSAPI()
     }
 
@@ -88,7 +91,7 @@ class RSAPIClient(
             builder.addInterceptor(loggingInterceptor)
         }
         val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl(preferencesService.apiUrl)
             .client(builder.build())
             .addConverterFactory(GsonConverterFactory.create(gson.create()))
             .build()
@@ -129,7 +132,6 @@ class RSAPIClient(
 
     fun runUpdateCountriesAndStations(
         context: Context,
-        railwayStationsApplication: RailwayStationsApplication,
         dbAdapter: DbAdapter, // TODO: RSAPIClient should not call database
         listener: ResultListener,
     ) {
@@ -153,7 +155,7 @@ class RSAPIClient(
                 ).show()
             }
         })
-        val countryCodes = railwayStationsApplication.countryCodes
+        val countryCodes = preferencesService.countryCodes
         val overallSuccess = AtomicBoolean(true)
         val runningRequestCount = AtomicInteger(
             countryCodes.size
@@ -170,7 +172,7 @@ class RSAPIClient(
                             stationList,
                             countryCode
                         )
-                        railwayStationsApplication.lastUpdate = System.currentTimeMillis()
+                        preferencesService.lastUpdate = System.currentTimeMillis()
                     }
                     if (!response.isSuccessful) {
                         overallSuccess.set(false)
@@ -289,6 +291,7 @@ class RSAPIClient(
 
     fun setToken(token: Token?) {
         this.token = token
+        preferencesService.accessToken = token?.accessToken
     }
 
     fun hasToken(): Boolean {
@@ -296,12 +299,13 @@ class RSAPIClient(
     }
 
     fun clearToken() {
+        preferencesService.accessToken = null
         token = null
     }
 
     @Throws(NoSuchAlgorithmException::class)
     fun createAuthorizeUri(): Uri {
-        return Uri.parse(baseUrl + "oauth2/authorize" + "?client_id=" + clientId + "&code_challenge=" + pkceCodeChallenge + "&code_challenge_method=S256&scope=all&response_type=code&redirect_uri=" + redirectUri)
+        return Uri.parse(preferencesService.apiUrl + "oauth2/authorize" + "?client_id=" + clientId + "&code_challenge=" + pkceCodeChallenge + "&code_challenge_method=S256&scope=all&response_type=code&redirect_uri=" + redirectUri)
     }
 
     fun interface ResultListener {

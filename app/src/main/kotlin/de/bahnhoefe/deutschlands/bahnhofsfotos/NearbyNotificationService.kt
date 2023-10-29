@@ -22,6 +22,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManagerFactory
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.cos
@@ -35,7 +36,9 @@ class NearbyNotificationService : Service(), LocationListener {
     private var myPos: Location? = Location(null as String?)
     private var locationManager: LocationManager? = null
     private var notifiedStationManager: NearbyBahnhofNotificationManager? = null
-    private lateinit var railwayStationsApplication: RailwayStationsApplication
+
+    @Inject
+    lateinit var preferencesService: PreferencesService
 
     @Inject
     lateinit var dbAdapter: DbAdapter
@@ -45,7 +48,6 @@ class NearbyNotificationService : Service(), LocationListener {
         myPos!!.latitude = 50.0
         myPos!!.longitude = 8.0
         notifiedStationManager = null
-        railwayStationsApplication = application as RailwayStationsApplication
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -176,7 +178,7 @@ class NearbyNotificationService : Service(), LocationListener {
             this,
             nearest,
             distance,
-            dbAdapter.fetchCountriesWithProviderApps(railwayStationsApplication.countryCodes)
+            dbAdapter.fetchCountriesWithProviderApps(preferencesService.countryCodes)
         )
         notifiedStationManager!!.notifyUser()
     }
@@ -309,7 +311,7 @@ class NearbyNotificationService : Service(), LocationListener {
             nearStations = dbAdapter.getStationByLatLngRectangle(
                 myPos!!.latitude,
                 myPos!!.longitude,
-                railwayStationsApplication.stationFilter
+                preferencesService.stationFilter
             )
         } catch (e: Exception) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e)

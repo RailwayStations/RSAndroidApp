@@ -8,22 +8,30 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityInboxBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.InboxAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PublicInbox
+import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class InboxActivity : AppCompatActivity() {
     private var adapter: InboxAdapter? = null
+
+    @Inject
+    lateinit var rsapiClient: RSAPIClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityInboxBinding.inflate(
             layoutInflater
         )
         setContentView(binding.root)
-        val inboxCall = (application as RailwayStationsApplication).rsapiClient.getPublicInbox()
+        val inboxCall = rsapiClient.getPublicInbox()
         inboxCall.enqueue(object : Callback<List<PublicInbox>> {
             override fun onResponse(
                 call: Call<List<PublicInbox>>,

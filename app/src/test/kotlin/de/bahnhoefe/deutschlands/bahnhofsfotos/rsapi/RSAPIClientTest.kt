@@ -14,6 +14,9 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Token
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
+import io.mockk.every
+import io.mockk.mockk
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -32,16 +35,18 @@ import java.util.Objects
 internal class RSAPIClientTest {
     private lateinit var server: MockWebServer
     private lateinit var client: RSAPIClient
+    private val preferencesService = mockk<PreferencesService>(relaxed = true)
 
     @BeforeEach
     fun setup() {
         server = MockWebServer()
         server.start()
         val baseUrl = server.url("/")
+        every { preferencesService.apiUrl } returns baseUrl.toString()
+        every { preferencesService.accessToken } returns "accessToken"
         client = RSAPIClient(
-            baseUrl.toString(),
+            preferencesService,
             "clientId",
-            null,
             "rsapiRedirectScheme://rsapiRedirectHost"
         )
     }
