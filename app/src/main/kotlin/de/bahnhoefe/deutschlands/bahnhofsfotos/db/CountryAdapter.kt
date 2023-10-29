@@ -13,8 +13,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemCountryBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.COUNTRIES
 
 class CountryAdapter(
-    private val context: Context,
-    countryCodes: Set<String>,
+    context: Context,
+    selectedCountryCodes: Set<String>,
     cursor: Cursor,
     flags: Int,
 ) : CursorAdapter(
@@ -22,7 +22,17 @@ class CountryAdapter(
 ) {
     private val layoutInflater: LayoutInflater =
         context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    val selectedCountries: MutableSet<String> = countryCodes.toMutableSet()
+    val selectedCountries: MutableSet<String> = selectedCountryCodes.toMutableSet()
+    private val countryNamesByCode: Map<String, String>
+
+    init {
+        val countryCodes = context.resources.getStringArray(R.array.country_codes)
+        val countryNames = context.resources.getStringArray(R.array.country_names)
+        countryNamesByCode = countryCodes.mapIndexed { index, code ->
+            Pair(code, countryNames[index])
+        }
+            .toMap()
+    }
 
     companion object {
         private val TAG = CountryAdapter::class.java.simpleName
@@ -63,11 +73,7 @@ class CountryAdapter(
     }
 
     private fun getCountryName(countryCode: String, defaultName: String): String {
-        val strId =
-            context.resources.getIdentifier("country_$countryCode", "string", context.packageName)
-        return if (strId != 0) {
-            context.getString(strId)
-        } else defaultName
+        return countryNamesByCode[countryCode] ?: defaultName
     }
 
     override fun newView(context: Context, cursor: Cursor, parent: ViewGroup): View {

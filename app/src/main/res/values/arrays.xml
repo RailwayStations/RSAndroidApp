@@ -11,4 +11,72 @@
         <item>@string/active_flag_inactive</item>
     </string-array>
 
+    <string-array name="country_codes">
+        <item>al</item>
+        <item>at</item>
+        <item>au</item>
+        <item>ba</item>
+        <item>be</item>
+        <item>ca</item>
+        <item>ch</item>
+        <item>cn</item>
+        <item>cz</item>
+        <item>dk</item>
+        <item>de</item>
+        <item>ee</item>
+        <item>es</item>
+        <item>fi</item>
+        <item>fr</item>
+        <item>hr</item>
+        <item>hu</item>
+        <item>ie</item>
+        <item>in</item>
+        <item>jp</item>
+        <item>lt</item>
+        <item>md</item>
+        <item>nl</item>
+        <item>no</item>
+        <item>pl</item>
+        <item>pt</item>
+        <item>ru</item>
+        <item>sk</item>
+        <item>tw</item>
+        <item>uk</item>
+        <item>us</item>
+    </string-array>
+
+    <string-array name="country_names">
+        <item>@string/country_al</item>
+        <item>@string/country_at</item>
+        <item>@string/country_au</item>
+        <item>@string/country_ba</item>
+        <item>@string/country_be</item>
+        <item>@string/country_ca</item>
+        <item>@string/country_ch</item>
+        <item>@string/country_cn</item>
+        <item>@string/country_cz</item>
+        <item>@string/country_dk</item>
+        <item>@string/country_de</item>
+        <item>@string/country_ee</item>
+        <item>@string/country_es</item>
+        <item>@string/country_fi</item>
+        <item>@string/country_fr</item>
+        <item>@string/country_hr</item>
+        <item>@string/country_hu</item>
+        <item>@string/country_ie</item>
+        <item>@string/country_in</item>
+        <item>@string/country_jp</item>
+        <item>@string/country_lt</item>
+        <item>@string/country_md</item>
+        <item>@string/country_nl</item>
+        <item>@string/country_no</item>
+        <item>@string/country_pl</item>
+        <item>@string/country_pt</item>
+        <item>@string/country_ru</item>
+        <item>@string/country_sk</item>
+        <item>@string/country_tw</item>
+        <item>@string/country_uk</item>
+        <item>@string/country_us</item>
+    </string-array>
+
 </resources>
