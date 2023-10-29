@@ -1,9 +1,11 @@
 import java.io.ByteArrayOutputStream
 
 plugins {
+    kotlin("kapt")
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("de.mannodermaus.android-junit5")
+    id("com.google.dagger.hilt.android")
 }
 
 fun getGitVersionCode(): Int {
@@ -101,6 +103,11 @@ android {
 
 }
 
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
@@ -136,6 +143,9 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("com.google.dagger:hilt-android:2.44")
+
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
