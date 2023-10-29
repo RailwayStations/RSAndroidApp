@@ -84,7 +84,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private var myLocSwitch: CheckBox? = null
     private lateinit var dbAdapter: DbAdapter
     private var nickname: String? = null
-    private lateinit var baseApplication: BaseApplication
+    private lateinit var railwayStationsApplication: RailwayStationsApplication
     private var locationManager: LocationManager? = null
     private var askedForPermission = false
     private var missingMarker: Marker? = null
@@ -100,9 +100,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         window.statusBarColor = Color.parseColor("#c71c4d")
         setSupportActionBar(binding.mapsToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        baseApplication = application as BaseApplication
-        dbAdapter = baseApplication.dbAdapter
-        nickname = baseApplication.nickname
+        railwayStationsApplication = application as RailwayStationsApplication
+        dbAdapter = railwayStationsApplication.dbAdapter
+        nickname = railwayStationsApplication.nickname
         val intent = intent
         var extraMarker: Marker? = null
         if (intent != null) {
@@ -165,9 +165,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
      */
     private fun initializePosition(mvp: IMapViewPosition) {
         if (myPos != null) {
-            mvp.mapPosition = MapPosition(myPos, baseApplication.zoomLevelDefault)
+            mvp.mapPosition = MapPosition(myPos, railwayStationsApplication.zoomLevelDefault)
         } else {
-            mvp.mapPosition = baseApplication.lastMapPosition
+            mvp.mapPosition = railwayStationsApplication.lastMapPosition
         }
         mvp.zoomLevelMax = zoomLevelMax
         mvp.zoomLevelMin = zoomLevelMin
@@ -213,7 +213,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
 
     private val renderTheme: XmlRenderTheme
         get() {
-            baseApplication.mapThemeUri?.let {
+            railwayStationsApplication.mapThemeUri?.let {
                 try {
                     val renderThemeFile = DocumentFile.fromSingleUri(application, it)
                     return StreamRenderTheme(
@@ -230,7 +230,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
     private val mapFile: MapDataStore?
         get() {
-            BaseApplication.toUri(baseApplication.map)?.let {
+            RailwayStationsApplication.toUri(railwayStationsApplication.map)?.let {
                 if (!DocumentFile.isDocumentUri(this, it)) {
                     return null
                 }
@@ -269,7 +269,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             layer = rendererLayer
             binding.map.mapView.layerManager.layers.add(layer)
         } else {
-            var tileSource: AbstractTileSource? = onlineTileSources[baseApplication.map]
+            var tileSource: AbstractTileSource? = onlineTileSources[railwayStationsApplication.map]
             if (tileSource == null) {
                 tileSource = OpenStreetMapMapnik.INSTANCE
             }
@@ -360,10 +360,10 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         val item = menu.findItem(R.id.menu_toggle_mypos)
         myLocSwitch = CheckBox(this)
         myLocSwitch?.setButtonDrawable(R.drawable.ic_gps_fix_selector)
-        myLocSwitch?.isChecked = baseApplication.isLocationUpdates
+        myLocSwitch?.isChecked = railwayStationsApplication.isLocationUpdates
         item.actionView = myLocSwitch
         myLocSwitch?.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            baseApplication.isLocationUpdates = isChecked
+            railwayStationsApplication.isLocationUpdates = isChecked
             if (isChecked) {
                 askedForPermission = false
                 registerLocationManager()
@@ -371,10 +371,16 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 unregisterLocationManager()
             }
         }
-        val map = baseApplication.map
+        val map = railwayStationsApplication.map
         val osmMapnick = menu.findItem(R.id.osm_mapnik)
         osmMapnick.isChecked = map == null
-        osmMapnick.setOnMenuItemClickListener(MapMenuListener(this, baseApplication, null))
+        osmMapnick.setOnMenuItemClickListener(
+            MapMenuListener(
+                this,
+                railwayStationsApplication,
+                null
+            )
+        )
         val mapSubmenu = menu.findItem(R.id.maps_submenu).subMenu!!
         for (tileSource in onlineTileSources.values) {
             val mapItem = mapSubmenu.add(R.id.maps_group, Menu.NONE, Menu.NONE, tileSource.name)
@@ -382,25 +388,25 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             mapItem.setOnMenuItemClickListener(
                 MapMenuListener(
                     this,
-                    baseApplication,
+                    railwayStationsApplication,
                     tileSource.name
                 )
             )
         }
-        baseApplication.mapDirectoryUri?.let { mapDirectoryUri ->
+        railwayStationsApplication.mapDirectoryUri?.let { mapDirectoryUri ->
             val documentsTree = getDocumentFileFromTreeUri(mapDirectoryUri)
             if (documentsTree != null) {
                 for (file in documentsTree.listFiles()) {
                     if (file.isFile && file.name!!.endsWith(".map")) {
                         val mapItem =
                             mapSubmenu.add(R.id.maps_group, Menu.NONE, Menu.NONE, file.name)
-                        mapItem.isChecked = BaseApplication.toUri(map)?.let {
+                        mapItem.isChecked = RailwayStationsApplication.toUri(map)?.let {
                             file.uri == it
                         } ?: false
                         mapItem.setOnMenuItemClickListener(
                             MapMenuListener(
                                 this,
-                                baseApplication,
+                                railwayStationsApplication,
                                 file.uri.toString()
                             )
                         )
@@ -414,11 +420,17 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             openMapDirectoryChooser()
             false
         }
-        val mapTheme = baseApplication.mapThemeUri
-        val mapThemeDirectory = baseApplication.mapThemeDirectoryUri
+        val mapTheme = railwayStationsApplication.mapThemeUri
+        val mapThemeDirectory = railwayStationsApplication.mapThemeDirectoryUri
         val defaultTheme = menu.findItem(R.id.default_theme)
         defaultTheme.isChecked = mapTheme == null
-        defaultTheme.setOnMenuItemClickListener(MapThemeMenuListener(this, baseApplication, null))
+        defaultTheme.setOnMenuItemClickListener(
+            MapThemeMenuListener(
+                this,
+                railwayStationsApplication,
+                null
+            )
+        )
         val themeSubmenu = menu.findItem(R.id.themes_submenu).subMenu!!
         mapThemeDirectory?.let {
             val documentsTree = getDocumentFileFromTreeUri(it)
@@ -433,7 +445,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                         themeItem.setOnMenuItemClickListener(
                             MapThemeMenuListener(
                                 this,
-                                baseApplication,
+                                railwayStationsApplication,
                                 file.uri
                             )
                         )
@@ -449,7 +461,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                             themeItem.setOnMenuItemClickListener(
                                 MapThemeMenuListener(
                                     this,
-                                    baseApplication,
+                                    railwayStationsApplication,
                                     childFile.uri
                                 )
                             )
@@ -486,7 +498,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-                baseApplication.setMapThemeDirectoryUri(uri)
+                railwayStationsApplication.setMapThemeDirectoryUri(uri)
                 recreate()
             }
         }
@@ -502,7 +514,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-                baseApplication.setMapDirectoryUri(uri)
+                railwayStationsApplication.setMapDirectoryUri(uri)
                 recreate()
             }
         }
@@ -548,9 +560,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
 
     private fun runUpdateCountriesAndStations() {
         binding.map.progressBar.visibility = View.VISIBLE
-        baseApplication.rsapiClient.runUpdateCountriesAndStations(
+        railwayStationsApplication.rsapiClient.runUpdateCountriesAndStations(
             this,
-            baseApplication
+            railwayStationsApplication
         ) { reloadMap() }
     }
 
@@ -592,7 +604,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
 
     private fun setMyLocSwitch(checked: Boolean) {
         myLocSwitch?.isChecked = checked
-        baseApplication.isLocationUpdates = checked
+        railwayStationsApplication.isLocationUpdates = checked
     }
 
     override fun stationFilterChanged(stationFilter: StationFilter) {
@@ -622,8 +634,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private fun readStations(): List<Station> {
         try {
             return dbAdapter.getAllStations(
-                baseApplication.stationFilter,
-                baseApplication.countryCodes
+                railwayStationsApplication.stationFilter,
+                railwayStationsApplication.countryCodes
             )
         } catch (e: Exception) {
             Log.i(TAG, "Datenbank konnte nicht geöffnet werden")
@@ -764,15 +776,15 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         if (layer is TileDownloadLayer) {
             (layer as TileDownloadLayer?)!!.onResume()
         }
-        if (baseApplication.lastUpdate == 0L) {
+        if (railwayStationsApplication.lastUpdate == 0L) {
             runUpdateCountriesAndStations()
         } else {
             reloadMap()
         }
-        if (baseApplication.isLocationUpdates) {
+        if (railwayStationsApplication.isLocationUpdates) {
             registerLocationManager()
         }
-        binding.map.stationFilterBar.init(baseApplication, this)
+        binding.map.stationFilterBar.init(railwayStationsApplication, this)
         binding.map.stationFilterBar.setSortOrderEnabled(false)
     }
 
@@ -794,7 +806,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
         unregisterLocationManager()
         val mapPosition = binding.map.mapView.model.mapViewPosition.mapPosition
-        baseApplication.lastMapPosition = mapPosition
+        railwayStationsApplication.lastMapPosition = mapPosition
         destroyClusterManager()
         super.onPause()
     }
@@ -962,7 +974,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
 
     private class MapMenuListener(
         mapsActivity: MapsActivity,
-        private val baseApplication: BaseApplication,
+        private val railwayStationsApplication: RailwayStationsApplication,
         private val map: String?
     ) : MenuItem.OnMenuItemClickListener {
         private val mapsActivityRef: WeakReference<MapsActivity>
@@ -974,9 +986,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         override fun onMenuItemClick(item: MenuItem): Boolean {
             item.isChecked = true
             if (item.itemId == R.id.osm_mapnik) { // default Mapnik online tiles
-                baseApplication.map = null
+                railwayStationsApplication.map = null
             } else {
-                baseApplication.map = map
+                railwayStationsApplication.map = map
             }
             val mapsActivity = mapsActivityRef.get()
             mapsActivity?.recreate()
@@ -986,7 +998,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
 
     private class MapThemeMenuListener(
         mapsActivity: MapsActivity,
-        private val baseApplication: BaseApplication?,
+        private val railwayStationsApplication: RailwayStationsApplication?,
         private val mapThemeUri: Uri?
     ) : MenuItem.OnMenuItemClickListener {
         private val mapsActivityRef: WeakReference<MapsActivity>
@@ -998,9 +1010,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         override fun onMenuItemClick(item: MenuItem): Boolean {
             item.isChecked = true
             if (item.itemId == R.id.default_theme) { // default theme
-                baseApplication!!.setMapThemeUri(null)
+                railwayStationsApplication!!.setMapThemeUri(null)
             } else {
-                baseApplication!!.setMapThemeUri(mapThemeUri)
+                railwayStationsApplication!!.setMapThemeUri(mapThemeUri)
             }
             val mapsActivity = mapsActivityRef.get()
             mapsActivity?.recreate()

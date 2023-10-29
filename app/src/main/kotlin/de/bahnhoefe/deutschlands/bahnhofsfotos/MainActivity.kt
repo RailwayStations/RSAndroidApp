@@ -51,7 +51,7 @@ import java.text.SimpleDateFormat
 
 class MainActivity : AppCompatActivity(), LocationListener,
     NavigationView.OnNavigationItemSelectedListener, StationFilterBar.OnChangeListener {
-    private lateinit var baseApplication: BaseApplication
+    private lateinit var railwayStationsApplication: RailwayStationsApplication
     private lateinit var dbAdapter: DbAdapter
     private lateinit var binding: ActivityMainBinding
     private var stationListAdapter: StationListAdapter? = null
@@ -67,9 +67,9 @@ class MainActivity : AppCompatActivity(), LocationListener,
         )
         setContentView(binding.root)
         setSupportActionBar(binding.appBarMain.toolbar)
-        baseApplication = application as BaseApplication
-        dbAdapter = baseApplication.dbAdapter
-        rsapiClient = baseApplication.rsapiClient
+        railwayStationsApplication = application as RailwayStationsApplication
+        dbAdapter = railwayStationsApplication.dbAdapter
+        rsapiClient = railwayStationsApplication.rsapiClient
         val toggle = ActionBarDrawerToggle(
             this,
             binding.drawerLayout,
@@ -82,11 +82,11 @@ class MainActivity : AppCompatActivity(), LocationListener,
         binding.navView.setNavigationItemSelectedListener(this)
         val header = binding.navView.getHeaderView(0)
         val tvUpdate = header.findViewById<TextView>(R.id.tvUpdate)
-        if (!baseApplication.firstAppStart) {
+        if (!railwayStationsApplication.firstAppStart) {
             startActivity(Intent(this, IntroSliderActivity::class.java))
             finish()
         }
-        val lastUpdateDate = baseApplication.lastUpdate
+        val lastUpdateDate = railwayStationsApplication.lastUpdate
         if (lastUpdateDate > 0) {
             tvUpdate.text = getString(
                 R.string.last_update_at,
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
         if (Intent.ACTION_SEARCH == searchIntent.action) {
             searchString = searchIntent.getStringExtra(SearchManager.QUERY)
         }
-        myPos = baseApplication.lastLocation
+        myPos = railwayStationsApplication.lastLocation
         bindToStatus()
         binding.appBarMain.main.pullToRefresh.setOnRefreshListener {
             runUpdateCountriesAndStations()
@@ -138,19 +138,19 @@ class MainActivity : AppCompatActivity(), LocationListener,
                 return false
             }
         })
-        val updatePolicy = baseApplication.updatePolicy
+        val updatePolicy = railwayStationsApplication.updatePolicy
         menu.findItem(updatePolicy.id).isChecked = true
         return true
     }
 
     private fun updateStationList() {
         try {
-            val sortByDistance = baseApplication.sortByDistance && myPos != null
-            val stationCount = dbAdapter.countStations(baseApplication.countryCodes)
+            val sortByDistance = railwayStationsApplication.sortByDistance && myPos != null
+            val stationCount = dbAdapter.countStations(railwayStationsApplication.countryCodes)
             val cursor = dbAdapter.getStationsListByKeyword(
                 searchString,
-                baseApplication.stationFilter,
-                baseApplication.countryCodes,
+                railwayStationsApplication.stationFilter,
+                railwayStationsApplication.countryCodes,
                 sortByDistance,
                 myPos
             )
@@ -183,15 +183,15 @@ class MainActivity : AppCompatActivity(), LocationListener,
         item.isChecked = !item.isChecked
         when (id) {
             R.id.rb_update_manual -> {
-                baseApplication.updatePolicy = UpdatePolicy.MANUAL
+                railwayStationsApplication.updatePolicy = UpdatePolicy.MANUAL
             }
 
             R.id.rb_update_automatic -> {
-                baseApplication.updatePolicy = UpdatePolicy.AUTOMATIC
+                railwayStationsApplication.updatePolicy = UpdatePolicy.AUTOMATIC
             }
 
             R.id.rb_update_notify -> {
-                baseApplication.updatePolicy = UpdatePolicy.NOTIFY
+                railwayStationsApplication.updatePolicy = UpdatePolicy.NOTIFY
             }
 
             R.id.apiUrl -> {
@@ -207,10 +207,10 @@ class MainActivity : AppCompatActivity(), LocationListener,
             R.string.apiUrl,
             EditorInfo.TYPE_TEXT_VARIATION_URI,
             R.string.api_url_hint,
-            baseApplication.apiUrl
+            railwayStationsApplication.apiUrl
         ) { prompt: String ->
-            baseApplication.apiUrl = prompt
-            baseApplication.lastUpdate = 0
+            railwayStationsApplication.apiUrl = prompt
+            railwayStationsApplication.lastUpdate = 0
             recreate()
         }
     }
@@ -287,12 +287,16 @@ class MainActivity : AppCompatActivity(), LocationListener,
 
     private fun runUpdateCountriesAndStations() {
         binding.appBarMain.main.progressBar.visibility = View.VISIBLE
-        rsapiClient.runUpdateCountriesAndStations(this, baseApplication) { success: Boolean ->
+        rsapiClient.runUpdateCountriesAndStations(
+            this,
+            railwayStationsApplication
+        ) { success: Boolean ->
             if (success) {
                 val tvUpdate = findViewById<TextView>(R.id.tvUpdate)
                 tvUpdate.text = getString(
                     R.string.last_update_at,
-                    SimpleDateFormat.getDateTimeInstance().format(baseApplication.lastUpdate)
+                    SimpleDateFormat.getDateTimeInstance()
+                        .format(railwayStationsApplication.lastUpdate)
                 )
                 updateStationList()
             }
@@ -310,12 +314,12 @@ class MainActivity : AppCompatActivity(), LocationListener,
         for (i in 0 until binding.navView.menu.size()) {
             binding.navView.menu.getItem(i).isChecked = false
         }
-        if (baseApplication.lastUpdate == 0L) {
+        if (railwayStationsApplication.lastUpdate == 0L) {
             runUpdateCountriesAndStations()
-        } else if (System.currentTimeMillis() - baseApplication.lastUpdate > CHECK_UPDATE_INTERVAL) {
-            baseApplication.lastUpdate = System.currentTimeMillis()
-            if (baseApplication.updatePolicy !== UpdatePolicy.MANUAL) {
-                for (country in baseApplication.countryCodes) {
+        } else if (System.currentTimeMillis() - railwayStationsApplication.lastUpdate > CHECK_UPDATE_INTERVAL) {
+            railwayStationsApplication.lastUpdate = System.currentTimeMillis()
+            if (railwayStationsApplication.updatePolicy !== UpdatePolicy.MANUAL) {
+                for (country in railwayStationsApplication.countryCodes) {
                     rsapiClient.getStatistic(country).enqueue(object : Callback<Statistic> {
                         override fun onResponse(
                             call: Call<Statistic>,
@@ -333,10 +337,10 @@ class MainActivity : AppCompatActivity(), LocationListener,
                 }
             }
         }
-        if (baseApplication.sortByDistance) {
+        if (railwayStationsApplication.sortByDistance) {
             registerLocationManager()
         }
-        binding.appBarMain.main.stationFilterBar.init(baseApplication, this)
+        binding.appBarMain.main.stationFilterBar.init(railwayStationsApplication, this)
         updateStationList()
     }
 
@@ -344,7 +348,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
         val dbStat = dbAdapter.getStatistic(country)
         Log.d(TAG, "DbStat: $dbStat")
         if (statistic.total != dbStat!!.total || statistic.withPhoto != dbStat.withPhoto || statistic.withoutPhoto != dbStat.withoutPhoto) {
-            if (baseApplication.updatePolicy === UpdatePolicy.AUTOMATIC) {
+            if (railwayStationsApplication.updatePolicy === UpdatePolicy.AUTOMATIC) {
                 runUpdateCountriesAndStations()
             } else {
                 AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
@@ -432,7 +436,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
                 registerLocationManager()
             } else {
                 //Permission not granted
-                baseApplication.sortByDistance = false
+                railwayStationsApplication.sortByDistance = false
                 binding.appBarMain.main.stationFilterBar.setSortOrder(false)
             }
         }
@@ -497,7 +501,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
             val b = Bundle()
             b.putString("error", "Error registering LocationManager: $e")
             locationManager = null
-            baseApplication.sortByDistance = false
+            railwayStationsApplication.sortByDistance = false
             binding.appBarMain.main.stationFilterBar.setSortOrder(false)
             return
         }
@@ -528,7 +532,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
     }
 
     override fun stationFilterChanged(stationFilter: StationFilter) {
-        baseApplication.stationFilter = stationFilter
+        railwayStationsApplication.stationFilter = stationFilter
         updateStationList()
     }
 

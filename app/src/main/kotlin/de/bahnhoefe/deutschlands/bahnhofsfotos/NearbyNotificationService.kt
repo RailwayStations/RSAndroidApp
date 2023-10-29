@@ -32,15 +32,15 @@ class NearbyNotificationService : Service(), LocationListener {
     private var myPos: Location? = Location(null as String?)
     private var locationManager: LocationManager? = null
     private var notifiedStationManager: NearbyBahnhofNotificationManager? = null
-    private lateinit var baseApplication: BaseApplication
+    private lateinit var railwayStationsApplication: RailwayStationsApplication
     private lateinit var dbAdapter: DbAdapter
     override fun onCreate() {
         super.onCreate()
         myPos!!.latitude = 50.0
         myPos!!.longitude = 8.0
         notifiedStationManager = null
-        baseApplication = application as BaseApplication
-        dbAdapter = baseApplication.dbAdapter
+        railwayStationsApplication = application as RailwayStationsApplication
+        dbAdapter = railwayStationsApplication.dbAdapter
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -171,7 +171,7 @@ class NearbyNotificationService : Service(), LocationListener {
             this,
             nearest,
             distance,
-            dbAdapter.fetchCountriesWithProviderApps(baseApplication.countryCodes)
+            dbAdapter.fetchCountriesWithProviderApps(railwayStationsApplication.countryCodes)
         )
         notifiedStationManager!!.notifyUser()
     }
@@ -304,7 +304,7 @@ class NearbyNotificationService : Service(), LocationListener {
             nearStations = dbAdapter.getStationByLatLngRectangle(
                 myPos!!.latitude,
                 myPos!!.longitude,
-                baseApplication.stationFilter
+                railwayStationsApplication.stationFilter
             )
         } catch (e: Exception) {
             Log.e(TAG, "Datenbank konnte nicht geöffnet werden", e)

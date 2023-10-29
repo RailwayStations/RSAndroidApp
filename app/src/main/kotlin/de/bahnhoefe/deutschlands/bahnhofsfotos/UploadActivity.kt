@@ -65,7 +65,7 @@ import java.util.zip.CheckedOutputStream
 
 class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
-    private lateinit var baseApplication: BaseApplication
+    private lateinit var railwayStationsApplication: RailwayStationsApplication
     private lateinit var rsapiClient: RSAPIClient
     private lateinit var binding: ActivityUploadBinding
     private lateinit var countries: List<Country>
@@ -82,17 +82,17 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             layoutInflater
         )
         setContentView(binding.root)
-        baseApplication = application as BaseApplication
-        rsapiClient = baseApplication.rsapiClient
-        countries = ArrayList(baseApplication.dbAdapter.allCountries)
+        railwayStationsApplication = application as RailwayStationsApplication
+        rsapiClient = railwayStationsApplication.rsapiClient
+        countries = ArrayList(railwayStationsApplication.dbAdapter.allCountries)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        if (!baseApplication.isLoggedIn) {
+        if (!railwayStationsApplication.isLoggedIn) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show()
             startActivity(Intent(this, MyDataActivity::class.java))
             finish()
             return
         }
-        if (!baseApplication.profile.isAllowedToUploadPhoto()) {
+        if (!railwayStationsApplication.profile.isAllowedToUploadPhoto()) {
             confirmOk(
                 this,
                 R.string.no_photo_upload_allowed
@@ -132,7 +132,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             station = intent.getSerializableExtra(EXTRA_STATION) as Station?
         }
         if (station == null && upload != null && upload!!.isUploadForExistingStation) {
-            station = baseApplication.dbAdapter.getStationForUpload(upload!!)
+            station = railwayStationsApplication.dbAdapter.getStationForUpload(upload!!)
         }
         if (latitude == null && longitude == null && upload != null && upload!!.isUploadForMissingStation) {
             latitude = upload!!.lat
@@ -154,7 +154,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             binding.upload.etStationTitle.isSingleLine = false
             if (upload == null) {
                 upload =
-                    baseApplication.dbAdapter.getPendingUploadsForStation(station!!)
+                    railwayStationsApplication.dbAdapter.getPendingUploadsForStation(station!!)
                         .firstOrNull(Upload::isPendingPhotoUpload)
             }
             setLocalBitmap(upload)
@@ -164,7 +164,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             updateOverrideLicense(country)
         } else {
             if (upload == null) {
-                upload = baseApplication.dbAdapter
+                upload = railwayStationsApplication.dbAdapter
                     .getPendingUploadForCoordinates(latitude!!, longitude!!)
             }
             binding.upload.etStationTitle.inputType = EditorInfo.TYPE_CLASS_TEXT
@@ -342,7 +342,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                 latitude,
                 longitude
             )
-            upload = baseApplication.dbAdapter.insertUpload(newUpload)
+            upload = railwayStationsApplication.dbAdapter.insertUpload(newUpload)
         }
     }
 
@@ -460,7 +460,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                 Log.e(TAG, "Error encoding station title or comment", e)
             }
             upload!!.active = binding.upload.spActive.selectedItemPosition == 1
-            baseApplication.dbAdapter.updateUpload(upload!!)
+            railwayStationsApplication.dbAdapter.updateUpload(upload!!)
             val file: RequestBody = if (mediaFile.exists()) mediaFile.asRequestBody(
                 URLConnection.guessContentTypeFromName(
                     mediaFile.name
@@ -495,7 +495,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                     upload!!.inboxUrl = inboxResponse.inboxUrl
                     upload!!.uploadState = inboxResponse.state.uploadState
                     upload!!.crc32 = inboxResponse.crc32
-                    baseApplication.dbAdapter.updateUpload(upload!!)
+                    railwayStationsApplication.dbAdapter.updateUpload(upload!!)
                     if (inboxResponse.state === InboxResponse.InboxResponseState.ERROR) {
                         confirmOk(
                             this@UploadActivity,
@@ -583,7 +583,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                             upload.rejectReason = remoteStateQuery.rejectedReason
                             upload.crc32 = remoteStateQuery.crc32
                             upload.remoteId = remoteStateQuery.id
-                            baseApplication.dbAdapter.updateUpload(upload)
+                            railwayStationsApplication.dbAdapter.updateUpload(upload)
                             updateCrc32Checkbox()
                         }
                     } else if (response.code() == 401) {
@@ -600,7 +600,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     }
 
     private fun onUnauthorized() {
-        baseApplication.accessToken = null
+        railwayStationsApplication.accessToken = null
         rsapiClient.clearToken()
         Toast.makeText(this, R.string.authorization_failed, Toast.LENGTH_LONG).show()
         startActivity(Intent(this, MyDataActivity::class.java))

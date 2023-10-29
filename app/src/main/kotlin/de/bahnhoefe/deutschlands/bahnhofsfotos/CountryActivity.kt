@@ -18,7 +18,7 @@ class CountryActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
-        val cursor = (application as BaseApplication).dbAdapter.countryList
+        val cursor = (application as RailwayStationsApplication).dbAdapter.countryList
         countryAdapter = CountryAdapter(this, cursor, 0)
         binding.lstCountries.adapter = countryAdapter
         binding.lstCountries.onItemClickListener =
@@ -47,11 +47,12 @@ class CountryActivity : AppCompatActivity() {
     }
 
     private fun navigateUp() {
-        val baseApplication: BaseApplication = BaseApplication.instance
+        val railwayStationsApplication: RailwayStationsApplication =
+            RailwayStationsApplication.instance
         val selectedCountries = countryAdapter.selectedCountries
-        if (baseApplication.countryCodes != selectedCountries) {
-            baseApplication.countryCodes = selectedCountries
-            baseApplication.lastUpdate = 0L
+        if (railwayStationsApplication.countryCodes != selectedCountries) {
+            railwayStationsApplication.countryCodes = selectedCountries
+            railwayStationsApplication.lastUpdate = 0L
         }
         finish()
     }

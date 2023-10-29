@@ -32,7 +32,7 @@ import retrofit2.Response
 
 class ProblemReportActivity : AppCompatActivity() {
 
-    private lateinit var baseApplication: BaseApplication
+    private lateinit var railwayStationsApplication: RailwayStationsApplication
     private lateinit var rsapiClient: RSAPIClient
     private lateinit var binding: ReportProblemBinding
     private var upload: Upload? = null
@@ -46,8 +46,8 @@ class ProblemReportActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
-        baseApplication = application as BaseApplication
-        rsapiClient = baseApplication.rsapiClient
+        railwayStationsApplication = application as RailwayStationsApplication
+        rsapiClient = railwayStationsApplication.rsapiClient
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         problemTypes.add(getString(R.string.problem_please_specify))
         for (type in ProblemType.values()) {
@@ -78,13 +78,13 @@ class ProblemReportActivity : AppCompatActivity() {
                 setTitleVisible(false)
             }
         }
-        if (!baseApplication.isLoggedIn) {
+        if (!railwayStationsApplication.isLoggedIn) {
             Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show()
             startActivity(Intent(this@ProblemReportActivity, MyDataActivity::class.java))
             finish()
             return
         }
-        if (!baseApplication.profile.emailVerified) {
+        if (!railwayStationsApplication.profile.emailVerified) {
             confirmOk(
                 this,
                 R.string.email_unverified_for_problem_report
@@ -137,7 +137,7 @@ class ProblemReportActivity : AppCompatActivity() {
             val selected = upload!!.problemType!!.ordinal + 1
             binding.problemType.setSelection(selected)
             if (station == null) {
-                station = baseApplication.dbAdapter.getStationForUpload(upload!!)
+                station = railwayStationsApplication.dbAdapter.getStationForUpload(upload!!)
             }
             fetchUploadStatus(upload)
         }
@@ -206,7 +206,7 @@ class ProblemReportActivity : AppCompatActivity() {
             null,
             type
         )
-        upload = baseApplication.dbAdapter.insertUpload(upload!!)
+        upload = railwayStationsApplication.dbAdapter.insertUpload(upload!!)
         val problemReport = ProblemReport(
             station!!.country,
             station!!.id,
@@ -239,7 +239,7 @@ class ProblemReportActivity : AppCompatActivity() {
                         }
                         upload!!.remoteId = inboxResponse.id
                         upload!!.uploadState = inboxResponse.state.uploadState
-                        baseApplication.dbAdapter.updateUpload(upload!!)
+                        railwayStationsApplication.dbAdapter.updateUpload(upload!!)
                         if (inboxResponse.state === InboxResponse.InboxResponseState.ERROR) {
                             confirmOk(
                                 this@ProblemReportActivity,
@@ -261,7 +261,7 @@ class ProblemReportActivity : AppCompatActivity() {
     }
 
     private fun onUnauthorized() {
-        baseApplication.accessToken = null
+        railwayStationsApplication.accessToken = null
         rsapiClient.clearToken()
         Toast.makeText(this@ProblemReportActivity, R.string.authorization_failed, Toast.LENGTH_LONG)
             .show()
@@ -312,7 +312,7 @@ class ProblemReportActivity : AppCompatActivity() {
                             upload.rejectReason = remoteStateQuery.rejectedReason
                             upload.crc32 = remoteStateQuery.crc32
                             upload.remoteId = remoteStateQuery.id
-                            baseApplication.dbAdapter.updateUpload(upload)
+                            railwayStationsApplication.dbAdapter.updateUpload(upload)
                         }
                     } else if (response.code() == 401) {
                         onUnauthorized()

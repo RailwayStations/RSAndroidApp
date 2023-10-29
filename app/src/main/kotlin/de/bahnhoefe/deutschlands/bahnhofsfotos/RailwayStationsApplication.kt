@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.multidex.MultiDex
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import dagger.hilt.android.HiltAndroidApp
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
@@ -22,7 +23,8 @@ import org.apache.commons.lang3.StringUtils
 import org.mapsforge.core.model.LatLong
 import org.mapsforge.core.model.MapPosition
 
-class BaseApplication : Application() {
+@HiltAndroidApp
+class RailwayStationsApplication : Application() {
     lateinit var dbAdapter: DbAdapter
     lateinit var rsapiClient: RSAPIClient
     private lateinit var preferences: SharedPreferences
@@ -368,10 +370,10 @@ class BaseApplication : Application() {
         get() = rsapiClient.hasToken()
 
     companion object {
-        private val TAG = BaseApplication::class.java.simpleName
+        private val TAG = RailwayStationsApplication::class.java.simpleName
         private const val DEFAULT_FIRSTAPPSTART = false
         private const val DEFAULT = ""
-        lateinit var instance: BaseApplication
+        lateinit var instance: RailwayStationsApplication
             private set
         const val DEFAULT_COUNTRY = "de"
         const val PREF_FILE = "APP_PREF_FILE"

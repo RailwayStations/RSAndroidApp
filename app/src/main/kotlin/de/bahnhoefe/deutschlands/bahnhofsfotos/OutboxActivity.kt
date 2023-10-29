@@ -31,8 +31,8 @@ class OutboxActivity : AppCompatActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val baseApplication = application as BaseApplication
-        dbAdapter = baseApplication.dbAdapter
+        val railwayStationsApplication = application as RailwayStationsApplication
+        dbAdapter = railwayStationsApplication.dbAdapter
         val binding = ActivityOutboxBinding.inflate(
             layoutInflater
         )
@@ -74,7 +74,7 @@ class OutboxActivity : AppCompatActivity() {
                 )
             }
             .toList()
-        baseApplication.rsapiClient.queryUploadState(query)
+        railwayStationsApplication.rsapiClient.queryUploadState(query)
             .enqueue(object : Callback<List<InboxStateQuery>> {
                 override fun onResponse(
                     call: Call<List<InboxStateQuery>>,
@@ -87,8 +87,8 @@ class OutboxActivity : AppCompatActivity() {
                             adapter.changeCursor(dbAdapter.outbox)
                         }
                     } else if (response.code() == 401) {
-                        baseApplication.accessToken = null
-                        baseApplication.rsapiClient.clearToken()
+                        railwayStationsApplication.accessToken = null
+                        railwayStationsApplication.rsapiClient.clearToken()
                         Toast.makeText(
                             this@OutboxActivity,
                             R.string.authorization_failed,

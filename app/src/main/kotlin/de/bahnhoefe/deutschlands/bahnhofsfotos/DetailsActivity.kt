@@ -61,7 +61,7 @@ import java.util.Locale
 import java.util.function.Consumer
 
 class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
-    private lateinit var baseApplication: BaseApplication
+    private lateinit var railwayStationsApplication: RailwayStationsApplication
     private lateinit var rsapiClient: RSAPIClient
     private lateinit var binding: ActivityDetailsBinding
     private lateinit var station: Station
@@ -77,10 +77,10 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
             layoutInflater
         )
         setContentView(binding.root)
-        baseApplication = application as BaseApplication
-        rsapiClient = baseApplication.rsapiClient
-        countries = baseApplication.dbAdapter
-            .fetchCountriesWithProviderApps(baseApplication.countryCodes)
+        railwayStationsApplication = application as RailwayStationsApplication
+        rsapiClient = railwayStationsApplication.rsapiClient
+        countries = railwayStationsApplication.dbAdapter
+            .fetchCountriesWithProviderApps(railwayStationsApplication.countryCodes)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         photoPagerAdapter = PhotoPagerAdapter(this)
         binding.details.viewPager.adapter = photoPagerAdapter
@@ -144,7 +144,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
             }
         }
         loadAdditionalPhotos(station)
-        baseApplication.dbAdapter
+        railwayStationsApplication.dbAdapter
             .getPendingUploadsForStation(station)
             .forEach(Consumer { upload: Upload? -> addUploadPhoto(upload) })
     }
@@ -153,7 +153,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         if (!upload!!.isPendingPhotoUpload) {
             return
         }
-        val profile = baseApplication.profile
+        val profile = railwayStationsApplication.profile
         val file = FileUtils.getStoredMediaFile(this, upload.id)
         if (file != null && file.canRead()) {
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
@@ -264,7 +264,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
     }
 
     private fun readPreferences() {
-        nickname = baseApplication.nickname
+        nickname = railwayStationsApplication.nickname
     }
 
     private val isOwner: Boolean

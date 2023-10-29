@@ -6,9 +6,9 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import com.google.gson.GsonBuilder
-import de.bahnhoefe.deutschlands.bahnhofsfotos.BaseApplication
 import de.bahnhoefe.deutschlands.bahnhofsfotos.BuildConfig
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.RailwayStationsApplication
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ChangePassword
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScore
@@ -128,7 +128,7 @@ class RSAPIClient(
 
     fun runUpdateCountriesAndStations(
         context: Context,
-        baseApplication: BaseApplication,
+        railwayStationsApplication: RailwayStationsApplication,
         listener: ResultListener,
     ) {
         getCountries().enqueue(object : Callback<List<Country>> {
@@ -138,7 +138,7 @@ class RSAPIClient(
             ) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
-                    baseApplication.dbAdapter.insertCountries(body)
+                    railwayStationsApplication.dbAdapter.insertCountries(body)
                 }
             }
 
@@ -151,7 +151,7 @@ class RSAPIClient(
                 ).show()
             }
         })
-        val countryCodes = baseApplication.countryCodes
+        val countryCodes = railwayStationsApplication.countryCodes
         val overallSuccess = AtomicBoolean(true)
         val runningRequestCount = AtomicInteger(
             countryCodes.size
@@ -164,8 +164,11 @@ class RSAPIClient(
                 ) {
                     val stationList = response.body()
                     if (response.isSuccessful && stationList != null) {
-                        baseApplication.dbAdapter.insertStations(stationList, countryCode)
-                        baseApplication.lastUpdate = System.currentTimeMillis()
+                        railwayStationsApplication.dbAdapter.insertStations(
+                            stationList,
+                            countryCode
+                        )
+                        railwayStationsApplication.lastUpdate = System.currentTimeMillis()
                     }
                     if (!response.isSuccessful) {
                         overallSuccess.set(false)

@@ -33,7 +33,7 @@ import java.security.NoSuchAlgorithmException
 
 class MyDataActivity : AppCompatActivity() {
     private var license: License? = null
-    private lateinit var baseApplication: BaseApplication
+    private lateinit var railwayStationsApplication: RailwayStationsApplication
     private lateinit var rsapiClient: RSAPIClient
     private lateinit var profile: Profile
     private lateinit var binding: ActivityMydataBinding
@@ -46,9 +46,9 @@ class MyDataActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setTitle(R.string.login)
         binding.myData.profileForm.visibility = View.INVISIBLE
-        baseApplication = application as BaseApplication
-        rsapiClient = baseApplication.rsapiClient
-        setProfileToUI(baseApplication.profile)
+        railwayStationsApplication = application as RailwayStationsApplication
+        rsapiClient = railwayStationsApplication.rsapiClient
+        setProfileToUI(railwayStationsApplication.profile)
         oauthAuthorizationCallback(intent)
         if (isLoginDataAvailable) {
             loadRemoteProfile()
@@ -163,8 +163,8 @@ class MyDataActivity : AppCompatActivity() {
                                     val token = response.body()
                                     Log.d(TAG, token.toString())
                                     if (token != null) {
-                                        baseApplication.accessToken = token.accessToken
-                                        baseApplication.rsapiClient.setToken(token)
+                                        railwayStationsApplication.accessToken = token.accessToken
+                                        railwayStationsApplication.rsapiClient.setToken(token)
                                         loadRemoteProfile()
                                     } else {
                                         Toast.makeText(
@@ -268,12 +268,12 @@ class MyDataActivity : AppCompatActivity() {
     }
 
     private fun saveLocalProfile(profile: Profile) {
-        baseApplication.profile = profile
+        railwayStationsApplication.profile = profile
         setProfileToUI(profile)
     }
 
     private val isLoginDataAvailable: Boolean
-        get() = baseApplication.accessToken != null
+        get() = railwayStationsApplication.accessToken != null
 
     private fun isValid(profile: Profile?): Boolean {
         if (StringUtils.isBlank(profile!!.nickname)) {
@@ -329,7 +329,7 @@ class MyDataActivity : AppCompatActivity() {
     }
 
     fun logout() {
-        baseApplication.accessToken = null
+        railwayStationsApplication.accessToken = null
         rsapiClient.clearToken()
         profile = Profile()
         saveLocalProfile(profile)

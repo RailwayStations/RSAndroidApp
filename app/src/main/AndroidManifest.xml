@@ -15,7 +15,7 @@
         android:required="false" />
 
     <application
-        android:name=".BaseApplication"
+        android:name=".RailwayStationsApplication"
         android:allowBackup="true"
         android:fullBackupOnly="true"
         android:networkSecurityConfig="@xml/network_security_config"

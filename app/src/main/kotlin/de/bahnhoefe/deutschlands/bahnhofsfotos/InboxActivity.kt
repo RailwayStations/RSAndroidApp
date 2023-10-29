@@ -23,7 +23,7 @@ class InboxActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
-        val inboxCall = (application as BaseApplication).rsapiClient.getPublicInbox()
+        val inboxCall = (application as RailwayStationsApplication).rsapiClient.getPublicInbox()
         inboxCall.enqueue(object : Callback<List<PublicInbox>> {
             override fun onResponse(
                 call: Call<List<PublicInbox>>,

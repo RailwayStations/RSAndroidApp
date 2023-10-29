@@ -30,9 +30,9 @@ class HighScoreActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
-        val baseApplication = application as BaseApplication
-        val firstSelectedCountry = baseApplication.countryCodes.iterator().next()
-        val countries = ArrayList(baseApplication.dbAdapter.allCountries)
+        val railwayStationsApplication = application as RailwayStationsApplication
+        val firstSelectedCountry = railwayStationsApplication.countryCodes.iterator().next()
+        val countries = ArrayList(railwayStationsApplication.dbAdapter.allCountries)
         countries.sort()
         countries.add(0, Country("", getString(R.string.all_countries)))
         var selectedItem = 0
@@ -55,15 +55,18 @@ class HighScoreActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                loadHighScore(baseApplication, parent.selectedItem as Country)
+                loadHighScore(railwayStationsApplication, parent.selectedItem as Country)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
-    private fun loadHighScore(baseApplication: BaseApplication, selectedCountry: Country) {
-        val rsapi = baseApplication.rsapiClient
+    private fun loadHighScore(
+        railwayStationsApplication: RailwayStationsApplication,
+        selectedCountry: Country
+    ) {
+        val rsapi = railwayStationsApplication.rsapiClient
         val highScoreCall =
             if (selectedCountry.code.isEmpty()) rsapi.getHighScore() else rsapi.getHighScore(
                 selectedCountry.code
@@ -76,9 +79,9 @@ class HighScoreActivity : AppCompatActivity() {
                     binding.highscoreList.onItemClickListener =
                         OnItemClickListener { adapter: AdapterView<*>, _: View?, position: Int, _: Long ->
                             val (name) = adapter.getItemAtPosition(position) as HighScoreItem
-                            val stationFilter = baseApplication.stationFilter
+                            val stationFilter = railwayStationsApplication.stationFilter
                             stationFilter.nickname = name
-                            baseApplication.stationFilter = stationFilter
+                            railwayStationsApplication.stationFilter = stationFilter
                             val intent = Intent(this@HighScoreActivity, MapsActivity::class.java)
                             startActivity(intent)
                         }

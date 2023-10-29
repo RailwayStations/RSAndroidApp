@@ -24,7 +24,7 @@ class IntroSliderActivity : AppCompatActivity() {
     private lateinit var layouts: IntArray
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val baseApplication = application as BaseApplication
+        val railwayStationsApplication = application as RailwayStationsApplication
         binding = ActivityIntroSliderBinding.inflate(layoutInflater)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
@@ -46,7 +46,7 @@ class IntroSliderActivity : AppCompatActivity() {
         binding.viewPager.adapter = viewPagerAdapter
         binding.viewPager.addOnPageChangeListener(viewListener)
         binding.btnSliderSkip.setOnClickListener {
-            baseApplication.firstAppStart = true
+            railwayStationsApplication.firstAppStart = true
             openMainActivity()
         }
         binding.btnSliderNext.setOnClickListener {
@@ -99,12 +99,12 @@ class IntroSliderActivity : AppCompatActivity() {
         }
 
         override fun onPageSelected(position: Int) {
-            val baseApplication = application as BaseApplication
+            val railwayStationsApplication = application as RailwayStationsApplication
             addBottomDots(position)
             if (position == layouts.size - 1) {
                 binding.btnSliderNext.setText(R.string.proceed)
                 binding.btnSliderSkip.visibility = View.INVISIBLE
-                baseApplication.firstAppStart = true
+                railwayStationsApplication.firstAppStart = true
             } else {
                 binding.btnSliderNext.setText(R.string.next)
                 binding.btnSliderSkip.visibility = View.VISIBLE
