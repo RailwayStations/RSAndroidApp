@@ -15,7 +15,7 @@ class PreferencesModule {
 
     @Singleton
     @Provides
-    fun provideDbAdapter(@ApplicationContext context: Context): PreferencesService {
+    fun providePreferencesService(@ApplicationContext context: Context): PreferencesService {
         return PreferencesService(context)
     }
 
