@@ -325,4 +325,5 @@
     <string name="problem_please_provide_corrected_title">Geef een gecorrigeerde naam van het station</string>
     <string name="corrected_station_title">Gecorrigeerde stationsnaam</string>
     <string name="corrected_station_coords">Gecorrigeerde stationscoördinaten</string>
+    <string name="problem_duplicate">Duplicate</string>
 </resources>
