@@ -16,12 +16,13 @@ enum class ProblemType(val messageId: Int) {
     STATION_NONEXISTENT(
         R.string.problem_station_nonexistent
     ),
+    DUPLICATE(R.string.problem_duplicate),
     WRONG_PHOTO(R.string.problem_wrong_photo),
 
     PHOTO_OUTDATED(
         R.string.problem_photo_outdated
     ),
-    
+
     OTHER(R.string.problem_other);
 
 }
