@@ -51,7 +51,7 @@ class CountryActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.home) {
+        if (item.itemId == androidx.appcompat.R.id.home) {
             navigateUp()
             return true
         }
