@@ -1,1 +1,4 @@
-- migrate to Kotlin
+- Codebase migrated to Kotlin
+- New: problem report "Duplicate"
+- Updated translations
+- Updated dependencies

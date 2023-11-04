@@ -1,1 +1,4 @@
-- Migration nach Kotlin
+- Migration der Codebasis nach Kotlin
+- Neu: Problem Report "Duplikat"
+- Übersetzungen aktualisiert
+- Abhängigkeiten aktualisiert
