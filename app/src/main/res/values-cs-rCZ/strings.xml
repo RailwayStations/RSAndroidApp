@@ -329,4 +329,5 @@
     <string name="problem_please_provide_corrected_title">Please provide a corrected station title</string>
     <string name="corrected_station_title">Corrected station title</string>
     <string name="corrected_station_coords">Corrected station coords</string>
+    <string name="problem_duplicate">Duplicate</string>
 </resources>

@@ -285,7 +285,7 @@
     <string name="country_al">Albanien</string>
     <string name="country_at">Österreich</string>
     <string name="country_au">Australien</string>
-    <string name="country_ba">Bosnia and Herzegovina</string>
+    <string name="country_ba">Bosnien und Herzegowina</string>
     <string name="country_be">Belgien</string>
     <string name="country_ca">Kanada</string>
     <string name="country_ch">Schweiz</string>
@@ -324,4 +324,5 @@
     <string name="problem_please_provide_corrected_title">Bitte gib einen korrigierten Bahnhofsnamen an</string>
     <string name="corrected_station_title">Korrigierter Bahnhofsname</string>
     <string name="corrected_station_coords">Korrigierte Bahnhofskoordinaten</string>
+    <string name="problem_duplicate">Duplikat</string>
 </resources>
