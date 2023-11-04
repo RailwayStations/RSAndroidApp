@@ -514,7 +514,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
             return
         }
         Log.i(TAG, "LocationManager registered")
-        onLocationChanged(myPos!!)
+        myPos?.let { onLocationChanged(it) }
     }
 
     private fun unregisterLocationManager() {
