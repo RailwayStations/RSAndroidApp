@@ -1,0 +1,1 @@
+- Absturz im Ausgangskorb behoben, wenn Benutzer nicht eingeloggt ist

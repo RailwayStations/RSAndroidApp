@@ -40,8 +40,8 @@ android {
         compileSdk = 34
         minSdk = 26
         targetSdk = 34
-        versionCode = 87
-        versionName = "15.0.2"
+        versionCode = 88
+        versionName = "15.0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -111,7 +111,7 @@ kapt {
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

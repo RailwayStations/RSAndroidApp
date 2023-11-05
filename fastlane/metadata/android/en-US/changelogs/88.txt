@@ -1,0 +1,1 @@
+- fix crash on OutboxActivity when not logged in

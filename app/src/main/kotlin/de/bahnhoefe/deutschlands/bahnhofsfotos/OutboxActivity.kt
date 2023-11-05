@@ -44,6 +44,14 @@ class OutboxActivity : AppCompatActivity() {
             layoutInflater
         )
         setContentView(binding.root)
+
+        if (!rsapiClient.isLoggedIn) {
+            Toast.makeText(this, R.string.please_login, Toast.LENGTH_LONG).show()
+            startActivity(Intent(this@OutboxActivity, MyDataActivity::class.java))
+            finish()
+            return
+        }
+
         adapter = OutboxAdapter(this@OutboxActivity, dbAdapter.outbox)
         binding.lstUploads.adapter = adapter
 
