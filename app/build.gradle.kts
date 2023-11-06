@@ -152,7 +152,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
 
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
