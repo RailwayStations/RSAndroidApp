@@ -161,6 +161,6 @@ dependencies {
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     androidTestImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
     androidTestImplementation("org.assertj:assertj-core:3.24.2")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.3.0")
+    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.4.0")
 
 }
