@@ -1,11 +1,9 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos
 
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemClickListener
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityCountryBinding
@@ -41,29 +39,12 @@ class CountryActivity : AppCompatActivity() {
                     binding.lstCountries,
                     cursor
                 )
+                val selectedCountries = countryAdapter.selectedCountries
+                if (preferencesService.countryCodes != selectedCountries) {
+                    preferencesService.countryCodes = selectedCountries
+                    preferencesService.lastUpdate = 0L
+                }
             }
-
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                navigateUp()
-            }
-        })
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == androidx.appcompat.R.id.home) {
-            navigateUp()
-            return true
-        }
-        return false
-    }
-
-    private fun navigateUp() {
-        val selectedCountries = countryAdapter.selectedCountries
-        if (preferencesService.countryCodes != selectedCountries) {
-            preferencesService.countryCodes = selectedCountries
-            preferencesService.lastUpdate = 0L
-        }
-        finish()
-    }
 }
