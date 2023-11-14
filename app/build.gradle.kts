@@ -34,8 +34,7 @@ android {
     }
 
     defaultConfig {
-        testInstrumentationRunnerArguments +=
-            mutableMapOf("runnerBuilder" to "de.mannodermaus.junit5.AndroidJUnit5Builder")
+        testInstrumentationRunnerArguments += mapOf("runnerBuilder" to "de.mannodermaus.junit5.AndroidJUnit5Builder")
         applicationId = "de.bahnhoefe.deutschlands.bahnhofsfotos"
         compileSdk = 34
         minSdk = 26
