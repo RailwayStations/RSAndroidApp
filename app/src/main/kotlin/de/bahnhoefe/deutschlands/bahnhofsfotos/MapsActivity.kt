@@ -81,12 +81,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGeoItem>,
     StationFilterBar.OnChangeListener {
-    private val onlineTileSources = mutableMapOf<String, OnlineTileSource>()
-    private var layer: Layer? = null
-    private var clusterer: ClusterManager<BahnhofGeoItem>? = null
-    private val tileCaches = mutableListOf<TileCache>()
-    private var myPos: LatLong? = null
-    private var myLocSwitch: CheckBox? = null
 
     @Inject
     lateinit var dbAdapter: DbAdapter
@@ -97,12 +91,18 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     @Inject
     lateinit var rsapiClient: RSAPIClient
 
+    private lateinit var binding: ActivityMapsBinding
+    private val onlineTileSources = mutableMapOf<String, OnlineTileSource>()
+    private var layer: Layer? = null
+    private var clusterer: ClusterManager<BahnhofGeoItem>? = null
+    private val tileCaches = mutableListOf<TileCache>()
+    private var myPos: LatLong? = null
+    private var myLocSwitch: CheckBox? = null
     private var nickname: String? = null
-    private lateinit var railwayStationsApplication: RailwayStationsApplication
     private var locationManager: LocationManager? = null
     private var askedForPermission = false
     private var missingMarker: Marker? = null
-    private lateinit var binding: ActivityMapsBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidGraphicFactory.createInstance(this.application)
@@ -114,13 +114,12 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         window.statusBarColor = Color.parseColor("#c71c4d")
         setSupportActionBar(binding.mapsToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        railwayStationsApplication = application as RailwayStationsApplication
         nickname = preferencesService.nickname
         val intent = intent
         var extraMarker: Marker? = null
         if (intent != null) {
             val latitude = intent.getDoubleExtra(EXTRAS_LATITUDE, 0.0)
-            val longitude = intent.getDoubleExtra(EXTRAS_LATITUDE, 0.0)
+            val longitude = intent.getDoubleExtra(EXTRAS_LONGITUDE, 0.0)
             val markerRes = intent.getIntExtra(EXTRAS_MARKER, -1)
             setMyLocSwitch(false)
             if (!(latitude == 0.0 && longitude == 0.0)) {
@@ -309,7 +308,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private fun createBitmapMarker(latLong: LatLong, markerRes: Int): Marker {
         val drawable = ContextCompat.getDrawable(this, markerRes)!!
         val bitmap = AndroidGraphicFactory.convertToBitmap(drawable)
-        return Marker(latLong, bitmap, -(bitmap.width / 2), -bitmap.height)
+        return Marker(latLong, bitmap, 0, -(bitmap.height / 2))
     }
 
     private fun onLongPress(tapLatLong: LatLong) {
@@ -769,10 +768,10 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             clusterer!!.addItem(geoItem)
         }
         clusterer!!.redraw()
-        if (!isUpdateMyLocationActive()) {
+        if (myPos == null || (myPos?.latitude == 0.0 && myPos?.longitude == 0.0)) {
             myPos = LatLong((minLat + maxLat) / 2, (minLon + maxLon) / 2)
         }
-        updatePosition(myLocSwitch == null || myLocSwitch?.isChecked == false)
+        updatePosition()
     }
 
     private fun isPendingUpload(station: Station, uploadList: List<Upload>): Boolean {
@@ -954,9 +953,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         Log.i(TAG, "LocationManager unregistered")
     }
 
-    private fun updatePosition(force: Boolean = false) {
-        // TODO: if open the map for specific station, keep location
-        if (isUpdateMyLocationActive() || force) {
+    private fun updatePosition() {
+        if (isUpdateMyLocationActive()) {
             binding.map.mapView.setCenter(myPos)
             binding.map.mapView.repaint()
         }

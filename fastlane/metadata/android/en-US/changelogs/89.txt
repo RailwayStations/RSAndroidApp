@@ -1,0 +1,1 @@
+- fix #427 remember last map position

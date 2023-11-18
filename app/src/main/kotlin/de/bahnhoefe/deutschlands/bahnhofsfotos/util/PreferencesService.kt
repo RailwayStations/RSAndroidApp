@@ -19,30 +19,27 @@ import org.mapsforge.core.model.MapPosition
 class PreferencesService(private val context: Context) {
     private val preferences: SharedPreferences =
         context.getSharedPreferences(PREF_FILE, MODE_PRIVATE)
-    private var encryptedPreferences: SharedPreferences
+    private var encryptedPreferences: SharedPreferences = try {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        EncryptedSharedPreferences.create(
+            context,
+            "secret_shared_prefs",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } catch (e: Exception) {
+        Log.w(
+            TAG,
+            "Unable to create EncryptedSharedPreferences, fallback to unencrypted preferences",
+            e
+        )
+        preferences
+    }
 
     init {
-        // Creates the instance for the encrypted preferences.
-        encryptedPreferences = try {
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-            EncryptedSharedPreferences.create(
-                context,
-                "secret_shared_prefs",
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        } catch (e: Exception) {
-            Log.w(
-                TAG,
-                "Unable to create EncryptedSharedPreferences, fallback to unencrypted preferences",
-                e
-            )
-            preferences
-        }
-
         // migrate access token from unencrypted to encrypted preferences
         if (encryptedPreferences != preferences
             && !encryptedPreferences.contains(context.getString(R.string.ACCESS_TOKEN))
@@ -67,33 +64,38 @@ class PreferencesService(private val context: Context) {
         }
 
     private fun putBoolean(key: Int, value: Boolean) {
-        val editor = preferences.edit()
-        editor.putBoolean(context.getString(key), value)
-        editor.apply()
+        with(preferences.edit()) {
+            putBoolean(context.getString(key), value)
+            apply()
+        }
     }
 
     private fun putString(key: Int, value: String?) {
-        val editor = preferences.edit()
-        editor.putString(context.getString(key), StringUtils.trimToNull(value))
-        editor.apply()
+        with(preferences.edit()) {
+            putString(context.getString(key), StringUtils.trimToNull(value))
+            apply()
+        }
     }
 
     private fun putStringSet(key: Int, value: Set<String>?) {
-        val editor = preferences.edit()
-        editor.putStringSet(context.getString(key), value)
-        editor.apply()
+        with(preferences.edit()) {
+            putStringSet(context.getString(key), value)
+            apply()
+        }
     }
 
     private fun putLong(key: Int, value: Long) {
-        val editor = preferences.edit()
-        editor.putLong(context.getString(key), value)
-        editor.apply()
+        with(preferences.edit()) {
+            putLong(context.getString(key), value)
+            apply()
+        }
     }
 
     private fun putDouble(key: Int, value: Double) {
-        val editor = preferences.edit()
-        editor.putLong(context.getString(key), java.lang.Double.doubleToRawLongBits(value))
-        editor.apply()
+        with(preferences.edit()) {
+            putLong(context.getString(key), java.lang.Double.doubleToRawLongBits(value))
+            apply()
+        }
     }
 
     private fun getDouble(key: Int): Double {
@@ -174,12 +176,13 @@ class PreferencesService(private val context: Context) {
     var accessToken: String?
         get() = encryptedPreferences.getString(context.getString(R.string.ACCESS_TOKEN), null)
         set(apiToken) {
-            val editor = encryptedPreferences.edit()
-            editor.putString(
-                context.getString(R.string.ACCESS_TOKEN),
-                StringUtils.trimToNull(apiToken)
-            )
-            editor.apply()
+            with(encryptedPreferences.edit()) {
+                putString(
+                    context.getString(R.string.ACCESS_TOKEN),
+                    StringUtils.trimToNull(apiToken)
+                )
+                apply()
+            }
         }
     var stationFilter: StationFilter
         get() {
