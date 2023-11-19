@@ -13,22 +13,22 @@ class NearbyBahnhofWithoutPhotoNotificationManager(
     countries: Set<Country>
 ) : NearbyBahnhofNotificationManager(context, station, distance, countries) {
 
-    private val fotoPendingIntent: PendingIntent
-        // helpers that create notification elements that are common to "with foto" and "without foto"
-        get() {
-            // Build an intent for an action to take a picture
-            // actually this launches UploadActivity with a specific Extra that causes it to launch
-            // Photo immediately.
-            val intent = uploadActivity
-            return pendifyMe(intent, REQUEST_FOTO)
-        }
+    /**
+     * Build an intent for an action to take a picture
+     * actually this launches UploadActivity with a specific Extra that causes it to launch
+     * Photo immediately.
+     */
+    private fun createFotoPendingIntent(): PendingIntent {
+        val intent = createUploadActivity()
+        return pendifyMe(intent, REQUEST_FOTO)
+    }
 
     /**
      * Build a notification for a station without photo. Call onNotificationReady if done.
      */
     override fun notifyUser() {
-        val notificationBuilder = basicNotificationBuilder
-        val fotoPendingIntent = fotoPendingIntent
+        val notificationBuilder = createBasicNotificationBuilder()
+        val fotoPendingIntent = createFotoPendingIntent()
         notificationBuilder
             .addAction(
                 R.drawable.ic_photo_camera_white_48px,

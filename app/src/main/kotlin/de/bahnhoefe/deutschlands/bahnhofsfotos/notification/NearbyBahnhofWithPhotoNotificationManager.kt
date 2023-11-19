@@ -43,7 +43,7 @@ class NearbyBahnhofWithPhotoNotificationManager(
         val bigPictureStyle = NotificationCompat.BigPictureStyle()
         bigPictureStyle.bigPicture(bitmap).setBigContentTitle(null)
             .setSummaryText(station.license)
-        val notificationBuilder = basicNotificationBuilder
+        val notificationBuilder = createBasicNotificationBuilder()
             .setStyle(bigPictureStyle)
             .extend(NotificationCompat.WearableExtender())
             .setVibrate(VIBRATION_PATTERN)

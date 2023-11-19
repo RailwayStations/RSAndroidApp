@@ -51,72 +51,42 @@ abstract class NearbyBahnhofNotificationManager(
         notificationManager.notify(NOTIFICATION_ID, notification!!)
     }
 
-    protected val basicNotificationBuilder: NotificationCompat.Builder
-        /**
-         * Helper method that configures a NotificationBuilder wtih the elements common to both
-         * notification types.
-         */
-        get() {
-            // Build an intent for an action to see station details
-            val detailPendingIntent = detailPendingIntent
-            // Build an intent to see the station on a map
-            val mapPendingIntent = mapPendingIntent
-            // Build an intent to view the station's timetable
-            val countryByCode = getCountryByCode(countries, station.country)
-            val timetablePendingIntent = countryByCode?.let { country: Country ->
-                getTimetablePendingIntent(
+    /**
+     * Helper method that configures a NotificationBuilder with the elements common to both
+     * notification types.
+     */
+    protected fun createBasicNotificationBuilder(): NotificationCompat.Builder {
+        val detailPendingIntent = createDetailPendingIntent()
+        val mapPendingIntent = createMapPendingIntent()
+        val timetablePendingIntent =
+            getCountryByCode(countries, station.country)?.let { country: Country ->
+                createTimetablePendingIntent(
                     country,
                     station
                 )
             }
-            createChannel(context)
+        createChannel(context)
 
-            // Texts and bigStyle
-            val textCreator = TextCreator().invoke()
-            val shortText = textCreator.shortText
-            val bigStyle = textCreator.bigStyle
-            var builder = NotificationCompat.Builder(
-                context, CHANNEL_ID
+        val textCreator = TextCreator().invoke()
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_logotrain_found)
+            .setContentTitle(context.getString(R.string.station_is_near))
+            .setContentText(textCreator.shortText)
+            .setContentIntent(detailPendingIntent)
+            .addAction(
+                R.drawable.ic_directions_white_24dp,
+                context.getString(R.string.label_map), mapPendingIntent
             )
-                .setSmallIcon(R.drawable.ic_logotrain_found)
-                .setContentTitle(context.getString(R.string.station_is_near))
-                .setContentText(shortText)
-                .setContentIntent(detailPendingIntent)
-                .addAction(
-                    R.drawable.ic_directions_white_24dp,
-                    context.getString(R.string.label_map), mapPendingIntent
-                )
-                .setStyle(bigStyle)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            if (timetablePendingIntent != null) {
-                builder.addAction(
-                    R.drawable.ic_timetable,
-                    context.getString(R.string.label_timetable),
-                    timetablePendingIntent
-                )
-            }
-            builder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_logotrain_found)
-                .setContentTitle(context.getString(R.string.station_is_near))
-                .setContentText(shortText)
-                .setContentIntent(detailPendingIntent)
-                .addAction(
-                    R.drawable.ic_directions_white_24dp,
-                    context.getString(R.string.label_map), mapPendingIntent
-                )
-                .addAction(
-                    R.drawable.ic_timetable,
-                    context.getString(R.string.label_timetable),
-                    timetablePendingIntent
-                )
-                .setStyle(bigStyle)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            return builder
-        }
+            .addAction(
+                R.drawable.ic_timetable,
+                context.getString(R.string.label_timetable),
+                timetablePendingIntent
+            )
+            .setStyle(textCreator.bigStyle)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOnlyAlertOnce(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+    }
 
     protected fun pendifyMe(intent: Intent?, requestCode: Int): PendingIntent {
         val stackBuilder = TaskStackBuilder.create(context)
@@ -131,33 +101,35 @@ abstract class NearbyBahnhofNotificationManager(
         return stackBuilder.getPendingIntent(requestCode, PendingIntent.FLAG_CANCEL_CURRENT)
     }
 
-    protected val uploadActivity: Intent
-        get() {
-            // Build an intent for an action to see station details
-            val detailIntent = Intent(context, UploadActivity::class.java)
-            detailIntent.putExtra(UploadActivity.EXTRA_STATION, station)
-            return detailIntent
-        }
-    private val detailPendingIntent: PendingIntent
-        get() = pendifyMe(uploadActivity, REQUEST_DETAIL)
-    private val mapPendingIntent: PendingIntent
-        /**
-         * Build an intent for an action to view a map.
-         *
-         * @return the PendingIntent built.
-         */
-        get() {
-            val mapIntent = Intent(Intent.ACTION_VIEW)
-            mapIntent.data = Uri.parse("geo:" + station.lat + "," + station.lon)
-            return pendifyMe(mapIntent, REQUEST_MAP)
-        }
+    /**
+     * Build an intent for an action to see station details
+     */
+    protected fun createUploadActivity(): Intent {
+        val detailIntent = Intent(context, UploadActivity::class.java)
+        detailIntent.putExtra(UploadActivity.EXTRA_STATION, station)
+        return detailIntent
+    }
+
+    /**
+     * Build an intent for an action to see station details
+     */
+    private fun createDetailPendingIntent(): PendingIntent {
+        return pendifyMe(createUploadActivity(), REQUEST_DETAIL)
+    }
+
+    /**
+     * Build an intent for an action to view a map.
+     */
+    private fun createMapPendingIntent(): PendingIntent {
+        val mapIntent = Intent(Intent.ACTION_VIEW)
+        mapIntent.data = Uri.parse("geo:" + station.lat + "," + station.lon)
+        return pendifyMe(mapIntent, REQUEST_MAP)
+    }
 
     /**
      * Build an intent for an action to view a timetable for the station.
-     *
-     * @return the PendingIntent built.
      */
-    private fun getTimetablePendingIntent(country: Country, station: Station?): PendingIntent? {
+    private fun createTimetablePendingIntent(country: Country, station: Station?): PendingIntent? {
         val timetableIntent = Timetable().createTimetableIntent(country, station)
         return if (timetableIntent != null) {
             pendifyMe(timetableIntent, REQUEST_TIMETABLE)
