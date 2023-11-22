@@ -125,7 +125,7 @@ dependencies {
     implementation("org.mapsforge:mapsforge-themes:0.20.0")
     implementation("net.sf.kxml:kxml2:2.3.0")
     implementation("com.caverock:androidsvg:1.4")
-    implementation("org.apache.commons:commons-lang3:3.13.0")
+    implementation("org.apache.commons:commons-lang3:3.14.0")
     implementation("commons-io:commons-io:20030203.000550")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
