@@ -71,7 +71,6 @@
             android:name=".UploadActivity"
             android:label="@string/title_activity_upload"
             android:launchMode="singleTask"
-            android:parentActivityName=".MainActivity"
             android:exported="false">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -1,6 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import android.app.TaskStackBuilder
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
@@ -28,7 +27,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
-import androidx.core.app.NavUtils
 import androidx.core.content.FileProvider
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -118,7 +116,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                navigateUp()
+                finish()
             }
         })
         onNewIntent(intent)
@@ -402,24 +400,11 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.share_photo)))
             }
         } else if (itemId == android.R.id.home) {
-            navigateUp()
+            finish()
         } else {
             return super.onOptionsItemSelected(item)
         }
         return true
-    }
-
-    fun navigateUp() {
-        // if MapsActivity was calling, then we don't want to rebuild the Backstack
-        val upIntent = NavUtils.getParentActivityIntent(this)
-        if (callingActivity == null && upIntent != null) {
-            upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot) {
-                TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent)
-                    .startActivities()
-            }
-        }
-        finish()
     }
 
     fun upload() {

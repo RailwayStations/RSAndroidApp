@@ -5,11 +5,13 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -103,7 +105,23 @@ class ProblemReportActivity : AppCompatActivity() {
         }
         binding.buttonReportProblem.setOnClickListener { reportProblem() }
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+            }
+        })
+
         onNewIntent(intent)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val itemId = item.itemId
+        if (itemId == android.R.id.home) {
+            finish()
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
+        return true
     }
 
     private fun setCoordsVisible(visible: Boolean) {
