@@ -37,14 +37,23 @@ object SimpleDialogs {
     fun confirmOkCancel(
         context: Context,
         message: Int,
-        listener: DialogInterface.OnClickListener?
+        okListener: DialogInterface.OnClickListener?,
+    ) {
+        confirmOkCancel(context, message, okListener, null)
+    }
+
+    fun confirmOkCancel(
+        context: Context,
+        message: Int,
+        okListener: DialogInterface.OnClickListener?,
+        cancelListener: DialogInterface.OnClickListener? = null,
     ) {
         AlertDialog.Builder(ContextThemeWrapper(context, R.style.AlertDialogCustom))
             .setIcon(R.mipmap.ic_launcher)
             .setTitle(R.string.app_name)
             .setMessage(message)
-            .setPositiveButton(R.string.button_ok_text, listener)
-            .setNegativeButton(R.string.button_cancel_text, null)
+            .setPositiveButton(R.string.button_ok_text, okListener)
+            .setNegativeButton(R.string.button_cancel_text, cancelListener)
             .create().show()
     }
 

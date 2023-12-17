@@ -319,22 +319,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             missingMarker =
                 object : Marker(tapLatLong, bitmap, -(bitmap.width / 2), -bitmap.height) {
                     override fun onTap(tapLatLong: LatLong, layerXY: Point, tapXY: Point): Boolean {
-                        SimpleDialogs.confirmOkCancel(
-                            this@MapsActivity,
-                            R.string.add_missing_station
-                        ) { _: DialogInterface?, _: Int ->
-                            val intent = Intent(this@MapsActivity, UploadActivity::class.java)
-                            intent.putExtra(
-                                UploadActivity.EXTRA_LATITUDE,
-                                latLong.latitude
-                            )
-                            intent.putExtra(
-                                UploadActivity.EXTRA_LONGITUDE,
-                                latLong.longitude
-                            )
-                            startActivity(intent)
-                        }
-                        return false
+                        return showMissingStationDialog()
                     }
                 }
             binding.map.mapView.layerManager.layers.add(missingMarker)
@@ -344,6 +329,32 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
 
         vibrationFeedbackForLongClick()
+    }
+
+    private fun Marker.showMissingStationDialog(): Boolean {
+        SimpleDialogs.confirmOkCancel(
+            this@MapsActivity,
+            R.string.add_missing_station,
+            { _: DialogInterface?, _: Int ->
+                val intent = Intent(this@MapsActivity, UploadActivity::class.java)
+                intent.putExtra(
+                    UploadActivity.EXTRA_LATITUDE,
+                    latLong.latitude
+                )
+                intent.putExtra(
+                    UploadActivity.EXTRA_LONGITUDE,
+                    latLong.longitude
+                )
+                binding.map.mapView.layerManager.layers.remove(missingMarker)
+                missingMarker = null
+                startActivity(intent)
+            })
+        { _: DialogInterface?, _: Int ->
+            binding.map.mapView.layerManager.layers.remove(missingMarker)
+            missingMarker = null
+        }
+
+        return false
     }
 
     private fun vibrationFeedbackForLongClick() {

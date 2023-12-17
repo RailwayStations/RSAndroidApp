@@ -346,7 +346,7 @@ class MyDataActivity : AppCompatActivity() {
     private fun deleteAccount() {
         SimpleDialogs.confirmOkCancel(
             this,
-            R.string.deleteAccountConfirmation
+            R.string.deleteAccountConfirmation,
         ) { _: DialogInterface?, _: Int ->
             rsapiClient.deleteAccount()
                 .enqueue(object : Callback<Void> {
