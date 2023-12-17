@@ -1,0 +1,2 @@
+- fix #441 country selection not working correctly
+- update dependencies

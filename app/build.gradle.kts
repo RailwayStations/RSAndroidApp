@@ -1,4 +1,5 @@
 import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 
 plugins {
     kotlin("kapt")
@@ -8,16 +9,17 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
-fun getGitVersionCode(): Int {
-    return try {
-        val stdout = ByteArrayOutputStream()
-        exec {
+abstract class GitVersionValueSource : ValueSource<Int, ValueSourceParameters.None> {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    override fun obtain(): Int {
+        val output = ByteArrayOutputStream()
+        execOperations.exec {
             commandLine("git", "rev-list", "HEAD", "--count")
-            standardOutput = stdout
+            standardOutput = output
         }
-        Integer.valueOf(stdout.toString().trim())
-    } catch (ignored: Exception) {
-        0
+        return Integer.valueOf(String(output.toByteArray(), Charset.defaultCharset()).trim())
     }
 }
 
@@ -39,8 +41,8 @@ android {
         compileSdk = 34
         minSdk = 26
         targetSdk = 34
-        versionCode = 89
-        versionName = "15.0.4"
+        versionCode = 90
+        versionName = "15.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -86,11 +88,14 @@ android {
         abortOnError = false
     }
 
+    val gitVersionProvider = providers.of(GitVersionValueSource::class) {}
+    val gitVersion = gitVersionProvider.get()
+
     applicationVariants.all {
         if (name == "nightly") {
             outputs.forEach { output ->
                 output as com.android.build.gradle.internal.api.ApkVariantOutputImpl
-                output.versionCodeOverride = getGitVersionCode()
+                output.versionCodeOverride = gitVersion
                 output.versionNameOverride = "${applicationId}_${output.versionCode}"
                 output.outputFileName = "${applicationId}_${versionCode}.apk"
             }
@@ -132,8 +137,8 @@ dependencies {
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.browser:browser:1.6.0")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.browser:browser:1.7.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")

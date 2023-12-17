@@ -26,10 +26,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.UPLOADS
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
 import org.apache.commons.lang3.StringUtils
 import java.text.Normalizer
-import java.util.Arrays
 import java.util.function.Consumer
 import java.util.function.Predicate
-import java.util.stream.Collectors
 import kotlin.math.cos
 import kotlin.math.pow
 
@@ -167,21 +165,6 @@ class DbAdapter(private val context: Context) {
         }
         return orderBy
     }
-
-    val countryList: Cursor?
-        get() {
-            val selectCountries =
-                "SELECT " + COUNTRIES.ROWID_COUNTRIES + " AS " + Constants.CURSOR_ADAPTER_ID + ", " +
-                        COUNTRIES.COUNTRYSHORTCODE + ", " + COUNTRIES.COUNTRYNAME +
-                        " FROM " + DATABASE_TABLE_COUNTRIES + " ORDER BY " + COUNTRIES.COUNTRYNAME + " ASC"
-            Log.d(TAG, selectCountries)
-            val cursor = db.rawQuery(selectCountries, null)
-            if (!cursor.moveToFirst()) {
-                cursor.close()
-                return null
-            }
-            return cursor
-        }
 
     /**
      * Return a cursor on station ids where the station's title matches the given string
@@ -370,10 +353,9 @@ class DbAdapter(private val context: Context) {
 
     private fun getUploadWhereClause(predicate: Predicate<UploadState>): String {
         return UPLOADS.UPLOAD_STATE + " IN (" +
-                Arrays.stream(UploadState.values())
-                    .filter(predicate)
-                    .map { s: UploadState -> "'" + s.name + "'" }
-                    .collect(Collectors.joining(",")) +
+                UploadState.entries
+                    .filter(predicate::test)
+                    .joinToString(",") { s: UploadState -> "'" + s.name + "'" } +
                 ')'
     }
 
@@ -773,10 +755,11 @@ class DbAdapter(private val context: Context) {
         return stationList
     }
 
-    val allCountries: Set<Country>
+    val allCountries: List<Country>
         get() {
-            val countryList = HashSet<Country>()
-            val query = "SELECT * FROM $DATABASE_TABLE_COUNTRIES"
+            val countryList = ArrayList<Country>()
+            val query =
+                "SELECT * FROM $DATABASE_TABLE_COUNTRIES ORDER BY ${COUNTRIES.COUNTRYSHORTCODE}"
             Log.d(TAG, query)
             db.rawQuery(query, null).use { cursor ->
                 if (cursor.moveToFirst()) {
