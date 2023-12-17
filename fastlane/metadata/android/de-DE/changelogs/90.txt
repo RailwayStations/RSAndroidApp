@@ -1,3 +1,4 @@
 - fix #441 Länderauswahl korrigiert
 - fix #439 Abbrechen entfernt den fehlenden Bahnhof Marker
+- fix #440 zurück vom Problembericht korrigiert
 - Abhängigkeiten aktualisiert

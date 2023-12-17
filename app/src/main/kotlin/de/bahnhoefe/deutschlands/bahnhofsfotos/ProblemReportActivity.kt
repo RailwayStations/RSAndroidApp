@@ -1,6 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos
 
-import android.app.TaskStackBuilder
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
@@ -11,9 +10,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NavUtils
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ReportProblemBinding
@@ -60,7 +57,7 @@ class ProblemReportActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         problemTypes.add(getString(R.string.problem_please_specify))
-        for (type in ProblemType.values()) {
+        for (type in ProblemType.entries) {
             problemTypes.add(getString(type.messageId))
         }
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, problemTypes)
@@ -74,7 +71,7 @@ class ProblemReportActivity : AppCompatActivity() {
                 id: Long
             ) {
                 if (position > 0) {
-                    val type = ProblemType.values()[position - 1]
+                    val type = ProblemType.entries[position - 1]
                     setCoordsVisible(type === ProblemType.WRONG_LOCATION)
                     setTitleVisible(type === ProblemType.WRONG_NAME)
                 } else {
@@ -105,12 +102,6 @@ class ProblemReportActivity : AppCompatActivity() {
             return
         }
         binding.buttonReportProblem.setOnClickListener { reportProblem() }
-
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                navigateUp()
-            }
-        })
 
         onNewIntent(intent)
     }
@@ -169,7 +160,7 @@ class ProblemReportActivity : AppCompatActivity() {
             ).show()
             return
         }
-        val type = ProblemType.values()[selectedType - 1]
+        val type = ProblemType.entries[selectedType - 1]
         val comment = binding.etProblemComment.text.toString()
         if (StringUtils.isBlank(comment)) {
             Toast.makeText(
@@ -334,21 +325,6 @@ class ProblemReportActivity : AppCompatActivity() {
                     Log.e(TAG, "Error retrieving upload state", t)
                 }
             })
-    }
-
-    private fun navigateUp() {
-        val callingActivity =
-            callingActivity // if MapsActivity was calling, then we don't want to rebuild the Backstack
-        if (callingActivity == null) {
-            val upIntent = NavUtils.getParentActivityIntent(this)!!
-            upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            if (NavUtils.shouldUpRecreateTask(this, upIntent) || isTaskRoot) {
-                Log.v(TAG, "Recreate back stack")
-                TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent)
-                    .startActivities()
-            }
-        }
-        finish()
     }
 
     companion object {

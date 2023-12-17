@@ -108,8 +108,7 @@
         </activity>
         <activity
             android:name=".ProblemReportActivity"
-            android:label="@string/title_activity_problem_report"
-            android:parentActivityName=".MainActivity">
+            android:label="@string/title_activity_problem_report">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
