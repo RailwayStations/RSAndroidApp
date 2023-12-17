@@ -35,9 +35,9 @@ class CountryActivity : AppCompatActivity() {
             previousSelectedCountries.toMutableSet()
         )
         binding.lstCountries.adapter = countryAdapter
-        binding.lstCountries.setOnItemClickListener { listview, view, position, id ->
+        binding.lstCountries.setOnItemClickListener { _, view, _, _ ->
             val itemBinding: ItemCountryBinding = view.tag as ItemCountryBinding
-            itemBinding.checkCountry.setChecked(!itemBinding.checkCountry.isChecked())
+            itemBinding.checkCountry.isChecked = !itemBinding.checkCountry.isChecked
             itemBinding.checkCountry.callOnClick()
         }
     }
