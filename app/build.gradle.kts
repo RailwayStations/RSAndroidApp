@@ -154,7 +154,7 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
-    testImplementation("org.assertj:assertj-core:3.25.1")
+    testImplementation("org.assertj:assertj-core:3.25.2")
     testImplementation("io.mockk:mockk:1.13.9")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
@@ -165,7 +165,7 @@ dependencies {
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.4.0")
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     androidTestImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
-    androidTestImplementation("org.assertj:assertj-core:3.25.1")
+    androidTestImplementation("org.assertj:assertj-core:3.25.2")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.4.0")
 
 }
