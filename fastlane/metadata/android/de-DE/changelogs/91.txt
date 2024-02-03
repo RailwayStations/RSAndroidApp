@@ -1,0 +1,2 @@
+- Fix #450 Timeouts beim Upload verbessert
+- Abhängigkeiten aktualisiert

@@ -37,6 +37,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.security.NoSuchAlgorithmException
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Consumer
@@ -79,23 +80,37 @@ class RSAPIClient(
         get() = pkce?.codeVerifier
 
     private fun createRSAPI(): RSAPI {
-        val gson = GsonBuilder()
-        gson.registerTypeAdapter(HighScore::class.java, HighScoreDeserializer())
-        gson.registerTypeAdapter(License::class.java, LicenseDeserializer())
+        val retrofit = Retrofit.Builder()
+            .baseUrl(preferencesService.apiUrl)
+            .client(createOkHttpClient())
+            .addConverterFactory(createGsonConverterFactory())
+            .build()
+
+        return retrofit.create(RSAPI::class.java)
+    }
+
+    private fun createOkHttpClient(): OkHttpClient {
         val builder: OkHttpClient.Builder = OkHttpClient.Builder()
             .addInterceptor(UserAgentInterceptor())
             .addInterceptor(AcceptLanguageInterceptor())
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
             builder.addInterceptor(loggingInterceptor)
         }
-        val retrofit = Retrofit.Builder()
-            .baseUrl(preferencesService.apiUrl)
-            .client(builder.build())
-            .addConverterFactory(GsonConverterFactory.create(gson.create()))
-            .build()
-        return retrofit.create(RSAPI::class.java)
+
+        return builder.build()
+    }
+
+    private fun createGsonConverterFactory(): GsonConverterFactory {
+        val gson = GsonBuilder()
+        gson.registerTypeAdapter(HighScore::class.java, HighScoreDeserializer())
+        gson.registerTypeAdapter(License::class.java, LicenseDeserializer())
+        return GsonConverterFactory.create(gson.create())
     }
 
     private class AcceptLanguageInterceptor : Interceptor {
