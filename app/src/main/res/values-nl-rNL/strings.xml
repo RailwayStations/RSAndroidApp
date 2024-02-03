@@ -326,4 +326,6 @@
     <string name="corrected_station_title">Gecorrigeerde stationsnaam</string>
     <string name="corrected_station_coords">Gecorrigeerde stationscoördinaten</string>
     <string name="problem_duplicate">Duplicate</string>
+    <string name="upload_review">Successfully submitted, your contribution will be reviewed.</string>
+    <string name="upload_error">Submitting your contribution failed: %1s</string>
 </resources>

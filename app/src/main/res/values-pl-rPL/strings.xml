@@ -329,4 +329,6 @@
     <string name="corrected_station_title">Corrected station title</string>
     <string name="corrected_station_coords">Corrected station coords</string>
     <string name="problem_duplicate">Duplicate</string>
+    <string name="upload_review">Successfully submitted, your contribution will be reviewed.</string>
+    <string name="upload_error">Submitting your contribution failed: %1s</string>
 </resources>
