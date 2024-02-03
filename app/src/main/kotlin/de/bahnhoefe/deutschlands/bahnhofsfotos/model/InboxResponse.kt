@@ -26,7 +26,7 @@ data class InboxResponse @JvmOverloads constructor(
     @JsonAdapter(InboxResponseState.Serializer::class)
     enum class InboxResponseState(val messageId: Int, val uploadState: UploadState) {
         REVIEW(
-            R.string.upload_completed,
+            R.string.upload_review,
             UploadState.REVIEW
         ),
         LAT_LON_OUT_OF_RANGE(
@@ -46,7 +46,7 @@ data class InboxResponse @JvmOverloads constructor(
         CONFLICT(R.string.upload_conflict, UploadState.CONFLICT), UNAUTHORIZED(
             R.string.authorization_failed, UploadState.UNKNOWN
         ),
-        ERROR(R.string.upload_failed, UploadState.UNKNOWN);
+        ERROR(R.string.upload_error, UploadState.UNKNOWN);
 
         internal class Serializer : JsonDeserializer<InboxResponseState> {
             override fun deserialize(
