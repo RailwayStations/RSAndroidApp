@@ -1,2 +1,4 @@
+- Neu: Beiträge können nun zurückgezogen werden (Löschen aus dem Ausgangskorb)
 - Fix #450 Timeouts beim Upload verbessert
 - Abhängigkeiten aktualisiert
+- Übersetzungen aktualisiert

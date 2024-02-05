@@ -55,7 +55,6 @@ class OutboxActivity : AppCompatActivity() {
         adapter = OutboxAdapter(this@OutboxActivity, dbAdapter.outbox)
         binding.lstUploads.adapter = adapter
 
-        // item click
         binding.lstUploads.onItemClickListener =
             OnItemClickListener { _: AdapterView<*>?, _: View?, _: Int, id: Long ->
                 val upload = dbAdapter.getUploadById(id)
@@ -71,24 +70,17 @@ class OutboxActivity : AppCompatActivity() {
             }
         binding.lstUploads.onItemLongClickListener =
             OnItemLongClickListener { _: AdapterView<*>?, _: View?, _: Int, id: Long ->
-                val uploadId = id.toString()
-                SimpleDialogs.confirmOkCancel(
-                    this@OutboxActivity,
-                    resources.getString(R.string.delete_upload, uploadId)
-                ) { _: DialogInterface?, _: Int ->
-                    dbAdapter.deleteUpload(id)
-                    FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, id))
-                    adapter.changeCursor(dbAdapter.outbox)
-                }
+                dbAdapter.getUploadById(id)?.let { deleteUploadEntry(it) }
                 true
             }
+
         val query = dbAdapter.getPendingUploads(true)
             .map { upload: Upload? ->
                 InboxStateQuery(
                     upload!!.remoteId
                 )
             }
-            .toList()
+
         rsapiClient.queryUploadState(query)
             .enqueue(object : Callback<List<InboxStateQuery>> {
                 override fun onResponse(
@@ -124,6 +116,62 @@ class OutboxActivity : AppCompatActivity() {
                     ).show()
                 }
             })
+    }
+
+    private fun deleteUploadEntry(upload: Upload) {
+        val remoteDelete = (upload.remoteId != null && upload.uploadState.isPending)
+        val message =
+            if (remoteDelete) {
+                getString(R.string.delete_outbox_entry_remote, upload.remoteId)
+            } else {
+                getString(R.string.delete_outbox_entry_local, upload.id)
+            }
+
+        SimpleDialogs.confirmOkCancel(this@OutboxActivity, message) { _: DialogInterface?, _: Int ->
+            if (remoteDelete) {
+                rsapiClient.deleteInboxEntry(upload.remoteId!!).enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) {
+                            deleteUploadEntryLocally(upload.id!!)
+                        } else if (response.code() == 401) {
+                            rsapiClient.clearToken()
+                            Toast.makeText(
+                                this@OutboxActivity,
+                                R.string.authorization_failed,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                this@OutboxActivity,
+                                getString(
+                                    R.string.error_deleting_inbox_entry,
+                                    "${response.code()}: ${response.message()}"
+                                ),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Log.e(TAG, "Error deleting remote inbox entry", t)
+                        Toast.makeText(
+                            this@OutboxActivity,
+                            getString(R.string.error_deleting_inbox_entry, t.message),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                })
+            } else {
+                deleteUploadEntryLocally(upload.id!!)
+            }
+        }
+    }
+
+    private fun deleteUploadEntryLocally(id: Long) {
+        dbAdapter.deleteUpload(id)
+        FileUtils.deleteQuietly(FileUtils.getStoredMediaFile(this, id))
+        adapter.changeCursor(dbAdapter.outbox)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {

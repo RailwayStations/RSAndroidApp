@@ -1,2 +1,4 @@
+- new: possibility to withdraw your contribution (delete from outbox)
 - fix #450 improve upload timeouts
 - update dependencies
+- update translations

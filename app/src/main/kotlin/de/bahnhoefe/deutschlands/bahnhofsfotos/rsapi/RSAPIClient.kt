@@ -270,6 +270,10 @@ class RSAPIClient(
         return api.queryUploadState(userAuthorization!!, stateQueries)
     }
 
+    fun deleteInboxEntry(id: Long): Call<Void> {
+        return api.deleteInboxEntry(userAuthorization!!, id)
+    }
+
     fun getProfile(): Call<Profile> {
         return api.getProfile(userAuthorization!!)
     }

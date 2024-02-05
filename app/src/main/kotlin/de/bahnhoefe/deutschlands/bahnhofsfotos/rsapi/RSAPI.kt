@@ -74,6 +74,12 @@ interface RSAPI {
         @Body inboxStateQueries: List<InboxStateQuery>
     ): Call<List<InboxStateQuery>>
 
+    @DELETE("/userInbox/{id}")
+    fun deleteInboxEntry(
+        @Header("Authorization") authorization: String,
+        @Path("id") id: Long
+    ): Call<Void>
+
     @Headers("Content-Type: application/json")
     @POST("/reportProblem")
     fun reportProblem(
