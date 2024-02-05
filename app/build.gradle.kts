@@ -152,7 +152,7 @@ dependencies {
 
     kapt("com.google.dagger:hilt-android-compiler:2.50")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
     testImplementation("org.assertj:assertj-core:3.25.3")
     testImplementation("io.mockk:mockk:1.13.9")
@@ -163,7 +163,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.4.0")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     androidTestImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
     androidTestImplementation("org.assertj:assertj-core:3.25.3")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.4.0")
