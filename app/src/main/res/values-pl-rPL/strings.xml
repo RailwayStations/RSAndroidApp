@@ -331,4 +331,7 @@
     <string name="problem_duplicate">Duplicate</string>
     <string name="upload_review">Successfully submitted, your contribution will be reviewed.</string>
     <string name="upload_error">Submitting your contribution failed: %1s</string>
+    <string name="delete_outbox_entry_remote">Do you want to withdraw your contribution and delete entry %1d?</string>
+    <string name="delete_outbox_entry_local">Delete entry %1d locally?</string>
+    <string name="error_deleting_inbox_entry">Failed to delete item: %1s</string>
 </resources>
