@@ -325,6 +325,9 @@
     <string name="corrected_station_title">Korrigierter Bahnhofsname</string>
     <string name="corrected_station_coords">Korrigierte Bahnhofskoordinaten</string>
     <string name="problem_duplicate">Duplikat</string>
-    <string name="upload_review">Successfully submitted, your contribution will be reviewed.</string>
-    <string name="upload_error">Submitting your contribution failed: %1s</string>
+    <string name="upload_review">Erfolgreich eingereicht, dein Beitrag wird überprüft.</string>
+    <string name="upload_error">Dein Beitrag konnte nicht übermittelt werden: %1s</string>
+    <string name="delete_outbox_entry_remote">Do you want to withdraw your contribution and delete entry %1d?</string>
+    <string name="delete_outbox_entry_local">Delete entry %1d locally?</string>
+    <string name="error_deleting_inbox_entry">Failed to delete item: %1s</string>
 </resources>
