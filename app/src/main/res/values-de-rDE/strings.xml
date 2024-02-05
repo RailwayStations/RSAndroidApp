@@ -327,7 +327,7 @@
     <string name="problem_duplicate">Duplikat</string>
     <string name="upload_review">Erfolgreich eingereicht, dein Beitrag wird überprüft.</string>
     <string name="upload_error">Dein Beitrag konnte nicht übermittelt werden: %1s</string>
-    <string name="delete_outbox_entry_remote">Do you want to withdraw your contribution and delete entry %1d?</string>
-    <string name="delete_outbox_entry_local">Delete entry %1d locally?</string>
-    <string name="error_deleting_inbox_entry">Failed to delete item: %1s</string>
+    <string name="delete_outbox_entry_remote">Möchtest du deinen Beitrag %1d zurückziehen und löschen?</string>
+    <string name="delete_outbox_entry_local">Eintrag %1d lokal löschen?</string>
+    <string name="error_deleting_inbox_entry">Löschen fehlgeschlagen: %1s</string>
 </resources>
