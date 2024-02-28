@@ -148,7 +148,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("de.hdodenhof:circleimageview:3.1.0")
-    implementation("com.google.dagger:hilt-android:2.50")
+    implementation("com.google.dagger:hilt-android:2.51")
 
     kapt("com.google.dagger:hilt-android-compiler:2.51")
 
