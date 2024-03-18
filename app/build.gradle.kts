@@ -122,7 +122,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("org.mapsforge:mapsforge-map-reader:0.20.0")
-    implementation("org.mapsforge:mapsforge-core:0.20.0")
+    implementation("org.mapsforge:mapsforge-core:0.21.0")
     implementation("org.mapsforge:mapsforge-themes:0.20.0")
     implementation("org.mapsforge:mapsforge-map:0.20.0")
     implementation("org.mapsforge:mapsforge-map-android:0.20.0")
