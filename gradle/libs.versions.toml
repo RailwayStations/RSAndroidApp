@@ -1,6 +1,6 @@
 [versions]
 androidGradlePlugin = "8.3.1"
-androidJunit5 = "1.8.2.1"
+androidJunit5 = "1.10.0.0"
 androidTestRunner = "1.4.0"
 androidTestCore = "1.4.0"
 assertjCore = "3.25.3"
