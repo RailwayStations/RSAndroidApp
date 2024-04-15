@@ -286,7 +286,7 @@
     <string name="country_al">Albanië</string>
     <string name="country_at">Oostenrijk</string>
     <string name="country_au">Australië</string>
-    <string name="country_ba">Bosnia and Herzegovina</string>
+    <string name="country_ba">Bosnië en Herzegovina</string>
     <string name="country_be">België</string>
     <string name="country_ca">Canada</string>
     <string name="country_ch">Zwitserland</string>
@@ -325,10 +325,10 @@
     <string name="problem_please_provide_corrected_title">Geef een gecorrigeerde naam van het station</string>
     <string name="corrected_station_title">Gecorrigeerde stationsnaam</string>
     <string name="corrected_station_coords">Gecorrigeerde stationscoördinaten</string>
-    <string name="problem_duplicate">Duplicate</string>
-    <string name="upload_review">Successfully submitted, your contribution will be reviewed.</string>
-    <string name="upload_error">Submitting your contribution failed: %1s</string>
+    <string name="problem_duplicate">Dupliceren</string>
+    <string name="upload_review">Succesvol ingediend, je bijdrage wordt nagekeken.</string>
+    <string name="upload_error">Het indienen van je bijdrage is mislukt: %1s</string>
     <string name="delete_outbox_entry_remote">Do you want to withdraw your contribution and delete entry %1d?</string>
     <string name="delete_outbox_entry_local">Delete entry %1d locally?</string>
-    <string name="error_deleting_inbox_entry">Failed to delete item: %1s</string>
+    <string name="error_deleting_inbox_entry">Fout bij het verwijderen van item: %1s</string>
 </resources>
