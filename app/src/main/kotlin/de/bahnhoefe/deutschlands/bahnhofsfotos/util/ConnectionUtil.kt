@@ -10,7 +10,7 @@ object ConnectionUtil {
     fun checkInternetConnection(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val currentNetwork = connectivityManager.getActiveNetwork()
+        val currentNetwork = connectivityManager.activeNetwork
         val isConnected = connectivityManager.getNetworkCapabilities(currentNetwork)
             ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         if (isConnected == false) {

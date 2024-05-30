@@ -33,6 +33,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
 
+private val TAG = ProblemReportActivity::class.java.simpleName
+const val EXTRA_PROBLEM_UPLOAD = "EXTRA_PROBLEM_UPLOAD"
+const val EXTRA_PROBLEM_STATION = "EXTRA_PROBLEM_STATION"
+const val EXTRA_PROBLEM_PHOTO_ID = "EXTRA_PROBLEM_PHOTO_ID"
+
 @AndroidEntryPoint
 class ProblemReportActivity : AppCompatActivity() {
 
@@ -137,17 +142,17 @@ class ProblemReportActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.hasExtra(EXTRA_PHOTO_ID)) {
-            photoId = intent.getLongExtra(EXTRA_PHOTO_ID, -1)
+        if (intent.hasExtra(EXTRA_PROBLEM_PHOTO_ID)) {
+            photoId = intent.getLongExtra(EXTRA_PROBLEM_PHOTO_ID, -1)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            upload = intent.getSerializableExtra(EXTRA_UPLOAD, Upload::class.java)
-            station = intent.getSerializableExtra(EXTRA_STATION, Station::class.java)
+            upload = intent.getSerializableExtra(EXTRA_PROBLEM_UPLOAD, Upload::class.java)
+            station = intent.getSerializableExtra(EXTRA_PROBLEM_STATION, Station::class.java)
         } else {
             @Suppress("DEPRECATION")
-            upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
+            upload = intent.getSerializableExtra(EXTRA_PROBLEM_UPLOAD) as Upload?
             @Suppress("DEPRECATION")
-            station = intent.getSerializableExtra(EXTRA_STATION) as Station?
+            station = intent.getSerializableExtra(EXTRA_PROBLEM_STATION) as Station?
         }
         if (upload != null && upload!!.isProblemReport) {
             binding.etProblemComment.setText(upload!!.comment)
@@ -343,12 +348,5 @@ class ProblemReportActivity : AppCompatActivity() {
                     Log.e(TAG, "Error retrieving upload state", t)
                 }
             })
-    }
-
-    companion object {
-        private val TAG = ProblemReportActivity::class.java.simpleName
-        const val EXTRA_UPLOAD = "EXTRA_UPLOAD"
-        const val EXTRA_STATION = "EXTRA_STATION"
-        const val EXTRA_PHOTO_ID = "EXTRA_PHOTO_ID"
     }
 }

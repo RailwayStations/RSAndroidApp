@@ -5,21 +5,23 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
+
+private val TAG = BitmapDownloader::class.java.simpleName
 
 /**
  * Helper class to download image in background
  */
 class BitmapDownloader(
-    private val url: URL,
+    private val uri: URI,
     private val bitmapAvailableHandler: BitmapAvailableHandler,
 ) : Thread() {
 
     override fun run() {
         var bitmap: Bitmap? = null
+        Log.i(TAG, "Fetching Bitmap from URI: $uri")
         try {
-            Log.i(TAG, "Fetching Bitmap from URL: $url")
-            val httpConnection = url.openConnection() as HttpURLConnection
+            val httpConnection = uri.toURL().openConnection() as HttpURLConnection
             httpConnection.inputStream.use { `is` ->
                 if (httpConnection.responseCode == HttpURLConnection.HTTP_OK) {
                     val contentType = httpConnection.contentType
@@ -39,10 +41,6 @@ class BitmapDownloader(
             bitmap = null
         }
         bitmapAvailableHandler.onBitmapAvailable(bitmap)
-    }
-
-    companion object {
-        private val TAG = BitmapDownloader::class.java.simpleName
     }
 
 }

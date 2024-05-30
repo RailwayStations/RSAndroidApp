@@ -13,12 +13,19 @@ import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import de.bahnhoefe.deutschlands.bahnhofsfotos.EXTRA_UPLOAD_STATION
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country.Companion.getCountryByCode
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.getCountryByCode
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Timetable
+
+private const val NOTIFICATION_ID = 1
+private const val REQUEST_MAP = 0x10
+private const val REQUEST_DETAIL = 0x20
+private const val REQUEST_TIMETABLE = 0x30
+const val CHANNEL_ID = "bahnhoefe_channel_01" // The id of the channel.
 
 abstract class NearbyBahnhofNotificationManager(
     val context: Context,
@@ -59,11 +66,8 @@ abstract class NearbyBahnhofNotificationManager(
         val detailPendingIntent = createDetailPendingIntent()
         val mapPendingIntent = createMapPendingIntent()
         val timetablePendingIntent =
-            getCountryByCode(countries, station.country)?.let { country: Country ->
-                createTimetablePendingIntent(
-                    country,
-                    station
-                )
+            getCountryByCode(countries, station.country)?.let {
+                createTimetablePendingIntent(it, station)
             }
         createChannel(context)
 
@@ -75,7 +79,8 @@ abstract class NearbyBahnhofNotificationManager(
             .setContentIntent(detailPendingIntent)
             .addAction(
                 R.drawable.ic_directions_white_24dp,
-                context.getString(R.string.label_map), mapPendingIntent
+                context.getString(R.string.label_map),
+                mapPendingIntent
             )
             .addAction(
                 R.drawable.ic_timetable,
@@ -106,7 +111,7 @@ abstract class NearbyBahnhofNotificationManager(
      */
     protected fun createUploadActivity(): Intent {
         val detailIntent = Intent(context, UploadActivity::class.java)
-        detailIntent.putExtra(UploadActivity.EXTRA_STATION, station)
+        detailIntent.putExtra(EXTRA_UPLOAD_STATION, station)
         return detailIntent
     }
 
@@ -164,22 +169,16 @@ abstract class NearbyBahnhofNotificationManager(
         }
     }
 
-    companion object {
-        private const val NOTIFICATION_ID = 1
-        private const val REQUEST_MAP = 0x10
-        private const val REQUEST_DETAIL = 0x20
-        private const val REQUEST_TIMETABLE = 0x30
-        const val CHANNEL_ID = "bahnhoefe_channel_01" // The id of the channel.
-        fun createChannel(context: Context?) {
-            val notificationManager =
-                context!!.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(
-                NotificationChannel(
-                    CHANNEL_ID, context.getString(
-                        R.string.channel_name
-                    ), NotificationManager.IMPORTANCE_DEFAULT
-                )
-            )
-        }
-    }
+}
+
+fun createChannel(context: Context?) {
+    val notificationManager =
+        context!!.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.createNotificationChannel(
+        NotificationChannel(
+            CHANNEL_ID, context.getString(
+                R.string.channel_name
+            ), NotificationManager.IMPORTANCE_DEFAULT
+        )
+    )
 }

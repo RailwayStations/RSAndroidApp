@@ -17,7 +17,7 @@ data class Country @JvmOverloads constructor(
     }
 
     val compatibleProviderApps: List<ProviderApp>
-        get() = ProviderApp.getCompatibleProviderApps(providerApps)
+        get() = getCompatibleProviderApps(providerApps)
 
     override fun toString(): String {
         return name
@@ -36,15 +36,7 @@ data class Country @JvmOverloads constructor(
     override fun hashCode(): Int {
         return code.hashCode()
     }
-
-    companion object {
-        @JvmStatic
-        fun getCountryByCode(
-            countries: Collection<Country>,
-            countryCode: String?
-        ): Country? {
-            return countries
-                .firstOrNull { country: Country -> country.code == countryCode }
-        }
-    }
 }
+
+fun getCountryByCode(countries: Collection<Country>, countryCode: String?) = countries
+    .firstOrNull { country: Country -> country.code == countryCode }

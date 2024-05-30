@@ -8,7 +8,7 @@ object Constants {
     /**
      * Columns of Stations table
      */
-    object STATIONS {
+    object Stations {
         const val ROWID = "rowid"
         const val ID = "id"
         const val TITLE = "title"
@@ -30,7 +30,7 @@ object Constants {
     /**
      * Columns of Countries table
      */
-    object COUNTRIES {
+    object Countries {
         const val COUNTRYNAME = "country"
         const val COUNTRYSHORTCODE = "countryflag"
         const val EMAIL = "mail"
@@ -42,7 +42,7 @@ object Constants {
     /**
      * Columns of ProviderApps table
      */
-    object PROVIDER_APPS {
+    object ProviderApps {
         const val COUNTRYSHORTCODE = "countryflag"
         const val PA_TYPE = "type"
         const val PA_NAME = "name"
@@ -52,7 +52,7 @@ object Constants {
     /**
      * Columns of Uploads table
      */
-    object UPLOADS {
+    object Uploads {
         const val ID = "id"
         const val REMOTE_ID = "remoteId"
         const val TITLE = "title"

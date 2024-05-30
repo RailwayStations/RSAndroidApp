@@ -3,6 +3,9 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import de.bahnhoefe.deutschlands.bahnhofsfotos.EXTRAS_MAPS_LATITUDE
+import de.bahnhoefe.deutschlands.bahnhofsfotos.EXTRAS_MAPS_LONGITUDE
+import de.bahnhoefe.deutschlands.bahnhofsfotos.EXTRAS_MAPS_MARKER
 import de.bahnhoefe.deutschlands.bahnhofsfotos.MapsActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 
@@ -39,9 +42,9 @@ enum class NavItem(val textRes: Int, val iconRes: Int, private val uriTemplate: 
             markerRes: Int
         ): Intent {
             val intent = Intent(packageContext, MapsActivity::class.java)
-            intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat)
-            intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon)
-            intent.putExtra(MapsActivity.EXTRAS_MARKER, markerRes)
+            intent.putExtra(EXTRAS_MAPS_LATITUDE, lat)
+            intent.putExtra(EXTRAS_MAPS_LONGITUDE, lon)
+            intent.putExtra(EXTRAS_MAPS_MARKER, markerRes)
             return intent
         }
     };
@@ -52,8 +55,5 @@ enum class NavItem(val textRes: Int, val iconRes: Int, private val uriTemplate: 
         lon: Double,
         text: String?,
         markerRes: Int
-    ): Intent {
-        val uriString = String.format(uriTemplate!!, lat, lon, text)
-        return Intent(Intent.ACTION_VIEW, Uri.parse(uriString))
-    }
+    ) = Intent(Intent.ACTION_VIEW, Uri.parse(String.format(uriTemplate!!, lat, lon, text)))
 }

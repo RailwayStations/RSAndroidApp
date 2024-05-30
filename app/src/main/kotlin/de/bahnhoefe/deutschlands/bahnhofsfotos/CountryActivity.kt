@@ -20,7 +20,7 @@ class CountryActivity : AppCompatActivity() {
     @Inject
     lateinit var preferencesService: PreferencesService
 
-    lateinit var previousSelectedCountries: Set<String>
+    private lateinit var previousSelectedCountries: Set<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

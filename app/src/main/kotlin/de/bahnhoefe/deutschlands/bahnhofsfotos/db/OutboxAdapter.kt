@@ -13,7 +13,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemUploadBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProblemType
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.UPLOADS
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.Uploads
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
 
 class OutboxAdapter(private val activity: Activity, uploadCursor: Cursor?) : CursorAdapter(
@@ -31,15 +31,15 @@ class OutboxAdapter(private val activity: Activity, uploadCursor: Cursor?) : Cur
     override fun bindView(view: View, context: Context, cursor: Cursor) {
         val binding = view.tag as ItemUploadBinding
         val id = cursor.getLong(cursor.getColumnIndexOrThrow(Constants.CURSOR_ADAPTER_ID))
-        val remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(UPLOADS.REMOTE_ID))
-        val stationId = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.STATION_ID))
-        val uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.TITLE))
+        val remoteId = cursor.getLong(cursor.getColumnIndexOrThrow(Uploads.REMOTE_ID))
+        val stationId = cursor.getString(cursor.getColumnIndexOrThrow(Uploads.STATION_ID))
+        val uploadTitle = cursor.getString(cursor.getColumnIndexOrThrow(Uploads.TITLE))
         val stationTitle =
-            cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.JOIN_STATION_TITLE))
-        val problemType = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.PROBLEM_TYPE))
-        val uploadStateStr = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.UPLOAD_STATE))
-        val comment = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.COMMENT))
-        val rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.REJECTED_REASON))
+            cursor.getString(cursor.getColumnIndexOrThrow(Uploads.JOIN_STATION_TITLE))
+        val problemType = cursor.getString(cursor.getColumnIndexOrThrow(Uploads.PROBLEM_TYPE))
+        val uploadStateStr = cursor.getString(cursor.getColumnIndexOrThrow(Uploads.UPLOAD_STATE))
+        val comment = cursor.getString(cursor.getColumnIndexOrThrow(Uploads.COMMENT))
+        val rejectReason = cursor.getString(cursor.getColumnIndexOrThrow(Uploads.REJECTED_REASON))
         val uploadState = UploadState.valueOf(uploadStateStr)
         val textState =
             id.toString() + (if (remoteId > 0) "/$remoteId" else "") + ": " + context.getString(

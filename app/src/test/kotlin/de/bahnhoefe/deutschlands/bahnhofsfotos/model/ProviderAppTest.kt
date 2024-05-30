@@ -1,7 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp.Companion.getCompatibleProviderApps
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp.Companion.hasCompatibleProviderApps
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest

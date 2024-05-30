@@ -3,30 +3,31 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos.util
 import android.graphics.Bitmap
 import android.util.Log
 import java.net.MalformedURLException
-import java.net.URL
+import java.net.URI
 import java.util.function.Consumer
+
+private val TAG = BitmapCache::class.java.simpleName
 
 /**
  * A cache for station photos.
  */
-class BitmapCache private constructor() {
+object BitmapCache {
 
-    private val requests: MutableMap<URL, MutableCollection<BitmapAvailableHandler>> =
-        mutableMapOf()
-    private val cache: MutableMap<URL, Bitmap> = mutableMapOf()
+    private val requests = mutableMapOf<URI, MutableCollection<BitmapAvailableHandler>>()
+    private val cache = mutableMapOf<URI, Bitmap>()
 
     /**
      * Get a picture for the given URL, either from cache or by downloading.
      * The fetching happens asynchronously. When finished, the provided callback interface is called.
      *
-     * @param resourceUrl the URL to fetch
+     * @param resourceUri the URI to fetch
      * @param callback    the BitmapAvailableHandler to call on completion.
      */
-    fun getPhoto(resourceUrl: String, callback: BitmapAvailableHandler) {
+    fun getPhoto(resourceUri: String, callback: BitmapAvailableHandler) {
         try {
-            getPhoto(URL(resourceUrl), callback)
+            getPhoto(URI.create(resourceUri), callback)
         } catch (e: MalformedURLException) {
-            Log.e(TAG, "Couldn't load photo from malformed URL $resourceUrl")
+            Log.e(TAG, "Couldn't load photo from malformed URL $resourceUri")
             callback.onBitmapAvailable(null)
         }
     }
@@ -38,7 +39,7 @@ class BitmapCache private constructor() {
      * @param resourceUrl the URL to fetch
      * @param callback    the BitmapAvailableHandler to call on completion.
      */
-    private fun getPhoto(resourceUrl: URL, callback: BitmapAvailableHandler) {
+    private fun getPhoto(resourceUrl: URI, callback: BitmapAvailableHandler) {
         val bitmap = cache[resourceUrl]
         if (bitmap == null) {
             val downloader = BitmapDownloader(resourceUrl) { fetchedBitmap: Bitmap? ->
@@ -74,29 +75,5 @@ class BitmapCache private constructor() {
         } else {
             callback.onBitmapAvailable(bitmap)
         }
-    }
-
-    companion object {
-
-        private val TAG = BitmapCache::class.java.simpleName
-
-        /**
-         * The singleton.
-         */
-        var instance: BitmapCache? = null
-            /**
-             * Get the BitmapCache instance.
-             *
-             * @return the single instance of BitmapCache.
-             */
-            get() {
-                synchronized(BitmapCache::class.java) {
-                    if (field == null) {
-                        field = BitmapCache()
-                    }
-                    return field
-                }
-            }
-            private set
     }
 }

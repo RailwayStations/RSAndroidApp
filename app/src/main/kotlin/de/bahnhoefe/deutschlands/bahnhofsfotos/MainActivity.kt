@@ -52,6 +52,13 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 
+private val TAG = MainActivity::class.java.simpleName
+private const val DIALOG_TAG = "App Info Dialog"
+private const val CHECK_UPDATE_INTERVAL_MILLIS = (10 * 60 * 1000).toLong()  // 10 minutes
+private const val REQUEST_FINE_LOCATION = 1
+private const val MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES: Long = 1_000 // 1 km
+private const val MIN_TIME_MILLIS_BETWEEN_UPDATES: Long = 500 // half a minute
+
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), LocationListener,
     NavigationView.OnNavigationItemSelectedListener, StationFilterBar.OnChangeListener {
@@ -171,7 +178,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
                     OnItemClickListener { _, _, _, id ->
                         val intentDetails = Intent(this@MainActivity, DetailsActivity::class.java)
                         intentDetails.putExtra(
-                            DetailsActivity.EXTRA_STATION,
+                            EXTRA_DETAILS_STATION,
                             dbAdapter.fetchStationByRowId(id)
                         )
                         startActivity(intentDetails)
@@ -324,7 +331,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
         }
         if (preferencesService.lastUpdate == 0L) {
             runUpdateCountriesAndStations()
-        } else if (System.currentTimeMillis() - preferencesService.lastUpdate > CHECK_UPDATE_INTERVAL) {
+        } else if (System.currentTimeMillis() - preferencesService.lastUpdate > CHECK_UPDATE_INTERVAL_MILLIS) {
             preferencesService.lastUpdate = System.currentTimeMillis()
             if (preferencesService.updatePolicy !== UpdatePolicy.MANUAL) {
                 for (country in preferencesService.countryCodes) {
@@ -376,7 +383,7 @@ class MainActivity : AppCompatActivity(), LocationListener,
 
     private fun bindToStatus() {
         val intent = Intent(this, NearbyNotificationService::class.java)
-        intent.action = NearbyNotificationService.STATUS_INTERFACE
+        intent.action = STATUS_INTERFACE
         if (!this.applicationContext.bindService(intent, object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName, service: IBinder) {
                     Log.d(TAG, "Bound to status service of NearbyNotificationService")
@@ -478,8 +485,8 @@ class MainActivity : AppCompatActivity(), LocationListener,
             if (isGPSEnabled) {
                 locationManager!!.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                    MIN_TIME_MILLIS_BETWEEN_UPDATES,
+                    MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES.toFloat(), this
                 )
                 Log.d(TAG, "GPS Enabled")
                 if (locationManager != null) {
@@ -494,8 +501,8 @@ class MainActivity : AppCompatActivity(), LocationListener,
                 if (isNetworkEnabled) {
                     locationManager!!.requestLocationUpdates(
                         LocationManager.NETWORK_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                        MIN_TIME_MILLIS_BETWEEN_UPDATES,
+                        MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES.toFloat(), this
                     )
                     Log.d(TAG, "Network Location enabled")
                     if (locationManager != null) {
@@ -551,17 +558,4 @@ class MainActivity : AppCompatActivity(), LocationListener,
         updateStationList()
     }
 
-    companion object {
-        private const val DIALOG_TAG = "App Info Dialog"
-        private const val CHECK_UPDATE_INTERVAL = (10 * 60 * 1000 // 10 minutes
-                ).toLong()
-        private val TAG = MainActivity::class.java.simpleName
-        private const val REQUEST_FINE_LOCATION = 1
-
-        // The minimum distance to change Updates in meters
-        private const val MIN_DISTANCE_CHANGE_FOR_UPDATES: Long = 1000
-
-        // The minimum time between updates in milliseconds
-        private const val MIN_TIME_BW_UPDATES: Long = 500 // minute
-    }
 }

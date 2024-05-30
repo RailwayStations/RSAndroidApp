@@ -4,8 +4,6 @@
     <string name="PHOTO_OWNER" translatable="false">APP_PREF_PHOTO_OWNER</string>
     <string name="NICKNAME" translatable="false">APP_PREF_NICKNAME</string>
     <string name="EMAIL" translatable="false">APP_PREF_EMAIL</string>
-    <string name="EMAIL_VERIFIED" translatable="false">APP_PREF_EMAIL_VERIFIED</string>
-    <string name="UPLOAD_TOKEN" translatable="false">APP_PREF_UPLOAD_TOKEN</string>
     <string name="ACCESS_TOKEN" translatable="false">APP_PREF_API_TOKEN</string>
     <string name="LINK_TO_PHOTOGRAPHER" translatable="false">APP_PREF_LINK_TO_PHOTOGRAPHER</string>
     <string name="COUNTRY" translatable="false">APP_PREF_COUNTRY</string>
@@ -21,7 +19,6 @@
     <string name="FIRSTAPPSTART" translatable="false">FirstAppStart</string>
     <string name="fab_email" translatable="false">info@railway-stations.org</string>
     <string name="menu_title_website" translatable="false">railway-stations.org</string>
-    <string name="railway_stations_activity" translatable="false">https://railway-stations.org</string>
     <string name="LOCATION_UPDATES" translatable="false">LOCATION_UPDATES</string>
     <string name="LAST_POSITION_LAT" translatable="false">LAST_POSITION_LAT</string>
     <string name="LAST_POSITION_LON" translatable="false">LAST_POSITION_LON</string>
@@ -34,9 +31,6 @@
     <!-- placeholder -->
     <string name="bahnhofname" translatable="false">BahnhofName</string>
     <string name="bahnhofnr" translatable="false">BahnhofNr</string>
-    <string name="latlong" translatable="false">Geoposition</string>
-    <string name="name" translatable="false">CountryName</string>
-    <string name="countryCode" translatable="false">DE</string>
     <string name="highscorePosition" translatable="false">177</string>
     <string name="highscorePhotos" translatable="false">188</string>
     <string name="highscoreName" translatable="false">ten</string>

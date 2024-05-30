@@ -28,6 +28,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
 
+private val TAG = OutboxActivity::class.java.simpleName
+
 @AndroidEntryPoint
 class OutboxActivity : AppCompatActivity() {
     private lateinit var adapter: OutboxAdapter
@@ -61,10 +63,10 @@ class OutboxActivity : AppCompatActivity() {
                 val intent: Intent
                 if (upload!!.isProblemReport) {
                     intent = Intent(this@OutboxActivity, ProblemReportActivity::class.java)
-                    intent.putExtra(ProblemReportActivity.EXTRA_UPLOAD, upload)
+                    intent.putExtra(EXTRA_PROBLEM_UPLOAD, upload)
                 } else {
                     intent = Intent(this@OutboxActivity, UploadActivity::class.java)
-                    intent.putExtra(UploadActivity.EXTRA_UPLOAD, upload)
+                    intent.putExtra(EXTRA_UPLOAD_UPLOAD, upload)
                 }
                 startActivity(intent)
             }
@@ -213,7 +215,4 @@ class OutboxActivity : AppCompatActivity() {
         adapter.changeCursor(dbAdapter.outbox)
     }
 
-    companion object {
-        private val TAG = OutboxActivity::class.java.simpleName
-    }
 }

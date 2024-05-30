@@ -20,22 +20,16 @@ enum class License(val longName: String) {
             typeOfT: Type,
             context: JsonDeserializationContext
         ): License {
-            return byName(json.asString)
+            return json.asString.toLicense()
         }
     }
 
-    companion object {
-        @JvmStatic
-        fun byName(name: String): License {
-            return Arrays.stream(values())
-                .filter { license: License ->
-                    license.toString() == name || StringUtils.equals(
-                        license.longName,
-                        name
-                    )
-                }
-                .findFirst()
-                .orElse(UNKNOWN)
-        }
-    }
 }
+
+fun String.toLicense() = License.entries
+    .firstOrNull {
+        it.toString() == this || StringUtils.equals(
+            it.longName,
+            this
+        )
+    } ?: License.UNKNOWN

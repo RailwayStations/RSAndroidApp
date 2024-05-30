@@ -78,6 +78,17 @@ import java.io.FileNotFoundException
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
+private val TAG = MapsActivity::class.java.simpleName
+
+const val EXTRAS_MAPS_LATITUDE = "EXTRAS_MAPS_LATITUDE"
+const val EXTRAS_MAPS_LONGITUDE = "EXTRAS_MAPS_LONGITUDE"
+const val EXTRAS_MAPS_MARKER = "EXTRAS_MAPS_MARKER"
+
+private const val MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES: Long = 1
+private const val MIN_TIME_MILLIS_BETWEEN_UPDATES: Long = 500 // half a minute
+private const val REQUEST_FINE_LOCATION = 1
+private const val USER_AGENT = "railway-stations.org-android"
+
 @AndroidEntryPoint
 class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGeoItem>,
     StationFilterBar.OnChangeListener {
@@ -118,9 +129,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         val intent = intent
         var extraMarker: Marker? = null
         if (intent != null) {
-            val latitude = intent.getDoubleExtra(EXTRAS_LATITUDE, 0.0)
-            val longitude = intent.getDoubleExtra(EXTRAS_LONGITUDE, 0.0)
-            val markerRes = intent.getIntExtra(EXTRAS_MARKER, -1)
+            val latitude = intent.getDoubleExtra(EXTRAS_MAPS_LATITUDE, 0.0)
+            val longitude = intent.getDoubleExtra(EXTRAS_MAPS_LONGITUDE, 0.0)
+            val markerRes = intent.getIntExtra(EXTRAS_MAPS_MARKER, -1)
             setMyLocSwitch(false)
             if (!(latitude == 0.0 && longitude == 0.0)) {
                 myPos = LatLong(latitude, longitude)
@@ -242,7 +253,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
     private val mapFile: MapDataStore?
         get() {
-            RailwayStationsApplication.toUri(preferencesService.map)?.let {
+            preferencesService.map.toUri()?.let {
                 if (!DocumentFile.isDocumentUri(this, it)) {
                     return null
                 }
@@ -338,11 +349,11 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             { _: DialogInterface?, _: Int ->
                 val intent = Intent(this@MapsActivity, UploadActivity::class.java)
                 intent.putExtra(
-                    UploadActivity.EXTRA_LATITUDE,
+                    EXTRA_UPLOAD_LATITUDE,
                     latLong.latitude
                 )
                 intent.putExtra(
-                    UploadActivity.EXTRA_LONGITUDE,
+                    EXTRA_UPLOAD_LONGITUDE,
                     latLong.longitude
                 )
                 binding.map.mapView.layerManager.layers.remove(missingMarker)
@@ -423,9 +434,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                     if (file.isFile && file.name!!.endsWith(".map")) {
                         val mapItem =
                             mapSubmenu.add(R.id.maps_group, Menu.NONE, Menu.NONE, file.name)
-                        mapItem.isChecked = RailwayStationsApplication.toUri(map)?.let {
-                            file.uri == it
-                        } ?: false
+                        mapItem.isChecked = map.toUri()?.let { file.uri == it } ?: false
                         mapItem.setOnMenuItemClickListener(
                             MapMenuListener(
                                 this,
@@ -609,15 +618,14 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     override fun onTap(item: BahnhofGeoItem) {
-        val intent = Intent(this@MapsActivity, DetailsActivity::class.java)
         val id = item.station.id
-        val country = item.station.country
         try {
-            val station = dbAdapter.getStationByKey(country, id)
-            intent.putExtra(DetailsActivity.EXTRA_STATION, station)
+            val station = dbAdapter.getStationByKey(item.station.country, id)
+            val intent = Intent(this@MapsActivity, DetailsActivity::class.java)
+                .putExtra(EXTRA_DETAILS_STATION, station)
             startActivity(intent)
         } catch (e: RuntimeException) {
-            Log.wtf(
+            Log.e(
                 TAG,
                 String.format("Could not fetch station id %s that we put onto the map", id),
                 e
@@ -639,11 +647,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     private class LoadMapMarkerTask(activity: MapsActivity) : Thread() {
-        private val activityRef: WeakReference<MapsActivity>
-
-        init {
-            activityRef = WeakReference(activity)
-        }
+        private val activityRef = WeakReference(activity)
 
         override fun run() {
             activityRef.get()?.let {
@@ -907,8 +911,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             if (isGPSEnabled) {
                 locationManager!!.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                    MIN_TIME_MILLIS_BETWEEN_UPDATES,
+                    MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES.toFloat(), this
                 )
                 Log.d(TAG, "GPS Enabled")
                 if (locationManager != null) {
@@ -925,8 +929,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 if (isNetworkEnabled) {
                     locationManager!!.requestLocationUpdates(
                         LocationManager.NETWORK_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                        MIN_TIME_MILLIS_BETWEEN_UPDATES,
+                        MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES.toFloat(), this
                     )
                     Log.d(TAG, "Network Location enabled")
                     if (locationManager != null) {
@@ -1000,11 +1004,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         private val preferencesService: PreferencesService,
         private val map: String?
     ) : MenuItem.OnMenuItemClickListener {
-        private val mapsActivityRef: WeakReference<MapsActivity>
-
-        init {
-            mapsActivityRef = WeakReference(mapsActivity)
-        }
+        private val mapsActivityRef = WeakReference(mapsActivity)
 
         override fun onMenuItemClick(item: MenuItem): Boolean {
             item.isChecked = true
@@ -1024,11 +1024,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         private val preferencesService: PreferencesService,
         private val mapThemeUri: Uri?
     ) : MenuItem.OnMenuItemClickListener {
-        private val mapsActivityRef: WeakReference<MapsActivity>
-
-        init {
-            mapsActivityRef = WeakReference(mapsActivity)
-        }
+        private val mapsActivityRef = WeakReference(mapsActivity)
 
         override fun onMenuItemClick(item: MenuItem): Boolean {
             item.isChecked = true
@@ -1043,18 +1039,4 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
     }
 
-    companion object {
-        const val EXTRAS_LATITUDE = "Extras_Latitude"
-        const val EXTRAS_LONGITUDE = "Extras_Longitude"
-        const val EXTRAS_MARKER = "Extras_Marker"
-
-        // The minimum distance to change Updates in meters
-        private const val MIN_DISTANCE_CHANGE_FOR_UPDATES: Long = 1 // meters
-
-        // The minimum time between updates in milliseconds
-        private const val MIN_TIME_BW_UPDATES: Long = 500 // minute
-        private val TAG = MapsActivity::class.java.simpleName
-        private const val REQUEST_FINE_LOCATION = 1
-        private const val USER_AGENT = "railway-stations.org-android"
-    }
 }

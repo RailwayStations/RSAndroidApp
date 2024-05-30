@@ -12,9 +12,17 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.License
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Profile
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UpdatePolicy
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.toLicense
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.toUpdatePolicy
 import org.apache.commons.lang3.StringUtils
 import org.mapsforge.core.model.LatLong
 import org.mapsforge.core.model.MapPosition
+
+private val TAG = PreferencesService::class.java.simpleName
+private const val DEFAULT_FIRSTAPPSTART = false
+private const val DEFAULT = ""
+const val DEFAULT_COUNTRY = "de"
+const val PREF_FILE = "APP_PREF_FILE"
 
 class PreferencesService(private val context: Context) {
     private val preferences: SharedPreferences =
@@ -129,22 +137,19 @@ class PreferencesService(private val context: Context) {
             putBoolean(R.string.FIRSTAPPSTART, firstAppStart)
         }
     var license: License?
-        get() = License.byName(
-            preferences.getString(
-                context.getString(R.string.LICENCE),
-                License.UNKNOWN.toString()
-            )!!
-        )
+        get() = preferences.getString(
+            context.getString(R.string.LICENCE),
+            License.UNKNOWN.toString()
+        )!!.toLicense()
         set(license) {
             putString(R.string.LICENCE, license?.toString() ?: License.UNKNOWN.toString())
         }
     var updatePolicy: UpdatePolicy
-        get() = UpdatePolicy.byName(
+        get() =
             preferences.getString(
                 context.getString(R.string.UPDATE_POLICY),
                 License.UNKNOWN.toString()
-            )!!
-        )
+            ).toUpdatePolicy()
         set(updatePolicy) {
             putString(R.string.UPDATE_POLICY, updatePolicy.toString())
         }
@@ -317,31 +322,24 @@ class PreferencesService(private val context: Context) {
             putBoolean(R.string.SORT_BY_DISTANCE, sortByDistance)
         }
 
-    companion object {
-        private val TAG = PreferencesService::class.java.simpleName
-        private const val DEFAULT_FIRSTAPPSTART = false
-        private const val DEFAULT = ""
-        const val DEFAULT_COUNTRY = "de"
-        const val PREF_FILE = "APP_PREF_FILE"
+}
 
-        private fun getValidatedApiUrlString(apiUrl: String?): String {
-            val uri = toUri(apiUrl)
-            uri?.let {
-                val scheme = it.scheme
-                if (scheme != null && scheme.matches("https?".toRegex())) {
-                    return apiUrl + if (apiUrl!!.endsWith("/")) "" else "/"
-                }
+private fun getValidatedApiUrlString(apiUrl: String?): String {
+    toUri(apiUrl)?.let { uri ->
+        uri.scheme?.let { scheme ->
+            if (scheme.matches("https?".toRegex())) {
+                return apiUrl + if (apiUrl!!.endsWith("/")) "" else "/"
             }
-            return "https://api.railway-stations.org/"
-        }
-
-        fun toUri(uriString: String?): Uri? {
-            try {
-                return Uri.parse(uriString)
-            } catch (ignored: Exception) {
-                Log.e(TAG, "can't read Uri string $uriString")
-            }
-            return null
         }
     }
+    return "https://api.railway-stations.org/"
+}
+
+fun toUri(uriString: String?): Uri? {
+    try {
+        return Uri.parse(uriString)
+    } catch (ignored: Exception) {
+        Log.e(TAG, "can't read Uri string $uriString")
+    }
+    return null
 }

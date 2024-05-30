@@ -12,6 +12,8 @@ import org.mapsforge.core.model.Rectangle
 import org.mapsforge.core.util.MercatorProjection
 import org.mapsforge.map.layer.Layer
 
+private const val TAG = "ClusterMarker"
+
 /**
  * Layer extended class to display Clustered Marker.
  *
@@ -86,10 +88,7 @@ class ClusterMarker<T : GeoItem>(private val cluster: Cluster<T>) : Layer() {
         if (zoomLevel > 13) {
             if (markerType == 0) {
                 // Draw bitmap
-                MarkerBitmap.getBitmapFromTitle(
-                    cluster.title,
-                    markerBitmap.paint
-                )?.let {
+                getBitmapFromTitle(cluster.title, markerBitmap.paint)?.let {
                     canvas.drawBitmap(
                         it, (left + halfBitmapWidth - it.width / 2).toInt(),
                         top - it.height
@@ -99,10 +98,7 @@ class ClusterMarker<T : GeoItem>(private val cluster: Cluster<T>) : Layer() {
                 val x = (left + bitmap.width * 1.3).toInt()
                 val y =
                     (top + bitmap.height * 1.3 + markerBitmap.paint.getTextHeight(cluster.title) / 2).toInt()
-                canvas.drawText(
-                    cluster.title, x, y,
-                    markerBitmap.paint
-                )
+                canvas.drawText(cluster.title, x, y, markerBitmap.paint)
             }
         }
     }
@@ -128,25 +124,20 @@ class ClusterMarker<T : GeoItem>(private val cluster: Cluster<T>) : Layer() {
         tapPoint: Point
     ): Boolean {
         if (cluster.getItems().size == 1 && contains(viewPosition, tapPoint)) {
-            Log.w(
-                TAG, "The Marker was touched with onTap: "
-                        + this.position.toString()
-            )
+            Log.w(TAG, "The Marker was touched with onTap: ${this.position}")
             cluster.clusterManager?.onTap(cluster.getItems()[0])
             requestRedraw()
             return true
         } else if (contains(viewPosition, tapPoint)) {
             val builder = StringBuilder(cluster.getItems().size.toString() + " items:")
                 .append(cluster.getItems()
-                    .map { i ->
-                        i.title
-                    }
+                    .map { it.title }
                     .take(6)
                     .joinToString("\n- ", "\n- "))
             if (cluster.getItems().size > 6) {
                 builder.append("\n...")
             }
-            ClusterManager.toast?.let {
+            toast?.let {
                 it.setText(builder)
                 it.show()
             }
@@ -193,7 +184,4 @@ class ClusterMarker<T : GeoItem>(private val cluster: Cluster<T>) : Layer() {
         get() = cluster.getItems().size == 1 &&
                 cluster.getItems()[0].isPendingUpload
 
-    companion object {
-        private const val TAG = "ClusterMarker"
-    }
 }

@@ -20,14 +20,30 @@ import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
+import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.CHANNEL_ID
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManager
 import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.NearbyBahnhofNotificationManagerFactory
+import de.bahnhoefe.deutschlands.bahnhofsfotos.notification.createChannel
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sqrt
+
+private val TAG = NearbyNotificationService::class.java.simpleName
+
+private const val MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES: Long = 1_000 // 1km
+private const val MIN_TIME_MILLIS_BETWEEN_UPDATES: Long = 10_000 // 10 seconds
+private const val MIN_NOTIFICATION_DISTANCE_KM = 1.0 // km
+private const val EARTH_CIRCUMFERENCE_KM = 40_075.017 // km at equator
+private const val ONGOING_NOTIFICATION_ID = -0x21524111
+
+/**
+ * The intent action to use to bind to this service's status interface.
+ */
+val STATUS_INTERFACE =
+    (NearbyNotificationService::class.java.getPackage()?.name ?: "") + ".Status"
 
 @AndroidEntryPoint
 class NearbyNotificationService : Service(), LocationListener {
@@ -60,11 +76,11 @@ class NearbyNotificationService : Service(), LocationListener {
             resultIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        NearbyBahnhofNotificationManager.createChannel(this)
+        createChannel(this)
 
         // show a permanent notification to indicate that position detection is running
         val ongoingNotification: Notification =
-            NotificationCompat.Builder(this, NearbyBahnhofNotificationManager.CHANNEL_ID)
+            NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(getString(R.string.nearby_notification_active))
                 .setOngoing(true)
@@ -119,7 +135,7 @@ class NearbyNotificationService : Service(), LocationListener {
 
             // check if currently advertised station is still in range
             if (notifiedStationManager != null) {
-                if (calcDistance(notifiedStationManager!!.station) > MIN_NOTIFICATION_DISTANCE) {
+                if (calcDistance(notifiedStationManager!!.station) > MIN_NOTIFICATION_DISTANCE_KM) {
                     cancelNotification()
                 }
             }
@@ -149,7 +165,7 @@ class NearbyNotificationService : Service(), LocationListener {
                 minDist = dist
             }
         }
-        if (nearest != null && minDist < MIN_NOTIFICATION_DISTANCE) {
+        if (nearest != null && minDist < MIN_NOTIFICATION_DISTANCE_KM) {
             notifyNearest(nearest, minDist)
             Log.i(TAG, "Issued notification to user")
         } else {
@@ -199,7 +215,7 @@ class NearbyNotificationService : Service(), LocationListener {
         // simple Pythagoras now.
         return sqrt(
             lateralDiff.pow(2.0) + longDiff.pow(2.0)
-        ) * EARTH_CIRCUMFERENCE / 360.0
+        ) * EARTH_CIRCUMFERENCE_KM / 360.0
     }
 
     private fun registerLocationManager() {
@@ -226,8 +242,8 @@ class NearbyNotificationService : Service(), LocationListener {
             if (isGPSEnabled) {
                 locationManager!!.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                    MIN_TIME_MILLIS_BETWEEN_UPDATES,
+                    MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES.toFloat(), this
                 )
                 Log.d(TAG, "GPS Enabled")
                 if (locationManager != null) {
@@ -243,8 +259,8 @@ class NearbyNotificationService : Service(), LocationListener {
                 if (isNetworkEnabled) {
                     locationManager!!.requestLocationUpdates(
                         LocationManager.NETWORK_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                        MIN_TIME_MILLIS_BETWEEN_UPDATES,
+                        MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES.toFloat(), this
                     )
                     Log.d(TAG, "Network Location enabled")
                     if (locationManager != null) {
@@ -318,22 +334,4 @@ class NearbyNotificationService : Service(), LocationListener {
         }
     }
 
-    companion object {
-        private val TAG = NearbyNotificationService::class.java.simpleName
-
-        // The minimum distance to change Updates in meters
-        private const val MIN_DISTANCE_CHANGE_FOR_UPDATES: Long = 1000 // 1km
-
-        // The minimum time between updates in milliseconds
-        private const val MIN_TIME_BW_UPDATES: Long = 10000 // 10 seconds
-        private const val MIN_NOTIFICATION_DISTANCE = 1.0 // km
-        private const val EARTH_CIRCUMFERENCE = 40075.017 // km at equator
-        private const val ONGOING_NOTIFICATION_ID = -0x21524111
-
-        /**
-         * The intent action to use to bind to this service's status interface.
-         */
-        val STATUS_INTERFACE =
-            (NearbyNotificationService::class.java.getPackage()?.name ?: "") + ".Status"
-    }
 }

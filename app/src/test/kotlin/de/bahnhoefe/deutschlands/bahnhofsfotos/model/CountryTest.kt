@@ -1,6 +1,5 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country.Companion.getCountryByCode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest

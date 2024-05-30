@@ -13,6 +13,16 @@ import org.mapsforge.map.view.MapView
 import java.util.Collections
 import java.util.function.Consumer
 
+private val TAG = ClusterManager::class.java.simpleName
+private const val MIN_CLUSTER_SIZE = 5
+
+/**
+ * A 'Toast' to display information, intended to show information on [ClusterMarker]
+ * with more than one [GeoItem] (while Marker with a single GeoItem should have their
+ * own OnClick functions)
+ */
+var toast: Toast? = null
+
 /**
  * Class for Clustering geotagged content
  */
@@ -283,7 +293,7 @@ class ClusterManager<T : GeoItem>(
         }
         markerIconBmps.forEach(Consumer { markerBitmap -> markerBitmap!!.decrementRefCounters() })
         synchronized(leftItems) { leftItems.clear() }
-        MarkerBitmap.clearCaptionBitmap()
+        clearCaptionBitmap()
     }
 
     override fun onTap(item: T) {
@@ -315,16 +325,4 @@ class ClusterManager<T : GeoItem>(
         }
     }
 
-    companion object {
-        private val TAG = ClusterManager::class.java.simpleName
-        private const val MIN_CLUSTER_SIZE = 5
-
-        /**
-         * A 'Toast' to display information, intended to show information on [ClusterMarker]
-         * with more than one [GeoItem] (while Marker with a single GeoItem should have their
-         * own OnClick functions)
-         */
-        var toast: Toast? = null
-
-    }
 }

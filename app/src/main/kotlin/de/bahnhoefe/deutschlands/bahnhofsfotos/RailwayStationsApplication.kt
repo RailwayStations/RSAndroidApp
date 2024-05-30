@@ -10,6 +10,8 @@ import androidx.multidex.MultiDex
 import dagger.hilt.android.HiltAndroidApp
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ExceptionHandler
 
+private val TAG = RailwayStationsApplication::class.java.simpleName
+
 @HiltAndroidApp
 class RailwayStationsApplication : Application() {
 
@@ -45,17 +47,11 @@ class RailwayStationsApplication : Application() {
             return processName != null && processName.endsWith(":crash")
         }
 
+}
 
-    companion object {
-        private val TAG = RailwayStationsApplication::class.java.simpleName
-
-        fun toUri(uriString: String?): Uri? {
-            try {
-                return Uri.parse(uriString)
-            } catch (ignored: Exception) {
-                Log.e(TAG, "can't read Uri string $uriString")
-            }
-            return null
-        }
-    }
+fun String?.toUri() = try {
+    Uri.parse(this)
+} catch (ignored: Exception) {
+    Log.e(TAG, "can't read Uri string $this")
+    null
 }

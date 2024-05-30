@@ -34,6 +34,8 @@ import java.nio.charset.StandardCharsets
 import java.security.NoSuchAlgorithmException
 import javax.inject.Inject
 
+private val TAG = MyDataActivity::class.java.simpleName
+
 @AndroidEntryPoint
 class MyDataActivity : AppCompatActivity() {
 
@@ -489,7 +491,4 @@ class MyDataActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        private val TAG = MyDataActivity::class.java.simpleName
-    }
 }

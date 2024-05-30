@@ -13,6 +13,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapAvailableHandler
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil
 
+private val VIBRATION_PATTERN = longArrayOf(300)
+private const val LED_COLOR = 0x00ff0000
+private const val BITMAP_HEIGHT = 400
+private const val BITMAP_WIDTH = 400
+
 class NearbyBahnhofWithPhotoNotificationManager(
     context: Context,
     station: Station,
@@ -26,7 +31,7 @@ class NearbyBahnhofWithPhotoNotificationManager(
      */
     override fun notifyUser() {
         if (ConnectionUtil.checkInternetConnection(context)) {
-            station.photoUrl?.let { BitmapCache.instance?.getPhoto(it, this) }
+            station.photoUrl?.let { BitmapCache.getPhoto(it, this) }
         }
     }
 
@@ -62,10 +67,4 @@ class NearbyBahnhofWithPhotoNotificationManager(
         return bm
     }
 
-    companion object {
-        private val VIBRATION_PATTERN = longArrayOf(300)
-        private const val LED_COLOR = 0x00ff0000
-        const val BITMAP_HEIGHT = 400
-        const val BITMAP_WIDTH = 400
-    }
 }

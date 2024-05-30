@@ -41,10 +41,6 @@ class PhotoPagerAdapter(private val context: Context) : RecyclerView.Adapter<Pho
     }
 
     class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var photoView: PhotoView
-
-        init {
-            photoView = itemView.findViewById(R.id.photoView)
-        }
+        var photoView: PhotoView = itemView.findViewById(R.id.photoView)
     }
 }

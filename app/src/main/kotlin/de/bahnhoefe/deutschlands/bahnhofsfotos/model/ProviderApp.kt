@@ -1,6 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.model
 
-data class ProviderApp constructor(
+data class ProviderApp(
     val type: String,
     val name: String,
     val url: String,
@@ -13,17 +13,12 @@ data class ProviderApp constructor(
     val isCompatible: Boolean
         get() = isAndroid || isWeb
 
-    companion object {
-        @JvmStatic
-        fun hasCompatibleProviderApps(providerApps: List<ProviderApp>): Boolean {
-            return providerApps.any { obj: ProviderApp -> obj.isCompatible }
-        }
-
-        @JvmStatic
-        fun getCompatibleProviderApps(providerApps: List<ProviderApp>): List<ProviderApp> {
-            return providerApps
-                .filter { obj: ProviderApp -> obj.isCompatible }
-                .toList()
-        }
-    }
 }
+
+fun hasCompatibleProviderApps(providerApps: List<ProviderApp>) =
+    providerApps.any { it.isCompatible }
+
+fun getCompatibleProviderApps(providerApps: List<ProviderApp>) =
+    providerApps
+        .filter { it.isCompatible }
+        .toList()

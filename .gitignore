@@ -9,3 +9,4 @@ app/google-services.json
 crowdin/credentials
 release/
 *.hprof
+/.kotlin/sessions/

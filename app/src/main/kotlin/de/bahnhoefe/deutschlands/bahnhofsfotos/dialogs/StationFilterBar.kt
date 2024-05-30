@@ -31,6 +31,8 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
 import java.util.stream.IntStream
 
+private val TAG = StationFilterBar::class.java.simpleName
+
 class StationFilterBar(
     context: Context,
     attrs: AttributeSet?,
@@ -366,20 +368,17 @@ class StationFilterBar(
         fun stationFilterChanged(stationFilter: StationFilter)
         fun sortOrderChanged(sortByDistance: Boolean)
     }
-
-    companion object {
-        private val TAG = StationFilterBar::class.java.simpleName
-        private fun getTintedDrawable(unwrappedDrawable: Drawable?, color: Int): Drawable? {
-            if (unwrappedDrawable != null) {
-                val wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable)
-                DrawableCompat.setTint(wrappedDrawable, color)
-                return wrappedDrawable
-            }
-            return null
-        }
-
-        private fun getCountryText(preferencesService: PreferencesService): String {
-            return preferencesService.countryCodes.joinToString(",")
-        }
-    }
 }
+
+private fun getTintedDrawable(unwrappedDrawable: Drawable?, color: Int) = when {
+    unwrappedDrawable != null -> {
+        val wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable)
+        DrawableCompat.setTint(wrappedDrawable, color)
+        wrappedDrawable
+    }
+
+    else -> null
+}
+
+private fun getCountryText(preferencesService: PreferencesService) =
+    preferencesService.countryCodes.joinToString(",")

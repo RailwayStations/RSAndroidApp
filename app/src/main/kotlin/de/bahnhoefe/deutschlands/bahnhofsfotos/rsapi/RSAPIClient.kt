@@ -42,6 +42,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Consumer
 
+private val TAG = RSAPIClient::class.java.simpleName
+
 class RSAPIClient(
     private val preferencesService: PreferencesService,
     private val clientId: String,
@@ -331,7 +333,4 @@ class RSAPIClient(
         fun onResult(success: Boolean)
     }
 
-    companion object {
-        private val TAG = RSAPIClient::class.java.simpleName
-    }
 }

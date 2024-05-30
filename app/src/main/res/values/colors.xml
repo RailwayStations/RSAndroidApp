@@ -14,13 +14,11 @@
     <color name="listItem1">#ffffff</color>
     <color name="listItem2">#F5F5F5</color>
     <color name="listItemSelected">#c71c4d</color>
-    <color name="uploadTokenDivider">#3EB90E</color>
     <color name="navigationViewText">#666666</color>
 
     <color name="filterActive">#ffffff</color>
     <color name="filterInactive">#b0b0b0</color>
 
-    <color name="chipBackground">#fafafa</color>
     <color name="chipForeground">#737373</color>
     <color name="fullTransparent">#00FFFFFF</color>
     <color name="colorSurface">#000000</color>
@@ -31,57 +29,21 @@
     <!-- Introslider-Colors -->
     <color name="introSlider1">#c2185b</color>
     <color name="introSlider2">#9c27b0</color>
-    <color name="introSlider3">#673ab7</color>
-    <color name="introSlider4">#3f51b5</color>
-    <color name="introSlider5">#1e88e5</color>
-    <color name="introSlider6">#651fff</color>
-    <color name="introSlider7">#3d5afe</color>
-    <color name="introSlider8">#039be5</color>
-    <color name="introSlider9">#0097a7</color>
 
     <color name="dotDarkSlider1">#ad1457</color>
     <color name="dotDarkSlider2">#6a1b9a</color>
-    <color name="dotDarkSlider3">#4527a0</color>
-    <color name="dotDarkSlider4">#283593</color>
-    <color name="dotDarkSlider5">#0d47a1</color>
-    <color name="dotDarkSlider6">#6200ea</color>
-    <color name="dotDarkSlider7">#304ffe</color>
-    <color name="dotDarkSlider8">#0277bd</color>
-    <color name="dotDarkSlider9">#006064</color>
 
     <color name="dotLightSlider1">#f06292</color>
     <color name="dotLightSlider2">#ce93d8</color>
-    <color name="dotLightSlider3">#b39ddb</color>
-    <color name="dotLightSlider4">#9fa8da</color>
-    <color name="dotLightSlider5">#90caf9</color>
-    <color name="dotLightSlider6">#b388ff</color>
-    <color name="dotLightSlider7">#8c9eff</color>
-    <color name="dotLightSlider8">#81d4fa</color>
-    <color name="dotLightSlider9">#b2ebf2</color>
 
     <array name="dot_active">
         <item>@color/dotLightSlider1</item>
         <item>@color/dotLightSlider2</item>
-        <item>@color/dotLightSlider3</item>
-        <item>@color/dotLightSlider4</item>
-        <item>@color/dotLightSlider5</item>
-        <item>@color/dotLightSlider6</item>
-        <item>@color/dotLightSlider7</item>
-        <item>@color/dotLightSlider8</item>
-        <item>@color/dotLightSlider9</item>
     </array>
 
     <array name="dot_inactive">
         <item>@color/dotDarkSlider1</item>
         <item>@color/dotDarkSlider2</item>
-        <item>@color/dotDarkSlider3</item>
-        <item>@color/dotDarkSlider4</item>
-        <item>@color/dotDarkSlider5</item>
-        <item>@color/dotDarkSlider6</item>
-        <item>@color/dotDarkSlider7</item>
-        <item>@color/dotDarkSlider8</item>
-        <item>@color/dotDarkSlider9</item>
     </array>
-
 
 </resources>

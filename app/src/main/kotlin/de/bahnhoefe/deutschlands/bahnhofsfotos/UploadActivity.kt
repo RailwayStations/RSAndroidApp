@@ -35,11 +35,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs.confirmOk
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country.Companion.getCountryByCode
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxResponse
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.InboxStateQuery
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.getCountryByCode
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.FileUtils
@@ -64,6 +64,14 @@ import java.util.zip.CRC32
 import java.util.zip.CheckedInputStream
 import java.util.zip.CheckedOutputStream
 import javax.inject.Inject
+
+private val TAG = UploadActivity::class.java.simpleName
+
+// Names of Extras that this class reacts to
+const val EXTRA_UPLOAD_UPLOAD = "EXTRA_UPLOAD_UPLOAD"
+const val EXTRA_UPLOAD_STATION = "EXTRA_UPLOAD_STATION"
+const val EXTRA_UPLOAD_LATITUDE = "EXTRA_UPLOAD_LATITUDE"
+const val EXTRA_UPLOAD_LONGITUDE = "EXTRA_UPLOAD_LONGITUDE"
 
 @AndroidEntryPoint
 class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
@@ -124,20 +132,20 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.hasExtra(EXTRA_LATITUDE)) {
-            latitude = intent.getDoubleExtra(EXTRA_LATITUDE, 0.0)
+        if (intent.hasExtra(EXTRA_UPLOAD_LATITUDE)) {
+            latitude = intent.getDoubleExtra(EXTRA_UPLOAD_LATITUDE, 0.0)
         }
-        if (intent.hasExtra(EXTRA_LONGITUDE)) {
-            longitude = intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0)
+        if (intent.hasExtra(EXTRA_UPLOAD_LONGITUDE)) {
+            longitude = intent.getDoubleExtra(EXTRA_UPLOAD_LONGITUDE, 0.0)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            upload = intent.getSerializableExtra(EXTRA_UPLOAD, Upload::class.java)
-            station = intent.getSerializableExtra(EXTRA_STATION, Station::class.java)
+            upload = intent.getSerializableExtra(EXTRA_UPLOAD_UPLOAD, Upload::class.java)
+            station = intent.getSerializableExtra(EXTRA_UPLOAD_STATION, Station::class.java)
         } else {
             @Suppress("DEPRECATION")
-            upload = intent.getSerializableExtra(EXTRA_UPLOAD) as Upload?
+            upload = intent.getSerializableExtra(EXTRA_UPLOAD_UPLOAD) as Upload?
             @Suppress("DEPRECATION")
-            station = intent.getSerializableExtra(EXTRA_STATION) as Station?
+            station = intent.getSerializableExtra(EXTRA_UPLOAD_STATION) as Station?
         }
         if (station == null && upload != null && upload!!.isUploadForExistingStation) {
             station = dbAdapter.getStationForUpload(upload!!)
@@ -149,7 +157,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         if (station == null && (latitude == null || longitude == null)) {
             Log.w(
                 TAG,
-                "EXTRA_STATION and EXTRA_LATITUDE or EXTRA_LONGITUDE in intent data missing"
+                "EXTRA_UPLOAD_STATION and EXTRA_UPLOAD_LATITUDE or EXTRA_UPLOAD_LONGITUDE in intent data missing"
             )
             Toast.makeText(this, R.string.station_or_coords_not_found, Toast.LENGTH_LONG).show()
             finish()
@@ -635,13 +643,4 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         return null
     }
 
-    companion object {
-        private val TAG = UploadActivity::class.java.simpleName
-
-        // Names of Extras that this class reacts to
-        const val EXTRA_UPLOAD = "EXTRA_UPLOAD"
-        const val EXTRA_STATION = "EXTRA_STATION"
-        const val EXTRA_LATITUDE = "EXTRA_LATITUDE"
-        const val EXTRA_LONGITUDE = "EXTRA_LONGITUDE"
-    }
 }

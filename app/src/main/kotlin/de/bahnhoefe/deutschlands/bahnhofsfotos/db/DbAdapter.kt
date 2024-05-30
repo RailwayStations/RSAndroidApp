@@ -19,10 +19,10 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Statistic
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.UploadState
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.COUNTRIES
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.PROVIDER_APPS
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.STATIONS
-import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.UPLOADS
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.Countries
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.ProviderApps
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.Stations
+import de.bahnhoefe.deutschlands.bahnhofsfotos.util.Constants.Uploads
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
 import org.apache.commons.lang3.StringUtils
 import java.text.Normalizer
@@ -59,11 +59,11 @@ class DbAdapter(private val context: Context) {
         photoStations: PhotoStations
     ): ContentValues {
         val values = ContentValues()
-        values.put(STATIONS.ID, station.id)
-        values.put(STATIONS.COUNTRY, station.country)
-        values.put(STATIONS.TITLE, station.title)
+        values.put(Stations.ID, station.id)
+        values.put(Stations.COUNTRY, station.country)
+        values.put(Stations.TITLE, station.title)
         values.put(
-            STATIONS.NORMALIZED_TITLE, StringUtils.replaceChars(
+            Stations.NORMALIZED_TITLE, StringUtils.replaceChars(
                 StringUtils.deleteWhitespace(
                     StringUtils.stripAccents(
                         Normalizer.normalize(
@@ -74,19 +74,19 @@ class DbAdapter(private val context: Context) {
                 ), "-_()", null
             )
         )
-        values.put(STATIONS.LAT, station.lat)
-        values.put(STATIONS.LON, station.lon)
-        values.put(STATIONS.DS100, station.shortCode)
-        values.put(STATIONS.ACTIVE, !station.inactive)
+        values.put(Stations.LAT, station.lat)
+        values.put(Stations.LON, station.lon)
+        values.put(Stations.DS100, station.shortCode)
+        values.put(Stations.ACTIVE, !station.inactive)
         if (station.photos.isNotEmpty()) {
             val (id, photographer, path, _, license, outdated) = station.photos[0]
-            values.put(STATIONS.PHOTO_ID, id)
-            values.put(STATIONS.PHOTO_URL, photoStations.photoBaseUrl + path)
-            values.put(STATIONS.PHOTOGRAPHER, photographer)
-            values.put(STATIONS.OUTDATED, outdated)
-            values.put(STATIONS.PHOTOGRAPHER_URL, photoStations.getPhotographerUrl(photographer))
-            values.put(STATIONS.LICENSE, photoStations.getLicenseName(license))
-            values.put(STATIONS.LICENSE_URL, photoStations.getLicenseUrl(license))
+            values.put(Stations.PHOTO_ID, id)
+            values.put(Stations.PHOTO_URL, photoStations.photoBaseUrl + path)
+            values.put(Stations.PHOTOGRAPHER, photographer)
+            values.put(Stations.OUTDATED, outdated)
+            values.put(Stations.PHOTOGRAPHER_URL, photoStations.getPhotographerUrl(photographer))
+            values.put(Stations.LICENSE, photoStations.getLicenseName(license))
+            values.put(Stations.LICENSE_URL, photoStations.getLicenseUrl(license))
         }
         return values
     }
@@ -120,20 +120,20 @@ class DbAdapter(private val context: Context) {
 
     private fun toContentValues(countryCode: String, app: ProviderApp): ContentValues {
         val values = ContentValues()
-        values.put(PROVIDER_APPS.COUNTRYSHORTCODE, countryCode)
-        values.put(PROVIDER_APPS.PA_TYPE, app.type)
-        values.put(PROVIDER_APPS.PA_NAME, app.name)
-        values.put(PROVIDER_APPS.PA_URL, app.url)
+        values.put(ProviderApps.COUNTRYSHORTCODE, countryCode)
+        values.put(ProviderApps.PA_TYPE, app.type)
+        values.put(ProviderApps.PA_NAME, app.name)
+        values.put(ProviderApps.PA_URL, app.url)
         return values
     }
 
     private fun toContentValues(country: Country): ContentValues {
         val values = ContentValues()
-        values.put(COUNTRIES.COUNTRYSHORTCODE, country.code)
-        values.put(COUNTRIES.COUNTRYNAME, country.name)
-        values.put(COUNTRIES.EMAIL, country.email)
-        values.put(COUNTRIES.TIMETABLE_URL_TEMPLATE, country.timetableUrlTemplate)
-        values.put(COUNTRIES.OVERRIDE_LICENSE, country.overrideLicense)
+        values.put(Countries.COUNTRYSHORTCODE, country.code)
+        values.put(Countries.COUNTRYNAME, country.name)
+        values.put(Countries.EMAIL, country.email)
+        values.put(Countries.TIMETABLE_URL_TEMPLATE, country.timetableUrlTemplate)
+        values.put(Countries.OVERRIDE_LICENSE, country.overrideLicense)
         return values
     }
 
@@ -152,7 +152,7 @@ class DbAdapter(private val context: Context) {
     }
 
     private fun getStationOrderBy(sortByDistance: Boolean, myPos: Location?): String {
-        var orderBy = STATIONS.TITLE + " ASC"
+        var orderBy = Stations.TITLE + " ASC"
         if (sortByDistance) {
             val fudge = cos(
                 Math.toRadians(
@@ -160,8 +160,8 @@ class DbAdapter(private val context: Context) {
                 )
             ).pow(2.0)
             orderBy =
-                "((" + myPos.latitude + " - " + STATIONS.LAT + ") * (" + myPos.latitude + " - " + STATIONS.LAT + ") + " +
-                        "(" + myPos.longitude + " - " + STATIONS.LON + ") * (" + myPos.longitude + " - " + STATIONS.LON + ") * " + fudge + ")"
+                "((" + myPos.latitude + " - " + Stations.LAT + ") * (" + myPos.latitude + " - " + Stations.LAT + ") + " +
+                        "(" + myPos.longitude + " - " + Stations.LON + ") * (" + myPos.longitude + " - " + Stations.LON + ") * " + fudge + ")"
         }
         return orderBy
     }
@@ -186,7 +186,7 @@ class DbAdapter(private val context: Context) {
         var selectQuery = whereCountryCodeIn(countryCodes)
         val queryArgs = mutableListOf<String>()
         if (StringUtils.isNotBlank(search)) {
-            selectQuery += String.format(" AND %s LIKE ?", STATIONS.NORMALIZED_TITLE)
+            selectQuery += String.format(" AND %s LIKE ?", Stations.NORMALIZED_TITLE)
             queryArgs.add(
                 "%" + StringUtils.replaceChars(
                     StringUtils.stripAccents(
@@ -198,24 +198,24 @@ class DbAdapter(private val context: Context) {
             )
         }
         if (stationFilter.nickname != null) {
-            selectQuery += " AND " + STATIONS.PHOTOGRAPHER + " = ?"
+            selectQuery += " AND " + Stations.PHOTOGRAPHER + " = ?"
             queryArgs.add(stationFilter.nickname!!)
         }
         if (stationFilter.hasPhoto() != null) {
-            selectQuery += " AND " + STATIONS.PHOTO_URL + " IS " + (if (stationFilter.hasPhoto()!!) "NOT" else "") + " NULL"
+            selectQuery += " AND " + Stations.PHOTO_URL + " IS " + (if (stationFilter.hasPhoto()!!) "NOT" else "") + " NULL"
         }
         if (stationFilter.isActive != null) {
-            selectQuery += " AND " + STATIONS.ACTIVE + " = ?"
+            selectQuery += " AND " + Stations.ACTIVE + " = ?"
             queryArgs.add(if (stationFilter.isActive!!) "1" else "0")
         }
         Log.w(TAG, selectQuery)
         val cursor = db.query(
             DATABASE_TABLE_STATIONS, arrayOf(
-                STATIONS.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID,
-                STATIONS.ID,
-                STATIONS.TITLE,
-                STATIONS.PHOTO_URL,
-                STATIONS.COUNTRY
+                Stations.ROWID + " AS " + Constants.CURSOR_ADAPTER_ID,
+                Stations.ID,
+                Stations.TITLE,
+                Stations.PHOTO_URL,
+                Stations.COUNTRY
             ),
             selectQuery,
             queryArgs.toTypedArray(), null, null, getStationOrderBy(sortByDistance, myPos)
@@ -229,7 +229,7 @@ class DbAdapter(private val context: Context) {
     }
 
     private fun whereCountryCodeIn(countryCodes: Set<String>): String {
-        return STATIONS.COUNTRY +
+        return Stations.COUNTRY +
                 " IN (" +
                 countryCodes.joinToString(",") { c: String -> "'$c'" } +
                 ")"
@@ -237,7 +237,7 @@ class DbAdapter(private val context: Context) {
 
     fun getStatistic(country: String): Statistic? {
         db.rawQuery(
-            "SELECT COUNT(*), COUNT(" + STATIONS.PHOTO_URL + "), COUNT(DISTINCT(" + STATIONS.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + STATIONS.COUNTRY + " = ?",
+            "SELECT COUNT(*), COUNT(" + Stations.PHOTO_URL + "), COUNT(DISTINCT(" + Stations.PHOTOGRAPHER + ")) FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Stations.COUNTRY + " = ?",
             arrayOf(country)
         ).use { cursor ->
             if (cursor.moveToNext()) {
@@ -256,7 +256,7 @@ class DbAdapter(private val context: Context) {
         get() {
             val photographers = ArrayList<String>()
             db.rawQuery(
-                "SELECT distinct " + STATIONS.PHOTOGRAPHER + " FROM " + DATABASE_TABLE_STATIONS + " WHERE " + STATIONS.PHOTOGRAPHER + " IS NOT NULL ORDER BY " + STATIONS.PHOTOGRAPHER,
+                "SELECT distinct " + Stations.PHOTOGRAPHER + " FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Stations.PHOTOGRAPHER + " IS NOT NULL ORDER BY " + Stations.PHOTOGRAPHER,
                 null
             ).use { cursor ->
                 while (cursor.moveToNext()) {
@@ -283,7 +283,7 @@ class DbAdapter(private val context: Context) {
         db.beginTransaction()
         try {
             db.update(
-                DATABASE_TABLE_UPLOADS, toContentValues(upload), UPLOADS.ID + " = ?", arrayOf(
+                DATABASE_TABLE_UPLOADS, toContentValues(upload), Uploads.ID + " = ?", arrayOf(
                     upload.id.toString()
                 )
             )
@@ -295,24 +295,24 @@ class DbAdapter(private val context: Context) {
 
     private fun toContentValues(upload: Upload): ContentValues {
         val values = ContentValues()
-        values.put(UPLOADS.COMMENT, upload.comment)
-        values.put(UPLOADS.COUNTRY, upload.country)
-        values.put(UPLOADS.CREATED_AT, upload.createdAt)
-        values.put(UPLOADS.INBOX_URL, upload.inboxUrl)
-        values.put(UPLOADS.LAT, upload.lat)
-        values.put(UPLOADS.LON, upload.lon)
+        values.put(Uploads.COMMENT, upload.comment)
+        values.put(Uploads.COUNTRY, upload.country)
+        values.put(Uploads.CREATED_AT, upload.createdAt)
+        values.put(Uploads.INBOX_URL, upload.inboxUrl)
+        values.put(Uploads.LAT, upload.lat)
+        values.put(Uploads.LON, upload.lon)
         values.put(
-            UPLOADS.PROBLEM_TYPE,
+            Uploads.PROBLEM_TYPE,
             if (upload.problemType != null) upload.problemType!!.name else null
         )
-        values.put(UPLOADS.REJECTED_REASON, upload.rejectReason)
-        values.put(UPLOADS.REMOTE_ID, upload.remoteId)
-        values.put(UPLOADS.STATION_ID, upload.stationId)
-        values.put(UPLOADS.TITLE, upload.title)
-        values.put(UPLOADS.UPLOAD_STATE, upload.uploadState.name)
-        values.put(UPLOADS.ACTIVE, upload.active)
-        values.put(UPLOADS.CRC32, upload.crc32)
-        values.put(UPLOADS.REMOTE_ID, upload.remoteId)
+        values.put(Uploads.REJECTED_REASON, upload.rejectReason)
+        values.put(Uploads.REMOTE_ID, upload.remoteId)
+        values.put(Uploads.STATION_ID, upload.stationId)
+        values.put(Uploads.TITLE, upload.title)
+        values.put(Uploads.UPLOAD_STATE, upload.uploadState.name)
+        values.put(Uploads.ACTIVE, upload.active)
+        values.put(Uploads.CRC32, upload.crc32)
+        values.put(Uploads.REMOTE_ID, upload.remoteId)
         return values
     }
 
@@ -321,11 +321,11 @@ class DbAdapter(private val context: Context) {
         db.query(
             DATABASE_TABLE_UPLOADS,
             null,
-            UPLOADS.COUNTRY + " = ? AND " + UPLOADS.STATION_ID + " = ? AND " + pendingUploadWhereClause,
+            Uploads.COUNTRY + " = ? AND " + Uploads.STATION_ID + " = ? AND " + pendingUploadWhereClause,
             arrayOf(station.country, station.id),
             null,
             null,
-            UPLOADS.CREATED_AT + " DESC"
+            Uploads.CREATED_AT + " DESC"
         ).use { cursor ->
             while (cursor.moveToNext()) {
                 uploads.add(createUploadFromCursor(cursor))
@@ -338,11 +338,11 @@ class DbAdapter(private val context: Context) {
         db.query(
             DATABASE_TABLE_UPLOADS,
             null,
-            UPLOADS.LAT + " = ? AND " + UPLOADS.LON + " = ? AND " + pendingUploadWhereClause,
+            Uploads.LAT + " = ? AND " + Uploads.LON + " = ? AND " + pendingUploadWhereClause,
             arrayOf(lat.toString(), lon.toString()),
             null,
             null,
-            UPLOADS.CREATED_AT + " DESC"
+            Uploads.CREATED_AT + " DESC"
         ).use { cursor ->
             if (cursor.moveToFirst()) {
                 return createUploadFromCursor(cursor)
@@ -352,10 +352,10 @@ class DbAdapter(private val context: Context) {
     }
 
     private fun getUploadWhereClause(predicate: Predicate<UploadState>): String {
-        return UPLOADS.UPLOAD_STATE + " IN (" +
+        return Uploads.UPLOAD_STATE + " IN (" +
                 UploadState.entries
-                    .filter(predicate::test)
-                    .joinToString(",") { s: UploadState -> "'" + s.name + "'" } +
+                    .filter { predicate.test(it) }
+                    .joinToString(",") { "'" + it.name + "'" } +
                 ')'
     }
 
@@ -370,26 +370,26 @@ class DbAdapter(private val context: Context) {
                     + " LEFT JOIN "
                     + DATABASE_TABLE_STATIONS
                     + " ON "
-                    + DATABASE_TABLE_STATIONS + "." + STATIONS.COUNTRY
+                    + DATABASE_TABLE_STATIONS + "." + Stations.COUNTRY
                     + " = "
-                    + DATABASE_TABLE_UPLOADS + "." + UPLOADS.COUNTRY
+                    + DATABASE_TABLE_UPLOADS + "." + Uploads.COUNTRY
                     + " AND "
-                    + DATABASE_TABLE_STATIONS + "." + STATIONS.ID
+                    + DATABASE_TABLE_STATIONS + "." + Stations.ID
                     + " = "
-                    + DATABASE_TABLE_UPLOADS + "." + UPLOADS.STATION_ID)
+                    + DATABASE_TABLE_UPLOADS + "." + Uploads.STATION_ID)
             return queryBuilder.query(
                 db, arrayOf(
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.ID + " AS " + Constants.CURSOR_ADAPTER_ID,
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.REMOTE_ID,
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.COUNTRY,
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.STATION_ID,
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.TITLE,
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.UPLOAD_STATE,
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.PROBLEM_TYPE,
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.COMMENT,
-                    DATABASE_TABLE_UPLOADS + "." + UPLOADS.REJECTED_REASON,
-                    DATABASE_TABLE_STATIONS + "." + UPLOADS.TITLE + " AS " + UPLOADS.JOIN_STATION_TITLE
-                ), null, null, null, null, UPLOADS.CREATED_AT + " DESC"
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.ID + " AS " + Constants.CURSOR_ADAPTER_ID,
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.REMOTE_ID,
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.COUNTRY,
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.STATION_ID,
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.TITLE,
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.UPLOAD_STATE,
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.PROBLEM_TYPE,
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.COMMENT,
+                    DATABASE_TABLE_UPLOADS + "." + Uploads.REJECTED_REASON,
+                    DATABASE_TABLE_STATIONS + "." + Uploads.TITLE + " AS " + Uploads.JOIN_STATION_TITLE
+                ), null, null, null, null, Uploads.CREATED_AT + " DESC"
             )
         }
 
@@ -397,7 +397,7 @@ class DbAdapter(private val context: Context) {
         db.query(
             DATABASE_TABLE_UPLOADS,
             null,
-            UPLOADS.ID + "=?",
+            Uploads.ID + "=?",
             arrayOf(id.toString()),
             null,
             null,
@@ -411,13 +411,13 @@ class DbAdapter(private val context: Context) {
     }
 
     fun deleteUpload(id: Long) {
-        db.delete(DATABASE_TABLE_UPLOADS, UPLOADS.ID + " = ?", arrayOf(id.toString()))
+        db.delete(DATABASE_TABLE_UPLOADS, Uploads.ID + " = ?", arrayOf(id.toString()))
     }
 
     fun getPendingUploads(withRemoteId: Boolean): List<Upload> {
         var selection = pendingUploadWhereClause
         if (withRemoteId) {
-            selection += " AND " + UPLOADS.REMOTE_ID + " IS NOT NULL"
+            selection += " AND " + Uploads.REMOTE_ID + " IS NOT NULL"
         }
         val uploads = mutableListOf<Upload>()
         db.query(
@@ -438,7 +438,7 @@ class DbAdapter(private val context: Context) {
                 db.update(
                     DATABASE_TABLE_UPLOADS,
                     toUploadStatesContentValues(state),
-                    UPLOADS.REMOTE_ID + " = ?",
+                    Uploads.REMOTE_ID + " = ?",
                     arrayOf(state.id.toString())
                 )
             })
@@ -450,9 +450,9 @@ class DbAdapter(private val context: Context) {
 
     private fun toUploadStatesContentValues(state: InboxStateQuery): ContentValues {
         val values = ContentValues()
-        values.put(UPLOADS.UPLOAD_STATE, state.state.name)
-        values.put(UPLOADS.REJECTED_REASON, state.rejectedReason)
-        values.put(UPLOADS.CRC32, state.crc32)
+        values.put(Uploads.UPLOAD_STATE, state.state.name)
+        values.put(Uploads.REJECTED_REASON, state.rejectedReason)
+        values.put(Uploads.CRC32, state.crc32)
         return values
     }
 
@@ -461,7 +461,7 @@ class DbAdapter(private val context: Context) {
             val uploads = ArrayList<Upload>()
             db.query(
                 DATABASE_TABLE_UPLOADS, null,
-                UPLOADS.REMOTE_ID + " IS NOT NULL AND " + completedUploadWhereClause,
+                Uploads.REMOTE_ID + " IS NOT NULL AND " + completedUploadWhereClause,
                 null, null, null, null
             ).use { cursor ->
                 while (cursor.moveToNext()) {
@@ -503,23 +503,23 @@ class DbAdapter(private val context: Context) {
                     db.execSQL(CREATE_STATEMENT_STATIONS_IDX)
                 }
                 if (oldVersion < 16) {
-                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_COUNTRIES + " ADD COLUMN " + COUNTRIES.OVERRIDE_LICENSE + " TEXT")
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_COUNTRIES + " ADD COLUMN " + Countries.OVERRIDE_LICENSE + " TEXT")
                 }
                 if (oldVersion < 17) {
-                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_UPLOADS + " ADD COLUMN " + UPLOADS.ACTIVE + " INTEGER")
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_UPLOADS + " ADD COLUMN " + Uploads.ACTIVE + " INTEGER")
                 }
                 if (oldVersion < 18) {
-                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + STATIONS.NORMALIZED_TITLE + " TEXT")
-                    db.execSQL("UPDATE " + DATABASE_TABLE_STATIONS + " SET " + STATIONS.NORMALIZED_TITLE + " = " + STATIONS.TITLE)
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Stations.NORMALIZED_TITLE + " TEXT")
+                    db.execSQL("UPDATE " + DATABASE_TABLE_STATIONS + " SET " + Stations.NORMALIZED_TITLE + " = " + Stations.TITLE)
                 }
                 if (oldVersion < 19) {
-                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_UPLOADS + " ADD COLUMN " + UPLOADS.CRC32 + " INTEGER")
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_UPLOADS + " ADD COLUMN " + Uploads.CRC32 + " INTEGER")
                 }
                 if (oldVersion < 20) {
-                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + STATIONS.OUTDATED + " INTEGER")
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Stations.OUTDATED + " INTEGER")
                 }
                 if (oldVersion < 21) {
-                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + STATIONS.PHOTO_ID + " INTEGER")
+                    db.execSQL("ALTER TABLE " + DATABASE_TABLE_STATIONS + " ADD COLUMN " + Stations.PHOTO_ID + " INTEGER")
                 }
             }
             db.setTransactionSuccessful()
@@ -529,64 +529,64 @@ class DbAdapter(private val context: Context) {
 
     private fun createStationFromCursor(cursor: Cursor): Station {
         return Station(
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.COUNTRY)),
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.ID)),
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.TITLE)),
-            cursor.getDouble(cursor.getColumnIndexOrThrow(STATIONS.LAT)),
-            cursor.getDouble(cursor.getColumnIndexOrThrow(STATIONS.LON)),
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.DS100)),
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.PHOTO_URL)),
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.PHOTOGRAPHER)),
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.PHOTOGRAPHER_URL)),
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.LICENSE)),
-            cursor.getString(cursor.getColumnIndexOrThrow(STATIONS.LICENSE_URL)),
-            java.lang.Boolean.TRUE == getBoolean(cursor, STATIONS.ACTIVE),
-            java.lang.Boolean.TRUE == getBoolean(cursor, STATIONS.OUTDATED),
-            cursor.getLong(cursor.getColumnIndexOrThrow(STATIONS.PHOTO_ID))
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.COUNTRY)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.ID)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.TITLE)),
+            cursor.getDouble(cursor.getColumnIndexOrThrow(Stations.LAT)),
+            cursor.getDouble(cursor.getColumnIndexOrThrow(Stations.LON)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.DS100)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.PHOTO_URL)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.PHOTOGRAPHER)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.PHOTOGRAPHER_URL)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.LICENSE)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Stations.LICENSE_URL)),
+            java.lang.Boolean.TRUE == getBoolean(cursor, Stations.ACTIVE),
+            java.lang.Boolean.TRUE == getBoolean(cursor, Stations.OUTDATED),
+            cursor.getLong(cursor.getColumnIndexOrThrow(Stations.PHOTO_ID))
         )
     }
 
     private fun createCountryFromCursor(cursor: Cursor): Country {
         return Country(
-            cursor.getString(cursor.getColumnIndexOrThrow(COUNTRIES.COUNTRYSHORTCODE)),
-            cursor.getString(cursor.getColumnIndexOrThrow(COUNTRIES.COUNTRYNAME)),
-            cursor.getString(cursor.getColumnIndexOrThrow(COUNTRIES.EMAIL)),
-            cursor.getString(cursor.getColumnIndexOrThrow(COUNTRIES.TIMETABLE_URL_TEMPLATE)),
-            cursor.getString(cursor.getColumnIndexOrThrow(COUNTRIES.OVERRIDE_LICENSE))
+            cursor.getString(cursor.getColumnIndexOrThrow(Countries.COUNTRYSHORTCODE)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Countries.COUNTRYNAME)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Countries.EMAIL)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Countries.TIMETABLE_URL_TEMPLATE)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Countries.OVERRIDE_LICENSE))
         )
     }
 
     private fun createProviderAppFromCursor(cursor: Cursor): ProviderApp {
         return ProviderApp(
-            cursor.getString(cursor.getColumnIndexOrThrow(PROVIDER_APPS.PA_TYPE)),
-            cursor.getString(cursor.getColumnIndexOrThrow(PROVIDER_APPS.PA_NAME)),
-            cursor.getString(cursor.getColumnIndexOrThrow(PROVIDER_APPS.PA_URL))
+            cursor.getString(cursor.getColumnIndexOrThrow(ProviderApps.PA_TYPE)),
+            cursor.getString(cursor.getColumnIndexOrThrow(ProviderApps.PA_NAME)),
+            cursor.getString(cursor.getColumnIndexOrThrow(ProviderApps.PA_URL))
         )
     }
 
     private fun createUploadFromCursor(cursor: Cursor): Upload {
         val upload = Upload(
-            cursor.getLong(cursor.getColumnIndexOrThrow(UPLOADS.ID)),
-            cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.COUNTRY)),
-            cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.STATION_ID)),
-            getLong(cursor, UPLOADS.REMOTE_ID),
-            cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.TITLE)),
-            getDouble(cursor, UPLOADS.LAT),
-            getDouble(cursor, UPLOADS.LON),
-            cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.COMMENT)),
-            cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.INBOX_URL)),
+            cursor.getLong(cursor.getColumnIndexOrThrow(Uploads.ID)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Uploads.COUNTRY)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Uploads.STATION_ID)),
+            getLong(cursor, Uploads.REMOTE_ID),
+            cursor.getString(cursor.getColumnIndexOrThrow(Uploads.TITLE)),
+            getDouble(cursor, Uploads.LAT),
+            getDouble(cursor, Uploads.LON),
+            cursor.getString(cursor.getColumnIndexOrThrow(Uploads.COMMENT)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Uploads.INBOX_URL)),
             null,
-            cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.REJECTED_REASON)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Uploads.REJECTED_REASON)),
             UploadState.UNKNOWN,
-            cursor.getLong(cursor.getColumnIndexOrThrow(UPLOADS.CREATED_AT)),
-            getBoolean(cursor, UPLOADS.ACTIVE),
-            getLong(cursor, UPLOADS.CRC32)
+            cursor.getLong(cursor.getColumnIndexOrThrow(Uploads.CREATED_AT)),
+            getBoolean(cursor, Uploads.ACTIVE),
+            getLong(cursor, Uploads.CRC32)
         )
-        val problemType = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.PROBLEM_TYPE))
+        val problemType = cursor.getString(cursor.getColumnIndexOrThrow(Uploads.PROBLEM_TYPE))
         if (problemType != null) {
             upload.problemType = ProblemType.valueOf(problemType)
         }
-        val uploadState = cursor.getString(cursor.getColumnIndexOrThrow(UPLOADS.UPLOAD_STATE))
+        val uploadState = cursor.getString(cursor.getColumnIndexOrThrow(Uploads.UPLOAD_STATE))
         if (uploadState != null) {
             upload.uploadState = UploadState.valueOf(uploadState)
         }
@@ -613,7 +613,7 @@ class DbAdapter(private val context: Context) {
 
     fun fetchStationByRowId(id: Long): Station? {
         db.query(
-            DATABASE_TABLE_STATIONS, null, STATIONS.ROWID + "=?", arrayOf(
+            DATABASE_TABLE_STATIONS, null, Stations.ROWID + "=?", arrayOf(
                 id.toString() + ""
             ), null, null, null
         ).use { cursor ->
@@ -628,7 +628,7 @@ class DbAdapter(private val context: Context) {
         db.query(
             DATABASE_TABLE_STATIONS,
             null,
-            STATIONS.COUNTRY + "=? AND " + STATIONS.ID + "=?",
+            Stations.COUNTRY + "=? AND " + Stations.ID + "=?",
             arrayOf(country, id),
             null,
             null,
@@ -645,7 +645,7 @@ class DbAdapter(private val context: Context) {
         db.query(
             DATABASE_TABLE_STATIONS,
             null,
-            STATIONS.COUNTRY + " = ? AND " + STATIONS.ID + " = ?",
+            Stations.COUNTRY + " = ? AND " + Stations.ID + " = ?",
             arrayOf(upload.country, upload.stationId),
             null,
             null,
@@ -664,7 +664,7 @@ class DbAdapter(private val context: Context) {
         db.query(
             DATABASE_TABLE_COUNTRIES,
             null,
-            COUNTRIES.COUNTRYSHORTCODE + " IN (" + countryList + ")",
+            Countries.COUNTRYSHORTCODE + " IN (" + countryList + ")",
             null,
             null,
             null,
@@ -677,7 +677,7 @@ class DbAdapter(private val context: Context) {
                     db.query(
                         DATABASE_TABLE_PROVIDER_APPS,
                         null,
-                        PROVIDER_APPS.COUNTRYSHORTCODE + " = ?",
+                        ProviderApps.COUNTRYSHORTCODE + " = ?",
                         arrayOf(country.code),
                         null,
                         null,
@@ -703,14 +703,14 @@ class DbAdapter(private val context: Context) {
             "SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + whereCountryCodeIn(countryCodes)
         val queryArgs = ArrayList<String>()
         stationFilter.nickname?.let {
-            selectQuery += " AND " + STATIONS.PHOTOGRAPHER + " = ?"
+            selectQuery += " AND " + Stations.PHOTOGRAPHER + " = ?"
             queryArgs.add(it)
         }
         stationFilter.hasPhoto()?.let {
-            selectQuery += " AND " + STATIONS.PHOTO_URL + " IS " + (if (it) "NOT" else "") + " NULL"
+            selectQuery += " AND " + Stations.PHOTO_URL + " IS " + (if (it) "NOT" else "") + " NULL"
         }
         stationFilter.isActive?.let {
-            selectQuery += " AND " + STATIONS.ACTIVE + " = ?"
+            selectQuery += " AND " + Stations.ACTIVE + " = ?"
             queryArgs.add(if (it) "1" else "0")
         }
         db.rawQuery(selectQuery, queryArgs.toArray(arrayOf())).use { cursor ->
@@ -731,18 +731,18 @@ class DbAdapter(private val context: Context) {
         val stationList = ArrayList<Station>()
         // Select All Query with rectangle - might be later change with it
         var selectQuery =
-            ("SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + STATIONS.LAT + " < " + (lat + 0.5) + " AND " + STATIONS.LAT + " > " + (lat - 0.5)
-                    + " AND " + STATIONS.LON + " < " + (lng + 0.5) + " AND " + STATIONS.LON + " > " + (lng - 0.5))
+            ("SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Stations.LAT + " < " + (lat + 0.5) + " AND " + Stations.LAT + " > " + (lat - 0.5)
+                    + " AND " + Stations.LON + " < " + (lng + 0.5) + " AND " + Stations.LON + " > " + (lng - 0.5))
         val queryArgs = ArrayList<String>()
         stationFilter.nickname?.let {
-            selectQuery += " AND " + STATIONS.PHOTOGRAPHER + " = ?"
+            selectQuery += " AND " + Stations.PHOTOGRAPHER + " = ?"
             queryArgs.add(it)
         }
         stationFilter.hasPhoto()?.let {
-            selectQuery += " AND " + STATIONS.PHOTO_URL + " IS " + (if (it) "NOT" else "") + " NULL"
+            selectQuery += " AND " + Stations.PHOTO_URL + " IS " + (if (it) "NOT" else "") + " NULL"
         }
         stationFilter.isActive?.let {
-            selectQuery += " AND " + STATIONS.ACTIVE + " = ?"
+            selectQuery += " AND " + Stations.ACTIVE + " = ?"
             queryArgs.add(if (it) "1" else "0")
         }
         db.rawQuery(selectQuery, queryArgs.toArray(arrayOf())).use { cursor ->
@@ -759,7 +759,7 @@ class DbAdapter(private val context: Context) {
         get() {
             val countryList = ArrayList<Country>()
             val query =
-                "SELECT * FROM $DATABASE_TABLE_COUNTRIES ORDER BY ${COUNTRIES.COUNTRYSHORTCODE}"
+                "SELECT * FROM $DATABASE_TABLE_COUNTRIES ORDER BY ${Countries.COUNTRYSHORTCODE}"
             Log.d(TAG, query)
             db.rawQuery(query, null).use { cursor ->
                 if (cursor.moveToFirst()) {
@@ -770,74 +770,83 @@ class DbAdapter(private val context: Context) {
             }
             return countryList
         }
-
-    companion object {
-        private val TAG = DbAdapter::class.java.simpleName
-        private const val DATABASE_TABLE_STATIONS = "bahnhoefe"
-        private const val DATABASE_TABLE_COUNTRIES = "laender"
-        private const val DATABASE_TABLE_PROVIDER_APPS = "providerApps"
-        private const val DATABASE_TABLE_UPLOADS = "uploads"
-        private const val DATABASE_NAME = "bahnhoefe.db"
-        private const val DATABASE_VERSION = 22
-        private const val CREATE_STATEMENT_STATIONS =
-            ("CREATE TABLE " + DATABASE_TABLE_STATIONS + " ("
-                    + STATIONS.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + STATIONS.COUNTRY + " TEXT, "
-                    + STATIONS.ID + " TEXT, "
-                    + STATIONS.TITLE + " TEXT, "
-                    + STATIONS.NORMALIZED_TITLE + " TEXT, "
-                    + STATIONS.LAT + " REAL, "
-                    + STATIONS.LON + " REAL, "
-                    + STATIONS.PHOTO_ID + " INTEGER, "
-                    + STATIONS.PHOTO_URL + " TEXT, "
-                    + STATIONS.PHOTOGRAPHER + " TEXT, "
-                    + STATIONS.PHOTOGRAPHER_URL + " TEXT, "
-                    + STATIONS.LICENSE + " TEXT, "
-                    + STATIONS.LICENSE_URL + " TEXT, "
-                    + STATIONS.DS100 + " TEXT, "
-                    + STATIONS.ACTIVE + " INTEGER, "
-                    + STATIONS.OUTDATED + " INTEGER)")
-        private const val CREATE_STATEMENT_STATIONS_IDX =
-            ("CREATE INDEX " + DATABASE_TABLE_STATIONS + "_IDX "
-                    + "ON " + DATABASE_TABLE_STATIONS + "(" + STATIONS.COUNTRY + ", " + STATIONS.ID + ")")
-        private const val CREATE_STATEMENT_COUNTRIES =
-            ("CREATE TABLE " + DATABASE_TABLE_COUNTRIES + " ("
-                    + COUNTRIES.ROWID_COUNTRIES + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + COUNTRIES.COUNTRYSHORTCODE + " TEXT, "
-                    + COUNTRIES.COUNTRYNAME + " TEXT, "
-                    + COUNTRIES.EMAIL + " TEXT, "
-                    + COUNTRIES.TIMETABLE_URL_TEMPLATE + " TEXT, "
-                    + COUNTRIES.OVERRIDE_LICENSE + " TEXT)")
-        private const val CREATE_STATEMENT_PROVIDER_APPS =
-            ("CREATE TABLE " + DATABASE_TABLE_PROVIDER_APPS + " ("
-                    + PROVIDER_APPS.COUNTRYSHORTCODE + " TEXT,"
-                    + PROVIDER_APPS.PA_TYPE + " TEXT,"
-                    + PROVIDER_APPS.PA_NAME + " TEXT, "
-                    + PROVIDER_APPS.PA_URL + " TEXT)")
-        private const val CREATE_STATEMENT_UPLOADS =
-            ("CREATE TABLE " + DATABASE_TABLE_UPLOADS + " ("
-                    + UPLOADS.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + UPLOADS.STATION_ID + " TEXT, "
-                    + UPLOADS.COUNTRY + " TEXT, "
-                    + UPLOADS.REMOTE_ID + " INTEGER, "
-                    + UPLOADS.TITLE + " TEXT, "
-                    + UPLOADS.LAT + " REAL, "
-                    + UPLOADS.LON + " REAL, "
-                    + UPLOADS.COMMENT + " TEXT, "
-                    + UPLOADS.INBOX_URL + " TEXT, "
-                    + UPLOADS.PROBLEM_TYPE + " TEXT, "
-                    + UPLOADS.REJECTED_REASON + " TEXT, "
-                    + UPLOADS.UPLOAD_STATE + " TEXT, "
-                    + UPLOADS.CREATED_AT + " INTEGER, "
-                    + UPLOADS.ACTIVE + " INTEGER, "
-                    + UPLOADS.CRC32 + " INTEGER)")
-        private const val DROP_STATEMENT_STATIONS_IDX =
-            "DROP INDEX IF EXISTS " + DATABASE_TABLE_STATIONS + "_IDX"
-        private const val DROP_STATEMENT_STATIONS =
-            "DROP TABLE IF EXISTS $DATABASE_TABLE_STATIONS"
-        private const val DROP_STATEMENT_COUNTRIES =
-            "DROP TABLE IF EXISTS $DATABASE_TABLE_COUNTRIES"
-        private const val DROP_STATEMENT_PROVIDER_APPS =
-            "DROP TABLE IF EXISTS $DATABASE_TABLE_PROVIDER_APPS"
-    }
 }
+
+private val TAG = DbAdapter::class.java.simpleName
+private const val DATABASE_TABLE_STATIONS = "bahnhoefe"
+private const val DATABASE_TABLE_COUNTRIES = "laender"
+private const val DATABASE_TABLE_PROVIDER_APPS = "providerApps"
+private const val DATABASE_TABLE_UPLOADS = "uploads"
+private const val DATABASE_NAME = "bahnhoefe.db"
+private const val DATABASE_VERSION = 22
+private const val CREATE_STATEMENT_STATIONS =
+    """
+        CREATE TABLE $DATABASE_TABLE_STATIONS (
+            ${Stations.ROWID} INTEGER PRIMARY KEY AUTOINCREMENT,
+            ${Stations.COUNTRY} TEXT, 
+            ${Stations.ID} TEXT, 
+            ${Stations.TITLE} TEXT, 
+            ${Stations.NORMALIZED_TITLE} TEXT, 
+            ${Stations.LAT} REAL, 
+            ${Stations.LON} REAL, 
+            ${Stations.PHOTO_ID} INTEGER, 
+            ${Stations.PHOTO_URL} TEXT, 
+            ${Stations.PHOTOGRAPHER} TEXT, 
+            ${Stations.PHOTOGRAPHER_URL} TEXT, 
+            ${Stations.LICENSE} TEXT, 
+            ${Stations.LICENSE_URL} TEXT, 
+            ${Stations.DS100} TEXT, 
+            ${Stations.ACTIVE} INTEGER, 
+            ${Stations.OUTDATED} INTEGER
+        )
+    """
+private const val CREATE_STATEMENT_STATIONS_IDX =
+    "CREATE INDEX ${DATABASE_TABLE_STATIONS}_IDX ON $DATABASE_TABLE_STATIONS(${Stations.COUNTRY}, ${Stations.ID})"
+private const val CREATE_STATEMENT_COUNTRIES =
+    """
+        CREATE TABLE $DATABASE_TABLE_COUNTRIES (
+            ${Countries.ROWID_COUNTRIES} INTEGER PRIMARY KEY AUTOINCREMENT, 
+            ${Countries.COUNTRYSHORTCODE} TEXT, 
+            ${Countries.COUNTRYNAME} TEXT, 
+            ${Countries.EMAIL} TEXT, 
+            ${Countries.TIMETABLE_URL_TEMPLATE} TEXT, 
+            ${Countries.OVERRIDE_LICENSE} TEXT
+        )
+    """
+private const val CREATE_STATEMENT_PROVIDER_APPS =
+    """
+        CREATE TABLE $DATABASE_TABLE_PROVIDER_APPS (
+            ${ProviderApps.COUNTRYSHORTCODE} TEXT,
+            ${ProviderApps.PA_TYPE} TEXT,
+            ${ProviderApps.PA_NAME} TEXT, 
+            ${ProviderApps.PA_URL} TEXT
+        )
+    """
+private const val CREATE_STATEMENT_UPLOADS =
+    """
+        CREATE TABLE $DATABASE_TABLE_UPLOADS (
+            ${Uploads.ID} INTEGER PRIMARY KEY AUTOINCREMENT, 
+            ${Uploads.STATION_ID} TEXT, 
+            ${Uploads.COUNTRY} TEXT, 
+            ${Uploads.REMOTE_ID} INTEGER, 
+            ${Uploads.TITLE} TEXT, 
+            ${Uploads.LAT} REAL, 
+            ${Uploads.LON} REAL, 
+            ${Uploads.COMMENT} TEXT, 
+            ${Uploads.INBOX_URL} TEXT, 
+            ${Uploads.PROBLEM_TYPE} TEXT, 
+            ${Uploads.REJECTED_REASON} TEXT, 
+            ${Uploads.UPLOAD_STATE} TEXT, 
+            ${Uploads.CREATED_AT} INTEGER, 
+            ${Uploads.ACTIVE} INTEGER, 
+            ${Uploads.CRC32} INTEGER
+        )
+    """
+private const val DROP_STATEMENT_STATIONS_IDX =
+    "DROP INDEX IF EXISTS ${DATABASE_TABLE_STATIONS}_IDX"
+private const val DROP_STATEMENT_STATIONS =
+    "DROP TABLE IF EXISTS $DATABASE_TABLE_STATIONS"
+private const val DROP_STATEMENT_COUNTRIES =
+    "DROP TABLE IF EXISTS $DATABASE_TABLE_COUNTRIES"
+private const val DROP_STATEMENT_PROVIDER_APPS =
+    "DROP TABLE IF EXISTS $DATABASE_TABLE_PROVIDER_APPS"

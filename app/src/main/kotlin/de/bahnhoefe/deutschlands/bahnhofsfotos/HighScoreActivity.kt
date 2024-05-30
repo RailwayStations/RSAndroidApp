@@ -26,6 +26,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
 
+private const val TAG = "HighScoreActivity"
+
 @AndroidEntryPoint
 class HighScoreActivity : AppCompatActivity() {
     private var adapter: HighScoreAdapter? = null
@@ -156,7 +158,4 @@ class HighScoreActivity : AppCompatActivity() {
         return true
     }
 
-    companion object {
-        private const val TAG = "HighScoreActivity"
-    }
 }

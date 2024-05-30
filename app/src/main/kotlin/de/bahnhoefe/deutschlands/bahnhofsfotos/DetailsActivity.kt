@@ -39,7 +39,6 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.StationInfoBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.dialogs.SimpleDialogs
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
-import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country.Companion.getCountryByCode
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PageablePhoto
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Photo
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStation
@@ -47,6 +46,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PhotoStations
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.ProviderApp
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Upload
+import de.bahnhoefe.deutschlands.bahnhofsfotos.model.getCountryByCode
 import de.bahnhoefe.deutschlands.bahnhofsfotos.rsapi.RSAPIClient
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.BitmapCache
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.ConnectionUtil
@@ -64,6 +64,10 @@ import java.util.Locale
 import java.util.function.Consumer
 import javax.inject.Inject
 
+
+private val TAG = DetailsActivity::class.java.simpleName
+const val EXTRA_DETAILS_STATION = "EXTRA_DETAILS_STATION"
+private const val LINK_FORMAT = "<b><a href=\"%s\">%s</a></b>"
 
 @AndroidEntryPoint
 class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
@@ -121,13 +125,13 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         val newStation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra(EXTRA_STATION, Station::class.java)
+            intent.getSerializableExtra(EXTRA_DETAILS_STATION, Station::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getSerializableExtra(EXTRA_STATION) as Station?
+            intent.getSerializableExtra(EXTRA_DETAILS_STATION) as Station?
         }
         if (newStation == null) {
-            Log.w(TAG, "EXTRA_STATION in intent data missing")
+            Log.w(TAG, "EXTRA_DETAILS_STATION in intent data missing")
             Toast.makeText(this, R.string.station_not_found, Toast.LENGTH_LONG).show()
             finish()
             return
@@ -139,20 +143,19 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         station.photoUrl?.let {
             if (ConnectionUtil.checkInternetConnection(this)) {
                 photoBitmaps[it] = null
-                BitmapCache.instance
-                    ?.getPhoto(it) { bitmap: Bitmap? ->
-                        if (bitmap != null) {
-                            val pageablePhoto = PageablePhoto(station, bitmap)
-                            runOnUiThread {
-                                addIndicator()
-                                val position =
-                                    photoPagerAdapter.addPageablePhoto(pageablePhoto)
-                                if (position == 0) {
-                                    onPageablePhotoSelected(pageablePhoto, position)
-                                }
+                BitmapCache.getPhoto(it) { bitmap ->
+                    if (bitmap != null) {
+                        val pageablePhoto = PageablePhoto(station, bitmap)
+                        runOnUiThread {
+                            addIndicator()
+                            val position =
+                                photoPagerAdapter.addPageablePhoto(pageablePhoto)
+                            if (position == 0) {
+                                onPageablePhotoSelected(pageablePhoto, position)
                             }
                         }
                     }
+                }
             }
         }
         loadAdditionalPhotos(station)
@@ -206,17 +209,16 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
                                 if (!photoBitmaps.containsKey(url)) {
                                     photoBitmaps[url] = null
                                     addIndicator()
-                                    BitmapCache.instance
-                                        ?.getPhoto(url) { fetchedBitmap: Bitmap? ->
-                                            runOnUiThread {
-                                                addAdditionalPhotoToPagerAdapter(
-                                                    photo,
-                                                    url,
-                                                    photoStations,
-                                                    fetchedBitmap
-                                                )
-                                            }
+                                    BitmapCache.getPhoto(url) { fetchedBitmap: Bitmap? ->
+                                        runOnUiThread {
+                                            addAdditionalPhotoToPagerAdapter(
+                                                photo,
+                                                url,
+                                                photoStations,
+                                                fetchedBitmap
+                                            )
                                         }
+                                    }
                                 }
                             }
                     }
@@ -295,15 +297,15 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         when (item.itemId) {
             R.id.add_photo -> {
                 val intent = Intent(this@DetailsActivity, UploadActivity::class.java)
-                intent.putExtra(UploadActivity.EXTRA_STATION, station)
+                intent.putExtra(EXTRA_UPLOAD_STATION, station)
                 activityForResultLauncher.launch(intent)
             }
 
             R.id.report_problem -> {
                 val intent = Intent(this@DetailsActivity, ProblemReportActivity::class.java)
-                intent.putExtra(ProblemReportActivity.EXTRA_STATION, station)
+                intent.putExtra(EXTRA_PROBLEM_STATION, station)
                 intent.putExtra(
-                    ProblemReportActivity.EXTRA_PHOTO_ID,
+                    EXTRA_PROBLEM_PHOTO_ID,
                     if (selectedPhoto != null) selectedPhoto!!.id else null
                 )
                 startActivity(intent)
@@ -488,7 +490,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
     private fun startNavigation(context: Context) {
         val adapter: ArrayAdapter<NavItem> = object : ArrayAdapter<NavItem>(
             this, android.R.layout.select_dialog_item,
-            android.R.id.text1, NavItem.values()
+            android.R.id.text1, NavItem.entries.toTypedArray()
         ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val item = getItem(position)!!
@@ -576,11 +578,4 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
         }
     }
 
-    companion object {
-        private val TAG = DetailsActivity::class.java.simpleName
-
-        // Names of Extras that this class reacts to
-        const val EXTRA_STATION = "EXTRA_STATION"
-        private const val LINK_FORMAT = "<b><a href=\"%s\">%s</a></b>"
-    }
 }

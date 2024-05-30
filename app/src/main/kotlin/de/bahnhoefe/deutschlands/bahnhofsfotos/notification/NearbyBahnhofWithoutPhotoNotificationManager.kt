@@ -6,6 +6,10 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.R
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 
+private val VIBRATION_PATTERN = longArrayOf(300, 100, 300, 100, 300)
+private const val LED_COLOR = 0x0000ffff
+private const val REQUEST_FOTO = 0x100
+
 class NearbyBahnhofWithoutPhotoNotificationManager(
     context: Context,
     station: Station,
@@ -39,9 +43,4 @@ class NearbyBahnhofWithoutPhotoNotificationManager(
         onNotificationReady(notificationBuilder.build())
     }
 
-    companion object {
-        private val VIBRATION_PATTERN = longArrayOf(300, 100, 300, 100, 300)
-        const val LED_COLOR = 0x0000ffff
-        private const val REQUEST_FOTO = 0x100
-    }
 }

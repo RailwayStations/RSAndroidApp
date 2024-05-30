@@ -18,6 +18,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
 
+private val TAG = InboxActivity::class.java.simpleName
+
 @AndroidEntryPoint
 class InboxActivity : AppCompatActivity() {
     private var adapter: InboxAdapter? = null
@@ -45,10 +47,10 @@ class InboxActivity : AppCompatActivity() {
                         OnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
                             val (_, _, stationId, lat, lon) = body[position]
                             val intent = Intent(this@InboxActivity, MapsActivity::class.java)
-                            intent.putExtra(MapsActivity.EXTRAS_LATITUDE, lat)
-                            intent.putExtra(MapsActivity.EXTRAS_LONGITUDE, lon)
+                            intent.putExtra(EXTRAS_MAPS_LATITUDE, lat)
+                            intent.putExtra(EXTRAS_MAPS_LONGITUDE, lon)
                             intent.putExtra(
-                                MapsActivity.EXTRAS_MARKER,
+                                EXTRAS_MAPS_MARKER,
                                 if (stationId == null) R.drawable.marker_missing else R.drawable.marker_red
                             )
                             startActivity(intent)
@@ -67,7 +69,4 @@ class InboxActivity : AppCompatActivity() {
         })
     }
 
-    companion object {
-        private val TAG = InboxActivity::class.java.simpleName
-    }
 }

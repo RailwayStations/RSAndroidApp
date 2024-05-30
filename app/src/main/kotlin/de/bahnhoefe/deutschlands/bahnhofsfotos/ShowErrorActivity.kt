@@ -11,6 +11,8 @@ import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+const val EXTRA_ERROR_TEXT = "error"
+
 class ShowErrorActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityShowErrorBinding
@@ -75,7 +77,4 @@ class ShowErrorActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    companion object {
-        const val EXTRA_ERROR_TEXT = "error"
-    }
 }
