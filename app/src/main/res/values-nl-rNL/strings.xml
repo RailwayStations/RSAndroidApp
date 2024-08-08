@@ -287,7 +287,7 @@
     <string name="problem_duplicate">Dupliceren</string>
     <string name="upload_review">Succesvol ingediend, je bijdrage wordt nagekeken.</string>
     <string name="upload_error">Het indienen van je bijdrage is mislukt: %1s</string>
-    <string name="delete_outbox_entry_remote">Do you want to withdraw your contribution and delete entry %1d?</string>
-    <string name="delete_outbox_entry_local">Delete entry %1d locally?</string>
+    <string name="delete_outbox_entry_remote">Wilt u uw bijdragen terugtrekken en invoer %1d verwijderen?</string>
+    <string name="delete_outbox_entry_local">Invoer %1d lokaal verwijderen?</string>
     <string name="error_deleting_inbox_entry">Fout bij het verwijderen van item: %1s</string>
 </resources>
