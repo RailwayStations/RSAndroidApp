@@ -23,7 +23,7 @@ class NearbyBahnhofWithoutPhotoNotificationManager(
      * Photo immediately.
      */
     private fun createFotoPendingIntent(): PendingIntent {
-        val intent = createUploadActivity()
+        val intent = createDetailsActivity()
         return pendifyMe(intent, REQUEST_FOTO)
     }
 

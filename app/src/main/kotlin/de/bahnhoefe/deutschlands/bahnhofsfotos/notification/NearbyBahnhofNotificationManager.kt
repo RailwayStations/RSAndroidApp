@@ -13,9 +13,9 @@ import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import de.bahnhoefe.deutschlands.bahnhofsfotos.EXTRA_UPLOAD_STATION
+import de.bahnhoefe.deutschlands.bahnhofsfotos.DetailsActivity
+import de.bahnhoefe.deutschlands.bahnhofsfotos.EXTRA_DETAILS_STATION
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
-import de.bahnhoefe.deutschlands.bahnhofsfotos.UploadActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Country
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.Station
 import de.bahnhoefe.deutschlands.bahnhofsfotos.model.getCountryByCode
@@ -97,30 +97,30 @@ abstract class NearbyBahnhofNotificationManager(
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntent(intent)
         try {
-            stackBuilder.addNextIntentWithParentStack(intent) // syntesize a back stack from the parent information in manifest
+            stackBuilder.addNextIntentWithParentStack(intent) // synthesize a back stack from the parent information in manifest
         } catch (iae: IllegalArgumentException) {
             // unfortunately, this occurs if the supplied intent is not handled by our app
             // in this case, just add the the intent...
             stackBuilder.addNextIntent(intent)
         }
-        return stackBuilder.getPendingIntent(requestCode, PendingIntent.FLAG_CANCEL_CURRENT)
+        return stackBuilder.getPendingIntent(
+            requestCode,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
+        )
     }
 
     /**
      * Build an intent for an action to see station details
      */
-    protected fun createUploadActivity(): Intent {
-        val detailIntent = Intent(context, UploadActivity::class.java)
-        detailIntent.putExtra(EXTRA_UPLOAD_STATION, station)
-        return detailIntent
-    }
+    protected fun createDetailsActivity() =
+        Intent(context, DetailsActivity::class.java)
+            .putExtra(EXTRA_DETAILS_STATION, station)
 
     /**
      * Build an intent for an action to see station details
      */
-    private fun createDetailPendingIntent(): PendingIntent {
-        return pendifyMe(createUploadActivity(), REQUEST_DETAIL)
-    }
+    private fun createDetailPendingIntent() =
+        pendifyMe(createDetailsActivity(), REQUEST_DETAIL)
 
     /**
      * Build an intent for an action to view a map.
@@ -134,12 +134,10 @@ abstract class NearbyBahnhofNotificationManager(
     /**
      * Build an intent for an action to view a timetable for the station.
      */
-    private fun createTimetablePendingIntent(country: Country, station: Station?): PendingIntent? {
-        val timetableIntent = Timetable().createTimetableIntent(country, station)
-        return if (timetableIntent != null) {
-            pendifyMe(timetableIntent, REQUEST_TIMETABLE)
-        } else null
-    }
+    private fun createTimetablePendingIntent(country: Country, station: Station?) =
+        Timetable().createTimetableIntent(country, station)?.let {
+            pendifyMe(it, REQUEST_TIMETABLE)
+        }
 
     fun destroy() {
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
