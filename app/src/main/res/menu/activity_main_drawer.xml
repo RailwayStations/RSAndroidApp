@@ -27,11 +27,6 @@
             android:checkable="false"
             android:icon="@drawable/ic_cached_gray_24px"
             android:title="@string/menu_title_update_photos" />
-        <item
-            android:id="@+id/nav_notification"
-            android:checkable="false"
-            android:icon="@drawable/ic_notifications_off_gray_24px"
-            android:title="@string/menu_nearby_notification" />
     </group>
 
     <item android:title="@string/information">

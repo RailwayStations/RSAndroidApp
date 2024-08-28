@@ -3,18 +3,14 @@ package de.bahnhoefe.deutschlands.bahnhofsfotos
 import android.Manifest
 import android.app.AlertDialog
 import android.app.SearchManager
-import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Menu
@@ -23,9 +19,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -34,7 +28,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
-import de.bahnhoefe.deutschlands.bahnhofsfotos.NearbyNotificationService.StatusBinder
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMainBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.StationListAdapter
@@ -56,7 +49,7 @@ private val TAG = MainActivity::class.java.simpleName
 private const val DIALOG_TAG = "App Info Dialog"
 private const val CHECK_UPDATE_INTERVAL_MILLIS = (10 * 60 * 1000).toLong()  // 10 minutes
 private const val REQUEST_FINE_LOCATION = 1
-private const val MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES: Long = 1_000 // 1 km
+private const val MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES: Long = 100 // 100 m
 private const val MIN_TIME_MILLIS_BETWEEN_UPDATES: Long = 500 // half a minute
 
 @AndroidEntryPoint
@@ -75,9 +68,9 @@ class MainActivity : AppCompatActivity(), LocationListener,
     private lateinit var binding: ActivityMainBinding
     private var stationListAdapter: StationListAdapter? = null
     private var searchString: String? = null
-    private var statusBinder: StatusBinder? = null
     private var myPos: Location? = null
     private var locationManager: LocationManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(
@@ -115,7 +108,6 @@ class MainActivity : AppCompatActivity(), LocationListener,
             searchString = searchIntent.getStringExtra(SearchManager.QUERY)
         }
         myPos = preferencesService.lastLocation
-        bindToStatus()
         binding.appBarMain.main.pullToRefresh.setOnRefreshListener {
             runUpdateCountriesAndStations()
             binding.appBarMain.main.pullToRefresh.isRefreshing = false
@@ -230,14 +222,6 @@ class MainActivity : AppCompatActivity(), LocationListener,
         }
     }
 
-    private fun setNotificationIcon(active: Boolean) {
-        val item = binding.navView.menu.findItem(R.id.nav_notification)
-        item.icon = ContextCompat.getDrawable(
-            this,
-            if (active) R.drawable.ic_notifications_active_gray_24px else R.drawable.ic_notifications_off_gray_24px
-        )
-    }
-
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_slideshow -> {
@@ -251,10 +235,6 @@ class MainActivity : AppCompatActivity(), LocationListener,
 
             R.id.nav_update_photos -> {
                 runUpdateCountriesAndStations()
-            }
-
-            R.id.nav_notification -> {
-                toggleNotification()
             }
 
             R.id.nav_highscore -> {
@@ -378,61 +358,6 @@ class MainActivity : AppCompatActivity(), LocationListener,
                     .setNegativeButton(R.string.button_cancel_text) { dialog: DialogInterface, _: Int -> dialog.dismiss() }
                     .create().show()
             }
-        }
-    }
-
-    private fun bindToStatus() {
-        val intent = Intent(this, NearbyNotificationService::class.java)
-        intent.action = STATUS_INTERFACE
-        if (!this.applicationContext.bindService(intent, object : ServiceConnection {
-                override fun onServiceConnected(name: ComponentName, service: IBinder) {
-                    Log.d(TAG, "Bound to status service of NearbyNotificationService")
-                    statusBinder = service as StatusBinder
-                    invalidateOptionsMenu()
-                }
-
-                override fun onServiceDisconnected(name: ComponentName) {
-                    Log.d(TAG, "Unbound from status service of NearbyNotificationService")
-                    statusBinder = null
-                    invalidateOptionsMenu()
-                }
-            }, 0)) {
-            Log.e(TAG, "Bind request to statistics interface failed")
-        }
-    }
-
-    private val requestNotificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean? ->
-            if (!isGranted!!) {
-                Toast.makeText(
-                    this@MainActivity,
-                    R.string.notification_permission_needed,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-
-    private fun toggleNotification() {
-        if (statusBinder == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            return
-        }
-        toggleNotificationWithPermissionGranted()
-    }
-
-    private fun toggleNotificationWithPermissionGranted() {
-        val intent = Intent(this@MainActivity, NearbyNotificationService::class.java)
-        if (statusBinder == null) {
-            startService(intent)
-            bindToStatus()
-            setNotificationIcon(true)
-        } else {
-            stopService(intent)
-            setNotificationIcon(false)
         }
     }
 
