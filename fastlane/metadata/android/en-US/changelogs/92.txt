@@ -1,0 +1,3 @@
+- remove broken nearby station notifications
+- update dependencies
+- update translations

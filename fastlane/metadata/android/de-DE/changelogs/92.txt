@@ -1,0 +1,3 @@
+- Nicht mehr funktionierende Benachrichtigung über nahegelegene Bahnhöfe entfernt
+- Abhängigkeiten aktualisiert
+- Übersetzungen aktualisiert
