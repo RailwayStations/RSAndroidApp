@@ -76,6 +76,8 @@ import org.mapsforge.map.rendertheme.XmlRenderTheme
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.lang.ref.WeakReference
+import java.net.URLDecoder
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 private val TAG = MapsActivity::class.java.simpleName
@@ -88,6 +90,13 @@ private const val MIN_DISTANCE_METERS_CHANGE_FOR_UPDATES: Long = 1
 private const val MIN_TIME_MILLIS_BETWEEN_UPDATES: Long = 500 // half a minute
 private const val REQUEST_FINE_LOCATION = 1
 private const val USER_AGENT = "railway-stations.org-android"
+
+private val NAME_PATTERN: Pattern = Pattern.compile("[+\\s]*\\((.*)\\)[+\\s]*$")
+private val POSITION_PATTERN: Pattern = Pattern.compile(
+    "([+-]?\\d+(?:\\.\\d+)?),\\s?([+-]?\\d+(?:\\.\\d+)?)"
+)
+private val QUERY_POSITION_PATTERN: Pattern =
+    Pattern.compile("q=([+-]?\\d+(?:\\.\\d+)?),\\s?([+-]?\\d+(?:\\.\\d+)?)")
 
 @AndroidEntryPoint
 class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGeoItem>,
@@ -103,6 +112,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     lateinit var rsapiClient: RSAPIClient
 
     private lateinit var binding: ActivityMapsBinding
+
     private val onlineTileSources = mutableMapOf<String, OnlineTileSource>()
     private var layer: Layer? = null
     private var clusterer: ClusterManager<BahnhofGeoItem>? = null
@@ -113,41 +123,86 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private var locationManager: LocationManager? = null
     private var askedForPermission = false
     private var missingMarker: Marker? = null
+    private var extraMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AndroidGraphicFactory.createInstance(this.application)
-        binding = ActivityMapsBinding.inflate(
-            layoutInflater
-        )
+        AndroidGraphicFactory.createInstance(application)
+        binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = Color.parseColor("#c71c4d")
         setSupportActionBar(binding.mapsToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         nickname = preferencesService.nickname
-        val intent = intent
-        var extraMarker: Marker? = null
-        if (intent != null) {
-            val latitude = intent.getDoubleExtra(EXTRAS_MAPS_LATITUDE, 0.0)
-            val longitude = intent.getDoubleExtra(EXTRAS_MAPS_LONGITUDE, 0.0)
-            val markerRes = intent.getIntExtra(EXTRAS_MAPS_MARKER, -1)
-            setMyLocSwitch(false)
-            if (!(latitude == 0.0 && longitude == 0.0)) {
-                myPos = LatLong(latitude, longitude)
-            }
-            if (markerRes != -1) {
-                extraMarker = createBitmapMarker(myPos!!, markerRes)
-            }
-        }
+        onNewIntent(intent)
         addDBSTileSource(R.string.dbs_osm_basic, "/styles/dbs-osm-basic/")
         addDBSTileSource(R.string.dbs_osm_railway, "/styles/dbs-osm-railway/")
         createMapViews()
         createTileCaches()
         checkPermissionsAndCreateLayersAndControls()
-        if (extraMarker != null) {
-            binding.map.mapView.layerManager.layers.add(extraMarker)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        if (intent == null) {
+            return
         }
+        super.onNewIntent(intent)
+
+        extraMarker = if ("geo" == intent.scheme && intent.data != null) {
+            fromGeoUri(intent.data.toString())
+        } else {
+            val latitude = intent.getDoubleExtra(EXTRAS_MAPS_LATITUDE, 0.0)
+            val longitude = intent.getDoubleExtra(EXTRAS_MAPS_LONGITUDE, 0.0)
+            val markerRes = intent.getIntExtra(EXTRAS_MAPS_MARKER, -1)
+            if (markerRes != -1) {
+                createBitmapMarker(LatLong(latitude, longitude), markerRes)
+            } else {
+                null
+            }
+        }
+
+        extraMarker?.let {
+            setMyLocSwitch(false)
+            myPos = it.latLong
+        }
+    }
+
+    private fun fromGeoUri(uri: String): Marker? {
+        var schemeSpecific = uri.substring(uri.indexOf(":") + 1)
+
+        val nameMatcher = NAME_PATTERN.matcher(schemeSpecific)
+        if (nameMatcher.find()) {
+            URLDecoder.decode(nameMatcher.group(1))?.let {
+                schemeSpecific = schemeSpecific.substring(0, nameMatcher.start())
+            }
+        }
+
+        var positionPart = schemeSpecific
+        var queryPart = ""
+        val queryStartIndex = schemeSpecific.indexOf('?')
+        if (queryStartIndex != -1) {
+            positionPart = schemeSpecific.substring(0, queryStartIndex)
+            queryPart = schemeSpecific.substring(queryStartIndex + 1)
+        }
+
+        val positionMatcher = POSITION_PATTERN.matcher(positionPart)
+        var lat: Double? = null
+        var lon: Double? = null
+        if (positionMatcher.find()) {
+            lat = positionMatcher.group(1)?.toDouble()
+            lon = positionMatcher.group(2)?.toDouble()
+        }
+
+        val queryPositionMatcher = QUERY_POSITION_PATTERN.matcher(queryPart)
+        if (queryPositionMatcher.find()) {
+            lat = queryPositionMatcher.group(1)?.toDouble()
+            lon = queryPositionMatcher.group(2)?.toDouble()
+        }
+        if (lat == null || lon == null) {
+            return null
+        }
+        return createBitmapMarker(LatLong(lat, lon), R.drawable.marker_orange)
     }
 
     private fun addDBSTileSource(nameResId: Int, baseUrl: String) {
@@ -211,9 +266,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         binding.map.mapView.mapZoomControls.setZoomInResource(R.drawable.zoom_control_in)
         binding.map.mapView.mapZoomControls.setZoomOutResource(R.drawable.zoom_control_out)
         binding.map.mapView.mapZoomControls.setMarginHorizontal(
-            resources.getDimensionPixelOffset(
-                R.dimen.controls_margin
-            )
+            resources.getDimensionPixelOffset(R.dimen.controls_margin)
         )
         binding.map.mapView.mapZoomControls.setMarginVertical(resources.getDimensionPixelOffset(R.dimen.controls_margin))
     }
@@ -324,7 +377,6 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
 
     private fun onLongPress(tapLatLong: LatLong) {
         if (missingMarker == null) {
-            // marker to show at the location
             val drawable = ContextCompat.getDrawable(this, R.drawable.marker_missing)!!
             val bitmap = AndroidGraphicFactory.convertToBitmap(drawable)
             missingMarker =
@@ -410,9 +462,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         osmMapnick.isChecked = map == null
         osmMapnick.setOnMenuItemClickListener(
             MapMenuListener(
-                this,
-                preferencesService,
-                null
+                mapsActivity = this,
+                preferencesService = preferencesService,
+                map = null
             )
         )
         val mapSubmenu = menu.findItem(R.id.maps_submenu).subMenu!!
@@ -421,111 +473,108 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             mapItem.isChecked = tileSource.name == map
             mapItem.setOnMenuItemClickListener(
                 MapMenuListener(
-                    this,
-                    preferencesService,
-                    tileSource.name
+                    mapsActivity = this,
+                    preferencesService = preferencesService,
+                    map = tileSource.name
                 )
             )
         }
         preferencesService.mapDirectoryUri?.let { mapDirectoryUri ->
-            val documentsTree = getDocumentFileFromTreeUri(mapDirectoryUri)
-            if (documentsTree != null) {
-                for (file in documentsTree.listFiles()) {
-                    if (file.isFile && file.name!!.endsWith(".map")) {
-                        val mapItem =
-                            mapSubmenu.add(R.id.maps_group, Menu.NONE, Menu.NONE, file.name)
-                        mapItem.isChecked = map.toUri()?.let { file.uri == it } ?: false
-                        mapItem.setOnMenuItemClickListener(
-                            MapMenuListener(
-                                this,
-                                preferencesService,
-                                file.uri.toString()
-                            )
-                        )
-                    }
-                }
-            }
-        }
-        mapSubmenu.setGroupCheckable(R.id.maps_group, true, true)
-        val mapFolder = mapSubmenu.add(R.string.map_folder)
-        mapFolder.setOnMenuItemClickListener {
-            openMapDirectoryChooser()
-            false
-        }
-        val mapTheme = preferencesService.mapThemeUri
-        val mapThemeDirectory = preferencesService.mapThemeDirectoryUri
-        val defaultTheme = menu.findItem(R.id.default_theme)
-        defaultTheme.isChecked = mapTheme == null
-        defaultTheme.setOnMenuItemClickListener(
-            MapThemeMenuListener(
-                this,
-                preferencesService,
-                null
-            )
-        )
-        val themeSubmenu = menu.findItem(R.id.themes_submenu).subMenu!!
-        mapThemeDirectory?.let {
-            val documentsTree = getDocumentFileFromTreeUri(it)
-            if (documentsTree != null) {
-                for (file in documentsTree.listFiles()) {
-                    if (file.isFile && file.name!!.endsWith(".xml")) {
-                        val themeName = file.name
-                        val themeItem =
-                            themeSubmenu.add(R.id.themes_group, Menu.NONE, Menu.NONE, themeName)
-                        themeItem.isChecked = mapTheme?.let { uri: Uri -> file.uri == uri }
-                            ?: false
-                        themeItem.setOnMenuItemClickListener(
-                            MapThemeMenuListener(
-                                this,
-                                preferencesService,
-                                file.uri
-                            )
-                        )
-                    } else if (file.isDirectory) {
-                        val childFile = file.findFile(file.name + ".xml")
-                        if (childFile != null) {
-                            val themeName = file.name
-                            val themeItem =
-                                themeSubmenu.add(R.id.themes_group, Menu.NONE, Menu.NONE, themeName)
-                            themeItem.isChecked =
-                                mapTheme?.let { uri: Uri -> childFile.uri == uri }
-                                    ?: false
-                            themeItem.setOnMenuItemClickListener(
-                                MapThemeMenuListener(
-                                    this,
-                                    preferencesService,
-                                    childFile.uri
+            getDocumentFileFromTreeUri(mapDirectoryUri)?.let { documentFile ->
+                documentFile.listFiles()
+                    .filter { it.isFile && it.name!!.endsWith(".map") }
+                    .forEach { file ->
+                        mapSubmenu.add(R.id.maps_group, Menu.NONE, Menu.NONE, file.name).apply {
+                            isChecked = map.toUri()?.let { file.uri == it } ?: false
+                            setOnMenuItemClickListener(
+                                MapMenuListener(
+                                    mapsActivity = this@MapsActivity,
+                                    preferencesService = preferencesService,
+                                    map = file.uri.toString()
                                 )
                             )
+                        }
+                    }
+            }
+        }
+
+        mapSubmenu.setGroupCheckable(R.id.maps_group, true, true)
+        mapSubmenu.add(R.string.map_folder).apply {
+            setOnMenuItemClickListener {
+                openMapDirectoryChooser()
+                false
+            }
+        }
+        val mapTheme = preferencesService.mapThemeUri
+        menu.findItem(R.id.default_theme).apply {
+            isChecked = mapTheme == null
+            setOnMenuItemClickListener(
+                MapThemeMenuListener(
+                    mapsActivity = this@MapsActivity,
+                    preferencesService = preferencesService,
+                    mapThemeUri = null
+                )
+            )
+        }
+        val themeSubmenu = menu.findItem(R.id.themes_submenu).subMenu!!
+        preferencesService.mapThemeDirectoryUri?.let {
+            getDocumentFileFromTreeUri(it)?.let { documentsTree ->
+                for (file in documentsTree.listFiles()) {
+                    if (file.isFile && file.name!!.endsWith(".xml")) {
+                        themeSubmenu.add(R.id.themes_group, Menu.NONE, Menu.NONE, file.name).apply {
+                            isChecked = mapTheme?.let { uri: Uri -> file.uri == uri }
+                                ?: false
+                            setOnMenuItemClickListener(
+                                MapThemeMenuListener(
+                                    this@MapsActivity,
+                                    preferencesService,
+                                    file.uri
+                                )
+                            )
+                        }
+                    } else if (file.isDirectory) {
+                        file.findFile(file.name + ".xml")?.let { childFile ->
+                            themeSubmenu.add(R.id.themes_group, Menu.NONE, Menu.NONE, file.name)
+                                .apply {
+                                    isChecked =
+                                        mapTheme?.let { uri: Uri -> childFile.uri == uri }
+                                            ?: false
+                                    setOnMenuItemClickListener(
+                                        MapThemeMenuListener(
+                                            this@MapsActivity,
+                                            preferencesService,
+                                            childFile.uri
+                                        )
+                                    )
+                                }
                         }
                     }
                 }
             }
         }
         themeSubmenu.setGroupCheckable(R.id.themes_group, true, true)
-        val themeFolder = themeSubmenu.add(R.string.theme_folder)
-        themeFolder.setOnMenuItemClickListener {
-            openThemeDirectoryChooser()
-            false
+        themeSubmenu.add(R.string.theme_folder).apply {
+            setOnMenuItemClickListener {
+                openThemeDirectoryChooser()
+                false
+            }
         }
         return true
     }
 
-    private fun getDocumentFileFromTreeUri(uri: Uri): DocumentFile? {
+    private fun getDocumentFileFromTreeUri(uri: Uri) =
         try {
-            return DocumentFile.fromTreeUri(application, uri)
+            DocumentFile.fromTreeUri(application, uri)
         } catch (e: Exception) {
             Log.w(TAG, "Error getting DocumentFile from Uri: $uri")
+            null
         }
-        return null
-    }
 
     private var themeDirectoryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK && result.data != null) {
-            val uri = result.data!!.data
-            if (uri != null) {
+            result.data!!.data?.let { uri ->
                 contentResolver.takePersistableUriPermission(
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -540,8 +589,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK && result.data != null) {
-            val uri = result.data!!.data
-            if (uri != null) {
+            result.data!!.data?.let { uri ->
                 contentResolver.takePersistableUriPermission(
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -553,8 +601,9 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     private fun openDirectory(launcher: ActivityResultLauncher<Intent>) {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        }
         launcher.launch(intent)
     }
 
@@ -576,14 +625,13 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         super.onDestroy()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem) =
         if (item.itemId == R.id.map_info) {
             MapInfoFragment().show(supportFragmentManager, "Map Info Dialog")
+            true
         } else {
-            return super.onOptionsItemSelected(item)
+            super.onOptionsItemSelected(item)
         }
-        return true
-    }
 
     private fun reloadMap() {
         destroyClusterManager()
@@ -602,6 +650,11 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         try {
             createClusterManager()
             addMarkers(stationList, uploadList)
+            extraMarker?.let { marker ->
+                if (stationList.none { it.lat == marker.latLong.latitude && it.lon == marker.latLong.longitude }) {
+                    binding.map.mapView.layerManager.layers.add(marker)
+                }
+            }
             binding.map.progressBar.visibility = View.GONE
             Toast.makeText(
                 this,
@@ -625,11 +678,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 .putExtra(EXTRA_DETAILS_STATION, station)
             startActivity(intent)
         } catch (e: RuntimeException) {
-            Log.e(
-                TAG,
-                String.format("Could not fetch station id %s that we put onto the map", id),
-                e
-            )
+            Log.e(TAG, "Could not fetch station id $id that we put onto the map", e)
         }
     }
 
@@ -658,34 +707,21 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         }
     }
 
-    private fun readStations(): List<Station> {
-        try {
-            return dbAdapter.getAllStations(
-                preferencesService.stationFilter,
-                preferencesService.countryCodes
-            )
-        } catch (e: Exception) {
-            Log.i(TAG, "Datenbank konnte nicht geöffnet werden")
-        }
-        return listOf()
-    }
+    private fun readStations() =
+        dbAdapter.getAllStations(
+            preferencesService.stationFilter,
+            preferencesService.countryCodes
+        )
 
-    private fun readPendingUploads(): List<Upload> {
-        try {
-            return dbAdapter.getPendingUploads(false)
-        } catch (e: Exception) {
-            Log.i(TAG, "Datenbank konnte nicht geöffnet werden")
-        }
-        return listOf()
-    }
+    private fun readPendingUploads() =
+        dbAdapter.getPendingUploads(false)
 
-    private fun createMarkerBitmaps(): List<MarkerBitmap> {
-        return listOf(
+    private fun createMarkerBitmaps() =
+        listOf(
             createSmallSingleIconMarker(),
             createSmallClusterIconMarker(),
             createLargeClusterIconMarker()
         )
-    }
 
     /**
      * large cluster icon. 100 will be ignored.
@@ -789,20 +825,12 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         updatePosition()
     }
 
-    private fun isPendingUpload(station: Station, uploadList: List<Upload>): Boolean {
-        for (upload in uploadList) {
-            if (upload.isPendingPhotoUpload && station.id == upload.stationId && station.country == upload.country) {
-                return true
-            }
-        }
-        return false
-    }
+    private fun isPendingUpload(station: Station, uploadList: List<Upload>) =
+        uploadList.any { it.isPendingPhotoUpload && station.id == it.stationId && station.country == it.country }
 
     public override fun onResume() {
         super.onResume()
-        if (layer is TileDownloadLayer) {
-            (layer as TileDownloadLayer?)!!.onResume()
-        }
+        (layer as? TileDownloadLayer)?.onResume()
         if (preferencesService.lastUpdate == 0L) {
             runUpdateCountriesAndStations()
         } else {
@@ -816,7 +844,6 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     private fun createClusterManager() {
-        // create clusterer instance
         clusterer = ClusterManager(
             binding.map.mapView,
             createMarkerBitmaps(), 9.toByte(),
@@ -828,9 +855,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     }
 
     override fun onPause() {
-        if (layer is TileDownloadLayer) {
-            (layer as TileDownloadLayer?)!!.onPause()
-        }
+        (layer as? TileDownloadLayer)?.onPause()
         unregisterLocationManager()
         val mapPosition = binding.map.mapView.model.mapViewPosition.mapPosition
         preferencesService.lastMapPosition = mapPosition
@@ -1033,8 +1058,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
             } else {
                 preferencesService.setMapThemeUri(mapThemeUri)
             }
-            val mapsActivity = mapsActivityRef.get()
-            mapsActivity?.recreate()
+            mapsActivityRef.get()?.recreate()
             return false
         }
     }

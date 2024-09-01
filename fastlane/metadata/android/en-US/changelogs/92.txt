@@ -1,3 +1,4 @@
+- fix #518 listen to geo: location intents
 - remove broken nearby station notifications
 - update dependencies
 - update translations

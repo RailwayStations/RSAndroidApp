@@ -46,13 +46,18 @@
             android:label="@string/maps_activity"
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            android:exported="false">
+            android:exported="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
 
             <intent-filter>
                 <action android:name=".MapsActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="geo" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
