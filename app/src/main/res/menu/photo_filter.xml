@@ -10,5 +10,5 @@
     <item
         android:id="@+id/photo_filter_inactive"
         android:title="@string/filter_clear"
-        android:icon="@drawable/ic_empty_24"/>
+        android:icon="@drawable/ic_empty_24" />
 </menu>

@@ -723,38 +723,6 @@ class DbAdapter(private val context: Context) {
         return stationList
     }
 
-    fun getStationByLatLngRectangle(
-        lat: Double,
-        lng: Double,
-        stationFilter: StationFilter
-    ): List<Station> {
-        val stationList = ArrayList<Station>()
-        // Select All Query with rectangle - might be later change with it
-        var selectQuery =
-            ("SELECT * FROM " + DATABASE_TABLE_STATIONS + " WHERE " + Stations.LAT + " < " + (lat + 0.5) + " AND " + Stations.LAT + " > " + (lat - 0.5)
-                    + " AND " + Stations.LON + " < " + (lng + 0.5) + " AND " + Stations.LON + " > " + (lng - 0.5))
-        val queryArgs = ArrayList<String>()
-        stationFilter.nickname?.let {
-            selectQuery += " AND " + Stations.PHOTOGRAPHER + " = ?"
-            queryArgs.add(it)
-        }
-        stationFilter.hasPhoto()?.let {
-            selectQuery += " AND " + Stations.PHOTO_URL + " IS " + (if (it) "NOT" else "") + " NULL"
-        }
-        stationFilter.isActive?.let {
-            selectQuery += " AND " + Stations.ACTIVE + " = ?"
-            queryArgs.add(if (it) "1" else "0")
-        }
-        db.rawQuery(selectQuery, queryArgs.toArray(arrayOf())).use { cursor ->
-            if (cursor.moveToFirst()) {
-                do {
-                    stationList.add(createStationFromCursor(cursor))
-                } while (cursor.moveToNext())
-            }
-        }
-        return stationList
-    }
-
     val allCountries: List<Country>
         get() {
             val countryList = ArrayList<Country>()
