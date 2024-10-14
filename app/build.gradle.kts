@@ -41,11 +41,19 @@ android {
         compileSdk = 34
         minSdk = 26
         targetSdk = 34
-        versionCode = 92
-        versionName = "15.3.0"
+        versionCode = 93
+        versionName = "16.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
+
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
+    }
+
     signingConfigs {
         register("nightly") {
             if (System.getProperty("nightly_store_file") != null) {
@@ -55,11 +63,20 @@ android {
                 keyPassword = System.getProperty("nightly_key_password")
             }
         }
+        register("release") {
+            if (System.getProperty("release_store_file") != null) {
+                storeFile = file(System.getProperty("release_store_file"))
+                storePassword = System.getProperty("release_store_password")
+                keyAlias = System.getProperty("release_key_alias")
+                keyPassword = System.getProperty("release_key_password")
+            }
+        }
     }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
@@ -78,12 +95,6 @@ android {
         buildConfig = true
     }
 
-    packaging {
-        resources {
-            excludes += listOf("META-INF/*")
-        }
-    }
-
     lint {
         abortOnError = false
     }
@@ -92,20 +103,21 @@ android {
     val gitVersion = gitVersionProvider.get()
 
     applicationVariants.all {
-        if (name == "nightly") {
+        if (name == "nightly" || name == "debug") {
             outputs.forEach { output ->
                 output as com.android.build.gradle.internal.api.ApkVariantOutputImpl
                 output.versionCodeOverride = gitVersion
                 output.versionNameOverride = "${applicationId}_${output.versionCode}"
                 output.outputFileName = "${applicationId}_${versionCode}.apk"
             }
+        } else {
+            outputs.forEach { output ->
+                output as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+                output.outputFileName = "${applicationId}_${versionName}.apk"
+            }
         }
-        outputs.forEach { output ->
-            output as com.android.build.gradle.internal.api.ApkVariantOutputImpl
-            output.outputFileName = "${applicationId}_${output.versionCode}.apk"
-        }
-    }
 
+    }
 }
 
 // Allow references to generated code
@@ -114,8 +126,6 @@ kapt {
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.retrofit)
