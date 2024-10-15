@@ -61,18 +61,18 @@ class MarkerBitmap(
         maxSize: Int,
         paint: Paint
     ) : this(
-        context,
-        bitmap,
-        bitmap,
-        bitmap,
-        bitmap,
-        bitmap,
-        bitmap,
-        bitmap,
-        grid,
-        textSize,
-        maxSize,
-        paint
+        context = context,
+        iconBmpWithoutPhoto = bitmap,
+        iconBmpWithPhoto = bitmap,
+        iconBmpOwnPhoto = bitmap,
+        iconBmpWithoutPhotoInactive = bitmap,
+        iconBmpWithPhotoInactive = bitmap,
+        iconBmpOwnPhotoInactive = bitmap,
+        iconBmpPendingUpload = bitmap,
+        iconOffset = grid,
+        textSize = textSize,
+        itemMax = maxSize,
+        paint = paint
     )
 
     /**
@@ -145,11 +145,7 @@ fun getBitmapFromTitle(title: String, paint: Paint): Bitmap? {
 
         //Layout the view at the width and height
         bubbleView.layout(0, 0, paint.getTextWidth(title), paint.getTextHeight(title))
-        captionViews[title] =
-            Utils.viewToBitmap(
-                context,
-                bubbleView
-            )
+        captionViews[title] = Utils.viewToBitmap(context, bubbleView)
         captionViews[title]?.incrementRefCount() // FIXME: is never reduced!
     }
     return captionViews[title]

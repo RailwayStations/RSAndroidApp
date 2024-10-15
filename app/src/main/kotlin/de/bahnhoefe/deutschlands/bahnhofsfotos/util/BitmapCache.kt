@@ -26,7 +26,7 @@ object BitmapCache {
     fun getPhoto(resourceUri: String, callback: BitmapAvailableHandler) {
         try {
             getPhoto(URI.create(resourceUri), callback)
-        } catch (e: MalformedURLException) {
+        } catch (_: MalformedURLException) {
             Log.e(TAG, "Couldn't load photo from malformed URL $resourceUri")
             callback.onBitmapAvailable(null)
         }
@@ -49,12 +49,10 @@ object BitmapCache {
 
                 // inform all requesters about the available image
                 synchronized(requests) {
-                    val handlers: Collection<BitmapAvailableHandler>? = requests.remove(resourceUrl)
-                    handlers?.forEach(Consumer { handler: BitmapAvailableHandler ->
-                        handler.onBitmapAvailable(
-                            fetchedBitmap
-                        )
-                    })
+                    requests.remove(resourceUrl)
+                        ?.forEach(Consumer { handler ->
+                            handler.onBitmapAvailable(fetchedBitmap)
+                        })
                         ?: Log.e(
                             TAG,
                             "Request result without a saved requester. This should never happen."

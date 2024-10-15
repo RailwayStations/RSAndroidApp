@@ -154,22 +154,24 @@ class ProblemReportActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             station = intent.getSerializableExtra(EXTRA_PROBLEM_STATION) as Station?
         }
-        if (upload != null && upload!!.isProblemReport) {
-            binding.etProblemComment.setText(upload!!.comment)
-            binding.etNewLatitude.setText(if (upload!!.lat != null) upload!!.lat.toString() else "")
-            binding.etNewLongitude.setText(if (upload!!.lon != null) upload!!.lon.toString() else "")
-            val selected = upload!!.problemType!!.ordinal + 1
-            binding.problemType.setSelection(selected)
-            if (station == null) {
-                station = dbAdapter.getStationForUpload(upload!!)
+        upload?.apply {
+            if (isProblemReport) {
+                binding.etProblemComment.setText(comment)
+                binding.etNewLatitude.setText(if (lat != null) lat.toString() else "")
+                binding.etNewLongitude.setText(if (lon != null) lon.toString() else "")
+                val selected = problemType!!.ordinal + 1
+                binding.problemType.setSelection(selected)
+                if (station == null) {
+                    station = dbAdapter.getStationForUpload(this)
+                }
+                fetchUploadStatus(this)
             }
-            fetchUploadStatus(upload)
         }
-        if (station != null) {
-            binding.tvStationTitle.text = station!!.title
-            binding.etNewTitle.setText(station!!.title)
-            binding.etNewLatitude.setText(station!!.lat.toString())
-            binding.etNewLongitude.setText(station!!.lon.toString())
+        station?.apply {
+            binding.tvStationTitle.text = title
+            binding.etNewTitle.setText(title)
+            binding.etNewLatitude.setText("$lat")
+            binding.etNewLongitude.setText("$lon")
         }
     }
 
@@ -219,27 +221,24 @@ class ProblemReportActivity : AppCompatActivity() {
             return
         }
         upload = Upload(
-            null,
-            station!!.country,
-            station!!.id,
-            null,
-            title,
-            lat,
-            lon,
-            comment,
-            null,
-            type
+            country = station!!.country,
+            stationId = station!!.id,
+            title = title,
+            lat = lat,
+            lon = lon,
+            comment = comment,
+            problemType = type
         )
         upload = dbAdapter.insertUpload(upload!!)
         val problemReport = ProblemReport(
-            station!!.country,
-            station!!.id,
-            comment,
-            type,
-            photoId,
-            lat,
-            lon,
-            title
+            countryCode = station!!.country,
+            stationId = station!!.id,
+            comment = comment,
+            type = type,
+            photoId = photoId,
+            lat = lat,
+            lon = lon,
+            title = title
         )
         SimpleDialogs.confirmOkCancel(
             this@ProblemReportActivity, R.string.send_problem_report
@@ -301,10 +300,7 @@ class ProblemReportActivity : AppCompatActivity() {
         return null
     }
 
-    private fun fetchUploadStatus(upload: Upload?) {
-        if (upload?.remoteId == null) {
-            return
-        }
+    private fun fetchUploadStatus(upload: Upload) {
         val stateQuery = InboxStateQuery(
             upload.remoteId,
             upload.country,

@@ -305,7 +305,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         try {
             imageCaptureResultLauncher.launch(intent)
-        } catch (exception: ActivityNotFoundException) {
+        } catch (_: ActivityNotFoundException) {
             Toast.makeText(this, R.string.no_image_capture_app_found, Toast.LENGTH_LONG).show()
         }
     }

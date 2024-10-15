@@ -306,7 +306,7 @@ class MyDataActivity : AppCompatActivity() {
             if ("http" != url.protocol && "https" != url.protocol) {
                 return false
             }
-        } catch (e: MalformedURLException) {
+        } catch (_: MalformedURLException) {
             return false
         }
         return true

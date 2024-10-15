@@ -26,7 +26,7 @@ enum class UploadState(val textId: Int, val colorId: Int, val isPending: Boolean
     ACCEPTED(
         R.string.upload_state_accepted, R.color.gridItemGood, false
     ),
-    
+
     REJECTED(R.string.upload_state_rejected, R.color.gridItemError, false);
 
     internal class Serializer : JsonDeserializer<UploadState> {
@@ -37,7 +37,7 @@ enum class UploadState(val textId: Int, val colorId: Int, val isPending: Boolean
         ): UploadState {
             return try {
                 valueOf(json.asString)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 UNKNOWN
             }
         }

@@ -1,5 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.db
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +12,11 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.HighScoreItem
 import java.util.Locale
 
 class HighScoreAdapter(private val context: Activity, private var highScore: List<HighScoreItem>) :
-    ArrayAdapter<HighScoreItem?>(
-        context, R.layout.item_highscore, highScore
-    ) {
+    ArrayAdapter<HighScoreItem?>(context, R.layout.item_highscore, highScore) {
+        
     private var filter: HighScoreFilter? = null
+
+    @SuppressLint("SetTextI18n")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var rowView = convertView
         // reuse views
@@ -24,13 +26,13 @@ class HighScoreAdapter(private val context: Activity, private var highScore: Lis
                 context.layoutInflater, parent, false
             )
             rowView = binding.root
-            rowView.setTag(binding)
+            rowView.tag = binding
         } else {
             binding = rowView.tag as ItemHighscoreBinding
         }
-        val (name, photos, position1) = highScore[position]
+        val (name, photoCount, position1) = highScore[position]
         binding.highscoreName.text = name
-        binding.highscorePhotos.text = photos.toString()
+        binding.highscorePhotos.text = "$photoCount"
         binding.highscorePosition.text = "$position1."
         when (position1) {
             1 -> {

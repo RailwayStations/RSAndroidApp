@@ -1,5 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos.db
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ class InboxAdapter(private val context: Activity, private val publicInboxes: Lis
     ArrayAdapter<PublicInbox?>(
         context, R.layout.item_inbox, publicInboxes
     ) {
+    @SuppressLint("SetTextI18n")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var rowView = convertView
         // reuse views
@@ -21,7 +23,7 @@ class InboxAdapter(private val context: Activity, private val publicInboxes: Lis
                 context.layoutInflater, parent, false
             )
             rowView = binding.root
-            rowView.setTag(binding)
+            rowView.tag = binding
         } else {
             binding = rowView.tag as ItemInboxBinding
         }
@@ -34,7 +36,7 @@ class InboxAdapter(private val context: Activity, private val publicInboxes: Lis
         } else {
             binding.txtStationId.setText(R.string.missing_station)
         }
-        binding.txtCoordinates.text = lat.toString() + "," + lon.toString()
+        binding.txtCoordinates.text = "$lat,$lon"
         return rowView
     }
 }

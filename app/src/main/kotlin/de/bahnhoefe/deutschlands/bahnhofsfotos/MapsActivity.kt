@@ -173,7 +173,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
 
         val nameMatcher = NAME_PATTERN.matcher(schemeSpecific)
         if (nameMatcher.find()) {
-            URLDecoder.decode(nameMatcher.group(1))?.let {
+            URLDecoder.decode(nameMatcher.group(1), "UTF-8")?.let {
                 schemeSpecific = schemeSpecific.substring(0, nameMatcher.start())
             }
         }
@@ -485,7 +485,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                     .filter { it.isFile && it.name!!.endsWith(".map") }
                     .forEach { file ->
                         mapSubmenu.add(R.id.maps_group, Menu.NONE, Menu.NONE, file.name).apply {
-                            isChecked = map.toUri()?.let { file.uri == it } ?: false
+                            isChecked = map.toUri()?.let { file.uri == it } == true
                             setOnMenuItemClickListener(
                                 MapMenuListener(
                                     mapsActivity = this@MapsActivity,
@@ -565,7 +565,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private fun getDocumentFileFromTreeUri(uri: Uri) =
         try {
             DocumentFile.fromTreeUri(application, uri)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Log.w(TAG, "Error getting DocumentFile from Uri: $uri")
             null
         }

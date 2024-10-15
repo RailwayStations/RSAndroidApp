@@ -45,7 +45,7 @@ class ShowErrorActivity : AppCompatActivity() {
                     )
                 )
             )
-        } catch (ignored: UnsupportedEncodingException) {
+        } catch (_: UnsupportedEncodingException) {
             // can't happen as UTF-8 is always available
             return
         }

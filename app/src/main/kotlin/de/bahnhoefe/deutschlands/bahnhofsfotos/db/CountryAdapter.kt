@@ -35,7 +35,7 @@ class CountryAdapter(
         if (rowView == null) {
             val binding = ItemCountryBinding.inflate(layoutInflater, parent, false)
             rowView = binding.root
-            rowView.setTag(binding)
+            rowView.tag = binding
         }
 
         val binding = rowView.tag as ItemCountryBinding

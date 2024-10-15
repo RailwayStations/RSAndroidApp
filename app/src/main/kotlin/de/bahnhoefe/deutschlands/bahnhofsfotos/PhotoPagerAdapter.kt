@@ -1,5 +1,6 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import de.bahnhoefe.deutschlands.bahnhofsfotos.model.PageablePhoto
 class PhotoPagerAdapter(private val context: Context) : RecyclerView.Adapter<PhotoViewHolder>() {
     private val pageablePhotos: MutableList<PageablePhoto> = mutableListOf()
 
+    @SuppressLint("NotifyDataSetChanged")
     fun addPageablePhoto(pageablePhoto: PageablePhoto): Int {
         pageablePhotos.add(pageablePhoto)
         notifyDataSetChanged()

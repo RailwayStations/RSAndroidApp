@@ -414,7 +414,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
             intent.addCategory(Intent.CATEGORY_LAUNCHER)
             context.startActivity(intent)
             true
-        } catch (e: ActivityNotFoundException) {
+        } catch (_: ActivityNotFoundException) {
             false
         }
     }
@@ -525,7 +525,7 @@ class DetailsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback 
                 )
                 try {
                     startActivity(intent)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     Toast.makeText(context, R.string.activitynotfound, Toast.LENGTH_LONG).show()
                 }
             }.show()

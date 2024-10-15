@@ -22,7 +22,7 @@ class BitmapDownloader(
         Log.i(TAG, "Fetching Bitmap from URI: $uri")
         try {
             val httpConnection = uri.toURL().openConnection() as HttpURLConnection
-            httpConnection.inputStream.use { `is` ->
+            httpConnection.inputStream.use { inputStream ->
                 if (httpConnection.responseCode == HttpURLConnection.HTTP_OK) {
                     val contentType = httpConnection.contentType
                     if (contentType != null && !contentType.startsWith("image")) {
@@ -31,12 +31,12 @@ class BitmapDownloader(
                             "Supplied URL does not appear to be an image resource (type=$contentType)"
                         )
                     }
-                    bitmap = BitmapFactory.decodeStream(`is`)
+                    bitmap = BitmapFactory.decodeStream(inputStream)
                 } else {
                     Log.e(TAG, "Error downloading photo: " + httpConnection.responseCode)
                 }
             }
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             Log.e(TAG, "Could not download photo")
             bitmap = null
         }

@@ -52,10 +52,10 @@ class StationFilterBar(
 
     @JvmOverloads
     constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : this(
-        context,
-        attrs,
-        defStyleAttr,
-        0
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        defStyleRes = 0
     )
 
     init {

@@ -39,7 +39,7 @@ class RailwayStationsApplication : Application() {
                     @SuppressLint("DiscouragedPrivateApi") val getProcessName =
                         activityThread.getDeclaredMethod("currentProcessName")
                     processName = getProcessName.invoke(null) as String
-                } catch (ignored: Exception) {
+                } catch (_: Exception) {
                 }
             } else {
                 processName = getProcessName()
@@ -51,7 +51,7 @@ class RailwayStationsApplication : Application() {
 
 fun String?.toUri() = try {
     Uri.parse(this)
-} catch (ignored: Exception) {
+} catch (_: Exception) {
     Log.e(TAG, "can't read Uri string $this")
     null
 }

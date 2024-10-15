@@ -23,6 +23,7 @@ data class InboxResponse @JvmOverloads constructor(
             inState = value
         }
 
+    @Suppress("unused")
     @JsonAdapter(InboxResponseState.Serializer::class)
     enum class InboxResponseState(val messageId: Int, val uploadState: UploadState) {
         REVIEW(
@@ -56,7 +57,7 @@ data class InboxResponse @JvmOverloads constructor(
             ): InboxResponseState {
                 return try {
                     valueOf(json.asString)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     ERROR
                 }
             }
