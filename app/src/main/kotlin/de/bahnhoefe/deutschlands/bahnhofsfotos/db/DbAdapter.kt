@@ -670,7 +670,7 @@ class DbAdapter(private val context: Context) {
             null,
             null
         ).use { cursor ->
-            if (cursor != null && cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 do {
                     var country = createCountryFromCursor(cursor)
                     val providerApps = mutableListOf<ProviderApp>()
@@ -683,7 +683,7 @@ class DbAdapter(private val context: Context) {
                         null,
                         null
                     ).use { cursorPa ->
-                        if (cursorPa != null && cursorPa.moveToFirst()) {
+                        if (cursorPa.moveToFirst()) {
                             do {
                                 providerApps.add(createProviderAppFromCursor(cursorPa))
                             } while (cursorPa.moveToNext())

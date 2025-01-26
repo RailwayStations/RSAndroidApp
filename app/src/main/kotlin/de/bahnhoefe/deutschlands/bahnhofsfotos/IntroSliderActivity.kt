@@ -1,19 +1,19 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos
 
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
-import android.view.WindowInsetsController
-import android.view.WindowManager
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,24 +31,19 @@ class IntroSliderActivity : AppCompatActivity() {
     lateinit var preferencesService: PreferencesService
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         binding = ActivityIntroSliderBinding.inflate(layoutInflater)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(false)
-            window.decorView.windowInsetsController?.let {
-                it.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                it.systemBarsBehavior =
-                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomBar) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = insets.bottom
             }
-        } else {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            WindowInsetsCompat.CONSUMED
         }
         setContentView(binding.root)
         layouts = intArrayOf(R.layout.intro_slider1, R.layout.intro_slider2)
         addBottomDots(0)
-        changeStatusBarColor()
         val viewPagerAdapter = ViewPagerAdapter()
         binding.viewPager.adapter = viewPagerAdapter
         binding.viewPager.addOnPageChangeListener(viewListener)
@@ -118,12 +113,6 @@ class IntroSliderActivity : AppCompatActivity() {
         }
 
         override fun onPageScrollStateChanged(state: Int) {}
-    }
-
-    private fun changeStatusBarColor() {
-        val window = window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = Color.TRANSPARENT
     }
 
     inner class ViewPagerAdapter : PagerAdapter() {

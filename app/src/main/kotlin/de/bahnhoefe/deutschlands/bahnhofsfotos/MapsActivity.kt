@@ -20,7 +20,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
-import android.view.WindowManager
 import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.Toast
@@ -62,7 +61,6 @@ import org.mapsforge.core.model.LatLong
 import org.mapsforge.core.model.MapPosition
 import org.mapsforge.core.model.Point
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
-import org.mapsforge.map.android.input.MapZoomControls
 import org.mapsforge.map.android.util.AndroidUtil
 import org.mapsforge.map.datastore.MapDataStore
 import org.mapsforge.map.layer.Layer
@@ -135,21 +133,28 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         super.onCreate(savedInstanceState)
         AndroidGraphicFactory.createInstance(application)
         binding = ActivityMapsBinding.inflate(layoutInflater)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot()) { v, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.mapsToolbar) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updateLayoutParams<MarginLayoutParams> {
                 topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.map.stationFilterBar) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<MarginLayoutParams> {
                 bottomMargin = insets.bottom
             }
             WindowInsetsCompat.CONSUMED
         }
         setContentView(binding.root)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = Color.parseColor("#c71c4d")
         setSupportActionBar(binding.mapsToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         nickname = preferencesService.nickname
-        onNewIntent(intent)
+
+        intent?.let {
+            onNewIntent(it)
+        }
         addDBSTileSource(R.string.dbs_osm_basic, "/styles/dbs-osm-basic/")
         addDBSTileSource(R.string.dbs_osm_railway, "/styles/dbs-osm-railway/")
         createMapViews()
@@ -157,12 +162,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
         checkPermissionsAndCreateLayersAndControls()
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        if (intent == null) {
-            return
-        }
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-
         extraMarker = if ("geo" == intent.scheme && intent.data != null) {
             fromGeoUri(intent.data.toString())
         } else {
@@ -271,18 +272,6 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private fun createMapViews() {
         binding.map.mapView.isClickable = true
         binding.map.mapView.setOnMapDragListener { myLocSwitch?.isChecked = false }
-        binding.map.mapView.mapScaleBar.isVisible = true
-        binding.map.mapView.setBuiltInZoomControls(true)
-        binding.map.mapView.mapZoomControls.isAutoHide = true
-        binding.map.mapView.mapZoomControls.zoomLevelMin = zoomLevelMin
-        binding.map.mapView.mapZoomControls.zoomLevelMax = zoomLevelMax
-        binding.map.mapView.mapZoomControls.setZoomControlsOrientation(MapZoomControls.Orientation.VERTICAL_IN_OUT)
-        binding.map.mapView.mapZoomControls.setZoomInResource(R.drawable.zoom_control_in)
-        binding.map.mapView.mapZoomControls.setZoomOutResource(R.drawable.zoom_control_out)
-        binding.map.mapView.mapZoomControls.setMarginHorizontal(
-            resources.getDimensionPixelOffset(R.dimen.controls_margin)
-        )
-        binding.map.mapView.mapZoomControls.setMarginVertical(resources.getDimensionPixelOffset(R.dimen.controls_margin))
     }
 
     private val zoomLevelMax: Byte
@@ -536,8 +525,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                 for (file in documentsTree.listFiles()) {
                     if (file.isFile && file.name!!.endsWith(".xml")) {
                         themeSubmenu.add(R.id.themes_group, Menu.NONE, Menu.NONE, file.name).apply {
-                            isChecked = mapTheme?.let { uri: Uri -> file.uri == uri }
-                                ?: false
+                            isChecked = mapTheme?.let { uri: Uri -> file.uri == uri } == true
                             setOnMenuItemClickListener(
                                 MapThemeMenuListener(
                                     this@MapsActivity,
@@ -551,8 +539,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                             themeSubmenu.add(R.id.themes_group, Menu.NONE, Menu.NONE, file.name)
                                 .apply {
                                     isChecked =
-                                        mapTheme?.let { uri: Uri -> childFile.uri == uri }
-                                            ?: false
+                                        mapTheme?.let { uri: Uri -> childFile.uri == uri } == true
                                     setOnMenuItemClickListener(
                                         MapThemeMenuListener(
                                             this@MapsActivity,

@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             xmlns:app="http://schemas.android.com/apk/res-auto"
-                                             xmlns:tools="http://schemas.android.com/tools"
-                                             android:id="@+id/content_main"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="match_parent"
-                                             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                                             tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.HighScoreActivity"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.HighScoreActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingBottom="@dimen/activity_vertical_margin"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    android:paddingTop="@dimen/activity_vertical_margin"
-                    tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.HighScoreActivity">
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context="de.bahnhoefe.deutschlands.bahnhofsfotos.HighScoreActivity">
 
         <Spinner
             android:id="@+id/countries"
@@ -25,7 +24,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
             android:background="@android:drawable/btn_dropdown"
-            android:spinnerMode="dropdown"/>
+            android:spinnerMode="dropdown" />
 
         <ListView
             android:layout_width="wrap_content"
@@ -33,7 +32,7 @@
             android:id="@+id/highscore_list"
             android:layout_alignParentStart="true"
             android:layout_below="@id/countries"
-            android:descendantFocusability="beforeDescendants"/>
+            android:descendantFocusability="beforeDescendants" />
 
 
     </RelativeLayout>

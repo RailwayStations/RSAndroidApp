@@ -1,12 +1,10 @@
 package de.bahnhoefe.deutschlands.bahnhofsfotos
 
 import android.os.Bundle
-import android.view.ViewGroup.MarginLayoutParams
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
 import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityCountryBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ItemCountryBinding
@@ -31,13 +29,18 @@ class CountryActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val binding = ActivityCountryBinding.inflate(layoutInflater)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot()) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updateLayoutParams<MarginLayoutParams> {
-                bottomMargin = insets.bottom
-                topMargin = insets.top
-            }
-            WindowInsetsCompat.CONSUMED
+        ViewCompat.setOnApplyWindowInsetsListener(binding.lstCountries) { v, windowInsets ->
+            val innerPadding = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                        or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.setPadding(
+                innerPadding.left,
+                innerPadding.top,
+                innerPadding.right,
+                innerPadding.bottom
+            )
+            windowInsets
         }
         setContentView(binding.root)
         previousSelectedCountries = preferencesService.countryCodes

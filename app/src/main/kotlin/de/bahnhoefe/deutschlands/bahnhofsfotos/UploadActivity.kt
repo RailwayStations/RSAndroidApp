@@ -307,11 +307,12 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             BuildConfig.APPLICATION_ID + ".fileprovider",
             cameraTempFile
         )
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-        intent.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, resources.getString(R.string.app_name))
-        intent.putExtra(MediaStore.EXTRA_MEDIA_TITLE, binding.upload.etStationTitle.text)
-        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+            putExtra(MediaStore.EXTRA_MEDIA_ALBUM, resources.getString(R.string.app_name))
+            putExtra(MediaStore.EXTRA_MEDIA_TITLE, binding.upload.etStationTitle.text)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        }
         try {
             imageCaptureResultLauncher.launch(intent)
         } catch (_: ActivityNotFoundException) {
@@ -319,7 +320,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         }
     }
 
-    private val selectPictureResultLauncher = registerForActivityResult<String, Uri>(
+    private val selectPictureResultLauncher = registerForActivityResult<String, Uri?>(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         try {

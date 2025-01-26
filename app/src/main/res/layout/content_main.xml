@@ -24,34 +24,23 @@
             android:indeterminate="true"
             android:visibility="gone" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:background="#f0f0f0"
-            android:layout_centerHorizontal="true"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
-            android:layout_below="@+id/progressBar"
-            android:id="@+id/filter_result" />
-
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/pullToRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="10dp"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/filter_result">
+            android:layout_below="@+id/progressBar">
 
             <ListView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/lstStations"
+                android:clipToPadding="false"
                 android:scrollX="0px"
                 android:scrollY="0px"
                 android:scrollbarAlwaysDrawVerticalTrack="true"
-                android:scrollbarSize="15dp"
+                android:scrollbarSize="13dp"
                 android:scrollbarStyle="outsideOverlay"
                 android:scrollbars="vertical" />
 

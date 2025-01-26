@@ -20,6 +20,7 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -80,10 +81,24 @@ class MainActivity : AppCompatActivity(), LocationListener,
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot()) { v, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appBarMain.toolbar) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updateLayoutParams<MarginLayoutParams> {
                 topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appBarMain.main.lstStations) { v, windowInsets ->
+            val innerPadding = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                        or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.setPadding(innerPadding.left, 0, innerPadding.right, innerPadding.bottom.plus(100))
+            windowInsets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appBarMain.main.stationFilterBar) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<MarginLayoutParams> {
                 bottomMargin = insets.bottom
             }
             WindowInsetsCompat.CONSUMED
@@ -188,8 +203,11 @@ class MainActivity : AppCompatActivity(), LocationListener,
                         startActivity(intentDetails)
                     }
             }
-            binding.appBarMain.main.filterResult.text =
-                getString(R.string.filter_result, stationListAdapter!!.count, stationCount)
+            Toast.makeText(
+                this,
+                getString(R.string.filter_result, stationListAdapter!!.count, stationCount),
+                Toast.LENGTH_SHORT
+            ).show()
         } catch (e: Exception) {
             Log.e(TAG, "Unhandled Exception in onQueryTextSubmit", e)
         }
