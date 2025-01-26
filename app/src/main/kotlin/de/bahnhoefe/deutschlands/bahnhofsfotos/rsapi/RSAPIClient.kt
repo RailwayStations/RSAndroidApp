@@ -30,6 +30,7 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.logging.HttpLoggingInterceptor.Level
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Retrofit
@@ -51,7 +52,7 @@ class RSAPIClient(
 ) {
     private var api: RSAPI
     private var token: Token? = null
-    private var pkce: PKCEUtil? = null
+    private val pkce = PKCEUtil()
 
     init {
         val accessToken = preferencesService.accessToken
@@ -74,12 +75,10 @@ class RSAPIClient(
 
     @get:Throws(NoSuchAlgorithmException::class)
     private val pkceCodeChallenge: String
-        get() {
-            pkce = PKCEUtil()
-            return pkce!!.codeChallenge
-        }
-    private val pkceCodeVerifier: String?
-        get() = pkce?.codeVerifier
+        get() = pkce.codeChallenge
+
+    private val pkceCodeVerifier: String
+        get() = pkce.codeVerifier
 
     private fun createRSAPI(): RSAPI {
         val retrofit = Retrofit.Builder()
@@ -92,7 +91,7 @@ class RSAPIClient(
     }
 
     private fun createOkHttpClient(): OkHttpClient {
-        val builder: OkHttpClient.Builder = OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .addInterceptor(UserAgentInterceptor())
             .addInterceptor(AcceptLanguageInterceptor())
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -100,18 +99,19 @@ class RSAPIClient(
             .readTimeout(60, TimeUnit.SECONDS)
 
         if (BuildConfig.DEBUG) {
-            val loggingInterceptor = HttpLoggingInterceptor()
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-            builder.addInterceptor(loggingInterceptor)
+            builder.addInterceptor(HttpLoggingInterceptor().apply<HttpLoggingInterceptor> {
+                setLevel(Level.BODY)
+            })
         }
 
         return builder.build()
     }
 
     private fun createGsonConverterFactory(): GsonConverterFactory {
-        val gson = GsonBuilder()
-        gson.registerTypeAdapter(HighScore::class.java, HighScoreDeserializer())
-        gson.registerTypeAdapter(License::class.java, LicenseDeserializer())
+        val gson = GsonBuilder().apply {
+            registerTypeAdapter(HighScore::class.java, HighScoreDeserializer())
+            registerTypeAdapter(License::class.java, LicenseDeserializer())
+        }
         return GsonConverterFactory.create(gson.create())
     }
 
@@ -306,7 +306,7 @@ class RSAPIClient(
             clientId,
             "authorization_code",
             redirectUri,
-            pkceCodeVerifier!!
+            pkceCodeVerifier
         )
     }
 

@@ -18,18 +18,19 @@ class PKCEUtil {
         }
 
     private fun generateCodeVerifier(): String {
-        val secureRandom = SecureRandom()
         val codeVerifier = ByteArray(32)
-        secureRandom.nextBytes(codeVerifier)
+        SecureRandom().run {
+            nextBytes(codeVerifier)
+        }
         return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier)
     }
 
     @Throws(NoSuchAlgorithmException::class)
     private fun generateCodeChallenge(codeVerifier: String): String {
-        val bytes = codeVerifier.toByteArray(Charset.defaultCharset())
-        val messageDigest = MessageDigest.getInstance("SHA-256")
-        messageDigest.update(bytes, 0, bytes.size)
-        val digest = messageDigest.digest()
+        val digest = MessageDigest.getInstance("SHA-256").apply<MessageDigest> {
+            val bytes = codeVerifier.toByteArray(Charset.defaultCharset())
+            update(bytes, 0, bytes.size)
+        }.digest()
         return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
     }
 }

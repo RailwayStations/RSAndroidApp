@@ -7,11 +7,16 @@ import android.util.Log
 import android.util.Patterns
 import android.view.ContextThemeWrapper
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityMydataBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ChangePasswordBinding
@@ -50,10 +55,17 @@ class MyDataActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMydataBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        binding = ActivityMydataBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityMydataBinding.inflate(layoutInflater)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot()) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = insets.bottom
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
         setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setTitle(R.string.login)

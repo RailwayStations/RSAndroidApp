@@ -20,6 +20,7 @@
     <color name="filterInactive">#b0b0b0</color>
 
     <color name="chipForeground">#737373</color>
+    <color name="chipBackground">#FFFFFF</color>
     <color name="fullTransparent">#00FFFFFF</color>
     <color name="colorSurface">#000000</color>
 

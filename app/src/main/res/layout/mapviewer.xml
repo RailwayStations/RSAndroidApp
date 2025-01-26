@@ -18,8 +18,7 @@
         android:id="@+id/mapView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@id/progressBar"
-        android:layout_above="@id/station_filter_bar" />
+        android:layout_below="@id/progressBar" />
 
     <TextView
         android:id="@+id/attribution"
@@ -37,6 +36,7 @@
         android:id="@+id/station_filter_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@color/fullTransparent"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
