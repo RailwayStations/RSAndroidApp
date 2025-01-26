@@ -38,9 +38,9 @@ android {
     defaultConfig {
         testInstrumentationRunnerArguments += mapOf("runnerBuilder" to "de.mannodermaus.junit5.AndroidJUnit5Builder")
         applicationId = "de.bahnhoefe.deutschlands.bahnhofsfotos"
-        compileSdk = 34
+        compileSdk = 35
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 93
         versionName = "16.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -136,7 +136,6 @@ dependencies {
     implementation(libs.mapsforge.themes)
     implementation(libs.mapsforge.map)
     implementation(libs.mapsforge.map.android)
-    implementation(libs.org.mapsforge.mapsforge.map.android)
     implementation(libs.mapsforge.map.reader)
     implementation(libs.mapsforge.themes)
     implementation(libs.kxml2)

@@ -18,16 +18,21 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityUploadBinding
@@ -95,10 +100,17 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     private var crc32: Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        binding = ActivityUploadBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityUploadBinding.inflate(layoutInflater)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot()) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = insets.bottom
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
         setContentView(binding.root)
         countries = ArrayList(dbAdapter.allCountries)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -109,10 +121,7 @@ class UploadActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             return
         }
         if (!preferencesService.profile.isAllowedToUploadPhoto()) {
-            confirmOk(
-                this,
-                R.string.no_photo_upload_allowed
-            ) { _: DialogInterface?, _: Int ->
+            confirmOk(this, R.string.no_photo_upload_allowed) { _: DialogInterface?, _: Int ->
                 startActivity(Intent(this, MyDataActivity::class.java))
                 finish()
             }

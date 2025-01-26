@@ -6,12 +6,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import dagger.hilt.android.AndroidEntryPoint
 import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.ActivityHighScoreBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
@@ -43,10 +48,17 @@ class HighScoreActivity : AppCompatActivity() {
     lateinit var rsapiClient: RSAPIClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        binding = ActivityHighScoreBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityHighScoreBinding.inflate(layoutInflater)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot()) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = insets.bottom
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
         setContentView(binding.root)
         val firstSelectedCountry = preferencesService.countryCodes.iterator().next()
         val countries = ArrayList(dbAdapter.allCountries)

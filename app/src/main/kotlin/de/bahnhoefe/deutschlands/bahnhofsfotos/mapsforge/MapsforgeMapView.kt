@@ -22,7 +22,7 @@ class MapsforgeMapView(context: Context?, attributeSet: AttributeSet?) :
         try {
             gestureDetector.onTouchEvent(ev)
             return super.onTouchEvent(ev)
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
         }
         return false
     }
