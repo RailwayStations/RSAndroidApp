@@ -146,6 +146,8 @@ dependencies {
     implementation(libs.legacy.support.v4)
     implementation(libs.cardview)
     implementation(libs.appcompat)
+    implementation(libs.activity)
+    implementation(libs.activity.ktx)
     implementation(libs.material)
     implementation(libs.browser)
     implementation(libs.constraintlayout)
