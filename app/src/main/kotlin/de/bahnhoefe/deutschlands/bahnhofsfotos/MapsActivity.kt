@@ -71,11 +71,11 @@ import org.mapsforge.map.layer.download.tilesource.OnlineTileSource
 import org.mapsforge.map.layer.download.tilesource.OpenStreetMapMapnik
 import org.mapsforge.map.layer.overlay.Marker
 import org.mapsforge.map.layer.renderer.TileRendererLayer
-import org.mapsforge.map.model.IMapViewPosition
+import org.mapsforge.map.model.MapViewPosition
 import org.mapsforge.map.reader.MapFile
-import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.rendertheme.StreamRenderTheme
 import org.mapsforge.map.rendertheme.XmlRenderTheme
+import org.mapsforge.map.rendertheme.internal.MapsforgeThemes
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.lang.ref.WeakReference
@@ -256,7 +256,7 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
      *
      * @param mvp the map view position to be set
      */
-    private fun initializePosition(mvp: IMapViewPosition) {
+    private fun initializePosition(mvp: MapViewPosition) {
         if (myPos != null) {
             mvp.mapPosition = MapPosition(myPos, preferencesService.zoomLevelDefault)
         } else {
@@ -272,6 +272,8 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
     private fun createMapViews() {
         binding.map.mapView.isClickable = true
         binding.map.mapView.setOnMapDragListener { myLocSwitch?.isChecked = false }
+        binding.map.mapView.mapScaleBar.isVisible = false
+        binding.map.mapView.setBuiltInZoomControls(false)
     }
 
     private val zoomLevelMax: Byte
@@ -302,10 +304,10 @@ class MapsActivity : AppCompatActivity(), LocationListener, TapHandler<BahnhofGe
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Error loading theme $it", e)
-                    return InternalRenderTheme.DEFAULT
+                    return MapsforgeThemes.DEFAULT
                 }
             }
-            return InternalRenderTheme.DEFAULT
+            return MapsforgeThemes.DEFAULT
         }
     private val mapFile: MapDataStore?
         get() {

@@ -9,6 +9,7 @@ import org.mapsforge.core.model.BoundingBox
 import org.mapsforge.core.model.LatLong
 import org.mapsforge.core.model.Point
 import org.mapsforge.core.model.Rectangle
+import org.mapsforge.core.model.Rotation
 import org.mapsforge.core.util.MercatorProjection
 import org.mapsforge.map.layer.Layer
 
@@ -48,7 +49,8 @@ class ClusterMarker<T : GeoItem>(private val cluster: Cluster<T>) : Layer() {
     @Synchronized
     override fun draw(
         boundingBox: BoundingBox, zoomLevel: Byte,
-        canvas: Canvas, topLeftPoint: Point
+        canvas: Canvas, topLeftPoint: Point,
+        rotation: Rotation,
     ) {
         if (cluster.clusterManager == null ||
             latLong == null
