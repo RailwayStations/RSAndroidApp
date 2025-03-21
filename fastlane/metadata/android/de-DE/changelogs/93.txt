@@ -1,0 +1,3 @@
+- Neu: Sprache kann über das AppInfo Menü des Betriebssystems geändert werden
+- Abhängigkeiten aktualisiert
+- Übersetzungen aktualisiert

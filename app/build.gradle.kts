@@ -41,8 +41,8 @@ android {
         compileSdk = 35
         minSdk = 26
         targetSdk = 35
-        versionCode = 93
-        versionName = "16.0.0"
+        versionCode = 94
+        versionName = "16.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -97,6 +97,11 @@ android {
 
     lint {
         abortOnError = false
+    }
+
+    androidResources {
+        @Suppress("UnstableApiUsage")
+        generateLocaleConfig = true
     }
 
     val gitVersionProvider = providers.of(GitVersionValueSource::class) {}
