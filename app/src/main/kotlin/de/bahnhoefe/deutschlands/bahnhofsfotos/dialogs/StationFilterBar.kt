@@ -26,6 +26,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.chip.Chip
 import de.bahnhoefe.deutschlands.bahnhofsfotos.CountryActivity
 import de.bahnhoefe.deutschlands.bahnhofsfotos.R
+import de.bahnhoefe.deutschlands.bahnhofsfotos.databinding.StationFilterBarBinding
 import de.bahnhoefe.deutschlands.bahnhofsfotos.db.DbAdapter
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.PreferencesService
 import de.bahnhoefe.deutschlands.bahnhofsfotos.util.StationFilter
@@ -39,16 +40,13 @@ class StationFilterBar(
     defStyleAttr: Int,
     defStyleRes: Int
 ) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
-    private val toggleSort: Chip
-    private val photoFilter: Chip
-    private val activeFilter: Chip
-    private val nicknameFilter: Chip
-    private val countrySelection: Chip
     private var listener: OnChangeListener? = null
     private lateinit var context: Context
     private lateinit var preferencesService: PreferencesService
     private lateinit var dbAdapter: DbAdapter
     private lateinit var activity: Activity
+
+    private val binding = StationFilterBarBinding.inflate(LayoutInflater.from(context), this, true)
 
     @JvmOverloads
     constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : this(
@@ -59,17 +57,11 @@ class StationFilterBar(
     )
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.station_filter_bar, this)
-        toggleSort = findViewById(R.id.toggleSort)
-        toggleSort.setOnClickListener { v: View -> showSortMenu(v) }
-        photoFilter = findViewById(R.id.photoFilter)
-        photoFilter.setOnClickListener { v: View -> showPhotoFilter(v) }
-        activeFilter = findViewById(R.id.activeFilter)
-        activeFilter.setOnClickListener { v: View -> showActiveFilter(v) }
-        nicknameFilter = findViewById(R.id.nicknameFilter)
-        nicknameFilter.setOnClickListener { selectNicknameFilter() }
-        countrySelection = findViewById(R.id.countrySelection)
-        countrySelection.setOnClickListener { selectCountry() }
+        binding.toggleSort.setOnClickListener { v: View -> showSortMenu(v) }
+        binding.photoFilter.setOnClickListener { v: View -> showPhotoFilter(v) }
+        binding.activeFilter.setOnClickListener { v: View -> showActiveFilter(v) }
+        binding.nicknameFilter.setOnClickListener { selectNicknameFilter() }
+        binding.countrySelection.setOnClickListener { selectCountry() }
     }
 
     private fun setCloseIcon(chip: Chip, icon: Int) {
@@ -135,25 +127,25 @@ class StationFilterBar(
         }
         val stationFilter = preferencesService.stationFilter
         setChipStatus(
-            photoFilter,
+            binding.photoFilter,
             stationFilter.photoIcon,
             stationFilter.isPhotoFilterActive,
             R.string.no_text
         )
         setChipStatus(
-            nicknameFilter,
+            binding.nicknameFilter,
             stationFilter.nicknameIcon,
             stationFilter.isNicknameFilterActive,
             stationFilter.getNicknameText(activity)
         )
         setChipStatus(
-            activeFilter,
+            binding.activeFilter,
             stationFilter.activeIcon,
             stationFilter.isActiveFilterActive,
             stationFilter.activeText
         )
         setChipStatus(
-            countrySelection,
+            binding.countrySelection,
             R.drawable.ic_countries_active_24px,
             true,
             getCountryText(preferencesService)
@@ -180,7 +172,7 @@ class StationFilterBar(
                 }
             }
             setChipStatus(
-                activeFilter,
+                binding.activeFilter,
                 stationFilter.activeIcon,
                 stationFilter.isActiveFilterActive,
                 R.string.no_text
@@ -191,12 +183,12 @@ class StationFilterBar(
         setPopupMenuIcons(popup)
         popup.setOnDismissListener {
             setCloseIcon(
-                activeFilter,
+                binding.activeFilter,
                 R.drawable.ic_baseline_arrow_drop_up_24
             )
         }
         popup.show()
-        setCloseIcon(activeFilter, R.drawable.ic_baseline_arrow_drop_down_24)
+        setCloseIcon(binding.activeFilter, R.drawable.ic_baseline_arrow_drop_down_24)
     }
 
     private fun showPhotoFilter(v: View) {
@@ -218,7 +210,7 @@ class StationFilterBar(
                 }
             }
             setChipStatus(
-                photoFilter,
+                binding.photoFilter,
                 stationFilter.photoIcon,
                 stationFilter.isPhotoFilterActive,
                 R.string.no_text
@@ -229,12 +221,12 @@ class StationFilterBar(
         setPopupMenuIcons(popup)
         popup.setOnDismissListener {
             setCloseIcon(
-                photoFilter,
+                binding.photoFilter,
                 R.drawable.ic_baseline_arrow_drop_up_24
             )
         }
         popup.show()
-        setCloseIcon(photoFilter, R.drawable.ic_baseline_arrow_drop_down_24)
+        setCloseIcon(binding.photoFilter, R.drawable.ic_baseline_arrow_drop_down_24)
     }
 
     private fun selectCountry() {
@@ -256,12 +248,12 @@ class StationFilterBar(
         setPopupMenuIcons(popup)
         popup.setOnDismissListener {
             setCloseIcon(
-                toggleSort,
+                binding.toggleSort,
                 R.drawable.ic_baseline_arrow_drop_up_24
             )
         }
         popup.show()
-        setCloseIcon(toggleSort, R.drawable.ic_baseline_arrow_drop_down_24)
+        setCloseIcon(binding.toggleSort, R.drawable.ic_baseline_arrow_drop_down_24)
     }
 
     @SuppressLint("RestrictedApi")
@@ -289,7 +281,7 @@ class StationFilterBar(
 
     fun setSortOrder(sortByDistance: Boolean) {
         setChipStatus(
-            toggleSort,
+            binding.toggleSort,
             if (sortByDistance) R.drawable.ic_sort_by_distance_active_24px else R.drawable.ic_sort_by_alpha_active_24px,
             true,
             R.string.no_text
@@ -320,7 +312,7 @@ class StationFilterBar(
                 if (selectedPosition >= 0 && nicknames.size > selectedPosition) {
                     stationFilter.nickname = nicknames[selectedPosition]
                     setChipStatus(
-                        nicknameFilter,
+                        binding.nicknameFilter,
                         stationFilter.nicknameIcon,
                         stationFilter.isNicknameFilterActive,
                         stationFilter.getNicknameText(context)
@@ -332,7 +324,7 @@ class StationFilterBar(
                 dialog.dismiss()
                 stationFilter.nickname = null
                 setChipStatus(
-                    nicknameFilter,
+                    binding.nicknameFilter,
                     stationFilter.nicknameIcon,
                     stationFilter.isNicknameFilterActive,
                     stationFilter.getNicknameText(context)
@@ -343,7 +335,7 @@ class StationFilterBar(
                 dialog.dismiss()
                 stationFilter.nickname = preferencesService.nickname
                 setChipStatus(
-                    nicknameFilter,
+                    binding.nicknameFilter,
                     stationFilter.nicknameIcon,
                     stationFilter.isNicknameFilterActive,
                     stationFilter.getNicknameText(context)
@@ -361,7 +353,7 @@ class StationFilterBar(
     }
 
     fun setSortOrderEnabled(enabled: Boolean) {
-        toggleSort.visibility = if (enabled) VISIBLE else GONE
+        binding.toggleSort.visibility = if (enabled) VISIBLE else GONE
     }
 
     interface OnChangeListener {
